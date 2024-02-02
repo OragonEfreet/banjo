@@ -13,16 +13,16 @@ typedef struct {
     const char*   title;
 } BjWindowCreateInfo;
 
-BJAPI_ATTR BjResult BJAPI_CALL bjCreateWindow(
+BANJO_EXPORT BjResult bjCreateWindow(
     const BjWindowCreateInfo* pCreateInfo,
     BjWindow*                 pInstance
 );
 
-BJAPI_ATTR void BJAPI_CALL bjDestroyWindow(
+BANJO_EXPORT void bjDestroyWindow(
     BjWindow window
 );
 
-BJAPI_ATTR bool BJAPI_CALL bjWindowShouldClose(
+BANJO_EXPORT bool bjWindowShouldClose(
     BjWindow window
 );
 

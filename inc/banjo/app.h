@@ -10,24 +10,24 @@ typedef struct {
     BjAllocationCallbacks* pAllocator;
 } BjApplicationCreateInfo;
 
-BJAPI_ATTR BjResult BJAPI_CALL bjCreateApplication(
+BANJO_EXPORT BjResult bjCreateApplication(
     const BjApplicationCreateInfo* pCreateInfo,
     BjApplication*                 pApplication
 );
 
-BJAPI_ATTR void BJAPI_CALL bjDestroyApplication(
+BANJO_EXPORT void bjDestroyApplication(
     BjApplication application
 );
 
-BJAPI_ATTR bool BJAPI_CALL bjApplicationShouldClose(
+BANJO_EXPORT bool bjApplicationShouldClose(
     BjApplication application
 );
 
-BJAPI_ATTR void BJAPI_CALL bjCloseApplication(
+BANJO_EXPORT void bjCloseApplication(
     BjApplication application
 );
 
-BJAPI_ATTR void BJAPI_CALL bjTickApplication(
+BANJO_EXPORT void bjTickApplication(
     BjApplication application
 );
 

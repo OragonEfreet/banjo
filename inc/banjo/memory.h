@@ -2,18 +2,18 @@
 
 #include <banjo/core.h>
 
-typedef void* (BJAPI_PTR *PFN_bjAllocationFunction)(
+typedef void* (*PFN_bjAllocationFunction)(
     void* pUserData,
     usize size
 );
 
-typedef void* (BJAPI_PTR *PFN_bjReallocationFunction)(
+typedef void* (*PFN_bjReallocationFunction)(
     void* pUserData,
     void* pOriginal,
     usize size
 );
 
-typedef void (BJAPI_PTR *PFN_bjFreeFunction)(
+typedef void (*PFN_bjFreeFunction)(
     void* pUserData,
     void* pMemory
 );
@@ -25,18 +25,18 @@ typedef struct {
     PFN_bjFreeFunction         pfnFree;
 } BjAllocationCallbacks;
 
-BJAPI_ATTR void* BJAPI_CALL bjAllocate(
+BANJO_EXPORT void* bjAllocate(
     usize                        size,
     const BjAllocationCallbacks* pAllocator
 );
 
-BJAPI_ATTR void* BJAPI_CALL bjReallocate(
+BANJO_EXPORT void* bjReallocate(
     void*                        pMemory,
     usize                        size,
     const BjAllocationCallbacks* pAllocator
 );
 
-BJAPI_ATTR void BJAPI_CALL bjFree(
+BANJO_EXPORT void bjFree(
     void*                         pMemory,
     const BjAllocationCallbacks*  pAllocator
 );

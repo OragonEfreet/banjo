@@ -10,11 +10,11 @@ typedef struct BjArray {
     usize                  count;
 } BjArray;
 
-BJAPI_ATTR BjResult BJAPI_CALL bjInitArray(
+BANJO_EXPORT BjResult bjInitArray(
     BjArray* array
 );
 
-BJAPI_ATTR BjResult BJAPI_CALL bjDropArray(
+BANJO_EXPORT BjResult bjDropArray(
     BjArray* array
 );
 

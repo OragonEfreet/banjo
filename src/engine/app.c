@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
-BJAPI_ATTR BjResult BJAPI_CALL bjCreateApplication(
+BjResult bjCreateApplication(
     const BjApplicationCreateInfo*    pCreateInfo,
     BjApplication*                    pApplication
 ) {
@@ -28,7 +28,7 @@ BJAPI_ATTR BjResult BJAPI_CALL bjCreateApplication(
     return BJ_SUCCESS;
 }
 
-BJAPI_ATTR void BJAPI_CALL bjDestroyApplication(
+void bjDestroyApplication(
     BjApplication                     application
 ){
     bjExpectValue(application, VK_NULL_INPUT_HANDLE);
@@ -39,20 +39,20 @@ BJAPI_ATTR void BJAPI_CALL bjDestroyApplication(
     bjFree(application, application->pAllocator);
 }
 
-BJAPI_ATTR bool BJAPI_CALL bjApplicationShouldClose(
+bool bjApplicationShouldClose(
     BjApplication application
 ) {
     return application->shouldClose;
 }
 
-BJAPI_ATTR void BJAPI_CALL bjCloseApplication(
+void bjCloseApplication(
     BjApplication application
 ) {
     bjExpectValue(application, VK_NULL_INPUT_HANDLE);
     application->shouldClose = true;
 }
 
-BJAPI_ATTR void BJAPI_CALL bjTickApplication(
+void bjTickApplication(
     BjApplication application
 ) {
     static usize fcount = 0;

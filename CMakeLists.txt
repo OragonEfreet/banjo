@@ -10,7 +10,7 @@ find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 add_subdirectory(vendor)
 
-add_library(banjo_engine STATIC
+add_library(banjo
     inc/banjo/app.h
     inc/banjo/core.h
     inc/banjo/memory.h
@@ -26,13 +26,19 @@ add_library(banjo_engine STATIC
     src/engine/window.c
 )
 
-target_include_directories(banjo_engine PUBLIC inc PRIVATE src)
-target_link_libraries(banjo_engine 
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(banjo PRIVATE BANJO_EXPORTS)
+else()
+    target_compile_definitions(banjo PUBLIC BANJO_STATIC)
+endif()
+
+target_include_directories(banjo PUBLIC inc PRIVATE src)
+target_link_libraries(banjo 
     PRIVATE
         Vulkan::Vulkan
         glfw
 )
-target_compile_features(banjo_engine PUBLIC c_std_99)
+target_compile_features(banjo PUBLIC c_std_99)
 
 add_subdirectory(examples)
 

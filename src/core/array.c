@@ -1,7 +1,7 @@
 #include <core/errors.h>
 #include <core/array.h>
 
-BJAPI_ATTR BjResult BJAPI_CALL bjInitArray(
+BjResult bjInitArray(
     BjArray* array
 ) {
     bjExpectValue(array, BJ_NULL_PARAMETER);
@@ -18,7 +18,7 @@ BJAPI_ATTR BjResult BJAPI_CALL bjInitArray(
     return BJ_SUCCESS;
 }
 
-BJAPI_ATTR BjResult BJAPI_CALL bjDropArray(
+BjResult bjDropArray(
     BjArray* array
 ) {
     bjExpectValue(array, BJ_NULL_PARAMETER);

@@ -4,7 +4,7 @@
 
 #include <core/array.h>
 
-BJAPI_ATTR BjResult BJAPI_CALL bjCreateWorld(
+BjResult bjCreateWorld(
     const BjWorldCreateInfo* pCreateInfo,
     BjWorld*                 pWorld
 ) {
@@ -28,7 +28,7 @@ BJAPI_ATTR BjResult BJAPI_CALL bjCreateWorld(
     return 0;
 }
 
-BJAPI_ATTR void BJAPI_CALL bjDestroyWorld(
+void bjDestroyWorld(
     BjWorld world
 ) {
     bjExpectValue(world, BJ_NULL_INPUT_HANDLE);
