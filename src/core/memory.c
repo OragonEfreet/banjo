@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-BJAPI_ATTR void* BJAPI_CALL bjAllocate(
+BANJO_EXPORT void* bjAllocate(
     usize                        size,
     const BjAllocationCallbacks* pAllocator
 ) {
@@ -12,7 +12,7 @@ BJAPI_ATTR void* BJAPI_CALL bjAllocate(
     return malloc(size);
 }
 
-BJAPI_ATTR void* BJAPI_CALL bjReallocate(
+BANJO_EXPORT void* bjReallocate(
     void*                        pMemory,
     usize                        size,
     const BjAllocationCallbacks* pAllocator
@@ -23,7 +23,7 @@ BJAPI_ATTR void* BJAPI_CALL bjReallocate(
     return realloc(pMemory, size);
 }
 
-BJAPI_ATTR void BJAPI_CALL bjFree(
+BANJO_EXPORT void bjFree(
     void*                         pMemory,
     const BjAllocationCallbacks*  pAllocator
 ) {

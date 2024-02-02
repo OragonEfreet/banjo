@@ -17,7 +17,26 @@
 
 #define BJ_VERSION BJ_MAKE_VERSION(BJ_VERSION_MAJOR, BJ_VERSION_MINOR, BJ_VERSION_PATCH)
 
-#define BJ_NAME "BanjoEngine"
+#define BJ_NAME "Banjo"
+
+#ifdef BANJO_STATIC
+#  define BANJO_EXPORT
+#  define BANJO_NO_EXPORT
+#else
+#  ifndef BANJO_EXPORT
+#    ifdef BANJO_EXPORTS
+        /* We are building this library */
+#      define BANJO_EXPORT __attribute__((visibility("default")))
+#    else
+        /* We are using this library */
+#      define BANJO_EXPORT __attribute__((visibility("default")))
+#    endif
+#  endif
+
+#  ifndef BANJO_NO_EXPORT
+#    define BANJO_NO_EXPORT __attribute__((visibility("hidden")))
+#  endif
+#endif
 
 typedef char      byte;
 typedef uint16_t  c16;
@@ -34,10 +53,6 @@ typedef int64_t   i64;
 typedef ptrdiff_t size;
 typedef size_t    usize;
 typedef uintptr_t uptr;
-
-#define BJAPI_ATTR
-#define BJAPI_CALL
-#define BJAPI_PTR
 
 typedef enum {
     BJ_SUCCESS,

@@ -17,7 +17,7 @@ void error_callback(int error, const char* description)
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
-BJAPI_ATTR BjResult BJAPI_CALL bjCreateWindow(
+BjResult bjCreateWindow(
     const BjWindowCreateInfo* pCreateInfo,
     BjWindow*                 pWindow
 ) {
@@ -47,7 +47,7 @@ BJAPI_ATTR BjResult BJAPI_CALL bjCreateWindow(
     return BJ_SUCCESS;
 }
 
-BJAPI_ATTR void BJAPI_CALL bjDestroyWindow(
+void bjDestroyWindow(
     BjWindow window
 ) {
     bjExpectValue(window, VK_NULL_INPUT_HANDLE);
@@ -59,7 +59,7 @@ BJAPI_ATTR void BJAPI_CALL bjDestroyWindow(
 
 }
 
-BJAPI_ATTR bool BJAPI_CALL bjWindowShouldClose(
+bool bjWindowShouldClose(
     BjWindow window
 ) {
     return glfwWindowShouldClose(window->handle);
