@@ -3,19 +3,29 @@
 #include <banjo/core.h>
 #include <banjo/memory.h>
 
-typedef struct BjArray {
+typedef struct BjArray_T {
     BjAllocationCallbacks* pAllocator;
-    void*                  data;
+    usize                  elem_size;
     usize                  capacity;
     usize                  count;
-} BjArray;
+    void*                  data;
+} BjArray_T;
 
-BANJO_EXPORT BjResult bjInitArray(
-    BjArray* array
+BJ_DEFINE_HANDLE(BjArray);
+
+typedef struct BjArrayCreateInfo {
+    BjAllocationCallbacks* pAllocator;
+    usize                  elem_size;
+    usize                  capacity;
+} BjArrayCreateInfo;
+
+BANJO_EXPORT BjResult bjCreateArray(
+    const BjArrayCreateInfo* pCreateInfo,
+    BjArray*                 pInstance
 );
 
-BANJO_EXPORT BjResult bjDropArray(
-    BjArray* array
+BANJO_EXPORT BjResult bjDestroyArray(
+    BjArray array
 );
 
 

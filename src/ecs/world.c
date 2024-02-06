@@ -17,8 +17,8 @@ BjResult bjCreateWorld(
     *pWorld = world;
 
 
-    BjArray array = {.count = 10};
-    bjInitArray(&array);
+    /* BjArray array = {.count = 10}; */
+    /* bjInitArray(&array); */
 
 
 
