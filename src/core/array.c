@@ -1,5 +1,5 @@
 #include <core/errors.h>
-#include <core/array.h>
+#include <banjo/array.h>
 
 BjResult bjInitArray(
     BjArray* array
