@@ -12,11 +12,11 @@ add_subdirectory(vendor)
 
 add_library(banjo
     inc/banjo/app.h
+    inc/banjo/array.h
     inc/banjo/core.h
     inc/banjo/memory.h
     inc/banjo/window.h
     src/core/array.c
-    src/core/array.h
     src/core/errors.h
     src/core/memory.c
     src/core/memory.h

@@ -2,7 +2,7 @@
 #include <core/memory.h>
 #include <ecs/world.h>
 
-#include <core/array.h>
+#include <banjo/array.h>
 
 BjResult bjCreateWorld(
     const BjWorldCreateInfo* pCreateInfo,
