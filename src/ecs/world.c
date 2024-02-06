@@ -11,7 +11,7 @@ BjResult bjCreateWorld(
     bjExpectValue(pCreateInfo, BJ_NULL_CREATE_INFO);
     bjExpectValue(pWorld, BJ_NULL_OUTPUT_HANDLE);
 
-    BjWorld world = bjNew(BjWorld, pCreateInfo->pAllocator);
+    BjWorld world = bjNewStruct(BjWorld, pCreateInfo->pAllocator);
     world->pAllocator = pCreateInfo->pAllocator;
 
     *pWorld = world;

@@ -24,6 +24,11 @@ BANJO_EXPORT BjResult bjCreateArray(
     BjArray*                 pInstance
 );
 
+BANJO_EXPORT BjResult bjReserveArray(
+    BjArray pArray,
+    usize   capacity
+);
+
 BANJO_EXPORT BjResult bjDestroyArray(
     BjArray array
 );
