@@ -6,7 +6,7 @@
 
 BJ_DEFINE_HANDLE(BjWindow);
 
-typedef struct {
+typedef struct BjWindowCreateInfo {
     BjApplication application;
     usize         width;
     usize         height;

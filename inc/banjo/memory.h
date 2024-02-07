@@ -18,7 +18,7 @@ typedef void (*PFN_bjFreeFunction)(
     void* pMemory
 );
 
-typedef struct {
+typedef struct BjAllocationCallbacks {
     void*                      pUserData;
     PFN_bjAllocationFunction   pfnAllocation;
     PFN_bjReallocationFunction pfnReallocation;

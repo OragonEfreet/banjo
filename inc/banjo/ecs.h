@@ -7,7 +7,7 @@ typedef usize entity_id;
 
 BJ_DEFINE_HANDLE(BjWorld);
 
-typedef struct {
+typedef struct BjWorldCreateInfo {
     BjAllocationCallbacks*   pAllocator;
 } BjWorldCreateInfo;
 

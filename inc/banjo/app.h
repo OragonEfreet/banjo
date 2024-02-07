@@ -5,7 +5,7 @@
 
 BJ_DEFINE_HANDLE(BjApplication);
 
-typedef struct {
+typedef struct BjApplicationCreateInfo {
     const char*            name;
     BjAllocationCallbacks* pAllocator;
 } BjApplicationCreateInfo;

@@ -2,6 +2,6 @@
 
 #include <banjo/ecs.h>
 
-struct BjWorld_T {
+typedef struct BjWorld_T {
     BjAllocationCallbacks* pAllocator;
-};
+} BjWorld_T;
