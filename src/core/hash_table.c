@@ -29,6 +29,15 @@ BjResult bjInitHashTable(
 
     pInstance->pAllocator = pCreateInfo->pAllocator;
     pInstance->elem_size  = pCreateInfo->elem_size;
+    // TODO
+    bjInitArray(
+        &(BjArrayCreateInfo){
+            .capacity = 10,
+            .elem_size = 1,
+            .pAllocator = pCreateInfo->pAllocator,
+        },
+        &pInstance->buckets
+    );
 
     return BJ_SUCCESS;
 }
@@ -37,6 +46,7 @@ BjResult bjResetHashTable(
     BjHashTable htable
 ) {
     BjResult res      = bjClearHashTable(htable);
+    bjResetArray(&htable->buckets);
     htable->elem_size = 0;
     return res;
 }

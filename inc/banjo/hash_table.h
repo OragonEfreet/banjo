@@ -1,11 +1,13 @@
 #pragma once
 
+#include <banjo/array.h>
 #include <banjo/core.h>
 #include <banjo/memory.h>
 
 typedef struct BjHashTable_T {
     BjAllocationCallbacks* pAllocator;
     usize                  elem_size;
+    BjArray_T              buckets;
 } BjHashTable_T;
 
 BJ_DEFINE_HANDLE(BjHashTable);
