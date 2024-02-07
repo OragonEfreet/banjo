@@ -14,6 +14,8 @@ TEST_CASE(zero_initialization) {
     REQUIRE_EQ(array->count, 0);
     REQUIRE_EQ(array->pAllocator, 0);
     REQUIRE_EQ(array->data, 0);
+
+    bjDestroyArray(array);
 }
 
 TEST_CASE(custom_allocator) {
@@ -24,6 +26,8 @@ TEST_CASE(custom_allocator) {
     REQUIRE_EQ(result, BJ_SUCCESS);
 
     REQUIRE(array->pAllocator != 0);
+
+    bjDestroyArray(array);
 }
 
 TEST_CASE(init_explicit_capacity) {
@@ -36,6 +40,8 @@ TEST_CASE(init_explicit_capacity) {
     REQUIRE(array->capacity >= array->count);
     REQUIRE(array->count == 0);
     REQUIRE(array->data != 0);
+
+    bjDestroyArray(array);
 }
 
 int main(int argc, char* argv[]) {
