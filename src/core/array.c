@@ -45,15 +45,16 @@ BjResult bjResetArray(
 ) {
     bjExpectValue(array, BJ_NULL_PARAMETER);
     bjFree(array->pData, array->pAllocator);
+    return BJ_SUCCESS;
 }
 
 BjResult bjDestroyArray(
     BjArray array
 ) {
     bjExpectValue(array, BJ_NULL_PARAMETER);
-    bjResetArray(array);
+    BjResult res = bjResetArray(array);
     bjFree(array, array->pAllocator);
-    return BJ_SUCCESS;
+    return res;
 }
 
 BjResult bjReserveArray(

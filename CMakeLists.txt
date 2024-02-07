@@ -10,15 +10,20 @@ find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 add_subdirectory(vendor)
 
-add_library(banjo
+set(_interface_headers
     inc/banjo/app.h
     inc/banjo/array.h
     inc/banjo/core.h
+    inc/banjo/hash_table.h
     inc/banjo/log.h
     inc/banjo/memory.h
     inc/banjo/window.h
+)
+
+set(_sources
     src/core/array.c
     src/core/errors.h
+    src/core/hash_table.c
     src/core/log.c
     src/core/memory.c
     src/core/memory.h
@@ -27,6 +32,8 @@ add_library(banjo
     src/engine/app.c
     src/engine/window.c
 )
+
+add_library(banjo ${_interface_headers} ${_sources})
 
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(banjo PRIVATE BANJO_EXPORTS)
