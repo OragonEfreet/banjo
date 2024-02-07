@@ -3,10 +3,10 @@
 #include <banjo/app.h>
 #include <banjo/window.h>
 
-struct BjWindow_T {
+typedef struct BjWindow_T {
     void*         handle;
     BjApplication application;
-};
+} BjWindow_T;
 
 void bj_ProcessEvents();
 BjResult bj_RetainWindowComponent(BjApplication application);

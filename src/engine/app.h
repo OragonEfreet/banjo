@@ -3,13 +3,13 @@
 #include <banjo/app.h>
 #include <banjo/window.h>
 
-struct BjApplication_T {
+typedef struct BjApplication_T {
     char*                  name;
     BjAllocationCallbacks* pAllocator;
     bool                   shouldClose;
     usize                  windowCount;
     BjWindow*              pWindows;
-};
+} BjApplication_T;
 
 void bj_LinkWindow(
     BjApplication                application,
