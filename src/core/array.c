@@ -7,22 +7,52 @@ BjResult bjCreateArray(
     BjArray* pInstance
 ) {
     bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pCreateInfo, BJ_NULL_CREATE_INFO);
     bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
 
     BjArray array     = bjNewStruct(BjArray, pCreateInfo->pAllocator);
-    array->pAllocator = pCreateInfo->pAllocator;
-    array->capacity   = 0;
-    array->count      = 0;
-    array->elem_size  = pCreateInfo->elem_size;
-    array->data       = 0;
 
-    if(pCreateInfo->capacity > 0) {
-        bjReserveArray(array, pCreateInfo->capacity);
+    BjResult result = bjInitArray(pCreateInfo, array);
+    if(result == BJ_SUCCESS) {
+        *pInstance = array;
+    } else {
+        bjFree(array, pCreateInfo->pAllocator);
     }
 
-    *pInstance = array;
+    return BJ_SUCCESS;
+}
 
+BjResult bjInitArray(
+    const BjArrayCreateInfo* pCreateInfo,
+    BjArray                  pInstance
+) {
+    bjExpectValue(pCreateInfo, BJ_NULL_CREATE_INFO);
+
+    pInstance->pAllocator = pCreateInfo->pAllocator;
+    pInstance->capacity   = 0;
+    pInstance->count      = 0;
+    pInstance->elem_size  = pCreateInfo->elem_size;
+    pInstance->data       = 0;
+
+    if(pCreateInfo->capacity > 0) {
+        bjReserveArray(pInstance, pCreateInfo->capacity);
+    }
+
+    return BJ_SUCCESS;
+}
+
+BjResult bjResetArray(
+    BjArray array
+) {
+    bjExpectValue(array, BJ_NULL_PARAMETER);
+    bjFree(array->data, array->pAllocator);
+}
+
+BjResult bjDestroyArray(
+    BjArray array
+) {
+    bjExpectValue(array, BJ_NULL_PARAMETER);
+    bjResetArray(array);
+    bjFree(array, array->pAllocator);
     return BJ_SUCCESS;
 }
 
@@ -39,14 +69,5 @@ BjResult bjReserveArray(
         }
         pArray->capacity = capacity;
     }
-    return BJ_SUCCESS;
-}
-
-BjResult bjDestroyArray(
-    BjArray array
-) {
-    bjExpectValue(array, BJ_NULL_PARAMETER);
-    bjFree(array->data, array->pAllocator);
-    bjFree(array, array->pAllocator);
     return BJ_SUCCESS;
 }
