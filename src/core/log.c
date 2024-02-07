@@ -1,6 +1,6 @@
 #include <banjo/log.h>
 
-#define WITH_COLORS
+#define BANJO_LOG_COLORS
 
 #include <stdarg.h>
 #include <time.h>
@@ -14,7 +14,7 @@ static const char* level_strings[] = {
     "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL",
 };
 
-#ifdef WITH_COLORS
+#ifdef BANJO_LOG_COLORS
 static const char* level_colors[] = {
   "\x1b[94m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"
 };
@@ -46,7 +46,7 @@ void bjLogMsg(int level, const char* pFile, int line, const char* pFmt, ...) {
         size_t eol_i = strftime(buffer, sizeof(buffer), "%H:%M:%S", pTime);
         buffer[eol_i] = '\0';
 
-#ifdef WITH_COLORS
+#ifdef BANJO_LOG_COLORS
         printf(header_fmt, buffer, level_colors[level], level_strings[level], pFile, line);
 #else
         printf(header_fmt, buffer, level_strings[level], pFile, line);
