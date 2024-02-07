@@ -34,6 +34,11 @@ else()
     target_compile_definitions(banjo PUBLIC BANJO_STATIC)
 endif()
 
+option(BANJO_PEDANTIC "Banjo runtime will make costly extra checks" OFF)
+if(BANJO_PEDANTIC)
+    target_compile_definitions(banjo PRIVATE BANJO_PEDANTIC)
+endif()
+
 target_include_directories(banjo PUBLIC inc PRIVATE src)
 target_link_libraries(banjo 
     PRIVATE
