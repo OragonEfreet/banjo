@@ -34,10 +34,16 @@ else()
     target_compile_definitions(banjo PUBLIC BANJO_STATIC)
 endif()
 
-option(BANJO_PEDANTIC "Banjo runtime will make costly extra checks" OFF)
-if(BANJO_PEDANTIC)
-    target_compile_definitions(banjo PRIVATE BANJO_PEDANTIC)
-endif()
+macro(banjo_compile_option _name _desc _default)
+    string(TOUPPER  "banjo_${_name}" _optmacro)
+    option(${_optmacro} ${_desc} ${_default})
+    if(${_optmacro})
+        target_compile_definitions(banjo PRIVATE "${_optmacro}")
+    endif()
+endmacro()
+banjo_compile_option(pedantic "Banjo runtime will make costly extra checks" OFF)
+banjo_compile_option(log_color "Banjo logs will have colored output" ON)
+
 
 target_include_directories(banjo PUBLIC inc PRIVATE src)
 target_link_libraries(banjo 
