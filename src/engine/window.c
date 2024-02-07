@@ -47,16 +47,16 @@ BjResult bjCreateWindow(
     return BJ_SUCCESS;
 }
 
-void bjDestroyWindow(
+BjResult bjDestroyWindow(
     BjWindow window
 ) {
-    bjExpectValue(window, VK_NULL_INPUT_HANDLE);
+    bjExpectValue(window, BJ_NULL_INPUT_HANDLE);
 
     bj_UnlinkWindow(window->application, window);
     glfwDestroyWindow(window->handle);
 
     bjFree(window, window->application->pAllocator);
-
+    return BJ_SUCCESS;
 }
 
 bool bjWindowShouldClose(

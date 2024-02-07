@@ -18,7 +18,7 @@ BANJO_EXPORT BjResult bjCreateWindow(
     BjWindow*                 pInstance
 );
 
-BANJO_EXPORT void bjDestroyWindow(
+BANJO_EXPORT BjResult bjDestroyWindow(
     BjWindow window
 );
 

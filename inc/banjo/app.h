@@ -15,7 +15,7 @@ BANJO_EXPORT BjResult bjCreateApplication(
     BjApplication*                 pApplication
 );
 
-BANJO_EXPORT void bjDestroyApplication(
+BANJO_EXPORT BjResult bjDestroyApplication(
     BjApplication application
 );
 
@@ -23,7 +23,7 @@ BANJO_EXPORT bool bjApplicationShouldClose(
     BjApplication application
 );
 
-BANJO_EXPORT void bjCloseApplication(
+BANJO_EXPORT BjResult bjCloseApplication(
     BjApplication application
 );
 

@@ -28,15 +28,16 @@ BjResult bjCreateApplication(
     return BJ_SUCCESS;
 }
 
-void bjDestroyApplication(
+BjResult bjDestroyApplication(
     BjApplication                     application
 ){
-    bjExpectValue(application, VK_NULL_INPUT_HANDLE);
+    bjExpectValue(application, BJ_NULL_INPUT_HANDLE);
 
     bj_ReleaseWindowComponent(application);
 
     bjFree(application->name, application->pAllocator);
     bjFree(application, application->pAllocator);
+    return BJ_SUCCESS;
 }
 
 bool bjApplicationShouldClose(
@@ -45,11 +46,12 @@ bool bjApplicationShouldClose(
     return application->shouldClose;
 }
 
-void bjCloseApplication(
+BjResult bjCloseApplication(
     BjApplication application
 ) {
-    bjExpectValue(application, VK_NULL_INPUT_HANDLE);
+    bjExpectValue(application, BJ_NULL_INPUT_HANDLE);
     application->shouldClose = true;
+    return BJ_SUCCESS;
 }
 
 void bjTickApplication(
