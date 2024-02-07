@@ -8,7 +8,7 @@ typedef struct BjArray_T {
     usize                  elem_size;
     usize                  capacity;
     usize                  count;
-    void*                  data;
+    void*                  pData;
 } BjArray_T;
 
 BJ_DEFINE_HANDLE(BjArray);

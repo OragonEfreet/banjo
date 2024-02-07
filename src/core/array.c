@@ -31,7 +31,7 @@ BjResult bjInitArray(
     pInstance->capacity   = 0;
     pInstance->count      = 0;
     pInstance->elem_size  = pCreateInfo->elem_size;
-    pInstance->data       = 0;
+    pInstance->pData      = 0;
 
     if(pCreateInfo->capacity > 0) {
         bjReserveArray(pInstance, pCreateInfo->capacity);
@@ -44,7 +44,7 @@ BjResult bjResetArray(
     BjArray array
 ) {
     bjExpectValue(array, BJ_NULL_PARAMETER);
-    bjFree(array->data, array->pAllocator);
+    bjFree(array->pData, array->pAllocator);
 }
 
 BjResult bjDestroyArray(
@@ -62,10 +62,10 @@ BjResult bjReserveArray(
 ) {
     bjExpectValue(pArray, BJ_NULL_OUTPUT_HANDLE);
     if(capacity > pArray->capacity) {
-        if(pArray->data == 0) {
-            pArray->data = bjAllocate(pArray->elem_size * capacity, pArray->pAllocator);
+        if(pArray->pData == 0) {
+            pArray->pData = bjAllocate(pArray->elem_size * capacity, pArray->pAllocator);
         } else {
-            pArray->data = bjReallocate(pArray->data, pArray->elem_size * capacity, pArray->pAllocator);
+            pArray->pData = bjReallocate(pArray->pData, pArray->elem_size * capacity, pArray->pAllocator);
         }
         pArray->capacity = capacity;
     }
