@@ -13,7 +13,7 @@ TEST_CASE(zero_initialization) {
     REQUIRE_EQ(array->capacity, 0);
     REQUIRE_EQ(array->count, 0);
     REQUIRE_EQ(array->pAllocator, 0);
-    REQUIRE_EQ(array->data, 0);
+    REQUIRE_EQ(array->pData, 0);
 
     bjDestroyArray(array);
 }
@@ -39,7 +39,7 @@ TEST_CASE(init_explicit_capacity) {
     REQUIRE(array->capacity >= 10);
     REQUIRE(array->capacity >= array->count);
     REQUIRE(array->count == 0);
-    REQUIRE(array->data != 0);
+    REQUIRE(array->pData != 0);
 
     bjDestroyArray(array);
 }
