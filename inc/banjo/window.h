@@ -1,7 +1,7 @@
 #pragma once
 
+#include <banjo/api.h>
 #include <banjo/app.h>
-#include <banjo/core.h>
 #include <banjo/memory.h>
 
 BJ_DEFINE_HANDLE(BjWindow);

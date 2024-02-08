@@ -1,7 +1,7 @@
 #pragma once
 
+#include <banjo/api.h>
 #include <banjo/array.h>
-#include <banjo/core.h>
 #include <banjo/memory.h>
 
 typedef struct BjHashTable_T {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <banjo/core.h>
+#include <banjo/api.h>
 #include <banjo/memory.h>
 
 typedef struct BjArray_T {
