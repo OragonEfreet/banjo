@@ -1,24 +1,6 @@
 #include <banjo/hash_table.h>
-#include <core/errors.h>
-
-BjResult bjCreateHashTable(
-    const BjHashTableCreateInfo* pCreateInfo,
-    BjHashTable* pInstance
-) {
-    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
-
-    BjHashTable htable = bjNewStruct(BjHashTable, pCreateInfo->pAllocator);
-
-    BjResult result = bjInitHashTable(pCreateInfo, htable);
-    if(result == BJ_SUCCESS) {
-        *pInstance = htable;
-    } else {
-        bjFree(htable, pCreateInfo->pAllocator);
-    }
-
-    return BJ_SUCCESS;
-}
+#include <data/hash_table.h>
+#include <errors.h>
 
 BjResult bjInitHashTable(
     const BjHashTableCreateInfo* pCreateInfo,
@@ -48,6 +30,25 @@ BjResult bjResetHashTable(
     bjResetArray(&htable->buckets);
     htable->elem_size = 0;
     return res;
+}
+
+BjResult bjCreateHashTable(
+    const BjHashTableCreateInfo* pCreateInfo,
+    BjHashTable* pInstance
+) {
+    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
+    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
+
+    BjHashTable htable = bjNewStruct(BjHashTable, pCreateInfo->pAllocator);
+
+    BjResult result = bjInitHashTable(pCreateInfo, htable);
+    if(result == BJ_SUCCESS) {
+        *pInstance = htable;
+    } else {
+        bjFree(htable, pCreateInfo->pAllocator);
+    }
+
+    return BJ_SUCCESS;
 }
 
 BjResult bjDestroyHashTable(
