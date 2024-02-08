@@ -1,6 +1,6 @@
 #pragma once
 
-#include <banjo/core.h>
+#include <banjo/api.h>
 #include <banjo/memory.h>
 
 typedef usize entity_id;

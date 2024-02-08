@@ -3,7 +3,7 @@
 #include <engine/app.h>
 #include <engine/window.h>
 
-#include <banjo/core.h>
+#include <banjo/api.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>

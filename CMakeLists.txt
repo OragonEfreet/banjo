@@ -12,16 +12,18 @@ find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 set(_interface_headers
     # inc/banjo/app.h
+    # inc/banjo/window.h
+    inc/banjo/api.h
     inc/banjo/array.h
-    inc/banjo/core.h
     inc/banjo/forward_list.h
     inc/banjo/hash_table.h
     inc/banjo/log.h
     inc/banjo/memory.h
-    # inc/banjo/window.h
 )
 
 set(_sources
+    # src/engine/app.c
+    # src/engine/window.c
     src/core/array.c
     src/core/errors.h
     src/core/forward_list.c
@@ -31,8 +33,6 @@ set(_sources
     src/core/memory.h
     src/ecs/world.c
     src/ecs/world.h
-    # src/engine/app.c
-    # src/engine/window.c
 )
 
 add_library(banjo ${_interface_headers} ${_sources})

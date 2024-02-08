@@ -1,6 +1,6 @@
 #pragma once
 
-#include <banjo/core.h>
+#include <banjo/api.h>
 
 typedef void* (*PFN_bjAllocationFunction)(
     void* pUserData,
