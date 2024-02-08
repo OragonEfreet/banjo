@@ -1,6 +1,5 @@
 #include <banjo/forward_list.h>
 #include <core/errors.h>
-#include <core/memory.h>
 
 BjResult bjCreateForwardList(
     const BjForwardListCreateInfo* pCreateInfo,
@@ -48,5 +47,29 @@ BjResult bjDestroyForwardList(
     BjResult res = bjResetForwardList(list);
     bjFree(list, list->pAllocator);
     return res;
+}
+
+usize bjForwardListCount(
+    BjForwardList list
+) {
+    usize result = 0;
+    BjForwardListEntry* entry = list->pFirstEntry;
+    while(entry != 0) {
+        result += 1;
+        entry = entry->pNext;
+    }
+    return result;
+}
+
+usize bjForwardListAppend(
+    BjForwardList list,
+    void* pData
+) {
+
+    
+
+
+    
+    return 0;
 }
 

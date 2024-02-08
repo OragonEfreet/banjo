@@ -1,6 +1,5 @@
 #include <banjo/hash_table.h>
 #include <core/errors.h>
-#include <core/memory.h>
 
 BjResult bjCreateHashTable(
     const BjHashTableCreateInfo* pCreateInfo,
