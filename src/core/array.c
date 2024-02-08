@@ -1,6 +1,5 @@
 #include <banjo/array.h>
 #include <core/errors.h>
-#include <core/memory.h>
 
 BjResult bjCreateArray(
     const BjArrayCreateInfo* pCreateInfo,

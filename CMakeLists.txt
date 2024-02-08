@@ -30,7 +30,6 @@ set(_sources
     src/core/hash_table.c
     src/core/log.c
     src/core/memory.c
-    src/core/memory.h
     src/ecs/world.c
     src/ecs/world.h
 )
