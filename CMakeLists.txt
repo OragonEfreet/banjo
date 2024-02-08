@@ -19,19 +19,23 @@ set(_interface_headers
     inc/banjo/hash_table.h
     inc/banjo/log.h
     inc/banjo/memory.h
+    inc/banjo/world.h
 )
 
 set(_sources
-    # src/engine/app.c
-    # src/engine/window.c
-    src/core/array.c
-    src/core/errors.h
-    src/core/forward_list.c
-    src/core/hash_table.c
-    src/core/log.c
-    src/core/memory.c
-    src/ecs/world.c
-    src/ecs/world.h
+    # src/_rfu/app.c
+    # src/_rfu/window.c
+    src/array.c
+    src/data/array.h
+    src/data/forward_list.h
+    src/data/hash_table.h
+    src/data/world.h
+    src/errors.h
+    src/forward_list.c
+    src/hash_table.c
+    src/log.c
+    src/memory.c
+    src/world.c
 )
 
 add_library(banjo ${_interface_headers} ${_sources})

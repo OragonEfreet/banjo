@@ -1,5 +1,5 @@
-#include <core/errors.h>
-#include <ecs/world.h>
+#include <errors.h>
+#include <data/world.h>
 
 #include <banjo/array.h>
 
@@ -19,12 +19,15 @@ BjResult bjCreateWorld(
     /* BjArray array = {.count = 10}; */
     /* bjInitArray(&array); */
 
-
-
-
-
-
     return 0;
+}
+
+BjResult bjInitWorld( const BjWorldCreateInfo* create_info, BjWorld world) {
+    return BJ_SUCCESS;
+}
+
+BjResult bjResetWorld(BjWorld world) {
+    return BJ_SUCCESS;
 }
 
 void bjDestroyWorld(

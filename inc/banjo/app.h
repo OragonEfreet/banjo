@@ -1,6 +1,6 @@
 #pragma once
 
-#include <banjo/banjo.h>
+#include <banjo/api.h>
 #include <banjo/memory.h>
 
 BJ_DEFINE_HANDLE(BjApplication);

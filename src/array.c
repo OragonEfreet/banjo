@@ -1,24 +1,5 @@
-#include <banjo/array.h>
-#include <core/errors.h>
-
-BjResult bjCreateArray(
-    const BjArrayCreateInfo* pCreateInfo,
-    BjArray* pInstance
-) {
-    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
-
-    BjArray array     = bjNewStruct(BjArray, pCreateInfo->pAllocator);
-
-    BjResult result = bjInitArray(pCreateInfo, array);
-    if(result == BJ_SUCCESS) {
-        *pInstance = array;
-    } else {
-        bjFree(array, pCreateInfo->pAllocator);
-    }
-
-    return BJ_SUCCESS;
-}
+#include <data/array.h>
+#include <errors.h>
 
 BjResult bjInitArray(
     const BjArrayCreateInfo* pCreateInfo,
@@ -44,6 +25,25 @@ BjResult bjResetArray(
 ) {
     bjExpectValue(array, BJ_NULL_PARAMETER);
     bjFree(array->pData, array->pAllocator);
+    return BJ_SUCCESS;
+}
+
+BjResult bjCreateArray(
+    const BjArrayCreateInfo* pCreateInfo,
+    BjArray* pInstance
+) {
+    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
+    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
+
+    BjArray array     = bjNewStruct(BjArray, pCreateInfo->pAllocator);
+
+    BjResult result = bjInitArray(pCreateInfo, array);
+    if(result == BJ_SUCCESS) {
+        *pInstance = array;
+    } else {
+        bjFree(array, pCreateInfo->pAllocator);
+    }
+
     return BJ_SUCCESS;
 }
 

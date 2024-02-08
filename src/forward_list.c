@@ -1,24 +1,5 @@
-#include <banjo/forward_list.h>
-#include <core/errors.h>
-
-BjResult bjCreateForwardList(
-    const BjForwardListCreateInfo* pCreateInfo,
-    BjForwardList* pInstance
-) {
-    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
-
-    BjForwardList list     = bjNewStruct(BjForwardList, pCreateInfo->pAllocator);
-
-    BjResult result = bjInitForwardList(pCreateInfo, list);
-    if(result == BJ_SUCCESS) {
-        *pInstance = list;
-    } else {
-        bjFree(list, pCreateInfo->pAllocator);
-    }
-
-    return BJ_SUCCESS;
-}
+#include <data/forward_list.h>
+#include <errors.h>
 
 BjResult bjInitForwardList(
     const BjForwardListCreateInfo* pCreateInfo,
@@ -37,6 +18,25 @@ BjResult bjResetForwardList(
     BjForwardList list
 ) {
     bjExpectValue(list, BJ_NULL_PARAMETER);
+    return BJ_SUCCESS;
+}
+
+BjResult bjCreateForwardList(
+    const BjForwardListCreateInfo* pCreateInfo,
+    BjForwardList* pInstance
+) {
+    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
+    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
+
+    BjForwardList list     = bjNewStruct(BjForwardList, pCreateInfo->pAllocator);
+
+    BjResult result = bjInitForwardList(pCreateInfo, list);
+    if(result == BJ_SUCCESS) {
+        *pInstance = list;
+    } else {
+        bjFree(list, pCreateInfo->pAllocator);
+    }
+
     return BJ_SUCCESS;
 }
 
