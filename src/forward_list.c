@@ -55,18 +55,21 @@ usize bjForwardListCount(
     BjForwardList list
 ) {
     usize result = 0;
-    BjForwardListEntry* entry = list->pFirstEntry;
-    while(entry != 0) {
-        result += 1;
-        entry = entry->pNext;
+    if(list != 0) {
+        BjForwardListEntry* entry = list->pFirstEntry;
+        while(entry != 0) {
+            result += 1;
+            entry = entry->pNext;
+        }
     }
     return result;
 }
 
-usize bjForwardListAppend(
+BjResult bjForwardListAppend(
     BjForwardList list,
     void* pData
 ) {
+    bjExpectValue(list, BJ_NULL_PARAMETER);
     if(list->pFirstEntry == 0) {
         BjForwardListEntry* entry = bjAllocate(sizeof(BjForwardListEntry), list->pAllocator);
         entry->pNext = 0;
