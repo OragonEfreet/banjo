@@ -65,27 +65,33 @@ usize bjForwardListCount(
     return result;
 }
 
-BjResult bjForwardListAppend(
+BjResult bjForwardListInsert(
     BjForwardList list,
+    usize index,
     void* pData
 ) {
     bjExpectValue(list, BJ_NULL_PARAMETER);
 
+    BjForwardListEntry** source_ptr = &list->pFirstEntry;
+    for(usize i = 0 ; (i < index) && ((*source_ptr) != 0) ; ++i) {
+        source_ptr = &(*source_ptr)->pNext;
+    }
+    BjForwardListEntry* next_entry = *source_ptr ? (*source_ptr) : 0;
+
     BjForwardListEntry* new_entry = bjAllocate(sizeof(BjForwardListEntry), list->pAllocator);
-    new_entry->pNext = 0;
-    new_entry->value = 0;
+    new_entry->pNext = next_entry;
+    new_entry->value = 0; // TODO
     /* entry->value = bjAllocate(list->elem_size, list->pAllocator); */
     /* memcpy(entry->value, pData, list->elem_size); */
 
-    if(list->pFirstEntry == 0) {
-        list->pFirstEntry = new_entry;
-    } else {
-        BjForwardListEntry* entry = list->pFirstEntry;
-        while(entry->pNext != 0) {
-            entry = entry->pNext;
-        }
-        entry->pNext = new_entry;
-    }
-    return 0;
+    *source_ptr = new_entry;
+    return BJ_SUCCESS;
+}
+
+BjResult bjForwardListPrepend(
+    BjForwardList list,
+    void* pData
+) {
+    return bjForwardListInsert(list, 0, pData);
 }
 

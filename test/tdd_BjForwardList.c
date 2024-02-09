@@ -36,20 +36,20 @@ TEST_CASE(default_initialization_has_empty_count) {
     bjDestroyForwardList(list);
 }
 
-TEST_CASE(a_first_append_initializes_first_entry) {
+TEST_CASE(a_first_prepend_initializes_first_entry) {
     BjForwardList list;
 
     BjResult result = bjCreateForwardList(&s_create_info, &list);
     CHECK_EQ(result, BJ_SUCCESS);
 
     REQUIRE_NULL(list->pFirstEntry);
-    bjForwardListAppend(list, &values[0]);
+    bjForwardListPrepend(list, &values[0]);
     REQUIRE_VALUE(list->pFirstEntry);
 
     bjDestroyForwardList(list);
 }
 
-TEST_CASE_ARGS(n_appends_means_count_is_n, {
+TEST_CASE_ARGS(n_prepends_means_count_is_n, {
     usize n_operation;
 }) {
     BjForwardList list;
@@ -59,7 +59,7 @@ TEST_CASE_ARGS(n_appends_means_count_is_n, {
 
     int data = {};
     for(usize i = 0 ; i < test_data->n_operation ; ++i) {
-        bjForwardListAppend(list, &data);
+        bjForwardListPrepend(list, &data);
     }
 
     REQUIRE_EQ(bjForwardListCount(list), test_data->n_operation);
@@ -73,10 +73,10 @@ int main(int argc, char* argv[]) {
 
     RUN_TEST(default_initialization_is_full_empty);
     RUN_TEST(default_initialization_has_empty_count);
-    RUN_TEST(a_first_append_initializes_first_entry);
-    RUN_TEST_ARGS(n_appends_means_count_is_n, {.n_operation=0});
-    RUN_TEST_ARGS(n_appends_means_count_is_n, {.n_operation=1});
-    RUN_TEST_ARGS(n_appends_means_count_is_n, {.n_operation=2});
+    RUN_TEST(a_first_prepend_initializes_first_entry);
+    RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=0});
+    RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=1});
+    RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=2});
 
     END_TESTS();
 }
