@@ -16,7 +16,7 @@ TEST_CASE(default_initialization_is_full_empty) {
     BjForwardList list;
 
     BjResult result = bjCreateForwardList(&s_create_info, &list);
-    REQUIRE_EQ(result, BJ_SUCCESS);
+    CHECK_EQ(result, BJ_SUCCESS);
 
     REQUIRE_EQ(list->elem_size, sizeof(elem_type));
     REQUIRE_NULL(list->pAllocator);
@@ -29,7 +29,7 @@ TEST_CASE(default_initialization_has_empty_count) {
     BjForwardList list;
 
     BjResult result = bjCreateForwardList(&s_create_info, &list);
-    REQUIRE_EQ(result, BJ_SUCCESS);
+    CHECK_EQ(result, BJ_SUCCESS);
 
     REQUIRE_EQ(bjForwardListCount(list), 0);
 
@@ -40,11 +40,30 @@ TEST_CASE(a_first_append_initializes_first_entry) {
     BjForwardList list;
 
     BjResult result = bjCreateForwardList(&s_create_info, &list);
-    REQUIRE_EQ(result, BJ_SUCCESS);
+    CHECK_EQ(result, BJ_SUCCESS);
 
     REQUIRE_NULL(list->pFirstEntry);
     bjForwardListAppend(list, &values[0]);
     REQUIRE_VALUE(list->pFirstEntry);
+
+    bjDestroyForwardList(list);
+}
+
+TEST_CASE_ARGS(n_appends_means_count_is_n, {
+    usize n_operation;
+}) {
+    BjForwardList list;
+
+    BjResult result = bjCreateForwardList(&s_create_info, &list);
+    CHECK_EQ(result, BJ_SUCCESS);
+
+    int data = {};
+    for(usize i = 0 ; i < test_data->n_operation ; ++i) {
+        bjForwardListAppend(list, &data);
+    }
+
+    REQUIRE_EQ(bjForwardListCount(list), test_data->n_operation);
+
 
     bjDestroyForwardList(list);
 }
@@ -55,6 +74,9 @@ int main(int argc, char* argv[]) {
     RUN_TEST(default_initialization_is_full_empty);
     RUN_TEST(default_initialization_has_empty_count);
     RUN_TEST(a_first_append_initializes_first_entry);
+    RUN_TEST_ARGS(n_appends_means_count_is_n, {.n_operation=0});
+    RUN_TEST_ARGS(n_appends_means_count_is_n, {.n_operation=1});
+    RUN_TEST_ARGS(n_appends_means_count_is_n, {.n_operation=2});
 
     END_TESTS();
 }

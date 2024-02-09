@@ -70,13 +70,21 @@ BjResult bjForwardListAppend(
     void* pData
 ) {
     bjExpectValue(list, BJ_NULL_PARAMETER);
+
+    BjForwardListEntry* new_entry = bjAllocate(sizeof(BjForwardListEntry), list->pAllocator);
+    new_entry->pNext = 0;
+    new_entry->value = 0;
+    /* entry->value = bjAllocate(list->elem_size, list->pAllocator); */
+    /* memcpy(entry->value, pData, list->elem_size); */
+
     if(list->pFirstEntry == 0) {
-        BjForwardListEntry* entry = bjAllocate(sizeof(BjForwardListEntry), list->pAllocator);
-        entry->pNext = 0;
-        entry->value = 0;
-        /* entry->value = bjAllocate(list->elem_size, list->pAllocator); */
-        /* memcpy(entry->value, pData, list->elem_size); */
-        list->pFirstEntry = entry;
+        list->pFirstEntry = new_entry;
+    } else {
+        BjForwardListEntry* entry = list->pFirstEntry;
+        while(entry->pNext != 0) {
+            entry = entry->pNext;
+        }
+        entry->pNext = new_entry;
     }
     return 0;
 }
