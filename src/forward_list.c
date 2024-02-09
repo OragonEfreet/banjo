@@ -1,6 +1,8 @@
 #include <data/forward_list.h>
 #include <errors.h>
 
+/* #include <string.h> */
+
 BjResult bjInitForwardList(
     const BjForwardListCreateInfo* pCreateInfo,
     BjForwardList                  pInstance
@@ -65,11 +67,14 @@ usize bjForwardListAppend(
     BjForwardList list,
     void* pData
 ) {
-
-    
-
-
-    
+    if(list->pFirstEntry == 0) {
+        BjForwardListEntry* entry = bjAllocate(sizeof(BjForwardListEntry), list->pAllocator);
+        entry->pNext = 0;
+        entry->value = 0;
+        /* entry->value = bjAllocate(list->elem_size, list->pAllocator); */
+        /* memcpy(entry->value, pData, list->elem_size); */
+        list->pFirstEntry = entry;
+    }
     return 0;
 }
 
