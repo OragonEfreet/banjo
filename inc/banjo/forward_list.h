@@ -24,7 +24,13 @@ BANJO_EXPORT usize bjForwardListCount(
     BjForwardList list
 );
 
-BANJO_EXPORT BjResult bjForwardListAppend(
+BANJO_EXPORT BjResult bjForwardListInsert(
+    BjForwardList list,
+    usize index,
+    void* pData
+);
+
+BANJO_EXPORT BjResult bjForwardListPrepend(
     BjForwardList list,
     void* pData
 );
