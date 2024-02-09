@@ -12,9 +12,7 @@ static BjForwardListCreateInfo s_create_info = {
     .elem_size = sizeof(int)
 };
 
-TEST_CASE(default_initialization_is_full_empty,  {
-    int value;
-}) {
+TEST_CASE(default_initialization_is_full_empty) {
     BjForwardList list;
 
     BjResult result = bjCreateForwardList(&s_create_info, &list);
@@ -27,7 +25,7 @@ TEST_CASE(default_initialization_is_full_empty,  {
     bjDestroyForwardList(list);
 }
 
-TEST_CASE(default_initialization_has_empty_count, {}) {
+TEST_CASE(default_initialization_has_empty_count) {
     BjForwardList list;
 
     BjResult result = bjCreateForwardList(&s_create_info, &list);
@@ -38,7 +36,7 @@ TEST_CASE(default_initialization_has_empty_count, {}) {
     bjDestroyForwardList(list);
 }
 
-TEST_CASE(a_first_append_initializes_first_entry, {}) {
+TEST_CASE(a_first_append_initializes_first_entry) {
     BjForwardList list;
 
     BjResult result = bjCreateForwardList(&s_create_info, &list);
@@ -54,9 +52,9 @@ TEST_CASE(a_first_append_initializes_first_entry, {}) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(default_initialization_is_full_empty, {.value=32});
-    RUN_TEST(default_initialization_has_empty_count, {});
-    RUN_TEST(a_first_append_initializes_first_entry, {});
+    RUN_TEST(default_initialization_is_full_empty);
+    RUN_TEST(default_initialization_has_empty_count);
+    RUN_TEST(a_first_append_initializes_first_entry);
 
     END_TESTS();
 }
