@@ -67,7 +67,8 @@ int terminate_context(Context* SM_CTX()) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // INTERNAL MACROS
-#define DEFINE_TST_FN(NAME) void SM_TST_FN(NAME)(Context* SM_CTX(), StatusFlag* SM_FLAGS_PARAM(), TST_STRUCT_T(NAME)* SM_DATA_PARAM())
+#define DEFINE_TST_FN(NAME) void SM_TST_FN(NAME)(Context* SM_CTX(), StatusFlag* SM_FLAGS_PARAM())
+#define DEFINE_TST_FN_ARGS(NAME) void SM_TST_FN(NAME)(Context* SM_CTX(), StatusFlag* SM_FLAGS_PARAM(), TST_STRUCT_T(NAME)* SM_DATA_PARAM())
 #define DECL_TST_FLAGS(NAME) static StatusFlag TST_FLAGS(NAME) = 0
 #define DECL_TST_DATASTRUCT(NAME, CONTENT) TST_STRUCT_T(NAME) CONTENT
 #define TRACE(NAME, STR, ...) PRINT("%s:%d: FAILED (%s): " STR "\n", SM_CTX()->prog_name, __LINE__, #NAME, __VA_ARGS__);
@@ -87,9 +88,11 @@ int terminate_context(Context* SM_CTX()) {
 #define BEGIN_TESTS(ARGC, ARGV) Context SM_CTX() = {}; initialize_context(&SM_CTX(), ARGC, ARGV)
 #define END_TESTS() return terminate_context(&SM_CTX())
 
-#define TEST_CASE(NAME, DATA) DECL_TST_DATASTRUCT(NAME, DATA); DECL_TST_FLAGS(NAME); DEFINE_TST_FN(NAME)
+#define TEST_CASE(NAME) DECL_TST_FLAGS(NAME); DEFINE_TST_FN(NAME)
+#define TEST_CASE_ARGS(NAME, DATA) DECL_TST_DATASTRUCT(NAME, DATA); DECL_TST_FLAGS(NAME); DEFINE_TST_FN_ARGS(NAME)
 
-#define RUN_TEST(NAME, DATA) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME), &(TST_STRUCT_T(NAME))DATA);CHECK_TEST(NAME);
+#define RUN_TEST(NAME) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME));CHECK_TEST(NAME);
+#define RUN_TEST_ARGS(NAME, DATA) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME), &(TST_STRUCT_T(NAME))DATA);CHECK_TEST(NAME);
 
 // Weak assertions
 #define CHECK(COND) DO_CHECK(CHECK, COND, NOPE)

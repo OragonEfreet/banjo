@@ -4,7 +4,7 @@
 #include <banjo/array.h>
 
 
-TEST_CASE(zero_initialization, {}) {
+TEST_CASE_ARGS(zero_initialization, {}) {
     BjArray array;
 
     BjResult result = bjCreateArray(&(BjArrayCreateInfo){.elem_size=1}, &array);
@@ -18,7 +18,7 @@ TEST_CASE(zero_initialization, {}) {
     bjDestroyArray(array);
 }
 
-TEST_CASE(custom_allocator, {}) {
+TEST_CASE_ARGS(custom_allocator, {}) {
     BjAllocationCallbacks allocator = mock_allocators();
     BjArray array;
 
@@ -30,7 +30,7 @@ TEST_CASE(custom_allocator, {}) {
     bjDestroyArray(array);
 }
 
-TEST_CASE(init_explicit_capacity, {}) {
+TEST_CASE_ARGS(init_explicit_capacity, {}) {
     BjArray array;
 
     BjResult result = bjCreateArray(&(BjArrayCreateInfo){.capacity = 10, .elem_size=1},&array);
@@ -47,9 +47,9 @@ TEST_CASE(init_explicit_capacity, {}) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(zero_initialization, {});
-    RUN_TEST(custom_allocator, {});
-    RUN_TEST(init_explicit_capacity, {});
+    RUN_TEST_ARGS(zero_initialization, {});
+    RUN_TEST_ARGS(custom_allocator, {});
+    RUN_TEST_ARGS(init_explicit_capacity, {});
 
     END_TESTS();
 }
