@@ -3,7 +3,7 @@
 
 #include <banjo/hash_table.h>
 
-TEST_CASE(zero_initialization) {
+TEST_CASE(zero_initialization, {}) {
     BjHashTable htable;
 
     BjResult result = bjCreateHashTable(&(BjHashTableCreateInfo){.elem_size=1}, &htable);
@@ -14,7 +14,7 @@ TEST_CASE(zero_initialization) {
     bjDestroyHashTable(htable);
 }
 
-TEST_CASE(custom_allocator) {
+TEST_CASE(custom_allocator, {}) {
     BjAllocationCallbacks allocator = mock_allocators();
     BjHashTable htable;
 
@@ -29,8 +29,8 @@ TEST_CASE(custom_allocator) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(zero_initialization);
-    RUN_TEST(custom_allocator);
+    RUN_TEST(zero_initialization, {});
+    RUN_TEST(custom_allocator, {});
 
     END_TESTS();
 }
