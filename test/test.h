@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mock_memory.h"
+
 // TODO: + No need to name tests anymore
 // TODO: + Tag system
 // TODO: + ShouldFail system
@@ -29,13 +31,14 @@ typedef enum {
 } StatusFlag;
 
 typedef struct {
-    char*         prog_name;   // Name of the curernt test progrm
-    unsigned char n_run;       // Number of test cases already finished
-    unsigned char n_fail;      // Number of failed test cases
-    int           stop_at_err; // If 0, program continues on error
-    void*         user_data;   // User data
+    char*                 prog_name;   // Name of the curernt test progrm
+    unsigned char         n_run;       // Number of test cases already finished
+    unsigned char         n_fail;      // Number of failed test cases
+    usize                 n_asserts;   // Total number of checked assertions
+    int                   stop_at_err; // If 0, program continues on error
+    void*                 user_data;   // User data
+    allocation_data       allocations; // Allocation Data
 } Context;
-
 
 // Parses ARGC/ARGV and builds the COntext object
 void initialize_context(Context* context, int argc, char* argv[]) {
@@ -44,6 +47,9 @@ void initialize_context(Context* context, int argc, char* argv[]) {
     } else {
         context->prog_name = "UnitTest";
     }
+
+    BjAllocationCallbacks allocators = mock_allocators(&context->allocations);
+    bjSetDefaultAllocator(&allocators);
 }
 
 // Called after each test ends
@@ -60,8 +66,19 @@ int record_test_result(Context* context, int status_flag) {
 // Terminate the test program, outputs a report
 // Return 0 means all test passed
 int terminate_context(Context* SM_CTX()) {
-    const char* fmt = SM_CTX()->stop_at_err ? "Ran up to %d test cases. %d failed\n" : "Ran %d test cases. %d failed.\n";
-    PRINT(fmt, SM_CTX()->n_run, SM_CTX()->n_fail);
+    const char* fmt = SM_CTX()->stop_at_err ? "Ran up to %d test cases, %d asserts.\n%d test failed\n" : "Ran %d test cases, %d asserts.\n%d test failed.\n";
+    PRINT(fmt, SM_CTX()->n_run, SM_CTX()->n_asserts, SM_CTX()->n_fail);
+
+    if(SM_CTX()->allocations.application_current_allocated > 0) {
+        PRINT("Leaks detected:\n\tApplication allocated:\t %ld (max: %ld)\n\tTotal allocated:\t %ld (max %ld)\n\t%d allocs, %d reallocs, %d frees",
+            SM_CTX()->allocations.application_current_allocated, SM_CTX()->allocations.application_max_allocated,
+            SM_CTX()->allocations.actual_current_allocated, SM_CTX()->allocations.actual_max_allocated,
+            SM_CTX()->allocations.n_allocations, SM_CTX()->allocations.n_reallocations, SM_CTX()->allocations.n_free
+        );
+        return 1;
+    } else {
+        PRINT("No leak detected\n");
+    }
     return SM_CTX()->n_fail;
 }
 
@@ -77,11 +94,11 @@ int terminate_context(Context* SM_CTX()) {
 #define NOPE ;
 #define STOP *SM_FLAGS_PARAM() |= FAIL;return;
 
-#define DO_CHECK(CMD, COND, IF_FAIL) if(!(COND)) { TRACE(CMD, "%s", #COND); IF_FAIL; }
-#define DO_CHECK_EQ(CMD, RES, EXPECTED, IF_FAIL)  if(!(RES == EXPECTED)) { TRACE(CMD, "%s: expected %s", #RES, #EXPECTED); IF_FAIL; } 
-#define DO_CHECK_NEQ(CMD, RES, EXPECTED, IF_FAIL)  if((RES == EXPECTED)) { TRACE(CMD, "%s: expected NOT %s", #RES, #EXPECTED); IF_FAIL; } 
-#define DO_CHECK_NULL(CMD, RES, IF_FAIL)  if(!(RES == 0)) { TRACE(CMD, "%s", #RES); IF_FAIL; } 
-#define DO_CHECK_VALUE(CMD, RES, IF_FAIL)  if((RES == 0)) { TRACE(CMD, "%s", #RES); IF_FAIL; } 
+#define DO_CHECK(CMD, COND, IF_FAIL) if(!(COND)) { TRACE(CMD, "%s", #COND); IF_FAIL; } else { ++SM_CTX()->n_asserts;}
+#define DO_CHECK_EQ(CMD, RES, EXPECTED, IF_FAIL)  if(!(RES == EXPECTED)) { TRACE(CMD, "%s: expected %s", #RES, #EXPECTED); IF_FAIL; }  else { ++SM_CTX()->n_asserts;}
+#define DO_CHECK_NEQ(CMD, RES, EXPECTED, IF_FAIL)  if((RES == EXPECTED)) { TRACE(CMD, "%s: expected NOT %s", #RES, #EXPECTED); IF_FAIL; }  else { ++SM_CTX()->n_asserts;}
+#define DO_CHECK_NULL(CMD, RES, IF_FAIL)  if(!(RES == 0)) { TRACE(CMD, "%s", #RES); IF_FAIL; }  else { ++SM_CTX()->n_asserts;}
+#define DO_CHECK_VALUE(CMD, RES, IF_FAIL)  if((RES == 0)) { TRACE(CMD, "%s", #RES); IF_FAIL; }  else { ++SM_CTX()->n_asserts;}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC

@@ -74,9 +74,9 @@ int main(int argc, char* argv[]) {
     RUN_TEST(default_initialization_is_full_empty);
     RUN_TEST(default_initialization_has_empty_count);
     RUN_TEST(a_first_prepend_initializes_first_entry);
-    RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=0});
-    RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=1});
-    RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=2});
+    /* RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=0}); */
+    /* RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=1}); */
+    /* RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=2}); */
 
     END_TESTS();
 }

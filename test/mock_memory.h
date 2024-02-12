@@ -64,6 +64,9 @@ static void* mock_malloc(void* pUserData, usize appsize) {
 }
 
 void mock_free(void* pUserData, void* pAppPtr) {
+    if(pAppPtr == 0) {
+        return;
+    }
 
     if(pUserData == 0) {
         free(pAppPtr);

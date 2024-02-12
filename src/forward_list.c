@@ -20,6 +20,7 @@ BjResult bjResetForwardList(
     BjForwardList list
 ) {
     bjExpectValue(list, BJ_NULL_PARAMETER);
+    bjClearForwardList(list);
     return BJ_SUCCESS;
 }
 
@@ -37,6 +38,22 @@ BjResult bjCreateForwardList(
         *pInstance = list;
     } else {
         bjFree(list, pCreateInfo->pAllocator);
+    }
+
+    return BJ_SUCCESS;
+}
+
+BjResult bjClearForwardList(
+    BjForwardList list
+) {
+    bjExpectValue(list, BJ_NULL_INPUT_HANDLE);
+
+    BjForwardListEntry* entry = list->pFirstEntry;
+    while(entry != 0) {
+        BjForwardListEntry* next = entry->pNext;
+        bjFree(entry->value, list->pAllocator);
+        bjFree(entry, list->pAllocator);
+        entry = next;
     }
 
     return BJ_SUCCESS;
