@@ -45,4 +45,12 @@ BANJO_EXPORT void bjFree(
     const BjAllocationCallbacks*  pAllocator
 );
 
+BANJO_EXPORT BjResult bjSetDefaultAllocator(
+    const BjAllocationCallbacks* pAllocator
+);
+
+BANJO_EXPORT BjResult bjUnsetDefaultAllocator(
+    const BjAllocationCallbacks* pAllocator
+);
+
 

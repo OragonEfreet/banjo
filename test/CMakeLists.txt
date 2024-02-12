@@ -6,6 +6,7 @@ foreach(_bin_source_path ${_bin_source_paths})
     add_executable(${_target} ${_bin_source_path})
     target_include_directories(${_target} PRIVATE ${CMAKE_SOURCE_DIR}/src/data)
     target_link_libraries(${_target} PRIVATE banjo)
+    set_target_properties(${_target} PROPERTIES OUTPUT_NAME ${_test_name})
     add_test(NAME ${_test_name} COMMAND ${_target})
 endforeach()
 

@@ -30,9 +30,10 @@ BjResult bjResetWorld(BjWorld world) {
     return BJ_SUCCESS;
 }
 
-void bjDestroyWorld(
+BjResult bjDestroyWorld(
     BjWorld world
 ) {
     bjExpectValue(world, BJ_NULL_INPUT_HANDLE);
     bjFree(world, world->pAllocator);
+    return BJ_SUCCESS;
 }
