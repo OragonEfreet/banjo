@@ -2,33 +2,46 @@
 
 #include <forward_list.h>
 
-typedef float elem_type;
+typedef struct {
+    usize mem_size;
+    usize n_values;
+    void* values;
+} element_type;
 
-elem_type values[] = {
-    42.5f,
-};
+/* typedef float elem_type; */
+/* elem_type values[] = { */
+/*     42.5f, */
+/* }; */
 
-static BjForwardListCreateInfo s_create_info = {
-    .elem_size = sizeof(int)
-};
+/* static BjForwardListCreateInfo s_create_info = { */
+/*     .elem_size = sizeof(elem_type) */
+/* }; */
 
-TEST_CASE(default_initialization_is_full_empty) {
+TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}) {
     BjForwardList list;
 
-    BjResult result = bjCreateForwardList(&s_create_info, &list);
+    BjForwardListCreateInfo create_info = {
+        .elem_size = test_data->value_type->mem_size,
+    };
+
+    BjResult result = bjCreateForwardList(&create_info, &list);
     CHECK_EQ(result, BJ_SUCCESS);
 
-    REQUIRE_EQ(list->elem_size, sizeof(elem_type));
+    REQUIRE_EQ(list->elem_size, test_data->value_type->mem_size);
     REQUIRE_NULL(list->pAllocator);
-    REQUIRE_NULL(list->pFirstEntry);
+    REQUIRE_NULL(list->pHead);
 
     bjDestroyForwardList(list);
 }
 
-TEST_CASE(default_initialization_has_empty_count) {
+TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type;}) {
     BjForwardList list;
 
-    BjResult result = bjCreateForwardList(&s_create_info, &list);
+    BjForwardListCreateInfo create_info = {
+        .elem_size = test_data->value_type->mem_size,
+    };
+
+    BjResult result = bjCreateForwardList(&create_info, &list);
     CHECK_EQ(result, BJ_SUCCESS);
 
     REQUIRE_EQ(bjForwardListCount(list), 0);
@@ -36,34 +49,40 @@ TEST_CASE(default_initialization_has_empty_count) {
     bjDestroyForwardList(list);
 }
 
-TEST_CASE(a_first_prepend_initializes_first_entry) {
+TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_type;}) {
     BjForwardList list;
 
-    BjResult result = bjCreateForwardList(&s_create_info, &list);
+    BjForwardListCreateInfo create_info = {
+        .elem_size = test_data->value_type->mem_size,
+    };
+
+    BjResult result = bjCreateForwardList(&create_info, &list);
     CHECK_EQ(result, BJ_SUCCESS);
 
-    REQUIRE_NULL(list->pFirstEntry);
-    bjForwardListPrepend(list, &values[0]);
-    REQUIRE_VALUE(list->pFirstEntry);
+    REQUIRE_NULL(list->pHead);
+    bjForwardListPrepend(list, test_data->value_type->values);
+    REQUIRE_VALUE(list->pHead);
 
     bjDestroyForwardList(list);
 }
 
-TEST_CASE_ARGS(n_prepends_means_count_is_n, {
-    usize n_operation;
-}) {
+TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
+    usize n_operations = 3;
     BjForwardList list;
 
-    BjResult result = bjCreateForwardList(&s_create_info, &list);
+    BjForwardListCreateInfo create_info = {
+        .elem_size = test_data->value_type->mem_size,
+    };
+
+    BjResult result = bjCreateForwardList(&create_info, &list);
     CHECK_EQ(result, BJ_SUCCESS);
 
     int data = {};
-    for(usize i = 0 ; i < test_data->n_operation ; ++i) {
+    for(usize i = 0 ; i < n_operations ; ++i) {
         bjForwardListPrepend(list, &data);
     }
 
-    REQUIRE_EQ(bjForwardListCount(list), test_data->n_operation);
-
+    REQUIRE_EQ(bjForwardListCount(list), n_operations);
 
     bjDestroyForwardList(list);
 }
@@ -71,12 +90,16 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(default_initialization_is_full_empty);
-    RUN_TEST(default_initialization_has_empty_count);
-    RUN_TEST(a_first_prepend_initializes_first_entry);
-    /* RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=0}); */
-    /* RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=1}); */
-    /* RUN_TEST_ARGS(n_prepends_means_count_is_n, {.n_operation=2}); */
+    element_type float_type = {
+        .mem_size = sizeof(float),
+        .n_values = 1,
+        .values = (float[]){4.5f},
+    };
+
+    RUN_TEST_ARGS(default_initialization_is_full_empty,    { .value_type = &float_type});
+    RUN_TEST_ARGS(default_initialization_has_empty_count,  { .value_type = &float_type});
+    RUN_TEST_ARGS(a_first_prepend_initializes_first_entry, { .value_type = &float_type});
+    RUN_TEST_ARGS(n_prepends_means_count_is_n,             { .value_type = &float_type});
 
     END_TESTS();
 }

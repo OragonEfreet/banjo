@@ -10,7 +10,8 @@ typedef struct BjForwardListEntry {
 typedef struct BjForwardList_T {
     BjAllocationCallbacks*     pAllocator;
     usize                      elem_size;
-    struct BjForwardListEntry* pFirstEntry;
+    bool                       weak_owning;
+    struct BjForwardListEntry* pHead;
 } BjForwardList_T;
 
 BjResult bjInitForwardList(const BjForwardListCreateInfo*, BjForwardList);
