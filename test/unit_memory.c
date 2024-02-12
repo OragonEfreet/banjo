@@ -118,6 +118,10 @@ TEST_CASE(test_custom_default_allocators) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
+    // Special case of the unit tests where the mock_allocator are not used
+    bjUnsetDefaultAllocator();
+
+
     RUN_TEST(fallback_allocator_works);
     RUN_TEST(forcing_default_allocators_is_possible);
     RUN_TEST(default_allocator_cannot_have_no_malloc);

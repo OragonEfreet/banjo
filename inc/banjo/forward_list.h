@@ -20,6 +20,10 @@ BANJO_EXPORT BjResult bjDestroyForwardList(
     BjForwardList list
 );
 
+BANJO_EXPORT BjResult bjClearForwardList(
+    BjForwardList list
+);
+
 BANJO_EXPORT usize bjForwardListCount(
     BjForwardList list
 );

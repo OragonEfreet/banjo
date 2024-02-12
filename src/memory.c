@@ -72,8 +72,6 @@ BjResult bjSetDefaultAllocator(
     return BJ_SUCCESS;
 }
 
-BANJO_EXPORT BjResult bjUnsetDefaultAllocator(
-    const BjAllocationCallbacks* pAllocator
-) {
+BANJO_EXPORT BjResult bjUnsetDefaultAllocator(void) {
     return bjSetDefaultAllocator(0);
 }
