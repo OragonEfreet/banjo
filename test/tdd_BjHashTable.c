@@ -1,5 +1,5 @@
 #include "test.h"
-#include "custom_allocators.h"
+#include "mock_memory.h"
 
 #include <banjo/hash_table.h>
 
@@ -15,7 +15,7 @@ TEST_CASE_ARGS(zero_initialization, {}) {
 }
 
 TEST_CASE_ARGS(custom_allocator, {}) {
-    BjAllocationCallbacks allocator = mock_allocators();
+    BjAllocationCallbacks allocator = mock_allocators(0);
     BjHashTable htable;
 
     BjResult result = bjCreateHashTable(&(BjHashTableCreateInfo){ .pAllocator = &allocator, .elem_size=1 },&htable);

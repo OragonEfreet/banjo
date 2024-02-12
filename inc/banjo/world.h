@@ -16,7 +16,7 @@ BANJO_EXPORT BjResult bjCreateWorld(
     BjWorld*                 pInstance
 );
 
-BANJO_EXPORT void bjDestroyWorld(
+BANJO_EXPORT BjResult bjDestroyWorld(
     BjWorld world
 );
 

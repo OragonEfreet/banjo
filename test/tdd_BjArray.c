@@ -1,5 +1,5 @@
 #include "test.h"
-#include "custom_allocators.h"
+#include "mock_memory.h"
 
 #include <banjo/array.h>
 
@@ -19,7 +19,7 @@ TEST_CASE_ARGS(zero_initialization, {}) {
 }
 
 TEST_CASE_ARGS(custom_allocator, {}) {
-    BjAllocationCallbacks allocator = mock_allocators();
+    BjAllocationCallbacks allocator = mock_allocators(0);
     BjArray array;
 
     BjResult result = bjCreateArray(&(BjArrayCreateInfo){ .pAllocator = &allocator, .elem_size=1 },&array);
