@@ -57,7 +57,7 @@ TEST_CASE(test_custom_default_allocators) {
         40, 60, 0, 10, -128, 0, 0,
         40, 60, 0, 10, -128, 0, 0,
     };
-    usize n_ops = sizeof(allocations) / sizeof(allocations[0]);
+    #define n_ops 14
 
     // At each iteration, the underlying instance of allocation_data is modified
     // and a test instance of allocation_data is modified here to compare the results.
