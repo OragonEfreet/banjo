@@ -28,8 +28,8 @@ TEST_CASE_ARGS(init_explicit_capacity, {}) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST_ARGS(zero_initialization, {});
-    RUN_TEST_ARGS(init_explicit_capacity, {});
+    RUN_TEST(zero_initialization);
+    RUN_TEST(init_explicit_capacity);
 
     END_TESTS();
 }
