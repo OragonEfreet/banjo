@@ -31,7 +31,7 @@ typedef enum {
 } StatusFlag;
 
 typedef struct {
-    char*                 prog_name;   // Name of the curernt test progrm
+    const char*           prog_name;   // Name of the curernt test progrm
     unsigned char         n_run;       // Number of test cases already finished
     unsigned char         n_fail;      // Number of failed test cases
     usize                 n_asserts;   // Total number of checked assertions
@@ -69,16 +69,21 @@ int terminate_context(Context* SM_CTX()) {
     const char* fmt = SM_CTX()->stop_at_err ? "Ran up to %d test cases, %d asserts.\n%d test failed\n" : "Ran %d test cases, %d asserts.\n%d test failed.\n";
     PRINT(fmt, SM_CTX()->n_run, SM_CTX()->n_asserts, SM_CTX()->n_fail);
 
-    if(SM_CTX()->allocations.application_current_allocated > 0) {
-        PRINT("Leaks detected:\n\tApplication allocated:\t %ld (max: %ld)\n\tTotal allocated:\t %ld (max %ld)\n\t%d allocs, %d reallocs, %d frees",
+    if(SM_CTX()->n_fail == 0) {
+            PRINT("\nApplication allocated:\t %ld (max: %ld)\nTotal allocated:\t %ld (max %ld)\n%d allocs, %d reallocs, %d frees\n",
             SM_CTX()->allocations.application_current_allocated, SM_CTX()->allocations.application_max_allocated,
             SM_CTX()->allocations.actual_current_allocated, SM_CTX()->allocations.actual_max_allocated,
             SM_CTX()->allocations.n_allocations, SM_CTX()->allocations.n_reallocations, SM_CTX()->allocations.n_free
         );
-        return 1;
-    } else {
-        PRINT("No leak detected\n");
+        if(SM_CTX()->allocations.application_current_allocated > 0) {
+            PRINT("Potential leaks detected\n");
+            return -1;
+        } else {
+            PRINT("No leak detected\n");
+            return 0;
+        }
     }
+
     return SM_CTX()->n_fail;
 }
 

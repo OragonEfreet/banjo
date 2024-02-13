@@ -125,3 +125,30 @@ BjResult bjForwardListPrepend(
     return bjForwardListInsert(list, 0, pData);
 }
 
+void* bjForwardListValue(
+    BjForwardList list,
+    usize index
+) {
+    BjForwardListEntry* entry = list->pHead;
+    usize current_index = 0;
+    while(entry != 0) {
+        if(current_index++ == index) {
+            if(list->elem_size > entry_ptr_size) {
+                return entry->value;
+            } else {
+                return &entry->value;
+            }
+            
+        }
+        entry = entry->pNext;
+    }
+
+    return 0;
+}
+
+void* bjForwardListHead(
+    BjForwardList list
+){
+    return bjForwardListValue(list, 0);
+}
+

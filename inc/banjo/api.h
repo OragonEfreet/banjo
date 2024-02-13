@@ -64,5 +64,6 @@ typedef enum {
     BJ_PLATFORM_ERROR,
     BJ_NULL_PARAMETER,
     BJ_INVALID_PARAMETER,
+    BJ_OUT_OF_BOUNDS,
 } BjResult;
 

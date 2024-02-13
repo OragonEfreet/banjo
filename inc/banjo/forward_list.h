@@ -39,6 +39,15 @@ BANJO_EXPORT BjResult bjForwardListPrepend(
     void* pData
 );
 
+BANJO_EXPORT void* bjForwardListValue(
+    BjForwardList list,
+    usize index
+);
+
+BANJO_EXPORT void* bjForwardListHead(
+    BjForwardList list
+);
+
 
 
 
