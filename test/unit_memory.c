@@ -46,7 +46,7 @@ TEST_CASE(default_allocator_cannot_have_no_free) {
 }
 
 TEST_CASE(test_custom_default_allocators) {
-    // An intenntionally complex test that plays with allocations to check
+    // An intentionally complex test that plays with allocations to check
     // for the status each time a memory operation is done.
 
     // Test data: each value represents an operation to to in order:
