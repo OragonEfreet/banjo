@@ -29,8 +29,8 @@ TEST_CASE_ARGS(custom_allocator, {}) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST_ARGS(zero_initialization, {});
-    RUN_TEST_ARGS(custom_allocator, {});
+    RUN_TEST(zero_initialization);
+    RUN_TEST(custom_allocator);
 
     END_TESTS();
 }
