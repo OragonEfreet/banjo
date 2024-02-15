@@ -11,14 +11,14 @@ typedef struct {
 TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}) {
     BjForwardList list;
 
-    BjForwardListCreateInfo create_info = {
-        .elem_size = test_data->value_type->mem_size,
+    BjForwardListInfo create_info = {
+        .value_size = test_data->value_type->mem_size,
     };
 
     BjResult result = bjCreateForwardList(&create_info, &list);
     CHECK_EQ(result, BJ_SUCCESS);
 
-    REQUIRE_EQ(list->elem_size, test_data->value_type->mem_size);
+    REQUIRE_EQ(list->value_size, test_data->value_type->mem_size);
     REQUIRE_NULL(list->pAllocator);
     REQUIRE_NULL(list->pHead);
 
@@ -28,8 +28,8 @@ TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}
 TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type;}) {
     BjForwardList list;
 
-    BjForwardListCreateInfo create_info = {
-        .elem_size = test_data->value_type->mem_size,
+    BjForwardListInfo create_info = {
+        .value_size = test_data->value_type->mem_size,
     };
 
     BjResult result = bjCreateForwardList(&create_info, &list);
@@ -43,8 +43,8 @@ TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type
 TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_type;}) {
     BjForwardList list;
 
-    BjForwardListCreateInfo create_info = {
-        .elem_size = test_data->value_type->mem_size,
+    BjForwardListInfo create_info = {
+        .value_size = test_data->value_type->mem_size,
     };
 
     BjResult result = bjCreateForwardList(&create_info, &list);
@@ -61,8 +61,8 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
     usize n_operations = 3;
     BjForwardList list;
 
-    BjForwardListCreateInfo create_info = {
-        .elem_size = test_data->value_type->mem_size,
+    BjForwardListInfo create_info = {
+        .value_size = test_data->value_type->mem_size,
     };
 
     BjResult result = bjCreateForwardList(&create_info, &list);
@@ -80,8 +80,8 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
 
 
 TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
-    BjForwardListCreateInfo create_info = {
-        .elem_size = test_data->value_type->mem_size,
+    BjForwardListInfo create_info = {
+        .value_size = test_data->value_type->mem_size,
     };
 
     BjForwardList list;

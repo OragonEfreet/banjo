@@ -2,23 +2,49 @@
 #include <data/hash_table.h>
 #include <errors.h>
 
+#include <stdio.h>
+
+#define BUCKET_COUNT 10
+
+typedef struct {
+    void*  pKey;
+    void*  pValue;
+} BjHashTableEntry;
+
+// FNV-1a hash function constants
+#define FNV_PRIME 0x01000193 // 16777619
+#define FNV_OFFSET_BASIS 0x811C9DC5 // 2166136261
+
+// Function to compute the hash of a buffer using FNV-1a
+u32 fnv1a_hash(const void *data, size_t size) {
+    const unsigned char *ptr = (const unsigned char *)data;
+    uint32_t hash = FNV_OFFSET_BASIS;
+
+    for (size_t i = 0; i < size; ++i) {
+        hash ^= (uint32_t)ptr[i];
+        hash *= FNV_PRIME;
+    }
+
+    return hash;
+}
+
 BjResult bjInitHashTable(
-    const BjHashTableCreateInfo* pCreateInfo,
+    const BjHashTableInfo* pInfo,
     BjHashTable                  pInstance
 ) {
-    bjExpectValue(pCreateInfo, BJ_NULL_CREATE_INFO);
+    bjExpectValue(pInfo, BJ_NULL_CREATE_INFO);
+    bjExpectValue(pInfo->value_size, BJ_INVALID_PARAMETER);
+    bjExpectValue(pInfo->key_size, BJ_INVALID_PARAMETER);
 
-    pInstance->pAllocator = pCreateInfo->pAllocator;
-    pInstance->elem_size  = pCreateInfo->elem_size;
-    // TODO
-    bjInitArray(
-        &(BjArrayCreateInfo){
-            .capacity = 10,
-            .elem_size = 1,
-            .pAllocator = pCreateInfo->pAllocator,
-        },
-        &pInstance->buckets
-    );
+    pInstance->pAllocator  = pInfo->pAllocator;
+    pInstance->weak_owning = pInfo->weak_owning;
+    pInstance->pfnHash = pInfo->pfnHash ? pInfo->pfnHash : fnv1a_hash;
+
+    bjInitArray(&(BjArrayInfo) {
+        .value_size = sizeof(BjForwardList_T),
+        .pAllocator = pInfo->pAllocator,
+        .capacity      = BUCKET_COUNT,
+    }, &pInstance->buckets_array);
 
     return BJ_SUCCESS;
 }
@@ -27,25 +53,29 @@ BjResult bjResetHashTable(
     BjHashTable htable
 ) {
     BjResult res      = bjClearHashTable(htable);
-    bjResetArray(&htable->buckets);
-    htable->elem_size = 0;
+    // TODO
+    /* for(usize i = 0 ; i < BUCKET_COUNT ; ++i) { */
+    /*     bjResetForwardList(htable->buckets_array.pData + sizeof(BjForwardList_T)*i); */
+    /* } */
+    bjResetArray(&htable->buckets_array);
     return res;
 }
 
 BjResult bjCreateHashTable(
-    const BjHashTableCreateInfo* pCreateInfo,
+    const BjHashTableInfo* pInfo,
     BjHashTable* pInstance
 ) {
     bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
+    bjExpectValue(pInfo->value_size, BJ_INVALID_PARAMETER);
 
-    BjHashTable htable = bjNewStruct(BjHashTable, pCreateInfo->pAllocator);
+    BjHashTable htable = bjNewStruct(BjHashTable, pInfo->pAllocator);
 
-    BjResult result = bjInitHashTable(pCreateInfo, htable);
+    BjResult result = bjInitHashTable(pInfo, htable);
     if(result == BJ_SUCCESS) {
         *pInstance = htable;
     } else {
-        bjFree(htable, pCreateInfo->pAllocator);
+        bjFree(htable, pInfo->pAllocator);
+        return result;
     }
 
     return BJ_SUCCESS;
@@ -68,3 +98,13 @@ BANJO_EXPORT BjResult bjClearHashTable(
     return BJ_SUCCESS;
 }
 
+BANJO_EXPORT BjResult bjHashTableSet(
+    BjHashTable table,
+    const void* pKey,
+    const void* pValue
+) {
+    u32 hash = table->pfnHash(pKey, table->key_size) % BUCKET_COUNT;
+    printf("Hash: %u\n", hash);
+
+    return BJ_SUCCESS;
+}

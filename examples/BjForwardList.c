@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
 
     
     // Usual Creation and destruction
-    BjForwardListCreateInfo create_info = { .elem_size = sizeof(int) };
+    BjForwardListInfo create_info = { .value_size = sizeof(int) };
     BjForwardList list                  = BJ_NULL_HANDLE;
     bjCreateForwardList(&create_info, &list);
     

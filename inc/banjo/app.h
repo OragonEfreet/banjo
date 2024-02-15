@@ -5,13 +5,13 @@
 
 BJ_DEFINE_HANDLE(BjApplication);
 
-typedef struct BjApplicationCreateInfo {
+typedef struct BjApplicationInfo {
     const char*            name;
     BjAllocationCallbacks* pAllocator;
-} BjApplicationCreateInfo;
+} BjApplicationInfo;
 
 BANJO_EXPORT BjResult bjCreateApplication(
-    const BjApplicationCreateInfo* pCreateInfo,
+    const BjApplicationInfo* pInfo,
     BjApplication*                 pApplication
 );
 

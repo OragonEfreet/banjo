@@ -5,14 +5,15 @@
 
 BJ_DEFINE_HANDLE(BjArray);
 
-typedef struct BjArrayCreateInfo {
+typedef struct BjArrayInfo {
     BjAllocationCallbacks* pAllocator;
-    usize                  elem_size;
+    usize                  value_size;
+    usize                  count;
     usize                  capacity;
-} BjArrayCreateInfo;
+} BjArrayInfo;
 
 BANJO_EXPORT BjResult bjCreateArray(
-    const BjArrayCreateInfo* pCreateInfo,
+    const BjArrayInfo* pInfo,
     BjArray*                 pInstance
 );
 

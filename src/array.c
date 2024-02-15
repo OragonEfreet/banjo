@@ -2,19 +2,19 @@
 #include <errors.h>
 
 BjResult bjInitArray(
-    const BjArrayCreateInfo* pCreateInfo,
+    const BjArrayInfo* pInfo,
     BjArray                  pInstance
 ) {
-    bjExpectValue(pCreateInfo, BJ_NULL_CREATE_INFO);
+    bjExpectValue(pInfo, BJ_NULL_CREATE_INFO);
 
-    pInstance->pAllocator = pCreateInfo->pAllocator;
+    pInstance->pAllocator = pInfo->pAllocator;
     pInstance->capacity   = 0;
     pInstance->count      = 0;
-    pInstance->elem_size  = pCreateInfo->elem_size;
+    pInstance->value_size  = pInfo->value_size;
     pInstance->pData      = 0;
 
-    if(pCreateInfo->capacity > 0) {
-        bjReserveArray(pInstance, pCreateInfo->capacity);
+    if(pInfo->capacity > 0) {
+        bjReserveArray(pInstance, pInfo->capacity);
     }
 
     return BJ_SUCCESS;
@@ -29,19 +29,19 @@ BjResult bjResetArray(
 }
 
 BjResult bjCreateArray(
-    const BjArrayCreateInfo* pCreateInfo,
+    const BjArrayInfo* pInfo,
     BjArray* pInstance
 ) {
     bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
+    bjExpectValue(pInfo->value_size, BJ_INVALID_PARAMETER);
 
-    BjArray array     = bjNewStruct(BjArray, pCreateInfo->pAllocator);
+    BjArray array     = bjNewStruct(BjArray, pInfo->pAllocator);
 
-    BjResult result = bjInitArray(pCreateInfo, array);
+    BjResult result = bjInitArray(pInfo, array);
     if(result == BJ_SUCCESS) {
         *pInstance = array;
     } else {
-        bjFree(array, pCreateInfo->pAllocator);
+        bjFree(array, pInfo->pAllocator);
     }
 
     return BJ_SUCCESS;
@@ -63,9 +63,9 @@ BjResult bjReserveArray(
     bjExpectValue(pArray, BJ_NULL_OUTPUT_HANDLE);
     if(capacity > pArray->capacity) {
         if(pArray->pData == 0) {
-            pArray->pData = bjAllocate(pArray->elem_size * capacity, pArray->pAllocator);
+            pArray->pData = bjAllocate(pArray->value_size * capacity, pArray->pAllocator);
         } else {
-            pArray->pData = bjReallocate(pArray->pData, pArray->elem_size * capacity, pArray->pAllocator);
+            pArray->pData = bjReallocate(pArray->pData, pArray->value_size * capacity, pArray->pAllocator);
         }
         pArray->capacity = capacity;
     }

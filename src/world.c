@@ -4,14 +4,14 @@
 #include <banjo/array.h>
 
 BjResult bjCreateWorld(
-    const BjWorldCreateInfo* pCreateInfo,
+    const BjWorldInfo* pInfo,
     BjWorld*                 pWorld
 ) {
-    bjExpectValue(pCreateInfo, BJ_NULL_CREATE_INFO);
+    bjExpectValue(pInfo, BJ_NULL_CREATE_INFO);
     bjExpectValue(pWorld, BJ_NULL_OUTPUT_HANDLE);
 
-    BjWorld world = bjNewStruct(BjWorld, pCreateInfo->pAllocator);
-    world->pAllocator = pCreateInfo->pAllocator;
+    BjWorld world = bjNewStruct(BjWorld, pInfo->pAllocator);
+    world->pAllocator = pInfo->pAllocator;
 
     *pWorld = world;
 
@@ -22,7 +22,7 @@ BjResult bjCreateWorld(
     return 0;
 }
 
-BjResult bjInitWorld( const BjWorldCreateInfo* create_info, BjWorld world) {
+BjResult bjInitWorld( const BjWorldInfo* create_info, BjWorld world) {
     return BJ_SUCCESS;
 }
 

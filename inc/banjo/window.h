@@ -6,15 +6,15 @@
 
 BJ_DEFINE_HANDLE(BjWindow);
 
-typedef struct BjWindowCreateInfo {
+typedef struct BjWindowInfo {
     BjApplication application;
     usize         width;
     usize         height;
     const char*   title;
-} BjWindowCreateInfo;
+} BjWindowInfo;
 
 BANJO_EXPORT BjResult bjCreateWindow(
-    const BjWindowCreateInfo* pCreateInfo,
+    const BjWindowInfo* pInfo,
     BjWindow*                 pInstance
 );
 

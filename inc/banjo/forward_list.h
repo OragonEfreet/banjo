@@ -5,14 +5,14 @@
 
 BJ_DEFINE_HANDLE(BjForwardList);
 
-typedef struct BjForwardListCreateInfo {
+typedef struct BjForwardListInfo {
     BjAllocationCallbacks* pAllocator;
-    usize                  elem_size;
+    usize                  value_size;
     bool                   weak_owning;
-} BjForwardListCreateInfo;
+} BjForwardListInfo;
 
 BANJO_EXPORT BjResult bjCreateForwardList(
-    const BjForwardListCreateInfo* pCreateInfo,
+    const BjForwardListInfo* pInfo,
     BjForwardList*                 pInstance
 );
 

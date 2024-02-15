@@ -2,12 +2,17 @@
 
 #include <banjo/hash_table.h>
 #include <data/array.h>
+#include <data/forward_list.h>
 
 typedef struct BjHashTable_T {
     BjAllocationCallbacks* pAllocator;
-    usize                  elem_size;
-    BjArray_T              buckets;
+    BjArray_T              buckets_array;
+    /* BjForwardList_T        buckets[BUCKET_COUNT]; */
+    bool                   weak_owning;
+    usize                  value_size;
+    usize                  key_size;
+    PFN_bjHashFunction     pfnHash;
 } BjHashTable_T;
 
-BjResult bjInitHashTable(const BjHashTableCreateInfo*, BjHashTable);
+BjResult bjInitHashTable(const BjHashTableInfo*, BjHashTable);
 BjResult bjResetHashTable(BjHashTable);
