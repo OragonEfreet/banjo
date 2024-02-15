@@ -7,12 +7,12 @@ typedef usize entity_id;
 
 BJ_DEFINE_HANDLE(BjWorld);
 
-typedef struct BjWorldCreateInfo {
+typedef struct BjWorldInfo {
     BjAllocationCallbacks*   pAllocator;
-} BjWorldCreateInfo;
+} BjWorldInfo;
 
 BANJO_EXPORT BjResult bjCreateWorld(
-    const BjWorldCreateInfo* pCreateInfo,
+    const BjWorldInfo* pInfo,
     BjWorld*                 pInstance
 );
 

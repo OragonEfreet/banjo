@@ -18,13 +18,13 @@ void error_callback(int error, const char* description)
 }
 
 BjResult bjCreateWindow(
-    const BjWindowCreateInfo* pCreateInfo,
+    const BjWindowInfo* pInfo,
     BjWindow*                 pWindow
 ) {
-    bjExpectValue(pCreateInfo,              BJ_NULL_CREATE_INFO);
-    bjExpectValue(pCreateInfo->application, BJ_INVALID_CREATE_INFO);
-    bjExpectValue(pCreateInfo->width,       BJ_INVALID_WINDOW_SIZE);
-    bjExpectValue(pCreateInfo->height,      BJ_INVALID_WINDOW_SIZE);
+    bjExpectValue(pInfo,              BJ_NULL_CREATE_INFO);
+    bjExpectValue(pInfo->application, BJ_INVALID_CREATE_INFO);
+    bjExpectValue(pInfo->width,       BJ_INVALID_WINDOW_SIZE);
+    bjExpectValue(pInfo->height,      BJ_INVALID_WINDOW_SIZE);
 
 
     glfwDefaultWindowHints();
@@ -32,16 +32,16 @@ BjResult bjCreateWindow(
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     GLFWwindow* handle = glfwCreateWindow(
-        pCreateInfo->width, pCreateInfo->height,
-        pCreateInfo->title ? pCreateInfo->title : pCreateInfo->application->name,
+        pInfo->width, pInfo->height,
+        pInfo->title ? pInfo->title : pInfo->application->name,
         NULL, NULL
     );
 
-    struct BjWindow_T* window = bjNewStruct(BjWindow, pCreateInfo->application->pAllocator);
+    struct BjWindow_T* window = bjNewStruct(BjWindow, pInfo->application->pAllocator);
     window->handle = handle;
-    window->application = pCreateInfo->application;
+    window->application = pInfo->application;
 
-    bj_LinkWindow(pCreateInfo->application, window);
+    bj_LinkWindow(pInfo->application, window);
 
     *pWindow = window;
     return BJ_SUCCESS;

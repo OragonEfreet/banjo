@@ -7,14 +7,14 @@
 static const usize entry_ptr_size = sizeof(BjForwardListEntry);
 
 BjResult bjInitForwardList(
-    const BjForwardListCreateInfo* pCreateInfo,
+    const BjForwardListInfo* pInfo,
     BjForwardList                  pInstance
 ) {
-    bjExpectValue(pCreateInfo, BJ_NULL_CREATE_INFO);
+    bjExpectValue(pInfo, BJ_NULL_CREATE_INFO);
 
-    pInstance->pAllocator  = pCreateInfo->pAllocator;
-    pInstance->elem_size   = pCreateInfo->elem_size;
-    pInstance->weak_owning = pCreateInfo->weak_owning;
+    pInstance->pAllocator   = pInfo->pAllocator;
+    pInstance->value_size   = pInfo->value_size;
+    pInstance->weak_owning  = pInfo->weak_owning;
     pInstance->pHead = 0;
 
     return BJ_SUCCESS;
@@ -29,19 +29,19 @@ BjResult bjResetForwardList(
 }
 
 BjResult bjCreateForwardList(
-    const BjForwardListCreateInfo* pCreateInfo,
+    const BjForwardListInfo* pInfo,
     BjForwardList* pInstance
 ) {
     bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pCreateInfo->elem_size, BJ_INVALID_PARAMETER);
+    bjExpectValue(pInfo->value_size, BJ_INVALID_PARAMETER);
 
-    BjForwardList list     = bjNewStruct(BjForwardList, pCreateInfo->pAllocator);
+    BjForwardList list     = bjNewStruct(BjForwardList, pInfo->pAllocator);
 
-    BjResult result = bjInitForwardList(pCreateInfo, list);
+    BjResult result = bjInitForwardList(pInfo, list);
     if(result == BJ_SUCCESS) {
         *pInstance = list;
     } else {
-        bjFree(list, pCreateInfo->pAllocator);
+        bjFree(list, pInfo->pAllocator);
     }
 
     return BJ_SUCCESS;
@@ -55,7 +55,7 @@ BjResult bjClearForwardList(
     BjForwardListEntry* entry = list->pHead;
     while(entry != 0) {
         BjForwardListEntry* next = entry->pNext;
-        if(list->weak_owning == false && list->elem_size > entry_ptr_size) {
+        if(list->weak_owning == false && list->value_size > entry_ptr_size) {
             bjFree(entry->value, list->pAllocator);
         }
         bjFree(entry, list->pAllocator);
@@ -106,11 +106,11 @@ BjResult bjForwardListInsert(
     if(list->weak_owning) {
         new_entry->value = pData;
     } else {
-        if(list->elem_size > entry_ptr_size) {
-            new_entry->value = bjAllocate(list->elem_size, list->pAllocator);
-            memcpy(new_entry->value, pData, list->elem_size);
+        if(list->value_size > entry_ptr_size) {
+            new_entry->value = bjAllocate(list->value_size, list->pAllocator);
+            memcpy(new_entry->value, pData, list->value_size);
         } else {
-            memcpy(&new_entry->value, pData, list->elem_size);
+            memcpy(&new_entry->value, pData, list->value_size);
         }
     }
 
@@ -133,7 +133,7 @@ void* bjForwardListValue(
     usize current_index = 0;
     while(entry != 0) {
         if(current_index++ == index) {
-            if(list->elem_size > entry_ptr_size) {
+            if(list->value_size > entry_ptr_size) {
                 return entry->value;
             } else {
                 return &entry->value;

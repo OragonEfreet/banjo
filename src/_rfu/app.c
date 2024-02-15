@@ -7,20 +7,20 @@
 #include <unistd.h>
 
 BjResult bjCreateApplication(
-    const BjApplicationCreateInfo*    pCreateInfo,
+    const BjApplicationInfo*    pInfo,
     BjApplication*                    pApplication
 ) {
-    bjExpectValue(pCreateInfo,  BJ_NULL_CREATE_INFO);
+    bjExpectValue(pInfo,  BJ_NULL_CREATE_INFO);
     bjExpectValue(pApplication, BJ_NULL_OUTPUT_HANDLE);
 
 
-    struct BjApplication_T* application = bjNewStruct(BjApplication, pCreateInfo->pAllocator);
+    struct BjApplication_T* application = bjNewStruct(BjApplication, pInfo->pAllocator);
 
-    const char *appName = pCreateInfo->name ? pCreateInfo->name : BJ_NAME;
-    application->name = bjNewN(char, strlen(appName)+1, pCreateInfo->pAllocator);
+    const char *appName = pInfo->name ? pInfo->name : BJ_NAME;
+    application->name = bjNewN(char, strlen(appName)+1, pInfo->pAllocator);
     strcpy(application->name, appName);
     application->shouldClose = false;
-    application->pAllocator = pCreateInfo->pAllocator;
+    application->pAllocator = pInfo->pAllocator;
 
     bj_RetainWindowComponent(application);
 

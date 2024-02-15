@@ -5,7 +5,7 @@
 TEST_CASE_ARGS(zero_initialization, {}) {
     BjArray array;
 
-    BjResult result = bjCreateArray(&(BjArrayCreateInfo){.elem_size=1}, &array);
+    BjResult result = bjCreateArray(&(BjArrayInfo){.value_size=1}, &array);
     REQUIRE_EQ(result, BJ_SUCCESS);
 
     REQUIRE_EQ(array->capacity, 0);
@@ -19,7 +19,7 @@ TEST_CASE_ARGS(zero_initialization, {}) {
 TEST_CASE_ARGS(init_explicit_capacity, {}) {
     BjArray array;
 
-    BjResult result = bjCreateArray(&(BjArrayCreateInfo){.capacity = 10, .elem_size=1},&array);
+    BjResult result = bjCreateArray(&(BjArrayInfo){.capacity = 10, .value_size=1},&array);
     REQUIRE_EQ(result, BJ_SUCCESS);
 
     bjDestroyArray(array);
