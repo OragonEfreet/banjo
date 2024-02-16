@@ -1,5 +1,6 @@
 #pragma once
 
+#include "banjo/memory.h"
 #include <banjo/forward_list.h>
 
 typedef struct BjForwardListEntry {
@@ -8,11 +9,11 @@ typedef struct BjForwardListEntry {
 } BjForwardListEntry;
 
 typedef struct BjForwardList_T {
-    BjAllocationCallbacks*     pAllocator;
-    usize                      value_size;
-    bool                       weak_owning;
-    struct BjForwardListEntry* pHead;
+    const BjAllocationCallbacks*     pAllocator;
+    usize                            value_size;
+    bool                             weak_owning;
+    struct BjForwardListEntry*       pHead;
 } BjForwardList_T;
 
-void bjInitForwardList(const BjForwardListInfo*, BjForwardList);
+void bjInitForwardList(const BjForwardListInfo*, const BjAllocationCallbacks*, BjForwardList);
 void bjResetForwardList(BjForwardList);

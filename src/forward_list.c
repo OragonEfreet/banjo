@@ -8,12 +8,13 @@
 static const usize entry_ptr_size = sizeof(BjForwardListEntry);
 
 void bjInitForwardList(
-    const BjForwardListInfo* pInfo,
-    BjForwardList                  pInstance
+    const BjForwardListInfo*     pInfo,
+    const BjAllocationCallbacks* pAllocator,
+    BjForwardList                pInstance
 ) {
     bjAssert(pInfo != 0);
 
-    pInstance->pAllocator   = pInfo->pAllocator;
+    pInstance->pAllocator   = pAllocator;
     pInstance->value_size   = pInfo->value_size;
     pInstance->weak_owning  = pInfo->weak_owning;
     pInstance->pHead = 0;
@@ -27,11 +28,12 @@ void bjResetForwardList(
 }
 
 BjForwardList bjCreateForwardList(
-    const BjForwardListInfo* pInfo
+    const BjForwardListInfo*     pInfo,
+    const BjAllocationCallbacks* pAllocator
 ) {
     bjAssert(pInfo != 0);
-    BjForwardList list = bjNewStruct(BjForwardList, pInfo->pAllocator);
-    bjInitForwardList(pInfo, list);
+    BjForwardList list = bjNewStruct(BjForwardList, pAllocator);
+    bjInitForwardList(pInfo, pAllocator, list);
     return list;
 }
 
