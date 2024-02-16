@@ -2,12 +2,13 @@
 #include <banjo/error.h>
 
 void bjInitArray(
-    const BjArrayInfo* pInfo,
-    BjArray                  pInstance
+    const BjArrayInfo*           pInfo,
+    const BjAllocationCallbacks* pAllocator,
+    BjArray                      pInstance
 ) {
     bjAssert(pInfo != 0);
 
-    pInstance->pAllocator = pInfo->pAllocator;
+    pInstance->pAllocator = pAllocator;
     pInstance->capacity   = 0;
     pInstance->count      = 0;
     pInstance->value_size  = pInfo->value_size;
@@ -26,11 +27,12 @@ void bjResetArray(
 }
 
 BjArray bjCreateArray(
-    const BjArrayInfo* pInfo
+    const BjArrayInfo*     pInfo,
+    const BjAllocationCallbacks* pAllocator
 ) {
     bjAssert(pInfo != 0);
-    BjArray array     = bjNewStruct(BjArray, pInfo->pAllocator);
-    bjInitArray(pInfo, array);
+    BjArray array     = bjNewStruct(BjArray, pAllocator);
+    bjInitArray(pInfo, pAllocator, array);
     return array;
 }
 

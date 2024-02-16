@@ -6,14 +6,14 @@
 BJ_DEFINE_HANDLE(BjArray);
 
 typedef struct BjArrayInfo {
-    BjAllocationCallbacks* pAllocator;
     usize                  value_size;
     usize                  count;
     usize                  capacity;
 } BjArrayInfo;
 
 BANJO_EXPORT BjArray bjCreateArray(
-    const BjArrayInfo* pInfo
+    const BjArrayInfo*           pInfo,
+    const BjAllocationCallbacks* pAllocator
 );
 
 BANJO_EXPORT void bjDestroyArray(

@@ -4,15 +4,13 @@
 #include <banjo/array.h>
 
 BjWorld bjCreateWorld(
-    const BjWorldInfo* pInfo
+    const BjWorldInfo*           pInfo,
+    const BjAllocationCallbacks* pAllocator
 ) {
     bjAssert(pInfo != 0);
 
-    BjWorld world = bjNewStruct(BjWorld, pInfo->pAllocator);
-    world->pAllocator = pInfo->pAllocator;
-
-
-
+    BjWorld world = bjNewStruct(BjWorld, pAllocator);
+    world->pAllocator = pAllocator;
     /* BjArray array = {.count = 10}; */
     /* bjInitArray(&array); */
 
