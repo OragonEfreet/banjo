@@ -1,6 +1,8 @@
 #include <data/array.h>
 #include <banjo/error.h>
 
+#include <string.h>
+
 void p_array_init(
     const BjArrayInfo*           p_info,
     const BjAllocationCallbacks* p_allocator,
@@ -58,3 +60,49 @@ void bj_array_reserve(
         p_array->capacity = capacity;
     }
 }
+
+BANJO_EXPORT void bj_array_push(
+    BjArray array,
+    const void* value
+) {
+    bj_assert(array != 0);
+    bj_assert(value != 0);
+
+    // Request for at least twice the new size
+    bj_array_reserve(array, (array->count + 1) * 2); 
+    void* dest = ((byte*)array->p_data) + array->value_size * array->count;
+    memcpy(dest, value, array->value_size);
+    ++array->count;
+}
+
+BANJO_EXPORT void bj_array_pop(
+    BjArray array
+) {
+    bj_assert(array != 0);
+    bj_assert(array->count > 0);
+    --array->count;
+}
+
+void* bj_array_at(
+    const BjArray array,
+    usize   at
+) {
+    bj_assert(array);
+    bj_assert(at < array->count);
+    return ((byte*)array->p_data) + array->value_size * at;
+}
+
+BANJO_EXPORT void* bj_array_data(
+    const BjArray array
+) {
+    bj_assert(array);
+    return array->p_data;
+}
+
+usize bj_array_count(
+    const BjArray array
+) {
+    bj_assert(array);
+    return array->count;
+}
+

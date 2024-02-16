@@ -4,7 +4,6 @@
 
 #define bj_new_struct(type, allocator) bj_malloc(sizeof(struct type##_T), allocator)
 #define bj_new(type, allocator) bj_malloc(sizeof(type), allocator)
-#define bj_new_n(type, count, allocator) bj_malloc(sizeof(type) * count, allocator)
 
 typedef void* (*PFN_bjAllocationFunction)(
     void* p_user_data,
