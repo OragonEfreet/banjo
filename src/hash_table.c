@@ -44,9 +44,8 @@ void bjInitHashTable(
 
     bjInitArray(&(BjArrayInfo) {
         .value_size = sizeof(BjForwardList_T),
-        .pAllocator = pInfo->pAllocator,
         .capacity      = BUCKET_COUNT,
-    }, &pInstance->buckets_array);
+    }, pInfo->pAllocator, &pInstance->buckets_array);
 }
 
 void bjResetHashTable(
