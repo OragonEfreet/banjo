@@ -1,56 +1,44 @@
+#include <banjo/error.h>
 #include <data/forward_list.h>
-#include <errors.h>
+
 #include <string.h>
 
 /* #include <string.h> */
 
 static const usize entry_ptr_size = sizeof(BjForwardListEntry);
 
-BjResult bjInitForwardList(
+void bjInitForwardList(
     const BjForwardListInfo* pInfo,
     BjForwardList                  pInstance
 ) {
-    bjExpectValue(pInfo, BJ_NULL_CREATE_INFO);
+    bjAssert(pInfo != 0);
 
     pInstance->pAllocator   = pInfo->pAllocator;
     pInstance->value_size   = pInfo->value_size;
     pInstance->weak_owning  = pInfo->weak_owning;
     pInstance->pHead = 0;
-
-    return BJ_SUCCESS;
 }
 
-BjResult bjResetForwardList(
+void bjResetForwardList(
     BjForwardList list
 ) {
-    bjExpectValue(list, BJ_NULL_PARAMETER);
+    bjAssert(list != 0);
     bjClearForwardList(list);
-    return BJ_SUCCESS;
 }
 
-BjResult bjCreateForwardList(
-    const BjForwardListInfo* pInfo,
-    BjForwardList* pInstance
+BjForwardList bjCreateForwardList(
+    const BjForwardListInfo* pInfo
 ) {
-    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pInfo->value_size, BJ_INVALID_PARAMETER);
-
-    BjForwardList list     = bjNewStruct(BjForwardList, pInfo->pAllocator);
-
-    BjResult result = bjInitForwardList(pInfo, list);
-    if(result == BJ_SUCCESS) {
-        *pInstance = list;
-    } else {
-        bjFree(list, pInfo->pAllocator);
-    }
-
-    return BJ_SUCCESS;
+    bjAssert(pInfo != 0);
+    BjForwardList list = bjNewStruct(BjForwardList, pInfo->pAllocator);
+    bjInitForwardList(pInfo, list);
+    return list;
 }
 
-BjResult bjClearForwardList(
+void bjClearForwardList(
     BjForwardList list
 ) {
-    bjExpectValue(list, BJ_NULL_INPUT_HANDLE);
+    bjAssert(list != 0);
 
     BjForwardListEntry* entry = list->pHead;
     while(entry != 0) {
@@ -61,17 +49,14 @@ BjResult bjClearForwardList(
         bjFree(entry, list->pAllocator);
         entry = next;
     }
-
-    return BJ_SUCCESS;
 }
 
-BjResult bjDestroyForwardList(
+void bjDestroyForwardList(
     BjForwardList list
 ) {
-    bjExpectValue(list, BJ_NULL_PARAMETER);
-    BjResult res = bjResetForwardList(list);
+    bjAssert(list != 0);
+    bjResetForwardList(list);
     bjFree(list, list->pAllocator);
-    return res;
 }
 
 usize bjForwardListCount(
@@ -88,12 +73,12 @@ usize bjForwardListCount(
     return result;
 }
 
-BjResult bjForwardListInsert(
+void bjForwardListInsert(
     BjForwardList list,
     usize index,
     void* pData
 ) {
-    bjExpectValue(list, BJ_NULL_PARAMETER);
+    bjAssert(list != 0);
 
     BjForwardListEntry** source_ptr = &list->pHead;
     for(usize i = 0 ; (i < index) && ((*source_ptr) != 0) ; ++i) {
@@ -115,14 +100,13 @@ BjResult bjForwardListInsert(
     }
 
     *source_ptr = new_entry;
-    return BJ_SUCCESS;
 }
 
-BjResult bjForwardListPrepend(
+void bjForwardListPrepend(
     BjForwardList list,
     void* pData
 ) {
-    return bjForwardListInsert(list, 0, pData);
+    bjForwardListInsert(list, 0, pData);
 }
 
 void* bjForwardListValue(

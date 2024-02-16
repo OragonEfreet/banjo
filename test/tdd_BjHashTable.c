@@ -3,16 +3,15 @@
 #include <banjo/hash_table.h>
 
 TEST_CASE_ARGS(zero_initialization, {}) {
-    BjHashTable htable;
 
     u32 key = 97;
     float value = 42.7;
 
-    BjResult result = bjCreateHashTable(&(BjHashTableInfo){
+    BjHashTable htable = bjCreateHashTable(&(BjHashTableInfo){
         .value_size=sizeof(u32),
         .key_size=sizeof(float),
-    }, &htable);
-    REQUIRE_EQ(result, BJ_SUCCESS);
+    });
+    REQUIRE_VALUE(htable);
 
     bjHashTableSet(htable, &key, &value);
 

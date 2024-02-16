@@ -12,16 +12,15 @@ typedef struct BjArrayInfo {
     usize                  capacity;
 } BjArrayInfo;
 
-BANJO_EXPORT BjResult bjCreateArray(
-    const BjArrayInfo* pInfo,
-    BjArray*                 pInstance
+BANJO_EXPORT BjArray bjCreateArray(
+    const BjArrayInfo* pInfo
 );
 
-BANJO_EXPORT BjResult bjDestroyArray(
+BANJO_EXPORT void bjDestroyArray(
     BjArray array
 );
 
-BANJO_EXPORT BjResult bjReserveArray(
+BANJO_EXPORT void bjReserveArray(
     BjArray pArray,
     usize   capacity
 );

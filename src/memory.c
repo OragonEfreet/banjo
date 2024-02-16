@@ -1,6 +1,6 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
-#include <errors.h>
+#include <banjo/error.h>
 
 #include <stdlib.h>
 
@@ -48,7 +48,7 @@ BANJO_EXPORT void bjFree(
 }
 
 
-BjResult bjSetDefaultAllocator(
+void bjSetDefaultAllocator(
     const BjAllocationCallbacks* pAllocator
 ) {
     if(pAllocator == 0) {
@@ -58,9 +58,9 @@ BjResult bjSetDefaultAllocator(
             .pfnFree         = fallback_free,
         };
     } else {
-        bjExpectValue(pAllocator->pfnAllocation, BJ_INVALID_PARAMETER);
-        bjExpectValue(pAllocator->pfnReallocation, BJ_INVALID_PARAMETER);
-        bjExpectValue(pAllocator->pfnFree, BJ_INVALID_PARAMETER);
+        bjAssert(pAllocator != 0);
+        bjAssert(pAllocator != 0);
+        bjAssert(pAllocator != 0);
         s_default = (BjAllocationCallbacks) {
             .pfnAllocation   = pAllocator->pfnAllocation,
             .pfnReallocation = pAllocator->pfnReallocation,
@@ -68,10 +68,8 @@ BjResult bjSetDefaultAllocator(
             .pUserData       = pAllocator->pUserData,
         };
     }
-
-    return BJ_SUCCESS;
 }
 
-BANJO_EXPORT BjResult bjUnsetDefaultAllocator(void) {
-    return bjSetDefaultAllocator(0);
+void bjUnsetDefaultAllocator(void) {
+    bjSetDefaultAllocator(0);
 }

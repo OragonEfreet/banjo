@@ -1,6 +1,6 @@
+#include <banjo/error.h>
 #include <banjo/hash_table.h>
 #include <data/hash_table.h>
-#include <errors.h>
 
 #include <stdio.h>
 
@@ -28,13 +28,13 @@ u32 fnv1a_hash(const void *data, size_t size) {
     return hash;
 }
 
-BjResult bjInitHashTable(
+void bjInitHashTable(
     const BjHashTableInfo* pInfo,
     BjHashTable                  pInstance
 ) {
-    bjExpectValue(pInfo, BJ_NULL_CREATE_INFO);
-    bjExpectValue(pInfo->value_size, BJ_INVALID_PARAMETER);
-    bjExpectValue(pInfo->key_size, BJ_INVALID_PARAMETER);
+    bjAssert(pInfo != 0);
+    bjAssert(pInfo != 0);
+    bjAssert(pInfo != 0);
 
     pInstance->pAllocator  = pInfo->pAllocator;
     pInstance->weak_owning = pInfo->weak_owning;
@@ -45,66 +45,48 @@ BjResult bjInitHashTable(
         .pAllocator = pInfo->pAllocator,
         .capacity      = BUCKET_COUNT,
     }, &pInstance->buckets_array);
-
-    return BJ_SUCCESS;
 }
 
-BjResult bjResetHashTable(
+void bjResetHashTable(
     BjHashTable htable
 ) {
-    BjResult res      = bjClearHashTable(htable);
+    bjClearHashTable(htable);
     // TODO
     /* for(usize i = 0 ; i < BUCKET_COUNT ; ++i) { */
     /*     bjResetForwardList(htable->buckets_array.pData + sizeof(BjForwardList_T)*i); */
     /* } */
     bjResetArray(&htable->buckets_array);
-    return res;
 }
 
-BjResult bjCreateHashTable(
-    const BjHashTableInfo* pInfo,
-    BjHashTable* pInstance
+BjHashTable bjCreateHashTable(
+    const BjHashTableInfo* pInfo
 ) {
-    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pInfo->value_size, BJ_INVALID_PARAMETER);
-
+    bjAssert(pInfo != 0);
     BjHashTable htable = bjNewStruct(BjHashTable, pInfo->pAllocator);
-
-    BjResult result = bjInitHashTable(pInfo, htable);
-    if(result == BJ_SUCCESS) {
-        *pInstance = htable;
-    } else {
-        bjFree(htable, pInfo->pAllocator);
-        return result;
-    }
-
-    return BJ_SUCCESS;
+    bjInitHashTable(pInfo, htable);
+    return htable;
 }
 
-BjResult bjDestroyHashTable(
+void bjDestroyHashTable(
     BjHashTable htable
 ) {
-    bjExpectValue(htable, BJ_NULL_PARAMETER);
-    BjResult res =  bjResetHashTable(htable);
+    bjAssert(htable != 0);
+    bjResetHashTable(htable);
     bjFree(htable, htable->pAllocator);
-    return res;
 }
 
-BANJO_EXPORT BjResult bjClearHashTable(
+void bjClearHashTable(
     BjHashTable htable
 ) {
-    bjExpectValue(htable, BJ_NULL_PARAMETER);
-
-    return BJ_SUCCESS;
+    // TODO?
+    bjAssert(htable != 0);
 }
 
-BANJO_EXPORT BjResult bjHashTableSet(
+BANJO_EXPORT void bjHashTableSet(
     BjHashTable table,
     const void* pKey,
     const void* pValue
 ) {
     u32 hash = table->pfnHash(pKey, table->key_size) % BUCKET_COUNT;
     printf("Hash: %u\n", hash);
-
-    return BJ_SUCCESS;
 }

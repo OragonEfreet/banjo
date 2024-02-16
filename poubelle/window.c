@@ -1,6 +1,6 @@
 #include <_rfu/app.h>
 #include <_rfu/window.h>
-#include <errors.h>
+#include <banjo/error.h>
 #include <memory.h>
 
 #include <banjo/api.h>
@@ -21,10 +21,10 @@ BjResult bjCreateWindow(
     const BjWindowInfo* pInfo,
     BjWindow*                 pWindow
 ) {
-    bjExpectValue(pInfo,              BJ_NULL_CREATE_INFO);
-    bjExpectValue(pInfo->application, BJ_INVALID_CREATE_INFO);
-    bjExpectValue(pInfo->width,       BJ_INVALID_WINDOW_SIZE);
-    bjExpectValue(pInfo->height,      BJ_INVALID_WINDOW_SIZE);
+    bjAssert(pInfo != 0);
+    bjAssert(pInfo != 0);
+    bjAssert(pInfo != 0);
+    bjAssert(pInfo != 0);
 
 
     glfwDefaultWindowHints();
@@ -50,7 +50,7 @@ BjResult bjCreateWindow(
 BjResult bjDestroyWindow(
     BjWindow window
 ) {
-    bjExpectValue(window, BJ_NULL_INPUT_HANDLE);
+    bjAssert(window != 0);
 
     bj_UnlinkWindow(window->application, window);
     glfwDestroyWindow(window->handle);

@@ -1,7 +1,7 @@
-#include <errors.h>
-#include <memory.h>
 #include <_rfu/app.h>
 #include <_rfu/window.h>
+#include <banjo/error.h>
+#include <memory.h>
 
 #include <string.h>
 #include <unistd.h>
@@ -10,8 +10,8 @@ BjResult bjCreateApplication(
     const BjApplicationInfo*    pInfo,
     BjApplication*                    pApplication
 ) {
-    bjExpectValue(pInfo,  BJ_NULL_CREATE_INFO);
-    bjExpectValue(pApplication, BJ_NULL_OUTPUT_HANDLE);
+    bjAssert(pInfo != 0);
+    bjAssert(pApplication != 0);
 
 
     struct BjApplication_T* application = bjNewStruct(BjApplication, pInfo->pAllocator);
@@ -31,7 +31,7 @@ BjResult bjCreateApplication(
 BjResult bjDestroyApplication(
     BjApplication                     application
 ){
-    bjExpectValue(application, BJ_NULL_INPUT_HANDLE);
+    bjAssert(application != 0);
 
     bj_ReleaseWindowComponent(application);
 
@@ -49,7 +49,7 @@ bool bjApplicationShouldClose(
 BjResult bjCloseApplication(
     BjApplication application
 ) {
-    bjExpectValue(application, BJ_NULL_INPUT_HANDLE);
+    bjAssert(application != 0);
     application->shouldClose = true;
     return BJ_SUCCESS;
 }

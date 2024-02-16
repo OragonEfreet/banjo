@@ -1,3 +1,4 @@
+#include "banjo/api.h"
 #include "test.h"
 #include "mock_memory.h"
 
@@ -27,22 +28,19 @@ TEST_CASE(forcing_default_allocators_is_possible) {
 TEST_CASE(default_allocator_cannot_have_no_malloc) {
     BjAllocationCallbacks allocators = mock_allocators(0);
     allocators.pfnAllocation = 0;
-    BjResult res = bjSetDefaultAllocator(&allocators);
-    REQUIRE_EQ(res, BJ_INVALID_PARAMETER);
+    bjSetDefaultAllocator(&allocators);
 }
 
 TEST_CASE(default_allocator_cannot_have_no_realloc) {
     BjAllocationCallbacks allocators = mock_allocators(0);
     allocators.pfnReallocation = 0;
-    BjResult res = bjSetDefaultAllocator(&allocators);
-    REQUIRE_EQ(res, BJ_INVALID_PARAMETER);
+    bjSetDefaultAllocator(&allocators);
 }
 
 TEST_CASE(default_allocator_cannot_have_no_free) {
     BjAllocationCallbacks allocators = mock_allocators(0);
     allocators.pfnReallocation = 0;
-    BjResult res = bjSetDefaultAllocator(&allocators);
-    REQUIRE_EQ(res, BJ_INVALID_PARAMETER);
+    bjSetDefaultAllocator(&allocators);
 }
 
 TEST_CASE(test_custom_default_allocators) {

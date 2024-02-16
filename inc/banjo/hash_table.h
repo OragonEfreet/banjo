@@ -17,20 +17,19 @@ typedef struct BjHashTableInfo {
     PFN_bjHashFunction     pfnHash;
 } BjHashTableInfo;
 
-BANJO_EXPORT BjResult bjCreateHashTable(
-    const BjHashTableInfo* pInfo,
-    BjHashTable*                 pInstance
+BANJO_EXPORT BjHashTable bjCreateHashTable(
+    const BjHashTableInfo* pInfo
 );
 
-BANJO_EXPORT BjResult bjDestroyHashTable(
+BANJO_EXPORT void bjDestroyHashTable(
     BjHashTable table
 );
 
-BANJO_EXPORT BjResult bjClearHashTable(
+BANJO_EXPORT void bjClearHashTable(
     BjHashTable table
 );
 
-BANJO_EXPORT BjResult bjHashTableSet(
+BANJO_EXPORT void bjHashTableSet(
     BjHashTable table,
     const void* key,
     const void* value

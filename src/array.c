@@ -1,11 +1,11 @@
 #include <data/array.h>
-#include <errors.h>
+#include <banjo/error.h>
 
-BjResult bjInitArray(
+void bjInitArray(
     const BjArrayInfo* pInfo,
     BjArray                  pInstance
 ) {
-    bjExpectValue(pInfo, BJ_NULL_CREATE_INFO);
+    bjAssert(pInfo != 0);
 
     pInstance->pAllocator = pInfo->pAllocator;
     pInstance->capacity   = 0;
@@ -16,51 +16,37 @@ BjResult bjInitArray(
     if(pInfo->capacity > 0) {
         bjReserveArray(pInstance, pInfo->capacity);
     }
-
-    return BJ_SUCCESS;
 }
 
-BjResult bjResetArray(
+void bjResetArray(
     BjArray array
 ) {
-    bjExpectValue(array, BJ_NULL_PARAMETER);
+    bjAssert(array != 0);
     bjFree(array->pData, array->pAllocator);
-    return BJ_SUCCESS;
 }
 
-BjResult bjCreateArray(
-    const BjArrayInfo* pInfo,
-    BjArray* pInstance
+BjArray bjCreateArray(
+    const BjArrayInfo* pInfo
 ) {
-    bjExpectValue(pInstance, BJ_NULL_OUTPUT_HANDLE);
-    bjExpectValue(pInfo->value_size, BJ_INVALID_PARAMETER);
-
+    bjAssert(pInfo != 0);
     BjArray array     = bjNewStruct(BjArray, pInfo->pAllocator);
-
-    BjResult result = bjInitArray(pInfo, array);
-    if(result == BJ_SUCCESS) {
-        *pInstance = array;
-    } else {
-        bjFree(array, pInfo->pAllocator);
-    }
-
-    return BJ_SUCCESS;
+    bjInitArray(pInfo, array);
+    return array;
 }
 
-BjResult bjDestroyArray(
+void bjDestroyArray(
     BjArray array
 ) {
-    bjExpectValue(array, BJ_NULL_PARAMETER);
-    BjResult res = bjResetArray(array);
+    bjAssert(array != 0);
+    bjResetArray(array);
     bjFree(array, array->pAllocator);
-    return res;
 }
 
-BjResult bjReserveArray(
+void bjReserveArray(
     BjArray pArray,
     usize   capacity
 ) {
-    bjExpectValue(pArray, BJ_NULL_OUTPUT_HANDLE);
+    bjAssert(pArray != 0);
     if(capacity > pArray->capacity) {
         if(pArray->pData == 0) {
             pArray->pData = bjAllocate(pArray->value_size * capacity, pArray->pAllocator);
@@ -69,5 +55,4 @@ BjResult bjReserveArray(
         }
         pArray->capacity = capacity;
     }
-    return BJ_SUCCESS;
 }

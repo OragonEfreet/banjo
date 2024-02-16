@@ -11,10 +11,9 @@ find_package(Vulkan REQUIRED COMPONENTS glslc)
 # add_subdirectory(vendor)
 
 set(_interface_headers
-    # inc/banjo/app.h
-    # inc/banjo/window.h
     inc/banjo/api.h
     inc/banjo/array.h
+    inc/banjo/error.h
     inc/banjo/forward_list.h
     inc/banjo/hash_table.h
     inc/banjo/log.h
@@ -23,14 +22,12 @@ set(_interface_headers
 )
 
 set(_sources
-    # src/_rfu/app.c
-    # src/_rfu/window.c
     src/array.c
     src/data/array.h
     src/data/forward_list.h
     src/data/hash_table.h
     src/data/world.h
-    src/errors.h
+    src/error.c
     src/forward_list.c
     src/hash_table.c
     src/log.c

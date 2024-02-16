@@ -11,12 +11,11 @@ typedef struct BjWorldInfo {
     BjAllocationCallbacks*   pAllocator;
 } BjWorldInfo;
 
-BANJO_EXPORT BjResult bjCreateWorld(
-    const BjWorldInfo* pInfo,
-    BjWorld*                 pInstance
+BANJO_EXPORT BjWorld bjCreateWorld(
+    const BjWorldInfo* pInfo
 );
 
-BANJO_EXPORT BjResult bjDestroyWorld(
+BANJO_EXPORT void bjDestroyWorld(
     BjWorld world
 );
 
