@@ -9,7 +9,7 @@ TEST_CASE_ARGS(zero_initialization, {}) {
     BjHashTable htable = bjCreateHashTable(&(BjHashTableInfo){
         .value_size=sizeof(u32),
         .key_size=sizeof(float),
-    });
+    }, 0);
     REQUIRE_VALUE(htable);
 
     for(u32 key = 0 ; key < 10000 ; ++key) {

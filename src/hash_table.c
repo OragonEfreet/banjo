@@ -1,3 +1,4 @@
+#include "banjo/memory.h"
 #include <banjo/error.h>
 #include <banjo/hash_table.h>
 #include <data/hash_table.h>
@@ -30,13 +31,14 @@ u32 fnv1a_hash(const void *data, size_t size) {
 
 void bjInitHashTable(
     const BjHashTableInfo* pInfo,
+    const BjAllocationCallbacks* pAllocator,
     BjHashTable                  pInstance
 ) {
     bjAssert(pInfo != 0);
     bjAssert(pInfo->value_size != 0);
     bjAssert(pInfo->key_size != 0);
 
-    pInstance->pAllocator  = pInfo->pAllocator;
+    pInstance->pAllocator  = pAllocator;
     pInstance->weak_owning = pInfo->weak_owning;
     pInstance->pfnHash     = pInfo->pfnHash ? pInfo->pfnHash : fnv1a_hash;
     pInstance->key_size    = pInfo->key_size;
@@ -45,7 +47,7 @@ void bjInitHashTable(
     bjInitArray(&(BjArrayInfo) {
         .value_size = sizeof(BjForwardList_T),
         .capacity      = BUCKET_COUNT,
-    }, pInfo->pAllocator, &pInstance->buckets_array);
+    }, pAllocator, &pInstance->buckets_array);
 }
 
 void bjResetHashTable(
@@ -60,11 +62,12 @@ void bjResetHashTable(
 }
 
 BjHashTable bjCreateHashTable(
-    const BjHashTableInfo* pInfo
+    const BjHashTableInfo*       pInfo,
+    const BjAllocationCallbacks* pAllocator
 ) {
     bjAssert(pInfo != 0);
-    BjHashTable htable = bjNewStruct(BjHashTable, pInfo->pAllocator);
-    bjInitHashTable(pInfo, htable);
+    BjHashTable htable = bjNewStruct(BjHashTable, pAllocator);
+    bjInitHashTable(pInfo, pAllocator, htable);
     return htable;
 }
 
