@@ -10,7 +10,6 @@ typedef u32 (*PFN_bjHashFunction)(
 );
 
 typedef struct BjHashTableInfo {
-    BjAllocationCallbacks* pAllocator;
     usize                  value_size;
     usize                  key_size;
     bool                   weak_owning;
@@ -18,7 +17,8 @@ typedef struct BjHashTableInfo {
 } BjHashTableInfo;
 
 BANJO_EXPORT BjHashTable bjCreateHashTable(
-    const BjHashTableInfo* pInfo
+    const BjHashTableInfo*       pInfo,
+    const BjAllocationCallbacks* pAllocator
 );
 
 BANJO_EXPORT void bjDestroyHashTable(
