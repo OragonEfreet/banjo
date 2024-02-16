@@ -177,8 +177,8 @@ int main(int argc, char* argv[]) {
         RUN_TEST(test_prepends,                            .value_type = &element_types[e]);
         RUN_TEST(test_prepends,                            .value_type = &element_types[e], .weak_owning = true);
         RUN_TEST(find_in_empty_always_return_null,         .value_type = &element_types[e]);
-        /* RUN_TEST(each_time_a_value_is_added_we_can_find_it,.value_type = &element_types[e]); */
-        /* RUN_TEST(each_time_a_value_is_added_we_can_find_it,.value_type = &element_types[e], .weak_owning = true); */
+        RUN_TEST(each_time_a_value_is_added_we_can_find_it,.value_type = &element_types[e]);
+        RUN_TEST(each_time_a_value_is_added_we_can_find_it,.value_type = &element_types[e], .weak_owning = true);
     }
     END_TESTS();
 }

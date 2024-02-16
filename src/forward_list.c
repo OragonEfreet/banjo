@@ -143,10 +143,13 @@ void* bj_forward_list_find(
     bj_assert(list != 0);
     bj_assert(value != 0);
 
-    /* PFN_bjValueCmp compare = fn_cmp == 0 ? memcmp : fn_cmp; */
+    PFN_bjValueCmp compare = fn_cmp == 0 ? memcmp : fn_cmp;
 
-
-    
-
+    for(BjForwardListEntry* entry = list->p_head;entry != 0;entry = entry->p_next) {
+        void* to_compare = VALUE_EMBED(list) ? &entry->value : entry->value;
+        if(compare(value, to_compare, list->value_size) == 0) {
+            return to_compare;
+        }
+    }
     return 0;
 }
