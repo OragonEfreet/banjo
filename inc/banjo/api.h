@@ -7,7 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define BJ_DEFINE_HANDLE(object) typedef struct object##_T* object;
+#define BJ_DEFINE_HANDLE(object) typedef struct object##_T* object
 
 #define BJ_NULL_HANDLE 0
 

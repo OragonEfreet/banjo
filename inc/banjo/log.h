@@ -21,7 +21,7 @@ enum {
 
 BANJO_EXPORT const char* bjGetLogLevelString(int level);
 BANJO_EXPORT void bjSetLogLevel(int level);
-BANJO_EXPORT int bjGetLogLevel();
+BANJO_EXPORT int bjGetLogLevel(void);
 BANJO_EXPORT void bjLogMsg(int level, const char* pFile, int line, const char* pFmt, ...);
 
 

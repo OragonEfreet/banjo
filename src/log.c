@@ -8,7 +8,7 @@
 
 static struct {
     int level;
-} s_context = {};
+} s_context = {.level=0};
 
 static const char* level_strings[] = {
     "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL",
@@ -31,7 +31,7 @@ void bjSetLogLevel(int level) {
     s_context.level = level;
 }
 
-int bjGetLogLevel() {
+int bjGetLogLevel(void) {
     return s_context.level;
 }
 

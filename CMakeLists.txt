@@ -8,6 +8,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Vulkan REQUIRED COMPONENTS glslc)
 
+
+include(CheckCXXCompilerFlag)
+
 # add_subdirectory(vendor)
 
 set(_interface_headers
@@ -36,6 +39,9 @@ set(_sources
 )
 
 add_library(banjo ${_interface_headers} ${_sources})
+if(NOT MSVC)
+    target_compile_options(banjo PRIVATE -Wall -pedantic)
+endif()
 
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(banjo PRIVATE BANJO_EXPORTS)
@@ -52,6 +58,7 @@ macro(banjo_compile_option _name _desc _default)
 endmacro()
 banjo_compile_option(pedantic "Banjo runtime will make costly extra checks" OFF)
 banjo_compile_option(log_color "Banjo logs will have colored output" ON)
+
 
 
 target_include_directories(banjo PUBLIC inc PRIVATE src)
