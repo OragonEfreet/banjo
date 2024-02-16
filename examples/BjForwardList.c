@@ -10,8 +10,7 @@ int main(int argc, char* argv[]) {
     
     // Usual Creation and destruction
     BjForwardListInfo create_info = { .value_size = sizeof(int) };
-    BjForwardList list                  = BJ_NULL_HANDLE;
-    bjCreateForwardList(&create_info, &list);
+    BjForwardList list = bjCreateForwardList(&create_info);
     
     // Initially, a list is 0 length
     bjLog(INFO, "Initial count: %d", bjForwardListCount(list));

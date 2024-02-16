@@ -10,6 +10,6 @@ typedef struct BjArray_T {
     void*                  pData;
 } BjArray_T;
 
-BjResult bjInitArray( const BjArrayInfo*, BjArray);
-BjResult bjResetArray(BjArray);
+void bjInitArray( const BjArrayInfo*, BjArray);
+void bjResetArray(BjArray);
 

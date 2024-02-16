@@ -9,14 +9,13 @@ typedef struct {
 } element_type;
 
 TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}) {
-    BjForwardList list;
 
     BjForwardListInfo create_info = {
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjResult result = bjCreateForwardList(&create_info, &list);
-    CHECK_EQ(result, BJ_SUCCESS);
+    BjForwardList list = bjCreateForwardList(&create_info);
+    REQUIRE_VALUE(list);
 
     REQUIRE_EQ(list->value_size, test_data->value_type->mem_size);
     REQUIRE_NULL(list->pAllocator);
@@ -26,14 +25,13 @@ TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}
 }
 
 TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type;}) {
-    BjForwardList list;
 
     BjForwardListInfo create_info = {
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjResult result = bjCreateForwardList(&create_info, &list);
-    CHECK_EQ(result, BJ_SUCCESS);
+    BjForwardList list = bjCreateForwardList(&create_info);
+    REQUIRE_VALUE(list);
 
     REQUIRE_EQ(bjForwardListCount(list), 0);
 
@@ -41,14 +39,13 @@ TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type
 }
 
 TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_type;}) {
-    BjForwardList list;
 
     BjForwardListInfo create_info = {
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjResult result = bjCreateForwardList(&create_info, &list);
-    CHECK_EQ(result, BJ_SUCCESS);
+    BjForwardList list = bjCreateForwardList(&create_info);
+    REQUIRE_VALUE(list);
 
     REQUIRE_NULL(list->pHead);
     bjForwardListPrepend(list, test_data->value_type->values);
@@ -59,14 +56,13 @@ TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_typ
 
 TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
     usize n_operations = 3;
-    BjForwardList list;
 
     BjForwardListInfo create_info = {
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjResult result = bjCreateForwardList(&create_info, &list);
-    CHECK_EQ(result, BJ_SUCCESS);
+    BjForwardList list = bjCreateForwardList(&create_info);
+    REQUIRE_VALUE(list);
 
     int data = 42;
     for(usize i = 0 ; i < n_operations ; ++i) {
@@ -84,9 +80,8 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjForwardList list;
-    BjResult result = bjCreateForwardList(&create_info, &list);
-    CHECK_EQ(result, BJ_SUCCESS);
+    BjForwardList list = bjCreateForwardList(&create_info);
+    REQUIRE_VALUE(list);
 
     for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
         void* data = test_data->value_type->values + test_data->value_type->mem_size * n;

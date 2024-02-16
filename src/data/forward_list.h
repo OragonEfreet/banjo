@@ -14,5 +14,5 @@ typedef struct BjForwardList_T {
     struct BjForwardListEntry* pHead;
 } BjForwardList_T;
 
-BjResult bjInitForwardList(const BjForwardListInfo*, BjForwardList);
-BjResult bjResetForwardList(BjForwardList);
+void bjInitForwardList(const BjForwardListInfo*, BjForwardList);
+void bjResetForwardList(BjForwardList);

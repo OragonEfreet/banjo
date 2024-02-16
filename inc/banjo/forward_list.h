@@ -11,16 +11,15 @@ typedef struct BjForwardListInfo {
     bool                   weak_owning;
 } BjForwardListInfo;
 
-BANJO_EXPORT BjResult bjCreateForwardList(
-    const BjForwardListInfo* pInfo,
-    BjForwardList*                 pInstance
+BANJO_EXPORT BjForwardList bjCreateForwardList(
+    const BjForwardListInfo* pInfo
 );
 
-BANJO_EXPORT BjResult bjDestroyForwardList(
+BANJO_EXPORT void bjDestroyForwardList(
     BjForwardList list
 );
 
-BANJO_EXPORT BjResult bjClearForwardList(
+BANJO_EXPORT void bjClearForwardList(
     BjForwardList list
 );
 
@@ -28,13 +27,13 @@ BANJO_EXPORT usize bjForwardListCount(
     BjForwardList list
 );
 
-BANJO_EXPORT BjResult bjForwardListInsert(
+BANJO_EXPORT void bjForwardListInsert(
     BjForwardList list,
     usize index,
     void* pData
 );
 
-BANJO_EXPORT BjResult bjForwardListPrepend(
+BANJO_EXPORT void bjForwardListPrepend(
     BjForwardList list,
     void* pData
 );

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef NDEBUG
+#  include <assert.h>
+#endif
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -54,16 +57,9 @@ typedef ptrdiff_t size;
 typedef size_t    usize;
 typedef uintptr_t uptr;
 
-typedef enum {
-    BJ_SUCCESS,
-    BJ_NULL_CREATE_INFO,
-    BJ_NULL_INPUT_HANDLE,
-    BJ_NULL_OUTPUT_HANDLE,
-    BJ_INVALID_CREATE_INFO,
-    BJ_INVALID_WINDOW_SIZE,
-    BJ_PLATFORM_ERROR,
-    BJ_NULL_PARAMETER,
-    BJ_INVALID_PARAMETER,
-    BJ_OUT_OF_BOUNDS,
-} BjResult;
+#ifdef NDEBUG
+#    define bjAssert(cond)
+#else
+#    define bjAssert(cond) assert(cond)
+#endif
 

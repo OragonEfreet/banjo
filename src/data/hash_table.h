@@ -14,5 +14,5 @@ typedef struct BjHashTable_T {
     PFN_bjHashFunction     pfnHash;
 } BjHashTable_T;
 
-BjResult bjInitHashTable(const BjHashTableInfo*, BjHashTable);
-BjResult bjResetHashTable(BjHashTable);
+void bjInitHashTable(const BjHashTableInfo*, BjHashTable);
+void bjResetHashTable(BjHashTable);
