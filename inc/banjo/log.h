@@ -11,18 +11,18 @@ enum {
     BJ_LOG_FATAL,
 };
 
-#define bjLog(LEVEL, ...) bjLogMsg(BJ_LOG_ ## LEVEL, __FILE__, __LINE__, __VA_ARGS__)
-#define bjLogTrace(...)   bjLog(TRACE, __VA_ARGS__)
-#define bjLogDebug(...)   bjLog(DEBUG, __VA_ARGS__)
-#define bjLogInfo(...)    bjLog(INFO, __VA_ARGS__)
-#define bjLogWarn(...)    bjLog(WARN, __VA_ARGS__)
-#define bjLogError(...)   bjLog(ERROR, __VA_ARGS__)
-#define bjLogFatal(...)   bjLog(FATAL, __VA_ARGS__)
+#define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, __FILE__, __LINE__, __VA_ARGS__)
+#define bj_trace(...)   bj_log(TRACE, __VA_ARGS__)
+#define bj_debug(...)   bj_log(DEBUG, __VA_ARGS__)
+#define bj_info(...)    bj_log(INFO, __VA_ARGS__)
+#define bj_warn(...)    bj_log(WARN, __VA_ARGS__)
+#define bj_error(...)   bj_log(ERROR, __VA_ARGS__)
+#define bj_fatal(...)   bj_log(FATAL, __VA_ARGS__)
 
-BANJO_EXPORT const char* bjGetLogLevelString(int level);
-BANJO_EXPORT void bjSetLogLevel(int level);
-BANJO_EXPORT int bjGetLogLevel(void);
-BANJO_EXPORT void bjLogMsg(int level, const char* pFile, int line, const char* pFmt, ...);
+BANJO_EXPORT const char* bj_log_get_levelString(int level);
+BANJO_EXPORT void bj_log_set_level(int level);
+BANJO_EXPORT int bj_log_get_level(void);
+BANJO_EXPORT void bj_message(int level, const char* pFile, int line, const char* pFmt, ...);
 
 
 

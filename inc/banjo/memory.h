@@ -2,53 +2,53 @@
 
 #include <banjo/api.h>
 
-#define bjNewStruct(type, allocator) bjAllocate(sizeof(struct type##_T), allocator)
-#define bjNew(type, allocator) bjAllocate(sizeof(type), allocator)
-#define bjNewN(type, count, allocator) bjAllocate(sizeof(type) * count, allocator)
+#define bj_new_struct(type, allocator) bj_malloc(sizeof(struct type##_T), allocator)
+#define bj_new(type, allocator) bj_malloc(sizeof(type), allocator)
+#define bj_new_n(type, count, allocator) bj_malloc(sizeof(type) * count, allocator)
 
 typedef void* (*PFN_bjAllocationFunction)(
-    void* pUserData,
+    void* p_user_data,
     usize size
 );
 
 typedef void* (*PFN_bjReallocationFunction)(
-    void* pUserData,
-    void* pOriginal,
+    void* p_user_data,
+    void* p_original,
     usize size
 );
 
-typedef void (*PFN_bjFreeFunction)(
-    void* pUserData,
-    void* pMemory
+typedef void (*PFN_bj_freeFunction)(
+    void* p_user_data,
+    void* p_memory
 );
 
 typedef struct BjAllocationCallbacks {
-    void*                      pUserData;
-    PFN_bjAllocationFunction   pfnAllocation;
-    PFN_bjReallocationFunction pfnReallocation;
-    PFN_bjFreeFunction         pfnFree;
+    void*                      p_user_data;
+    PFN_bjAllocationFunction   fn_allocation;
+    PFN_bjReallocationFunction fn_reallocation;
+    PFN_bj_freeFunction         fn_free;
 } BjAllocationCallbacks;
 
-BANJO_EXPORT void* bjAllocate(
+BANJO_EXPORT void* bj_malloc(
     usize                        size,
-    const BjAllocationCallbacks* pAllocator
+    const BjAllocationCallbacks* p_allocator
 );
 
-BANJO_EXPORT void* bjReallocate(
-    void*                        pMemory,
+BANJO_EXPORT void* bj_realloc(
+    void*                        p_memory,
     usize                        size,
-    const BjAllocationCallbacks* pAllocator
+    const BjAllocationCallbacks* p_allocator
 );
 
-BANJO_EXPORT void bjFree(
-    void*                         pMemory,
-    const BjAllocationCallbacks*  pAllocator
+BANJO_EXPORT void bj_free(
+    void*                         p_memory,
+    const BjAllocationCallbacks*  p_allocator
 );
 
-BANJO_EXPORT void bjSetDefaultAllocator(
-    const BjAllocationCallbacks* pAllocator
+BANJO_EXPORT void bj_memory_set_defaults(
+    const BjAllocationCallbacks* p_allocator
 );
 
-BANJO_EXPORT void bjUnsetDefaultAllocator(void);
+BANJO_EXPORT void bj_memory_unset_defaults(void);
 
 

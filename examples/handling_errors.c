@@ -5,7 +5,7 @@
 #define CODE 101
 
 void function_returning_error(BjError* error) {
-    bjSetError(error, DOMAIN, CODE);
+    bj_set_error(error, DOMAIN, CODE);
 }
 
 int main(int argc, char* argv[]) {
@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     function_returning_error(&error);
 
     if(error.code) {
-        bjLogWarn("Error!");
+        bj_warn("Error!");
     }
 
     return 0;

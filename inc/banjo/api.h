@@ -58,8 +58,8 @@ typedef size_t    usize;
 typedef uintptr_t uptr;
 
 #ifdef NDEBUG
-#    define bjAssert(cond)
+#    define bj_assert(cond)
 #else
-#    define bjAssert(cond) assert(cond)
+#    define bj_assert(cond) assert(cond)
 #endif
 

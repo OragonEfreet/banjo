@@ -5,13 +5,13 @@
 #include <data/forward_list.h>
 
 typedef struct BjHashTable_T {
-    const BjAllocationCallbacks* pAllocator;
+    const BjAllocationCallbacks* p_allocator;
     BjArray_T                    buckets_array;
     bool                         weak_owning;
     usize                        value_size;
     usize                        key_size;
-    PFN_bjHashFunction           pfnHash;
+    PFN_bjHashFunction           fn_hash;
 } BjHashTable_T;
 
-void bjInitHashTable(const BjHashTableInfo*, const BjAllocationCallbacks*, BjHashTable);
-void bjResetHashTable(BjHashTable);
+void bj_hash_table_init(const BjHashTableInfo*, const BjAllocationCallbacks*, BjHashTable);
+void bj_hash_table_reset(BjHashTable);

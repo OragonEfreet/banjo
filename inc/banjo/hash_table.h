@@ -6,30 +6,30 @@
 BJ_DEFINE_HANDLE(BjHashTable);
 
 typedef u32 (*PFN_bjHashFunction)(
-    const void* pData, usize size
+    const void* p_data, usize size
 );
 
 typedef struct BjHashTableInfo {
     usize                  value_size;
     usize                  key_size;
     bool                   weak_owning;
-    PFN_bjHashFunction     pfnHash;
+    PFN_bjHashFunction     fn_hash;
 } BjHashTableInfo;
 
-BANJO_EXPORT BjHashTable bjCreateHashTable(
-    const BjHashTableInfo*       pInfo,
-    const BjAllocationCallbacks* pAllocator
+BANJO_EXPORT BjHashTable bj_hash_table_create(
+    const BjHashTableInfo*       p_info,
+    const BjAllocationCallbacks* p_allocator
 );
 
-BANJO_EXPORT void bjDestroyHashTable(
+BANJO_EXPORT void bj_hash_table_destroy(
     BjHashTable table
 );
 
-BANJO_EXPORT void bjClearHashTable(
+BANJO_EXPORT void bj_hash_table_clear(
     BjHashTable table
 );
 
-BANJO_EXPORT void bjHashTableSet(
+BANJO_EXPORT void bj_hash_table_set(
     BjHashTable table,
     const void* key,
     const void* value

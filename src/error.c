@@ -2,19 +2,19 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-void bjSetError(
-    BjError* pError,
+void bj_set_error(
+    BjError* p_error,
     u32 domain,
     u32 code
 ) {
-    if(pError == 0) {
+    if(p_error == 0) {
         return;
     }
 
-    if(pError->code == 0) {
-        pError->domain = domain;
-        pError->code = code;
+    if(p_error->code == 0) {
+        p_error->domain = domain;
+        p_error->code = code;
     } else {
-        bjLogError("Error %d/%d", domain, code);
+        bj_error("Error %d/%d", domain, code);
     }
 }

@@ -5,136 +5,148 @@
 
 /* #include <string.h> */
 
-static const usize entry_ptr_size = sizeof(BjForwardListEntry);
+static const usize p_entry_ptr_size = sizeof(BjForwardListEntry);
 
-void bjInitForwardList(
-    const BjForwardListInfo*     pInfo,
-    const BjAllocationCallbacks* pAllocator,
-    BjForwardList                pInstance
+#define VALUE_EMBED(list) ((list->weak_owning == false) && (list->value_size <= p_entry_ptr_size))
+
+void bj_forward_list_init(
+    const BjForwardListInfo*     p_info,
+    const BjAllocationCallbacks* p_allocator,
+    BjForwardList                p_instance
 ) {
-    bjAssert(pInfo != 0);
+    bj_assert(p_info != 0);
 
-    pInstance->pAllocator   = pAllocator;
-    pInstance->value_size   = pInfo->value_size;
-    pInstance->weak_owning  = pInfo->weak_owning;
-    pInstance->pHead = 0;
+    p_instance->p_allocator = p_allocator;
+    p_instance->value_size  = p_info->value_size;
+    p_instance->weak_owning = p_info->weak_owning;
+    p_instance->p_head = 0;
 }
 
-void bjResetForwardList(
+void bj_forward_list_reset(
     BjForwardList list
 ) {
-    bjAssert(list != 0);
-    bjClearForwardList(list);
+    bj_assert(list != 0);
+    bj_forward_list_clear(list);
 }
 
-BjForwardList bjCreateForwardList(
-    const BjForwardListInfo*     pInfo,
-    const BjAllocationCallbacks* pAllocator
+BjForwardList bj_forward_list_create(
+    const BjForwardListInfo*     p_info,
+    const BjAllocationCallbacks* p_allocator
 ) {
-    bjAssert(pInfo != 0);
-    BjForwardList list = bjNewStruct(BjForwardList, pAllocator);
-    bjInitForwardList(pInfo, pAllocator, list);
+    bj_assert(p_info != 0);
+    BjForwardList list = bj_new_struct(BjForwardList, p_allocator);
+    bj_forward_list_init(p_info, p_allocator, list);
     return list;
 }
 
-void bjClearForwardList(
+void bj_forward_list_clear(
     BjForwardList list
 ) {
-    bjAssert(list != 0);
+    bj_assert(list != 0);
 
-    BjForwardListEntry* entry = list->pHead;
+    BjForwardListEntry* entry = list->p_head;
     while(entry != 0) {
-        BjForwardListEntry* next = entry->pNext;
-        if(list->weak_owning == false && list->value_size > entry_ptr_size) {
-            bjFree(entry->value, list->pAllocator);
+        BjForwardListEntry* next = entry->p_next;
+        if(VALUE_EMBED(list) == 0 && list->weak_owning == false) {
+            bj_free(entry->value, list->p_allocator);
         }
-        bjFree(entry, list->pAllocator);
+        bj_free(entry, list->p_allocator);
         entry = next;
     }
 }
 
-void bjDestroyForwardList(
+void bj_forward_list_destroy(
     BjForwardList list
 ) {
-    bjAssert(list != 0);
-    bjResetForwardList(list);
-    bjFree(list, list->pAllocator);
+    bj_assert(list != 0);
+    bj_forward_list_reset(list);
+    bj_free(list, list->p_allocator);
 }
 
-usize bjForwardListCount(
+usize bj_forward_list_count(
     BjForwardList list
 ) {
     usize result = 0;
     if(list != 0) {
-        BjForwardListEntry* entry = list->pHead;
+        BjForwardListEntry* entry = list->p_head;
         while(entry != 0) {
             result += 1;
-            entry = entry->pNext;
+            entry = entry->p_next;
         }
     }
     return result;
 }
 
-void bjForwardListInsert(
+void bj_forward_list_insert(
     BjForwardList list,
     usize index,
-    void* pData
+    void* p_data
 ) {
-    bjAssert(list != 0);
+    bj_assert(list != 0);
 
-    BjForwardListEntry** source_ptr = &list->pHead;
+    BjForwardListEntry** source_ptr = &list->p_head;
     for(usize i = 0 ; (i < index) && ((*source_ptr) != 0) ; ++i) {
-        source_ptr = &(*source_ptr)->pNext;
+        source_ptr = &(*source_ptr)->p_next;
     }
     BjForwardListEntry* next_entry = *source_ptr ? (*source_ptr) : 0;
 
-    BjForwardListEntry* new_entry = bjAllocate(sizeof(BjForwardListEntry), list->pAllocator);
-    new_entry->pNext = next_entry;
+    BjForwardListEntry* new_entry = bj_malloc(sizeof(BjForwardListEntry), list->p_allocator);
+    new_entry->p_next = next_entry;
     if(list->weak_owning) {
-        new_entry->value = pData;
+        new_entry->value = p_data;
     } else {
-        if(list->value_size > entry_ptr_size) {
-            new_entry->value = bjAllocate(list->value_size, list->pAllocator);
-            memcpy(new_entry->value, pData, list->value_size);
+        if(VALUE_EMBED(list)) {
+            memcpy(&new_entry->value, p_data, list->value_size);
         } else {
-            memcpy(&new_entry->value, pData, list->value_size);
+            new_entry->value = bj_malloc(list->value_size, list->p_allocator);
+            memcpy(new_entry->value, p_data, list->value_size);
         }
     }
 
     *source_ptr = new_entry;
 }
 
-void bjForwardListPrepend(
+void bj_forward_list_prepend(
     BjForwardList list,
-    void* pData
+    void* p_data
 ) {
-    bjForwardListInsert(list, 0, pData);
+    bj_forward_list_insert(list, 0, p_data);
 }
 
-void* bjForwardListValue(
+void* bj_forward_list_value(
     BjForwardList list,
     usize index
 ) {
-    BjForwardListEntry* entry = list->pHead;
+    BjForwardListEntry* entry = list->p_head;
     usize current_index = 0;
     while(entry != 0) {
         if(current_index++ == index) {
-            if(list->value_size > entry_ptr_size) {
-                return entry->value;
-            } else {
-                return &entry->value;
-            }
-            
+            return VALUE_EMBED(list) ? &entry->value : entry->value;
         }
-        entry = entry->pNext;
+        entry = entry->p_next;
     }
 
     return 0;
 }
 
-void* bjForwardListHead(
+void* bj_forward_list_head(
     BjForwardList list
 ){
-    return bjForwardListValue(list, 0);
+    return bj_forward_list_value(list, 0);
 }
 
+void* bj_forward_list_find(
+    BjForwardList  list,
+    void*          value,
+    PFN_bjValueCmp fn_cmp
+) {
+    bj_assert(list != 0);
+    bj_assert(value != 0);
+
+    /* PFN_bjValueCmp compare = fn_cmp == 0 ? memcmp : fn_cmp; */
+
+
+    
+
+    return 0;
+}

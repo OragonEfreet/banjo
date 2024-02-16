@@ -3,16 +3,16 @@
 
 #include <banjo/array.h>
 
-BjWorld bjCreateWorld(
-    const BjWorldInfo*           pInfo,
-    const BjAllocationCallbacks* pAllocator
+BjWorld bj_world_create(
+    const BjWorldInfo*           p_info,
+    const BjAllocationCallbacks* p_allocator
 ) {
-    bjAssert(pInfo != 0);
+    bj_assert(p_info != 0);
 
-    BjWorld world = bjNewStruct(BjWorld, pAllocator);
-    world->pAllocator = pAllocator;
+    BjWorld world = bj_new_struct(BjWorld, p_allocator);
+    world->p_allocator = p_allocator;
     /* BjArray array = {.count = 10}; */
-    /* bjInitArray(&array); */
+    /* p_array_init(&array); */
 
     return world;
 }
@@ -25,9 +25,9 @@ void bjResetWorld(BjWorld world) {
     // ...
 }
 
-void bjDestroyWorld(
+void bj_world_destroy(
     BjWorld world
 ) {
-    bjAssert(world != 0);
-    bjFree(world, world->pAllocator);
+    bj_assert(world != 0);
+    bj_free(world, world->p_allocator);
 }

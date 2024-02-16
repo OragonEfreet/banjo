@@ -8,8 +8,8 @@
 #define BUCKET_COUNT 10
 
 typedef struct {
-    void*  pKey;
-    void*  pValue;
+    void*  p_key;
+    void*  p_value;
 } BjHashTableEntry;
 
 // FNV-1a hash function constants
@@ -29,69 +29,70 @@ u32 fnv1a_hash(const void *data, size_t size) {
     return hash;
 }
 
-void bjInitHashTable(
-    const BjHashTableInfo* pInfo,
-    const BjAllocationCallbacks* pAllocator,
-    BjHashTable                  pInstance
+void bj_hash_table_init(
+    const BjHashTableInfo* p_info,
+    const BjAllocationCallbacks* p_allocator,
+    BjHashTable                  p_instance
 ) {
-    bjAssert(pInfo != 0);
-    bjAssert(pInfo->value_size != 0);
-    bjAssert(pInfo->key_size != 0);
+    bj_assert(p_info != 0);
+    bj_assert(p_info->value_size != 0);
+    bj_assert(p_info->key_size != 0);
 
-    pInstance->pAllocator  = pAllocator;
-    pInstance->weak_owning = pInfo->weak_owning;
-    pInstance->pfnHash     = pInfo->pfnHash ? pInfo->pfnHash : fnv1a_hash;
-    pInstance->key_size    = pInfo->key_size;
-    pInstance->value_size  = pInfo->value_size;
+    p_instance->p_allocator = p_allocator;
+    p_instance->weak_owning = p_info->weak_owning;
+    p_instance->fn_hash     = p_info->fn_hash ? p_info->fn_hash : fnv1a_hash;
+    p_instance->key_size    = p_info->key_size;
+    p_instance->value_size  = p_info->value_size;
 
-    bjInitArray(&(BjArrayInfo) {
+    p_array_init(&(BjArrayInfo) {
         .value_size = sizeof(BjForwardList_T),
         .capacity      = BUCKET_COUNT,
-    }, pAllocator, &pInstance->buckets_array);
+    }, p_allocator, &p_instance->buckets_array);
 }
 
-void bjResetHashTable(
+void bj_hash_table_reset(
     BjHashTable htable
 ) {
-    bjClearHashTable(htable);
+    bj_hash_table_clear(htable);
     // TODO
     /* for(usize i = 0 ; i < BUCKET_COUNT ; ++i) { */
-    /*     bjResetForwardList(htable->buckets_array.pData + sizeof(BjForwardList_T)*i); */
+    /*     bj_forward_list_reset(htable->buckets_array.p_data + sizeof(BjForwardList_T)*i); */
     /* } */
-    bjResetArray(&htable->buckets_array);
+    p_array_reset(&htable->buckets_array);
 }
 
-BjHashTable bjCreateHashTable(
-    const BjHashTableInfo*       pInfo,
-    const BjAllocationCallbacks* pAllocator
+BjHashTable bj_hash_table_create(
+    const BjHashTableInfo*       p_info,
+    const BjAllocationCallbacks* p_allocator
 ) {
-    bjAssert(pInfo != 0);
-    BjHashTable htable = bjNewStruct(BjHashTable, pAllocator);
-    bjInitHashTable(pInfo, pAllocator, htable);
+    bj_assert(p_info != 0);
+    BjHashTable htable = bj_new_struct(BjHashTable, p_allocator);
+    bj_hash_table_init(p_info, p_allocator, htable);
     return htable;
 }
 
-void bjDestroyHashTable(
+void bj_hash_table_destroy(
     BjHashTable htable
 ) {
-    bjAssert(htable != 0);
-    bjResetHashTable(htable);
-    bjFree(htable, htable->pAllocator);
+    bj_assert(htable != 0);
+    bj_hash_table_reset(htable);
+    bj_free(htable, htable->p_allocator);
 }
 
-void bjClearHashTable(
+void bj_hash_table_clear(
     BjHashTable htable
 ) {
     // TODO?
-    bjAssert(htable != 0);
+    bj_assert(htable != 0);
 }
 
-BANJO_EXPORT void bjHashTableSet(
+BANJO_EXPORT void bj_hash_table_set(
     BjHashTable table,
-    const void* pKey,
-    const void* pValue
+    const void* p_key,
+    const void* p_value
 ) {
-    u32 hash = table->pfnHash(pKey, table->key_size);
-    u32 scoped_hash = hash % BUCKET_COUNT;
-    printf("Hash: %u (%u)\n", scoped_hash, hash);
+    /* u32 _ = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT; */
+    // TODOSTACK implement FList find function
+
+
 }

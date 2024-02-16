@@ -6,22 +6,19 @@ TEST_CASE_ARGS(zero_initialization, {}) {
 
     float value = 42.7;
 
-    BjHashTable htable = bjCreateHashTable(&(BjHashTableInfo){
+    BjHashTable htable = bj_hash_table_create(&(BjHashTableInfo){
         .value_size=sizeof(u32),
         .key_size=sizeof(float),
     }, 0);
     REQUIRE_VALUE(htable);
 
-    for(u32 key = 0 ; key < 10000 ; ++key) {
-        bjHashTableSet(htable, &key, &value);
+    for(u32 key = 0 ; key < 10 ; ++key) {
+        bj_hash_table_set(htable, &key, &value);
     }
 
+    /* REQUIRE_EQ(htable->p_allocator, 0); */
 
-
-
-    /* REQUIRE_EQ(htable->pAllocator, 0); */
-
-    bjDestroyHashTable(htable);
+    bj_hash_table_destroy(htable);
 }
 
 

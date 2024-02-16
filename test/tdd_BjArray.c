@@ -4,23 +4,23 @@
 
 TEST_CASE_ARGS(zero_initialization, {}) {
 
-    BjArray array = bjCreateArray(&(BjArrayInfo){.value_size=1}, 0);
+    BjArray array = bj_array_create(&(BjArrayInfo){.value_size=1}, 0);
     REQUIRE_VALUE(array);
 
     REQUIRE_EQ(array->capacity, 0);
     REQUIRE_EQ(array->count, 0);
-    REQUIRE_EQ(array->pAllocator, 0);
-    REQUIRE_EQ(array->pData, 0);
+    REQUIRE_EQ(array->p_allocator, 0);
+    REQUIRE_EQ(array->p_data, 0);
 
-    bjDestroyArray(array);
+    bj_array_destroy(array);
 }
 
 TEST_CASE_ARGS(init_explicit_capacity, {}) {
 
-    BjArray array = bjCreateArray(&(BjArrayInfo){.value_size=1}, 0);
+    BjArray array = bj_array_create(&(BjArrayInfo){.value_size=1}, 0);
     REQUIRE_VALUE(array);
 
-    bjDestroyArray(array);
+    bj_array_destroy(array);
 }
 
 int main(int argc, char* argv[]) {

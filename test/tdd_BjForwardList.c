@@ -1,3 +1,4 @@
+#include "banjo/forward_list.h"
 #include "test.h"
 
 #include <forward_list.h>
@@ -14,14 +15,14 @@ TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjForwardList list = bjCreateForwardList(&create_info, 0);
+    BjForwardList list = bj_forward_list_create(&create_info, 0);
     REQUIRE_VALUE(list);
 
     REQUIRE_EQ(list->value_size, test_data->value_type->mem_size);
-    REQUIRE_NULL(list->pAllocator);
-    REQUIRE_NULL(list->pHead);
+    REQUIRE_NULL(list->p_allocator);
+    REQUIRE_NULL(list->p_head);
 
-    bjDestroyForwardList(list);
+    bj_forward_list_destroy(list);
 }
 
 TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type;}) {
@@ -30,12 +31,12 @@ TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjForwardList list = bjCreateForwardList(&create_info, 0);
+    BjForwardList list = bj_forward_list_create(&create_info, 0);
     REQUIRE_VALUE(list);
 
-    REQUIRE_EQ(bjForwardListCount(list), 0);
+    REQUIRE_EQ(bj_forward_list_count(list), 0);
 
-    bjDestroyForwardList(list);
+    bj_forward_list_destroy(list);
 }
 
 TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_type;}) {
@@ -44,14 +45,14 @@ TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_typ
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjForwardList list = bjCreateForwardList(&create_info, 0);
+    BjForwardList list = bj_forward_list_create(&create_info, 0);
     REQUIRE_VALUE(list);
 
-    REQUIRE_NULL(list->pHead);
-    bjForwardListPrepend(list, test_data->value_type->values);
-    REQUIRE_VALUE(list->pHead);
+    REQUIRE_NULL(list->p_head);
+    bj_forward_list_prepend(list, test_data->value_type->values);
+    REQUIRE_VALUE(list->p_head);
 
-    bjDestroyForwardList(list);
+    bj_forward_list_destroy(list);
 }
 
 TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
@@ -61,17 +62,17 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjForwardList list = bjCreateForwardList(&create_info, 0);
+    BjForwardList list = bj_forward_list_create(&create_info, 0);
     REQUIRE_VALUE(list);
 
     int data = 42;
     for(usize i = 0 ; i < n_operations ; ++i) {
-        bjForwardListPrepend(list, &data);
+        bj_forward_list_prepend(list, &data);
     }
 
-    REQUIRE_EQ(bjForwardListCount(list), n_operations);
+    REQUIRE_EQ(bj_forward_list_count(list), n_operations);
 
-    bjDestroyForwardList(list);
+    bj_forward_list_destroy(list);
 }
 
 
@@ -80,22 +81,62 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjForwardList list = bjCreateForwardList(&create_info, 0);
+    BjForwardList list = bj_forward_list_create(&create_info, 0);
     REQUIRE_VALUE(list);
 
     for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
         void* data = test_data->value_type->values + test_data->value_type->mem_size * n;
 
-        bjForwardListPrepend(list, data);
-        REQUIRE_EQ(bjForwardListCount(list), n+1);
+        bj_forward_list_prepend(list, data);
+        REQUIRE_EQ(bj_forward_list_count(list), n+1);
 
         // Test if the first entry is the newly assigned one
-        void* res = bjForwardListHead(list);
+        void* res = bj_forward_list_head(list);
         int cmp = memcmp(res, data, test_data->value_type->mem_size);
         REQUIRE_EQ(cmp, 0);
     }
 
-    bjDestroyForwardList(list);
+    bj_forward_list_destroy(list);
+}
+
+TEST_CASE_ARGS(find_in_empty_always_return_null, { element_type* value_type;  bool weak_owning;}) {
+
+    BjForwardListInfo create_info = {
+        .value_size = test_data->value_type->mem_size,
+    };
+
+
+    BjForwardList list = bj_forward_list_create(&create_info, 0);
+    REQUIRE_VALUE(list);
+
+    void* found = bj_forward_list_find(list, test_data->value_type->values, 0);
+    REQUIRE_NULL(found);
+
+    bj_forward_list_destroy(list);
+}
+
+TEST_CASE_ARGS(each_time_a_value_is_added_we_can_find_it, { element_type* value_type;  bool weak_owning;}) {
+    BjForwardListInfo create_info = {
+        .value_size = test_data->value_type->mem_size,
+    };
+
+    BjForwardList list = bj_forward_list_create(&create_info, 0);
+    REQUIRE_VALUE(list);
+
+    for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
+        void* data = test_data->value_type->values + test_data->value_type->mem_size * n;
+
+        bj_forward_list_prepend(list, data);
+        REQUIRE_EQ(bj_forward_list_count(list), n+1);
+
+        void* found = bj_forward_list_find(list, data, 0);
+        REQUIRE_VALUE(found);
+
+
+
+    }
+
+    bj_forward_list_destroy(list);
 }
 
 typedef struct {
@@ -135,7 +176,10 @@ int main(int argc, char* argv[]) {
         RUN_TEST(n_prepends_means_count_is_n,              .value_type = &element_types[e]);
         RUN_TEST(test_prepends,                            .value_type = &element_types[e]);
         RUN_TEST(test_prepends,                            .value_type = &element_types[e], .weak_owning = true);
+        RUN_TEST(find_in_empty_always_return_null,         .value_type = &element_types[e]);
+        /* RUN_TEST(each_time_a_value_is_added_we_can_find_it,.value_type = &element_types[e]); */
+        /* RUN_TEST(each_time_a_value_is_added_we_can_find_it,.value_type = &element_types[e], .weak_owning = true); */
     }
-
     END_TESTS();
 }
+
