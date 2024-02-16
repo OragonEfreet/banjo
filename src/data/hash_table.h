@@ -7,7 +7,6 @@
 typedef struct BjHashTable_T {
     BjAllocationCallbacks* pAllocator;
     BjArray_T              buckets_array;
-    /* BjForwardList_T        buckets[BUCKET_COUNT]; */
     bool                   weak_owning;
     usize                  value_size;
     usize                  key_size;

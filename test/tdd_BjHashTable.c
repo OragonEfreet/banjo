@@ -4,7 +4,6 @@
 
 TEST_CASE_ARGS(zero_initialization, {}) {
 
-    u32 key = 97;
     float value = 42.7;
 
     BjHashTable htable = bjCreateHashTable(&(BjHashTableInfo){
@@ -13,7 +12,9 @@ TEST_CASE_ARGS(zero_initialization, {}) {
     });
     REQUIRE_VALUE(htable);
 
-    bjHashTableSet(htable, &key, &value);
+    for(u32 key = 0 ; key < 10000 ; ++key) {
+        bjHashTableSet(htable, &key, &value);
+    }
 
 
 
