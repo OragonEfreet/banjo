@@ -17,14 +17,11 @@ void error_callback(int error, const char* description)
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
-BjResult bjCreateWindow(
-    const BjWindowInfo* pInfo,
+BjResult bj_window_create(
+    const BjWindowInfo* p_info,
     BjWindow*                 pWindow
 ) {
-    bjAssert(pInfo != 0);
-    bjAssert(pInfo != 0);
-    bjAssert(pInfo != 0);
-    bjAssert(pInfo != 0);
+    bjAssert(p_info != 0);
 
 
     glfwDefaultWindowHints();
@@ -32,34 +29,34 @@ BjResult bjCreateWindow(
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     GLFWwindow* handle = glfwCreateWindow(
-        pInfo->width, pInfo->height,
-        pInfo->title ? pInfo->title : pInfo->application->name,
+        p_info->width, p_info->height,
+        p_info->title ? p_info->title : p_info->application->name,
         NULL, NULL
     );
 
-    struct BjWindow_T* window = bjNewStruct(BjWindow, pInfo->application->pAllocator);
+    struct BjWindow_T* window = bj_new_struct(BjWindow, p_info->application->p_allocator);
     window->handle = handle;
-    window->application = pInfo->application;
+    window->application = p_info->application;
 
-    bj_LinkWindow(pInfo->application, window);
+    bj_window_link(p_info->application, window);
 
     *pWindow = window;
     return BJ_SUCCESS;
 }
 
-BjResult bjDestroyWindow(
+BjResult bj_window_destroy(
     BjWindow window
 ) {
     bjAssert(window != 0);
 
-    bj_UnlinkWindow(window->application, window);
+    bj_window_unlink(window->application, window);
     glfwDestroyWindow(window->handle);
 
-    bjFree(window, window->application->pAllocator);
+    bj_free(window, window->application->p_allocator);
     return BJ_SUCCESS;
 }
 
-bool bjWindowShouldClose(
+bool bj_window_should_close(
     BjWindow window
 ) {
     return glfwWindowShouldClose(window->handle);
@@ -71,7 +68,7 @@ void bj_ProcessEvents() {
 
 static usize n_instances = 0;
 
-BjResult bj_RetainWindowComponent(BjApplication application)
+BjResult bj_window_retain(BjApplication application)
 {
     if(n_instances++ == 0) {
         glfwSetErrorCallback(error_callback);
@@ -82,7 +79,7 @@ BjResult bj_RetainWindowComponent(BjApplication application)
     return BJ_SUCCESS;
 }
 
-BjResult bj_ReleaseWindowComponent(BjApplication application)
+BjResult bj_window_release(BjApplication application)
 {
     if(--n_instances == 0) {
         glfwTerminate();

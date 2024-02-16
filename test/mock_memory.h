@@ -14,7 +14,7 @@ typedef struct  {
     u16   n_allocations;
     u16   n_reallocations;
     u16   n_free;
-} allocation_data;
+} sAllocationData;
 
 #define CHECK_CLEAN_ALLOC(ALLOC) \
     CHECK_EQ(ALLOC.application_current_allocated, 0); \
@@ -24,8 +24,8 @@ typedef struct  {
     REQUIRE_EQ(ALLOC.application_current_allocated, 0); \
     REQUIRE_EQ(ALLOC.actual_current_allocated, 0);
 
-void logAllocations(allocation_data* data) {
-    bjLog(TRACE, "Memory:\n\tApplication allocated:\t %ld (max: %ld)\n\tTotal allocated:\t %ld (max %ld)\n\t%d allocs, %d reallocs, %d frees",
+void logAllocations(sAllocationData* data) {
+    bj_log(TRACE, "Memory:\n\tApplication allocated:\t %ld (max: %ld)\n\tTotal allocated:\t %ld (max %ld)\n\t%d allocs, %d reallocs, %d frees",
         data->application_current_allocated, data->application_max_allocated,
         data->actual_current_allocated, data->actual_max_allocated,
         data->n_allocations, data->n_reallocations, data->n_free
@@ -39,8 +39,8 @@ typedef struct {
 
 static usize block_allocation_size = sizeof(block_allocation);
 
-static void* mock_malloc(void* pUserData, usize appsize) {
-    if (pUserData == 0) {
+static void* mock_malloc(void* p_user_data, usize appsize) {
+    if (p_user_data == 0) {
         return malloc(appsize);
     }
 
@@ -51,7 +51,7 @@ static void* mock_malloc(void* pUserData, usize appsize) {
     meta->appsize = appsize;
     meta->ptr = meta + 1;
 
-    allocation_data* pData = (allocation_data*)pUserData;
+    sAllocationData* pData = (sAllocationData*)p_user_data;
     if((pData->actual_current_allocated += memsize) > pData->actual_max_allocated) {
         pData->actual_max_allocated = pData->actual_current_allocated;
     }
@@ -60,17 +60,17 @@ static void* mock_malloc(void* pUserData, usize appsize) {
     }
     pData->n_allocations += 1;
 
-    bjLog(TRACE, "Allocated %ld bytes @ %p", meta->appsize, meta->ptr); 
+    /* bjLog(TRACE, "Allocated %ld bytes @ %p", meta->appsize, meta->ptr); */ 
 
     return meta->ptr;
 }
 
-void mock_free(void* pUserData, void* pAppPtr) {
+void mock_free(void* p_user_data, void* pAppPtr) {
     if(pAppPtr == 0) {
         return;
     }
 
-    if(pUserData == 0) {
+    if(p_user_data == 0) {
         free(pAppPtr);
     } else {
 
@@ -83,25 +83,25 @@ void mock_free(void* pUserData, void* pAppPtr) {
         memset(meta, 0, memsize);
         free(meta);
 
-        allocation_data* pData = (allocation_data*)pUserData;
+        sAllocationData* pData = (sAllocationData*)p_user_data;
         pData->actual_current_allocated -= memsize;
         pData->application_current_allocated -= appsize;
         pData->n_free += 1;
 
-        bjLog(TRACE, "Freed %ld bytes @ %p", appsize, pAppPtr); 
+        /* bjLog(TRACE, "Freed %ld bytes @ %p", appsize, pAppPtr); */ 
     }
 }
 
-static void* mock_realloc(void* pUserData, void* pAppPtr, usize appsize) {
-    if(pUserData == 0) {
+static void* mock_realloc(void* p_user_data, void* pAppPtr, usize appsize) {
+    if(p_user_data == 0) {
         return realloc(pAppPtr, appsize);
     }
 
-    void* res = mock_malloc(pUserData, appsize);
+    void* res = mock_malloc(p_user_data, appsize);
     memcpy(res, pAppPtr, appsize);
-    mock_free(pUserData, pAppPtr);
+    mock_free(p_user_data, pAppPtr);
 
-    allocation_data* pData = (allocation_data*)pUserData;
+    sAllocationData* pData = (sAllocationData*)p_user_data;
     pData->n_free -= 1;
     pData->n_allocations -= 1;
     pData->n_reallocations += 1;
@@ -109,12 +109,12 @@ static void* mock_realloc(void* pUserData, void* pAppPtr, usize appsize) {
     return res;
 }
 
-BjAllocationCallbacks mock_allocators(allocation_data* pData) {
+BjAllocationCallbacks mock_allocators(sAllocationData* pData) {
     return (BjAllocationCallbacks) {
-        .pfnAllocation   = mock_malloc,
-        .pfnReallocation = mock_realloc,
-        .pfnFree         = mock_free,
-        .pUserData       = pData,
+        .fn_allocation   = mock_malloc,
+        .fn_reallocation = mock_realloc,
+        .fn_free         = mock_free,
+        .p_user_data       = pData,
     };
 }
 

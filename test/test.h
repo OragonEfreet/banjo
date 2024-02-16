@@ -37,7 +37,7 @@ typedef struct {
     usize                 n_asserts;   // Total number of checked assertions
     int                   stop_at_err; // If 0, program continues on error
     void*                 user_data;   // User data
-    allocation_data       allocations; // Allocation Data
+    sAllocationData       allocations; // Allocation Data
 } Context;
 
 // Parses ARGC/ARGV and builds the COntext object
@@ -49,7 +49,7 @@ void initialize_context(Context* context, int argc, char* argv[]) {
     }
 
     BjAllocationCallbacks allocators = mock_allocators(&context->allocations);
-    bjSetDefaultAllocator(&allocators);
+    bj_memory_set_defaults(&allocators);
 }
 
 // Called after each test ends

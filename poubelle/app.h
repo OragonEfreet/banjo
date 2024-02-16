@@ -5,18 +5,18 @@
 
 typedef struct BjApplication_T {
     char*                  name;
-    BjAllocationCallbacks* pAllocator;
+    BjAllocationCallbacks* p_allocator;
     bool                   shouldClose;
     usize                  windowCount;
-    BjWindow*              pWindows;
+    BjWindow*              p_windows;
 } BjApplication_T;
 
-void bj_LinkWindow(
+void bj_window_link(
     BjApplication                application,
     BjWindow                     window
 );
 
-void bj_UnlinkWindow(
+void bj_window_unlink(
     BjApplication                application,
     BjWindow                     window
 );

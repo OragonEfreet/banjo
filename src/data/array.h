@@ -3,13 +3,13 @@
 #include <banjo/array.h>
 
 typedef struct BjArray_T {
-    const BjAllocationCallbacks* pAllocator;
+    const BjAllocationCallbacks* p_allocator;
     usize                        value_size;
     usize                        capacity;
     usize                        count;
-    void*                        pData;
+    void*                        p_data;
 } BjArray_T;
 
-void bjInitArray(const BjArrayInfo*, const BjAllocationCallbacks*, BjArray);
-void bjResetArray(BjArray);
+void p_array_init(const BjArrayInfo*, const BjAllocationCallbacks*, BjArray);
+void p_array_reset(BjArray);
 

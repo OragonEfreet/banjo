@@ -1,60 +1,60 @@
 #include <data/array.h>
 #include <banjo/error.h>
 
-void bjInitArray(
-    const BjArrayInfo*           pInfo,
-    const BjAllocationCallbacks* pAllocator,
-    BjArray                      pInstance
+void p_array_init(
+    const BjArrayInfo*           p_info,
+    const BjAllocationCallbacks* p_allocator,
+    BjArray                      p_instance
 ) {
-    bjAssert(pInfo != 0);
+    bj_assert(p_info != 0);
 
-    pInstance->pAllocator = pAllocator;
-    pInstance->capacity   = 0;
-    pInstance->count      = 0;
-    pInstance->value_size  = pInfo->value_size;
-    pInstance->pData      = 0;
+    p_instance->p_allocator = p_allocator;
+    p_instance->capacity    = 0;
+    p_instance->count       = 0;
+    p_instance->value_size  = p_info->value_size;
+    p_instance->p_data      = 0;
 
-    if(pInfo->capacity > 0) {
-        bjReserveArray(pInstance, pInfo->capacity);
+    if(p_info->capacity > 0) {
+        bj_array_reserve(p_instance, p_info->capacity);
     }
 }
 
-void bjResetArray(
+void p_array_reset(
     BjArray array
 ) {
-    bjAssert(array != 0);
-    bjFree(array->pData, array->pAllocator);
+    bj_assert(array != 0);
+    bj_free(array->p_data, array->p_allocator);
 }
 
-BjArray bjCreateArray(
-    const BjArrayInfo*     pInfo,
-    const BjAllocationCallbacks* pAllocator
+BjArray bj_array_create(
+    const BjArrayInfo*     p_info,
+    const BjAllocationCallbacks* p_allocator
 ) {
-    bjAssert(pInfo != 0);
-    BjArray array     = bjNewStruct(BjArray, pAllocator);
-    bjInitArray(pInfo, pAllocator, array);
+    bj_assert(p_info != 0);
+    BjArray array     = bj_new_struct(BjArray, p_allocator);
+    p_array_init(p_info, p_allocator, array);
     return array;
 }
 
-void bjDestroyArray(
+void bj_array_destroy(
     BjArray array
 ) {
-    bjAssert(array != 0);
-    bjResetArray(array);
-    bjFree(array, array->pAllocator);
+    bj_assert(array != 0);
+    p_array_reset(array);
+    bj_free(array, array->p_allocator);
 }
 
-void bjReserveArray(
-    BjArray pArray,
+void bj_array_reserve(
+    BjArray p_array,
     usize   capacity
 ) {
-    bjAssert(pArray != 0);
-    if(capacity > pArray->capacity) {
-        if(pArray->pData == 0) {
-            pArray->pData = bjAllocate(pArray->value_size * capacity, pArray->pAllocator);
+    bj_assert(p_array != 0);
+    if(capacity > p_array->capacity) {
+        if(p_array->p_data == 0) {
+            p_array->p_data = bj_malloc(p_array->value_size * capacity, p_array->p_allocator);
         } else {
-            pArray->pData = bjReallocate(pArray->pData, pArray->value_size * capacity, pArray->pAllocator);
+            p_array->p_data = bj_realloc(p_array->p_data, p_array->value_size * capacity, p_array->p_allocator);
         }
-        pArray->capacity = capacity;
+        p_array->capacity = capacity;
     }
 }

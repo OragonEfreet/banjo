@@ -10,14 +10,14 @@ int main(int argc, char* argv[]) {
     
     // Usual Creation and destruction
     BjForwardListInfo create_info = { .value_size = sizeof(int) };
-    BjForwardList list = bjCreateForwardList(&create_info, 0);
+    BjForwardList list = bj_forward_list_create(&create_info, 0);
     
     // Initially, a list is 0 length
-    bjLog(INFO, "Initial count: %d", bjForwardListCount(list));
+    bj_log(INFO, "Initial count: %d", bj_forward_list_count(list));
 
     // Items can be appended to list end
 
-    bjDestroyForwardList(list);
+    bj_forward_list_destroy(list);
     
 
     return 0;

@@ -9,19 +9,19 @@ int main(int argc, char* argv[]) {
     // BJ_LOG_TRACE < BJ_LOG_DEBUG < BJ_LOG_INFO,
     // BJ_LOG_WARN <  BJ_LOG_ERROR < BJ_LOG_FATAL.
     // The default log level on application start is 0 (TRACE)
-    int default_level = bjGetLogLevel();
+    int default_level = bj_log_get_level();
     assert(default_level == 0);
 
     // To set the current log level:
-    bjSetLogLevel(BJ_LOG_INFO);
+    bj_log_set_level(BJ_LOG_INFO);
     // Since level are signed int, you can provide any custom log level outside
     // the range [0;5].
 
     // Any message sent in a level equal to higher than the current will
     // output:
-    bjLog(TRACE, "Trace level won't display");
-    bjLog(INFO, "INFO level will display");
-    bjLog(WARN, "WARN level will display");
+    bj_log(TRACE, "Trace level won't display");
+    bj_log(INFO, "INFO level will display");
+    bj_log(WARN, "WARN level will display");
 
     // ALso ther is BjLogInfo(), BjLogTrace(), etc.
 }

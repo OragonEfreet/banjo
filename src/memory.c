@@ -17,59 +17,59 @@ static inline void fallback_free(void* user_data, void* ptr) {
 }
 
 static BjAllocationCallbacks s_default = {
-    .pfnAllocation   = fallback_malloc,
-    .pfnReallocation = fallback_realloc,
-    .pfnFree         = fallback_free,
+    .fn_allocation   = fallback_malloc,
+    .fn_reallocation = fallback_realloc,
+    .fn_free         = fallback_free,
 };
 
-BANJO_EXPORT void* bjAllocate(
+BANJO_EXPORT void* bj_malloc(
     usize                        size,
-    const BjAllocationCallbacks* pAllocator
+    const BjAllocationCallbacks* p_allocator
 ) {
-    const BjAllocationCallbacks* allocator = (pAllocator == 0 ? &s_default : pAllocator);
-    return allocator->pfnAllocation(allocator->pUserData, size);
+    const BjAllocationCallbacks* allocator = (p_allocator == 0 ? &s_default : p_allocator);
+    return allocator->fn_allocation(allocator->p_user_data, size);
 }
 
-BANJO_EXPORT void* bjReallocate(
-    void*                        pMemory,
+BANJO_EXPORT void* bj_realloc(
+    void*                        p_memory,
     usize                        size,
-    const BjAllocationCallbacks* pAllocator
+    const BjAllocationCallbacks* p_allocator
 ) {
-    const BjAllocationCallbacks* allocator = (pAllocator == 0 ? &s_default : pAllocator);
-    return allocator->pfnReallocation(allocator->pUserData, pMemory, size);
+    const BjAllocationCallbacks* allocator = (p_allocator == 0 ? &s_default : p_allocator);
+    return allocator->fn_reallocation(allocator->p_user_data, p_memory, size);
 }
 
-BANJO_EXPORT void bjFree(
-    void*                         pMemory,
-    const BjAllocationCallbacks*  pAllocator
+BANJO_EXPORT void bj_free(
+    void*                         p_memory,
+    const BjAllocationCallbacks*  p_allocator
 ) {
-    const BjAllocationCallbacks* allocator = (pAllocator == 0 ? &s_default : pAllocator);
-    allocator->pfnFree(allocator->pUserData, pMemory);
+    const BjAllocationCallbacks* allocator = (p_allocator == 0 ? &s_default : p_allocator);
+    allocator->fn_free(allocator->p_user_data, p_memory);
 }
 
 
-void bjSetDefaultAllocator(
-    const BjAllocationCallbacks* pAllocator
+void bj_memory_set_defaults(
+    const BjAllocationCallbacks* p_allocator
 ) {
-    if(pAllocator == 0) {
+    if(p_allocator == 0) {
         s_default = (BjAllocationCallbacks) {
-            .pfnAllocation   = fallback_malloc,
-            .pfnReallocation = fallback_realloc,
-            .pfnFree         = fallback_free,
+            .fn_allocation   = fallback_malloc,
+            .fn_reallocation = fallback_realloc,
+            .fn_free         = fallback_free,
         };
     } else {
-        bjAssert(pAllocator != 0);
-        bjAssert(pAllocator != 0);
-        bjAssert(pAllocator != 0);
+        bj_assert(p_allocator != 0);
+        bj_assert(p_allocator != 0);
+        bj_assert(p_allocator != 0);
         s_default = (BjAllocationCallbacks) {
-            .pfnAllocation   = pAllocator->pfnAllocation,
-            .pfnReallocation = pAllocator->pfnReallocation,
-            .pfnFree         = pAllocator->pfnFree,
-            .pUserData       = pAllocator->pUserData,
+            .fn_allocation   = p_allocator->fn_allocation,
+            .fn_reallocation = p_allocator->fn_reallocation,
+            .fn_free         = p_allocator->fn_free,
+            .p_user_data       = p_allocator->p_user_data,
         };
     }
 }
 
-void bjUnsetDefaultAllocator(void) {
-    bjSetDefaultAllocator(0);
+void bj_memory_unset_defaults(void) {
+    bj_memory_set_defaults(0);
 }

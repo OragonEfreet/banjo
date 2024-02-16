@@ -8,10 +8,10 @@ typedef struct BjError_T {
     u32 code;
 } BjError;
 
-BANJO_EXPORT void bjSetError(
-    BjError* pError,
-    u32 domain,
-    u32 code
+BANJO_EXPORT void bj_set_error(
+    BjError* p_error,
+    u32      domain,
+    u32      code
 );
 
 
