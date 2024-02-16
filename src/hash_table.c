@@ -33,12 +33,14 @@ void bjInitHashTable(
     BjHashTable                  pInstance
 ) {
     bjAssert(pInfo != 0);
-    bjAssert(pInfo != 0);
-    bjAssert(pInfo != 0);
+    bjAssert(pInfo->value_size != 0);
+    bjAssert(pInfo->key_size != 0);
 
     pInstance->pAllocator  = pInfo->pAllocator;
     pInstance->weak_owning = pInfo->weak_owning;
-    pInstance->pfnHash = pInfo->pfnHash ? pInfo->pfnHash : fnv1a_hash;
+    pInstance->pfnHash     = pInfo->pfnHash ? pInfo->pfnHash : fnv1a_hash;
+    pInstance->key_size    = pInfo->key_size;
+    pInstance->value_size  = pInfo->value_size;
 
     bjInitArray(&(BjArrayInfo) {
         .value_size = sizeof(BjForwardList_T),
@@ -87,6 +89,7 @@ BANJO_EXPORT void bjHashTableSet(
     const void* pKey,
     const void* pValue
 ) {
-    u32 hash = table->pfnHash(pKey, table->key_size) % BUCKET_COUNT;
-    printf("Hash: %u\n", hash);
+    u32 hash = table->pfnHash(pKey, table->key_size);
+    u32 scoped_hash = hash % BUCKET_COUNT;
+    printf("Hash: %u (%u)\n", scoped_hash, hash);
 }
