@@ -45,10 +45,18 @@ void bj_hash_table_init(
     p_instance->key_size    = p_info->key_size;
     p_instance->value_size  = p_info->value_size;
 
-    p_array_init(&(BjArrayInfo) {
+    bj_array_init(&(BjArrayInfo) {
         .value_size = sizeof(BjForwardList_T),
-        .capacity      = BUCKET_COUNT,
+        .count      = BUCKET_COUNT,
     }, p_allocator, &p_instance->buckets);
+
+    /* for(usize i = 0 ; i < */ 
+
+
+
+
+
+    
 }
 
 void bj_hash_table_reset(
@@ -59,7 +67,7 @@ void bj_hash_table_reset(
     /* for(usize i = 0 ; i < BUCKET_COUNT ; ++i) { */
     /*     bj_forward_list_reset(htable->buckets.p_data + sizeof(BjForwardList_T)*i); */
     /* } */
-    p_array_reset(&htable->buckets);
+    bj_array_reset(&htable->buckets);
 }
 
 BjHashTable bj_hash_table_create(
@@ -92,7 +100,9 @@ BANJO_EXPORT void bj_hash_table_set(
     const void* p_key,
     const void* p_value
 ) {
-    u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
+    /* u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT; */
     /* BjForwardList* bucket = bj_array_at(&table->buckets, hash); */
+    
+
 
 }
