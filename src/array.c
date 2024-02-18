@@ -71,7 +71,7 @@ BANJO_EXPORT void bj_array_push(
     // Request for at least twice the new size
     bj_array_reserve(array, (array->count + 1) * 2); 
     void* dest = ((byte*)array->p_data) + array->value_size * array->count;
-    memcpy(dest, value, array->value_size);
+    bj_memcpy(dest, value, array->value_size);
     ++array->count;
 }
 

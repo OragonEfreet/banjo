@@ -96,10 +96,10 @@ void bj_forward_list_insert(
         new_entry->value = p_data;
     } else {
         if(VALUE_EMBED(list)) {
-            memcpy(&new_entry->value, p_data, list->value_size);
+            bj_memcpy(&new_entry->value, p_data, list->value_size);
         } else {
             new_entry->value = bj_malloc(list->value_size, list->p_allocator);
-            memcpy(new_entry->value, p_data, list->value_size);
+            bj_memcpy(new_entry->value, p_data, list->value_size);
         }
     }
 
