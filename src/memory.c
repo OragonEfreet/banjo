@@ -82,3 +82,12 @@ void bj_memcpy(
 ) {
     memcpy(p_dest, p_src, mem_size);
 }
+
+void bj_memset(
+    void* p_dest,
+    u8    value,
+    usize num
+) {
+    memset(p_dest, value, num);
+
+}

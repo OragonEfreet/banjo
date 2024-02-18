@@ -56,6 +56,12 @@ BANJO_EXPORT void bj_memcpy(
     usize       mem_size
 );
 
+BANJO_EXPORT void bj_memset(
+    void* p_dest,
+    u8    value,
+    usize num
+);
+
 
 
 

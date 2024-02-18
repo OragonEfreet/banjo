@@ -47,7 +47,7 @@ static void* mock_malloc(void* p_user_data, usize appsize) {
     usize memsize = appsize + block_allocation_size;
 
     block_allocation* meta = malloc(memsize);
-    memset(meta, 0, memsize);
+    bj_memset(meta, 0, memsize);
     meta->appsize = appsize;
     meta->ptr = meta + 1;
 
@@ -80,7 +80,7 @@ void mock_free(void* p_user_data, void* pAppPtr) {
         usize appsize = meta->appsize;
         usize memsize = appsize + block_allocation_size;
 
-        memset(meta, 0, memsize);
+        bj_memset(meta, 0, memsize);
         free(meta);
 
         sAllocationData* pData = (sAllocationData*)p_user_data;

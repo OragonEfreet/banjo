@@ -20,6 +20,19 @@ BANJO_EXPORT void bj_array_destroy(
     BjArray array
 );
 
+BANJO_EXPORT void bj_array_clear(
+    BjArray array
+);
+
+BANJO_EXPORT void bj_array_shrink(
+    BjArray array
+);
+
+BANJO_EXPORT void bj_array_set_count(
+    BjArray array,
+    usize   capacity
+);
+
 BANJO_EXPORT void bj_array_reserve(
     BjArray array,
     usize   capacity
