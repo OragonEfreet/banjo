@@ -3,6 +3,7 @@
 #include <banjo/error.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 static inline void* fallback_malloc(void* user_data, usize size) {
     return malloc(size);
@@ -72,4 +73,12 @@ void bj_memory_set_defaults(
 
 void bj_memory_unset_defaults(void) {
     bj_memory_set_defaults(0);
+}
+
+void bj_memcpy(
+    void*       p_dest,
+    const void* p_src,
+    usize       mem_size
+) {
+    memcpy(p_dest, p_src, mem_size);
 }

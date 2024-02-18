@@ -98,7 +98,7 @@ static void* mock_realloc(void* p_user_data, void* pAppPtr, usize appsize) {
     }
 
     void* res = mock_malloc(p_user_data, appsize);
-    memcpy(res, pAppPtr, appsize);
+    bj_memcpy(res, pAppPtr, appsize);
     mock_free(p_user_data, pAppPtr);
 
     sAllocationData* pData = (sAllocationData*)p_user_data;
@@ -111,10 +111,10 @@ static void* mock_realloc(void* p_user_data, void* pAppPtr, usize appsize) {
 
 BjAllocationCallbacks mock_allocators(sAllocationData* pData) {
     return (BjAllocationCallbacks) {
+        .p_user_data     = pData,
         .fn_allocation   = mock_malloc,
         .fn_reallocation = mock_realloc,
         .fn_free         = mock_free,
-        .p_user_data       = pData,
     };
 }
 

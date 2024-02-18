@@ -50,4 +50,12 @@ BANJO_EXPORT void bj_memory_set_defaults(
 
 BANJO_EXPORT void bj_memory_unset_defaults(void);
 
+BANJO_EXPORT void bj_memcpy(
+    void*       p_dest,
+    const void* p_src,
+    usize       mem_size
+);
+
+
+
 
