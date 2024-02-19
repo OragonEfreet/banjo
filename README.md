@@ -17,15 +17,28 @@ Features
 Container types
 ---------------
 
-* `BjArray`: *Sequence container* that wraps a classic C-Style array.
-* `BjForwardList`: Forward-only *linked list*.
-* `BjHashTable`: Associative array.
+- `BjArray`: *Sequence container* that wraps a classic C-Style array.
+- `BjForwardList`: Forward-only *linked list*.
+- `BjHashTable`: Associative array.
 
 Misc
 ----
 
 * Simple *logging* system.
 * Custom allocators.
+
+Support
+=======
+
+Code is multi-platform, but I'm testing on the following environments:
+
+- *Local Machine*:
+  - **Manjaro** Linux
+  - **gcc** (GCC) 13.2.1 20230801
+  - **ldd** (GNU libc) 2.38
+  - **cmake** version 3.28.1
+
+
 
 
 
