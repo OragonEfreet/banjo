@@ -1,7 +1,5 @@
 # Banjo API
 
-[TOC]
-
 Banjo is a small projet in making myself a C99 framework for game development.
 The work aims at the following objectives:
 
