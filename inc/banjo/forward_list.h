@@ -4,6 +4,7 @@
 #include <banjo/memory.h>
 
 BJ_DEFINE_HANDLE(BjForwardList);
+BJ_DEFINE_HANDLE(BjForwardListIterator);
 
 typedef struct BjForwardListInfo {
     usize                  value_size;
@@ -47,19 +48,20 @@ BANJO_EXPORT void* bj_forward_list_head(
     BjForwardList list
 );
 
-typedef int (*PFN_bjValueCmp)(
-    const void* p_left,
-    const void* p_right,
-    usize       mem_size
+
+BANJO_EXPORT BjForwardListIterator bj_forward_list_iterator_create(
+    const BjForwardList list
 );
 
-BANJO_EXPORT void* bj_forward_list_find(
-    BjForwardList  list,
-    void*          value,
-    PFN_bjValueCmp fn_cmp
+BANJO_EXPORT void bj_forward_list_iterator_destroy(
+    BjForwardListIterator iterator
 );
 
+BANJO_EXPORT void* bj_forward_list_iterator_value(
+    BjForwardListIterator iterator
+);
 
-
-
+BANJO_EXPORT bool bj_forward_list_iterator_next(
+    BjForwardListIterator iterator
+);
 

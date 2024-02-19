@@ -99,46 +99,6 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
     bj_forward_list_destroy(list);
 }
 
-TEST_CASE_ARGS(find_in_empty_always_return_null, { element_type* value_type;  bool weak_owning;}) {
-
-    BjForwardListInfo create_info = {
-        .value_size = test_data->value_type->mem_size,
-    };
-
-
-    BjForwardList list = bj_forward_list_create(&create_info, 0);
-    REQUIRE_VALUE(list);
-
-    void* found = bj_forward_list_find(list, test_data->value_type->values, 0);
-    REQUIRE_NULL(found);
-
-    bj_forward_list_destroy(list);
-}
-
-TEST_CASE_ARGS(each_time_a_value_is_added_we_can_find_it, { element_type* value_type;  bool weak_owning;}) {
-    BjForwardListInfo create_info = {
-        .value_size = test_data->value_type->mem_size,
-    };
-
-    BjForwardList list = bj_forward_list_create(&create_info, 0);
-    REQUIRE_VALUE(list);
-
-    for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
-        void* data = test_data->value_type->values + test_data->value_type->mem_size * n;
-
-        bj_forward_list_prepend(list, data);
-        REQUIRE_EQ(bj_forward_list_count(list), n+1);
-
-        void* found = bj_forward_list_find(list, data, 0);
-        REQUIRE_VALUE(found);
-
-
-
-    }
-
-    bj_forward_list_destroy(list);
-}
-
 typedef struct {
     double value00;    double value01;
     double value11;    double value12;
@@ -176,9 +136,6 @@ int main(int argc, char* argv[]) {
         RUN_TEST(n_prepends_means_count_is_n,              .value_type = &element_types[e]);
         RUN_TEST(test_prepends,                            .value_type = &element_types[e]);
         RUN_TEST(test_prepends,                            .value_type = &element_types[e], .weak_owning = true);
-        RUN_TEST(find_in_empty_always_return_null,         .value_type = &element_types[e]);
-        RUN_TEST(each_time_a_value_is_added_we_can_find_it,.value_type = &element_types[e]);
-        RUN_TEST(each_time_a_value_is_added_we_can_find_it,.value_type = &element_types[e], .weak_owning = true);
     }
     END_TESTS();
 }
