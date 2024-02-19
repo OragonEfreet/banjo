@@ -1,4 +1,4 @@
-# Building From Sources
+# Building From Sources {#build}
 
 If you want to build the project from source, follow the instructions of this page.
 
