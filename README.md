@@ -29,8 +29,8 @@ Container types
 Misc
 ----
 
-* Simple *logging* system.
-* #BjAllocationCallbacks.
+* Simple *logging* system with _log.h_.
+* Custom allocators with `BjAllocationCallbacks`.
 
 Support
 =======
