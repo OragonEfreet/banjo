@@ -1,4 +1,4 @@
-/// \file world.h
+/// \file
 /// \brief Main structure for Entity-Component-System object.
 #pragma once
 

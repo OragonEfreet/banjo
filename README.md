@@ -1,5 +1,6 @@
-Banjo API
-=========
+# Banjo API
+
+[TOC]
 
 Banjo is a small projet in making myself a C99 framework for game development.
 The work aims at the following objectives:
@@ -14,26 +15,22 @@ Current status of the projet is **early draft**, consisting in:
 - Providing most standard core features (base containers, memory function)
 - Developping an Entity-Component-System framework
 
-Features
-========
+## Features
 
 This section only shows the currently available features.
 
-Container types
----------------
+### Container types
 
 - `BjArray`: *Sequence container* that wraps a classic C-Style array.
 - `BjForwardList`: Forward-only *linked list*.
 - `BjHashTable`: Associative array.
 
-Misc
-----
+### Misc
 
 * Simple *logging* system with _log.h_.
 * Custom allocators with `BjAllocationCallbacks`.
 
-Support
-=======
+## Support
 
 Code is multi-platform, but I'm testing on the following environments:
 
@@ -43,6 +40,12 @@ Code is multi-platform, but I'm testing on the following environments:
 | **Ubuntu 23.10 Mantic** | GCC 13.2.0-4ubuntu3 / GNU libc 2.38-1ubuntu6.1 | 3.27.4    |
 
 Here, "testing" corresponds to building the entire project and running all tests successfully.
+
+## Demo Code
+
+You can browse a full work set of examples from the _examples_ folder in the repository.
+
+\example handling_errors.c
 
 
 
