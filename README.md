@@ -5,14 +5,19 @@ Banjo is a small projet in making myself a C99 framework for game development.
 The work aims at the following objectives:
 
 - **Little to no dependency**: The API must implement everything by itself and rely on the least amount of dependencies. Even the testing framework is local.
-- **Simple**: Easy to grasp for newcomers as long as they know C.
-- **Self-Documented**: Documentation is fully available from header files, making code API sufficient to learn.
-- **Fast compile times**: Banjo **must** compile fast. 
+- **Simple**:                  Easy to grasp for newcomers as long as they know C.
+- **Self-Documented**:         Documentation is fully available from header files, making code API sufficient to learn.
+- **Fast compile times**:      Banjo **must** compile fast.
 
-Current status of the projet is *early draft*. I'm currently thinking the API design as well as implementing basic containers.
+Current status of the projet is **early draft**, consisting in:
+- Designing the API
+- Providing most standard core features (base containers, memory function)
+- Developping an Entity-Component-System framework
 
 Features
 ========
+
+This section only shows the currently available features.
 
 Container types
 ---------------
@@ -37,6 +42,15 @@ Code is multi-platform, but I'm testing on the following environments:
   - **gcc** (GCC) 13.2.1 20230801
   - **ldd** (GNU libc) 2.38
   - **cmake** version 3.28.1
+
+- *Local Machine*:
+  - **Ubuntu** 23.10 (mantic)
+  - **gcc** (Ubuntu 13.2.0-4ubuntu3) 13.2.0
+  - **ldd** (Ubuntu GLIBC 2.38-1ubuntu6.1) 2.38
+  - **cmake** version 3.27.4
+
+Here, "testing" corresponds to building the entire project and running all tests successfully.
+
 
 
 
