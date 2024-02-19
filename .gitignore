@@ -157,4 +157,5 @@ dkms.conf
 ./run_*
 compile_commands.json
 .cache/
-html/
+
+docs/html
