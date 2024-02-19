@@ -30,7 +30,7 @@ Misc
 ----
 
 * Simple *logging* system.
-* Custom allocators.
+* \ref "BjAllocationCallbacks" "Custom allocators".
 
 Support
 =======
