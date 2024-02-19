@@ -1,3 +1,4 @@
+#include "banjo/array.h"
 #include "banjo/forward_list.h"
 #include "banjo/memory.h"
 #include <banjo/error.h>
@@ -5,6 +6,7 @@
 #include <data/hash_table.h>
 
 #include <stdio.h>
+#include <string.h>
 
 #define BUCKET_COUNT 10
 
@@ -50,13 +52,13 @@ void bj_hash_table_init(
         .count      = BUCKET_COUNT,
     }, p_allocator, &p_instance->buckets);
 
-    /* for(usize i = 0 ; i < */ 
-
-
-
-
-
-    
+    for(usize i = 0 ; i < bj_array_count(&p_instance->buckets) ; ++i) {
+        BjForwardList bucket = bj_array_at(&p_instance->buckets, i);
+        bj_forward_list_init(&(BjForwardListInfo) {
+            .value_size  = sizeof(BjHashTableEntry),
+            .weak_owning = false,
+        }, p_allocator, bucket);
+    }
 }
 
 void bj_hash_table_reset(
@@ -95,14 +97,32 @@ void bj_hash_table_clear(
     bj_assert(htable != 0);
 }
 
+
 BANJO_EXPORT void bj_hash_table_set(
     BjHashTable table,
-    const void* p_key,
-    const void* p_value
+    void* p_key,
+    void* p_value
 ) {
-    /* u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT; */
-    /* BjForwardList* bucket = bj_array_at(&table->buckets, hash); */
-    
+    u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
+    BjForwardList bucket = bj_array_at(&table->buckets, hash);
 
+    BjForwardListIterator_T it = {};
+    bj_forward_list_iterator_init(bucket, &it);
 
+    do {
+        BjHashTableEntry* entry = bj_forward_list_iterator_value(&it);
+        if(entry != 0) {
+            if(memcmp(entry->p_key, p_key, table->key_size) == 0) {
+                entry->p_value = p_value;
+                return;
+            }
+        }
+    } while(bj_forward_list_iterator_next(&it));
+    bj_forward_list_iterator_reset(&it);
+
+    BjHashTableEntry new_entry = {
+        .p_key = p_key,
+        .p_value = p_value,
+    };
+    bj_forward_list_prepend(bucket, &new_entry);
 }

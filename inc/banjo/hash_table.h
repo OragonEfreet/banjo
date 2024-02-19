@@ -31,8 +31,8 @@ BANJO_EXPORT void bj_hash_table_clear(
 
 BANJO_EXPORT void bj_hash_table_set(
     BjHashTable table,
-    const void* key,
-    const void* value
+    void* key,
+    void* value
 );
 
 

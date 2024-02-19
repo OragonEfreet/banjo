@@ -17,3 +17,13 @@ typedef struct BjForwardList_T {
 
 void bj_forward_list_init(const BjForwardListInfo*, const BjAllocationCallbacks*, BjForwardList);
 void bj_forward_list_reset(BjForwardList);
+
+typedef struct BjForwardListIterator_T {
+    BjForwardList                list;
+    struct BjForwardListEntry*   p_current;
+} BjForwardListIterator_T;
+
+void bj_forward_list_iterator_init(const BjForwardList, BjForwardListIterator);
+void bj_forward_list_iterator_reset(BjForwardListIterator);
+
+

@@ -60,7 +60,7 @@ static void* mock_malloc(void* p_user_data, usize appsize) {
     }
     pData->n_allocations += 1;
 
-    /* bjLog(TRACE, "Allocated %ld bytes @ %p", meta->appsize, meta->ptr); */ 
+    bj_trace("Allocated %ld bytes @ %p", meta->appsize, meta->ptr); 
 
     return meta->ptr;
 }
@@ -88,7 +88,7 @@ void mock_free(void* p_user_data, void* pAppPtr) {
         pData->application_current_allocated -= appsize;
         pData->n_free += 1;
 
-        /* bjLog(TRACE, "Freed %ld bytes @ %p", appsize, pAppPtr); */ 
+        bj_trace("Freed %ld bytes @ %p", appsize, pAppPtr); 
     }
 }
 

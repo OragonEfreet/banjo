@@ -1,3 +1,5 @@
+#include "banjo/forward_list.h"
+#include "banjo/memory.h"
 #include <banjo/error.h>
 #include <data/forward_list.h>
 
@@ -135,21 +137,52 @@ void* bj_forward_list_head(
     return bj_forward_list_value(list, 0);
 }
 
-void* bj_forward_list_find(
-    BjForwardList  list,
-    void*          value,
-    PFN_bjValueCmp fn_cmp
+void bj_forward_list_iterator_init(const BjForwardList list, BjForwardListIterator iterator) {
+    bj_assert(iterator);
+    iterator->list        = list;
+    iterator->p_current   = list->p_head;
+}
+
+void bj_forward_list_iterator_reset(BjForwardListIterator iterator) {
+    bj_assert(iterator);
+    iterator->list      = 0;
+    iterator->p_current = 0;
+}
+
+BANJO_EXPORT BjForwardListIterator bj_forward_list_iterator_create(
+    const BjForwardList list
 ) {
-    bj_assert(list != 0);
-    bj_assert(value != 0);
+    bj_assert(list);
+    BjForwardListIterator it = bj_new_struct(BjForwardListIterator, list->p_allocator);
+    bj_forward_list_iterator_init(list, it);
+    return it;
+}
 
-    PFN_bjValueCmp compare = fn_cmp == 0 ? memcmp : fn_cmp;
+BANJO_EXPORT void bj_forward_list_iterator_destroy(
+    BjForwardListIterator iterator
+) {
+    const BjAllocationCallbacks* allocator = iterator->list->p_allocator;
+    bj_forward_list_iterator_reset(iterator);
+    bj_free(iterator, allocator);
+}
 
-    for(BjForwardListEntry* entry = list->p_head;entry != 0;entry = entry->p_next) {
-        void* to_compare = VALUE_EMBED(list) ? &entry->value : entry->value;
-        if(compare(value, to_compare, list->value_size) == 0) {
-            return to_compare;
-        }
+BANJO_EXPORT void* bj_forward_list_iterator_value(
+    BjForwardListIterator iterator
+) {
+    bj_assert(iterator);
+    if(VALUE_EMBED(iterator->list)) {
+        return &(iterator->p_current->value);
     }
-    return 0;
+    return iterator->p_current->value;
+}
+
+BANJO_EXPORT bool bj_forward_list_iterator_next(
+    BjForwardListIterator iterator
+) {
+    bj_assert(iterator);
+    if(iterator->p_current == 0) {
+        return false;
+    }
+    iterator->p_current = iterator->p_current->p_next;
+    return iterator->p_current != 0;
 }
