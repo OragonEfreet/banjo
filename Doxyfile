@@ -367,7 +367,7 @@ MARKDOWN_SUPPORT       = YES
 # Minimum value: 0, maximum value: 99, default value: 5.
 # This tag requires that the tag MARKDOWN_SUPPORT is set to YES.
 
-TOC_INCLUDE_HEADINGS   = 2
+TOC_INCLUDE_HEADINGS   = 0
 
 # The MARKDOWN_ID_STYLE tag can be used to specify the algorithm used to
 # generate identifiers for the Markdown headings. Note: Every identifier is
@@ -476,7 +476,7 @@ INLINE_SIMPLE_STRUCTS  = YES
 # types are typedef'ed and only the typedef is referenced, never the tag name.
 # The default value is: NO.
 
-TYPEDEF_HIDES_STRUCT   = NO
+TYPEDEF_HIDES_STRUCT   = YES
 
 # The size of the symbol lookup cache can be set using LOOKUP_CACHE_SIZE. This
 # cache is used to resolve symbols given their name and scope. Since this can be
@@ -950,8 +950,9 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = README.md \
-                         docs/containers.md \
+                         docs/api.md \
                          docs/build.md \
+                         docs/containers.md \
                          inc/banjo/api.h \
                          inc/banjo/array.h \
                          inc/banjo/error.h \
