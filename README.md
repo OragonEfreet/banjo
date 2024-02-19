@@ -37,17 +37,10 @@ Support
 
 Code is multi-platform, but I'm testing on the following environments:
 
-- *Local Machine*:
-  - **Manjaro** Linux
-  - **gcc** (GCC) 13.2.1 20230801
-  - **ldd** (GNU libc) 2.38
-  - **cmake** version 3.28.1
-
-- *Local Machine*:
-  - **Ubuntu** 23.10 (mantic)
-  - **gcc** (Ubuntu 13.2.0-4ubuntu3) 13.2.0
-  - **ldd** (Ubuntu GLIBC 2.38-1ubuntu6.1) 2.38
-  - **cmake** version 3.27.4
+| **Distribution**        | **Compiler**                                   | **CMake** |
+|-------------------------|------------------------------------------------|-----------|
+| **Manjaro Linux**       | GCC 13.2.1 20230801 / GNU libc 2.38            | 3.28.1    |
+| **Ubuntu 23.10 Mantic** | GCC 13.2.0-4ubuntu3 / GNU libc 2.38-1ubuntu6.1 | 3.27.4    |
 
 Here, "testing" corresponds to building the entire project and running all tests successfully.
 
