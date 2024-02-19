@@ -1,4 +1,4 @@
-/// \file log.h
+/// \file
 /// Logging utility functions
 #pragma once
 
