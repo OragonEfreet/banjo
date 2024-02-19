@@ -10,7 +10,7 @@ typedef struct BjHashTable_T {
     bool                         weak_owning;
     usize                        value_size;
     usize                        key_size;
-    PFN_bjHashFunction           fn_hash;
+    bjHashFunctionPtr            fn_hash;
 } BjHashTable_T;
 
 void bj_hash_table_init(const BjHashTableInfo*, const BjAllocationCallbacks*, BjHashTable);
