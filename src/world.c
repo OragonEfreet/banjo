@@ -31,3 +31,7 @@ void bj_world_destroy(
     bj_assert(world != 0);
     bj_free(world, world->p_allocator);
 }
+// Tableau de component id -> Signature? Has to be sorted
+// Archetype -> Tableau de signatures+entity ID qui ont cette signature
+// Map EntityID -> Archetype?
+// Map Signature->Archetype?
