@@ -5,7 +5,7 @@
 
 BJ_DEFINE_HANDLE(BjHashTable);
 
-typedef u32 (*PFN_bjHashFunction)(
+typedef u32 (*bjHashFunctionPtr)(
     const void* p_data, usize size
 );
 
@@ -13,7 +13,7 @@ typedef struct BjHashTableInfo {
     usize                  value_size;
     usize                  key_size;
     bool                   weak_owning;
-    PFN_bjHashFunction     fn_hash;
+    bjHashFunctionPtr      fn_hash;
 } BjHashTableInfo;
 
 BANJO_EXPORT BjHashTable bj_hash_table_create(

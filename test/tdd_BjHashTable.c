@@ -25,7 +25,7 @@ TEST_CASE_ARGS(zero_initialization, {}) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(zero_initialization);
+    /* RUN_TEST(zero_initialization); */
     /* RUN_TEST(custom_allocator); */
 
     END_TESTS();

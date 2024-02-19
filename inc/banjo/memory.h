@@ -17,7 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Memory allocation callback.
 /// Used in \ref BjAllocationCallbacks to set the function used for custom allocations.
-typedef void* (*PFN_bjAllocationFunction)(
+typedef void* (*BjAllocationFunctionPtr)(
     void* p_user_data, //< General purpose context data.
     usize size         //< Allocation size in bytes requested by the caller.
 );
@@ -25,7 +25,7 @@ typedef void* (*PFN_bjAllocationFunction)(
 ////////////////////////////////////////////////////////////////////////////////
 /// Memory allocation callback.
 /// Used in \ref BjAllocationCallbacks to set the function used for custom reallocations.
-typedef void* (*PFN_bjReallocationFunction)(
+typedef void* (*BjReallocationFunctionPtr)(
     void* p_user_data, //< General purpose context data.
     void* p_original,  //< Initial object to reallocate.
     usize size         //< Allocation size in bytes requested by the caller.
@@ -35,7 +35,7 @@ typedef void* (*PFN_bjReallocationFunction)(
 /// Memory allocation callback.
 ///
 /// Used in \ref BjAllocationCallbacks to set the function used for custom deallocations.
-typedef void (*PFN_bj_freeFunction)(
+typedef void (*BjFreeFunctionPtr)(
     void* p_user_data, //< General purpose context data.
     void* p_memory     //< Object memory to dispose.
 );
@@ -47,9 +47,9 @@ typedef void (*PFN_bj_freeFunction)(
 /// Also, the custom allocators can be set globally with \ref bj_memory_set_defaults.
 typedef struct BjAllocationCallbacks {
     void*                      p_user_data;     ///< General purpose context data.
-    PFN_bjAllocationFunction   fn_allocation;   ///< The allocation function.
-    PFN_bjReallocationFunction fn_reallocation; ///< The reallocation function.
-    PFN_bj_freeFunction        fn_free;         ///< The deallocation function.
+    BjAllocationFunctionPtr    fn_allocation;   ///< The allocation function.
+    BjReallocationFunctionPtr  fn_reallocation; ///< The reallocation function.
+    BjFreeFunctionPtr          fn_free;         ///< The deallocation function.
 } BjAllocationCallbacks;
 
 ////////////////////////////////////////////////////////////////////////////////
