@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.21)
 
-project(banjo)
+project(banjo C)
 
 include(CTest)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_C_STANDARD 99)              # TODO CHECK
+set(CMAKE_C_STANDARD_REQUIRED TRUE)   # TODO CHECK
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-find_package(Vulkan REQUIRED COMPONENTS glslc)
-
+#find_package(Vulkan REQUIRED COMPONENTS glslc)
 
 include(CheckCXXCompilerFlag)
 
@@ -67,7 +69,8 @@ target_include_directories(banjo PUBLIC inc PRIVATE src)
 #         Vulkan::Vulkan
 #         glfw
 # )
-target_compile_features(banjo PUBLIC c_std_99)
+set_property(TARGET banjo PROPERTY C_STANDARD 99) # TODO CHECK
+target_compile_features(banjo PUBLIC c_std_99)    # TODO CHECK
 
 add_subdirectory(examples)
 

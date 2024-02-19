@@ -2,7 +2,7 @@
 
 #include <banjo/hash_table.h>
 
-TEST_CASE_ARGS(zero_initialization, {}) {
+TEST_CASE(zero_initialization) {
 
     float value = 42.7;
 

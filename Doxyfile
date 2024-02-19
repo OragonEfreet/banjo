@@ -952,6 +952,7 @@ WARN_LOGFILE           =
 INPUT                  = README.md \
                          docs/containers.md \
                          docs/examples.md \
+                         docs/build.md \
                          inc/banjo/api.h \
                          inc/banjo/array.h \
                          inc/banjo/error.h \

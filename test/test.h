@@ -40,7 +40,7 @@ typedef struct {
     sAllocationData       allocations; // Allocation Data
 } Context;
 
-// Parses ARGC/ARGV and builds the COntext object
+// Parses ARGC/ARGV and builds the Context object
 void initialize_context(Context* context, int argc, char* argv[]) {
     if(argc >= 1) {
         context->prog_name = argv[0];
@@ -70,7 +70,7 @@ int terminate_context(Context* SM_CTX()) {
     PRINT(fmt, SM_CTX()->n_run, SM_CTX()->n_asserts, SM_CTX()->n_fail);
 
     if(SM_CTX()->n_fail == 0) {
-            PRINT("\nApplication allocated:\t %ld (max: %ld)\nTotal allocated:\t %ld (max %ld)\n%d allocs, %d reallocs, %d frees\n",
+            PRINT("\nApplication allocated:\t %zu (max: %zu)\nTotal allocated:\t %zu (max %zu)\n%d allocs, %d reallocs, %d frees\n",
             SM_CTX()->allocations.application_current_allocated, SM_CTX()->allocations.application_max_allocated,
             SM_CTX()->allocations.actual_current_allocated, SM_CTX()->allocations.actual_max_allocated,
             SM_CTX()->allocations.n_allocations, SM_CTX()->allocations.n_reallocations, SM_CTX()->allocations.n_free
@@ -111,7 +111,7 @@ int terminate_context(Context* SM_CTX()) {
 #define END_TESTS() return terminate_context(&SM_CTX())
 
 #define TEST_CASE_ARGS(NAME, DATA) DECL_TST_DATASTRUCT(NAME, DATA); DECL_TST_FLAGS(NAME); DEFINE_TST_FN_ARGS(NAME)
-#define TEST_CASE(NAME) TEST_CASE_ARGS(NAME, {})
+#define TEST_CASE(NAME) TEST_CASE_ARGS(NAME, {int nothing;})
 
 #define RUN_TEST(NAME, ...) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME), &(TST_STRUCT_T(NAME)){__VA_ARGS__});CHECK_TEST(NAME);
 

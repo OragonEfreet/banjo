@@ -85,7 +85,7 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
     REQUIRE_VALUE(list);
 
     for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
-        void* data = test_data->value_type->values + test_data->value_type->mem_size * n;
+        void* data = (byte*)test_data->value_type->values + test_data->value_type->mem_size * n;
 
         bj_forward_list_prepend(list, data);
         REQUIRE_EQ(bj_forward_list_count(list), n+1);
