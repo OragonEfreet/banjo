@@ -38,7 +38,7 @@ Code is multi-platform, but I'm testing on the following environments:
 |-------------------------|------------------------------------------------|-----------|
 | **Manjaro Linux**       | GCC 13.2.1 20230801 / GNU libc 2.38            | 3.28.1    |
 | **Ubuntu 23.10 Mantic** | GCC 13.2.0-4ubuntu3 / GNU libc 2.38-1ubuntu6.1 | 3.27.4    |
-| **Windows 11 64 bit**   |                                                | 3.28.1    |
+| **Windows 11 64 bit**   | Microsoft Visual C++ 2022 4.8.09032            | 3.28.1    |
 
 Here, "testing" corresponds to building the entire project and running all tests successfully.
 
