@@ -106,7 +106,7 @@ BANJO_EXPORT void bj_hash_table_set(
     u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
     BjForwardList bucket = bj_array_at(&table->buckets, hash);
 
-    BjForwardListIterator_T it = {};
+    BjForwardListIterator_T it;
     bj_forward_list_iterator_init(bucket, &it);
 
     do {
