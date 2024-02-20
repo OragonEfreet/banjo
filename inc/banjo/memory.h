@@ -1,5 +1,12 @@
+////////////////////////////////////////////////////////////////////////////////
 /// \file
-/// \brief All memory-related functions, including custom allocators.
+/// All memory-related functions, including custom allocators.
+
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup memory Memory Management 
+/// \ingroup core 
+/// Memory allocation and manipulation facilities
+/// \{
 #pragma once
 
 #include <banjo/api.h>
@@ -160,3 +167,4 @@ BANJO_EXPORT void bj_memset(
     usize mem_size
 );
 
+/// \} End of memory

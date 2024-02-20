@@ -1,4 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////
 /// \file
+/// Header file for \ref htable container type.
+
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup htable Hash Table
+/// \ingroup containers
 /// API related to the \ref BjHashTable object
 ///
 ///  **Generic Name**     | hash table                 
@@ -9,7 +15,7 @@
 ///
 /// \ref BjHashTable is an associative container that maps a _key_ to an _value_.
 /// The elements are stored in an array of linked lists called _buckets_.
-///
+/// \{
 #pragma once
 
 #include <banjo/api.h>
@@ -106,5 +112,5 @@ BANJO_EXPORT void bj_hash_table_set(
     void*       value
 );
 
-
+/// \} End of htable group
 

@@ -1,4 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////
 /// \file
+/// Header file for \ref flist container type.
+
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup flist Forward List
+/// \ingroup containers
 /// API related to the \ref BjForwardList object
 ///
 ///  **Generic Name**     | forward list                 
@@ -10,6 +16,7 @@
 /// \ref BjForwardList is a container that supports constant time insertion and removal
 /// from anywhere in the container.
 /// It is implemented as a simply linked list.
+/// \{
 #pragma once
 
 #include <banjo/api.h>
@@ -186,4 +193,4 @@ BANJO_EXPORT void* bj_forward_list_iterator_value(
 BANJO_EXPORT bool bj_forward_list_iterator_next(
     BjForwardListIterator iterator ///< Pouet
 );
-
+/// \} End of flist group
