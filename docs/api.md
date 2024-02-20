@@ -1,5 +1,7 @@
 # API Design {#api}
 
+\brief How to work with Banjo API
+
 ## Objects and Handles
 
 In Banjo, the term _object_ refers to any structured memory, such as an array or a linked list.
@@ -61,21 +63,22 @@ void bj_world_destroy(BjWorld);
 
 The API uses a few naming conventions to help user quickly identify the usage and scope of each symbol:
 
- **Type**             | **casing**            | **Example**
-----------------------|-----------------------|----------------
- **Files**            | `snake_case`          | `forward_list.h`
- **Functions**        | `snake_case`          | `bj_memcpy()`
- **Parameters**       | `snake_case`          | `mem_size`
- **Structs**          | `PascalCase`          | `BjHashTableInfo`
- **Typedefs**         | `PascalCase`          | `BjArray`
- **Macros**           | `CAPITAL_CASE`        | `BJ_MAKE_VERSION`
+ **Type**                 | **casing**            | **Example**
+--------------------------|-----------------------|----------------
+ **Files**                | `snake_case`          | `forward_list.h`
+ **Functions**            | `snake_case`          | `bj_memcpy()`
+ **Function-like Macros** | `snake_case`          | `BJ_MAKE_VERSION`
+ **Parameters**           | `snake_case`          | `mem_size`
+ **Structs**              | `PascalCase`          | `BjHashTableInfo`
+ **Typedefs**             | `PascalCase`          | `BjArray`
+ **Constant Macros**      | `CAPITAL_CASE`        | `BJ_MAKE_VERSION`
 
 Additionally:
 
-* All functions start with `bj_`
+* All functions and functionèlike macros start with `bj_`
 * All structures and typedefs start with `Bj`
   * Typedefs to function pointers end with `FunctionPtr`. For example: `BjHashFunctionPtr`.
-* All Macros start with `BJ_`.
+* All constants macro start with `BJ_`.
 
 
 

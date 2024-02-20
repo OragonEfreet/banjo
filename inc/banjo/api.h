@@ -1,5 +1,12 @@
+////////////////////////////////////////////////////////////////////////////////
 /// \file
 /// General-purpose definitions for Banjo API.
+
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup core Core
+/// General-purpose API
+///
+/// \{
 #pragma once
 
 #ifndef NDEBUG
@@ -76,3 +83,4 @@ typedef size_t    usize; ///< Unsigned integer type which can hold the size of a
 #    define bj_assert(cond) assert(cond)
 #endif
 
+/// \} End of core

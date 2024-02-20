@@ -18,6 +18,7 @@ include(CheckCXXCompilerFlag)
 set(_interface_headers
     inc/banjo/api.h
     inc/banjo/array.h
+    inc/banjo/containers.h
     inc/banjo/error.h
     inc/banjo/forward_list.h
     inc/banjo/hash_table.h

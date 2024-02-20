@@ -1,5 +1,7 @@
 # Building From Sources {#build}
 
+\brief How to build the documentation from source code
+
 If you want to build the project from source, follow the instructions of this page.
 
 ## Requirements

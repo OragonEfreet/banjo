@@ -1,4 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////
 /// \file
+/// Header file for \ref array container type.
+
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup array Array
+/// \ingroup containers
 /// API related to the \ref BjArray object
 ///
 ///  **Generic Name**     | array                 
@@ -12,6 +18,7 @@
 /// using offsets.
 ///
 /// The storage of the array is expanded as needed.
+/// \{
 #pragma once
 
 #include <banjo/api.h>
@@ -201,6 +208,6 @@ BANJO_EXPORT usize bj_array_count(
     const BjArray array
 );
 
-
+/// \} End of array group
 
 
