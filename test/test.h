@@ -42,11 +42,13 @@ typedef struct {
 
 // Parses ARGC/ARGV and builds the Context object
 void initialize_context(Context* context, int argc, char* argv[]) {
+    bj_memset(context, 0, sizeof(Context));
     if(argc >= 1) {
         context->prog_name = argv[0];
     } else {
         context->prog_name = "UnitTest";
     }
+
 
     BjAllocationCallbacks allocators = mock_allocators(&context->allocations);
     bj_memory_set_defaults(&allocators);
@@ -107,7 +109,7 @@ int terminate_context(Context* SM_CTX()) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC
-#define BEGIN_TESTS(ARGC, ARGV) Context SM_CTX() = {}; initialize_context(&SM_CTX(), ARGC, ARGV)
+#define BEGIN_TESTS(ARGC, ARGV) Context SM_CTX(); initialize_context(&SM_CTX(), ARGC, ARGV)
 #define END_TESTS() return terminate_context(&SM_CTX())
 
 #define TEST_CASE_ARGS(NAME, DATA) DECL_TST_DATASTRUCT(NAME, DATA); DECL_TST_FLAGS(NAME); DEFINE_TST_FN_ARGS(NAME)
