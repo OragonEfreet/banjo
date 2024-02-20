@@ -59,17 +59,17 @@ TEST_CASE(test_custom_default_allocators) {
 
     // At each iteration, the underlying instance of sAllocationData is modified
     // and a test instance of sAllocationData is modified here to compare the results.
-    sAllocationData result = {};
-    sAllocationData expected = {};
+    sAllocationData result = {.actual_current_allocated=0};
+    sAllocationData expected = {.actual_current_allocated=0};
     CHECK_CLEAN_ALLOC(result);
     BjAllocationCallbacks allocators = mock_allocators(&result);
 
     // Stack the allocated ptrs
-    void* ptrs_fifo[n_ops] = {};
+    void* ptrs_fifo[n_ops];
     usize ptrs_fifo_len = 0;
 
     // Stack the allocated sizes
-    usize size_fifo[n_ops] = {};
+    usize size_fifo[n_ops];
     usize size_fifo_len = 0;
 
     for(usize i = 0 ; i < n_ops ; ++i) {
