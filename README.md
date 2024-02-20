@@ -1,6 +1,7 @@
 # Banjo API
 
 ![Documentation](https://github.com/OragonEfreet/banjo/actions/workflows/documentation.yml/badge.svg)
+![BuildTest](https://github.com/OragonEfreet/banjo/actions/workflows/cmake-multi-platform.yml/badge.svg)
 
 Banjo is a small projet in making myself a C99 framework for game development.
 The work aims at the following objectives:
