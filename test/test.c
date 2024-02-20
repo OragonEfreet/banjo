@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     /* /1* RUN_TEST(factorial_11_is_39_916_800); *1/ */
     /* RUN_TEST(factorial_10_is_3_628_800); */
 
-    RUN_TEST(test_arguments, .a = 42, .b = 5);
+    RUN_TEST_ARGS(test_arguments, .a = 42, .b = 5);
 
     END_TESTS();
 }

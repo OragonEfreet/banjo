@@ -130,12 +130,12 @@ int main(int argc, char* argv[]) {
     usize n_elements = sizeof(element_types) / sizeof(element_types[0]);
 
     for(usize e = 0 ; e < n_elements ; ++e) {
-        RUN_TEST(default_initialization_is_full_empty,     .value_type = &element_types[e]);
-        RUN_TEST(default_initialization_has_empty_count,   .value_type = &element_types[e]);
-        RUN_TEST(a_first_prepend_initializes_first_entry,  .value_type = &element_types[e]);
-        RUN_TEST(n_prepends_means_count_is_n,              .value_type = &element_types[e]);
-        RUN_TEST(test_prepends,                            .value_type = &element_types[e]);
-        RUN_TEST(test_prepends,                            .value_type = &element_types[e], .weak_owning = true);
+        RUN_TEST_ARGS(default_initialization_is_full_empty,     .value_type = &element_types[e]);
+        RUN_TEST_ARGS(default_initialization_has_empty_count,   .value_type = &element_types[e]);
+        RUN_TEST_ARGS(a_first_prepend_initializes_first_entry,  .value_type = &element_types[e]);
+        RUN_TEST_ARGS(n_prepends_means_count_is_n,              .value_type = &element_types[e]);
+        RUN_TEST_ARGS(test_prepends,                            .value_type = &element_types[e]);
+        RUN_TEST_ARGS(test_prepends,                            .value_type = &element_types[e], .weak_owning = true);
     }
     END_TESTS();
 }
