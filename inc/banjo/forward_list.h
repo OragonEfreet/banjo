@@ -104,44 +104,53 @@ BANJO_EXPORT usize bj_forward_list_count(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Inserts a new element in the list.
+/// Insert a new element at `pos` and return a pointer to it.
 ///
-/// \param list  The list object.
+/// \param list   The list object.
 /// \param index  The position of the new element in the list.
 /// \param p_data A pointer to the memory of the data to insert.
+///
+/// \return A pointer to the inserted value.
 ///
 /// The newly inserted element is located at `index`.
 /// All elements previously located at any position starting from `index` have
 /// their position shifted by _1_.
 ///
 /// \par Weak/Strong ownership
-/// If the list was created with strong ownership, the data is copied into the
-/// list internal memory using \ref bj_memcpy.
-/// If not, the pointer is used instead and the caller is responsible for its
-/// management.
-BANJO_EXPORT void bj_forward_list_insert(
+///
+/// In weak ownership, the return value is equal to `p_data`.
+///
+/// In strong ownership, the return value points to a newly allocated block.
+/// In this case, if `p_data` != _0_, the allocated block is initialized with
+/// the content pointed by `p_data` (using \ref bj_memcpy).
+/// Otherwise, the block is left uninitialized.
+BANJO_EXPORT void* bj_forward_list_emplace(
     BjForwardList list,
     usize         index,
     void*         p_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Inserts a new element at the begining of the list.
+/// Insert a new element at position _0_ and return a pointer to it.
 ///
-/// \param list The list object.
+/// \param list   The list object.
 /// \param p_data A pointer to the memory of the data to insert.
 ///
-/// The newly inserted element is located at index _0_.
-/// If existing, all other elements have their new position shifter by _1_.
+/// \return A pointer to the inserted value.
 ///
-/// This function effectively calls \ref bj_forward_list_insert with `index` _0_.
+/// The newly inserted element is located at index _0_.
+/// All elements previously located at any position starting from `index` have
+/// their position shifted by _1_.
 ///
 /// \par Weak/Strong ownership
-/// If the list was created with strong ownership, the data is copied into the
-/// list internal memory using \ref bj_memcpy.
-/// If not, the pointer is used instead and the caller is responsible for its
-/// management.
-BANJO_EXPORT void bj_forward_list_prepend(
+///
+/// In weak ownership, the return value is equal to `p_data`.
+///
+/// In strong ownership, the return value points to a newly allocated block.
+/// In this case, if `p_data` != _0_, the allocated block is initialized with
+/// the content pointed by `p_data` (using \ref bj_memcpy).
+/// Otherwise, the block is left uninitialized.
+BANJO_EXPORT void* bj_forward_list_emplace_head(
     BjForwardList list,
     void*         p_data
 );

@@ -3,14 +3,6 @@
 #include <banjo/error.h>
 #include <data/forward_list.h>
 
-#include <string.h>
-
-/* #include <string.h> */
-
-static const usize p_entry_ptr_size = sizeof(BjForwardListEntry);
-
-#define VALUE_EMBED(list) ((list->weak_owning == false) && (list->value_size <= p_entry_ptr_size))
-
 void bj_forward_list_init(
     const BjForwardListInfo*     p_info,
     const BjAllocationCallbacks* p_allocator,
@@ -21,6 +13,7 @@ void bj_forward_list_init(
     p_instance->p_allocator = p_allocator;
     p_instance->value_size  = p_info->value_size;
     p_instance->weak_owning = p_info->weak_owning;
+    p_instance->entry_size  = p_instance->weak_owning ? sizeof(void*) * 2 : p_info->value_size + sizeof(void*);
     p_instance->p_head = 0;
 }
 
@@ -46,15 +39,13 @@ void bj_forward_list_clear(
 ) {
     bj_assert(list != 0);
 
-    BjForwardListEntry* entry = list->p_head;
-    while(entry != 0) {
-        BjForwardListEntry* next = entry->p_next;
-        if(VALUE_EMBED(list) == 0 && list->weak_owning == false) {
-            bj_free(entry->value, list->p_allocator);
-        }
-        bj_free(entry, list->p_allocator);
-        entry = next;
+    void** p_next_block = list->p_head;
+    while(p_next_block != 0) {
+        void* to_free = p_next_block;
+        p_next_block = *p_next_block;
+        bj_free(to_free, list->p_allocator);
     }
+    list->p_head = 0;
 }
 
 void bj_forward_list_destroy(
@@ -69,65 +60,72 @@ usize bj_forward_list_count(
     BjForwardList list
 ) {
     usize result = 0;
-    if(list != 0) {
-        BjForwardListEntry* entry = list->p_head;
-        while(entry != 0) {
-            result += 1;
-            entry = entry->p_next;
-        }
+
+    void** p_next_block = list->p_head;
+    while(p_next_block != 0) {
+        p_next_block = *p_next_block;
+        ++result;
     }
+
     return result;
 }
 
-void bj_forward_list_insert(
+void* bj_forward_list_emplace(
     BjForwardList list,
     usize index,
     void* p_data
 ) {
     bj_assert(list != 0);
 
-    BjForwardListEntry** source_ptr = &list->p_head;
-    for(usize i = 0 ; (i < index) && ((*source_ptr) != 0) ; ++i) {
-        source_ptr = &(*source_ptr)->p_next;
+    void* p_previous_block = &list->p_head;
+    void** p_next_block    = list->p_head;
+    for(usize i = 0 ; i < index && (p_next_block != 0) ; ++i) {
+        p_previous_block = p_next_block;
+        p_next_block     = *p_next_block;
     }
-    BjForwardListEntry* next_entry = *source_ptr ? (*source_ptr) : 0;
 
-    BjForwardListEntry* new_entry = bj_malloc(sizeof(BjForwardListEntry), list->p_allocator);
-    new_entry->p_next = next_entry;
+    // p_next_block contains the address of the block that will be on the right
+    // of the new element.
+    // p_previous_block gets the address of the memory holding the newly current element.
+
+    // We create the new block, its first bytes must contain the address of the next block
+    u8* p_block = bj_malloc(list->entry_size, list->p_allocator);
+    bj_memcpy(p_block, &p_next_block, sizeof(void*));
+    // While in previous block, we put the adress of the current block
+    bj_memcpy(p_previous_block, &p_block, sizeof(void*)); 
+
+    void* value = p_block + sizeof(void*);
     if(list->weak_owning) {
-        new_entry->value = p_data;
+        // Weak owning, copy pointer value in buffer value
+        bj_memcpy(value, &p_data, sizeof(void*)); 
     } else {
-        if(VALUE_EMBED(list)) {
-            bj_memcpy(&new_entry->value, p_data, list->value_size);
-        } else {
-            new_entry->value = bj_malloc(list->value_size, list->p_allocator);
-            bj_memcpy(new_entry->value, p_data, list->value_size);
+        if(p_data != 0) {
+            // Strong owning, copy pointed value into buffer value
+            bj_memcpy(value, p_data, list->value_size); 
         }
     }
 
-    *source_ptr = new_entry;
+    return value;
 }
 
-void bj_forward_list_prepend(
+void* bj_forward_list_emplace_head(
     BjForwardList list,
     void* p_data
 ) {
-    bj_forward_list_insert(list, 0, p_data);
+    return bj_forward_list_emplace(list, 0, p_data);
 }
 
 void* bj_forward_list_value(
     BjForwardList list,
     usize index
 ) {
-    BjForwardListEntry* entry = list->p_head;
-    usize current_index = 0;
-    while(entry != 0) {
-        if(current_index++ == index) {
-            return VALUE_EMBED(list) ? &entry->value : entry->value;
+    void** p_next_block = list->p_head;
+    while(p_next_block != 0) {
+        if(index == 0) {
+            return ((byte*)p_next_block)+sizeof(void*);
         }
-        entry = entry->p_next;
+        p_next_block = *p_next_block;
     }
-
     return 0;
 }
 
@@ -170,10 +168,9 @@ BANJO_EXPORT void* bj_forward_list_iterator_value(
     BjForwardListIterator iterator
 ) {
     bj_assert(iterator);
-    if(VALUE_EMBED(iterator->list)) {
-        return &(iterator->p_current->value);
-    }
-    return iterator->p_current->value;
+    // TODO
+    return 0;
+    /* return iterator->p_current->value; */
 }
 
 BANJO_EXPORT bool bj_forward_list_iterator_next(
@@ -183,6 +180,7 @@ BANJO_EXPORT bool bj_forward_list_iterator_next(
     if(iterator->p_current == 0) {
         return false;
     }
-    iterator->p_current = iterator->p_current->p_next;
+    // TODO
+    /* iterator->p_current = iterator->p_current->p_next; */
     return iterator->p_current != 0;
 }

@@ -5,15 +5,9 @@
 #include <banjo/hash_table.h>
 #include <data/hash_table.h>
 
-#include <stdio.h>
 #include <string.h>
 
 #define BUCKET_COUNT 10
-
-typedef struct {
-    void*  p_key;
-    void*  p_value;
-} BjHashTableEntry;
 
 // FNV-1a hash function constants
 #define FNV_PRIME 0x01000193 // 16777619
@@ -46,6 +40,7 @@ void bj_hash_table_init(
     p_instance->fn_hash     = p_info->fn_hash ? p_info->fn_hash : fnv1a_hash;
     p_instance->key_size    = p_info->key_size;
     p_instance->value_size  = p_info->value_size;
+    p_instance->entry_size  = p_info->weak_owning ? sizeof(void*) * 2 : p_instance->key_size + p_instance->value_size;
 
     bj_array_init(&(BjArrayInfo) {
         .value_size = sizeof(BjForwardList_T),
@@ -55,7 +50,7 @@ void bj_hash_table_init(
     for(usize i = 0 ; i < bj_array_count(&p_instance->buckets) ; ++i) {
         BjForwardList bucket = bj_array_at(&p_instance->buckets, i);
         bj_forward_list_init(&(BjForwardListInfo) {
-            .value_size  = sizeof(BjHashTableEntry),
+            .value_size  = p_instance->entry_size,
             .weak_owning = false,
         }, p_allocator, bucket);
     }
@@ -110,19 +105,23 @@ BANJO_EXPORT void bj_hash_table_set(
     bj_forward_list_iterator_init(bucket, &it);
 
     do {
-        BjHashTableEntry* entry = bj_forward_list_iterator_value(&it);
-        if(entry != 0) {
-            if(memcmp(entry->p_key, p_key, table->key_size) == 0) {
-                entry->p_value = p_value;
+        byte* key = bj_forward_list_iterator_value(&it);
+        if(key != 0) {
+            if(memcmp(key, p_key, table->key_size) == 0) {
+                byte* value = key+sizeof(table->key_size);
+                bj_memcpy(value, p_value, table->value_size);
                 return;
             }
         }
     } while(bj_forward_list_iterator_next(&it));
     bj_forward_list_iterator_reset(&it);
 
-    BjHashTableEntry new_entry = {
-        .p_key = p_key,
-        .p_value = p_value,
-    };
-    bj_forward_list_prepend(bucket, &new_entry);
+    void* new_entry = bj_malloc(table->entry_size, table->p_allocator);
+    byte* new_key   = new_entry;
+    byte* new_value = new_key + table->key_size;
+
+    bj_memcpy(new_key, p_key, table->key_size);
+    bj_memcpy(new_value, p_value, table->value_size);
+    bj_forward_list_emplace_head(bucket, new_key);
+    bj_free(new_entry, table->p_allocator);
 }

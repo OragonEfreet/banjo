@@ -73,6 +73,7 @@ typedef int64_t   i64;   ///< 64 signed integer.
 typedef uint64_t  u64;   ///< 64 unsigned integer.
 typedef ptrdiff_t size;  ///< Signed integer type used for signed representatin of memory sizes.
 typedef size_t    usize; ///< Unsigned integer type which can hold the size of any memory allocation or data structure.
+typedef uintptr_t uptr;  ///< Representation of a pointer value as an int
 
 /// \def bj_assert
 /// Expands to either nothing or standard assert

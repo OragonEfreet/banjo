@@ -4,17 +4,18 @@
 
 TEST_CASE(zero_initialization) {
 
-    float value = 42.7;
+    u32 key = 42;
+    short value = 17;
 
     BjHashTable htable = bj_hash_table_create(&(BjHashTableInfo){
-        .value_size=sizeof(u32),
-        .key_size=sizeof(float),
+        .value_size=sizeof(short),
+        .key_size=sizeof(u32),
     }, 0);
     REQUIRE_VALUE(htable);
 
-    for(u32 key = 0 ; key < 10 ; ++key) {
-        bj_hash_table_set(htable, &key, &value);
-    }
+
+    bj_hash_table_set(htable, &key, &value);
+    bj_hash_table_set(htable, &key, &value);
 
     /* REQUIRE_EQ(htable->p_allocator, 0); */
 
