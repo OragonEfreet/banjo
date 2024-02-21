@@ -4,7 +4,6 @@
 #include <banjo/log.h>
 
 #include <stdlib.h>
-#include <string.h>
 
 typedef struct  {
     usize actual_max_allocated;
@@ -62,6 +61,7 @@ static void* mock_malloc(void* p_user_data, usize appsize) {
 
     bj_trace("Allocated %ld bytes @ %p", meta->appsize, meta->ptr); 
 
+    bj_memset(meta->ptr, 0, meta->appsize);
     return meta->ptr;
 }
 
