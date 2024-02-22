@@ -116,12 +116,11 @@ BANJO_EXPORT void bj_hash_table_set(
     } while(bj_forward_list_iterator_next(&it));
     bj_forward_list_iterator_reset(&it);
 
-    void* new_entry = bj_malloc(table->entry_size, table->p_allocator);
+    void* new_entry = bj_forward_list_prepend(bucket, 0);
     byte* new_key   = new_entry;
     byte* new_value = new_key + table->key_size;
-
     bj_memcpy(new_key, p_key, table->key_size);
     bj_memcpy(new_value, p_value, table->value_size);
-    bj_forward_list_emplace_head(bucket, new_key);
-    bj_free(new_entry, table->p_allocator);
+    /* bj_forward_list_emplace_head(bucket, new_key); */
+    /* bj_free(new_entry, table->p_allocator); */
 }

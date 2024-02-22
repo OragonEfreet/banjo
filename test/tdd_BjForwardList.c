@@ -51,7 +51,7 @@ TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_typ
     REQUIRE_VALUE(list);
 
     REQUIRE_NULL(list->p_head);
-    bj_forward_list_emplace_head(list, test_data->value_type->values);
+    bj_forward_list_prepend(list, test_data->value_type->values);
     REQUIRE_VALUE(list->p_head);
 
     bj_forward_list_destroy(list);
@@ -69,7 +69,7 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
 
     int data = 42;
     for(usize i = 0 ; i < n_operations ; ++i) {
-        bj_forward_list_emplace_head(list, &data);
+        bj_forward_list_prepend(list, &data);
     }
 
     REQUIRE_EQ(bj_forward_list_count(list), n_operations);
@@ -89,7 +89,7 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
     for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
         void* data = (byte*)test_data->value_type->values + test_data->value_type->mem_size * n;
 
-        bj_forward_list_emplace_head(list, data);
+        bj_forward_list_prepend(list, data);
         REQUIRE_EQ(bj_forward_list_count(list), n+1);
 
         // Test if the first entry is the newly assigned one

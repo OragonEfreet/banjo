@@ -20,9 +20,9 @@ int main(int argc, char* argv[]) {
 
     // Let's append some values
     /* for(int i = 0 ; i < 10 ; i ++) { */
-    vec2f* v0 = bj_forward_list_emplace_head(list, &(vec2f){.x = -1.0f, .y=1.0f});
-    vec2f* v1 = bj_forward_list_emplace_head(list, &(vec2f){.x = 4.4f});
-    vec2f* v2 = bj_forward_list_emplace_head(list, &(vec2f){.x = -2.0f, .y=4.5f});
+    vec2f* v0 = bj_forward_list_prepend(list, &(vec2f){.x = -1.0f, .y=1.0f});
+    vec2f* v1 = bj_forward_list_prepend(list, &(vec2f){.x = 4.4f});
+    vec2f* v2 = bj_forward_list_prepend(list, &(vec2f){.x = -2.0f, .y=4.5f});
     /* } */
 
     bj_log(INFO, "Total count: %d", bj_forward_list_count(list));
