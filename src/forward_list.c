@@ -70,7 +70,7 @@ usize bj_forward_list_count(
     return result;
 }
 
-void* bj_forward_list_emplace(
+void* bj_forward_list_insert(
     BjForwardList list,
     usize index,
     void* p_data
@@ -108,11 +108,11 @@ void* bj_forward_list_emplace(
     return value;
 }
 
-void* bj_forward_list_emplace_head(
+void* bj_forward_list_prepend(
     BjForwardList list,
     void* p_data
 ) {
-    return bj_forward_list_emplace(list, 0, p_data);
+    return bj_forward_list_insert(list, 0, p_data);
 }
 
 void* bj_forward_list_value(

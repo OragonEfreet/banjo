@@ -124,7 +124,7 @@ BANJO_EXPORT usize bj_forward_list_count(
 /// In this case, if `p_data` != _0_, the allocated block is initialized with
 /// the content pointed by `p_data` (using \ref bj_memcpy).
 /// Otherwise, the block is left uninitialized.
-BANJO_EXPORT void* bj_forward_list_emplace(
+BANJO_EXPORT void* bj_forward_list_insert(
     BjForwardList list,
     usize         index,
     void*         p_data
@@ -150,7 +150,7 @@ BANJO_EXPORT void* bj_forward_list_emplace(
 /// In this case, if `p_data` != _0_, the allocated block is initialized with
 /// the content pointed by `p_data` (using \ref bj_memcpy).
 /// Otherwise, the block is left uninitialized.
-BANJO_EXPORT void* bj_forward_list_emplace_head(
+BANJO_EXPORT void* bj_forward_list_prepend(
     BjForwardList list,
     void*         p_data
 );
