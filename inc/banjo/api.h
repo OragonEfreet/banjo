@@ -44,12 +44,27 @@
 #  define BANJO_EXPORT
 #  define BANJO_NO_EXPORT
 #else
+
+#ifdef _MSC_VER
+
 #  ifndef BANJO_EXPORT
 #    ifdef BANJO_EXPORTS
-        /* We are building this library */
+#      define BANJO_EXPORT __declspec(dllexport)
+#    else
+#      define BANJO_EXPORT  __declspec( dllexport )
+#    endif
+#  endif
+
+#  ifndef BANJO_NO_EXPORT
+#    define BANJO_NO_EXPORT 
+#  endif
+
+#else
+
+#  ifndef BANJO_EXPORT
+#    ifdef BANJO_EXPORTS
 #      define BANJO_EXPORT __attribute__((visibility("default")))
 #    else
-        /* We are using this library */
 #      define BANJO_EXPORT __attribute__((visibility("default")))
 #    endif
 #  endif
@@ -57,6 +72,10 @@
 #  ifndef BANJO_NO_EXPORT
 #    define BANJO_NO_EXPORT __attribute__((visibility("hidden")))
 #  endif
+
+#endif
+
+
 #endif
 
 typedef char      byte;  ///< Single byte integer
