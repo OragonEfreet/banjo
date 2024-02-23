@@ -121,7 +121,7 @@ void* bj_forward_list_value(
 ) {
     void** p_next_block = list->p_head;
     while(p_next_block != 0) {
-        if(index == 0) {
+        if(index-- == 0) {
             return ((byte*)p_next_block)+sizeof(void*);
         }
         p_next_block = *p_next_block;

@@ -9,11 +9,7 @@ set(CMAKE_C_STANDARD 99)              # TODO CHECK
 set(CMAKE_C_STANDARD_REQUIRED TRUE)   # TODO CHECK
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-#find_package(Vulkan REQUIRED COMPONENTS glslc)
-
 include(CheckCXXCompilerFlag)
-
-# add_subdirectory(vendor)
 
 set(_interface_headers
     inc/banjo/api.h
@@ -41,6 +37,11 @@ set(_sources
     src/world.c
 )
 
+if(MSVC)
+    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/runtime")
+    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/runtime")
+endif()
+
 add_library(banjo ${_interface_headers} ${_sources})
 if(NOT MSVC)
     target_compile_options(banjo PRIVATE -Wall -pedantic)
@@ -62,14 +63,7 @@ endmacro()
 banjo_compile_option(pedantic "Banjo runtime will make costly extra checks" OFF)
 banjo_compile_option(log_color "Banjo logs will have colored output" ON)
 
-
-
 target_include_directories(banjo PUBLIC inc PRIVATE src)
-# target_link_libraries(banjo 
-#     PRIVATE
-#         Vulkan::Vulkan
-#         glfw
-# )
 set_property(TARGET banjo PROPERTY C_STANDARD 99) # TODO CHECK
 target_compile_features(banjo PUBLIC c_std_99)    # TODO CHECK
 
