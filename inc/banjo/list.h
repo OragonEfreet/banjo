@@ -1,19 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file
-/// Header file for \ref flist container type.
+/// Header file for \ref list container type.
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \defgroup flist Forward List
+/// \defgroup list List
 /// \ingroup containers
-/// API related to the \ref BjForwardList object
+/// API related to the \ref BjList object
 ///
-///  **Generic Name**     | forward list                 
+///  **Generic Name**     | list                 
 /// ----------------------|-----------------------
 ///  **Opaque Type**      | yes                   
-///  **Create Function**  | \ref bj_forward_list_create  
-///  **Destroy Function** | \ref bj_forward_list_destroy 
+///  **Create Function**  | \ref bj_list_create  
+///  **Destroy Function** | \ref bj_list_destroy 
 ///
-/// \ref BjForwardList is a container that supports constant time insertion and removal
+/// \ref BjList is a container that supports constant time insertion and removal
 /// from anywhere in the container.
 /// It is implemented as a simply linked list.
 /// \{
@@ -22,20 +22,20 @@
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
-/// Handle to an forward list object.
-BJ_DEFINE_HANDLE(BjForwardList);
+/// Handle to an list object.
+BJ_DEFINE_HANDLE(BjList);
 
-/// Handle to an forward list iterator.
-BJ_DEFINE_HANDLE(BjForwardListIterator);
+/// Handle to an list iterator.
+BJ_DEFINE_HANDLE(BjListIterator);
 
-/// Info structure used to create a new \ref BjForwardList.
-typedef struct BjForwardListInfo {
+/// Info structure used to create a new \ref BjList.
+typedef struct BjListInfo {
     usize  value_size;  ///< Size in bytes of each item in the list.
     bool   weak_owning; ///< If _true_, the container doesn't own the stored elements.
-} BjForwardListInfo;
+} BjListInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Create a new \ref BjForwardList.
+/// Create a new \ref BjList.
 ///
 /// \param p_info       Creation options.
 /// \param p_allocator  Allocation callbacks, can be _0_.
@@ -45,7 +45,7 @@ typedef struct BjForwardListInfo {
 /// \par Memory Management
 ///
 /// The list pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_forward_list_destroy.
+/// by calling \ref bj_list_destroy.
 ///
 /// When `p_allocator` is not _0_, the given allocator is used though the entire
 /// life of the list object.
@@ -62,25 +62,25 @@ typedef struct BjForwardListInfo {
 /// When set to _false_, the inserted data is copied into the container's internal
 /// memory using \ref bj_memcpy.
 ///
-/// \see bj_forward_list_destroy
-BANJO_EXPORT BjForwardList bj_forward_list_create(
-    const BjForwardListInfo*     p_info,
+/// \see bj_list_destroy
+BANJO_EXPORT BjList bj_list_create(
+    const BjListInfo*     p_info,
     const BjAllocationCallbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Destroy a list previously created by \ref bj_forward_list_create.
+/// Destroy a list previously created by \ref bj_list_create.
 ///
 /// \param list The instance to destroy.
 ///
 /// \par Memory Management
 ///
 /// The memory allocated for `list` will be freed using the allocator callbacks
-/// set by \ref bj_forward_list_create.
+/// set by \ref bj_list_create.
 ///
-/// \see bj_forward_list_create
-BANJO_EXPORT void bj_forward_list_destroy(
-    BjForwardList list
+/// \see bj_list_create
+BANJO_EXPORT void bj_list_destroy(
+    BjList list
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,8 +89,8 @@ BANJO_EXPORT void bj_forward_list_destroy(
 /// \param list The list object.
 ///
 /// If the list is already empty, this function does nothing.
-BANJO_EXPORT void bj_forward_list_clear(
-    BjForwardList list
+BANJO_EXPORT void bj_list_clear(
+    BjList list
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -99,8 +99,8 @@ BANJO_EXPORT void bj_forward_list_clear(
 /// \param list The list object.
 ///
 /// \return a integer indicating the number of elements in the list.
-BANJO_EXPORT usize bj_forward_list_count(
-    BjForwardList list
+BANJO_EXPORT usize bj_list_count(
+    BjList list
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -124,8 +124,8 @@ BANJO_EXPORT usize bj_forward_list_count(
 /// In this case, if `p_data` != _0_, the allocated block is initialized with
 /// the content pointed by `p_data` (using \ref bj_memcpy).
 /// Otherwise, the block is left uninitialized.
-BANJO_EXPORT void* bj_forward_list_insert(
-    BjForwardList list,
+BANJO_EXPORT void* bj_list_insert(
+    BjList list,
     usize         index,
     void*         p_data
 );
@@ -150,8 +150,8 @@ BANJO_EXPORT void* bj_forward_list_insert(
 /// In this case, if `p_data` != _0_, the allocated block is initialized with
 /// the content pointed by `p_data` (using \ref bj_memcpy).
 /// Otherwise, the block is left uninitialized.
-BANJO_EXPORT void* bj_forward_list_prepend(
-    BjForwardList list,
+BANJO_EXPORT void* bj_list_prepend(
+    BjList list,
     void*         p_data
 );
 
@@ -162,8 +162,8 @@ BANJO_EXPORT void* bj_forward_list_prepend(
 /// \param index The position of the element to get.
 ///
 /// \return A pointer to the element.
-BANJO_EXPORT void* bj_forward_list_value(
-    BjForwardList list,
+BANJO_EXPORT void* bj_list_value(
+    BjList list,
     usize         index
 );
 
@@ -174,32 +174,32 @@ BANJO_EXPORT void* bj_forward_list_value(
 ///
 /// \return A pointer to the first element.
 ///
-/// This function effectively calls \ref bj_forward_list_value with `index` 0.
-BANJO_EXPORT void* bj_forward_list_head(
-    BjForwardList list
+/// This function effectively calls \ref bj_list_value with `index` 0.
+BANJO_EXPORT void* bj_list_head(
+    BjList list
 );
 
 
 /// Pouet
 /// \return nothing
-BANJO_EXPORT BjForwardListIterator bj_forward_list_iterator_create(
-    const BjForwardList list ///< Pouet
+BANJO_EXPORT BjListIterator bj_list_iterator_create(
+    const BjList list ///< Pouet
 );
 
 /// Pouet
-BANJO_EXPORT void bj_forward_list_iterator_destroy(
-    BjForwardListIterator iterator ///< Pouet
+BANJO_EXPORT void bj_list_iterator_destroy(
+    BjListIterator iterator ///< Pouet
 );
 
 /// Pouet
 /// \return nothing
-BANJO_EXPORT void* bj_forward_list_iterator_value(
-    BjForwardListIterator iterator ///< Pouet
+BANJO_EXPORT void* bj_list_iterator_value(
+    BjListIterator iterator ///< Pouet
 );
 
 /// Pouet
 /// \return pouet
-BANJO_EXPORT bool bj_forward_list_iterator_next(
-    BjForwardListIterator iterator ///< Pouet
+BANJO_EXPORT bool bj_list_iterator_next(
+    BjListIterator iterator ///< Pouet
 );
-/// \} End of flist group
+/// \} End of list group

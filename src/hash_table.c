@@ -1,5 +1,5 @@
 #include "banjo/array.h"
-#include "banjo/forward_list.h"
+#include "banjo/list.h"
 #include "banjo/memory.h"
 #include <banjo/error.h>
 #include <banjo/hash_table.h>
@@ -43,13 +43,13 @@ void bj_hash_table_init(
     p_instance->entry_size  = p_info->weak_owning ? sizeof(void*) * 2 : p_instance->key_size + p_instance->value_size;
 
     bj_array_init(&(BjArrayInfo) {
-        .value_size = sizeof(BjForwardList_T),
+        .value_size = sizeof(BjList_T),
         .count      = BUCKET_COUNT,
     }, p_allocator, &p_instance->buckets);
 
     for(usize i = 0 ; i < bj_array_count(&p_instance->buckets) ; ++i) {
-        BjForwardList bucket = bj_array_at(&p_instance->buckets, i);
-        bj_forward_list_init(&(BjForwardListInfo) {
+        BjList bucket = bj_array_at(&p_instance->buckets, i);
+        bj_list_init(&(BjListInfo) {
             .value_size  = p_instance->entry_size,
             .weak_owning = false,
         }, p_allocator, bucket);
@@ -62,7 +62,7 @@ void bj_hash_table_reset(
     bj_hash_table_clear(htable);
     // TODO
     /* for(usize i = 0 ; i < BUCKET_COUNT ; ++i) { */
-    /*     bj_forward_list_reset(htable->buckets.p_data + sizeof(BjForwardList_T)*i); */
+    /*     bj_list_reset(htable->buckets.p_data + sizeof(BjList_T)*i); */
     /* } */
     bj_array_reset(&htable->buckets);
 }
@@ -99,13 +99,13 @@ BANJO_EXPORT void bj_hash_table_set(
     void* p_value
 ) {
     u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
-    BjForwardList bucket = bj_array_at(&table->buckets, hash);
+    BjList bucket = bj_array_at(&table->buckets, hash);
 
-    BjForwardListIterator_T it;
-    bj_forward_list_iterator_init(bucket, &it);
+    BjListIterator_T it;
+    bj_list_iterator_init(bucket, &it);
 
     do {
-        byte* key = bj_forward_list_iterator_value(&it);
+        byte* key = bj_list_iterator_value(&it);
         if(key != 0) {
             if(memcmp(key, p_key, table->key_size) == 0) {
                 byte* value = key+sizeof(table->key_size);
@@ -113,14 +113,14 @@ BANJO_EXPORT void bj_hash_table_set(
                 return;
             }
         }
-    } while(bj_forward_list_iterator_next(&it));
-    bj_forward_list_iterator_reset(&it);
+    } while(bj_list_iterator_next(&it));
+    bj_list_iterator_reset(&it);
 
-    void* new_entry = bj_forward_list_prepend(bucket, 0);
+    void* new_entry = bj_list_prepend(bucket, 0);
     byte* new_key   = new_entry;
     byte* new_value = new_key + table->key_size;
     bj_memcpy(new_key, p_key, table->key_size);
     bj_memcpy(new_value, p_value, table->value_size);
-    /* bj_forward_list_emplace_head(bucket, new_key); */
+    /* bj_list_emplace_head(bucket, new_key); */
     /* bj_free(new_entry, table->p_allocator); */
 }
