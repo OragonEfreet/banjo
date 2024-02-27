@@ -15,8 +15,8 @@ void bj_list_init(const BjListInfo*, const BjAllocationCallbacks*, BjList);
 void bj_list_reset(BjList);
 
 typedef struct BjListIterator_T {
-    BjList                list;
-    void*                        p_current;
+    BjList          list;
+    void**          p_current;
 } BjListIterator_T;
 
 void bj_list_iterator_init(const BjList, BjListIterator);
