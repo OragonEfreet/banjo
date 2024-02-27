@@ -80,7 +80,8 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
 
 TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
     BjListInfo create_info = {
-        .value_size = test_data->value_type->mem_size,
+        .value_size  = test_data->value_type->mem_size,
+        .weak_owning = test_data->weak_owning,
     };
 
     BjList list = bj_list_create(&create_info, 0);
@@ -98,6 +99,35 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
         REQUIRE_EQ(cmp, 0);
     }
 
+    bj_list_destroy(list);
+}
+
+TEST_CASE(iterator) {
+    BjListInfo create_info = {
+        .value_size = sizeof(short),
+    };
+
+    BjList list = bj_list_create(&create_info, 0);
+    REQUIRE_VALUE(list);
+
+    short values[] = {4, -1, 102};
+    usize n_elements = sizeof(values) / sizeof(short);
+
+    for(usize n = 0 ; n < n_elements ; ++n) {
+        bj_list_prepend(list, &values[n]);
+    }
+
+    BjListIterator it = bj_list_iterator_create(list);
+
+    usize i = n_elements - 1;
+    while(bj_list_iterator_has_next(it)) {
+        short expected = values[i--];
+        short* got = bj_list_iterator_next(it);
+        REQUIRE_EQ(*got, expected);
+    }
+
+
+    bj_list_iterator_destroy(it);
     bj_list_destroy(list);
 }
 
@@ -139,6 +169,7 @@ int main(int argc, char* argv[]) {
         RUN_TEST_ARGS(test_prepends,                            .value_type = &element_types[e]);
         RUN_TEST_ARGS(test_prepends,                            .value_type = &element_types[e], .weak_owning = true);
     }
+    RUN_TEST(iterator);
     END_TESTS();
 }
 

@@ -122,7 +122,11 @@ void* bj_list_value(
     void** p_next_block = list->p_head;
     while(p_next_block != 0) {
         if(index-- == 0) {
-            return ((byte*)p_next_block)+sizeof(void*);
+            void* p_value = ((byte*)p_next_block)+sizeof(void*);
+            if(list->weak_owning) {
+                return *(void**)p_value;
+            }
+            return p_value;
         }
         p_next_block = *p_next_block;
     }
@@ -133,18 +137,6 @@ void* bj_list_head(
     BjList list
 ){
     return bj_list_value(list, 0);
-}
-
-void bj_list_iterator_init(const BjList list, BjListIterator iterator) {
-    bj_assert(iterator);
-    iterator->list        = list;
-    iterator->p_current   = list->p_head;
-}
-
-void bj_list_iterator_reset(BjListIterator iterator) {
-    bj_assert(iterator);
-    iterator->list      = 0;
-    iterator->p_current = 0;
 }
 
 BANJO_EXPORT BjListIterator bj_list_iterator_create(
@@ -164,23 +156,33 @@ BANJO_EXPORT void bj_list_iterator_destroy(
     bj_free(iterator, allocator);
 }
 
-BANJO_EXPORT void* bj_list_iterator_value(
-    BjListIterator iterator
-) {
+void bj_list_iterator_init(const BjList list, BjListIterator iterator) {
     bj_assert(iterator);
-    // TODO
-    return 0;
-    /* return iterator->p_current->value; */
+    iterator->list        = list;
+    iterator->p_current   = &list->p_head;
 }
 
-BANJO_EXPORT bool bj_list_iterator_next(
+void bj_list_iterator_reset(BjListIterator iterator) {
+    bj_assert(iterator);
+    iterator->list      = 0;
+    iterator->p_current = 0;
+}
+
+BANJO_EXPORT bool bj_list_iterator_has_next(
     BjListIterator iterator
 ) {
     bj_assert(iterator);
-    if(iterator->p_current == 0) {
-        return false;
+    return *(iterator->p_current) != 0;
+}
+
+BANJO_EXPORT void* bj_list_iterator_next(
+    BjListIterator iterator
+) {
+    bj_assert(iterator);
+    iterator->p_current = *iterator->p_current;
+    void* p_value = ((byte*)iterator->p_current)+sizeof(void*);
+    if(iterator->list->weak_owning) {
+        return *(void**)p_value;
     }
-    // TODO
-    /* iterator->p_current = iterator->p_current->p_next; */
-    return iterator->p_current != 0;
+    return p_value;
 }

@@ -61,9 +61,10 @@ void bj_hash_table_reset(
 ) {
     bj_hash_table_clear(htable);
     // TODO
-    /* for(usize i = 0 ; i < BUCKET_COUNT ; ++i) { */
-    /*     bj_list_reset(htable->buckets.p_data + sizeof(BjList_T)*i); */
-    /* } */
+    BjList_T* bucket = bj_array_data(&htable->buckets);
+    for(usize i = 0 ; i < BUCKET_COUNT ; ++i) {
+        bj_list_reset(bucket++);
+    }
     bj_array_reset(&htable->buckets);
 }
 
@@ -104,8 +105,8 @@ BANJO_EXPORT void bj_hash_table_set(
     BjListIterator_T it;
     bj_list_iterator_init(bucket, &it);
 
-    do {
-        byte* key = bj_list_iterator_value(&it);
+    while(bj_list_iterator_has_next(&it)) {
+        byte* key = bj_list_iterator_next(&it);
         if(key != 0) {
             if(memcmp(key, p_key, table->key_size) == 0) {
                 byte* value = key+sizeof(table->key_size);
@@ -113,7 +114,7 @@ BANJO_EXPORT void bj_hash_table_set(
                 return;
             }
         }
-    } while(bj_list_iterator_next(&it));
+    };
     bj_list_iterator_reset(&it);
 
     void* new_entry = bj_list_prepend(bucket, 0);
@@ -121,6 +122,4 @@ BANJO_EXPORT void bj_hash_table_set(
     byte* new_value = new_key + table->key_size;
     bj_memcpy(new_key, p_key, table->key_size);
     bj_memcpy(new_value, p_value, table->value_size);
-    /* bj_list_emplace_head(bucket, new_key); */
-    /* bj_free(new_entry, table->p_allocator); */
 }

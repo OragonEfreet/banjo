@@ -179,27 +179,51 @@ BANJO_EXPORT void* bj_list_head(
     BjList list
 );
 
-
-/// Pouet
-/// \return nothing
+////////////////////////////////////////////////////////////////////////////////
+/// Create a forward-only iterator for the given list
+///
+/// \param list The list object.
+///
+/// \return A new iterator object
+///
+/// \par Memory Management
+///
+/// This function uses the allocator set in the given list for any memory-wise
+/// operation performed by this iterator.
 BANJO_EXPORT BjListIterator bj_list_iterator_create(
-    const BjList list ///< Pouet
+    const BjList list ///< The `BjList` object to iterate
 );
 
-/// Pouet
+////////////////////////////////////////////////////////////////////////////////
+/// destroy the given list iterator.
+///
+/// \param iterator The iterator object.
+///
+/// \par Memory Management
+///
+/// This function uses the allocator set in the given iterator to destroy the
+/// iterator.
 BANJO_EXPORT void bj_list_iterator_destroy(
-    BjListIterator iterator ///< Pouet
+    BjListIterator iterator
 );
 
-/// Pouet
-/// \return nothing
-BANJO_EXPORT void* bj_list_iterator_value(
-    BjListIterator iterator ///< Pouet
+
+////////////////////////////////////////////////////////////////////////////////
+/// Return `true` if the iterator has more elements.
+///
+/// \param iterator The iterator object
+/// \return `true` if the iterator has more elements.
+BANJO_EXPORT bool bj_list_iterator_has_next(
+    BjListIterator iterator
 );
 
-/// Pouet
-/// \return pouet
-BANJO_EXPORT bool bj_list_iterator_next(
-    BjListIterator iterator ///< Pouet
+////////////////////////////////////////////////////////////////////////////////
+/// Return the next element in the iteration.
+///
+/// \param iterator The iterator object
+/// \return A pointer to the next element in the iteration or _0_ if no new element.
+BANJO_EXPORT void* bj_list_iterator_next(
+    BjListIterator iterator
 );
-/// \} End of list group
+
+
