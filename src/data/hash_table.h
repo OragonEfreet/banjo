@@ -2,7 +2,7 @@
 
 #include <banjo/hash_table.h>
 #include <data/array.h>
-#include <data/forward_list.h>
+#include <data/list.h>
 
 typedef struct BjHashTable_T {
     const BjAllocationCallbacks* p_allocator;

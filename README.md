@@ -23,7 +23,7 @@ This section only shows the currently available features.
 ### Container types
 
 - `BjArray`: *Sequence container* that wraps a classic C-Style array.
-- `BjForwardList`: Forward-only *linked list*.
+- `BjList`: Forward-only *linked list*.
 - `BjHashTable`: Associative array.
 
 ### Misc

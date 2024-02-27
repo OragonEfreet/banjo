@@ -16,8 +16,8 @@ set(_interface_headers
     inc/banjo/array.h
     inc/banjo/containers.h
     inc/banjo/error.h
-    inc/banjo/forward_list.h
     inc/banjo/hash_table.h
+    inc/banjo/list.h
     inc/banjo/log.h
     inc/banjo/memory.h
     inc/banjo/world.h
@@ -26,12 +26,12 @@ set(_interface_headers
 set(_sources
     src/array.c
     src/data/array.h
-    src/data/forward_list.h
     src/data/hash_table.h
+    src/data/list.h
     src/data/world.h
     src/error.c
-    src/forward_list.c
     src/hash_table.c
+    src/list.c
     src/log.c
     src/memory.c
     src/world.c

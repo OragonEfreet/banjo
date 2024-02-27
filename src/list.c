@@ -1,12 +1,12 @@
-#include "banjo/forward_list.h"
+#include "banjo/list.h"
 #include "banjo/memory.h"
 #include <banjo/error.h>
-#include <data/forward_list.h>
+#include <data/list.h>
 
-void bj_forward_list_init(
-    const BjForwardListInfo*     p_info,
+void bj_list_init(
+    const BjListInfo*     p_info,
     const BjAllocationCallbacks* p_allocator,
-    BjForwardList                p_instance
+    BjList                p_instance
 ) {
     bj_assert(p_info != 0);
 
@@ -17,25 +17,25 @@ void bj_forward_list_init(
     p_instance->p_head = 0;
 }
 
-void bj_forward_list_reset(
-    BjForwardList list
+void bj_list_reset(
+    BjList list
 ) {
     bj_assert(list != 0);
-    bj_forward_list_clear(list);
+    bj_list_clear(list);
 }
 
-BjForwardList bj_forward_list_create(
-    const BjForwardListInfo*     p_info,
+BjList bj_list_create(
+    const BjListInfo*     p_info,
     const BjAllocationCallbacks* p_allocator
 ) {
     bj_assert(p_info != 0);
-    BjForwardList list = bj_new_struct(BjForwardList, p_allocator);
-    bj_forward_list_init(p_info, p_allocator, list);
+    BjList list = bj_new_struct(BjList, p_allocator);
+    bj_list_init(p_info, p_allocator, list);
     return list;
 }
 
-void bj_forward_list_clear(
-    BjForwardList list
+void bj_list_clear(
+    BjList list
 ) {
     bj_assert(list != 0);
 
@@ -48,16 +48,16 @@ void bj_forward_list_clear(
     list->p_head = 0;
 }
 
-void bj_forward_list_destroy(
-    BjForwardList list
+void bj_list_destroy(
+    BjList list
 ) {
     bj_assert(list != 0);
-    bj_forward_list_reset(list);
+    bj_list_reset(list);
     bj_free(list, list->p_allocator);
 }
 
-usize bj_forward_list_count(
-    BjForwardList list
+usize bj_list_count(
+    BjList list
 ) {
     usize result = 0;
 
@@ -70,8 +70,8 @@ usize bj_forward_list_count(
     return result;
 }
 
-void* bj_forward_list_insert(
-    BjForwardList list,
+void* bj_list_insert(
+    BjList list,
     usize index,
     void* p_data
 ) {
@@ -108,15 +108,15 @@ void* bj_forward_list_insert(
     return value;
 }
 
-void* bj_forward_list_prepend(
-    BjForwardList list,
+void* bj_list_prepend(
+    BjList list,
     void* p_data
 ) {
-    return bj_forward_list_insert(list, 0, p_data);
+    return bj_list_insert(list, 0, p_data);
 }
 
-void* bj_forward_list_value(
-    BjForwardList list,
+void* bj_list_value(
+    BjList list,
     usize index
 ) {
     void** p_next_block = list->p_head;
@@ -129,43 +129,43 @@ void* bj_forward_list_value(
     return 0;
 }
 
-void* bj_forward_list_head(
-    BjForwardList list
+void* bj_list_head(
+    BjList list
 ){
-    return bj_forward_list_value(list, 0);
+    return bj_list_value(list, 0);
 }
 
-void bj_forward_list_iterator_init(const BjForwardList list, BjForwardListIterator iterator) {
+void bj_list_iterator_init(const BjList list, BjListIterator iterator) {
     bj_assert(iterator);
     iterator->list        = list;
     iterator->p_current   = list->p_head;
 }
 
-void bj_forward_list_iterator_reset(BjForwardListIterator iterator) {
+void bj_list_iterator_reset(BjListIterator iterator) {
     bj_assert(iterator);
     iterator->list      = 0;
     iterator->p_current = 0;
 }
 
-BANJO_EXPORT BjForwardListIterator bj_forward_list_iterator_create(
-    const BjForwardList list
+BANJO_EXPORT BjListIterator bj_list_iterator_create(
+    const BjList list
 ) {
     bj_assert(list);
-    BjForwardListIterator it = bj_new_struct(BjForwardListIterator, list->p_allocator);
-    bj_forward_list_iterator_init(list, it);
+    BjListIterator it = bj_new_struct(BjListIterator, list->p_allocator);
+    bj_list_iterator_init(list, it);
     return it;
 }
 
-BANJO_EXPORT void bj_forward_list_iterator_destroy(
-    BjForwardListIterator iterator
+BANJO_EXPORT void bj_list_iterator_destroy(
+    BjListIterator iterator
 ) {
     const BjAllocationCallbacks* allocator = iterator->list->p_allocator;
-    bj_forward_list_iterator_reset(iterator);
+    bj_list_iterator_reset(iterator);
     bj_free(iterator, allocator);
 }
 
-BANJO_EXPORT void* bj_forward_list_iterator_value(
-    BjForwardListIterator iterator
+BANJO_EXPORT void* bj_list_iterator_value(
+    BjListIterator iterator
 ) {
     bj_assert(iterator);
     // TODO
@@ -173,8 +173,8 @@ BANJO_EXPORT void* bj_forward_list_iterator_value(
     /* return iterator->p_current->value; */
 }
 
-BANJO_EXPORT bool bj_forward_list_iterator_next(
-    BjForwardListIterator iterator
+BANJO_EXPORT bool bj_list_iterator_next(
+    BjListIterator iterator
 ) {
     bj_assert(iterator);
     if(iterator->p_current == 0) {
