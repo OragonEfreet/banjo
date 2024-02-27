@@ -123,3 +123,27 @@ BANJO_EXPORT void bj_hash_table_set(
     bj_memcpy(new_key, p_key, table->key_size);
     bj_memcpy(new_value, p_value, table->value_size);
 }
+
+void* bj_hash_table_get(
+    const BjHashTable table,
+    const void*       p_key,
+    void*             p_default
+) {
+    u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
+    BjList bucket = bj_array_at(&table->buckets, hash);
+
+    BjListIterator_T it;
+    bj_list_iterator_init(bucket, &it);
+
+    while(bj_list_iterator_has_next(&it)) {
+        byte* key = bj_list_iterator_next(&it);
+        if(key != 0) {
+            if(memcmp(key, p_key, table->key_size) == 0) {
+                return key+sizeof(table->key_size);
+            }
+        }
+    };
+    bj_list_iterator_reset(&it);
+
+    return p_default;
+}
