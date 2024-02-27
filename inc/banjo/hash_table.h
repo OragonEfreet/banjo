@@ -108,8 +108,23 @@ BANJO_EXPORT void bj_hash_table_clear(
 /// memory using \ref bj_memcpy.
 BANJO_EXPORT void bj_hash_table_set(
     BjHashTable table,
-    void*       key,
-    void*       value
+    void*       p_key,
+    void*       p_value
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Return the value associated to `p_key`, if existing.
+///
+/// \param table      The table object
+/// \param p_key      The search key
+/// \param p_default  The value returned if the key if not found
+///
+/// If `table` holds no value at `p_key`, the function returns `p_default`.
+///
+BANJO_EXPORT void* bj_hash_table_get(
+    const BjHashTable table,
+    const void*       p_key,
+    void*             p_default
 );
 
 /// \} End of htable group
