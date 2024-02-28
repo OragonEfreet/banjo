@@ -3,7 +3,6 @@
 #include "banjo/memory.h"
 #include <banjo/error.h>
 #include <banjo/hash_table.h>
-#include <data/hash_table.h>
 
 #include <string.h>
 
@@ -29,7 +28,7 @@ u32 fnv1a_hash(const void *data, size_t size) {
 void bj_hash_table_init(
     const BjHashTableInfo* p_info,
     const BjAllocationCallbacks* p_allocator,
-    BjHashTable                  p_instance
+    BjHashTable*              p_instance
 ) {
     bj_assert(p_info != 0);
     bj_assert(p_info->value_size != 0);
@@ -43,12 +42,12 @@ void bj_hash_table_init(
     p_instance->entry_size  = p_info->weak_owning ? sizeof(void*) * 2 : p_instance->key_size + p_instance->value_size;
 
     bj_array_init(&(BjArrayInfo) {
-        .value_size = sizeof(BjList_T),
+        .value_size = sizeof(BjList),
         .count      = BUCKET_COUNT,
     }, p_allocator, &p_instance->buckets);
 
     for(usize i = 0 ; i < bj_array_count(&p_instance->buckets) ; ++i) {
-        BjList bucket = bj_array_at(&p_instance->buckets, i);
+        BjList* bucket = bj_array_at(&p_instance->buckets, i);
         bj_list_init(&(BjListInfo) {
             .value_size  = p_instance->entry_size,
             .weak_owning = false,
@@ -57,29 +56,29 @@ void bj_hash_table_init(
 }
 
 void bj_hash_table_reset(
-    BjHashTable htable
+    BjHashTable* htable
 ) {
     bj_hash_table_clear(htable);
     // TODO
-    BjList_T* bucket = bj_array_data(&htable->buckets);
+    BjList* bucket = bj_array_data(&htable->buckets);
     for(usize i = 0 ; i < BUCKET_COUNT ; ++i) {
         bj_list_reset(bucket++);
     }
     bj_array_reset(&htable->buckets);
 }
 
-BjHashTable bj_hash_table_create(
+BjHashTable* bj_hash_table_create(
     const BjHashTableInfo*       p_info,
     const BjAllocationCallbacks* p_allocator
 ) {
     bj_assert(p_info != 0);
-    BjHashTable htable = bj_new_struct(BjHashTable, p_allocator);
+    BjHashTable* htable = bj_new_struct(BjHashTable, p_allocator);
     bj_hash_table_init(p_info, p_allocator, htable);
     return htable;
 }
 
 void bj_hash_table_destroy(
-    BjHashTable htable
+    BjHashTable* htable
 ) {
     bj_assert(htable != 0);
     bj_hash_table_reset(htable);
@@ -87,7 +86,7 @@ void bj_hash_table_destroy(
 }
 
 void bj_hash_table_clear(
-    BjHashTable htable
+    BjHashTable* htable
 ) {
     // TODO?
     bj_assert(htable != 0);
@@ -95,14 +94,14 @@ void bj_hash_table_clear(
 
 
 BANJO_EXPORT void* bj_hash_table_set(
-    BjHashTable table,
+    BjHashTable* table,
     void* p_key,
     void* p_value
 ) {
     u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
-    BjList bucket = bj_array_at(&table->buckets, hash);
+    BjList* bucket = bj_array_at(&table->buckets, hash);
 
-    BjListIterator_T it;
+    BjListIterator it;
     bj_list_iterator_init(bucket, &it);
 
     while(bj_list_iterator_has_next(&it)) {
@@ -126,14 +125,14 @@ BANJO_EXPORT void* bj_hash_table_set(
 }
 
 void* bj_hash_table_get(
-    const BjHashTable table,
+    const BjHashTable* table,
     const void*       p_key,
     void*             p_default
 ) {
     u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
-    BjList bucket = bj_array_at(&table->buckets, hash);
+    BjList* bucket = bj_array_at(&table->buckets, hash);
 
-    BjListIterator_T it;
+    BjListIterator it;
     bj_list_iterator_init(bucket, &it);
 
     while(bj_list_iterator_has_next(&it)) {

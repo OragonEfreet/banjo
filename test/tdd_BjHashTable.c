@@ -4,7 +4,7 @@
 
 TEST_CASE(zero_initialization) {
 
-    BjHashTable htable = bj_hash_table_create(&(BjHashTableInfo){
+    BjHashTable* htable = bj_hash_table_create(&(BjHashTableInfo){
         .value_size=sizeof(short),
         .key_size=sizeof(u32),
     }, 0);
@@ -18,7 +18,7 @@ TEST_CASE(set_data) {
     u32 key = 42;
     short value = 17;
 
-    BjHashTable htable = bj_hash_table_create(&(BjHashTableInfo){
+    BjHashTable* htable = bj_hash_table_create(&(BjHashTableInfo){
         .value_size=sizeof(short),
         .key_size=sizeof(u32),
     }, 0);
@@ -38,7 +38,7 @@ TEST_CASE(get_data) {
     short value0 = 17;
     short value1 = 50;
 
-    BjHashTable htable = bj_hash_table_create(&(BjHashTableInfo){
+    BjHashTable* htable = bj_hash_table_create(&(BjHashTableInfo){
         .value_size=sizeof(short),
         .key_size=sizeof(u32),
     }, 0);
@@ -60,7 +60,7 @@ TEST_CASE(get_data_default) {
     u32 key = 42;
     short fallback = 50;
 
-    BjHashTable htable = bj_hash_table_create(&(BjHashTableInfo){
+    BjHashTable* htable = bj_hash_table_create(&(BjHashTableInfo){
         .value_size=sizeof(short),
         .key_size=sizeof(u32),
     }, 0);

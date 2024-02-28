@@ -19,15 +19,27 @@
 #pragma once
 
 #include <banjo/api.h>
+#include <banjo/array.h>
 #include <banjo/memory.h>
-
-/// Handle to an hash table object.
-BJ_DEFINE_HANDLE(BjHashTable);
 
 /// Function type for hashing keys.
 typedef u32 (*bjHashFunctionPtr)(
     const void* p_data, usize size
 );
+
+typedef struct BjHashTable_T BjHashTable;
+
+#ifdef BJ_NO_OPAQUE
+struct BjHashTable_T {
+    const BjAllocationCallbacks* p_allocator;
+    BjArray                      buckets;
+    bool                         weak_owning;
+    usize                        value_size;
+    usize                        key_size;
+    bjHashFunctionPtr            fn_hash;
+    usize                        entry_size;
+};
+#endif
 
 /// Info structure used to create a new \ref BjHashTable.
 typedef struct BjHashTableInfo {
@@ -56,7 +68,7 @@ typedef struct BjHashTableInfo {
 /// to retain the pointer after creating the table.
 ///
 /// \see bj_array_destroy
-BANJO_EXPORT BjHashTable bj_hash_table_create(
+BANJO_EXPORT BjHashTable* bj_hash_table_create(
     const BjHashTableInfo*       p_info,
     const BjAllocationCallbacks* p_allocator
 );
@@ -73,8 +85,11 @@ BANJO_EXPORT BjHashTable bj_hash_table_create(
 ///
 /// \see bj_hash_table_create
 BANJO_EXPORT void bj_hash_table_destroy(
-    BjHashTable table
+    BjHashTable* table
 );
+
+void bj_hash_table_init(const BjHashTableInfo*, const BjAllocationCallbacks*, BjHashTable*);
+void bj_hash_table_reset(BjHashTable*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Clear all data in the hash table.
@@ -83,7 +98,7 @@ BANJO_EXPORT void bj_hash_table_destroy(
 ///
 /// If the table is already empty, this function does nothing.
 BANJO_EXPORT void bj_hash_table_clear(
-    BjHashTable table
+    BjHashTable* table
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +124,7 @@ BANJO_EXPORT void bj_hash_table_clear(
 /// When set to _false_, the inserted data is copied into the container's internal
 /// memory using \ref bj_memcpy.
 BANJO_EXPORT void* bj_hash_table_set(
-    BjHashTable table,
+    BjHashTable* table,
     void*       p_key,
     void*       p_value
 );
@@ -126,7 +141,7 @@ BANJO_EXPORT void* bj_hash_table_set(
 /// If `table` holds no value at `p_key`, the function returns `p_default`.
 ///
 BANJO_EXPORT void* bj_hash_table_get(
-    const BjHashTable table,
+    const BjHashTable* table,
     const void*       p_key,
     void*             p_default
 );

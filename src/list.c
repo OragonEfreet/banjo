@@ -1,12 +1,11 @@
 #include "banjo/list.h"
 #include "banjo/memory.h"
 #include <banjo/error.h>
-#include <data/list.h>
 
 void bj_list_init(
-    const BjListInfo*     p_info,
-    const BjAllocationCallbacks* p_allocator,
-    BjList                p_instance
+    const BjListInfo*              p_info,
+    const BjAllocationCallbacks*   p_allocator,
+    BjList*                p_instance
 ) {
     bj_assert(p_info != 0);
 
@@ -18,24 +17,24 @@ void bj_list_init(
 }
 
 void bj_list_reset(
-    BjList list
+    BjList* list
 ) {
     bj_assert(list != 0);
     bj_list_clear(list);
 }
 
-BjList bj_list_create(
+BjList* bj_list_create(
     const BjListInfo*     p_info,
     const BjAllocationCallbacks* p_allocator
 ) {
     bj_assert(p_info != 0);
-    BjList list = bj_new_struct(BjList, p_allocator);
+    BjList* list = bj_new_struct(BjList, p_allocator);
     bj_list_init(p_info, p_allocator, list);
     return list;
 }
 
 void bj_list_clear(
-    BjList list
+    BjList* list
 ) {
     bj_assert(list != 0);
 
@@ -49,7 +48,7 @@ void bj_list_clear(
 }
 
 void bj_list_destroy(
-    BjList list
+    BjList* list
 ) {
     bj_assert(list != 0);
     bj_list_reset(list);
@@ -57,7 +56,7 @@ void bj_list_destroy(
 }
 
 usize bj_list_count(
-    BjList list
+    BjList* list
 ) {
     usize result = 0;
 
@@ -71,7 +70,7 @@ usize bj_list_count(
 }
 
 void* bj_list_insert(
-    BjList list,
+    BjList* list,
     usize index,
     void* p_data
 ) {
@@ -109,14 +108,14 @@ void* bj_list_insert(
 }
 
 void* bj_list_prepend(
-    BjList list,
+    BjList* list,
     void* p_data
 ) {
     return bj_list_insert(list, 0, p_data);
 }
 
 void* bj_list_value(
-    BjList list,
+    BjList* list,
     usize index
 ) {
     void** p_next_block = list->p_head;
@@ -134,49 +133,49 @@ void* bj_list_value(
 }
 
 void* bj_list_head(
-    BjList list
+    BjList* list
 ){
     return bj_list_value(list, 0);
 }
 
-BANJO_EXPORT BjListIterator bj_list_iterator_create(
-    const BjList list
+BANJO_EXPORT BjListIterator* bj_list_iterator_create(
+    BjList* list
 ) {
     bj_assert(list);
-    BjListIterator it = bj_new_struct(BjListIterator, list->p_allocator);
+    BjListIterator* it = bj_new_struct(BjListIterator, list->p_allocator);
     bj_list_iterator_init(list, it);
     return it;
 }
 
 BANJO_EXPORT void bj_list_iterator_destroy(
-    BjListIterator iterator
+    BjListIterator* iterator
 ) {
     const BjAllocationCallbacks* allocator = iterator->list->p_allocator;
     bj_list_iterator_reset(iterator);
     bj_free(iterator, allocator);
 }
 
-void bj_list_iterator_init(const BjList list, BjListIterator iterator) {
+void bj_list_iterator_init(BjList* list, BjListIterator* iterator) {
     bj_assert(iterator);
     iterator->list        = list;
     iterator->p_current   = &list->p_head;
 }
 
-void bj_list_iterator_reset(BjListIterator iterator) {
+void bj_list_iterator_reset(BjListIterator* iterator) {
     bj_assert(iterator);
     iterator->list      = 0;
     iterator->p_current = 0;
 }
 
 BANJO_EXPORT bool bj_list_iterator_has_next(
-    BjListIterator iterator
+    BjListIterator* iterator
 ) {
     bj_assert(iterator);
     return *(iterator->p_current) != 0;
 }
 
 BANJO_EXPORT void* bj_list_iterator_next(
-    BjListIterator iterator
+    BjListIterator* iterator
 ) {
     bj_assert(iterator);
     iterator->p_current = *iterator->p_current;

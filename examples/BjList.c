@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     
     // Usual Creation and destruction
     BjListInfo create_info = { .value_size = sizeof(vec2f) };
-    BjList list = bj_list_create(&create_info, 0);
+    BjList* list = bj_list_create(&create_info, 0);
     
     // Initially, a list is 0 length
     bj_log(INFO, "Initial count: %d", bj_list_count(list));

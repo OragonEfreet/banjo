@@ -7,7 +7,7 @@
 /// \ingroup containers
 /// API related to the \ref BjList object
 ///
-///  **Generic Name**     | list                 
+///  **Generic Name**     | list                
 /// ----------------------|-----------------------
 ///  **Opaque Type**      | yes                   
 ///  **Create Function**  | \ref bj_list_create  
@@ -22,11 +22,17 @@
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
-/// Handle to an list object.
-BJ_DEFINE_HANDLE(BjList);
+typedef struct BjList_T BjList;
 
-/// Handle to an list iterator.
-BJ_DEFINE_HANDLE(BjListIterator);
+#ifdef BJ_NO_OPAQUE
+struct BjList_T {
+    const BjAllocationCallbacks* p_allocator;
+    usize                        value_size;
+    usize                        entry_size;
+    bool                         weak_owning;
+    void*                        p_head;
+};
+#endif
 
 /// Info structure used to create a new \ref BjList.
 typedef struct BjListInfo {
@@ -63,7 +69,7 @@ typedef struct BjListInfo {
 /// memory using \ref bj_memcpy.
 ///
 /// \see bj_list_destroy
-BANJO_EXPORT BjList bj_list_create(
+BANJO_EXPORT BjList* bj_list_create(
     const BjListInfo*     p_info,
     const BjAllocationCallbacks* p_allocator
 );
@@ -80,8 +86,11 @@ BANJO_EXPORT BjList bj_list_create(
 ///
 /// \see bj_list_create
 BANJO_EXPORT void bj_list_destroy(
-    BjList list
+    BjList* list
 );
+
+void bj_list_init(const BjListInfo*, const BjAllocationCallbacks*, BjList*);
+void bj_list_reset(BjList*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Clear all data in the list.
@@ -90,7 +99,7 @@ BANJO_EXPORT void bj_list_destroy(
 ///
 /// If the list is already empty, this function does nothing.
 BANJO_EXPORT void bj_list_clear(
-    BjList list
+    BjList* list
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +109,7 @@ BANJO_EXPORT void bj_list_clear(
 ///
 /// \return a integer indicating the number of elements in the list.
 BANJO_EXPORT usize bj_list_count(
-    BjList list
+    BjList* list
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -125,9 +134,9 @@ BANJO_EXPORT usize bj_list_count(
 /// the content pointed by `p_data` (using \ref bj_memcpy).
 /// Otherwise, the block is left uninitialized.
 BANJO_EXPORT void* bj_list_insert(
-    BjList list,
-    usize         index,
-    void*         p_data
+    BjList* list,
+    usize           index,
+    void*           p_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,8 +160,8 @@ BANJO_EXPORT void* bj_list_insert(
 /// the content pointed by `p_data` (using \ref bj_memcpy).
 /// Otherwise, the block is left uninitialized.
 BANJO_EXPORT void* bj_list_prepend(
-    BjList list,
-    void*         p_data
+    BjList* list,
+    void*           p_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -163,8 +172,8 @@ BANJO_EXPORT void* bj_list_prepend(
 ///
 /// \return A pointer to the element.
 BANJO_EXPORT void* bj_list_value(
-    BjList list,
-    usize         index
+    BjList* list,
+    usize           index
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,8 +185,20 @@ BANJO_EXPORT void* bj_list_value(
 ///
 /// This function effectively calls \ref bj_list_value with `index` 0.
 BANJO_EXPORT void* bj_list_head(
-    BjList list
+    BjList* list
 );
+
+typedef struct BjListIterator_T BjListIterator;
+
+#ifdef BJ_NO_OPAQUE
+struct BjListIterator_T {
+    BjList*  list;
+    void**           p_current;
+};
+#endif
+
+void bj_list_iterator_init(BjList*, BjListIterator*);
+void bj_list_iterator_reset(BjListIterator*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a forward-only iterator for the given list
@@ -190,8 +211,8 @@ BANJO_EXPORT void* bj_list_head(
 ///
 /// This function uses the allocator set in the given list for any memory-wise
 /// operation performed by this iterator.
-BANJO_EXPORT BjListIterator bj_list_iterator_create(
-    const BjList list ///< The `BjList` object to iterate
+BANJO_EXPORT BjListIterator* bj_list_iterator_create(
+    BjList* list
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +225,7 @@ BANJO_EXPORT BjListIterator bj_list_iterator_create(
 /// This function uses the allocator set in the given iterator to destroy the
 /// iterator.
 BANJO_EXPORT void bj_list_iterator_destroy(
-    BjListIterator iterator
+    BjListIterator* iterator
 );
 
 
@@ -214,7 +235,7 @@ BANJO_EXPORT void bj_list_iterator_destroy(
 /// \param iterator The iterator object
 /// \return `true` if the iterator has more elements.
 BANJO_EXPORT bool bj_list_iterator_has_next(
-    BjListIterator iterator
+    BjListIterator* iterator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -223,7 +244,7 @@ BANJO_EXPORT bool bj_list_iterator_has_next(
 /// \param iterator The iterator object
 /// \return A pointer to the next element in the iteration or _0_ if no new element.
 BANJO_EXPORT void* bj_list_iterator_next(
-    BjListIterator iterator
+    BjListIterator* iterator
 );
 
 
