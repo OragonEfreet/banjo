@@ -6,7 +6,11 @@
 
 #include <string.h>
 
+#include "internal.h"
+
 #define BUCKET_COUNT 10
+
+BJ_IMPL_OBJ(HashTable, hash_table)
 
 // FNV-1a hash function constants
 #define FNV_PRIME 0x01000193 // 16777619
@@ -67,23 +71,6 @@ void bj_hash_table_reset(
     bj_array_reset(&htable->buckets);
 }
 
-BjHashTable* bj_hash_table_new(
-    const BjHashTableInfo*       p_info,
-    const BjAllocationCallbacks* p_allocator
-) {
-    bj_assert(p_info != 0);
-    BjHashTable* htable = bj_malloc(sizeof(struct BjHashTable_T), p_allocator);
-    bj_hash_table_init(p_info, p_allocator, htable);
-    return htable;
-}
-
-void bj_hash_table_del(
-    BjHashTable* htable
-) {
-    bj_assert(htable != 0);
-    bj_hash_table_reset(htable);
-    bj_free(htable, htable->p_allocator);
-}
 
 void bj_hash_table_clear(
     BjHashTable* htable

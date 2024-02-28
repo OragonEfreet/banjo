@@ -2,6 +2,10 @@
 #include <banjo/error.h>
 #include <banjo/world.h>
 
+/* #include "internal.h" */
+
+/* BJ_IMPL_OBJ(World, world) */
+
 BjWorld* bj_world_new(
     const BjWorldInfo*           p_info,
     const BjAllocationCallbacks* p_allocator
@@ -16,6 +20,13 @@ BjWorld* bj_world_new(
     return world;
 }
 
+void bj_world_del(
+    BjWorld* world
+) {
+    bj_assert(world != 0);
+    bj_free(world, world->p_allocator);
+}
+
 void bjInitWorld( const BjWorldInfo* create_info, BjWorld* world) {
     // ...
 }
@@ -24,12 +35,6 @@ void bjResetWorld(BjWorld* world) {
     // ...
 }
 
-void bj_world_del(
-    BjWorld* world
-) {
-    bj_assert(world != 0);
-    bj_free(world, world->p_allocator);
-}
 // Tableau de component id -> Signature? Has to be sorted
 // Archetype -> Tableau de signatures+entity ID qui ont cette signature
 // Map EntityID -> Archetype?

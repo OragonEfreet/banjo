@@ -1,6 +1,10 @@
-#include "banjo/list.h"
-#include "banjo/memory.h"
 #include <banjo/error.h>
+#include <banjo/list.h>
+#include <banjo/memory.h>
+
+#include "internal.h"
+
+BJ_IMPL_OBJ(List, list)
 
 void bj_list_init(
     const BjListInfo*              p_info,
@@ -14,23 +18,6 @@ void bj_list_init(
     p_instance->weak_owning = p_info->weak_owning;
     p_instance->entry_size  = p_instance->weak_owning ? sizeof(void*) * 2 : p_info->value_size + sizeof(void*);
     p_instance->p_head = 0;
-}
-
-void bj_list_reset(
-    BjList* list
-) {
-    bj_assert(list != 0);
-    bj_list_clear(list);
-}
-
-BjList* bj_list_new(
-    const BjListInfo*     p_info,
-    const BjAllocationCallbacks* p_allocator
-) {
-    bj_assert(p_info != 0);
-    BjList* list = bj_malloc(sizeof(struct BjList_T), p_allocator);
-    bj_list_init(p_info, p_allocator, list);
-    return list;
 }
 
 void bj_list_clear(
@@ -47,12 +34,11 @@ void bj_list_clear(
     list->p_head = 0;
 }
 
-void bj_list_del(
+void bj_list_reset(
     BjList* list
 ) {
     bj_assert(list != 0);
-    bj_list_reset(list);
-    bj_free(list, list->p_allocator);
+    bj_list_clear(list);
 }
 
 usize bj_list_count(
