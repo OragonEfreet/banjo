@@ -89,9 +89,11 @@ BANJO_EXPORT void bj_hash_table_clear(
 ////////////////////////////////////////////////////////////////////////////////
 /// Insert a value in the hash table.
 ///
-/// \param table The table object.
-/// \param key   The key used to identify the value.
-/// \param value A pointer to the value to insert.
+/// \param table   The table object.
+/// \param p_key   The key used to identify the value.
+/// \param p_value A pointer to the value to insert.
+///
+/// \return A pionter to the inserted value.
 ///
 /// The the key already exists, the associated value is modified to stored
 /// `value` instead.
@@ -106,7 +108,7 @@ BANJO_EXPORT void bj_hash_table_clear(
 ///
 /// When set to _false_, the inserted data is copied into the container's internal
 /// memory using \ref bj_memcpy.
-BANJO_EXPORT void bj_hash_table_set(
+BANJO_EXPORT void* bj_hash_table_set(
     BjHashTable table,
     void*       p_key,
     void*       p_value
@@ -118,6 +120,8 @@ BANJO_EXPORT void bj_hash_table_set(
 /// \param table      The table object
 /// \param p_key      The search key
 /// \param p_default  The value returned if the key if not found
+///
+/// \return A pointer to the found value or `p_default`.
 ///
 /// If `table` holds no value at `p_key`, the function returns `p_default`.
 ///

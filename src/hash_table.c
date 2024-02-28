@@ -94,7 +94,7 @@ void bj_hash_table_clear(
 }
 
 
-BANJO_EXPORT void bj_hash_table_set(
+BANJO_EXPORT void* bj_hash_table_set(
     BjHashTable table,
     void* p_key,
     void* p_value
@@ -111,7 +111,7 @@ BANJO_EXPORT void bj_hash_table_set(
             if(memcmp(key, p_key, table->key_size) == 0) {
                 byte* value = key+sizeof(table->key_size);
                 bj_memcpy(value, p_value, table->value_size);
-                return;
+                return value;
             }
         }
     };
@@ -122,6 +122,7 @@ BANJO_EXPORT void bj_hash_table_set(
     byte* new_value = new_key + table->key_size;
     bj_memcpy(new_key, p_key, table->key_size);
     bj_memcpy(new_value, p_value, table->value_size);
+    return new_value;
 }
 
 void* bj_hash_table_get(
