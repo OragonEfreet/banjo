@@ -116,7 +116,7 @@ BANJO_EXPORT void bj_array_destroy(
 /// to retain the pointer after creating the array.
 ///
 /// \see bj_array_destroy
-void bj_array_init(
+BANJO_EXPORT void bj_array_init(
     const BjArrayInfo*           p_info,
     const BjAllocationCallbacks* p_allocator,
     BjArray*                     p_array
@@ -126,7 +126,7 @@ void bj_array_init(
 /// Resets a \ref BjArray to an invalid state
 ///
 /// \param p_array The array object
-void bj_array_reset(
+BANJO_EXPORT void bj_array_reset(
     BjArray* p_array
 );
 

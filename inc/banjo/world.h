@@ -46,14 +46,14 @@ BANJO_EXPORT void bj_world_destroy(
 /// \param p_info  The info object
 /// \param p_world The world object
 ///
-void bjInitWorld(
+BANJO_EXPORT void bjInitWorld(
     const BjWorldInfo* p_info,
     BjWorld* p_world
 );
 
 /// Reset a given world to invalid state
 /// \param p_world The world object
-void bjResetWorld(BjWorld* p_world);
+BANJO_EXPORT void bjResetWorld(BjWorld* p_world);
 
 
 
