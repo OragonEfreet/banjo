@@ -1,15 +1,14 @@
-#include <banjo/error.h>
-#include <data/world.h>
-
 #include <banjo/array.h>
+#include <banjo/error.h>
+#include <banjo/world.h>
 
-BjWorld bj_world_create(
+BjWorld* bj_world_create(
     const BjWorldInfo*           p_info,
     const BjAllocationCallbacks* p_allocator
 ) {
     bj_assert(p_info != 0);
 
-    BjWorld world = bj_new_struct(BjWorld, p_allocator);
+    BjWorld* world = bj_new_struct(BjWorld, p_allocator);
     world->p_allocator = p_allocator;
     /* BjArray array = {.count = 10}; */
     /* p_array_init(&array); */
@@ -17,16 +16,16 @@ BjWorld bj_world_create(
     return world;
 }
 
-void bjInitWorld( const BjWorldInfo* create_info, BjWorld world) {
+void bjInitWorld( const BjWorldInfo* create_info, BjWorld* world) {
     // ...
 }
 
-void bjResetWorld(BjWorld world) {
+void bjResetWorld(BjWorld* world) {
     // ...
 }
 
 void bj_world_destroy(
-    BjWorld world
+    BjWorld* world
 ) {
     bj_assert(world != 0);
     bj_free(world, world->p_allocator);

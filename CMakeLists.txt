@@ -25,10 +25,6 @@ set(_interface_headers
 
 set(_sources
     src/array.c
-    src/data/array.h
-    src/data/hash_table.h
-    src/data/list.h
-    src/data/world.h
     src/error.c
     src/hash_table.c
     src/list.c
@@ -43,6 +39,8 @@ if(MSVC)
 endif()
 
 add_library(banjo ${_interface_headers} ${_sources})
+target_compile_definitions(banjo PRIVATE BJ_NO_OPAQUE)
+
 if(NOT MSVC)
     target_compile_options(banjo PRIVATE -Wall -pedantic)
 endif()

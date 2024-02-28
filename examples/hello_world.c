@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[]) {
 
-    /* BjWorld world = BJ_NULL_HANDLE; */
+    /* BjWorld* world = BJ_NULL_HANDLE; */
 
     /* bj_world_create( &(BjWorldInfo){}, &world); */
 

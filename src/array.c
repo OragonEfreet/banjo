@@ -1,14 +1,33 @@
-#include <data/array.h>
+#include <banjo/array.h>
 #include <banjo/error.h>
 
-#include <string.h>
+
+BjArray* bj_array_create(
+    const BjArrayInfo*     p_info,
+    const BjAllocationCallbacks* p_allocator
+) {
+    bj_assert(p_info != 0);
+    BjArray* array    = bj_new_struct(BjArray, p_allocator);
+    bj_array_init(p_info, p_allocator, array);
+    return array;
+}
+
+void bj_array_destroy(
+    BjArray* array
+) {
+    bj_assert(array != 0);
+    bj_array_reset(array);
+    bj_free(array, array->p_allocator);
+}
 
 void bj_array_init(
     const BjArrayInfo*           p_info,
     const BjAllocationCallbacks* p_allocator,
-    BjArray                      p_instance
+    BjArray*                     p_instance
 ) {
     bj_assert(p_info != 0);
+
+    bj_array_reset(p_instance);
 
     p_instance->p_allocator = p_allocator;
     p_instance->value_size  = p_info->value_size;
@@ -23,7 +42,7 @@ void bj_array_init(
 }
 
 void bj_array_reset(
-    BjArray array
+    BjArray* array
 ) {
     bj_assert(array != 0);
     bj_free(array->p_data, array->p_allocator);
@@ -35,33 +54,15 @@ void bj_array_reset(
     array->p_data      = 0;
 }
 
-BjArray bj_array_create(
-    const BjArrayInfo*     p_info,
-    const BjAllocationCallbacks* p_allocator
-) {
-    bj_assert(p_info != 0);
-    BjArray array     = bj_new_struct(BjArray, p_allocator);
-    bj_array_init(p_info, p_allocator, array);
-    return array;
-}
-
-void bj_array_destroy(
-    BjArray array
-) {
-    bj_assert(array != 0);
-    bj_array_reset(array);
-    bj_free(array, array->p_allocator);
-}
-
 BANJO_EXPORT void bj_array_clear(
-    BjArray array
+    BjArray* array
 ) {
     bj_assert(array != 0);
     array->count = 0;
 }
 
 BANJO_EXPORT void bj_array_shrink(
-    BjArray array
+    BjArray* array
 ) {
     bj_assert(array != 0);
     if(array->count < array->capacity) {
@@ -76,7 +77,7 @@ BANJO_EXPORT void bj_array_shrink(
 }
 
 void bj_array_set_count(
-    BjArray array,
+    BjArray* array,
     usize   count
 ) {
     bj_assert(array != 0);
@@ -91,7 +92,7 @@ void bj_array_set_count(
 }
 
 void bj_array_reserve(
-    BjArray array,
+    BjArray* array,
     usize   capacity
 ) {
     bj_assert(array != 0);
@@ -111,7 +112,7 @@ void bj_array_reserve(
 }
 
 BANJO_EXPORT void bj_array_push(
-    BjArray array,
+    BjArray* array,
     const void* value
 ) {
     bj_assert(array != 0);
@@ -125,7 +126,7 @@ BANJO_EXPORT void bj_array_push(
 }
 
 BANJO_EXPORT void bj_array_pop(
-    BjArray array
+    BjArray* array
 ) {
     bj_assert(array != 0);
     bj_assert(array->count > 0);
@@ -133,7 +134,7 @@ BANJO_EXPORT void bj_array_pop(
 }
 
 void* bj_array_at(
-    const BjArray array,
+    const BjArray* array,
     usize   at
 ) {
     bj_assert(array);
@@ -142,14 +143,14 @@ void* bj_array_at(
 }
 
 BANJO_EXPORT void* bj_array_data(
-    const BjArray array
+    const BjArray* array
 ) {
     bj_assert(array);
     return array->p_data;
 }
 
 usize bj_array_count(
-    const BjArray array
+    const BjArray* array
 ) {
     bj_assert(array);
     return array->count;

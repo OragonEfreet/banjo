@@ -9,5 +9,6 @@ foreach(_bin_source_path ${_bin_source_paths})
     set_target_properties(${_target} PROPERTIES OUTPUT_NAME ${_test_name})
     add_test(NAME ${_test_name} COMMAND ${_target})
     set_target_properties(${_target} PROPERTIES FOLDER "Tests")
+    target_compile_definitions(${_target} PRIVATE BJ_NO_OPAQUE)
 endforeach()
 

@@ -24,8 +24,17 @@
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
-/// Handle to an array object.
-BJ_DEFINE_HANDLE(BjArray);
+typedef struct BjArray_T BjArray;
+
+#ifdef BJ_NO_OPAQUE
+struct BjArray_T {
+    const BjAllocationCallbacks* p_allocator;
+    usize                        value_size;
+    usize                        capacity;
+    usize                        count;
+    void*                        p_data;
+};
+#endif
 
 /// Info structure used to create a new \ref BjArray.
 typedef struct {
@@ -37,8 +46,8 @@ typedef struct {
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new \ref BjArray.
 ///
-/// \param p_info       Creation options.
-/// \param p_allocator  Allocation callbacks, can be _0_.
+/// \param p_info      Creation options.
+/// \param p_allocator Allocation callbacks, can be _0_.
 ///
 /// \return A handle to a new array.
 ///
@@ -60,7 +69,7 @@ typedef struct {
 /// to retain the pointer after creating the array.
 ///
 /// \see bj_array_destroy
-BANJO_EXPORT BjArray bj_array_create(
+BANJO_EXPORT BjArray* bj_array_create(
     const BjArrayInfo*           p_info,
     const BjAllocationCallbacks* p_allocator
 );
@@ -77,7 +86,19 @@ BANJO_EXPORT BjArray bj_array_create(
 ///
 /// \see bj_array_create
 BANJO_EXPORT void bj_array_destroy(
-    BjArray array
+    BjArray* array
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Initializes an array
+void bj_array_init(
+    const BjArrayInfo*           p_info,
+    const BjAllocationCallbacks* p_allocator,
+    BjArray*                     p_array
+);
+
+void bj_array_reset(
+    BjArray* p_array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +112,7 @@ BANJO_EXPORT void bj_array_destroy(
 /// To effectively free the memory used by the array, call \ref bj_array_shrink
 /// after have called this function.
 BANJO_EXPORT void bj_array_clear(
-    BjArray array
+    BjArray* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +129,7 @@ BANJO_EXPORT void bj_array_clear(
 ///
 /// \note This function effectively invalidates the array data pointer.
 BANJO_EXPORT void bj_array_shrink(
-    BjArray array
+    BjArray* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +145,7 @@ BANJO_EXPORT void bj_array_shrink(
 /// \note This function will invalidate the array data pointer if the resize
 /// required a new reallocation.
 BANJO_EXPORT void bj_array_set_count(
-    BjArray array,
+    BjArray* array,
     usize   count
 );
 
@@ -141,7 +162,7 @@ BANJO_EXPORT void bj_array_set_count(
 /// \note This function will invalidate the array data pointer if the reserve
 /// if performed.
 BANJO_EXPORT void bj_array_reserve(
-    BjArray array,
+    BjArray* array,
     usize   capacity
 );
 
@@ -161,7 +182,7 @@ BANJO_EXPORT void bj_array_reserve(
 /// \note If needed, the function will reserve more space in the array,
 /// which invalidates the data pointer.
 BANJO_EXPORT void bj_array_push(
-    BjArray array,
+    BjArray* array,
     const void* value
 );
 
@@ -172,7 +193,7 @@ BANJO_EXPORT void bj_array_push(
 ///
 /// This function does nothing else than reducing the array size by _1_.
 BANJO_EXPORT void bj_array_pop(
-    BjArray array
+    BjArray* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +205,7 @@ BANJO_EXPORT void bj_array_pop(
 /// \return A pointer to the value.
 ///
 BANJO_EXPORT void* bj_array_at(
-    const BjArray array,
+    const BjArray* array,
     usize   at
 );
 
@@ -195,7 +216,7 @@ BANJO_EXPORT void* bj_array_at(
 ///
 /// \return a pointer to the underlying data.
 BANJO_EXPORT void* bj_array_data(
-    const BjArray array
+    const BjArray* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +226,7 @@ BANJO_EXPORT void* bj_array_data(
 ///
 /// \return a integer indicating the number of elements in the array.
 BANJO_EXPORT usize bj_array_count(
-    const BjArray array
+    const BjArray* array
 );
 
 /// \} End of array group
