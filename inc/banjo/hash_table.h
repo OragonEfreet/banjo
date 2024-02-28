@@ -10,8 +10,8 @@
 ///  **Generic Name**     | hash table                 
 /// ----------------------|-----------------------
 ///  **Opaque Type**      | yes                   
-///  **Create Function**  | \ref bj_hash_table_create  
-///  **Destroy Function** | \ref bj_hash_table_destroy 
+///  **Create Function**  | \ref bj_hash_table_new  
+///  **Destroy Function** | \ref bj_hash_table_del 
 ///
 /// \ref BjHashTable is an associative container that maps a _key_ to an _value_.
 /// The elements are stored in an array of linked lists called _buckets_.
@@ -62,31 +62,31 @@ typedef struct BjHashTableInfo {
 /// \par Memory Management
 ///
 /// The table pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_hash_table_destroy.
+/// by calling \ref bj_hash_table_del.
 ///
 /// When `p_allocator` is not _0_, the given allocator is used though the entire
 /// life of the table object.
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the table.
 ///
-/// \see bj_array_destroy
-BANJO_EXPORT BjHashTable* bj_hash_table_create(
+/// \see bj_array_del
+BANJO_EXPORT BjHashTable* bj_hash_table_new(
     const BjHashTableInfo*       p_info,
     const BjAllocationCallbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Destroy a table previously created by \ref bj_hash_table_create.
+/// Destroy a table previously created by \ref bj_hash_table_new.
 ///
 /// \param table The instance to destroy.
 ///
 /// \par Memory Management
 ///
 /// The memory allocated for `table` will be freed using the allocator callbacks
-/// set by \ref bj_hash_table_create.
+/// set by \ref bj_hash_table_new.
 ///
-/// \see bj_hash_table_create
-BANJO_EXPORT void bj_hash_table_destroy(
+/// \see bj_hash_table_new
+BANJO_EXPORT void bj_hash_table_del(
     BjHashTable* table
 );
 
@@ -100,14 +100,14 @@ BANJO_EXPORT void bj_hash_table_destroy(
 /// \par Memory Management
 ///
 /// The table pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_hash_table_destroy.
+/// by calling \ref bj_hash_table_del.
 ///
 /// When `p_allocator` is not _0_, the given allocator is used though the entire
 /// life of the table object.
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the table.
 ///
-/// \see bj_array_destroy
+/// \see bj_array_del
 BANJO_EXPORT void bj_hash_table_init(
     const BjHashTableInfo*       p_info,
     const BjAllocationCallbacks* p_allocator,

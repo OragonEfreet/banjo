@@ -2,7 +2,7 @@
 #include <banjo/error.h>
 
 
-BjArray* bj_array_create(
+BjArray* bj_array_new(
     const BjArrayInfo*     p_info,
     const BjAllocationCallbacks* p_allocator
 ) {
@@ -12,7 +12,7 @@ BjArray* bj_array_create(
     return array;
 }
 
-void bj_array_destroy(
+void bj_array_del(
     BjArray* array
 ) {
     bj_assert(array != 0);

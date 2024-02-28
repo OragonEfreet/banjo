@@ -67,7 +67,7 @@ void bj_hash_table_reset(
     bj_array_reset(&htable->buckets);
 }
 
-BjHashTable* bj_hash_table_create(
+BjHashTable* bj_hash_table_new(
     const BjHashTableInfo*       p_info,
     const BjAllocationCallbacks* p_allocator
 ) {
@@ -77,7 +77,7 @@ BjHashTable* bj_hash_table_create(
     return htable;
 }
 
-void bj_hash_table_destroy(
+void bj_hash_table_del(
     BjHashTable* htable
 ) {
     bj_assert(htable != 0);

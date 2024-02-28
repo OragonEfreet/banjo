@@ -2,7 +2,7 @@
 
 int main(int argc, char* argv[]) {
 
-    BjArray* array = bj_array_create(&(BjArrayInfo) {
+    BjArray* array = bj_array_new(&(BjArrayInfo) {
         .value_size = sizeof(int),
     }, 0);
 

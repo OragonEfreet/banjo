@@ -10,8 +10,8 @@
 ///  **Generic Name**     | array                 
 /// ----------------------|-----------------------
 ///  **Opaque Type**      | yes                   
-///  **Create Function**  | \ref bj_array_create  
-///  **Destroy Function** | \ref bj_array_destroy 
+///  **Create Function**  | \ref bj_array_new  
+///  **Destroy Function** | \ref bj_array_del 
 ///
 /// \ref BjArray is a sequence container that encapsulate dynamic C-Style arrays.
 /// The elements are stored contiguously, which means that they can be accessed
@@ -63,31 +63,31 @@ typedef struct {
 /// \par Memory Management
 ///
 /// The array pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_array_destroy.
+/// by calling \ref bj_array_del.
 ///
 /// When `p_allocator` is not _0_, the given allocator is used though the entire
 /// life of the array object.
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the array.
 ///
-/// \see bj_array_destroy
-BANJO_EXPORT BjArray* bj_array_create(
+/// \see bj_array_del
+BANJO_EXPORT BjArray* bj_array_new(
     const BjArrayInfo*           p_info,
     const BjAllocationCallbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Destroy an array previously created by \ref bj_array_create.
+/// Destroy an array previously created by \ref bj_array_new.
 ///
 /// \param array The instance to destroy.
 ///
 /// \par Memory Management
 ///
 /// The memory allocated for `array` will be freed using the allocator callbacks
-/// set by \ref bj_array_create.
+/// set by \ref bj_array_new.
 ///
-/// \see bj_array_create
-BANJO_EXPORT void bj_array_destroy(
+/// \see bj_array_new
+BANJO_EXPORT void bj_array_del(
     BjArray* array
 );
 
@@ -108,14 +108,14 @@ BANJO_EXPORT void bj_array_destroy(
 /// \par Memory Management
 ///
 /// The array pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_array_destroy.
+/// by calling \ref bj_array_del.
 ///
 /// When `p_allocator` is not _0_, the given allocator is used though the entire
 /// life of the array object.
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the array.
 ///
-/// \see bj_array_destroy
+/// \see bj_array_del
 BANJO_EXPORT void bj_array_init(
     const BjArrayInfo*           p_info,
     const BjAllocationCallbacks* p_allocator,

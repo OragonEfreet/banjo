@@ -104,7 +104,7 @@ BANJO_EXPORT void bj_free(
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the default allocators.
 ///
-/// When a function requires memory changes, (such as \ref bj_world_create),
+/// When a function requires memory changes, (such as \ref bj_world_new),
 /// the caller can send callback memory functions.
 /// If the given allocator is _0_, Banjo uses global defaults
 /// (`malloc`/`realloc`/`free`).

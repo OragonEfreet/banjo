@@ -2,7 +2,7 @@
 #include <banjo/error.h>
 #include <banjo/world.h>
 
-BjWorld* bj_world_create(
+BjWorld* bj_world_new(
     const BjWorldInfo*           p_info,
     const BjAllocationCallbacks* p_allocator
 ) {
@@ -24,7 +24,7 @@ void bjResetWorld(BjWorld* world) {
     // ...
 }
 
-void bj_world_destroy(
+void bj_world_del(
     BjWorld* world
 ) {
     bj_assert(world != 0);
