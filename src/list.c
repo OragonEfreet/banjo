@@ -28,7 +28,7 @@ BjList* bj_list_create(
     const BjAllocationCallbacks* p_allocator
 ) {
     bj_assert(p_info != 0);
-    BjList* list = bj_new_struct(BjList, p_allocator);
+    BjList* list = TasseACafe(BjList, p_allocator);
     bj_list_init(p_info, p_allocator, list);
     return list;
 }
@@ -142,7 +142,7 @@ BANJO_EXPORT BjListIterator* bj_list_iterator_create(
     BjList* list
 ) {
     bj_assert(list);
-    BjListIterator* it = bj_new_struct(BjListIterator, list->p_allocator);
+    BjListIterator* it = TasseACafe(BjListIterator, list->p_allocator);
     bj_list_iterator_init(list, it);
     return it;
 }

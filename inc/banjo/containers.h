@@ -11,7 +11,7 @@
 /// | Name            | Summary                         | 
 /// |-----------------|---------------------------------|
 /// | #BjArray        | C-Style contiguous array        |
-/// | #BjList  | Forward-only linked list        |
+/// | #BjList         | Forward-only linked list        |
 /// | #BjHashTable    | Unordered associative container |
 ///
 /// Containers purpose is to provide your code with organized memory.

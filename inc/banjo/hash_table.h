@@ -108,7 +108,7 @@ BANJO_EXPORT void bj_hash_table_destroy(
 /// to retain the pointer after creating the table.
 ///
 /// \see bj_array_destroy
-void bj_hash_table_init(
+BANJO_EXPORT void bj_hash_table_init(
     const BjHashTableInfo*       p_info,
     const BjAllocationCallbacks* p_allocator,
     BjHashTable*                 p_table
@@ -118,7 +118,7 @@ void bj_hash_table_init(
 /// Reset a hash table to an invalid state
 ///
 /// \param p_table The Hash Table object.
-void bj_hash_table_reset(
+BANJO_EXPORT void bj_hash_table_reset(
     BjHashTable* p_table
 );
 

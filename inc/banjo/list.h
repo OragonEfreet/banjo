@@ -111,17 +111,19 @@ BANJO_EXPORT void bj_list_destroy(
 /// to retain the pointer after creating the list.
 ///
 /// \see bj_list_destroy
-void bj_list_init(
-    const BjListInfo* p_info,
+BANJO_EXPORT void bj_list_init(
+    const BjListInfo*            p_info,
     const BjAllocationCallbacks* p_allocator,
-    BjList* p_list
+    BjList*                      p_list
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Reset a given list to invalid state
 ///
 /// \param p_list The list object
-void bj_list_reset(BjList* p_list);
+BANJO_EXPORT void bj_list_reset(
+    BjList* p_list
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Clear all data in the list.

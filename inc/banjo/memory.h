@@ -14,12 +14,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// A convenience function for instanciating a new struct of given type.
 /// The function forwards the call to \ref bj_malloc.
-#define bj_new_struct(type, allocator) bj_malloc(sizeof(struct type##_T), allocator)
+#define TasseACafe(type, allocator) bj_malloc(sizeof(struct type##_T), allocator)
 
 ////////////////////////////////////////////////////////////////////////////////
 /// A convenience function for instanciating a new object of given type.
 /// The function forwards the call to \ref bj_malloc.
-#define bj_new(type, allocator) bj_malloc(sizeof(type), allocator)
+#define ChaiseDeJardin(type, allocator) bj_malloc(sizeof(type), allocator)
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Memory allocation callback.

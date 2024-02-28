@@ -72,7 +72,7 @@ BjHashTable* bj_hash_table_create(
     const BjAllocationCallbacks* p_allocator
 ) {
     bj_assert(p_info != 0);
-    BjHashTable* htable = bj_new_struct(BjHashTable, p_allocator);
+    BjHashTable* htable = TasseACafe(BjHashTable, p_allocator);
     bj_hash_table_init(p_info, p_allocator, htable);
     return htable;
 }

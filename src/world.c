@@ -8,7 +8,7 @@ BjWorld* bj_world_create(
 ) {
     bj_assert(p_info != 0);
 
-    BjWorld* world = bj_new_struct(BjWorld, p_allocator);
+    BjWorld* world = TasseACafe(BjWorld, p_allocator);
     world->p_allocator = p_allocator;
     /* BjArray array = {.count = 10}; */
     /* p_array_init(&array); */
