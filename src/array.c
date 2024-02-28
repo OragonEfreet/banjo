@@ -7,7 +7,7 @@ BjArray* bj_array_create(
     const BjAllocationCallbacks* p_allocator
 ) {
     bj_assert(p_info != 0);
-    BjArray* array    = TasseACafe(BjArray, p_allocator);
+    BjArray* array = bj_malloc(sizeof(struct BjArray_T), p_allocator);
     bj_array_init(p_info, p_allocator, array);
     return array;
 }

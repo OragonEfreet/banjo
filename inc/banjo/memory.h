@@ -12,16 +12,6 @@
 #include <banjo/api.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// A convenience function for instanciating a new struct of given type.
-/// The function forwards the call to \ref bj_malloc.
-#define TasseACafe(type, allocator) bj_malloc(sizeof(struct type##_T), allocator)
-
-////////////////////////////////////////////////////////////////////////////////
-/// A convenience function for instanciating a new object of given type.
-/// The function forwards the call to \ref bj_malloc.
-#define ChaiseDeJardin(type, allocator) bj_malloc(sizeof(type), allocator)
-
-////////////////////////////////////////////////////////////////////////////////
 /// Memory allocation callback.
 /// Used in \ref BjAllocationCallbacks to set the function used for custom allocations.
 typedef void* (*BjAllocationFunctionPtr)(
