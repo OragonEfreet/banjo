@@ -1,24 +1,9 @@
 #include <banjo/array.h>
 #include <banjo/error.h>
 
+#include "internal.h"
 
-BjArray* bj_array_new(
-    const BjArrayInfo*     p_info,
-    const BjAllocationCallbacks* p_allocator
-) {
-    bj_assert(p_info != 0);
-    BjArray* array = bj_malloc(sizeof(struct BjArray_T), p_allocator);
-    bj_array_init(p_info, p_allocator, array);
-    return array;
-}
-
-void bj_array_del(
-    BjArray* array
-) {
-    bj_assert(array != 0);
-    bj_array_reset(array);
-    bj_free(array, array->p_allocator);
-}
+BJ_IMPL_OBJ(Array, array)
 
 void bj_array_init(
     const BjArrayInfo*           p_info,

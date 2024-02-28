@@ -27,6 +27,7 @@ set(_sources
     src/array.c
     src/error.c
     src/hash_table.c
+    src/internal.h
     src/list.c
     src/log.c
     src/memory.c
