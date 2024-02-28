@@ -10,8 +10,8 @@
 ///  **Generic Name**     | list                
 /// ----------------------|-----------------------
 ///  **Opaque Type**      | yes                   
-///  **Create Function**  | \ref bj_list_create  
-///  **Destroy Function** | \ref bj_list_destroy 
+///  **Create Function**  | \ref bj_list_new  
+///  **Destroy Function** | \ref bj_list_del 
 ///
 /// \ref BjList is a container that supports constant time insertion and removal
 /// from anywhere in the container.
@@ -66,7 +66,7 @@ typedef struct BjListInfo {
 /// \par Memory Management
 ///
 /// The list pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_list_destroy.
+/// by calling \ref bj_list_del.
 ///
 /// When `p_allocator` is not _0_, the given allocator is used though the entire
 /// life of the list object.
@@ -75,24 +75,24 @@ typedef struct BjListInfo {
 ///
 /// \par Weak / Strong ownership
 ///
-/// \see bj_list_destroy
-BANJO_EXPORT BjList* bj_list_create(
+/// \see bj_list_del
+BANJO_EXPORT BjList* bj_list_new(
     const BjListInfo*     p_info,
     const BjAllocationCallbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Destroy a list previously created by \ref bj_list_create.
+/// Destroy a list previously created by \ref bj_list_new.
 ///
 /// \param list The instance to destroy.
 ///
 /// \par Memory Management
 ///
 /// The memory allocated for `list` will be freed using the allocator callbacks
-/// set by \ref bj_list_create.
+/// set by \ref bj_list_new.
 ///
-/// \see bj_list_create
-BANJO_EXPORT void bj_list_destroy(
+/// \see bj_list_new
+BANJO_EXPORT void bj_list_del(
     BjList* list
 );
 
@@ -110,7 +110,7 @@ BANJO_EXPORT void bj_list_destroy(
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the list.
 ///
-/// \see bj_list_destroy
+/// \see bj_list_del
 BANJO_EXPORT void bj_list_init(
     const BjListInfo*            p_info,
     const BjAllocationCallbacks* p_allocator,
@@ -244,7 +244,7 @@ struct BjListIterator_T {
 ///
 /// This function uses the allocator set in the given list for any memory-wise
 /// operation performed by this iterator.
-BANJO_EXPORT BjListIterator* bj_list_iterator_create(
+BANJO_EXPORT BjListIterator* bj_list_iterator_new(
     BjList* list
 );
 
@@ -257,7 +257,7 @@ BANJO_EXPORT BjListIterator* bj_list_iterator_create(
 ///
 /// This function uses the allocator set in the given iterator to destroy the
 /// iterator.
-BANJO_EXPORT void bj_list_iterator_destroy(
+BANJO_EXPORT void bj_list_iterator_del(
     BjListIterator* iterator
 );
 

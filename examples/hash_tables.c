@@ -15,7 +15,7 @@ typedef struct {
     entry_t** entries;
 } ht_t;
 
-ht_t* ht_create(void) {
+ht_t* ht_new(void) {
     // ajllocate table
     ht_t* hashtable = malloc(sizeof(ht_t));
 
@@ -148,7 +148,7 @@ void ht_dump(ht_t* hashtable) {
 
 int main(int rgc, char* arg[]) {
 
-    ht_t *ht = ht_create();
+    ht_t *ht = ht_new();
 
 
     ht_set(ht, "name1", "em");

@@ -17,14 +17,14 @@ TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjList* list = bj_list_create(&create_info, 0);
+    BjList* list = bj_list_new(&create_info, 0);
     REQUIRE_VALUE(list);
 
     REQUIRE_EQ(list->value_size, test_data->value_type->mem_size);
     REQUIRE_NULL(list->p_allocator);
     REQUIRE_NULL(list->p_head);
 
-    bj_list_destroy(list);
+    bj_list_del(list);
 }
 
 TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type;}) {
@@ -33,12 +33,12 @@ TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjList* list = bj_list_create(&create_info, 0);
+    BjList* list = bj_list_new(&create_info, 0);
     REQUIRE_VALUE(list);
 
     REQUIRE_EQ(bj_list_count(list), 0);
 
-    bj_list_destroy(list);
+    bj_list_del(list);
 }
 
 TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_type;}) {
@@ -47,14 +47,14 @@ TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_typ
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjList* list = bj_list_create(&create_info, 0);
+    BjList* list = bj_list_new(&create_info, 0);
     REQUIRE_VALUE(list);
 
     REQUIRE_NULL(list->p_head);
     bj_list_prepend(list, test_data->value_type->values);
     REQUIRE_VALUE(list->p_head);
 
-    bj_list_destroy(list);
+    bj_list_del(list);
 }
 
 TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
@@ -64,7 +64,7 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
         .value_size = test_data->value_type->mem_size,
     };
 
-    BjList* list = bj_list_create(&create_info, 0);
+    BjList* list = bj_list_new(&create_info, 0);
     REQUIRE_VALUE(list);
 
     int data = 42;
@@ -74,7 +74,7 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
 
     REQUIRE_EQ(bj_list_count(list), n_operations);
 
-    bj_list_destroy(list);
+    bj_list_del(list);
 }
 
 
@@ -84,7 +84,7 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
         .weak_owning = test_data->weak_owning,
     };
 
-    BjList* list = bj_list_create(&create_info, 0);
+    BjList* list = bj_list_new(&create_info, 0);
     REQUIRE_VALUE(list);
 
     for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
@@ -99,7 +99,7 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
         REQUIRE_EQ(cmp, 0);
     }
 
-    bj_list_destroy(list);
+    bj_list_del(list);
 }
 
 TEST_CASE(iterator) {
@@ -107,7 +107,7 @@ TEST_CASE(iterator) {
         .value_size = sizeof(short),
     };
 
-    BjList* list = bj_list_create(&create_info, 0);
+    BjList* list = bj_list_new(&create_info, 0);
     REQUIRE_VALUE(list);
 
     short values[] = {4, -1, 102};
@@ -117,7 +117,7 @@ TEST_CASE(iterator) {
         bj_list_prepend(list, &values[n]);
     }
 
-    BjListIterator* it = bj_list_iterator_create(list);
+    BjListIterator* it = bj_list_iterator_new(list);
 
     usize i = n_elements - 1;
     while(bj_list_iterator_has_next(it)) {
@@ -127,8 +127,8 @@ TEST_CASE(iterator) {
     }
 
 
-    bj_list_iterator_destroy(it);
-    bj_list_destroy(list);
+    bj_list_iterator_del(it);
+    bj_list_del(list);
 }
 
 typedef struct {

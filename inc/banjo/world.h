@@ -24,24 +24,24 @@ typedef struct BjWorldInfo {
 /// Create a new instance of \ref BjWorld.
 ///
 /// The caller owns the returned object.
-/// To free it properly, use \ref bj_world_destroy.
+/// To free it properly, use \ref bj_world_del.
 ///
 /// \return A new \ref BjWorld.
-BANJO_EXPORT BjWorld* bj_world_create(
+BANJO_EXPORT BjWorld* bj_world_new(
     const BjWorldInfo*           p_info,        ///< The creation configuration.
     const BjAllocationCallbacks* p_allocator    ///< Custom allocator. Can be _0_.
 );
 
 /// Destroy an instance of \ref BjWorld.
 /// \param world The world object
-BANJO_EXPORT void bj_world_destroy(
+BANJO_EXPORT void bj_world_del(
     BjWorld* world
 );
 
 /// Initializes a new instance of \ref BjWorld.
 ///
 /// The caller owns the returned object.
-/// To free it properly, use \ref bj_world_destroy.
+/// To free it properly, use \ref bj_world_del.
 ///
 /// \param p_info  The info object
 /// \param p_world The world object

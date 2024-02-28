@@ -23,7 +23,7 @@ void bj_list_reset(
     bj_list_clear(list);
 }
 
-BjList* bj_list_create(
+BjList* bj_list_new(
     const BjListInfo*     p_info,
     const BjAllocationCallbacks* p_allocator
 ) {
@@ -47,7 +47,7 @@ void bj_list_clear(
     list->p_head = 0;
 }
 
-void bj_list_destroy(
+void bj_list_del(
     BjList* list
 ) {
     bj_assert(list != 0);
@@ -138,7 +138,7 @@ void* bj_list_head(
     return bj_list_value(list, 0);
 }
 
-BANJO_EXPORT BjListIterator* bj_list_iterator_create(
+BANJO_EXPORT BjListIterator* bj_list_iterator_new(
     BjList* list
 ) {
     bj_assert(list);
@@ -147,7 +147,7 @@ BANJO_EXPORT BjListIterator* bj_list_iterator_create(
     return it;
 }
 
-BANJO_EXPORT void bj_list_iterator_destroy(
+BANJO_EXPORT void bj_list_iterator_del(
     BjListIterator* iterator
 ) {
     const BjAllocationCallbacks* allocator = iterator->list->p_allocator;
