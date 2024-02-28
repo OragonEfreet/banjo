@@ -27,6 +27,8 @@ typedef u32 (*bjHashFunctionPtr)(
     const void* p_data, usize size
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Typedef for the BjHashTable_T struct
 typedef struct BjHashTable_T BjHashTable;
 
 #ifdef BJ_NO_OPAQUE
@@ -88,8 +90,37 @@ BANJO_EXPORT void bj_hash_table_destroy(
     BjHashTable* table
 );
 
-void bj_hash_table_init(const BjHashTableInfo*, const BjAllocationCallbacks*, BjHashTable*);
-void bj_hash_table_reset(BjHashTable*);
+////////////////////////////////////////////////////////////////////////////////
+/// Initializes a new \ref BjHashTable.
+///
+/// \param p_info       Creation options.
+/// \param p_allocator  Allocation callbacks, can be _0_.
+/// \param p_table      The object to initialize
+///
+/// \par Memory Management
+///
+/// The table pointed to by the returned handle **must** be released after use
+/// by calling \ref bj_hash_table_destroy.
+///
+/// When `p_allocator` is not _0_, the given allocator is used though the entire
+/// life of the table object.
+/// The content of `p_allocator` being copied in memory, the caller doesn't have
+/// to retain the pointer after creating the table.
+///
+/// \see bj_array_destroy
+void bj_hash_table_init(
+    const BjHashTableInfo*       p_info,
+    const BjAllocationCallbacks* p_allocator,
+    BjHashTable*                 p_table
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Reset a hash table to an invalid state
+///
+/// \param p_table The Hash Table object.
+void bj_hash_table_reset(
+    BjHashTable* p_table
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Clear all data in the hash table.

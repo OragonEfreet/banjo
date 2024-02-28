@@ -5,6 +5,8 @@
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
+////////////////////////////////////////////////////////////////////////////////
+/// Typedef for the BjWorld_T struct
 typedef struct BjWorld_T BjWorld;
 
 #ifdef BJ_NO_OPAQUE
@@ -31,12 +33,28 @@ BANJO_EXPORT BjWorld* bj_world_create(
 );
 
 /// Destroy an instance of \ref BjWorld.
+/// \param world The world object
 BANJO_EXPORT void bj_world_destroy(
     BjWorld* world
 );
 
-void bjInitWorld(const BjWorldInfo*, BjWorld*);
-void bjResetWorld(BjWorld*);
+/// Initializes a new instance of \ref BjWorld.
+///
+/// The caller owns the returned object.
+/// To free it properly, use \ref bj_world_destroy.
+///
+/// \param p_info  The info object
+/// \param p_world The world object
+///
+void bjInitWorld(
+    const BjWorldInfo* p_info,
+    BjWorld* p_world
+);
+
+/// Reset a given world to invalid state
+/// \param p_world The world object
+void bjResetWorld(BjWorld* p_world);
+
 
 
 
