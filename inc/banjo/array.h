@@ -24,6 +24,8 @@
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
+////////////////////////////////////////////////////////////////////////////////
+/// Typedef for the BjArray_T struct
 typedef struct BjArray_T BjArray;
 
 #ifdef BJ_NO_OPAQUE
@@ -90,13 +92,40 @@ BANJO_EXPORT void bj_array_destroy(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Initializes an array
+/// Initializes a new \ref BjArray.
+///
+/// \param p_info      Creation options.
+/// \param p_allocator Allocation callbacks, can be _0_.
+/// \param p_array     The array object
+///
+/// \par Create Info
+///
+/// When `p_info->capacity` > _0_, the array is allocated with `value_size`
+/// times the value in bytes.
+///
+/// When `p_info->count` > _0_, the array is allocated and resized to the value.
+///
+/// \par Memory Management
+///
+/// The array pointed to by the returned handle **must** be released after use
+/// by calling \ref bj_array_destroy.
+///
+/// When `p_allocator` is not _0_, the given allocator is used though the entire
+/// life of the array object.
+/// The content of `p_allocator` being copied in memory, the caller doesn't have
+/// to retain the pointer after creating the array.
+///
+/// \see bj_array_destroy
 void bj_array_init(
     const BjArrayInfo*           p_info,
     const BjAllocationCallbacks* p_allocator,
     BjArray*                     p_array
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Resets a \ref BjArray to an invalid state
+///
+/// \param p_array The array object
 void bj_array_reset(
     BjArray* p_array
 );
