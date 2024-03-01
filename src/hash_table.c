@@ -35,26 +35,26 @@ void bj_hash_table_init(
     BjHashTable*              p_instance
 ) {
     bj_assert(p_info != 0);
-    bj_assert(p_info->value_size != 0);
-    bj_assert(p_info->key_size != 0);
+    bj_assert(p_info->bytes_value != 0);
+    bj_assert(p_info->bytes_key != 0);
 
     p_instance->p_allocator = p_allocator;
     p_instance->weak_owning = p_info->weak_owning;
     p_instance->fn_hash     = p_info->fn_hash ? p_info->fn_hash : fnv1a_hash;
-    p_instance->key_size    = p_info->key_size;
-    p_instance->value_size  = p_info->value_size;
-    p_instance->entry_size  = p_info->weak_owning ? sizeof(void*) * 2 : p_instance->key_size + p_instance->value_size;
+    p_instance->bytes_key    = p_info->bytes_key;
+    p_instance->bytes_value  = p_info->bytes_value;
+    p_instance->bytes_entry  = p_info->weak_owning ? sizeof(void*) * 2 : p_instance->bytes_key + p_instance->bytes_value;
 
     bj_array_init(&(BjArrayInfo) {
-        .value_size = sizeof(BjList),
-        .count      = BUCKET_COUNT,
+        .bytes_payload = sizeof(BjList),
+        .count        = BUCKET_COUNT,
     }, p_allocator, &p_instance->buckets);
 
     for(usize i = 0 ; i < bj_array_count(&p_instance->buckets) ; ++i) {
         BjList* bucket = bj_array_at(&p_instance->buckets, i);
         bj_list_init(&(BjListInfo) {
-            .value_size  = p_instance->entry_size,
-            .weak_owning = false,
+            .bytes_payload  = p_instance->bytes_entry,
+            .weak_owning   = false,
         }, p_allocator, bucket);
     }
 }
@@ -85,7 +85,7 @@ BANJO_EXPORT void* bj_hash_table_set(
     void* p_key,
     void* p_value
 ) {
-    u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
+    u32 hash = table->fn_hash(p_key, table->bytes_key) % BUCKET_COUNT;
     BjList* bucket = bj_array_at(&table->buckets, hash);
 
     BjListIterator it;
@@ -94,9 +94,9 @@ BANJO_EXPORT void* bj_hash_table_set(
     while(bj_list_iterator_has_next(&it)) {
         byte* key = bj_list_iterator_next(&it);
         if(key != 0) {
-            if(memcmp(key, p_key, table->key_size) == 0) {
-                byte* value = key+table->key_size;
-                bj_memcpy(value, p_value, table->value_size);
+            if(memcmp(key, p_key, table->bytes_key) == 0) {
+                byte* value = key+table->bytes_key;
+                bj_memcpy(value, p_value, table->bytes_value);
                 return value;
             }
         }
@@ -105,9 +105,9 @@ BANJO_EXPORT void* bj_hash_table_set(
 
     void* new_entry = bj_list_prepend(bucket, 0);
     byte* new_key   = new_entry;
-    byte* new_value = new_key + table->key_size;
-    bj_memcpy(new_key, p_key, table->key_size);
-    bj_memcpy(new_value, p_value, table->value_size);
+    byte* new_value = new_key + table->bytes_key;
+    bj_memcpy(new_key, p_key, table->bytes_key);
+    bj_memcpy(new_value, p_value, table->bytes_value);
     return new_value;
 }
 
@@ -116,7 +116,7 @@ void* bj_hash_table_get(
     const void*       p_key,
     void*             p_default
 ) {
-    u32 hash = table->fn_hash(p_key, table->key_size) % BUCKET_COUNT;
+    u32 hash = table->fn_hash(p_key, table->bytes_key) % BUCKET_COUNT;
     BjList* bucket = bj_array_at(&table->buckets, hash);
 
     BjListIterator it;
@@ -125,8 +125,8 @@ void* bj_hash_table_get(
     while(bj_list_iterator_has_next(&it)) {
         byte* key = bj_list_iterator_next(&it);
         if(key != 0) {
-            if(memcmp(key, p_key, table->key_size) == 0) {
-                return key+table->key_size;
+            if(memcmp(key, p_key, table->bytes_key) == 0) {
+                return key+table->bytes_key;
             }
         }
     };

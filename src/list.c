@@ -13,10 +13,10 @@ void bj_list_init(
 ) {
     bj_assert(p_info != 0);
 
-    p_instance->p_allocator = p_allocator;
-    p_instance->value_size  = p_info->value_size;
-    p_instance->weak_owning = p_info->weak_owning;
-    p_instance->entry_size  = p_instance->weak_owning ? sizeof(void*) * 2 : p_info->value_size + sizeof(void*);
+    p_instance->p_allocator  = p_allocator;
+    p_instance->bytes_payload = p_info->bytes_payload;
+    p_instance->weak_owning  = p_info->weak_owning;
+    p_instance->bytes_entry   = p_instance->weak_owning ? sizeof(void*) * 2 : p_info->bytes_payload + sizeof(void*);
     p_instance->p_head = 0;
 }
 
@@ -74,7 +74,7 @@ void* bj_list_insert(
     // p_previous_block gets the address of the memory holding the newly current element.
 
     // We create the new block, its first bytes must contain the address of the next block
-    u8* p_block = bj_malloc(list->entry_size, list->p_allocator);
+    u8* p_block = bj_malloc(list->bytes_entry, list->p_allocator);
     bj_memcpy(p_block, &p_next_block, sizeof(void*));
     // While in previous block, we put the adress of the current block
     bj_memcpy(p_previous_block, &p_block, sizeof(void*)); 
@@ -86,7 +86,7 @@ void* bj_list_insert(
     } else {
         if(p_data != 0) {
             // Strong owning, copy pointed value into buffer value
-            bj_memcpy(value, p_data, list->value_size); 
+            bj_memcpy(value, p_data, list->bytes_payload); 
         }
     }
 
