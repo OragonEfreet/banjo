@@ -25,6 +25,7 @@ TEST_CASE(set_data) {
     REQUIRE_VALUE(htable);
 
     bj_hash_table_set(htable, &key, &value);
+    value = 71;
     bj_hash_table_set(htable, &key, &value);
 
     /* REQUIRE_EQ(htable->p_allocator, 0); */

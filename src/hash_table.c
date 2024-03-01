@@ -95,7 +95,7 @@ BANJO_EXPORT void* bj_hash_table_set(
         byte* key = bj_list_iterator_next(&it);
         if(key != 0) {
             if(memcmp(key, p_key, table->key_size) == 0) {
-                byte* value = key+sizeof(table->key_size);
+                byte* value = key+table->key_size;
                 bj_memcpy(value, p_value, table->value_size);
                 return value;
             }
@@ -126,7 +126,7 @@ void* bj_hash_table_get(
         byte* key = bj_list_iterator_next(&it);
         if(key != 0) {
             if(memcmp(key, p_key, table->key_size) == 0) {
-                return key+sizeof(table->key_size);
+                return key+table->key_size;
             }
         }
     };
