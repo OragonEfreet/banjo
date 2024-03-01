@@ -6,7 +6,7 @@
 #include <string.h>
 
 typedef struct {
-    usize mem_size;
+    usize bytes_payload;
     usize n_values;
     void* values;
 } element_type;
@@ -14,13 +14,13 @@ typedef struct {
 TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}) {
 
     BjListInfo create_info = {
-        .value_size = test_data->value_type->mem_size,
+        .bytes_payload = test_data->value_type->bytes_payload,
     };
 
     BjList* list = bj_list_new(&create_info, 0);
     REQUIRE_VALUE(list);
 
-    REQUIRE_EQ(list->value_size, test_data->value_type->mem_size);
+    REQUIRE_EQ(list->bytes_payload, test_data->value_type->bytes_payload);
     REQUIRE_NULL(list->p_allocator);
     REQUIRE_NULL(list->p_head);
 
@@ -30,7 +30,7 @@ TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}
 TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type;}) {
 
     BjListInfo create_info = {
-        .value_size = test_data->value_type->mem_size,
+        .bytes_payload = test_data->value_type->bytes_payload,
     };
 
     BjList* list = bj_list_new(&create_info, 0);
@@ -44,7 +44,7 @@ TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type
 TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_type;}) {
 
     BjListInfo create_info = {
-        .value_size = test_data->value_type->mem_size,
+        .bytes_payload = test_data->value_type->bytes_payload,
     };
 
     BjList* list = bj_list_new(&create_info, 0);
@@ -61,7 +61,7 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
     usize n_operations = 3;
 
     BjListInfo create_info = {
-        .value_size = test_data->value_type->mem_size,
+        .bytes_payload = test_data->value_type->bytes_payload,
     };
 
     BjList* list = bj_list_new(&create_info, 0);
@@ -80,7 +80,7 @@ TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
 
 TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
     BjListInfo create_info = {
-        .value_size  = test_data->value_type->mem_size,
+        .bytes_payload  = test_data->value_type->bytes_payload,
         .weak_owning = test_data->weak_owning,
     };
 
@@ -88,14 +88,14 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
     REQUIRE_VALUE(list);
 
     for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
-        void* data = (byte*)test_data->value_type->values + test_data->value_type->mem_size * n;
+        void* data = (byte*)test_data->value_type->values + test_data->value_type->bytes_payload * n;
 
         bj_list_prepend(list, data);
         REQUIRE_EQ(bj_list_count(list), n+1);
 
         // Test if the first entry is the newly assigned one
         void* res = bj_list_head(list);
-        int cmp = memcmp(res, data, test_data->value_type->mem_size);
+        int cmp = memcmp(res, data, test_data->value_type->bytes_payload);
         REQUIRE_EQ(cmp, 0);
     }
 
@@ -104,7 +104,7 @@ TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
 
 TEST_CASE(iterator) {
     BjListInfo create_info = {
-        .value_size = sizeof(short),
+        .bytes_payload = sizeof(short),
     };
 
     BjList* list = bj_list_new(&create_info, 0);
@@ -144,11 +144,11 @@ int main(int argc, char* argv[]) {
 
     element_type element_types[] = {
         {
-            .mem_size = sizeof(int),
+            .bytes_payload = sizeof(int),
             .n_values = 5,
             .values = (int[]){45, 104, 0, -30, 128},
         },{
-            .mem_size = sizeof(big_struct),
+            .bytes_payload = sizeof(big_struct),
             .n_values = 1,
             .values = (big_struct[]){{
                 .value00 = 0.0, .value01 = 0.1,

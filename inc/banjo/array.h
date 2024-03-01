@@ -31,18 +31,18 @@ typedef struct BjArray_T BjArray;
 #ifdef BJ_NO_OPAQUE
 struct BjArray_T {
     const BjAllocationCallbacks* p_allocator;
-    usize                        value_size;
+    usize                        bytes_payload;
     usize                        capacity;
     usize                        count;
-    void*                        p_data;
+    void*                        p_buffer;
 };
 #endif
 
 /// Info structure used to create a new \ref BjArray.
 typedef struct {
-    usize value_size; ///< Size in bytes, of each item in the array.
-    usize count;      ///< Number of elements in the array.
-    usize capacity;   ///< Number of allocated elements in the array.
+    usize bytes_payload; ///< Size in bytes, of each item in the array.
+    usize count;        ///< Number of elements in the array.
+    usize capacity;     ///< Number of allocated elements in the array.
 } BjArrayInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ typedef struct {
 ///
 /// \par Create Info
 ///
-/// When `p_info->capacity` > _0_, the array is allocated with `value_size`
+/// When `p_info->capacity` > _0_, the array is allocated with `bytes_payload`
 /// times the value in bytes.
 ///
 /// When `p_info->count` > _0_, the array is allocated and resized to the value.
@@ -100,7 +100,7 @@ BANJO_EXPORT void bj_array_del(
 ///
 /// \par Create Info
 ///
-/// When `p_info->capacity` > _0_, the array is allocated with `value_size`
+/// When `p_info->capacity` > _0_, the array is allocated with `bytes_payload`
 /// times the value in bytes.
 ///
 /// When `p_info->count` > _0_, the array is allocated and resized to the value.

@@ -3,7 +3,7 @@
 int main(int argc, char* argv[]) {
 
     BjArray* array = bj_array_new(&(BjArrayInfo) {
-        .value_size = sizeof(int),
+        .bytes_payload = sizeof(int),
     }, 0);
 
     int a = 42;

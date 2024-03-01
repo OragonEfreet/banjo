@@ -30,8 +30,8 @@ typedef struct BjList_T BjList;
 #ifdef BJ_NO_OPAQUE
 struct BjList_T {
     const BjAllocationCallbacks* p_allocator;
-    usize                        value_size;
-    usize                        entry_size;
+    usize                        bytes_payload;
+    usize                        bytes_entry;
     bool                         weak_owning;
     void*                        p_head;
 };
@@ -51,8 +51,8 @@ struct BjList_T {
 /// memory using \ref bj_memcpy.
 ///
 typedef struct BjListInfo {
-    usize  value_size;  ///< Size in bytes of each item in the list.
-    bool   weak_owning; ///< If _true_, the container doesn't own the stored elements.
+    usize  bytes_payload;  ///< Size in bytes of each item in the list.
+    bool   weak_owning;   ///< If _true_, the container doesn't own the stored elements.
 } BjListInfo;
 
 ////////////////////////////////////////////////////////////////////////////////

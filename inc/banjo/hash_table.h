@@ -36,17 +36,17 @@ struct BjHashTable_T {
     const BjAllocationCallbacks* p_allocator;
     BjArray                      buckets;
     bool                         weak_owning;
-    usize                        value_size;
-    usize                        key_size;
+    usize                        bytes_value;
+    usize                        bytes_key;
     bjHashFunctionPtr            fn_hash;
-    usize                        entry_size;
+    usize                        bytes_entry;
 };
 #endif
 
 /// Info structure used to create a new \ref BjHashTable.
 typedef struct BjHashTableInfo {
-    usize                  value_size;  ///< Size in bytes of each item in the table.
-    usize                  key_size;    ///< Size in bytes of each key.
+    usize                  bytes_value;  ///< Size in bytes of each item in the table.
+    usize                  bytes_key;    ///< Size in bytes of each key.
     bool                   weak_owning; ///< _true_ is the table owns the inserted memory.
     bjHashFunctionPtr      fn_hash;     ///< Hash function used for keys.
 } BjHashTableInfo;
