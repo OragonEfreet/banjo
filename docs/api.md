@@ -40,6 +40,39 @@ digraph workflow {
 }
 \enddot
 
+To see more in details what happens behind **new** and **del**, read the following sections.
+
+# The Complete Workflow
+
+The full workflow of an object's type is shown here:
+
+\dot
+digraph workflow {
+    rankdir=TB
+    node [shape=box, color="grey", fontcolor="grey"];
+    edge [fontname="Courier New", color="grey", fontcolor="grey"];
+    {rank=same;start;ready;freed}
+    
+    
+    start [shape="point", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    freed [shape="point", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    uninitialized [label="Uninitialized", color="black", fontcolor="black"]
+    ready [label="Ready", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    empty [label="Empty", color="black", fontcolor="black"]
+    
+    uninitialized -> ready [label="init", color="black", fontcolor="black"]
+    start -> uninitialized [label="alloc", color="black", fontcolor="black"]   
+    start -> ready [label="new", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    ready -> empty [label="reset", color="black", fontcolor="black"]
+    empty -> empty [label="reset", style="dashed"]
+    empty -> ready [label="init", style="dashed"]
+    empty -> freed [label="free", color="black", fontcolor="black"]
+    uninitialized -> freed [label="free", style="dashed"]
+    ready -> freed [label="del", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    empty -> freed [label="del", style="dashed"]
+}
+\enddot
+
 ## Allocation
 
 First, the object's memory size is allocated using #bj_malloc.
@@ -63,7 +96,7 @@ For every type `BjType/bj_type` [`BjArray/bj_array`]:
 * `bj_type_alloc` **will** return an *uninitialized* `Type` [#BjArray].
 
 \warning Passing any *uninitialized* object as a parameter to a function is undefined behaviour.
-The only exceptions are the type's matching `*_init` and `*_reset` functions and #bj_free.
+The only exception are the type's matching `*_init` and `*_del` functions and #bj_free.
 
 ## Initialization
 
@@ -319,37 +352,6 @@ bj_array_del(array);
 bj_array_reset(array);
 bj_free(array);
 ```
-
-# The Complete Workflow
-
-The full view of an object's type is shown here:
-
-\dot
-digraph workflow {
-    rankdir=TB
-    node [shape=box, color="grey", fontcolor="grey"];
-    edge [fontname="Courier New", color="grey", fontcolor="grey"];
-    {rank=same;start;ready;freed}
-    
-    
-    start [shape="point", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    freed [shape="point", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    uninitialized [label="Uninitialized", color="black", fontcolor="black"]
-    ready [label="Ready", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    empty [label="Empty", color="black", fontcolor="black"]
-    
-    uninitialized -> ready [label="init", color="black", fontcolor="black"]
-    start -> uninitialized [label="alloc", color="black", fontcolor="black"]   
-    start -> ready [label="new", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    ready -> empty [label="reset", color="black", fontcolor="black"]
-    empty -> empty [label="reset", style="dashed"]
-    empty -> ready [label="init", style="dashed"]
-    empty -> freed [label="free", color="black", fontcolor="black"]
-    uninitialized -> freed [label="free", style="dashed"]
-    ready -> freed [label="del", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    empty -> freed [label="del", style="dashed"]
-}
-\enddot
 
 # Stack-Allocated Objects
 
