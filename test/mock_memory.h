@@ -23,13 +23,13 @@ typedef struct  {
     REQUIRE_EQ(ALLOC.application_current_allocated, 0); \
     REQUIRE_EQ(ALLOC.actual_current_allocated, 0);
 
-void logAllocations(sAllocationData* data) {
-    bj_log(TRACE, "Memory:\n\tApplication allocated:\t %ld (max: %ld)\n\tTotal allocated:\t %ld (max %ld)\n\t%d allocs, %d reallocs, %d frees",
-        data->application_current_allocated, data->application_max_allocated,
-        data->actual_current_allocated, data->actual_max_allocated,
-        data->n_allocations, data->n_reallocations, data->n_free
-    );
-}
+/* void logAllocations(sAllocationData* data) { */
+/*     bj_log(TRACE, "Memory:\n\tApplication allocated:\t %ld (max: %ld)\n\tTotal allocated:\t %ld (max %ld)\n\t%d allocs, %d reallocs, %d frees", */
+/*         data->application_current_allocated, data->application_max_allocated, */
+/*         data->actual_current_allocated, data->actual_max_allocated, */
+/*         data->n_allocations, data->n_reallocations, data->n_free */
+/*     ); */
+/* } */
 
 typedef struct {
     usize appsize;
@@ -59,7 +59,7 @@ static void* mock_malloc(void* p_user_data, usize appsize) {
     }
     pData->n_allocations += 1;
 
-    bj_trace("Allocated %ld bytes @ %p", meta->appsize, meta->ptr); 
+    /* bj_trace("Allocated %ld bytes @ %p", meta->appsize, meta->ptr); */ 
 
     bj_memset(meta->ptr, 0, meta->appsize);
     return meta->ptr;
@@ -88,7 +88,7 @@ void mock_free(void* p_user_data, void* pAppPtr) {
         pData->application_current_allocated -= appsize;
         pData->n_free += 1;
 
-        bj_trace("Freed %ld bytes @ %p", appsize, pAppPtr); 
+        /* bj_trace("Freed %ld bytes @ %p", appsize, pAppPtr); */ 
     }
 }
 

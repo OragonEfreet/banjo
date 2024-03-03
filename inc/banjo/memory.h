@@ -137,8 +137,10 @@ BANJO_EXPORT void bj_memory_unset_defaults(void);
 /// \param[in] p_src    Pointer to the object to copy from.
 /// \param[in] mem_size Number of bytes to copy.
 ///
+/// \return `p_dest` pointer.
+///
 /// The function effectively calls the standard `memcpy` function.
-BANJO_EXPORT void bj_memcpy(
+BANJO_EXPORT void* bj_memcpy(
     void*       p_dest,
     const void* p_src,
     usize       mem_size

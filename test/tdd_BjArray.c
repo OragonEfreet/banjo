@@ -2,167 +2,136 @@
 
 #include <banjo/array.h>
 
-TEST_CASE(zero_initialization) {
-
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=1}, 0);
-    REQUIRE_VALUE(array);
-
-    REQUIRE_EQ(array->capacity, 0);
-    REQUIRE_EQ(array->count, 0);
-    REQUIRE_EQ(array->p_allocator, 0);
-    REQUIRE_EQ(array->p_buffer, 0);
-
-    bj_array_del(array);
-}
-
-TEST_CASE(initialize_with_size_allocates_memory) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=1, .count = 10}, 0);
-    REQUIRE_EQ(array->count, 10);
-    REQUIRE_VALUE(array->p_buffer);
-    bj_array_del(array);
-}
-
-TEST_CASE(initialize_with_size_set_shrink_capacity) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=1, .count = 10}, 0);
-    REQUIRE_EQ(array->count, array->capacity);
-    bj_array_del(array);
-}
-
-TEST_CASE(init_explicit_capacity) {
-
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=1}, 0);
-    REQUIRE_VALUE(array);
-
-    bj_array_del(array);
-}
+BjArray array;
 
 typedef struct {
-    int i;
-} value_type;
+    short elem0;
+    long elem1;
+} payload;
+static const usize bytes_payload = sizeof(payload);
 
-static value_type values[] = {
-    {.i = 42},
-    {.i = 420},
+TEST_CASE(zero_initialization) {
+    bj_array_init(&array, 0, 0);
+    REQUIRE_EMPTY(BjArray, &array);
+}
+
+TEST_CASE(array_alloc) {
+    void* block = bj_array_alloc(0);
+    REQUIRE_VALUE(block);
+    bj_array_del(block);
+}
+
+TEST_CASE(del_0_is_ok) {
+    bj_array_del(0);
+}
+
+TEST_CASE(invalid_byte_size_is_zero) {
+    BjArrayInfo info = {.bytes_payload = 0};
+    bj_array_init(&array, &info, 0);
+    REQUIRE_EMPTY(BjArray, &array);
+}
+
+TEST_CASE(empty_initialization) {
+    BjArrayInfo info = {.bytes_payload = bytes_payload};
+    bj_array_init(&array, &info, 0);
+
+    REQUIRE_EQ(array.p_allocator, 0);
+    REQUIRE_EQ(array.bytes_payload, bytes_payload);
+    REQUIRE_EQ(array.capacity, 0);
+    REQUIRE_EQ(array.count, 0);
+    REQUIRE_EQ(array.p_buffer, 0);
+}
+
+TEST_CASE_ARGS(init_with_capacity_allocates_buffer, {usize capacity;}) {
+
+    BjArrayInfo info = {.bytes_payload = bytes_payload, .capacity = 10};
+    bj_array_init(&array, &info, 0);
+
+    REQUIRE_EQ(array.p_allocator, 0);
+    REQUIRE_EQ(array.bytes_payload, bytes_payload);
+    REQUIRE_EQ(array.capacity, test_data->capacity);
+    REQUIRE_EQ(array.count, 0);
+    REQUIRE_VALUE(array.p_buffer);
+
+    bj_array_reset(&array);
 };
-static usize n_values = sizeof(values) / sizeof(values[0]);
 
-TEST_CASE(each_insertion_growth_count_by_1) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=sizeof(value_type)}, 0);
+TEST_CASE_ARGS(init_with_count_allocates_buffer, {usize count;}) {
 
-    for(usize i = 0 ; i < n_values ; ++i) {
-        bj_array_push(array, &values[i]);
-        REQUIRE_EQ(bj_array_count(array), i + 1);
-        REQUIRE_EQ(array->count, i + 1);
-    }
+    BjArrayInfo info = {.bytes_payload = bytes_payload, .count = test_data->count};
+    bj_array_init(&array, &info, 0);
 
-    bj_array_del(array);
-}
+    REQUIRE_EQ(array.p_allocator, 0);
+    REQUIRE_EQ(array.bytes_payload, bytes_payload);
+    REQUIRE(array.capacity >= test_data->count);
+    REQUIRE_EQ(array.count, test_data->count);
+    REQUIRE_VALUE(array.p_buffer);
+    bj_array_reset(&array);
+};
 
-TEST_CASE(inserted_value_retrieved_using_last_index) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=sizeof(value_type)}, 0);
+TEST_CASE_ARGS(init_with_count_gt_capacity, {usize count; usize capacity;}) {
 
-    for(usize i = 0 ; i < n_values ; ++i) {
-        bj_array_push(array, &values[i]);
+    BjArrayInfo info = {
+        .bytes_payload = bytes_payload,
+        .count         = test_data->count,
+        .capacity      = test_data->capacity
+    };
+    bj_array_init(&array, &info, 0);
 
-        value_type* got = bj_array_at(array, i);
-        REQUIRE_VALUE(got);
-        REQUIRE_EQ(got->i, values[i].i);
-    }
+    REQUIRE_EQ(array.p_allocator, 0);
+    REQUIRE_EQ(array.bytes_payload, bytes_payload);
+    REQUIRE(array.capacity >= test_data->count);
+    REQUIRE_EQ(array.count, test_data->count);
+    REQUIRE_VALUE(array.p_buffer);
+    bj_array_reset(&array);
+};
 
-    bj_array_del(array);
-}
+TEST_CASE_ARGS(init_with_count_lt_capacity, {usize count; usize capacity;}) {
 
-TEST_CASE(capacity_grows_twice_count) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=sizeof(value_type)}, 0);
+    BjArrayInfo info = {
+        .bytes_payload = bytes_payload,
+        .count         = test_data->count,
+        .capacity      = test_data->capacity
+    };
+    bj_array_init(&array, &info, 0);
 
-    for(usize i = 0 ; i < n_values ; ++i) {
-        bj_array_push(array, &values[i]);
-        usize count = bj_array_count(array);
-        REQUIRE_EQ(array->capacity, count * 2);
-    }
+    REQUIRE_EQ(array.p_allocator, 0);
+    REQUIRE_EQ(array.bytes_payload, bytes_payload);
+    REQUIRE_EQ(array.capacity, test_data->capacity);
+    REQUIRE_EQ(array.count, test_data->count);
+    REQUIRE_VALUE(array.p_buffer);
+    bj_array_reset(&array);
+};
 
-    bj_array_del(array);
-}
+TEST_CASE(empty) {
+    bj_array_init(&array, 0, 0);
+    void* block = 0;
 
-TEST_CASE(capacity_is_not_updated_when_big_enough) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=sizeof(value_type)}, 0);
-    usize expected_capacity = n_values * 2;
-    bj_array_reserve(array, expected_capacity);
+    bj_array_clear(&array);                      REQUIRE_EMPTY(BjArray, &array);
+    bj_array_shrink(&array);                     REQUIRE_EMPTY(BjArray, &array);
+    bj_array_set_count(&array, 10);              REQUIRE_EMPTY(BjArray, &array);
+    bj_array_reserve(&array, 10);                REQUIRE_EMPTY(BjArray, &array);
+    bj_array_push(&array, &(payload){.elem0=0}); REQUIRE_EMPTY(BjArray, &array);
+    bj_array_pop(&array);                        REQUIRE_EMPTY(BjArray, &array);
+    block = bj_array_at(&array, 10);             REQUIRE_EMPTY(BjArray, &array); REQUIRE_NULL(block);
+    block = bj_array_data(&array);               REQUIRE_EMPTY(BjArray, &array); REQUIRE_NULL(block);
+    usize count = bj_array_count(&array);        REQUIRE_EMPTY(BjArray, &array); REQUIRE_EQ(count, 0);
 
-    for(usize i = 0 ; i < n_values ; ++i) {
-        bj_array_push(array, &values[i]);
-        REQUIRE_EQ(array->capacity, expected_capacity);
-    }
-
-    bj_array_del(array);
-}
-
-TEST_CASE(asking_smaller_capacity_does_nothing) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=sizeof(value_type)}, 0);
-    bj_array_reserve(array, 10);
-    bj_array_reserve(array, 5);
-    REQUIRE_EQ(array->capacity, 10);
-    bj_array_del(array);
-}
-
-TEST_CASE(clear_array_set_count_to_0) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=sizeof(value_type)}, 0);
-    usize expected_capacity = n_values * 2;
-    bj_array_reserve(array, expected_capacity);
-
-    for(usize i = 0 ; i < n_values ; ++i) {
-        bj_array_push(array, &values[i]);
-    }
-    bj_array_clear(array);
-    REQUIRE_EQ(array->count, 0);
-    usize count = bj_array_count(array);
-    REQUIRE_EQ(count, 0);
-
-    bj_array_del(array);
-}
-
-TEST_CASE(clear_and_shrink_array_clears_memory) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=sizeof(value_type)}, 0);
-    usize expected_capacity = n_values * 2;
-    bj_array_reserve(array, expected_capacity);
-
-    for(usize i = 0 ; i < n_values ; ++i) {
-        bj_array_push(array, &values[i]);
-    }
-    bj_array_clear(array);
-    bj_array_shrink(array);
-    REQUIRE_EQ(array->capacity, 0);
-    REQUIRE_EQ(array->p_buffer, 0);
-
-    bj_array_del(array);
-}
-
-TEST_CASE(shrink_sets_capacity_to_size) {
-    BjArray* array = bj_array_new(&(BjArrayInfo){.bytes_payload=sizeof(value_type)}, 0);
-
-    for(usize i = 0 ; i < n_values ; ++i) {
-        bj_array_push(array, &values[i]);
-        bj_array_shrink(array);
-        REQUIRE_EQ(array->capacity, array->count);
-    }
-    bj_array_del(array);
 }
 
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
     RUN_TEST(zero_initialization);
-    RUN_TEST(initialize_with_size_allocates_memory);
-    RUN_TEST(initialize_with_size_set_shrink_capacity);
-    RUN_TEST(init_explicit_capacity);
-    RUN_TEST(each_insertion_growth_count_by_1);
-    RUN_TEST(inserted_value_retrieved_using_last_index);
-    RUN_TEST(capacity_grows_twice_count);
-    RUN_TEST(capacity_is_not_updated_when_big_enough);
-    RUN_TEST(asking_smaller_capacity_does_nothing);
-    RUN_TEST(clear_array_set_count_to_0);
-    RUN_TEST(clear_and_shrink_array_clears_memory);
-    RUN_TEST(shrink_sets_capacity_to_size);
+    RUN_TEST(array_alloc);
+    RUN_TEST(del_0_is_ok);
+    RUN_TEST(invalid_byte_size_is_zero);
+    RUN_TEST(empty_initialization);
+    RUN_TEST_ARGS(init_with_capacity_allocates_buffer, .capacity = 10);
+    RUN_TEST_ARGS(init_with_count_allocates_buffer, .count = 10);
+    RUN_TEST_ARGS(init_with_count_gt_capacity, .count = 10, .capacity = 5);
+    RUN_TEST_ARGS(init_with_count_lt_capacity, .count = 5, .capacity = 10);
+    RUN_TEST(empty);
 
     END_TESTS();
 }
