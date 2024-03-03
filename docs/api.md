@@ -76,7 +76,7 @@ digraph workflow {
 ## Allocation
 
 First, the object's memory size is allocated using #bj_malloc.
-Since the size of a type isn't know by default from a user code, each type provide its own allocation function, for example: #bj_array_alloc.
+Since the size of a type isn't known by default from a user code, each type provide its own allocation function, for example: #bj_array_alloc.
 
 \dot
 digraph workflow {
@@ -123,7 +123,7 @@ For every type `BjType/bj_type` [`BjArray/bj_array`]:
 * The returned `Type` [#BjArray] is *ready*.
 * `bj_type_init` **will** return a *ready* `Type` [#BjArray].
 
-\warning Unless explicited otherwise by the type's documentation, calling the **init** function on an already initialized object **will** result in a memory leak.
+\warning Unless explicitely otherwise by the type's documentation, calling the **init** function on an already initialized object **will** result in a memory leak.
 \dot
 digraph workflow {
     rankdir=LR
@@ -246,7 +246,7 @@ digraph workflow {
 
 ## Free
 
-Freeing the the act of releasing the memory directly used by the object's structure.
+The **fre** function releases the memory directly used by the object's structure.
 This is done by calling the general-purpose #bj_free function on an *empty* or *uninitialized* object:
 
 \dot
@@ -280,7 +280,7 @@ For every type `BjType/bj_type` [`BjArray/bj_array`]:
 * #bj_free **will not** leak any memory when called on an *empty* object.
 
 \warning Unless explicited otherwise by the type's documentation, calling the #bj_free on a *ready* object **will** result in a memory leak.
-This is because #bj_free only deallocated the structure itself.
+This is because #bj_free only deallocates the structure itself.
 The underlying data must be released using the type's **reset** function before.
 \dot
 digraph workflow {
@@ -308,7 +308,7 @@ digraph workflow {
 
 ## Deleting
 
-The **del** function is a convenience that performs both a **reset** and a **free** on an object.
+The **del** function is a convenience function that performs both a **reset** and a **free** on an object.
 It can be called from an *ready* or *empty* object:
 
 \dot
