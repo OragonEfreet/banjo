@@ -1,29 +1,46 @@
 #include <banjo/array.h>
 #include <banjo/error.h>
 
-#include "internal.h"
+BjArray* bj_array_alloc(
+    const BjAllocationCallbacks* p_allocator
+) {
+    return bj_malloc(sizeof(BjArray), p_allocator);
+}
 
-BJ_IMPL_OBJ(Array, array)
+BjArray* bj_array_new(
+    const BjArrayInfo* p_info,
+    const BjAllocationCallbacks* p_allocator
+) {
+    BjArray* obj = bj_array_alloc(p_allocator);
+    bj_array_init(obj, p_info, p_allocator);
+    return obj;
+}
+
+void bj_array_del(
+    BjArray* obj
+) {
+    bj_array_reset(obj);
+    bj_free(obj, obj->p_allocator);
+}
 
 void bj_array_init(
+    BjArray*                      p_instance,
     const BjArrayInfo*           p_info,
-    const BjAllocationCallbacks* p_allocator,
-    BjArray*                     p_instance
+    const BjAllocationCallbacks*   p_allocator
 ) {
     bj_assert(p_info != 0);
 
     bj_array_reset(p_instance);
 
-    p_instance->p_allocator = p_allocator;
-    p_instance->bytes_payload  = p_info->bytes_payload;
+    p_instance->p_allocator   = p_allocator;
+    p_instance->bytes_payload = p_info->bytes_payload;
     p_instance->capacity      = 0;
     p_instance->count         = 0;
-    p_instance->p_buffer     = 0;
+    p_instance->p_buffer      = 0;
 
     bj_array_reserve(p_instance, p_info->count);
     bj_array_set_count(p_instance, p_info->count);
     bj_array_reserve(p_instance, p_info->capacity);
-
 }
 
 void bj_array_reset(
@@ -33,10 +50,10 @@ void bj_array_reset(
     bj_free(array->p_buffer, array->p_allocator);
 
     array->p_allocator   = 0;
-    array->bytes_payload  = 0;
+    array->bytes_payload = 0;
     array->capacity      = 0;
     array->count         = 0;
-    array->p_buffer     = 0;
+    array->p_buffer      = 0;
 }
 
 BANJO_EXPORT void bj_array_clear(

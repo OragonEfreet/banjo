@@ -45,11 +45,12 @@ typedef struct {
     usize capacity;     ///< Number of allocated elements in the array.
 } BjArrayInfo;
 
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new \ref BjArray.
 ///
-/// \param p_info      Creation options.
 /// \param p_allocator Allocation callbacks, can be _0_.
+/// \param p_info      Creation options.
 ///
 /// \return A handle to a new array.
 ///
@@ -76,6 +77,7 @@ BANJO_EXPORT BjArray* bj_array_new(
     const BjAllocationCallbacks* p_allocator
 );
 
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Destroy an array previously created by \ref bj_array_new.
 ///
@@ -89,6 +91,24 @@ BANJO_EXPORT BjArray* bj_array_new(
 /// \see bj_array_new
 BANJO_EXPORT void bj_array_del(
     BjArray* array
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Allocate a new BjArray object
+///
+/// \param p_allocator Allocation callbacks, can be _0_.
+///
+/// \par Memory Management
+///
+/// The array pointed to by the returned handle **must** be released after use
+/// by calling \ref bj_free.
+///
+/// When `p_allocator` is not _0_, the given allocator is used though the entire
+/// life of the array object.
+/// The content of `p_allocator` being copied in memory, the caller doesn't have
+/// to retain the pointer after creating the array.
+BANJO_EXPORT BjArray* bj_array_alloc(
+    const BjAllocationCallbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,9 +137,9 @@ BANJO_EXPORT void bj_array_del(
 ///
 /// \see bj_array_del
 BANJO_EXPORT void bj_array_init(
+    BjArray*                     p_instance,
     const BjArrayInfo*           p_info,
-    const BjAllocationCallbacks* p_allocator,
-    BjArray*                     p_array
+    const BjAllocationCallbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
