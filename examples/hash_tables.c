@@ -24,7 +24,7 @@ ht_t* ht_new(void) {
     
     // Set each to null, needed
     for(int i = 0 ; i < HASH_TABLE_SIZE ; ++i) {
-        hashtable->entries[i] = NULL;
+        hashtable->entries[i] = 0;
     }
 
     return hashtable;
@@ -55,7 +55,7 @@ entry_t* ht_pair(const char* key, const char* value) {
     strcpy(entry->key, key);
     strcpy(entry->value, value);
 
-    entry->next = NULL;
+    entry->next = 0;
 
     return entry;
 }
@@ -125,7 +125,7 @@ char* ht_get(ht_t* hashtable, const char* key) {
 void ht_dump(ht_t* hashtable) {
     for(int i = 0 ; i < HASH_TABLE_SIZE ; ++i) {
         entry_t* entry = hashtable->entries[i];
-        if(entry == NULL) {
+        if(entry == 0) {
             continue;
         }
 

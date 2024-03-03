@@ -9,9 +9,12 @@
 ///
 ///  **Generic Name**     | array                 
 /// ----------------------|-----------------------
-///  **Opaque Type**      | yes                   
-///  **Create Function**  | \ref bj_array_new  
-///  **Destroy Function** | \ref bj_array_del 
+///  Type                 | \ref BjArray
+///  Info Type            | \ref BjArrayInfo
+///  **Alloc**            | \ref bj_array_alloc 
+///  **Create**           | \ref bj_array_new  
+///  **Delete**           | \ref bj_array_del  
+///  **Reset**            | \ref bj_array_reset  
 ///
 /// \ref BjArray is a sequence container that encapsulate dynamic C-Style arrays.
 /// The elements are stored contiguously, which means that they can be accessed
@@ -46,7 +49,7 @@ struct BjArray_T {
 ///
 /// When `count` > _0_, the array is allocated and resized to the value.
 ///
-/// When `bytes_paload` is _0_, the object will be initialized empty.
+/// When `bytes_paload` is _0_, the object will be nil.
 ///
 typedef struct {
     usize bytes_payload; ///< Size in bytes, of each item in the array.
@@ -73,7 +76,7 @@ typedef struct {
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the array.
 ///
-/// If `p_info` is zero, the object is initialized empty.
+/// If `p_info` is zero, the object is initialized nil.
 ///
 /// \see bj_array_del
 BANJO_EXPORT BjArray* bj_array_new(
@@ -153,7 +156,7 @@ BANJO_EXPORT void bj_array_init(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Resets a \ref BjArray to an empty state
+/// Resets a \ref BjArray to a nil state
 ///
 /// \param p_array The array object
 BANJO_EXPORT void bj_array_reset(
@@ -171,7 +174,7 @@ BANJO_EXPORT void bj_array_reset(
 /// To effectively free the memory used by the array, call \ref bj_array_shrink
 /// after have called this function.
 ///
-/// When called on an  empty array object, the function does nothing.
+/// When called on an  nil object, the function does nothing.
 ///
 /// The function fails is `array` is _0_.
 BANJO_EXPORT void bj_array_clear(
@@ -190,7 +193,7 @@ BANJO_EXPORT void bj_array_clear(
 /// This function reallocated the memory used by the array to fit the current 
 /// array count.
 ///
-/// When called on an empty array object, the function does nothing.
+/// When called on an nil object, the function does nothing.
 ///
 /// The function fails is `array` is _0_.
 ///
@@ -209,7 +212,7 @@ BANJO_EXPORT void bj_array_shrink(
 ///
 /// If `count == 0`, this function is the same as calling \ref bj_array_clear.
 ///
-/// When called on an empty object, the function does nothing.
+/// When called on an nil, the function does nothing.
 ///
 /// \note This function will invalidate the array data pointer if the resize
 /// required a new reallocation.
@@ -228,7 +231,7 @@ BANJO_EXPORT void bj_array_set_count(
 /// nothing.
 /// Otherwise, the array in-memory is reallocated to fit the new capacity.
 ///
-/// When called on an empty object, the function does nothing.
+/// When called on an nil, the function does nothing.
 ///
 /// \note This function will invalidate the array data pointer if the reserve
 /// if performed.
@@ -250,7 +253,7 @@ BANJO_EXPORT void bj_array_reserve(
 /// The newly added object can be retrieved by calling \ref bj_array_at with
 /// an index of `count` - _1_.
 ///
-/// When called on an empty object, the function does nothing.
+/// When called on an nil, the function does nothing.
 ///
 /// \note If needed, the function will reserve more space in the array,
 /// which invalidates the data pointer.
@@ -266,7 +269,7 @@ BANJO_EXPORT void bj_array_push(
 ///
 /// This function does nothing else than reducing the array size by _1_.
 ///
-/// When called on an empty object, the function does nothing.
+/// When called on an nil, the function does nothing.
 BANJO_EXPORT void bj_array_pop(
     BjArray* array
 );
@@ -279,7 +282,7 @@ BANJO_EXPORT void bj_array_pop(
 ///
 /// \return A pointer to the value.
 ///
-/// \retval 0 if `array` is empty.
+/// \retval 0 if `array` is nil.
 ///
 BANJO_EXPORT void* bj_array_at(
     const BjArray* array,
@@ -293,7 +296,7 @@ BANJO_EXPORT void* bj_array_at(
 ///
 /// \return a pointer to the underlying data.
 ///
-/// \retval 0 if `array` is empty.
+/// \retval 0 if `array` is nil.
 ///
 BANJO_EXPORT void* bj_array_data(
     const BjArray* array
@@ -306,7 +309,7 @@ BANJO_EXPORT void* bj_array_data(
 ///
 /// \return a integer indicating the number of elements in the array.
 ///
-/// \retval 0 if `array` is empty.
+/// \retval 0 if `array` is nil.
 ///
 BANJO_EXPORT usize bj_array_count(
     const BjArray* array

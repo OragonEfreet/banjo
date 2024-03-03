@@ -32,11 +32,11 @@ digraph workflow {
     node [shape=box, fontname="Courier New"];
     
     start [shape="point"]
-    ready [label="Ready"];
+    valid [label="Valid"];
     freed [label="Freed",shape="point"];
     
-    start -> ready [label="new"]   
-    ready -> freed [label="del"]   
+    start -> valid [label="new"]   
+    valid -> freed [label="del"]   
 }
 \enddot
 
@@ -51,27 +51,35 @@ digraph workflow {
     rankdir=TB
     node [shape=box, color="grey", fontcolor="grey"];
     edge [fontname="Courier New", color="grey", fontcolor="grey"];
-    {rank=same;start;ready;freed}
+    {rank=same;start;valid;freed}
     
     
     start [shape="point", color="forestgreen", fontcolor="forestgreen", penwidth=2]
     freed [shape="point", color="forestgreen", fontcolor="forestgreen", penwidth=2]
     uninitialized [label="Uninitialized", color="black", fontcolor="black"]
-    ready [label="Ready", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    empty [label="Empty", color="black", fontcolor="black"]
+    valid [label="Valid", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    nil [label="Nil", color="black", fontcolor="black"]
     
-    uninitialized -> ready [label="init", color="black", fontcolor="black"]
+    uninitialized -> valid [label="init", color="black", fontcolor="black"]
     start -> uninitialized [label="alloc", color="black", fontcolor="black"]   
-    start -> ready [label="new", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    ready -> empty [label="reset", color="black", fontcolor="black"]
-    empty -> empty [label="reset", style="dashed"]
-    empty -> ready [label="init", style="dashed"]
-    empty -> freed [label="free", color="black", fontcolor="black"]
+    start -> valid [label="new", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    valid -> nil [label="reset", color="black", fontcolor="black"]
+    nil -> nil [label="reset", style="dashed"]
+    nil -> valid [label="init", style="dashed"]
+    nil -> freed [label="free", color="black", fontcolor="black"]
     uninitialized -> freed [label="free", style="dashed"]
-    ready -> freed [label="del", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    empty -> freed [label="del", style="dashed"]
+    valid -> freed [label="del", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    nil -> freed [label="del", style="dashed"]
 }
 \enddot
+
+### Object States
+
+All along their lifecycle, an object can be described as in one of these qualifier:
+
+* **uninitialized**: The memory cannot be used as-is and may contain any random data.
+* **nil**: The object is zero-initialized. It is always safe to use a Nil object.
+* **valid**: The object has meaningful data and can be used in functions with expected results.
 
 ## Allocation
 
@@ -109,9 +117,9 @@ digraph workflow {
     
     start [shape="point", color="grey"]
     uninitialized [label="Uninitialized"]
-    ready [label="Ready"]
+    valid [label="Valid"]
     
-    uninitialized -> ready [label="init"]
+    uninitialized -> valid [label="init"]
     start -> uninitialized [label="alloc", color="grey", fontcolor="grey"]   
 }
 \enddot
@@ -120,11 +128,11 @@ For every type `BjType/bj_type` [`BjArray/bj_array`]:
 
 * The **init** function is `void bj_type_init(BjType*, const BjTypeInfo*, const BjAllocationCallbacks*)` [#bj_array_init].
   * The `BjTypeInfo` [#BjArrayInfo] structure is used to decide how the object is initialized and depends on the object type.
-  * When the paramter is _0_ or invalid, the **init** function sets the object to an empty state.
-* The returned `Type` [#BjArray] is *ready*.
-* `bj_type_init` **will** return a *ready* `Type` [#BjArray].
+  * When the paramter is _0_ or invalid, the **init** function sets the object to an nil state.
+* The returned `Type` [#BjArray] is *valid*.
+* `bj_type_init` **will** return a *valid* `Type` [#BjArray].
 
-\warning Unless explicitely otherwise by the type's documentation, calling the **init** function on an already initialized object **will** result in a memory leak.
+\warning Unless explicitely otherwise by the type's documentation, calling the **init** function on an alvalid initialized object **will** result in a memory leak.
 \dot
 digraph workflow {
     rankdir=LR
@@ -133,10 +141,10 @@ digraph workflow {
     
     start [shape="point"]
     uninitialized [label="Uninitialized"]
-    ready [label="Ready", color="red", fontcolor="red"]
+    valid [label="Valid", color="red", fontcolor="red"]
     
-    ready -> ready [label="init", color="red", fontcolor="red"]
-    uninitialized -> ready [label="init"]
+    valid -> valid [label="init", color="red", fontcolor="red"]
+    uninitialized -> valid [label="init"]
     start -> uninitialized [label="alloc"]   
 }
 \enddot
@@ -154,19 +162,19 @@ digraph workflow {
     
     start [shape="point", color="black", fontcolor="black"]
     uninitialized [label="Uninitialized"]
-    ready [label="Ready", color="black", fontcolor="black"]
+    valid [label="Valid", color="black", fontcolor="black"]
     
-    uninitialized -> ready [label="init"]
+    uninitialized -> valid [label="init"]
     start -> uninitialized [label="alloc"]   
 
-    start -> ready [label="new", color="black", fontcolor="black"]
+    start -> valid [label="new", color="black", fontcolor="black"]
 }
 \enddot
 
 For every type `BjType/bj_type` [`BjArray/bj_array`]:
 
 * The **new** function is `BjType* bj_type_new(const BjTypeInfo*, const BjAllocationCallbacks*)` [#bj_array_new].
-* `bj_type_new` **will** return a *ready* `Type` [#BjArray].
+* `bj_type_new` **will** return a *valid* `Type` [#BjArray].
 
 For example, the two code snippets are equivalent:
 
@@ -179,14 +187,14 @@ BjArray* array = bj_array_alloc(p_allocator);
 bj_array_init(array, p_allocator, p_info);
 ```
 
-Most Banjo function expecting a `Type` parameter expect it to be *ready*.
+Most Banjo function expecting a `Type` parameter expect it to be *valid*.
 
 ## Reset
 
 Before an object itself is destroyed (using #bj_free), its underlying memory must be released.
 The operation is done by calling the **reset** function for the type.
 
-The function can be called on a *ready* or *empty* object:
+The function can be called on a *valid* or *nil* object:
 
 \dot
 digraph workflow {
@@ -196,16 +204,16 @@ digraph workflow {
     
     start [shape="point"]
     uninitialized [label="Uninitialized"]
-    ready [label="Ready", color="black", fontcolor="black"]
-    empty [label="Empty", color="black", fontcolor="balck"]
+    valid [label="Valid", color="black", fontcolor="black"]
+    nil [label="Nil", color="black", fontcolor="black"]
     
-    uninitialized -> ready [label="init"]
+    uninitialized -> valid [label="init"]
     start -> uninitialized [label="alloc"]   
-    start -> ready [label="new"]
-    ready -> empty [label="reset", color="black", fontcolor="black"]
+    start -> valid [label="new"]
+    valid -> nil [label="reset", color="black", fontcolor="black"]
 
-    empty -> empty [label="reset", color="black", fontcolor="black"]
-    empty -> ready [label="init", color="black", fontcolor="black"]
+    nil -> nil [label="reset", color="black", fontcolor="black"]
+    nil -> valid [label="init", color="black", fontcolor="black"]
 }
 \enddot
 
@@ -213,13 +221,13 @@ digraph workflow {
 For every type `BjType/bj_type` [`BjArray/bj_array`]:
 
 * The **reset** function is `void bj_type_reset(BjType*)`
-* `bj_type_reset` **will** return an *empty* `Type` [#BjArray].
-* `bj_type_reset` can be called on **any object**, including an *empty* object.
+* `bj_type_reset` **will** return an *nil* `Type` [#BjArray].
+* `bj_type_reset` can be called on **any object**, including an *nil* object.
 * `bj_type_reset` frees the underlying memory and sets its entire content to using #bj_memset.
 * The function uses the object's #BjAllocationCallbacks set in `bj_type_init` [#bj_array_init] to release the memory.
 
-Moreover, any function expecting a `BjType` as a paremeter can receive an *empty* object with the least consequence possible.
-The actual effect of sending an *empty* object depends on the function and is documented in the API reference.
+Moreover, any function expecting a `BjType` as a paremeter can receive an *nil* object with the least consequence possible.
+The actual effect of sending an *nil* object depends on the function and is documented in the API reference.
 
 \warning Calling the **reset** function on an uninitialized object will cause undefined behaviour.
 \dot
@@ -230,16 +238,16 @@ digraph workflow {
     
     start [shape="point"]
     uninitialized [label="Uninitialized"]
-    ready [label="Ready"]
-    empty [label="Empty"]
+    valid [label="Valid"]
+    nil [label="Nil"]
     ub [label="?", shape="plaintext", color="red", fontcolor="red"]
     
-    uninitialized -> ready [label="init"]
+    uninitialized -> valid [label="init"]
     start -> uninitialized [label="alloc"]   
-    start -> ready [label="new"]
-    ready -> empty [label="reset"]
-    empty -> empty [label="reset"]
-    empty -> ready [label="init"]
+    start -> valid [label="new"]
+    valid -> nil [label="reset"]
+    nil -> nil [label="reset"]
+    nil -> valid [label="init"]
     uninitialized -> ub  [label="reset", color="red", fontcolor="red"]
 }
 \enddot
@@ -248,7 +256,7 @@ digraph workflow {
 ## Free
 
 The **fre** function releases the memory directly used by the object's structure.
-This is done by calling the general-purpose #bj_free function on an *empty* or *uninitialized* object:
+This is done by calling the general-purpose #bj_free function on an *nil* or *uninitialized* object:
 
 \dot
 digraph workflow {
@@ -259,17 +267,17 @@ digraph workflow {
     start [shape="point"]
     freed [shape="point", color="black", fontcolor="black"]
     uninitialized [label="Uninitialized", color="black", fontcolor="black"]
-    ready [label="Ready"]
-    empty [label="Empty", color="black", fontcolor="black"]
+    valid [label="Valid"]
+    nil [label="Nil", color="black", fontcolor="black"]
     
-    uninitialized -> ready [label="init"]
+    uninitialized -> valid [label="init"]
     start -> uninitialized [label="alloc"]   
-    start -> ready [label="new"]
-    ready -> empty [label="reset"]
-    empty -> empty [label="reset"]
-    empty -> ready [label="init"]
+    start -> valid [label="new"]
+    valid -> nil [label="reset"]
+    nil -> nil [label="reset"]
+    nil -> valid [label="init"]
 
-    empty -> freed [label="free", color="black", fontcolor="black"]
+    nil -> freed [label="free", color="black", fontcolor="black"]
     uninitialized -> freed [label="free", color="black", fontcolor="black"]
 }
 \enddot
@@ -278,9 +286,9 @@ For every type `BjType/bj_type` [`BjArray/bj_array`]:
 
 * The **free** function is #bj_free *(Same function for everything)*
 * The function uses the object's #BjAllocationCallbacks set in `bj_type_init` [#bj_array_init] to release the memory.
-* #bj_free **will not** leak any memory when called on an *empty* object.
+* #bj_free **will not** leak any memory when called on an *nil* object.
 
-\warning Unless explicited otherwise by the type's documentation, calling the #bj_free on a *ready* object **will** result in a memory leak.
+\warning Unless explicited otherwise by the type's documentation, calling the #bj_free on a *valid* object **will** result in a memory leak.
 This is because #bj_free only deallocates the structure itself.
 The underlying data must be released using the type's **reset** function before.
 \dot
@@ -292,25 +300,25 @@ digraph workflow {
     start [shape="point"]
     freed [shape="point", color="black", fontcolor="black"]
     uninitialized [label="Uninitialized"]
-    ready [label="Ready", color="black", fontcolor="black"]
-    empty [label="Empty"]
+    valid [label="Valid", color="black", fontcolor="black"]
+    nil [label="Nil"]
     
-    uninitialized -> ready [label="init"]
+    uninitialized -> valid [label="init"]
     start -> uninitialized [label="alloc"]   
-    start -> ready [label="new"]
-    ready -> empty [label="reset"]
-    empty -> empty [label="reset"]
-    empty -> ready [label="init"]
-    empty -> freed [label="free"]
+    start -> valid [label="new"]
+    valid -> nil [label="reset"]
+    nil -> nil [label="reset"]
+    nil -> valid [label="init"]
+    nil -> freed [label="free"]
     uninitialized -> freed [label="free"]
-    ready -> freed [label="free", color="red", fontcolor="red"]
+    valid -> freed [label="free", color="red", fontcolor="red"]
 }
 \enddot
 
 ## Deleting
 
 The **del** function is a convenience function that performs both a **reset** and a **free** on an object.
-It can be called from an *ready* or *empty* object:
+It can be called from an *valid* or *nil* object:
 
 \dot
 digraph workflow {
@@ -321,20 +329,20 @@ digraph workflow {
     start [shape="point"]
     freed [shape="point", color="black", fontcolor="black"]
     uninitialized [label="Uninitialized"]
-    ready [label="Ready", color="black", fontcolor="black"]
-    empty [label="Empty", color="black", fontcolor="black"]
+    valid [label="Valid", color="black", fontcolor="black"]
+    nil [label="Nil", color="black", fontcolor="black"]
     
-    uninitialized -> ready [label="init"]
+    uninitialized -> valid [label="init"]
     start -> uninitialized [label="alloc"]   
-    start -> ready [label="new"]
-    ready -> empty [label="reset"]
-    empty -> empty [label="reset"]
-    empty -> ready [label="init"]
-    empty -> freed [label="free"]
+    start -> valid [label="new"]
+    valid -> nil [label="reset"]
+    nil -> nil [label="reset"]
+    nil -> valid [label="init"]
+    nil -> freed [label="free"]
     uninitialized -> freed [label="free"]
     
-    ready -> freed [label="del", color="black", fontcolor="black"]
-    empty -> freed [label="del", color="black", fontcolor="black"]
+    valid -> freed [label="del", color="black", fontcolor="black"]
+    nil -> freed [label="del", color="black", fontcolor="black"]
 }
 \enddot
 
@@ -386,15 +394,15 @@ digraph workflow {
     start [shape="point"]
     end [shape="point"];
     uninitialized [label="Uninitialized", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    ready [label="Ready", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    empty [label="Empty", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    valid [label="Valid", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    nil [label="Nil", color="forestgreen", fontcolor="forestgreen", penwidth=2]
     
     
     start -> uninitialized
-    empty -> end
-    uninitialized -> ready [label="init", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    ready -> empty [label="reset", color="forestgreen", fontcolor="forestgreen", penwidth=2]
-    empty -> empty [label="reset", style="dashed"]
-    empty -> ready [label="init", style="dashed"]
+    nil -> end
+    uninitialized -> valid [label="init", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    valid -> nil [label="reset", color="forestgreen", fontcolor="forestgreen", penwidth=2]
+    nil -> nil [label="reset", style="dashed"]
+    nil -> valid [label="init", style="dashed"]
 }
 \enddot
