@@ -38,11 +38,20 @@ struct BjArray_T {
 };
 #endif
 
+////////////////////////////////////////////////////////////////////////////////
 /// Info structure used to create a new \ref BjArray.
+///
+/// When `capacity` > _0_, the array is allocated with `bytes_payload`
+/// times the value in bytes.
+///
+/// When `count` > _0_, the array is allocated and resized to the value.
+///
+/// When `bytes_paload` is _0_, the object will be initialized empty.
+///
 typedef struct {
     usize bytes_payload; ///< Size in bytes, of each item in the array.
-    usize count;        ///< Number of elements in the array.
-    usize capacity;     ///< Number of allocated elements in the array.
+    usize count;         ///< Number of elements in the array.
+    usize capacity;      ///< Number of allocated elements in the array.
 } BjArrayInfo;
 
 
@@ -52,14 +61,7 @@ typedef struct {
 /// \param p_allocator Allocation callbacks, can be _0_.
 /// \param p_info      Creation options.
 ///
-/// \return A handle to a new array.
-///
-/// \par Create Info
-///
-/// When `p_info->capacity` > _0_, the array is allocated with `bytes_payload`
-/// times the value in bytes.
-///
-/// When `p_info->count` > _0_, the array is allocated and resized to the value.
+/// \return A pointer to an empty array object.
 ///
 /// \par Memory Management
 ///
@@ -70,6 +72,8 @@ typedef struct {
 /// life of the array object.
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the array.
+///
+/// If `p_info` is zero, the object is initialized empty.
 ///
 /// \see bj_array_del
 BANJO_EXPORT BjArray* bj_array_new(
@@ -98,6 +102,8 @@ BANJO_EXPORT void bj_array_del(
 ///
 /// \param p_allocator Allocation callbacks, can be _0_.
 ///
+/// \return An uninitialized array object
+///
 /// \par Memory Management
 ///
 /// The array pointed to by the returned handle **must** be released after use
@@ -114,9 +120,9 @@ BANJO_EXPORT BjArray* bj_array_alloc(
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes a new \ref BjArray.
 ///
+/// \param p_instance  The array object
 /// \param p_info      Creation options.
 /// \param p_allocator Allocation callbacks, can be _0_.
-/// \param p_array     The array object
 ///
 /// \par Create Info
 ///
@@ -135,6 +141,10 @@ BANJO_EXPORT BjArray* bj_array_alloc(
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the array.
 ///
+/// \par Error Management
+///
+/// The function fails if `p_instance` is _0_.
+///
 /// \see bj_array_del
 BANJO_EXPORT void bj_array_init(
     BjArray*                     p_instance,
@@ -143,7 +153,7 @@ BANJO_EXPORT void bj_array_init(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Resets a \ref BjArray to an invalid state
+/// Resets a \ref BjArray to an empty state
 ///
 /// \param p_array The array object
 BANJO_EXPORT void bj_array_reset(
@@ -157,9 +167,13 @@ BANJO_EXPORT void bj_array_reset(
 ///
 /// If the array is already empty, this function does nothing.
 /// After calling this function, the array is considered as empty, but the
-/// internal memory is not release.
+/// internal memory is not released.
 /// To effectively free the memory used by the array, call \ref bj_array_shrink
 /// after have called this function.
+///
+/// When called on an  empty array object, the function does nothing.
+///
+/// The function fails is `array` is _0_.
 BANJO_EXPORT void bj_array_clear(
     BjArray* array
 );
@@ -176,6 +190,10 @@ BANJO_EXPORT void bj_array_clear(
 /// This function reallocated the memory used by the array to fit the current 
 /// array count.
 ///
+/// When called on an empty array object, the function does nothing.
+///
+/// The function fails is `array` is _0_.
+///
 /// \note This function effectively invalidates the array data pointer.
 BANJO_EXPORT void bj_array_shrink(
     BjArray* array
@@ -190,6 +208,8 @@ BANJO_EXPORT void bj_array_shrink(
 /// \param count The number of element in the new array.
 ///
 /// If `count == 0`, this function is the same as calling \ref bj_array_clear.
+///
+/// When called on an empty object, the function does nothing.
 ///
 /// \note This function will invalidate the array data pointer if the resize
 /// required a new reallocation.
@@ -207,6 +227,8 @@ BANJO_EXPORT void bj_array_set_count(
 /// If `capacity` is smaller than the array current capacity, this function does
 /// nothing.
 /// Otherwise, the array in-memory is reallocated to fit the new capacity.
+///
+/// When called on an empty object, the function does nothing.
 ///
 /// \note This function will invalidate the array data pointer if the reserve
 /// if performed.
@@ -228,6 +250,8 @@ BANJO_EXPORT void bj_array_reserve(
 /// The newly added object can be retrieved by calling \ref bj_array_at with
 /// an index of `count` - _1_.
 ///
+/// When called on an empty object, the function does nothing.
+///
 /// \note If needed, the function will reserve more space in the array,
 /// which invalidates the data pointer.
 BANJO_EXPORT void bj_array_push(
@@ -241,6 +265,8 @@ BANJO_EXPORT void bj_array_push(
 /// \param array The array object.
 ///
 /// This function does nothing else than reducing the array size by _1_.
+///
+/// When called on an empty object, the function does nothing.
 BANJO_EXPORT void bj_array_pop(
     BjArray* array
 );
@@ -253,6 +279,8 @@ BANJO_EXPORT void bj_array_pop(
 ///
 /// \return A pointer to the value.
 ///
+/// \retval 0 if `array` is empty.
+///
 BANJO_EXPORT void* bj_array_at(
     const BjArray* array,
     usize   at
@@ -264,6 +292,9 @@ BANJO_EXPORT void* bj_array_at(
 /// \param array The array object
 ///
 /// \return a pointer to the underlying data.
+///
+/// \retval 0 if `array` is empty.
+///
 BANJO_EXPORT void* bj_array_data(
     const BjArray* array
 );
@@ -274,6 +305,9 @@ BANJO_EXPORT void* bj_array_data(
 /// \param array The array object.
 ///
 /// \return a integer indicating the number of elements in the array.
+///
+/// \retval 0 if `array` is empty.
+///
 BANJO_EXPORT usize bj_array_count(
     const BjArray* array
 );

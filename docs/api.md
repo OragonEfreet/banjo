@@ -120,6 +120,7 @@ For every type `BjType/bj_type` [`BjArray/bj_array`]:
 
 * The **init** function is `void bj_type_init(BjType*, const BjTypeInfo*, const BjAllocationCallbacks*)` [#bj_array_init].
   * The `BjTypeInfo` [#BjArrayInfo] structure is used to decide how the object is initialized and depends on the object type.
+  * When the paramter is _0_ or invalid, the **init** function sets the object to an empty state.
 * The returned `Type` [#BjArray] is *ready*.
 * `bj_type_init` **will** return a *ready* `Type` [#BjArray].
 
@@ -195,8 +196,8 @@ digraph workflow {
     
     start [shape="point"]
     uninitialized [label="Uninitialized"]
-    ready [label="Ready", color="black", fontcolor="back"]
-    empty [label="Empty", color="black", fontcolor="back"]
+    ready [label="Ready", color="black", fontcolor="black"]
+    empty [label="Empty", color="black", fontcolor="balck"]
     
     uninitialized -> ready [label="init"]
     start -> uninitialized [label="alloc"]   
@@ -356,7 +357,7 @@ bj_free(array);
 # Stack-Allocated Objects
 
 By default, Banjo API provides dynamically allocated objects.
-If you defined the #BJ_NO_OPAQUE macro definition, you have access to the type definition from your code and can thus directly use objects from the stack.
+If you defined the `BJ_NO_OPAQUE` macro definition, you have access to the type definition from your code and can thus directly use objects from the stack.
 
 In this case, only **init** and **reset** are needed:
 

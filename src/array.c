@@ -1,46 +1,21 @@
+#include "banjo/memory.h"
 #include <banjo/array.h>
 #include <banjo/error.h>
 
-BjArray* bj_array_alloc(
-    const BjAllocationCallbacks* p_allocator
-) {
-    return bj_malloc(sizeof(BjArray), p_allocator);
-}
-
-BjArray* bj_array_new(
-    const BjArrayInfo* p_info,
-    const BjAllocationCallbacks* p_allocator
-) {
-    BjArray* obj = bj_array_alloc(p_allocator);
-    bj_array_init(obj, p_info, p_allocator);
-    return obj;
-}
-
-void bj_array_del(
-    BjArray* obj
-) {
-    bj_array_reset(obj);
-    bj_free(obj, obj->p_allocator);
-}
-
 void bj_array_init(
-    BjArray*                      p_instance,
-    const BjArrayInfo*           p_info,
+    BjArray*                       p_instance,
+    const BjArrayInfo*             p_info,
     const BjAllocationCallbacks*   p_allocator
 ) {
-    bj_assert(p_info != 0);
+    bj_memset(p_instance, 0, sizeof(BjArray));
+    if(p_info != 0 && p_info->bytes_payload > 0) {
+        p_instance->p_allocator   = p_allocator;
+        p_instance->bytes_payload = p_info->bytes_payload;
 
-    bj_array_reset(p_instance);
-
-    p_instance->p_allocator   = p_allocator;
-    p_instance->bytes_payload = p_info->bytes_payload;
-    p_instance->capacity      = 0;
-    p_instance->count         = 0;
-    p_instance->p_buffer      = 0;
-
-    bj_array_reserve(p_instance, p_info->count);
-    bj_array_set_count(p_instance, p_info->count);
-    bj_array_reserve(p_instance, p_info->capacity);
+        bj_array_reserve(p_instance, p_info->count);
+        bj_array_set_count(p_instance, p_info->count);
+        bj_array_reserve(p_instance, p_info->capacity);
+    }
 }
 
 void bj_array_reset(
@@ -48,12 +23,7 @@ void bj_array_reset(
 ) {
     bj_assert(array != 0);
     bj_free(array->p_buffer, array->p_allocator);
-
-    array->p_allocator   = 0;
-    array->bytes_payload = 0;
-    array->capacity      = 0;
-    array->count         = 0;
-    array->p_buffer      = 0;
+    bj_memset(array, 0, sizeof(BjArray));
 }
 
 BANJO_EXPORT void bj_array_clear(
@@ -83,14 +53,10 @@ void bj_array_set_count(
     usize   count
 ) {
     bj_assert(array != 0);
-    if(count == array->count) {
-        return;
-    }
-
+    array->count = array->bytes_payload == 0 ? 0 : count;
     if(array->capacity < count) {
         bj_array_reserve(array, count * 2);
     }
-    array->count = count;
 }
 
 void bj_array_reserve(
@@ -98,17 +64,13 @@ void bj_array_reserve(
     usize   capacity
 ) {
     bj_assert(array != 0);
-    if(capacity > array->capacity) {
+    const usize bytes_capacity_req = array->bytes_payload * capacity;
+    if(bytes_capacity_req > array->bytes_payload * array->capacity) {
         if(array->p_buffer == 0) {
-            array->p_buffer = bj_malloc(array->bytes_payload * capacity, array->p_allocator);
+            array->p_buffer = bj_malloc(bytes_capacity_req, array->p_allocator);
         } else {
-            array->p_buffer = bj_realloc(array->p_buffer, array->bytes_payload * capacity, array->p_allocator);
+            array->p_buffer = bj_realloc(array->p_buffer, bytes_capacity_req, array->p_allocator);
         }
-#ifdef BANJO_PEDANTIC
-    if(capacity > array->capacity) {
-        bj_memset((char*)array->p_buffer + capacity, 0, capacity - array->capacity);
-    }
-#endif
         array->capacity = capacity;
     }
 }
@@ -123,16 +85,18 @@ BANJO_EXPORT void bj_array_push(
     // Request for at least twice the new size
     bj_array_reserve(array, (array->count + 1) * 2); 
     void* dest = ((byte*)array->p_buffer) + array->bytes_payload * array->count;
-    bj_memcpy(dest, value, array->bytes_payload);
-    ++array->count;
+    if(bj_memcpy(dest, value, array->bytes_payload)) {
+        ++array->count;
+    }
 }
 
 BANJO_EXPORT void bj_array_pop(
     BjArray* array
 ) {
     bj_assert(array != 0);
-    bj_assert(array->count > 0);
-    --array->count;
+    if(array->count > 0) {
+        --array->count;
+    }
 }
 
 void* bj_array_at(
@@ -140,8 +104,10 @@ void* bj_array_at(
     usize   at
 ) {
     bj_assert(array);
-    bj_assert(at < array->count);
-    return ((byte*)array->p_buffer) + array->bytes_payload * at;
+    if(at < array->count) {
+        return ((byte*)array->p_buffer) + array->bytes_payload * at;
+    }
+    return 0;
 }
 
 BANJO_EXPORT void* bj_array_data(

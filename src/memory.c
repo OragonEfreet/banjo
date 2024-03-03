@@ -75,12 +75,12 @@ void bj_memory_unset_defaults(void) {
     bj_memory_set_defaults(0);
 }
 
-void bj_memcpy(
+void* bj_memcpy(
     void*       p_dest,
     const void* p_src,
     usize       mem_size
 ) {
-    memcpy(p_dest, p_src, mem_size);
+    return memcpy(p_dest, p_src, mem_size);
 }
 
 void bj_memset(

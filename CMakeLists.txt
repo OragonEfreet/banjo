@@ -24,6 +24,7 @@ set(_interface_headers
 )
 
 set(_sources
+    src/api.c
     src/array.c
     src/error.c
     src/hash_table.c

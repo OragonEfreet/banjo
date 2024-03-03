@@ -49,7 +49,6 @@ void initialize_context(Context* context, int argc, char* argv[]) {
         context->prog_name = "UnitTest";
     }
 
-
     BjAllocationCallbacks allocators = mock_allocators(&context->allocations);
     bj_memory_set_defaults(&allocators);
 }
@@ -89,6 +88,16 @@ int terminate_context(Context* SM_CTX()) {
     return SM_CTX()->n_fail;
 }
 
+bool all_zero(void* ptr, usize byte_size) {
+    byte* b = ptr;
+    while(byte_size-- > 0) {
+        if((*b++) != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // INTERNAL MACROS
 #define DEFINE_TST_FN(NAME) void SM_TST_FN(NAME)(Context* SM_CTX(), StatusFlag* SM_FLAGS_PARAM())
@@ -106,6 +115,7 @@ int terminate_context(Context* SM_CTX()) {
 #define DO_CHECK_NEQ(CMD, RES, EXPECTED, IF_FAIL)  if((RES == EXPECTED)) { TRACE(CMD, "%s: expected NOT %s", #RES, #EXPECTED); IF_FAIL; }  else { ++SM_CTX()->n_asserts;}
 #define DO_CHECK_NULL(CMD, RES, IF_FAIL)  if(!(RES == 0)) { TRACE(CMD, "%s", #RES); IF_FAIL; }  else { ++SM_CTX()->n_asserts;}
 #define DO_CHECK_VALUE(CMD, RES, IF_FAIL)  if((RES == 0)) { TRACE(CMD, "%s", #RES); IF_FAIL; }  else { ++SM_CTX()->n_asserts;}
+#define DO_CHECK_EMPTY(CMD, T, OBJ, IF_FAIL) if(!all_zero(OBJ, sizeof(T))) { TRACE(CMD, "%s object not empty", #T); IF_FAIL; }  else { ++SM_CTX()->n_asserts;}
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC
@@ -124,6 +134,7 @@ int terminate_context(Context* SM_CTX()) {
 #define CHECK_NEQ(EXPR, EXPECTED) DO_CHECK_NEQ(CHECK_NEQ, EXPR, EXPECTED, NOPE)
 #define CHECK_NULL(EXPR) DO_CHECK_NULL(CHECK_NULL, EXPR, NOPE)
 #define CHECK_VALUE(EXPR) DO_CHECK_VALUE(CHECK_VALUE, EXPR, NOPE)
+#define CHECK_EMPTY(T, OBJ) DO_CHECK_EMPTY(CHECK_EMPTY, T, OBJ, NOPE)
 
 // Strong assertions
 #define REQUIRE(COND) DO_CHECK(REQUIRED, COND, STOP)
@@ -131,3 +142,4 @@ int terminate_context(Context* SM_CTX()) {
 #define REQUIRE_NEQ(EXPR, EXPECTED) DO_CHECK_NEQ(REQUIRE_NEQ, EXPR, EXPECTED, STOP)
 #define REQUIRE_NULL(EXPR) DO_CHECK_NULL(REQUIRE_NULL, EXPR, STOP)
 #define REQUIRE_VALUE(EXPR) DO_CHECK_VALUE(REQUIRE_VALUE, EXPR, STOP)
+#define REQUIRE_EMPTY(T, OBJ) DO_CHECK_EMPTY(REQUIRE_EMPTY, T, OBJ, STOP)
