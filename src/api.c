@@ -33,5 +33,7 @@ void bj_ ## t ## _del(                                                         \
     BJ_IMPL_DEL2(T, t)
 
 #include <banjo/array.h>
+#include <banjo/hash_table.h>
 
 BJ_IMPL_OBJ2(Array, array)
+BJ_IMPL_OBJ2(HashTable, hash_table)

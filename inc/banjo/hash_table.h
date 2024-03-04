@@ -7,13 +7,16 @@
 /// \ingroup containers
 /// API related to the \ref BjHashTable object
 ///
-///  **Generic Name**     | hash table                 
+///  **Generic Name**     | array                 
 /// ----------------------|-----------------------
-///  **Opaque Type**      | yes                   
-///  **Create Function**  | \ref bj_hash_table_new  
-///  **Destroy Function** | \ref bj_hash_table_del 
+///  Type                 | \ref BjHashTable
+///  Info Type            | \ref BjHashTableInfo
+///  **Alloc**            | \ref bj_hash_table_alloc 
+///  **Create**           | \ref bj_hash_table_new  
+///  **Delete**           | \ref bj_hash_table_del  
+///  **Reset**            | \ref bj_hash_table_reset  
 ///
-/// \ref BjHashTable is an associative container that maps a _key_ to an _value_.
+/// \ref BjHashTable is an associative container that maps a _key_ to a _value_.
 /// The elements are stored in an array of linked lists called _buckets_.
 /// \{
 #pragma once
@@ -91,11 +94,31 @@ BANJO_EXPORT void bj_hash_table_del(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Allocate a new BjHashTable object
+///
+/// \param p_allocator Allocation callbacks, can be _0_.
+///
+/// \return An uninitialized hash table object
+///
+/// \par Memory Management
+///
+/// The hash table pointed to by the returned handle **must** be released after use
+/// by calling \ref bj_free.
+///
+/// When `p_allocator` is not _0_, the given allocator is used though the entire
+/// life of the hash table object.
+/// The content of `p_allocator` being copied in memory, the caller doesn't have
+/// to retain the pointer after creating the hash table.
+BANJO_EXPORT BjHashTable* bj_hash_table_alloc(
+    const BjAllocationCallbacks* p_allocator
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Initializes a new \ref BjHashTable.
 ///
+/// \param p_table      The object to initialize
 /// \param p_info       Creation options.
 /// \param p_allocator  Allocation callbacks, can be _0_.
-/// \param p_table      The object to initialize
 ///
 /// \par Memory Management
 ///
@@ -109,9 +132,9 @@ BANJO_EXPORT void bj_hash_table_del(
 ///
 /// \see bj_array_del
 BANJO_EXPORT void bj_hash_table_init(
+    BjHashTable*                 p_table,
     const BjHashTableInfo*       p_info,
-    const BjAllocationCallbacks* p_allocator,
-    BjHashTable*                 p_table
+    const BjAllocationCallbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////

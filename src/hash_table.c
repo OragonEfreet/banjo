@@ -6,11 +6,7 @@
 
 #include <string.h>
 
-#include "internal.h"
-
 #define BUCKET_COUNT 10
-
-BJ_IMPL_OBJ(HashTable, hash_table)
 
 // FNV-1a hash function constants
 #define FNV_PRIME 0x01000193 // 16777619
@@ -30,20 +26,21 @@ u32 fnv1a_hash(const void *data, size_t size) {
 }
 
 void bj_hash_table_init(
+    BjHashTable*              p_instance,
     const BjHashTableInfo* p_info,
-    const BjAllocationCallbacks* p_allocator,
-    BjHashTable*              p_instance
+    const BjAllocationCallbacks* p_allocator
 ) {
-    bj_assert(p_info != 0);
-    bj_assert(p_info->bytes_value != 0);
-    bj_assert(p_info->bytes_key != 0);
+    bj_memset(p_instance, 0, sizeof(BjHashTable));
+    if(p_info == 0 || p_info->bytes_key == 0 || p_info->bytes_value == 0) {
+        return;
+    }
 
     p_instance->p_allocator = p_allocator;
     p_instance->weak_owning = p_info->weak_owning;
     p_instance->fn_hash     = p_info->fn_hash ? p_info->fn_hash : fnv1a_hash;
-    p_instance->bytes_key    = p_info->bytes_key;
-    p_instance->bytes_value  = p_info->bytes_value;
-    p_instance->bytes_entry  = p_info->weak_owning ? sizeof(void*) * 2 : p_instance->bytes_key + p_instance->bytes_value;
+    p_instance->bytes_key   = p_info->bytes_key;
+    p_instance->bytes_value = p_info->bytes_value;
+    p_instance->bytes_entry = p_info->weak_owning ? sizeof(void*) * 2 : p_instance->bytes_key + p_instance->bytes_value;
 
     bj_array_init(&p_instance->buckets, 
         &(BjArrayInfo) {
