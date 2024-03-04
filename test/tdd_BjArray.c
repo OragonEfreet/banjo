@@ -6,7 +6,7 @@ BjArray array;
 
 typedef struct {
     short elem0;
-    long elem1;
+    long  elem1;
 } payload;
 static const usize bytes_payload = sizeof(payload);
 
@@ -15,17 +15,17 @@ TEST_CASE(zero_initialization) {
     REQUIRE_EMPTY(BjArray, &array);
 }
 
-TEST_CASE(array_alloc) {
+TEST_CASE(alloc) {
     void* block = bj_array_alloc(0);
     REQUIRE_VALUE(block);
-    bj_array_del(block);
+    bj_free(block, 0);
 }
 
 TEST_CASE(del_0_is_ok) {
     bj_array_del(0);
 }
 
-TEST_CASE(invalid_byte_size_is_zero) {
+TEST_CASE(invalid_byte_size_is_nil) {
     BjArrayInfo info = {.bytes_payload = 0};
     bj_array_init(&array, &info, 0);
     REQUIRE_EMPTY(BjArray, &array);
@@ -123,9 +123,9 @@ int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
     RUN_TEST(zero_initialization);
-    RUN_TEST(array_alloc);
+    RUN_TEST(alloc);
     RUN_TEST(del_0_is_ok);
-    RUN_TEST(invalid_byte_size_is_zero);
+    RUN_TEST(invalid_byte_size_is_nil);
     RUN_TEST(empty_initialization);
     RUN_TEST_ARGS(init_with_capacity_allocates_buffer, .capacity = 10);
     RUN_TEST_ARGS(init_with_count_allocates_buffer, .count = 10);
