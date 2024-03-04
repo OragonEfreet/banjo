@@ -156,7 +156,6 @@ dkms.conf
 *.swo
 *.spv
 ./run_*
-compile_commands.json
 .cache/
 
 docs/html

@@ -9,7 +9,6 @@ typedef struct {float x; float y;} vec2f;
 
 int main(int argc, char* argv[]) {
 
-    
     // Usual Creation and destruction
     BjListInfo create_info = { .bytes_payload = sizeof(vec2f) };
     BjList* list = bj_list_new(&create_info, 0);
