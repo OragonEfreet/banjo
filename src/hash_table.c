@@ -51,10 +51,10 @@ void bj_hash_table_init(
 
     for(usize i = 0 ; i < bj_array_count(&p_instance->buckets) ; ++i) {
         BjList* bucket = bj_array_at(&p_instance->buckets, i);
-        bj_list_init(&(BjListInfo) {
+        bj_list_init(bucket, &(BjListInfo) {
             .bytes_payload  = p_instance->bytes_entry,
             .weak_owning   = false,
-        }, p_allocator, bucket);
+        }, p_allocator);
     }
 }
 

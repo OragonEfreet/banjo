@@ -2,14 +2,10 @@
 #include <banjo/list.h>
 #include <banjo/memory.h>
 
-#include "internal.h"
-
-BJ_IMPL_OBJ(List, list)
-
 void bj_list_init(
+    BjList*                p_instance,
     const BjListInfo*              p_info,
-    const BjAllocationCallbacks*   p_allocator,
-    BjList*                p_instance
+    const BjAllocationCallbacks*   p_allocator
 ) {
     bj_assert(p_info != 0);
 

@@ -7,11 +7,14 @@
 /// \ingroup containers
 /// API related to the \ref BjList object
 ///
-///  **Generic Name**     | list                
+///  **Generic Name**     | array                 
 /// ----------------------|-----------------------
-///  **Opaque Type**      | yes                   
-///  **Create Function**  | \ref bj_list_new  
-///  **Destroy Function** | \ref bj_list_del 
+///  Type                 | \ref BjList
+///  Info Type            | \ref BjListInfo
+///  **Alloc**            | \ref bj_list_alloc 
+///  **Create**           | \ref bj_list_new  
+///  **Delete**           | \ref bj_list_del  
+///  **Reset**            | \ref bj_list_reset  
 ///
 /// \ref BjList is a container that supports constant time insertion and removal
 /// from anywhere in the container.
@@ -97,11 +100,31 @@ BANJO_EXPORT void bj_list_del(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Allocate a new BjList object
+///
+/// \param p_allocator Allocation callbacks, can be _0_.
+///
+/// \return An uninitialized list object
+///
+/// \par Memory Management
+///
+/// The list pointed to by the returned handle **must** be released after use
+/// by calling \ref bj_free.
+///
+/// When `p_allocator` is not _0_, the given allocator is used though the entire
+/// life of the list object.
+/// The content of `p_allocator` being copied in memory, the caller doesn't have
+/// to retain the pointer after creating the list.
+BANJO_EXPORT BjList* bj_list_alloc(
+    const BjAllocationCallbacks* p_allocator
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Initialize a new \ref BjList.
 ///
+/// \param p_list       The list object.
 /// \param p_info       Creation options.
 /// \param p_allocator  Allocation callbacks, can be _0_.
-/// \param p_list       The list object.
 ///
 /// \par Memory Management
 ///
@@ -112,9 +135,9 @@ BANJO_EXPORT void bj_list_del(
 ///
 /// \see bj_list_del
 BANJO_EXPORT void bj_list_init(
+    BjList*                      p_list,
     const BjListInfo*            p_info,
-    const BjAllocationCallbacks* p_allocator,
-    BjList*                      p_list
+    const BjAllocationCallbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
