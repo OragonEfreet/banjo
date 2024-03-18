@@ -47,6 +47,8 @@ TEST_CASE(empty_valid_initialization) {
     REQUIRE_EQ(htable.bytes_key, 2);
     REQUIRE_VALUE(htable.fn_hash);
     REQUIRE_EQ(htable.bytes_entry, 6);
+
+    bj_hash_table_reset(&htable);
 }
 
 int main(int argc, char* argv[]) {
