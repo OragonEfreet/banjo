@@ -36,7 +36,7 @@ struct BjArray_T {
     const BjAllocationCallbacks* p_allocator;
     usize                        bytes_payload;
     usize                        capacity;
-    usize                        count;
+    usize                        len;
     void*                        p_buffer;
 };
 #endif
@@ -47,13 +47,13 @@ struct BjArray_T {
 /// When `capacity` > _0_, the array is allocated with `bytes_payload`
 /// times the value in bytes.
 ///
-/// When `count` > _0_, the array is allocated and resized to the value.
+/// When `len` > _0_, the array is allocated and resized to the value.
 ///
 /// When `bytes_paload` is _0_, the object will be nil.
 ///
 typedef struct {
     usize bytes_payload; ///< Size in bytes, of each item in the array.
-    usize count;         ///< Number of elements in the array.
+    usize len;         ///< Number of elements in the array.
     usize capacity;      ///< Number of allocated elements in the array.
 } BjArrayInfo;
 
@@ -132,7 +132,7 @@ BANJO_EXPORT BjArray* bj_array_alloc(
 /// When `p_info->capacity` > _0_, the array is allocated with `bytes_payload`
 /// times the value in bytes.
 ///
-/// When `p_info->count` > _0_, the array is allocated and resized to the value.
+/// When `p_info->len` > _0_, the array is allocated and resized to the value.
 ///
 /// \par Memory Management
 ///
@@ -182,7 +182,7 @@ BANJO_EXPORT void bj_array_clear(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Reallocated the used memory to match the array count.
+/// Reallocated the used memory to match the array length.
 ///
 /// \param array The array object.
 ///
@@ -191,7 +191,7 @@ BANJO_EXPORT void bj_array_clear(
 /// the required space.
 /// 
 /// This function reallocated the memory used by the array to fit the current 
-/// array count.
+/// array length.
 ///
 /// When called on an nil object, the function does nothing.
 ///
@@ -205,20 +205,20 @@ BANJO_EXPORT void bj_array_shrink(
 ////////////////////////////////////////////////////////////////////////////////
 /// Resize the array.
 ///
-/// If needed, the array will reserve up to twice the requested count in memory.
+/// If needed, the array will reserve up to twice the requested length in memory.
 /// 
 /// \param array The array object.
-/// \param count The number of element in the new array.
+/// \param len The number of element in the new array.
 ///
-/// If `count == 0`, this function is the same as calling \ref bj_array_clear.
+/// If `len == 0`, this function is the same as calling \ref bj_array_clear.
 ///
 /// When called on an nil, the function does nothing.
 ///
 /// \note This function will invalidate the array data pointer if the resize
 /// required a new reallocation.
-BANJO_EXPORT void bj_array_set_count(
+BANJO_EXPORT void bj_array_set_len(
     BjArray* array,
-    usize   count
+    usize   len
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -249,9 +249,9 @@ BANJO_EXPORT void bj_array_reserve(
 /// The memory pointed at `value` is copied into the in-memory array using
 /// \ref bj_memcpy.
 ///
-/// Calling this function effectively grow array count by _1_.
+/// Calling this function effectively grow array len by _1_.
 /// The newly added object can be retrieved by calling \ref bj_array_at with
-/// an index of `count` - _1_.
+/// an index of `len` - _1_.
 ///
 /// When called on an nil, the function does nothing.
 ///
@@ -311,7 +311,20 @@ BANJO_EXPORT void* bj_array_data(
 ///
 /// \retval 0 if `array` is nil.
 ///
-BANJO_EXPORT usize bj_array_count(
+BANJO_EXPORT usize bj_array_len(
+    const BjArray* array
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Returns the number of elements the array can hold without reallocating.
+///
+/// \param array The array object.
+///
+/// \return a integer indicating the capacity of the array.
+///
+/// \retval 0 if `array` is nil.
+///
+BANJO_EXPORT usize bj_array_capacity(
     const BjArray* array
 );
 

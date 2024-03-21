@@ -50,8 +50,8 @@ struct BjHashTable_T {
 typedef struct BjHashTableInfo {
     usize                  bytes_value;  ///< Size in bytes of each item in the table.
     usize                  bytes_key;    ///< Size in bytes of each key.
-    bool                   weak_owning; ///< _true_ is the table owns the inserted memory.
-    bjHashFunctionPtr      fn_hash;     ///< Hash function used for keys.
+    bool                   weak_owning;  ///< _true_ is the table owns the inserted memory.
+    bjHashFunctionPtr      fn_hash;      ///< Hash function used for keys.
 } BjHashTableInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
