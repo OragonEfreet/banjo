@@ -45,11 +45,11 @@ void bj_hash_table_init(
     bj_array_init(&p_instance->buckets, 
         &(BjArrayInfo) {
             .bytes_payload = sizeof(BjList),
-            .count        = BUCKET_COUNT,
+            .len           = BUCKET_COUNT,
         }, p_allocator
     );
 
-    for(usize i = 0 ; i < bj_array_count(&p_instance->buckets) ; ++i) {
+    for(usize i = 0 ; i < bj_array_len(&p_instance->buckets) ; ++i) {
         BjList* bucket = bj_array_at(&p_instance->buckets, i);
         bj_list_init(bucket, &(BjListInfo) {
             .bytes_payload  = p_instance->bytes_entry,

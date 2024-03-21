@@ -40,7 +40,7 @@ TEST_CASE(empty_valid_initialization) {
     REQUIRE_NULL(htable.buckets.p_allocator);
     REQUIRE_EQ(htable.buckets.bytes_payload, sizeof(BjList));
     REQUIRE_EQ(htable.buckets.capacity, 10);
-    REQUIRE_EQ(htable.buckets.count, 10);
+    REQUIRE_EQ(htable.buckets.len, 10);
     REQUIRE_VALUE(htable.buckets.p_buffer);
     REQUIRE_EQ(htable.weak_owning, false);
     REQUIRE_EQ(htable.bytes_value, 4);

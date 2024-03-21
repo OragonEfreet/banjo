@@ -12,8 +12,8 @@ void bj_array_init(
         p_instance->p_allocator   = p_allocator;
         p_instance->bytes_payload = p_info->bytes_payload;
 
-        bj_array_reserve(p_instance, p_info->count);
-        bj_array_set_count(p_instance, p_info->count);
+        bj_array_reserve(p_instance, p_info->len);
+        bj_array_set_len(p_instance, p_info->len);
         bj_array_reserve(p_instance, p_info->capacity);
     }
 }
@@ -30,32 +30,32 @@ BANJO_EXPORT void bj_array_clear(
     BjArray* array
 ) {
     bj_assert(array != 0);
-    array->count = 0;
+    array->len = 0;
 }
 
 BANJO_EXPORT void bj_array_shrink(
     BjArray* array
 ) {
     bj_assert(array != 0);
-    if(array->count < array->capacity) {
-        if(array->count == 0) {
+    if(array->len < array->capacity) {
+        if(array->len == 0) {
             bj_free(array->p_buffer, array->p_allocator);
             array->p_buffer = 0;
         } else {
-            array->p_buffer = bj_realloc(array->p_buffer, array->bytes_payload * array->count, array->p_allocator);
+            array->p_buffer = bj_realloc(array->p_buffer, array->bytes_payload * array->len, array->p_allocator);
         }
-        array->capacity = array->count;
+        array->capacity = array->len;
     }
 }
 
-void bj_array_set_count(
+void bj_array_set_len(
     BjArray* array,
-    usize   count
+    usize   len
 ) {
     bj_assert(array != 0);
-    array->count = array->bytes_payload == 0 ? 0 : count;
-    if(array->capacity < count) {
-        bj_array_reserve(array, count * 2);
+    array->len = array->bytes_payload == 0 ? 0 : len;
+    if(array->capacity < len) {
+        bj_array_reserve(array, len * 2);
     }
 }
 
@@ -83,10 +83,10 @@ BANJO_EXPORT void bj_array_push(
     bj_assert(value != 0);
 
     // Request for at least twice the new size
-    bj_array_reserve(array, (array->count + 1) * 2); 
-    void* dest = ((byte*)array->p_buffer) + array->bytes_payload * array->count;
+    bj_array_reserve(array, (array->len + 1) * 2); 
+    void* dest = ((byte*)array->p_buffer) + array->bytes_payload * array->len;
     if(bj_memcpy(dest, value, array->bytes_payload)) {
-        ++array->count;
+        ++array->len;
     }
 }
 
@@ -94,8 +94,8 @@ BANJO_EXPORT void bj_array_pop(
     BjArray* array
 ) {
     bj_assert(array != 0);
-    if(array->count > 0) {
-        --array->count;
+    if(array->len > 0) {
+        --array->len;
     }
 }
 
@@ -104,7 +104,7 @@ void* bj_array_at(
     usize   at
 ) {
     bj_assert(array);
-    if(at < array->count) {
+    if(at < array->len) {
         return ((byte*)array->p_buffer) + array->bytes_payload * at;
     }
     return 0;
@@ -117,10 +117,17 @@ BANJO_EXPORT void* bj_array_data(
     return array->p_buffer;
 }
 
-usize bj_array_count(
+usize bj_array_len(
     const BjArray* array
 ) {
     bj_assert(array);
-    return array->count;
+    return array->len;
+}
+
+usize bj_array_capacity(
+    const BjArray* array
+) {
+    bj_assert(array);
+    return array->capacity;
 }
 
