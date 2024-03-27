@@ -7,13 +7,22 @@ void bj_list_init(
     const BjListInfo*              p_info,
     const BjAllocationCallbacks*   p_allocator
 ) {
-    bj_assert(p_info != 0);
+    bj_memset(p_instance, 0, sizeof(BjList));
+    if(p_info != 0 && p_info->bytes_payload > 0) {
+        p_instance->p_allocator   = p_allocator;
+        p_instance->bytes_payload = p_info->bytes_payload;
+        p_instance->weak_owning   = p_info->weak_owning;
+        p_instance->bytes_entry   = p_instance->weak_owning ? sizeof(void*) * 2 : p_info->bytes_payload + sizeof(void*);
+        p_instance->p_head        = 0;
+    }
+}
 
-    p_instance->p_allocator  = p_allocator;
-    p_instance->bytes_payload = p_info->bytes_payload;
-    p_instance->weak_owning  = p_info->weak_owning;
-    p_instance->bytes_entry   = p_instance->weak_owning ? sizeof(void*) * 2 : p_info->bytes_payload + sizeof(void*);
-    p_instance->p_head = 0;
+void bj_list_reset(
+    BjList* list
+) {
+    bj_assert(list != 0);
+    bj_list_clear(list);
+    bj_memset(list, 0, sizeof(BjList));
 }
 
 void bj_list_clear(
@@ -30,12 +39,6 @@ void bj_list_clear(
     list->p_head = 0;
 }
 
-void bj_list_reset(
-    BjList* list
-) {
-    bj_assert(list != 0);
-    bj_list_clear(list);
-}
 
 usize bj_list_count(
     BjList* list
