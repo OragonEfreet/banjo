@@ -1,46 +1,47 @@
-// BjList is included in list.h
+#include <assert.h>
 #include <banjo/list.h>
 
-#include <banjo/log.h>
+int main() {
+    // Create a list information object
+    BjListInfo list_info = {
+        .bytes_payload = sizeof(int), // Size of each element in the list
+        .weak_owning = 0 // Strong ownership
+    };
 
-typedef struct {float x; float y;} vec2f;
+    // Create a new list
+    BjList* list = bj_list_new(&list_info, 0); // No custom allocator
+    assert(list); // Ensure list creation was successful
 
-// A forward list is a linear container where each element is linked to its next one.
+    // Insert elements into the list
+    bj_list_insert(list, 0, &(int){10});
+    bj_list_insert(list, 1, &(int){20});
+    bj_list_insert(list, 2, &(int){30});
 
-int main(int argc, char* argv[]) {
+    // Get the count of elements in the list
+    assert(bj_list_count(list) == 3); // Ensure the count is correct
 
-    // Usual Creation and destruction
-    BjListInfo create_info = { .bytes_payload = sizeof(vec2f) };
-    BjList* list = bj_list_new(&create_info, 0);
-    
-    // Initially, a list is 0 length
-    bj_log(INFO, "Initial count: %d", bj_list_count(list));
+    // Accessing elements by index
+    assert(*(int*)bj_list_value(list, 0) == 10); // Ensure the value at index 0 is correct
+    assert(*(int*)bj_list_value(list, 1) == 20); // Ensure the value at index 1 is correct
+    assert(*(int*)bj_list_value(list, 2) == 30); // Ensure the value at index 2 is correct
 
-    // Let's append some values
-    /* for(int i = 0 ; i < 10 ; i ++) { */
-    vec2f* v0 = bj_list_prepend(list, &(vec2f){.x = -1.0f, .y=1.0f});
-    vec2f* v1 = bj_list_prepend(list, &(vec2f){.x = 4.4f});
-    vec2f* v2 = bj_list_prepend(list, &(vec2f){.x = -2.0f, .y=4.5f});
-    /* } */
+    // Iterating over the list using an iterator
+    BjListIterator* iterator = bj_list_iterator_new(list);
+    assert(iterator); // Ensure iterator creation was successful
+    while (bj_list_iterator_has_next(iterator)) {
+        bj_list_iterator_next(iterator);
+    }
+    bj_list_iterator_del(iterator);
 
-    bj_log(INFO, "Total count: %d", bj_list_count(list));
+    // Clearing the list
+    bj_list_clear(list);
+    assert(bj_list_count(list) == 0); // Ensure the list is cleared
 
-    v0 = bj_list_value(list, 2);
-    v1 = bj_list_value(list, 1);
-    v2 = bj_list_value(list, 0);
+    // Resetting the list
+    bj_list_reset(list);
 
-    /* BjListIterator it = bj_list_iterator_new(list); */
-
-    /* do { */
-    /*     bj_info("%d", *(int*)bj_list_iterator_value(it)); */
-    /* } while(bj_list_iterator_next(it)); */
-
-
-    // Items can be appended to list end
-
+    // Deleting the list
     bj_list_del(list);
-    
 
     return 0;
 }
-

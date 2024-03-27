@@ -82,8 +82,10 @@ BANJO_EXPORT void bj_array_push(
     bj_assert(array != 0);
     bj_assert(value != 0);
 
-    // Request for at least twice the new size
-    bj_array_reserve(array, (array->len + 1) * 2); 
+    // If capacity is not enough, growth by twice the target size
+    if(array->len + 1 > array->capacity) {
+        bj_array_reserve(array, (array->len + 1) * 2); 
+    }
     void* dest = ((byte*)array->p_buffer) + array->bytes_payload * array->len;
     if(bj_memcpy(dest, value, array->bytes_payload)) {
         ++array->len;
