@@ -17,5 +17,6 @@ endmacro()
 
 gen_test(TDD "${CMAKE_CURRENT_SOURCE_DIR}/tdd_*.c")
 gen_test(Unit "${CMAKE_CURRENT_SOURCE_DIR}/obj_*.c")
+gen_test(Unit "${CMAKE_CURRENT_SOURCE_DIR}/unit_*.c")
 
 
