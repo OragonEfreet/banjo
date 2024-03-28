@@ -23,7 +23,7 @@ static BjAllocationCallbacks s_default = {
     .fn_free         = fallback_free,
 };
 
-BANJO_EXPORT void* bj_malloc(
+void* bj_malloc(
     usize                        size,
     const BjAllocationCallbacks* p_allocator
 ) {
@@ -31,7 +31,7 @@ BANJO_EXPORT void* bj_malloc(
     return allocator->fn_allocation(allocator->p_user_data, size);
 }
 
-BANJO_EXPORT void* bj_realloc(
+void* bj_realloc(
     void*                        p_memory,
     usize                        size,
     const BjAllocationCallbacks* p_allocator
@@ -40,7 +40,7 @@ BANJO_EXPORT void* bj_realloc(
     return allocator->fn_reallocation(allocator->p_user_data, p_memory, size);
 }
 
-BANJO_EXPORT void bj_free(
+void bj_free(
     void*                         p_memory,
     const BjAllocationCallbacks*  p_allocator
 ) {
