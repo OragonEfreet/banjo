@@ -2,7 +2,8 @@
 
 #include <banjo/hash_table.h>
 
-int main() {
+int main()
+{
     // Create a hash table information object
     BjHashTableInfo table_info = {
         .bytes_value = sizeof(int), // Size of each value in the table

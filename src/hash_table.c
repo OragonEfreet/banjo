@@ -62,10 +62,12 @@ void bj_hash_table_reset(
     BjHashTable* htable
 ) {
     bj_hash_table_clear(htable);
-    // TODO
     BjList* bucket = bj_array_data(&htable->buckets);
-    for(usize i = 0 ; i < BUCKET_COUNT ; ++i) {
-        bj_list_reset(bucket++);
+    for(usize i = 0 ; i < bj_array_len(&htable->buckets) ; ++i) {
+        if(bucket != 0) {
+            bj_list_reset(bucket);
+        }
+        ++bucket;
     }
     bj_array_reset(&htable->buckets);
 }
@@ -79,7 +81,7 @@ void bj_hash_table_clear(
 }
 
 
-BANJO_EXPORT void* bj_hash_table_set(
+void* bj_hash_table_set(
     BjHashTable* table,
     void* p_key,
     void* p_value
