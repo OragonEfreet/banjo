@@ -164,7 +164,7 @@ BANJO_EXPORT void bj_list_clear(
 /// \param list The list object.
 ///
 /// \return a integer indicating the number of elements in the list.
-BANJO_EXPORT usize bj_list_count(
+BANJO_EXPORT usize bj_list_len(
     BjList* list
 );
 
@@ -227,7 +227,7 @@ BANJO_EXPORT void* bj_list_prepend(
 /// \param index The position of the element to get.
 ///
 /// \return A pointer to the element.
-BANJO_EXPORT void* bj_list_value(
+BANJO_EXPORT void* bj_list_at(
     BjList* list,
     usize           index
 );
@@ -239,7 +239,7 @@ BANJO_EXPORT void* bj_list_value(
 ///
 /// \return A pointer to the first element.
 ///
-/// This function effectively calls \ref bj_list_value with `index` 0.
+/// This function effectively calls \ref bj_list_at with `index` 0.
 BANJO_EXPORT void* bj_list_head(
     BjList* list
 );
