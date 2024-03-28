@@ -26,14 +26,14 @@ void bj_array_reset(
     bj_memset(array, 0, sizeof(BjArray));
 }
 
-BANJO_EXPORT void bj_array_clear(
+void bj_array_clear(
     BjArray* array
 ) {
     bj_assert(array != 0);
     array->len = 0;
 }
 
-BANJO_EXPORT void bj_array_shrink(
+void bj_array_shrink(
     BjArray* array
 ) {
     bj_assert(array != 0);
@@ -75,7 +75,7 @@ void bj_array_reserve(
     }
 }
 
-BANJO_EXPORT void bj_array_push(
+void bj_array_push(
     BjArray* array,
     const void* value
 ) {
@@ -92,7 +92,7 @@ BANJO_EXPORT void bj_array_push(
     }
 }
 
-BANJO_EXPORT void bj_array_pop(
+void bj_array_pop(
     BjArray* array
 ) {
     bj_assert(array != 0);
@@ -112,7 +112,7 @@ void* bj_array_at(
     return 0;
 }
 
-BANJO_EXPORT void* bj_array_data(
+void* bj_array_data(
     const BjArray* array
 ) {
     bj_assert(array);
