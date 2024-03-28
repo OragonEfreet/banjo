@@ -322,7 +322,7 @@ TEST_CASE(at_nonempty_returns_indexed_value) {
 
         payload* got = bj_array_at(&array, i);
 
-        REQUIRE_EQ(p.elem0, got->elem0);
+        REQUIRE_EQ(p.elem0, got->elem1);
         REQUIRE_EQ(p.elem1, got->elem1);
 
         int diff = memcmp(&p, got, bytes_payload);

@@ -100,7 +100,6 @@ int main(int argc, char* argv[]) {
     RUN_TEST_ARGS(insert_to_n_makes_item_available_at_index_n, .n=0);
     RUN_TEST_ARGS(insert_to_n_makes_item_available_at_index_n, .n=10);
 
-
     END_TESTS();
 }
 
