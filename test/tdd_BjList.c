@@ -5,171 +5,102 @@
 
 #include <string.h>
 
-typedef struct {
-    usize bytes_payload;
-    usize n_values;
-    void* values;
-} element_type;
-
-TEST_CASE_ARGS(default_initialization_is_full_empty, {element_type* value_type;}) {
-
-    BjListInfo create_info = {
-        .bytes_payload = test_data->value_type->bytes_payload,
-    };
-
-    BjList* list = bj_list_new(&create_info, 0);
-    REQUIRE_VALUE(list);
-
-    REQUIRE_EQ(list->bytes_payload, test_data->value_type->bytes_payload);
-    REQUIRE_NULL(list->p_allocator);
-    REQUIRE_NULL(list->p_head);
-
-    bj_list_del(list);
-}
-
-TEST_CASE_ARGS(default_initialization_has_empty_count, {element_type* value_type;}) {
-
-    BjListInfo create_info = {
-        .bytes_payload = test_data->value_type->bytes_payload,
-    };
-
-    BjList* list = bj_list_new(&create_info, 0);
-    REQUIRE_VALUE(list);
-
-    REQUIRE_EQ(bj_list_count(list), 0);
-
-    bj_list_del(list);
-}
-
-TEST_CASE_ARGS(a_first_prepend_initializes_first_entry, {element_type* value_type;}) {
-
-    BjListInfo create_info = {
-        .bytes_payload = test_data->value_type->bytes_payload,
-    };
-
-    BjList* list = bj_list_new(&create_info, 0);
-    REQUIRE_VALUE(list);
-
-    REQUIRE_NULL(list->p_head);
-    bj_list_prepend(list, test_data->value_type->values);
-    REQUIRE_VALUE(list->p_head);
-
-    bj_list_del(list);
-}
-
-TEST_CASE_ARGS(n_prepends_means_count_is_n, { element_type* value_type; }) {
-    usize n_operations = 3;
-
-    BjListInfo create_info = {
-        .bytes_payload = test_data->value_type->bytes_payload,
-    };
-
-    BjList* list = bj_list_new(&create_info, 0);
-    REQUIRE_VALUE(list);
-
-    int data = 42;
-    for(usize i = 0 ; i < n_operations ; ++i) {
-        bj_list_prepend(list, &data);
-    }
-
-    REQUIRE_EQ(bj_list_count(list), n_operations);
-
-    bj_list_del(list);
-}
-
-
-TEST_CASE_ARGS(test_prepends, { element_type* value_type;  bool weak_owning;}) {
-    BjListInfo create_info = {
-        .bytes_payload  = test_data->value_type->bytes_payload,
-        .weak_owning = test_data->weak_owning,
-    };
-
-    BjList* list = bj_list_new(&create_info, 0);
-    REQUIRE_VALUE(list);
-
-    for(usize n = 0 ; n < test_data->value_type->n_values ; ++n) {
-        void* data = (byte*)test_data->value_type->values + test_data->value_type->bytes_payload * n;
-
-        bj_list_prepend(list, data);
-        REQUIRE_EQ(bj_list_count(list), n+1);
-
-        // Test if the first entry is the newly assigned one
-        void* res = bj_list_head(list);
-        int cmp = memcmp(res, data, test_data->value_type->bytes_payload);
-        REQUIRE_EQ(cmp, 0);
-    }
-
-    bj_list_del(list);
-}
-
-TEST_CASE(iterator) {
-    BjListInfo create_info = {
-        .bytes_payload = sizeof(short),
-    };
-
-    BjList* list = bj_list_new(&create_info, 0);
-    REQUIRE_VALUE(list);
-
-    short values[] = {4, -1, 102};
-    usize n_elements = sizeof(values) / sizeof(short);
-
-    for(usize n = 0 ; n < n_elements ; ++n) {
-        bj_list_prepend(list, &values[n]);
-    }
-
-    BjListIterator* it = bj_list_iterator_new(list);
-
-    usize i = n_elements - 1;
-    while(bj_list_iterator_has_next(it)) {
-        short expected = values[i--];
-        short* got = bj_list_iterator_next(it);
-        REQUIRE_EQ(*got, expected);
-    }
-
-
-    bj_list_iterator_del(it);
-    bj_list_del(list);
-}
+BjList list;
 
 typedef struct {
-    double value00;    double value01;
-    double value11;    double value12;
-    double value22;    double value23;
-    double value33;    double value34;
-    double value44;    double value45;
-} big_struct;
+    short elem0;
+    long  elem1;
+} payload;
+static const usize bytes_payload = sizeof(payload);
+
+TEST_CASE(initialize_with_payload_gives_empty_list) {
+    BjListInfo info = {.bytes_payload = bytes_payload};
+    bj_list_init(&list, &info, 0);
+
+    REQUIRE_EQ(list.p_allocator, 0);
+    REQUIRE_EQ(list.bytes_payload, bytes_payload);
+    REQUIRE(list.bytes_entry > bytes_payload);
+    REQUIRE_EQ(list.weak_owning, false);
+    REQUIRE_EQ(list.p_head, 0);
+}
+
+TEST_CASE(clear_nil_does_nothing) {
+    bj_list_init(&list, 0, 0);
+    bj_list_clear(&list);
+    REQUIRE_EMPTY(BjList, &list);
+}
+
+TEST_CASE(clear_empty_does_nothing) {
+    BjListInfo info = {.bytes_payload = bytes_payload};
+    bj_list_init(&list, &info, 0);
+    bj_list_clear(&list);
+
+    REQUIRE_EQ(list.p_allocator, 0);
+    REQUIRE_EQ(list.bytes_payload, bytes_payload);
+    REQUIRE(list.bytes_entry > bytes_payload);
+    REQUIRE_EQ(list.weak_owning, false);
+    REQUIRE_EQ(list.p_head, 0);
+}
+
+TEST_CASE(len_nil_returns_0) {
+    bj_list_init(&list, 0, 0);
+    REQUIRE_EQ(bj_list_len(&list), 0);
+}
+
+TEST_CASE(len_empty_returns_0) {
+    bj_list_init(&list, &(BjListInfo){.bytes_payload = bytes_payload}, 0);
+    REQUIRE_EQ(bj_list_len(&list), 0);
+}
+
+TEST_CASE(len_returns_number_of_elements) {
+    payload p;
+    bj_list_init(&list, &(BjListInfo){.bytes_payload = bytes_payload}, 0);
+
+    for(usize i = 1 ; i < 10 ; ++i) {
+        bj_list_prepend(&list, &p);
+        REQUIRE_EQ(bj_list_len(&list), i);
+    }
+    bj_list_reset(&list);
+}
+
+TEST_CASE_ARGS(insert_to_n_makes_item_available_at_index_n, {usize n;}) {
+    payload filler = {.elem0 = -1, .elem1 = -1};
+    payload data = {.elem0 = 42, .elem1 = 513};
+
+    bj_list_init(&list, &(BjListInfo){.bytes_payload = bytes_payload}, 0);
+
+    usize initial_total = 10 + (test_data->n * 2);
+    for(usize i = 0 ; i < initial_total ; ++i) {
+        bj_list_prepend(&list, &filler);
+    }
+    CHECK_EQ(bj_list_len(&list), initial_total);
+
+    bj_list_insert(&list, test_data->n, &data);
+    REQUIRE_EQ(bj_list_len(&list), initial_total + 1);
+
+    const payload* got = bj_list_at(&list, test_data->n);
+
+    REQUIRE_EQ(got->elem0, data.elem0);
+    REQUIRE_EQ(got->elem1, data.elem1);
+    int diff = memcmp(got, &data, bytes_payload);
+    REQUIRE_EQ(diff, 0);
+
+    bj_list_reset(&list);
+}
 
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    element_type element_types[] = {
-        {
-            .bytes_payload = sizeof(int),
-            .n_values = 5,
-            .values = (int[]){45, 104, 0, -30, 128},
-        },{
-            .bytes_payload = sizeof(big_struct),
-            .n_values = 1,
-            .values = (big_struct[]){{
-                .value00 = 0.0, .value01 = 0.1,
-                .value11 = 1.1, .value12 = 1.2,
-                .value22 = 2.2, .value23 = 2.3,
-                .value33 = 3.3, .value34 = 3.4,
-                .value44 = 4.4, .value45 = 4.5,
-            }},
-        }
-    };
-    usize n_elements = sizeof(element_types) / sizeof(element_types[0]);
+    RUN_TEST(initialize_with_payload_gives_empty_list);
+    RUN_TEST(clear_nil_does_nothing);
+    RUN_TEST(clear_empty_does_nothing);
+    RUN_TEST(len_nil_returns_0);
+    RUN_TEST(len_empty_returns_0);
+    RUN_TEST(len_returns_number_of_elements);
+    RUN_TEST_ARGS(insert_to_n_makes_item_available_at_index_n, .n=0);
+    RUN_TEST_ARGS(insert_to_n_makes_item_available_at_index_n, .n=10);
 
-    for(usize e = 0 ; e < n_elements ; ++e) {
-        RUN_TEST_ARGS(default_initialization_is_full_empty,     .value_type = &element_types[e]);
-        RUN_TEST_ARGS(default_initialization_has_empty_count,   .value_type = &element_types[e]);
-        RUN_TEST_ARGS(a_first_prepend_initializes_first_entry,  .value_type = &element_types[e]);
-        RUN_TEST_ARGS(n_prepends_means_count_is_n,              .value_type = &element_types[e]);
-        RUN_TEST_ARGS(test_prepends,                            .value_type = &element_types[e]);
-        RUN_TEST_ARGS(test_prepends,                            .value_type = &element_types[e], .weak_owning = true);
-    }
-    RUN_TEST(iterator);
+
     END_TESTS();
 }
 

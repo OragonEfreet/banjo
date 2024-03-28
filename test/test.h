@@ -55,12 +55,14 @@ void initialize_context(Context* context, int argc, char* argv[]) {
 
 // Called after each test ends
 // Returns 1 means "terminate program"
-int record_test_result(Context* context, int status_flag) {
+int record_test_result(Context* context, const char* test_name, int status_flag) {
     ++context->n_run;
     if ((status_flag & FAIL) > 0) {
         ++context->n_fail;
+        PRINT("[FAIL] | %s...\n", test_name);
         return 1 & context->stop_at_err;
     }
+    PRINT("[OK]   | %s...\n", test_name);
     return 0;
 }
 
@@ -104,8 +106,9 @@ bool all_zero(void* ptr, usize byte_size) {
 #define DEFINE_TST_FN_ARGS(NAME) void SM_TST_FN(NAME)(Context* SM_CTX(), StatusFlag* SM_FLAGS_PARAM(), TST_STRUCT_T(NAME)* SM_DATA_PARAM())
 #define DECL_TST_FLAGS(NAME) static StatusFlag TST_FLAGS(NAME) = 0
 #define DECL_TST_DATASTRUCT(NAME, CONTENT) TST_STRUCT_T(NAME) CONTENT
-#define TRACE(NAME, STR, ...) PRINT("%s:%d: FAILED (%s): " STR "\n", SM_CTX()->prog_name, __LINE__, #NAME, __VA_ARGS__);
-#define CHECK_TEST(NAME) if (record_test_result(&SM_CTX(), TST_FLAGS(NAME))) END_TESTS();
+
+#define TRACE(NAME, STR, ...) PRINT("         %s:%d: FAILED (%s): " STR "\n", SM_CTX()->prog_name, __LINE__, #NAME, __VA_ARGS__);
+#define CHECK_TEST(NAME, LABEL) if (record_test_result(&SM_CTX(), LABEL, TST_FLAGS(NAME))) END_TESTS();
 
 #define NOPE ;
 #define STOP *SM_FLAGS_PARAM() |= FAIL;return;
@@ -125,8 +128,9 @@ bool all_zero(void* ptr, usize byte_size) {
 #define TEST_CASE_ARGS(NAME, DATA) DECL_TST_DATASTRUCT(NAME, DATA); DECL_TST_FLAGS(NAME); DEFINE_TST_FN_ARGS(NAME)
 #define TEST_CASE(NAME) DECL_TST_FLAGS(NAME); DEFINE_TST_FN(NAME)
 
-#define RUN_TEST_ARGS(NAME, ...) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME), &(TST_STRUCT_T(NAME)){__VA_ARGS__});CHECK_TEST(NAME);
-#define RUN_TEST(NAME) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME));CHECK_TEST(NAME);
+#define RUN_TEST_ARGS(NAME, ...) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME), &(TST_STRUCT_T(NAME)){__VA_ARGS__});CHECK_TEST(NAME, #NAME " {" #__VA_ARGS__ "}");//PRINT("%s\n", #__VA_ARGS__);
+#define RUN_TEST(NAME) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME));CHECK_TEST(NAME, #NAME);
+
 
 // Weak assertions
 #define CHECK(COND) DO_CHECK(CHECK, COND, NOPE)

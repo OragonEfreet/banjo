@@ -17,13 +17,13 @@ int main() {
     bj_list_insert(list, 1, &(int){20});
     bj_list_insert(list, 2, &(int){30});
 
-    // Get the count of elements in the list
-    assert(bj_list_count(list) == 3); // Ensure the count is correct
+    // Get the number of elements in the list
+    assert(bj_list_len(list) == 3); // Ensure the count is correct
 
     // Accessing elements by index
-    assert(*(int*)bj_list_value(list, 0) == 10); // Ensure the value at index 0 is correct
-    assert(*(int*)bj_list_value(list, 1) == 20); // Ensure the value at index 1 is correct
-    assert(*(int*)bj_list_value(list, 2) == 30); // Ensure the value at index 2 is correct
+    assert(*(int*)bj_list_at(list, 0) == 10); // Ensure the value at index 0 is correct
+    assert(*(int*)bj_list_at(list, 1) == 20); // Ensure the value at index 1 is correct
+    assert(*(int*)bj_list_at(list, 2) == 30); // Ensure the value at index 2 is correct
 
     // Iterating over the list using an iterator
     BjListIterator* iterator = bj_list_iterator_new(list);
@@ -35,7 +35,7 @@ int main() {
 
     // Clearing the list
     bj_list_clear(list);
-    assert(bj_list_count(list) == 0); // Ensure the list is cleared
+    assert(bj_list_len(list) == 0); // Ensure the list is cleared
 
     // Resetting the list
     bj_list_reset(list);

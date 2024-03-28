@@ -40,7 +40,7 @@ void bj_list_clear(
 }
 
 
-usize bj_list_count(
+usize bj_list_len(
     BjList* list
 ) {
     usize result = 0;
@@ -99,7 +99,7 @@ void* bj_list_prepend(
     return bj_list_insert(list, 0, p_data);
 }
 
-void* bj_list_value(
+void* bj_list_at(
     BjList* list,
     usize index
 ) {
@@ -120,7 +120,7 @@ void* bj_list_value(
 void* bj_list_head(
     BjList* list
 ){
-    return bj_list_value(list, 0);
+    return bj_list_at(list, 0);
 }
 
 BjListIterator* bj_list_iterator_new(

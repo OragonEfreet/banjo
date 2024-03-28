@@ -12,7 +12,7 @@ typedef struct {
 } payload;
 static const usize bytes_payload = sizeof(payload);
 
-TEST_CASE(initialize_with_payload_gies_empty_array) {
+TEST_CASE(initialize_with_payload_gives_empty_array) {
     BjArrayInfo info = {.bytes_payload = bytes_payload};
     bj_array_init(&array, &info, 0);
 
@@ -335,7 +335,7 @@ TEST_CASE(at_nonempty_returns_indexed_value) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(initialize_with_payload_gies_empty_array);
+    RUN_TEST(initialize_with_payload_gives_empty_array);
     RUN_TEST(nonzero_capacity_allocates_buffer);
     RUN_TEST(nonzero_len_allocates_buffer);
     RUN_TEST(len_gt_capacity_expands_capacity);
