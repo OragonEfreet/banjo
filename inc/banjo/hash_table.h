@@ -200,5 +200,16 @@ BANJO_EXPORT void* bj_hash_table_get(
     void*             p_default
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Return the number of elements in the table
+///
+/// \param table      The table object
+///
+/// \return The number of elements in the table
+///
+BANJO_EXPORT usize bj_hash_table_len(
+    const BjHashTable* table
+);
+
 /// \} End of htable group
 
