@@ -13,6 +13,11 @@ typedef struct {
 } payload;
 static const usize bytes_payload = sizeof(payload);
 
+TEST_CASE(initialize_with_no_payload_gives_nil) {
+    BjListInfo info = {.bytes_payload = 0};
+    REQUIRE_EMPTY(BjList, &list);
+}
+
 TEST_CASE(initialize_with_payload_gives_empty_list) {
     BjListInfo info = {.bytes_payload = bytes_payload};
     bj_list_init(&list, &info, 0);
@@ -88,6 +93,60 @@ TEST_CASE_ARGS(insert_to_n_makes_item_available_at_index_n, {usize n;}) {
     bj_list_reset(&list);
 }
 
+TEST_CASE(prepend_to_makes_item_available_at_index_0) {
+    bj_list_init(&list, &(BjListInfo){.bytes_payload = bytes_payload}, 0);
+
+    for(usize i = 1 ; i < 10 ; ++i) {
+        payload p = {.elem0 = 42, .elem1 = -(i*3)};
+        bj_list_prepend(&list, &p);
+        REQUIRE_EQ(bj_list_len(&list), i);
+
+        const payload* got = bj_list_at(&list, 0);
+
+        REQUIRE_EQ(got->elem0, p.elem0);
+        REQUIRE_EQ(got->elem1, p.elem1);
+        int diff = memcmp(got, &p, bytes_payload);
+        REQUIRE_EQ(diff, 0);
+    }
+    bj_list_reset(&list);
+}
+
+TEST_CASE(at_nil_returns_0) {
+    bj_list_init(&list, 0, 0);
+    REQUIRE_EQ(bj_list_at(&list, 0), 0);
+    REQUIRE_EQ(bj_list_at(&list, 1), 0);
+    REQUIRE_EQ(bj_list_at(&list, 2), 0);
+    REQUIRE_EQ(bj_list_at(&list, 3), 0);
+    REQUIRE_EQ(bj_list_at(&list, 4), 0);
+}
+
+TEST_CASE(at_empty_returns_0) {
+    bj_list_init(&list, &(BjListInfo){.bytes_payload = bytes_payload}, 0);
+    REQUIRE_EQ(bj_list_at(&list, 0), 0);
+    REQUIRE_EQ(bj_list_at(&list, 1), 0);
+    REQUIRE_EQ(bj_list_at(&list, 2), 0);
+    REQUIRE_EQ(bj_list_at(&list, 3), 0);
+    REQUIRE_EQ(bj_list_at(&list, 4), 0);
+}
+
+TEST_CASE(head_is_at_0) {
+    bj_list_init(&list, &(BjListInfo){.bytes_payload = bytes_payload}, 0);
+
+    for(usize i = 1 ; i < 10 ; ++i) {
+        payload p = {.elem0 = 42, .elem1 = -(i*3)};
+        bj_list_prepend(&list, &p);
+        REQUIRE_EQ(bj_list_len(&list), i);
+
+        const payload* got = bj_list_head(&list);
+
+        REQUIRE_EQ(got->elem0, p.elem0);
+        REQUIRE_EQ(got->elem1, p.elem1);
+        int diff = memcmp(got, &p, bytes_payload);
+        REQUIRE_EQ(diff, 0);
+    }
+    bj_list_reset(&list);
+}
+
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
@@ -99,6 +158,12 @@ int main(int argc, char* argv[]) {
     RUN_TEST(len_returns_number_of_elements);
     RUN_TEST_ARGS(insert_to_n_makes_item_available_at_index_n, .n=0);
     RUN_TEST_ARGS(insert_to_n_makes_item_available_at_index_n, .n=10);
+    RUN_TEST_ARGS(insert_to_n_makes_item_available_at_index_n, .n=5);
+    RUN_TEST(prepend_to_makes_item_available_at_index_0);
+    RUN_TEST(at_nil_returns_0);
+    RUN_TEST(at_empty_returns_0);
+    RUN_TEST(head_is_at_0);
+    RUN_TEST(initialize_with_no_payload_gives_nil);
 
     END_TESTS();
 }

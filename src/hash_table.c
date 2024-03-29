@@ -117,21 +117,40 @@ void* bj_hash_table_get(
     const void*       p_key,
     void*             p_default
 ) {
-    u32 hash = table->fn_hash(p_key, table->bytes_key) % BUCKET_COUNT;
+    u32 hash = 0;
+    if (table->fn_hash) {
+        hash = table->fn_hash(p_key, table->bytes_key) % BUCKET_COUNT;
+    }
+
     BjList* bucket = bj_array_at(&table->buckets, hash);
 
-    BjListIterator it;
-    bj_list_iterator_init(bucket, &it);
+    if(bucket != 0) {
+        BjListIterator it;
+        bj_list_iterator_init(bucket, &it);
 
-    while(bj_list_iterator_has_next(&it)) {
-        byte* key = bj_list_iterator_next(&it);
-        if(key != 0) {
-            if(memcmp(key, p_key, table->bytes_key) == 0) {
-                return key+table->bytes_key;
+        while(bj_list_iterator_has_next(&it)) {
+            byte* key = bj_list_iterator_next(&it);
+            if(key != 0) {
+                if(memcmp(key, p_key, table->bytes_key) == 0) {
+                    return key+table->bytes_key;
+                }
             }
-        }
-    };
-    bj_list_iterator_reset(&it);
+        };
+        bj_list_iterator_reset(&it);
+    }
 
     return p_default;
+}
+
+usize bj_hash_table_len(
+    const BjHashTable* p_table
+) {
+    usize len = 0;
+
+    for(usize i = 0 ; i < bj_array_len(&p_table->buckets) ; ++i) {
+        BjList* bucket = bj_array_at(&p_table->buckets, i);
+        len += bj_list_len(bucket);
+    }
+
+    return len;
 }
