@@ -9,7 +9,7 @@ int main() {
     };
 
     // Create a new list
-    BjList* list = bj_list_new(&list_info, 0); // No custom allocator
+    BjList* list = bj_list_new(&list_info); // No custom allocator
     assert(list); // Ensure list creation was successful
 
     // Insert elements into the list

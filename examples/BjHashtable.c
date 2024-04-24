@@ -13,7 +13,7 @@ int main()
     };
 
     // Create a new hash table
-    BjHashTable* table = bj_hash_table_new(&table_info, 0); // No custom allocator
+    BjHashTable* table = bj_hash_table_new(&table_info); // No custom allocator
     assert(table); // Ensure table creation was successful
 
     // Insert values into the table

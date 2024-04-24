@@ -5,6 +5,12 @@
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
+/// Creation info for a new instance of BjWorld.
+/// \see BjWorld
+typedef struct BjWorldInfo {
+    int rfu; //!< Unused
+} BjWorldInfo;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Typedef for the BjWorld_T struct
 typedef struct BjWorld_T BjWorld;
@@ -12,14 +18,9 @@ typedef struct BjWorld_T BjWorld;
 #ifdef BJ_NO_OPAQUE
 struct BjWorld_T {
     const BjAllocationCallbacks* p_allocator;
+    BjWorldInfo                  info;
 };
 #endif
-
-/// Creation info for a new instance of BjWorld.
-/// \see BjWorld
-typedef struct BjWorldInfo {
-    int rfu; //!< Unused
-} BjWorldInfo;
 
 /// Create a new instance of \ref BjWorld.
 ///

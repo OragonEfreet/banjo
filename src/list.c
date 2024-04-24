@@ -2,18 +2,20 @@
 #include <banjo/list.h>
 #include <banjo/memory.h>
 
+#include "obj.h"
+
+BJ_IMPL_OBJ(List, list)
+
 void bj_list_init(
     BjList*                p_instance,
-    const BjListInfo*              p_info,
-    const BjAllocationCallbacks*   p_allocator
+    const BjListInfo*              p_info
 ) {
     bj_memset(p_instance, 0, sizeof(BjList));
     if(p_info != 0 && p_info->bytes_payload > 0) {
-        p_instance->p_allocator   = p_allocator;
-        p_instance->bytes_payload = p_info->bytes_payload;
-        p_instance->weak_owning   = p_info->weak_owning;
-        p_instance->bytes_entry   = p_instance->weak_owning ? sizeof(void*) * 2 : p_info->bytes_payload + sizeof(void*);
-        p_instance->p_head        = 0;
+        p_instance->info.bytes_payload = p_info->bytes_payload;
+        p_instance->info.weak_owning   = p_info->weak_owning;
+        p_instance->bytes_entry        = p_instance->info.weak_owning ? sizeof(void*) * 2 : p_info->bytes_payload + sizeof(void*);
+        p_instance->p_head             = 0;
     }
 }
 
@@ -34,7 +36,7 @@ void bj_list_clear(
     while(p_next_block != 0) {
         void* to_free = p_next_block;
         p_next_block = *p_next_block;
-        bj_free(to_free, list->p_allocator);
+        bj_free(to_free, list->info.p_allocator);
     }
     list->p_head = 0;
 }
@@ -73,19 +75,19 @@ void* bj_list_insert(
     // p_previous_block gets the address of the memory holding the newly current element.
 
     // We create the new block, its first bytes must contain the address of the next block
-    u8* p_block = bj_malloc(list->bytes_entry, list->p_allocator);
+    u8* p_block = bj_malloc(list->bytes_entry, list->info.p_allocator);
     bj_memcpy(p_block, &p_next_block, sizeof(void*));
     // While in previous block, we put the adress of the current block
     bj_memcpy(p_previous_block, &p_block, sizeof(void*)); 
 
     void* value = p_block + sizeof(void*);
-    if(list->weak_owning) {
+    if(list->info.weak_owning) {
         // Weak owning, copy pointer value in buffer value
         bj_memcpy(value, &p_data, sizeof(void*)); 
     } else {
         if(p_data != 0) {
             // Strong owning, copy pointed value into buffer value
-            bj_memcpy(value, p_data, list->bytes_payload); 
+            bj_memcpy(value, p_data, list->info.bytes_payload); 
         }
     }
 
@@ -107,7 +109,7 @@ void* bj_list_at(
     while(p_next_block != 0) {
         if(index-- == 0) {
             void* p_value = ((byte*)p_next_block)+sizeof(void*);
-            if(list->weak_owning) {
+            if(list->info.weak_owning) {
                 return *(void**)p_value;
             }
             return p_value;
@@ -127,7 +129,7 @@ BjListIterator* bj_list_iterator_new(
     BjList* list
 ) {
     bj_assert(list);
-    BjListIterator* it = bj_malloc(sizeof(struct BjListIterator_T), list->p_allocator);
+    BjListIterator* it = bj_malloc(sizeof(struct BjListIterator_T), list->info.p_allocator);
     bj_list_iterator_init(list, it);
     return it;
 }
@@ -135,7 +137,7 @@ BjListIterator* bj_list_iterator_new(
 void bj_list_iterator_del(
     BjListIterator* iterator
 ) {
-    const BjAllocationCallbacks* allocator = iterator->list->p_allocator;
+    const BjAllocationCallbacks* allocator = iterator->list->info.p_allocator;
     bj_list_iterator_reset(iterator);
     bj_free(iterator, allocator);
 }
@@ -165,7 +167,7 @@ void* bj_list_iterator_next(
     bj_assert(iterator);
     iterator->p_current = *iterator->p_current;
     void* p_value = ((byte*)iterator->p_current)+sizeof(void*);
-    if(iterator->list->weak_owning) {
+    if(iterator->list->info.weak_owning) {
         return *(void**)p_value;
     }
     return p_value;

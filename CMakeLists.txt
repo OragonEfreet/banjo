@@ -24,13 +24,13 @@ set(_interface_headers
 )
 
 set(_sources
-    src/api.c
     src/array.c
     src/error.c
     src/hash_table.c
     src/list.c
     src/log.c
     src/memory.c
+    src/obj.h
     src/world.c
 )
 

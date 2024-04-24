@@ -5,7 +5,7 @@
 BjHashTable htable;
 
 TEST_CASE(initialize_with_null_info_returns_nil_object) {
-    bj_hash_table_init(&htable, 0, 0);
+    bj_hash_table_init(&htable, 0);
     REQUIRE_EMPTY(BjHashTable, &htable);
 }
 
@@ -20,7 +20,7 @@ TEST_CASE(delete_null_pointer_is_valid_action) {
 }
 
 TEST_CASE_ARGS(initializes_to_nil, {BjHashTableInfo info;} ) {
-    bj_hash_table_init(&htable, &test_data->info, 0);
+    bj_hash_table_init(&htable, &test_data->info);
     REQUIRE_EMPTY(BjHashTable, &htable);
 }
 

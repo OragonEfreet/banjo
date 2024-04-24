@@ -28,20 +28,6 @@
 #include <banjo/memory.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Typedef for the BjArray_T struct
-typedef struct BjArray_T BjArray;
-
-#ifdef BJ_NO_OPAQUE
-struct BjArray_T {
-    const BjAllocationCallbacks* p_allocator;
-    usize                        bytes_payload;
-    usize                        capacity;
-    usize                        len;
-    void*                        p_buffer;
-};
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
 /// Info structure used to create a new \ref BjArray.
 ///
 /// When `capacity` > _0_, the array is allocated with `bytes_payload`
@@ -52,11 +38,22 @@ struct BjArray_T {
 /// When `bytes_paload` is _0_, the object will be nil.
 ///
 typedef struct {
+    const BjAllocationCallbacks* p_allocator;
     usize bytes_payload; ///< Size in bytes, of each item in the array.
-    usize len;         ///< Number of elements in the array.
+    usize len;           ///< Number of elements in the array.
     usize capacity;      ///< Number of allocated elements in the array.
 } BjArrayInfo;
 
+////////////////////////////////////////////////////////////////////////////////
+/// Typedef for the BjArray_T struct
+typedef struct BjArray_T BjArray;
+
+#ifdef BJ_NO_OPAQUE
+struct BjArray_T {
+    BjArrayInfo info;
+    void*       p_buffer;
+};
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new \ref BjArray.
@@ -80,8 +77,7 @@ typedef struct {
 ///
 /// \see bj_array_del
 BANJO_EXPORT BjArray* bj_array_new(
-    const BjArrayInfo*           p_info,
-    const BjAllocationCallbacks* p_allocator
+    const BjArrayInfo* p_info
 );
 
 
@@ -151,8 +147,7 @@ BANJO_EXPORT BjArray* bj_array_alloc(
 /// \see bj_array_del
 BANJO_EXPORT void bj_array_init(
     BjArray*                     p_instance,
-    const BjArrayInfo*           p_info,
-    const BjAllocationCallbacks* p_allocator
+    const BjArrayInfo*           p_info
 );
 
 ////////////////////////////////////////////////////////////////////////////////
