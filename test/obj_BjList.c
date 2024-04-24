@@ -5,7 +5,7 @@
 BjList list;
 
 TEST_CASE(initialize_with_null_info_returns_nil_object) {
-    bj_list_init(&list, 0, 0);
+    bj_list_init(&list, 0);
     REQUIRE_EMPTY(BjList, &list);
 }
 
@@ -20,7 +20,7 @@ TEST_CASE(delete_null_pointer_is_valid_action) {
 }
 
 TEST_CASE_ARGS(initializes_to_nil, {BjListInfo info;} ) {
-    bj_list_init(&list, &test_data->info, 0);
+    bj_list_init(&list, &test_data->info);
     REQUIRE_EMPTY(BjList, &list);
 }
 

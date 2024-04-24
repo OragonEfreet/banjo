@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
 
     // To create a new array, you must at least provide a payload size.
     BjArrayInfo info = { .bytes_payload = sizeof(int) };
-    BjArray* array = bj_array_new(&info, 0);
+    BjArray* array = bj_array_new(&info);
 
     // Add a new element in the array
     int a = 42;
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
          val = bj_array_at(array, 1); assert(*val == val_1);
          val = bj_array_at(array, 2); assert(*val == val_2);
 
-    // You caan directly access the array underlying data
+    // You can directly access the array underlying data
     int* data = bj_array_data(array);
     assert(*data++ == val_0);
     assert(*data++ == val_1);

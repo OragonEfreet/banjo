@@ -25,21 +25,6 @@
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
-
-////////////////////////////////////////////////////////////////////////////////
-/// Typedef for the BList_T struct
-typedef struct BjList_T BjList;
-
-#ifdef BJ_NO_OPAQUE
-struct BjList_T {
-    const BjAllocationCallbacks* p_allocator;
-    usize                        bytes_payload;
-    usize                        bytes_entry;
-    bool                         weak_owning;
-    void*                        p_head;
-};
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 /// Info structure used to create a new \ref BjList.
 ///
@@ -54,9 +39,22 @@ struct BjList_T {
 /// memory using \ref bj_memcpy.
 ///
 typedef struct BjListInfo {
+    const BjAllocationCallbacks* p_allocator;
     usize  bytes_payload;  ///< Size in bytes of each item in the list.
     bool   weak_owning;   ///< If _true_, the container doesn't own the stored elements.
 } BjListInfo;
+
+////////////////////////////////////////////////////////////////////////////////
+/// Typedef for the BList_T struct
+typedef struct BjList_T BjList;
+
+#ifdef BJ_NO_OPAQUE
+struct BjList_T {
+    BjListInfo                   info;
+    usize                        bytes_entry;
+    void*                        p_head;
+};
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new \ref BjList.
@@ -80,8 +78,7 @@ typedef struct BjListInfo {
 ///
 /// \see bj_list_del
 BANJO_EXPORT BjList* bj_list_new(
-    const BjListInfo*     p_info,
-    const BjAllocationCallbacks* p_allocator
+    const BjListInfo*     p_info
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,9 +132,8 @@ BANJO_EXPORT BjList* bj_list_alloc(
 ///
 /// \see bj_list_del
 BANJO_EXPORT void bj_list_init(
-    BjList*                      p_list,
-    const BjListInfo*            p_info,
-    const BjAllocationCallbacks* p_allocator
+    BjList*           p_list,
+    const BjListInfo* p_info
 );
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -30,29 +30,26 @@ typedef u32 (*bjHashFunctionPtr)(
     const void* p_data, usize size
 );
 
+/// Info structure used to create a new \ref BjHashTable.
+typedef struct BjHashTableInfo {
+    const BjAllocationCallbacks* p_allocator;
+    usize                  bytes_value;  ///< Size in bytes of each item in the table.
+    usize                  bytes_key;    ///< Size in bytes of each key.
+    bool                   weak_owning;  ///< _true_ is the table owns the inserted memory.
+    bjHashFunctionPtr      fn_hash;      ///< Hash function used for keys.
+} BjHashTableInfo;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Typedef for the BjHashTable_T struct
 typedef struct BjHashTable_T BjHashTable;
 
 #ifdef BJ_NO_OPAQUE
 struct BjHashTable_T {
-    const BjAllocationCallbacks* p_allocator;
-    BjArray                      buckets;
-    bool                         weak_owning;
-    usize                        bytes_value;
-    usize                        bytes_key;
-    bjHashFunctionPtr            fn_hash;
-    usize                        bytes_entry;
+    BjHashTableInfo info;
+    BjArray         buckets;
+    usize           bytes_entry;
 };
 #endif
-
-/// Info structure used to create a new \ref BjHashTable.
-typedef struct BjHashTableInfo {
-    usize                  bytes_value;  ///< Size in bytes of each item in the table.
-    usize                  bytes_key;    ///< Size in bytes of each key.
-    bool                   weak_owning;  ///< _true_ is the table owns the inserted memory.
-    bjHashFunctionPtr      fn_hash;      ///< Hash function used for keys.
-} BjHashTableInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new \ref BjHashTable.
@@ -74,8 +71,7 @@ typedef struct BjHashTableInfo {
 ///
 /// \see bj_array_del
 BANJO_EXPORT BjHashTable* bj_hash_table_new(
-    const BjHashTableInfo*       p_info,
-    const BjAllocationCallbacks* p_allocator
+    const BjHashTableInfo* p_info
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,8 +129,7 @@ BANJO_EXPORT BjHashTable* bj_hash_table_alloc(
 /// \see bj_array_del
 BANJO_EXPORT void bj_hash_table_init(
     BjHashTable*                 p_table,
-    const BjHashTableInfo*       p_info,
-    const BjAllocationCallbacks* p_allocator
+    const BjHashTableInfo*       p_info
 );
 
 ////////////////////////////////////////////////////////////////////////////////

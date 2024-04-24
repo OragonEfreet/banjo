@@ -5,7 +5,7 @@
 BjArray array;
 
 TEST_CASE(initialize_with_null_info_returns_nil_object) {
-    bj_array_init(&array, 0, 0);
+    bj_array_init(&array, 0);
     REQUIRE_EMPTY(BjArray, &array);
 }
 
@@ -20,7 +20,7 @@ TEST_CASE(delete_null_pointer_is_valid_action) {
 }
 
 TEST_CASE_ARGS(initializes_to_nil, {BjArrayInfo info;} ) {
-    bj_array_init(&array, &test_data->info, 0);
+    bj_array_init(&array, &test_data->info);
     REQUIRE_EMPTY(BjArray, &array);
 }
 
