@@ -14,22 +14,30 @@ include(CheckCXXCompilerFlag)
 set(_interface_headers
     inc/banjo/api.h
     inc/banjo/array.h
+    inc/banjo/color.h
     inc/banjo/containers.h
     inc/banjo/error.h
+    inc/banjo/framebuffer.h
+    inc/banjo/graphics.h
+    inc/banjo/graphics_pipeline.h
     inc/banjo/htable.h
     inc/banjo/list.h
     inc/banjo/log.h
     inc/banjo/memory.h
+    inc/banjo/renderer.h
     inc/banjo/world.h
 )
 
 set(_sources
     src/array.c
     src/error.c
+    src/framebuffer.c
+    src/graphics_pipeline.c
     src/htable.c
     src/list.c
     src/log.c
     src/memory.c
+    src/renderer.c
     src/world.c
 )
 
@@ -41,9 +49,7 @@ endif()
 add_library(banjo ${_interface_headers} ${_sources})
 target_compile_definitions(banjo PRIVATE BJ_NO_OPAQUE)
 
-if(MSVC)
-    target_compile_options(banjo PUBLIC /Zc:preprocessor)
-else()
+if(NOT MSVC)
     target_compile_options(banjo PRIVATE -Wall -pedantic)
 endif()
 
