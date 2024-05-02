@@ -51,7 +51,6 @@ You can browse a full work set of examples from the _examples_ folder in the rep
 ### Dta Structures
 
 \example BjArray.c
-\example BjHashTable.c
 \example BjList.c
 
 ### Worlflows

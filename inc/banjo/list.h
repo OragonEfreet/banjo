@@ -59,7 +59,6 @@ struct BjList_T {
 /// Create a new \ref BjList.
 ///
 /// \param p_info       Creation options.
-/// \param p_allocator  Allocation callbacks, can be _0_.
 ///
 /// \return A handle to a new list.
 ///
@@ -67,11 +66,6 @@ struct BjList_T {
 ///
 /// The list pointed to by the returned handle **must** be released after use
 /// by calling \ref bj_list_del.
-///
-/// When `p_allocator` is not _0_, the given allocator is used though the entire
-/// life of the list object.
-/// The content of `p_allocator` being copied in memory, the caller doesn't have
-/// to retain the pointer after creating the list.
 ///
 /// \par Weak / Strong ownership
 ///
@@ -98,19 +92,12 @@ BANJO_EXPORT void bj_list_del(
 ////////////////////////////////////////////////////////////////////////////////
 /// Allocate a new BjList object
 ///
-/// \param p_allocator Allocation callbacks, can be _0_.
-///
 /// \return An uninitialized list object
 ///
 /// \par Memory Management
 ///
 /// The list pointed to by the returned handle **must** be released after use
 /// by calling \ref bj_free.
-///
-/// When `p_allocator` is not _0_, the given allocator is used though the entire
-/// life of the list object.
-/// The content of `p_allocator` being copied in memory, the caller doesn't have
-/// to retain the pointer after creating the list.
 BANJO_EXPORT BjList* bj_list_alloc(void);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,14 +105,8 @@ BANJO_EXPORT BjList* bj_list_alloc(void);
 ///
 /// \param p_list       The list object.
 /// \param p_info       Creation options.
-/// \param p_allocator  Allocation callbacks, can be _0_.
 ///
 /// \par Memory Management
-///
-/// When `p_allocator` is not _0_, the given allocator is used though the entire
-/// life of the list object.
-/// The content of `p_allocator` being copied in memory, the caller doesn't have
-/// to retain the pointer after creating the list.
 ///
 /// \see bj_list_del
 BANJO_EXPORT void bj_list_init(

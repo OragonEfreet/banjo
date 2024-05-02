@@ -77,13 +77,9 @@ BANJO_EXPORT void* bj_realloc(
 /// Deallocate the given area of memory.
 /// 
 /// \param[in] p_memory    Pointer to the memory area to be reallocated.
-/// \param[in] p_allocator A pointer to a custom allocator. Can be _0_.
 ///
 /// `p_memory` must be previously allocated by \ref bj_malloc or \ref bj_realloc.
 ///
-///
-/// If `p_allocator` is set, `p_allocator->fn_free` is called to perform the
-/// operation. If not, a global free function is used.
 /// The latter can have been overriden by \ref bj_memory_set_defaults.
 BANJO_EXPORT void bj_free(
     void*                         p_memory
