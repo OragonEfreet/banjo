@@ -54,19 +54,12 @@ struct BjHashTable_T {
 /// Create a new \ref BjHashTable.
 ///
 /// \param p_info       Creation options.
-/// \param p_allocator  Allocation callbacks, can be _0_.
-///
 /// \return A handle to a new table.
 ///
 /// \par Memory Management
 ///
 /// The table pointed to by the returned handle **must** be released after use
 /// by calling \ref bj_hash_table_del.
-///
-/// When `p_allocator` is not _0_, the given allocator is used though the entire
-/// life of the table object.
-/// The content of `p_allocator` being copied in memory, the caller doesn't have
-/// to retain the pointer after creating the table.
 ///
 /// \see bj_array_del
 BANJO_EXPORT BjHashTable* bj_hash_table_new(
@@ -91,8 +84,6 @@ BANJO_EXPORT void bj_hash_table_del(
 ////////////////////////////////////////////////////////////////////////////////
 /// Allocate a new BjHashTable object
 ///
-/// \param p_allocator Allocation callbacks, can be _0_.
-///
 /// \return An uninitialized hash table object
 ///
 /// \par Memory Management
@@ -100,10 +91,6 @@ BANJO_EXPORT void bj_hash_table_del(
 /// The hash table pointed to by the returned handle **must** be released after use
 /// by calling \ref bj_free.
 ///
-/// When `p_allocator` is not _0_, the given allocator is used though the entire
-/// life of the hash table object.
-/// The content of `p_allocator` being copied in memory, the caller doesn't have
-/// to retain the pointer after creating the hash table.
 BANJO_EXPORT BjHashTable* bj_hash_table_alloc(void);
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,17 +98,11 @@ BANJO_EXPORT BjHashTable* bj_hash_table_alloc(void);
 ///
 /// \param p_table      The object to initialize
 /// \param p_info       Creation options.
-/// \param p_allocator  Allocation callbacks, can be _0_.
 ///
 /// \par Memory Management
 ///
 /// The table pointed to by the returned handle **must** be released after use
 /// by calling \ref bj_hash_table_del.
-///
-/// When `p_allocator` is not _0_, the given allocator is used though the entire
-/// life of the table object.
-/// The content of `p_allocator` being copied in memory, the caller doesn't have
-/// to retain the pointer after creating the table.
 ///
 /// \see bj_array_del
 BANJO_EXPORT void bj_hash_table_init(

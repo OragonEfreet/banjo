@@ -96,8 +96,6 @@ BANJO_EXPORT void bj_array_del(
 ////////////////////////////////////////////////////////////////////////////////
 /// Allocate a new BjArray object
 ///
-/// \param p_allocator Allocation callbacks, can be _0_.
-///
 /// \return An uninitialized array object
 ///
 /// \par Memory Management
