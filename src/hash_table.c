@@ -6,9 +6,22 @@
 
 #include <string.h>
 
-#include "obj.h"
+BjHashTable* bj_hash_table_new(const BjHashTableInfo* p_info) {
+    BjHashTable* obj = bj_hash_table_alloc();
+    bj_hash_table_init(obj, p_info);
+    return obj;
+}
 
-BJ_IMPL_OBJ(HashTable, hash_table)
+void bj_hash_table_del(BjHashTable* obj) {
+    if(obj != 0) {
+        bj_hash_table_reset(obj);
+    }
+    bj_free(obj);
+}
+
+BjHashTable* bj_hash_table_alloc(void) {
+    return bj_malloc(sizeof(BjHashTable));
+}
 
 #define BUCKET_COUNT 10
 

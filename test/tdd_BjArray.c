@@ -16,7 +16,6 @@ TEST_CASE(initialize_with_payload_gives_empty_array) {
     BjArrayInfo info = {.bytes_payload = bytes_payload};
     bj_array_init(&array, &info);
 
-    REQUIRE_EQ(array.info.p_allocator, 0);
     REQUIRE_EQ(array.info.bytes_payload, bytes_payload);
     REQUIRE_EQ(array.info.capacity, 0);
     REQUIRE_EQ(array.info.len, 0);
@@ -29,7 +28,6 @@ TEST_CASE(nonzero_capacity_allocates_buffer) {
     BjArrayInfo info = {.bytes_payload = bytes_payload, .capacity = capacity};
     bj_array_init(&array, &info);
 
-    REQUIRE_EQ(array.info.p_allocator, 0);
     REQUIRE_EQ(array.info.bytes_payload, bytes_payload);
     REQUIRE_EQ(array.info.capacity, capacity);
     REQUIRE_EQ(array.info.len, 0);
@@ -44,7 +42,6 @@ TEST_CASE(nonzero_len_allocates_buffer) {
     BjArrayInfo info = {.bytes_payload = bytes_payload, .len = len};
     bj_array_init(&array, &info);
 
-    REQUIRE_EQ(array.info.p_allocator, 0);
     REQUIRE_EQ(array.info.bytes_payload, bytes_payload);
     REQUIRE(array.info.capacity >= len);
     REQUIRE_EQ(array.info.len, len);
@@ -63,7 +60,6 @@ TEST_CASE(len_gt_capacity_expands_capacity) {
     };
     bj_array_init(&array, &info);
 
-    REQUIRE_EQ(array.info.p_allocator, 0);
     REQUIRE_EQ(array.info.bytes_payload, bytes_payload);
     REQUIRE(array.info.capacity >= len);
     REQUIRE_EQ(array.info.len, len);
@@ -82,7 +78,6 @@ TEST_CASE(capacity_gt_len_does_not_expand_capacity) {
     };
     bj_array_init(&array, &info);
 
-    REQUIRE_EQ(array.info.p_allocator, 0);
     REQUIRE_EQ(array.info.bytes_payload, bytes_payload);
     REQUIRE_EQ(array.info.capacity, capacity);
     REQUIRE_EQ(array.info.len, len);

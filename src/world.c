@@ -12,7 +12,7 @@ BjWorld* bj_world_new(
 ) {
     bj_assert(p_info != 0);
 
-    BjWorld* world = bj_malloc(sizeof(struct BjWorld_T), p_allocator);
+    BjWorld* world = bj_malloc(sizeof(struct BjWorld_T));
     world->p_allocator = p_allocator;
     /* BjArray array = {.count = 10}; */
     /* p_array_init(&array); */
@@ -24,7 +24,7 @@ void bj_world_del(
     BjWorld* world
 ) {
     bj_assert(world != 0);
-    bj_free(world, world->p_allocator);
+    bj_free(world);
 }
 
 void bjInitWorld( const BjWorldInfo* create_info, BjWorld* world) {

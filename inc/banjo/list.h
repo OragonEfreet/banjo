@@ -39,7 +39,6 @@
 /// memory using \ref bj_memcpy.
 ///
 typedef struct BjListInfo {
-    const BjAllocationCallbacks* p_allocator;
     usize  bytes_payload;  ///< Size in bytes of each item in the list.
     bool   weak_owning;   ///< If _true_, the container doesn't own the stored elements.
 } BjListInfo;
@@ -112,9 +111,7 @@ BANJO_EXPORT void bj_list_del(
 /// life of the list object.
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the list.
-BANJO_EXPORT BjList* bj_list_alloc(
-    const BjAllocationCallbacks* p_allocator
-);
+BANJO_EXPORT BjList* bj_list_alloc(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Initialize a new \ref BjList.

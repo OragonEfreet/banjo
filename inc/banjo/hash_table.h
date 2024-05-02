@@ -32,7 +32,6 @@ typedef u32 (*bjHashFunctionPtr)(
 
 /// Info structure used to create a new \ref BjHashTable.
 typedef struct BjHashTableInfo {
-    const BjAllocationCallbacks* p_allocator;
     usize                  bytes_value;  ///< Size in bytes of each item in the table.
     usize                  bytes_key;    ///< Size in bytes of each key.
     bool                   weak_owning;  ///< _true_ is the table owns the inserted memory.
@@ -105,9 +104,7 @@ BANJO_EXPORT void bj_hash_table_del(
 /// life of the hash table object.
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the hash table.
-BANJO_EXPORT BjHashTable* bj_hash_table_alloc(
-    const BjAllocationCallbacks* p_allocator
-);
+BANJO_EXPORT BjHashTable* bj_hash_table_alloc(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes a new \ref BjHashTable.

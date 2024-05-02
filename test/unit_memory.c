@@ -5,11 +5,11 @@
 static usize s_mem_size = sizeof(int);
 
 TEST_CASE(fallback_allocator_works) {
-    void* blocks = bj_malloc(s_mem_size, 0);
+    void* blocks = bj_malloc(s_mem_size);
     REQUIRE_VALUE(blocks);
-    blocks = bj_realloc(blocks, s_mem_size * 2, 0);
+    blocks = bj_realloc(blocks, s_mem_size * 2);
     REQUIRE_VALUE(blocks);
-    bj_free(blocks, 0);
+    bj_free(blocks);
 }
 
 TEST_CASE(forcing_default_allocators_is_possible) {
@@ -18,11 +18,11 @@ TEST_CASE(forcing_default_allocators_is_possible) {
     bj_memory_set_defaults(&allocators);
     bj_memory_set_defaults(0);
 
-    void* blocks = bj_malloc(s_mem_size, 0);
+    void* blocks = bj_malloc(s_mem_size);
     REQUIRE_VALUE(blocks);
-    blocks = bj_realloc(blocks, s_mem_size * 2, 0);
+    blocks = bj_realloc(blocks, s_mem_size * 2);
     REQUIRE_VALUE(blocks);
-    bj_free(blocks, 0);
+    bj_free(blocks);
 }
 
 TEST_CASE(default_allocator_cannot_have_no_malloc) {
@@ -64,6 +64,8 @@ TEST_CASE(test_custom_default_allocators) {
     CHECK_CLEAN_ALLOC(result);
     BjAllocationCallbacks allocators = mock_allocators(&result);
 
+    bj_memory_set_defaults(&allocators);
+
     // Stack the allocated ptrs
     void* ptrs_fifo[n_ops];
     usize ptrs_fifo_len = 0;
@@ -74,12 +76,12 @@ TEST_CASE(test_custom_default_allocators) {
 
     for(usize i = 0 ; i < n_ops ; ++i) {
         if(allocations[i] == 0) {
-            bj_free(ptrs_fifo[--ptrs_fifo_len], &allocators);
+            bj_free(ptrs_fifo[--ptrs_fifo_len]);
             expected.n_free += 1;
             expected.application_current_allocated -= size_fifo[(--size_fifo_len)];
         } else if(allocations[i] < 0) {
             usize size = -allocations[i];
-            ptrs_fifo[ptrs_fifo_len-1] = bj_realloc(ptrs_fifo[ptrs_fifo_len-1], size, &allocators);
+            ptrs_fifo[ptrs_fifo_len-1] = bj_realloc(ptrs_fifo[ptrs_fifo_len-1], size);
             expected.n_reallocations += 1;
             expected.application_current_allocated += size;
             if(expected.application_current_allocated > expected.application_max_allocated) {
@@ -89,7 +91,7 @@ TEST_CASE(test_custom_default_allocators) {
             size_fifo[size_fifo_len-1] = size;
         } else {
             usize size = allocations[i];
-            ptrs_fifo[ptrs_fifo_len++] = bj_malloc(size, &allocators);
+            ptrs_fifo[ptrs_fifo_len++] = bj_malloc(size);
             expected.n_allocations += 1;
             expected.application_current_allocated += size;
             if(expected.application_current_allocated > expected.application_max_allocated) {
@@ -111,6 +113,7 @@ TEST_CASE(test_custom_default_allocators) {
     CHECK_EQ(size_fifo_len, 0);
 
     REQUIRE_CLEAN_ALLOC(result);
+    bj_memory_unset_defaults();
 }
 
 int main(int argc, char* argv[]) {

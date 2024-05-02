@@ -53,16 +53,10 @@ typedef struct BjAllocationCallbacks {
 /// Allocate `size` bytes of memory and returns a pointer to it.
 /// 
 /// \param[in] size        The number of bytes to allocate.
-/// \param[in] p_allocator A pointer to a custom allocator. Can be _0_.
-///
-/// If `p_allocator` is set, `p_allocator->fn_allocation` is called to perform$
-/// the allocation. If not, a global allocation function is used.
-/// The latter can have been overriden by \ref bj_memory_set_defaults.
 ///
 /// \return The memory address of the newly allocated block.
 BANJO_EXPORT void* bj_malloc(
-    usize                        size,
-    const BjAllocationCallbacks* p_allocator
+    usize size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,19 +64,13 @@ BANJO_EXPORT void* bj_malloc(
 /// 
 /// \param[in] p_memory    Pointer to the memory area to be reallocated.
 /// \param[in] size        The number of bytes to allocate.
-/// \param[in] p_allocator A pointer to a custom allocator. Can be _0_.
 ///
 /// `p_memory` must be previously allocated by \ref bj_malloc or \ref bj_realloc.
-///
-/// If `p_allocator` is set, `p_allocator->fn_reallocation` is called to
-/// perform the operation. If not, a global reallocation function is used.
-/// The latter can have been overriden by \ref bj_memory_set_defaults.
 ///
 /// \return The memory address of the newly allocated block.
 BANJO_EXPORT void* bj_realloc(
     void*                        p_memory,
-    usize                        size,
-    const BjAllocationCallbacks* p_allocator
+    usize                        size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,12 +81,12 @@ BANJO_EXPORT void* bj_realloc(
 ///
 /// `p_memory` must be previously allocated by \ref bj_malloc or \ref bj_realloc.
 ///
+///
 /// If `p_allocator` is set, `p_allocator->fn_free` is called to perform the
 /// operation. If not, a global free function is used.
 /// The latter can have been overriden by \ref bj_memory_set_defaults.
 BANJO_EXPORT void bj_free(
-    void*                         p_memory,
-    const BjAllocationCallbacks*  p_allocator
+    void*                         p_memory
 );
 
 ////////////////////////////////////////////////////////////////////////////////

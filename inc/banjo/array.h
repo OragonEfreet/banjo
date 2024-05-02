@@ -25,7 +25,6 @@
 #pragma once
 
 #include <banjo/api.h>
-#include <banjo/memory.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Info structure used to create a new \ref BjArray.
@@ -38,7 +37,6 @@
 /// When `bytes_paload` is _0_, the object will be nil.
 ///
 typedef struct {
-    const BjAllocationCallbacks* p_allocator;
     usize bytes_payload; ///< Size in bytes, of each item in the array.
     usize len;           ///< Number of elements in the array.
     usize capacity;      ///< Number of allocated elements in the array.
@@ -58,7 +56,6 @@ struct BjArray_T {
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new \ref BjArray.
 ///
-/// \param p_allocator Allocation callbacks, can be _0_.
 /// \param p_info      Creation options.
 ///
 /// \return A pointer to an empty array object.
@@ -112,16 +109,13 @@ BANJO_EXPORT void bj_array_del(
 /// life of the array object.
 /// The content of `p_allocator` being copied in memory, the caller doesn't have
 /// to retain the pointer after creating the array.
-BANJO_EXPORT BjArray* bj_array_alloc(
-    const BjAllocationCallbacks* p_allocator
-);
+BANJO_EXPORT BjArray* bj_array_alloc(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes a new \ref BjArray.
 ///
 /// \param p_instance  The array object
 /// \param p_info      Creation options.
-/// \param p_allocator Allocation callbacks, can be _0_.
 ///
 /// \par Create Info
 ///
