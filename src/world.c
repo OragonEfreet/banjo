@@ -8,13 +8,13 @@
 
 BjWorld* bj_world_new(
     const BjWorldInfo*           p_info,
-    const BjAllocationCallbacks* p_allocator
+    const bj_memory_callbacks* p_allocator
 ) {
     bj_assert(p_info != 0);
 
-    BjWorld* world = bj_malloc(sizeof(struct BjWorld_T));
+    BjWorld* world = bj_malloc(sizeof(struct BjWorld_t));
     world->p_allocator = p_allocator;
-    /* BjArray array = {.count = 10}; */
+    /* bj_array array = {.count = 10}; */
     /* p_array_init(&array); */
 
     return world;

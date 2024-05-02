@@ -1,4 +1,3 @@
-/// \file
 /// \brief Main structure for Entity-Component-System object.
 #pragma once
 
@@ -12,12 +11,12 @@ typedef struct BjWorldInfo {
 } BjWorldInfo;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Typedef for the BjWorld_T struct
-typedef struct BjWorld_T BjWorld;
+/// Typedef for the BjWorld_t struct
+typedef struct BjWorld_t BjWorld;
 
 #ifdef BJ_NO_OPAQUE
-struct BjWorld_T {
-    const BjAllocationCallbacks* p_allocator;
+struct BjWorld_t {
+    const bj_memory_callbacks* p_allocator;
     BjWorldInfo                  info;
 };
 #endif
@@ -30,7 +29,7 @@ struct BjWorld_T {
 /// \return A new \ref BjWorld.
 BANJO_EXPORT BjWorld* bj_world_new(
     const BjWorldInfo*           p_info,        ///< The creation configuration.
-    const BjAllocationCallbacks* p_allocator    ///< Custom allocator. Can be _0_.
+    const bj_memory_callbacks* p_allocator    ///< Custom allocator. Can be _0_.
 );
 
 /// Destroy an instance of \ref BjWorld.
