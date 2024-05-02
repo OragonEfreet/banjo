@@ -2,13 +2,14 @@
 /// Demonstrate how to use `BjArray`, the vector-like structure.
 ///
 #include <banjo/array.h>
+#include <banjo/memory.h>
 #include <assert.h>
 
 int main(int argc, char* argv[]) {
 
     // To create a new array, you must at least provide a payload size.
     BjArrayInfo info = { .bytes_payload = sizeof(int) };
-    BjArray* array = bj_array_new(&info);
+    BjArray* array = bj_new(array, &info);
 
     // Add a new element in the array
     int a = 42;
@@ -54,5 +55,5 @@ int main(int argc, char* argv[]) {
     assert(*data++ == val_1);
     assert(*data++ == val_2);
 
-    bj_array_del(array);
+    bj_del(array, array);
 }

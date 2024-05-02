@@ -96,9 +96,4 @@ typedef uintptr_t uptr;  ///< Representation of a pointer value as an int
 #    define bj_assert(cond) assert(cond)
 #endif
 
-//#define bj_new(T, INF, ALLOC) bj_ ## T ## _init(INF, ALLOC, bj_malloc(bj_ ## T ## _size(), ALLOC))
-/* #define bj_new(T, ALLOC, ...) bj_ ## T ## _init(&(bj_ ## T ## _info){__VA_ARGS__}, ALLOC, bj_malloc(bj_ ## T ## _size_type())) */
-
-
-
 /// \} End of core
