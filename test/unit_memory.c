@@ -13,7 +13,7 @@ TEST_CASE(fallback_allocator_works) {
 }
 
 TEST_CASE(forcing_default_allocators_is_possible) {
-    BjAllocationCallbacks allocators = mock_allocators(0);
+    bj_memory_callbacks allocators = mock_allocators(0);
 
     bj_memory_set_defaults(&allocators);
     bj_memory_set_defaults(0);
@@ -26,19 +26,19 @@ TEST_CASE(forcing_default_allocators_is_possible) {
 }
 
 TEST_CASE(default_allocator_cannot_have_no_malloc) {
-    BjAllocationCallbacks allocators = mock_allocators(0);
+    bj_memory_callbacks allocators = mock_allocators(0);
     allocators.fn_allocation = 0;
     bj_memory_set_defaults(&allocators);
 }
 
 TEST_CASE(default_allocator_cannot_have_no_realloc) {
-    BjAllocationCallbacks allocators = mock_allocators(0);
+    bj_memory_callbacks allocators = mock_allocators(0);
     allocators.fn_reallocation = 0;
     bj_memory_set_defaults(&allocators);
 }
 
 TEST_CASE(default_allocator_cannot_have_no_free) {
-    BjAllocationCallbacks allocators = mock_allocators(0);
+    bj_memory_callbacks allocators = mock_allocators(0);
     allocators.fn_reallocation = 0;
     bj_memory_set_defaults(&allocators);
 }
@@ -62,7 +62,7 @@ TEST_CASE(test_custom_default_allocators) {
     sAllocationData result = {.actual_current_allocated=0};
     sAllocationData expected = {.actual_current_allocated=0};
     CHECK_CLEAN_ALLOC(result);
-    BjAllocationCallbacks allocators = mock_allocators(&result);
+    bj_memory_callbacks allocators = mock_allocators(&result);
 
     bj_memory_set_defaults(&allocators);
 

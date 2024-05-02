@@ -49,7 +49,7 @@ void initialize_context(Context* context, int argc, char* argv[]) {
         context->prog_name = "UnitTest";
     }
 
-    BjAllocationCallbacks allocators = mock_allocators(&context->allocations);
+    bj_memory_callbacks allocators = mock_allocators(&context->allocations);
     bj_memory_set_defaults(&allocators);
 }
 

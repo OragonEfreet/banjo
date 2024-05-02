@@ -17,7 +17,7 @@ static inline void fallback_free(void* user_data, void* ptr) {
     free(ptr);
 }
 
-static BjAllocationCallbacks s_default = {
+static bj_memory_callbacks s_default = {
     .fn_allocation   = fallback_malloc,
     .fn_reallocation = fallback_realloc,
     .fn_free         = fallback_free,
@@ -37,10 +37,10 @@ void bj_free(void* p_memory) {
 
 
 void bj_memory_set_defaults(
-    const BjAllocationCallbacks* p_allocator
+    const bj_memory_callbacks* p_allocator
 ) {
     if(p_allocator == 0) {
-        s_default = (BjAllocationCallbacks) {
+        s_default = (bj_memory_callbacks) {
             .fn_allocation   = fallback_malloc,
             .fn_reallocation = fallback_realloc,
             .fn_free         = fallback_free,
@@ -49,7 +49,7 @@ void bj_memory_set_defaults(
         bj_assert(p_allocator != 0);
         bj_assert(p_allocator != 0);
         bj_assert(p_allocator != 0);
-        s_default = (BjAllocationCallbacks) {
+        s_default = (bj_memory_callbacks) {
             .fn_allocation   = p_allocator->fn_allocation,
             .fn_reallocation = p_allocator->fn_reallocation,
             .fn_free         = p_allocator->fn_free,

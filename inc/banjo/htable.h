@@ -5,18 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup htable Hash Table
 /// \ingroup containers
-/// API related to the \ref BjHashTable object
+/// API related to the \ref bj_htable object
 ///
-///  **Generic Name**     | array                 
-/// ----------------------|-----------------------
-///  Type                 | \ref BjHashTable
-///  Info Type            | \ref BjHashTableInfo
-///  **Alloc**            | \ref bj_hash_table_alloc 
-///  **Create**           | \ref bj_hash_table_new  
-///  **Delete**           | \ref bj_hash_table_del  
-///  **Reset**            | \ref bj_hash_table_reset  
-///
-/// \ref BjHashTable is an associative container that maps a _key_ to a _value_.
+/// \ref bj_htable is an associative container that maps a _key_ to a _value_.
 /// The elements are stored in an array of linked lists called _buckets_.
 /// \{
 #pragma once
@@ -30,92 +21,49 @@ typedef u32 (*bjHashFunctionPtr)(
     const void* p_data, usize size
 );
 
-/// Info structure used to create a new \ref BjHashTable.
-typedef struct BjHashTableInfo {
-    usize                  bytes_value;  ///< Size in bytes of each item in the table.
-    usize                  bytes_key;    ///< Size in bytes of each key.
-    bool                   weak_owning;  ///< _true_ is the table owns the inserted memory.
-    bjHashFunctionPtr      fn_hash;      ///< Hash function used for keys.
-} BjHashTableInfo;
-
 ////////////////////////////////////////////////////////////////////////////////
-/// Typedef for the BjHashTable_T struct
-typedef struct BjHashTable_T BjHashTable;
+/// Typedef for the bj_htable_t struct
+typedef struct bj_htable_t bj_htable;
 
-#ifdef BJ_NO_OPAQUE
-struct BjHashTable_T {
-    BjHashTableInfo info;
-    BjArray         buckets;
-    usize           bytes_entry;
+/// \brief The internal data structure for the \ref bj_htable type.
+struct bj_htable_t {
+    usize             bytes_value;  ///< Size in bytes of each item in the table.
+    usize             bytes_key;    ///< Size in bytes of each key.
+    bool              weak_owning;  ///< _true_ is the table owns the inserted memory.
+    bjHashFunctionPtr fn_hash;      ///< Hash function used for keys
+    bj_array          buckets;      ///< Internal data buffer
+    usize             bytes_entry;  ///< Size of an element (key+value+metadata)
 };
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Create a new \ref BjHashTable.
-///
-/// \param p_info       Creation options.
-/// \return A handle to a new table.
-///
-/// \par Memory Management
-///
-/// The table pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_hash_table_del.
-///
-/// \see bj_array_del
-BANJO_EXPORT BjHashTable* bj_hash_table_new(
-    const BjHashTableInfo* p_info
-);
-
-////////////////////////////////////////////////////////////////////////////////
-/// Destroy a table previously created by \ref bj_hash_table_new.
-///
-/// \param table The instance to destroy.
-///
-/// \par Memory Management
-///
-/// The memory allocated for `table` will be freed using the allocator callbacks
-/// set by \ref bj_hash_table_new.
-///
-/// \see bj_hash_table_new
-BANJO_EXPORT void bj_hash_table_del(
-    BjHashTable* table
-);
-
-////////////////////////////////////////////////////////////////////////////////
-/// Allocate a new BjHashTable object
-///
-/// \return An uninitialized hash table object
-///
-/// \par Memory Management
-///
-/// The hash table pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_free.
-///
-BANJO_EXPORT BjHashTable* bj_hash_table_alloc(void);
-
-////////////////////////////////////////////////////////////////////////////////
-/// Initializes a new \ref BjHashTable.
+/// Initializes a new \ref bj_htable.
 ///
 /// \param p_table      The object to initialize
-/// \param p_info       Creation options.
+/// \param bytes_value  The size in bytes of a value
+/// \param bytes_key    The size in bytes of a key
+///
+/// \return `p_table`
 ///
 /// \par Memory Management
 ///
 /// The table pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_hash_table_del.
+/// by calling \ref bj_htable_reset.
 ///
 /// \see bj_array_del
-BANJO_EXPORT void bj_hash_table_init(
-    BjHashTable*                 p_table,
-    const BjHashTableInfo*       p_info
+BANJO_EXPORT bj_htable* bj_htable_init_default(
+    bj_htable*                 p_table,
+    usize bytes_value,
+    usize bytes_key
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Reset a hash table to an invalid state
 ///
 /// \param p_table The Hash Table object.
-BANJO_EXPORT void bj_hash_table_reset(
-    BjHashTable* p_table
+///
+/// \return `p_table`
+BANJO_EXPORT bj_htable* bj_htable_reset(
+    bj_htable* p_table
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -124,8 +72,8 @@ BANJO_EXPORT void bj_hash_table_reset(
 /// \param table The table object.
 ///
 /// If the table is already empty, this function does nothing.
-BANJO_EXPORT void bj_hash_table_clear(
-    BjHashTable* table
+BANJO_EXPORT void bj_htable_clear(
+    bj_htable* table
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,8 +98,8 @@ BANJO_EXPORT void bj_hash_table_clear(
 ///
 /// When set to _false_, the inserted data is copied into the container's internal
 /// memory using \ref bj_memcpy.
-BANJO_EXPORT void* bj_hash_table_set(
-    BjHashTable* table,
+BANJO_EXPORT void* bj_htable_set(
+    bj_htable* table,
     void*       p_key,
     void*       p_value
 );
@@ -167,8 +115,8 @@ BANJO_EXPORT void* bj_hash_table_set(
 ///
 /// If `table` holds no value at `p_key`, the function returns `p_default`.
 ///
-BANJO_EXPORT void* bj_hash_table_get(
-    const BjHashTable* table,
+BANJO_EXPORT void* bj_htable_get(
+    const bj_htable* table,
     const void*       p_key,
     void*             p_default
 );
@@ -180,8 +128,8 @@ BANJO_EXPORT void* bj_hash_table_get(
 ///
 /// \return The number of elements in the table
 ///
-BANJO_EXPORT usize bj_hash_table_len(
-    const BjHashTable* table
+BANJO_EXPORT usize bj_htable_len(
+    const bj_htable* table
 );
 
 /// \} End of htable group

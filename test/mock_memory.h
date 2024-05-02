@@ -109,8 +109,8 @@ static void* mock_realloc(void* p_user_data, void* pAppPtr, usize appsize) {
     return res;
 }
 
-BjAllocationCallbacks mock_allocators(sAllocationData* pData) {
-    return (BjAllocationCallbacks) {
+bj_memory_callbacks mock_allocators(sAllocationData* pData) {
+    return (bj_memory_callbacks) {
         .p_user_data     = pData,
         .fn_allocation   = mock_malloc,
         .fn_reallocation = mock_realloc,

@@ -2,14 +2,9 @@
 #include <banjo/list.h>
 
 int main() {
-    // Create a list information object
-    BjListInfo list_info = {
-        .bytes_payload = sizeof(int), // Size of each element in the list
-        .weak_owning = 0 // Strong ownership
-    };
 
     // Create a new list
-    BjList* list = bj_list_new(&list_info); // No custom allocator
+    bj_list* list = bj_new(list, default, sizeof(int)); // No custom allocator
     assert(list); // Ensure list creation was successful
 
     // Insert elements into the list
@@ -26,7 +21,7 @@ int main() {
     assert(*(int*)bj_list_at(list, 2) == 30); // Ensure the value at index 2 is correct
 
     // Iterating over the list using an iterator
-    BjListIterator* iterator = bj_list_iterator_new(list);
+    bj_list_iterator* iterator = bj_list_iterator_new(list);
     assert(iterator); // Ensure iterator creation was successful
     while (bj_list_iterator_has_next(iterator)) {
         bj_list_iterator_next(iterator);
@@ -41,7 +36,7 @@ int main() {
     bj_list_reset(list);
 
     // Deleting the list
-    bj_list_del(list);
+    bj_del(list, list);
 
     return 0;
 }

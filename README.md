@@ -50,8 +50,9 @@ You can browse a full work set of examples from the _examples_ folder in the rep
 
 ### Dta Structures
 
-\example BjArray.c
-\example BjList.c
+\example array.c
+\example htable.c
+\example list.c
 
 ### Worlflows
 

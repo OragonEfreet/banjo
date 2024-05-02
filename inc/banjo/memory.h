@@ -13,16 +13,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Memory allocation callback.
-/// Used in \ref BjAllocationCallbacks to set the function used for custom allocations.
-typedef void* (*BjAllocationFunctionPtr)(
+/// Used in \ref bj_memory_callbacks to set the function used for custom allocations.
+typedef void* (*bj_malloc_fn)(
     void* p_user_data, //< General purpose context data.
     usize size         //< Allocation size in bytes requested by the caller.
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Memory allocation callback.
-/// Used in \ref BjAllocationCallbacks to set the function used for custom reallocations.
-typedef void* (*BjReallocationFunctionPtr)(
+/// Used in \ref bj_memory_callbacks to set the function used for custom reallocations.
+typedef void* (*bj_realloc_fn)(
     void* p_user_data, //< General purpose context data.
     void* p_original,  //< Initial object to reallocate.
     usize size         //< Allocation size in bytes requested by the caller.
@@ -31,8 +31,8 @@ typedef void* (*BjReallocationFunctionPtr)(
 ////////////////////////////////////////////////////////////////////////////////
 /// Memory allocation callback.
 ///
-/// Used in \ref BjAllocationCallbacks to set the function used for custom deallocations.
-typedef void (*BjFreeFunctionPtr)(
+/// Used in \ref bj_memory_callbacks to set the function used for custom deallocations.
+typedef void (*bj_free_fn)(
     void* p_user_data, //< General purpose context data.
     void* p_memory     //< Object memory to dispose.
 );
@@ -42,12 +42,12 @@ typedef void (*BjFreeFunctionPtr)(
 /// This structure is used to set the function used by the API upon managing memory.
 /// Each object created by the API can be set a specific set of callbacks.
 /// Also, the custom allocators can be set globally with \ref bj_memory_set_defaults.
-typedef struct BjAllocationCallbacks {
+typedef struct bj_memory_callbacks {
     void*                      p_user_data;     ///< General purpose context data.
-    BjAllocationFunctionPtr    fn_allocation;   ///< The allocation function.
-    BjReallocationFunctionPtr  fn_reallocation; ///< The reallocation function.
-    BjFreeFunctionPtr          fn_free;         ///< The deallocation function.
-} BjAllocationCallbacks;
+    bj_malloc_fn    fn_allocation;   ///< The allocation function.
+    bj_realloc_fn  fn_reallocation; ///< The reallocation function.
+    bj_free_fn          fn_free;         ///< The deallocation function.
+} bj_memory_callbacks;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Allocate `size` bytes of memory and returns a pointer to it.
@@ -88,7 +88,7 @@ BANJO_EXPORT void bj_free(
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the default allocators.
 ///
-/// When a function requires memory changes, (such as \ref bj_world_new),
+/// When a function requires memory changes, (such as \ref bj_new),
 /// the caller can send callback memory functions.
 /// If the given allocator is _0_, Banjo uses global defaults
 /// (`malloc`/`realloc`/`free`).
@@ -103,7 +103,7 @@ BANJO_EXPORT void bj_free(
 ///
 /// \see bj_memory_unset_defaults
 BANJO_EXPORT void bj_memory_set_defaults(
-    const BjAllocationCallbacks* p_allocator
+    const bj_memory_callbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -143,8 +143,55 @@ BANJO_EXPORT void bj_memset(
     usize mem_size
 );
 
-#define bj_new(typ, INF) bj_ ## typ ## _init(bj_ ## typ ## _alloc(), INF)
-#define bj_del(typ, ptr) bj_free(bj_ ## typ ## _reset(ptr))
+/// \brief Convenience macro for creating a new object of any type.
+///
+/// This macro effectively calls \ref bj_malloc and any corresponding 
+/// initialization function, given it exists.
+///
+/// \param typ      The name of the object to create, for example, _array_.
+/// \param initlzr  The right and side of any `bj_??_init_()` function.
+///
+/// \par Example
+///
+/// The following line:
+///
+///     bj_new(array, with_capacity, sizeof(int), 10)
+///
+/// will expand to:
+///
+///     bj_array_init_with_capacity(bj_malloc(sizeof(bj_array), sizeof(int), 10))
+///
+/// \par Memory
+///
+/// The allocation being done using \ref bj_malloc, the memory can be managed
+/// using the custom allocators (see \ref bj_memory_callbacks).
+///
+/// The returned pointer must be reset, then freed.
+/// For this, call \ref bj_del.
+#define bj_new(typ, initlzr, ...) bj_ ## typ ## _init_ ## initlzr(bj_malloc(sizeof(bj_ ## typ)), __VA_ARGS__)
 
+
+/// \brief Convenience macro for deleting an object.
+///
+/// Thie macro effectively calls the reset function of the given type, then \ref bj_free.
+///
+/// \param typ      The name of the object to create, for example, _array_.
+/// \param ptr      The object to delete
+///
+/// \par Example
+///
+/// The following line:
+///
+///     bj_del(array, an_array)
+///
+/// will expand to:
+///
+///     bj_free(bj_array_reset(an_array))
+///
+/// \par Memory
+///
+/// The deallocation being done using \ref bj_free, the memory can be managed
+/// using the custom allocators (see \ref bj_memory_callbacks).
+#define bj_del(typ, ptr) bj_free(bj_ ## typ ## _reset(ptr))
 
 /// \} End of memory

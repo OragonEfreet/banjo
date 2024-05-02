@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// Demonstrate how to use `BjArray`, the vector-like structure.
+/// Demonstrate how to use `bj_array`, the vector-like structure.
 ///
 #include <banjo/array.h>
 #include <banjo/memory.h>
@@ -7,9 +7,9 @@
 
 int main(int argc, char* argv[]) {
 
-    // To create a new array, you must at least provide a payload size.
-    BjArrayInfo info = { .bytes_payload = sizeof(int) };
-    BjArray* array = bj_new(array, &info);
+    bj_array* array = bj_new(array, default,
+        sizeof(int)
+    );
 
     // Add a new element in the array
     int a = 42;
