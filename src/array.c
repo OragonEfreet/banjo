@@ -2,24 +2,11 @@
 #include <banjo/error.h>
 #include <banjo/memory.h>
 
-BjArray* bj_array_new(const BjArrayInfo* p_info) {
-    BjArray* obj = bj_array_alloc();
-    bj_array_init(obj, p_info);
-    return obj;
-}
-
-void bj_array_del(BjArray* obj) {
-    if(obj != 0) {
-        bj_array_reset(obj);
-    }
-    bj_free(obj);
-}
-
 BjArray* bj_array_alloc(void) {
     return bj_malloc(sizeof(BjArray));
 }
 
-void bj_array_init(
+BjArray* bj_array_init(
     BjArray*           p_instance,
     const BjArrayInfo* p_info
 ) {
@@ -30,14 +17,16 @@ void bj_array_init(
         bj_array_set_len(p_instance, p_info->len);
         bj_array_reserve(p_instance, p_info->capacity);
     }
+    return p_instance;
 }
 
-void bj_array_reset(
+BjArray* bj_array_reset(
     BjArray* array
 ) {
     bj_assert(array != 0);
     bj_free(array->p_buffer);
     bj_memset(array, 0, sizeof(BjArray));
+    return array;
 }
 
 void bj_array_clear(

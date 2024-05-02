@@ -15,10 +15,6 @@ TEST_CASE(alloc_function_returns_valid_pointer) {
     bj_free(block);
 }
 
-TEST_CASE(delete_null_pointer_is_valid_action) {
-    bj_array_del(0);
-}
-
 TEST_CASE_ARGS(initializes_to_nil, {BjArrayInfo info;} ) {
     bj_array_init(&array, &test_data->info);
     REQUIRE_EMPTY(BjArray, &array);
@@ -29,7 +25,6 @@ int main(int argc, char* argv[]) {
 
     RUN_TEST(initialize_with_null_info_returns_nil_object);
     RUN_TEST(alloc_function_returns_valid_pointer);
-    RUN_TEST(delete_null_pointer_is_valid_action);
     RUN_TEST_ARGS(initializes_to_nil, {.bytes_payload = 0});
 
     END_TESTS();

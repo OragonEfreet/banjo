@@ -54,46 +54,6 @@ struct BjArray_T {
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Create a new \ref BjArray.
-///
-/// \param p_info      Creation options.
-///
-/// \return A pointer to an empty array object.
-///
-/// \par Memory Management
-///
-/// The array pointed to by the returned handle **must** be released after use
-/// by calling \ref bj_array_del.
-///
-/// When `p_allocator` is not _0_, the given allocator is used though the entire
-/// life of the array object.
-/// The content of `p_allocator` being copied in memory, the caller doesn't have
-/// to retain the pointer after creating the array.
-///
-/// If `p_info` is zero, the object is initialized nil.
-///
-/// \see bj_array_del
-BANJO_EXPORT BjArray* bj_array_new(
-    const BjArrayInfo* p_info
-);
-
-
-////////////////////////////////////////////////////////////////////////////////
-/// Destroy an array previously created by \ref bj_array_new.
-///
-/// \param array The instance to destroy.
-///
-/// \par Memory Management
-///
-/// The memory allocated for `array` will be freed using the allocator callbacks
-/// set by \ref bj_array_new.
-///
-/// \see bj_array_new
-BANJO_EXPORT void bj_array_del(
-    BjArray* array
-);
-
-////////////////////////////////////////////////////////////////////////////////
 /// Allocate a new BjArray object
 ///
 /// \return An uninitialized array object
@@ -137,7 +97,7 @@ BANJO_EXPORT BjArray* bj_array_alloc(void);
 /// The function fails if `p_instance` is _0_.
 ///
 /// \see bj_array_del
-BANJO_EXPORT void bj_array_init(
+BANJO_EXPORT BjArray* bj_array_init(
     BjArray*                     p_instance,
     const BjArrayInfo*           p_info
 );
@@ -146,7 +106,7 @@ BANJO_EXPORT void bj_array_init(
 /// Resets a \ref BjArray to a nil state
 ///
 /// \param p_array The array object
-BANJO_EXPORT void bj_array_reset(
+BANJO_EXPORT BjArray* bj_array_reset(
     BjArray* p_array
 );
 

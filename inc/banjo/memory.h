@@ -143,4 +143,8 @@ BANJO_EXPORT void bj_memset(
     usize mem_size
 );
 
+#define bj_new(typ, INF) bj_ ## typ ## _init(bj_ ## typ ## _alloc(), INF)
+#define bj_del(typ, ptr) bj_free(bj_ ## typ ## _reset(ptr))
+
+
 /// \} End of memory
