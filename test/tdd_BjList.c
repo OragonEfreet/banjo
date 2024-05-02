@@ -22,7 +22,6 @@ TEST_CASE(initialize_with_payload_gives_empty_list) {
     BjListInfo info = {.bytes_payload = bytes_payload};
     bj_list_init(&list, &info);
 
-    REQUIRE_EQ(list.info.p_allocator, 0);
     REQUIRE_EQ(list.info.bytes_payload, bytes_payload);
     REQUIRE(list.bytes_entry > bytes_payload);
     REQUIRE_EQ(list.info.weak_owning, false);
@@ -40,7 +39,6 @@ TEST_CASE(clear_empty_does_nothing) {
     bj_list_init(&list, &info);
     bj_list_clear(&list);
 
-    REQUIRE_EQ(list.info.p_allocator, 0);
     REQUIRE_EQ(list.info.bytes_payload, bytes_payload);
     REQUIRE(list.bytes_entry > bytes_payload);
     REQUIRE_EQ(list.info.weak_owning, false);

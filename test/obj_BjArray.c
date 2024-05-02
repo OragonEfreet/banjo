@@ -10,9 +10,9 @@ TEST_CASE(initialize_with_null_info_returns_nil_object) {
 }
 
 TEST_CASE(alloc_function_returns_valid_pointer) {
-    void* block = bj_array_alloc(0);
+    void* block = bj_array_alloc();
     REQUIRE_VALUE(block);
-    bj_free(block, 0);
+    bj_free(block);
 }
 
 TEST_CASE(delete_null_pointer_is_valid_action) {

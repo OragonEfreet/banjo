@@ -23,29 +23,16 @@ static BjAllocationCallbacks s_default = {
     .fn_free         = fallback_free,
 };
 
-void* bj_malloc(
-    usize                        size,
-    const BjAllocationCallbacks* p_allocator
-) {
-    const BjAllocationCallbacks* allocator = (p_allocator == 0 ? &s_default : p_allocator);
-    return allocator->fn_allocation(allocator->p_user_data, size);
+void* bj_malloc(usize size) {
+    return s_default.fn_allocation(s_default.p_user_data, size);
 }
 
-void* bj_realloc(
-    void*                        p_memory,
-    usize                        size,
-    const BjAllocationCallbacks* p_allocator
-) {
-    const BjAllocationCallbacks* allocator = (p_allocator == 0 ? &s_default : p_allocator);
-    return allocator->fn_reallocation(allocator->p_user_data, p_memory, size);
+void* bj_realloc(void* p_memory, usize size) {
+    return s_default.fn_reallocation(s_default.p_user_data, p_memory, size);
 }
 
-void bj_free(
-    void*                         p_memory,
-    const BjAllocationCallbacks*  p_allocator
-) {
-    const BjAllocationCallbacks* allocator = (p_allocator == 0 ? &s_default : p_allocator);
-    allocator->fn_free(allocator->p_user_data, p_memory);
+void bj_free(void* p_memory) {
+    s_default.fn_free(s_default.p_user_data, p_memory);
 }
 
 
@@ -89,5 +76,4 @@ void bj_memset(
     usize num
 ) {
     memset(p_dest, value, num);
-
 }

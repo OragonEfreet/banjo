@@ -4,7 +4,7 @@
 Bj ## T* bj_ ## t ## _alloc(                                                   \
     const BjAllocationCallbacks* p_allocator                                   \
 ) {                                                                            \
-    return bj_malloc(sizeof(Bj ## T), p_allocator);                            \
+    return bj_malloc(sizeof(Bj ## T));                                         \
 }
 
 #define BJ_IMPL_NEW(T, t)                                                      \
@@ -18,12 +18,10 @@ Bj ## T* bj_ ## t ## _new(const Bj ## T ## Info* p_info) {                     \
 void bj_ ## t ## _del(                                                         \
     Bj ## T* obj                                                               \
 ) {                                                                            \
-    const BjAllocationCallbacks* allocs = 0;                                   \
     if(obj != 0) {                                                             \
-        allocs = obj->info.p_allocator;                                        \
         bj_ ## t ## _reset(obj);                                               \
     }                                                                          \
-    bj_free(obj, allocs);                                                      \
+    bj_free(obj);                                                              \
 }
 
 #define BJ_IMPL_OBJ(T, t)                                                      \

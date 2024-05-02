@@ -2,9 +2,22 @@
 #include <banjo/list.h>
 #include <banjo/memory.h>
 
-#include "obj.h"
+BjList* bj_list_new(const BjListInfo* p_info) {
+    BjList* obj = bj_list_alloc();
+    bj_list_init(obj, p_info);
+    return obj;
+}
 
-BJ_IMPL_OBJ(List, list)
+void bj_list_del(BjList* obj) {
+    if(obj != 0) {
+        bj_list_reset(obj);
+    }
+    bj_free(obj);
+}
+
+BjList* bj_list_alloc(void) {
+    return bj_malloc(sizeof(BjList));
+}
 
 void bj_list_init(
     BjList*                p_instance,
@@ -36,7 +49,7 @@ void bj_list_clear(
     while(p_next_block != 0) {
         void* to_free = p_next_block;
         p_next_block = *p_next_block;
-        bj_free(to_free, list->info.p_allocator);
+        bj_free(to_free);
     }
     list->p_head = 0;
 }
@@ -75,7 +88,7 @@ void* bj_list_insert(
     // p_previous_block gets the address of the memory holding the newly current element.
 
     // We create the new block, its first bytes must contain the address of the next block
-    u8* p_block = bj_malloc(list->bytes_entry, list->info.p_allocator);
+    u8* p_block = bj_malloc(list->bytes_entry);
     bj_memcpy(p_block, &p_next_block, sizeof(void*));
     // While in previous block, we put the adress of the current block
     bj_memcpy(p_previous_block, &p_block, sizeof(void*)); 
@@ -129,7 +142,7 @@ BjListIterator* bj_list_iterator_new(
     BjList* list
 ) {
     bj_assert(list);
-    BjListIterator* it = bj_malloc(sizeof(struct BjListIterator_T), list->info.p_allocator);
+    BjListIterator* it = bj_malloc(sizeof(struct BjListIterator_T));
     bj_list_iterator_init(list, it);
     return it;
 }
@@ -137,9 +150,8 @@ BjListIterator* bj_list_iterator_new(
 void bj_list_iterator_del(
     BjListIterator* iterator
 ) {
-    const BjAllocationCallbacks* allocator = iterator->list->info.p_allocator;
     bj_list_iterator_reset(iterator);
-    bj_free(iterator, allocator);
+    bj_free(iterator);
 }
 
 void bj_list_iterator_init(BjList* list, BjListIterator* iterator) {

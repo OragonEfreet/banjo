@@ -32,8 +32,6 @@ TEST_CASE(init_with_no_hash_gives_default_hash) {
 
 TEST_CASE(empty_valid_initialization) {
     bj_hash_table_init(&htable, &(BjHashTableInfo){.bytes_value=bytes_value, .bytes_key=bytes_key});
-    REQUIRE_NULL(htable.info.p_allocator);
-    REQUIRE_NULL(htable.buckets.info.p_allocator);
     REQUIRE_EQ(htable.buckets.info.bytes_payload, sizeof(BjList));
     REQUIRE_EQ(htable.buckets.info.capacity, 10);
     REQUIRE_EQ(htable.buckets.info.len, 10);
@@ -58,8 +56,6 @@ TEST_CASE(clear_nil_does_nothing) {
 TEST_CASE(clear_empty_does_nothing) {
     bj_hash_table_init(&htable, &(BjHashTableInfo){.bytes_value=bytes_value, .bytes_key=bytes_key});
     bj_hash_table_clear(&htable);
-    REQUIRE_NULL(htable.info.p_allocator);
-    REQUIRE_NULL(htable.buckets.info.p_allocator);
     REQUIRE_EQ(htable.buckets.info.bytes_payload, sizeof(BjList));
     REQUIRE_EQ(htable.buckets.info.capacity, 10);
     REQUIRE_EQ(htable.buckets.info.len, 10);

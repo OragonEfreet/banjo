@@ -1,10 +1,23 @@
-#include "banjo/memory.h"
 #include <banjo/array.h>
 #include <banjo/error.h>
+#include <banjo/memory.h>
 
-#include "obj.h"
+BjArray* bj_array_new(const BjArrayInfo* p_info) {
+    BjArray* obj = bj_array_alloc();
+    bj_array_init(obj, p_info);
+    return obj;
+}
 
-BJ_IMPL_OBJ(Array, array)
+void bj_array_del(BjArray* obj) {
+    if(obj != 0) {
+        bj_array_reset(obj);
+    }
+    bj_free(obj);
+}
+
+BjArray* bj_array_alloc(void) {
+    return bj_malloc(sizeof(BjArray));
+}
 
 void bj_array_init(
     BjArray*           p_instance,
@@ -23,7 +36,7 @@ void bj_array_reset(
     BjArray* array
 ) {
     bj_assert(array != 0);
-    bj_free(array->p_buffer, array->info.p_allocator);
+    bj_free(array->p_buffer);
     bj_memset(array, 0, sizeof(BjArray));
 }
 
@@ -40,10 +53,10 @@ void bj_array_shrink(
     bj_assert(array != 0);
     if(array->info.len < array->info.capacity) {
         if(array->info.len == 0) {
-            bj_free(array->p_buffer, array->info.p_allocator);
+            bj_free(array->p_buffer);
             array->p_buffer = 0;
         } else {
-            array->p_buffer = bj_realloc(array->p_buffer, array->info.bytes_payload * array->info.len, array->info.p_allocator);
+            array->p_buffer = bj_realloc(array->p_buffer, array->info.bytes_payload * array->info.len);
         }
         array->info.capacity = array->info.len;
     }
@@ -68,9 +81,9 @@ void bj_array_reserve(
     const usize bytes_capacity_req = array->info.bytes_payload * capacity;
     if(bytes_capacity_req > array->info.bytes_payload * array->info.capacity) {
         if(array->p_buffer == 0) {
-            array->p_buffer = bj_malloc(bytes_capacity_req, array->info.p_allocator);
+            array->p_buffer = bj_malloc(bytes_capacity_req);
         } else {
-            array->p_buffer = bj_realloc(array->p_buffer, bytes_capacity_req, array->info.p_allocator);
+            array->p_buffer = bj_realloc(array->p_buffer, bytes_capacity_req);
         }
         array->info.capacity = capacity;
     }
