@@ -17,7 +17,7 @@
 #include <banjo/memory.h>
 
 /// Function type for hashing keys.
-typedef u32 (*bjHashFunctionPtr)(
+typedef u32 (*bj_hash_fn)(
     const void* p_data, usize size
 );
 
@@ -30,7 +30,7 @@ struct bj_htable_t {
     usize             bytes_value;  ///< Size in bytes of each item in the table.
     usize             bytes_key;    ///< Size in bytes of each key.
     bool              weak_owning;  ///< _true_ is the table owns the inserted memory.
-    bjHashFunctionPtr fn_hash;      ///< Hash function used for keys
+    bj_hash_fn fn_hash;      ///< Hash function used for keys
     bj_array          buckets;      ///< Internal data buffer
     usize             bytes_entry;  ///< Size of an element (key+value+metadata)
 };
