@@ -7,12 +7,12 @@ All data types in Banjo API, such as #bj_array and #bj_htable, strictly follow t
 To create any object, the simplest is to use #bj_new:
 
 ```c
-bj_array* arr = bj_new(array, default, int);
+bj_array* arr = bj_new(array, default_t, int);
 ```
 
 - The first parameter is the type of object to create, matches the pointer name without the `bj_` prefix (`array`: #bj_array).
 - The second parameter is a name used to determine which initializer is used.
-  Here, we use `default`. All Banjo types are guaranteed to provide at least this initializer.
+  Here, we use `default_t`, a variant of `default`. All object types are guaranteed to provide at least `default`.
 - The following parameters (here `int`) depend on the object type and are forwarded to the initializer of the object.
 
 Once the object is not needed anymore, you can call #bj_del to destroy the object:
@@ -47,7 +47,7 @@ The code in the previous section is the same as:
 
 \code{c}
 bj_array* arr = bj_malloc(sizeof(bj_array))
-bj_array_init_default(arr, int);
+bj_array_init_default_t(arr, int);
 \endcode
 
 Conversely, the following code is the same as using #bj_del:
