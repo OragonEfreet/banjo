@@ -41,7 +41,9 @@ endif()
 add_library(banjo ${_interface_headers} ${_sources})
 target_compile_definitions(banjo PRIVATE BJ_NO_OPAQUE)
 
-if(NOT MSVC)
+if(MSVC)
+    target_compile_options(banjo PUBLIC /Zc:preprocessor)
+else()
     target_compile_options(banjo PRIVATE -Wall -pedantic)
 endif()
 
