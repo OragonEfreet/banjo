@@ -2,25 +2,23 @@
 #include <banjo/framebuffer.h>
 #include <banjo/memory.h>
 
-void bj_framebuffer_init(
-    BjFramebuffer*                p_renderer,
-    const BjFramebufferInfo*      p_info,
-    const BjAllocationCallbacks*  p_allocator
+BANJO_EXPORT bj_framebuffer* bj_famebuffer_init_default(
+    bj_framebuffer*   p_framebuffer,
+    usize             width,
+    usize             height
 ) {
-    bj_memset(p_renderer, 0, sizeof(BjArray));
-    if(p_info != 0) {
-        p_renderer->p_allocator = p_allocator;
-    }
-
+    bj_memset(p_framebuffer, 0, sizeof(bj_framebuffer));
+    p_framebuffer->width = width;
+    p_framebuffer->height = height;
+    return p_framebuffer;
 }
 
-void bj_framebuffer_reset(
-    BjFramebuffer* p_renderer
+BANJO_EXPORT bj_framebuffer* bj_renderer_reset(
+    bj_framebuffer* p_framebuffer
 ) {
-    bj_array_reset(&p_renderer->array);
-    p_renderer->width       = 0;
-    p_renderer->height      = 0;
-    p_renderer->p_allocator = 0;
+    bj_array_reset(&p_framebuffer->array);
+    p_framebuffer->width       = 0;
+    p_framebuffer->height      = 0;
+    return p_framebuffer;
 }
-
 

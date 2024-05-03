@@ -1,41 +1,25 @@
 #pragma once
 
+#include <banjo/array.h>
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
-typedef struct BjFramebuffer_T BjFramebuffer;
+typedef struct bj_framebuffer_t bj_framebuffer;
 
-#ifdef BJ_NO_OPAQUE
-#include <banjo/array.h>
-struct BjFramebuffer_T {
-    const BjAllocationCallbacks* p_allocator;
-    struct BjArray_T array;
+struct bj_framebuffer_t {
     usize width;
     usize height;
+    struct bj_array_t array;
 };
-#endif
 
-typedef struct BjFramebufferInfo {
-    usize width;
-    usize height;
-} BjFramebufferInfo;
-
-BANJO_EXPORT BjFramebuffer* bj_renderer_alloc(
-    const BjAllocationCallbacks* p_allocator
+BANJO_EXPORT bj_framebuffer* bj_famebuffer_init_default(
+    bj_framebuffer*   p_framebuffer,
+    usize             width,
+    usize             height
 );
 
-BANJO_EXPORT void bj_renderer_init(
-    BjFramebuffer*           p_renderer,
-    const BjFramebufferInfo* p_info,
-    const BjAllocationCallbacks*  p_allocator
-);
-
-BANJO_EXPORT void bj_renderer_reset(
-    BjFramebuffer* p_list
-);
-
-BANJO_EXPORT void bj_renderer_del(
-    BjFramebuffer* list
+BANJO_EXPORT bj_framebuffer* bj_renderer_reset(
+    bj_framebuffer* p_framebuffer
 );
 
 
