@@ -50,7 +50,7 @@ struct bj_htable_t {
 /// by calling \ref bj_htable_reset.
 ///
 /// \see bj_array_del
-BANJO_EXPORT bj_htable* bj_htable_init_default_with_size(
+BANJO_EXPORT bj_htable* bj_htable_init_default(
     bj_htable*                 p_table,
     usize bytes_key,
     usize bytes_value
@@ -65,7 +65,7 @@ BANJO_EXPORT bj_htable* bj_htable_init_default_with_size(
 ///
 /// \return `p_table`
 ///
-/// This function expands to a call to \ref bj_htable_init_default_with_size,
+/// This function expands to a call to \ref bj_htable_init_default,
 /// using `K` anv `V` for respectively `bytes_key` and `bytes_value`.
 ///
 /// \par Memory Management
@@ -74,7 +74,7 @@ BANJO_EXPORT bj_htable* bj_htable_init_default_with_size(
 /// by calling \ref bj_htable_reset.
 ///
 /// \see bj_array_del
-#define bj_htable_init_default(p_table, K, V) bj_htable_init_default_with_size(p_table, sizeof(K), sizeof(V))
+#define bj_htable_init_default_t(p_table, K, V) bj_htable_init_default(p_table, sizeof(K), sizeof(V))
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Reset a hash table to an invalid state

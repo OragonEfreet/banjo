@@ -43,7 +43,7 @@ struct bj_array_t {
 /// \return `p_instance`.
 ///
 /// \see bj_array_del
-BANJO_EXPORT bj_array* bj_array_init_default_with_size(
+BANJO_EXPORT bj_array* bj_array_init_default(
     bj_array* p_instance,
     usize     bytes_payload
 );
@@ -56,7 +56,7 @@ BANJO_EXPORT bj_array* bj_array_init_default_with_size(
 ///
 /// This creates and empty array with initial capacity to _0_.
 ///
-/// The function expands to a call to \ref bj_array_init_default_with_size, using
+/// The function expands to a call to \ref bj_array_init_default, using
 /// `T` for the `bytes_payload` parameter.
 ///
 /// \par Error Management
@@ -68,7 +68,7 @@ BANJO_EXPORT bj_array* bj_array_init_default_with_size(
 /// \return `p_instance`.
 ///
 /// \see bj_array_del
-#define bj_array_init_default(p_instance, T) bj_array_init_default_with_size(p_instance, sizeof(T))
+#define bj_array_init_default_t(p_instance, T) bj_array_init_default(p_instance, sizeof(T))
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes a new \ref bj_array byt setting its initial capacity.
@@ -90,7 +90,7 @@ BANJO_EXPORT bj_array* bj_array_init_default_with_size(
 /// \return `p_instance`.
 ///
 /// \see bj_array_del
-BANJO_EXPORT bj_array* bj_array_init_with_size_and_capacity(
+BANJO_EXPORT bj_array* bj_array_init_with_capacity(
     bj_array* p_instance,
     usize     bytes_payload,
     usize     capacity
@@ -117,7 +117,7 @@ BANJO_EXPORT bj_array* bj_array_init_with_size_and_capacity(
 /// \return `p_instance`.
 ///
 /// \see bj_array_del
-#define bj_array_init_with_capacity(p_instance, T, capacity) bj_array_init_with_size_and_capacity(p_instance, sizeof(T), capacity)
+#define bj_array_init_with_capacity_t(p_instance, T, capacity) bj_array_init_with_capacity(p_instance, sizeof(T), capacity)
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Resets a \ref bj_array to a nil state
