@@ -4,7 +4,7 @@
 int main() {
 
     // Create a new list
-    bj_list* list = bj_new(list, default, int); // No custom allocator
+    bj_list* list = bj_new(list, default_t, int); // No custom allocator
     assert(list); // Ensure list creation was successful
 
     // Insert elements into the list

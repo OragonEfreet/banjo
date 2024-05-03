@@ -12,7 +12,7 @@ typedef struct {
 } payload;
 
 TEST_CASE(initialize_with_payload_gives_empty_array) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     REQUIRE_EQ(array.bytes_payload, sizeof(payload));
     REQUIRE_EQ(array.capacity, 0);
@@ -22,7 +22,7 @@ TEST_CASE(initialize_with_payload_gives_empty_array) {
 
 TEST_CASE(nonzero_capacity_allocates_buffer) {
     const usize capacity = 10;
-    bj_array_init_with_capacity(&array, payload, capacity);
+    bj_array_init_with_capacity_t(&array, payload, capacity);
 
     REQUIRE_EQ(array.bytes_payload, sizeof(payload));
     REQUIRE_EQ(array.capacity, capacity);
@@ -33,7 +33,7 @@ TEST_CASE(nonzero_capacity_allocates_buffer) {
 };
 
 TEST_CASE(clear_empty_does_nothing) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
     CHECK_EQ(array.len, 0);
     bj_array_clear(&array);
     REQUIRE_EQ(array.len, 0);
@@ -41,7 +41,7 @@ TEST_CASE(clear_empty_does_nothing) {
 }
 
 TEST_CASE(clear_nil_does_nothing) {
-    bj_array_init_default_with_size(&array, 0);
+    bj_array_init_default(&array, 0);
     CHECK_EMPTY(bj_array, &array);
     bj_array_clear(&array);
     REQUIRE_EMPTY(bj_array, &array);
@@ -49,7 +49,7 @@ TEST_CASE(clear_nil_does_nothing) {
 }
 
 TEST_CASE(clear_filled_reduces_size_to_zero) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
     bj_array_push(&array, &(payload){.elem0 = 0});
     bj_array_clear(&array);
     REQUIRE_EQ(array.len, 0);
@@ -57,7 +57,7 @@ TEST_CASE(clear_filled_reduces_size_to_zero) {
 }
 
 TEST_CASE(clear_filled_does_not_change_capacity) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
     bj_array_push(&array, &(payload){.elem0 = 0});
     usize capacity = bj_array_capacity(&array);
     bj_array_clear(&array);
@@ -66,7 +66,7 @@ TEST_CASE(clear_filled_does_not_change_capacity) {
 }
 
 TEST_CASE(shrink_empty_does_nothing) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
     CHECK_EQ(array.capacity, 0);
     bj_array_clear(&array);
     REQUIRE_EQ(array.capacity, 0);
@@ -74,7 +74,7 @@ TEST_CASE(shrink_empty_does_nothing) {
 }
 
 TEST_CASE(shrink_nil_does_nothing) {
-    bj_array_init_default(&array, 0);
+    bj_array_init_default_t(&array, 0);
     CHECK_EQ(array.capacity, 0);
     bj_array_clear(&array);
     REQUIRE_EQ(array.capacity, 0);
@@ -83,7 +83,7 @@ TEST_CASE(shrink_nil_does_nothing) {
 
 TEST_CASE(shrink_sets_capacity_to_size) {
     payload p;
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     for(usize len = 1 ; len <= 10 ; ++len) {
         bj_array_push(&array, &p);
@@ -99,7 +99,7 @@ TEST_CASE(shrink_sets_capacity_to_size) {
 }
 
 TEST_CASE(set_greater_len_changes_len_and_capacity) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     for(usize len = 0 ; len < 10 ; ++len) {
         bj_array_set_len(&array, len);
@@ -110,7 +110,7 @@ TEST_CASE(set_greater_len_changes_len_and_capacity) {
 }
 
 TEST_CASE(set_lower_len_changes_len_but_not_capacity) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     usize len = 9;
     do {
@@ -122,7 +122,7 @@ TEST_CASE(set_lower_len_changes_len_but_not_capacity) {
 }
 
 TEST_CASE(reserve_greater_capacity_growth_buffer) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
     bj_array_reserve(&array, 10);
     REQUIRE(array.capacity >= 10);
     REQUIRE_VALUE(array.p_buffer);
@@ -130,7 +130,7 @@ TEST_CASE(reserve_greater_capacity_growth_buffer) {
 }
 
 TEST_CASE(reserve_smaller_or_equal_capacity_does_nothing) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     bj_array_reserve(&array, 0);
     REQUIRE_EQ(array.capacity, 0);
@@ -153,7 +153,7 @@ TEST_CASE(reserve_smaller_or_equal_capacity_does_nothing) {
 
 TEST_CASE(push_into_empty_array_creates_new_buffer) {
     payload p;
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     CHECK(array.p_buffer == 0);
     CHECK_EQ(array.len, 0);
@@ -170,7 +170,7 @@ TEST_CASE(push_into_empty_array_creates_new_buffer) {
 
 TEST_CASE(push_growth_len_by_1) {
     payload p;
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     for(usize i = 1 ; i < 9 ; ++i) {
         bj_array_push(&array, &p);
@@ -182,7 +182,7 @@ TEST_CASE(push_growth_len_by_1) {
 
 TEST_CASE(push_growth_capacity_only_if_equals_to_len) {
     payload p;
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     for(usize i = 1 ; i < 90 ; ++i) {
         usize before_capacity  = array.capacity;
@@ -201,14 +201,14 @@ TEST_CASE(push_growth_capacity_only_if_equals_to_len) {
 }
 
 TEST_CASE(pop_nil_does_nothing) {
-    bj_array_init_default_with_size(&array, 0);
+    bj_array_init_default(&array, 0);
     CHECK_EMPTY(bj_array, &array);
     bj_array_pop(&array);
     REQUIRE_EMPTY(bj_array, &array);
 }
 
 TEST_CASE(pop_empty_does_nothing) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
     bj_array_pop(&array);
     REQUIRE_EQ(array.p_buffer, 0);
     REQUIRE_EQ(array.len, 0);
@@ -216,7 +216,7 @@ TEST_CASE(pop_empty_does_nothing) {
 }
 
 TEST_CASE(pop_nonempty_reduces_len_but_not_capacity_nor_pointer) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     usize len = 10;
     bj_array_set_len(&array, len);
@@ -233,7 +233,7 @@ TEST_CASE(pop_nonempty_reduces_len_but_not_capacity_nor_pointer) {
 }
 
 TEST_CASE(at_nil_returns_0) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     REQUIRE_EQ(bj_array_at(&array, 0), 0);
     REQUIRE_EQ(bj_array_at(&array, 1), 0);
@@ -243,7 +243,7 @@ TEST_CASE(at_nil_returns_0) {
 }
 
 TEST_CASE(at_empty_returns_0) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     REQUIRE_EQ(bj_array_at(&array, 0), 0);
     REQUIRE_EQ(bj_array_at(&array, 1), 0);
@@ -253,7 +253,7 @@ TEST_CASE(at_empty_returns_0) {
 }
 
 TEST_CASE(at_nonempty_returns_indexed_value) {
-    bj_array_init_default(&array, payload);
+    bj_array_init_default_t(&array, payload);
 
     for(usize i = 0 ; i < 10 ; ++i) {
 

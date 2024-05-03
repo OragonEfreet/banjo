@@ -5,7 +5,7 @@
 int main()
 {
     // Create a new hash table
-    bj_htable* table = bj_new(htable, default, int, int); // No custom allocator
+    bj_htable* table = bj_new(htable, default_t, int, int); // No custom allocator
     assert(table); // Ensure table creation was successful
 
     // Insert values into the table

@@ -2,7 +2,7 @@
 #include <banjo/list.h>
 #include <banjo/memory.h>
 
-bj_list* bj_list_init_default_with_size(
+bj_list* bj_list_init_default(
     bj_list* p_instance,
     usize    bytes_payload
 ) {

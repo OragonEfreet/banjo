@@ -2,7 +2,7 @@
 #include <banjo/error.h>
 #include <banjo/memory.h>
 
-bj_array* bj_array_init_default_with_size(
+bj_array* bj_array_init_default(
     bj_array* p_instance,
     usize bytes_payload
 ) {
@@ -13,7 +13,7 @@ bj_array* bj_array_init_default_with_size(
     return p_instance;
 }
 
-bj_array* bj_array_init_with_size_and_capacity(
+bj_array* bj_array_init_with_capacity(
     bj_array* p_instance,
     usize bytes_payload,
     usize capacity
