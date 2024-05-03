@@ -7,9 +7,7 @@
 
 int main(int argc, char* argv[]) {
 
-    bj_array* array = bj_new(array, default,
-        sizeof(int)
-    );
+    bj_array* array = bj_new(array, default, int);
 
     // Add a new element in the array
     int a = 42;

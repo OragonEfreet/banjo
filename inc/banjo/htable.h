@@ -30,7 +30,7 @@ struct bj_htable_t {
     usize             bytes_value;  ///< Size in bytes of each item in the table.
     usize             bytes_key;    ///< Size in bytes of each key.
     bool              weak_owning;  ///< _true_ is the table owns the inserted memory.
-    bj_hash_fn fn_hash;      ///< Hash function used for keys
+    bj_hash_fn        fn_hash;      ///< Hash function used for keys
     bj_array          buckets;      ///< Internal data buffer
     usize             bytes_entry;  ///< Size of an element (key+value+metadata)
 };
@@ -50,11 +50,31 @@ struct bj_htable_t {
 /// by calling \ref bj_htable_reset.
 ///
 /// \see bj_array_del
-BANJO_EXPORT bj_htable* bj_htable_init_default(
+BANJO_EXPORT bj_htable* bj_htable_init_default_with_size(
     bj_htable*                 p_table,
-    usize bytes_value,
-    usize bytes_key
+    usize bytes_key,
+    usize bytes_value
 );
+
+////////////////////////////////////////////////////////////////////////////////
+/// Initializes a new \ref bj_htable.
+///
+/// \param p_table      The object to initialize
+/// \param K            Key type
+/// \param V            Value type
+///
+/// \return `p_table`
+///
+/// This function expands to a call to \ref bj_htable_init_default_with_size,
+/// using `K` anv `V` for respectively `bytes_key` and `bytes_value`.
+///
+/// \par Memory Management
+///
+/// The table pointed to by the returned handle **must** be released after use
+/// by calling \ref bj_htable_reset.
+///
+/// \see bj_array_del
+#define bj_htable_init_default(p_table, K, V) bj_htable_init_default_with_size(p_table, sizeof(K), sizeof(V))
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Reset a hash table to an invalid state
