@@ -25,10 +25,10 @@ u32 fnv1a_hash(const void *data, size_t size) {
     return hash;
 }
 
-bj_htable* bj_htable_init_default(
+bj_htable* bj_htable_init_default_with_size(
     bj_htable*                 p_instance,
-    usize bytes_value,
-    usize bytes_key
+    usize bytes_key,
+    usize bytes_value
 ) {
     bj_memset(p_instance, 0, sizeof(bj_htable));
     if(bytes_key == 0 || bytes_value == 0) {
@@ -42,11 +42,12 @@ bj_htable* bj_htable_init_default(
     p_instance->bytes_value = bytes_value;
     p_instance->bytes_entry = p_instance->weak_owning ? sizeof(void*) * 2 : p_instance->bytes_key + p_instance->bytes_value;
 
-    bj_array_init_with_len(&p_instance->buckets, sizeof(bj_list), BUCKET_COUNT);
+    bj_array_init_with_capacity(&p_instance->buckets, bj_list, BUCKET_COUNT);
+    bj_array_set_len(&p_instance->buckets, BUCKET_COUNT);
 
     for(usize i = 0 ; i < bj_array_len(&p_instance->buckets) ; ++i) {
         bj_list* bucket = bj_array_at(&p_instance->buckets, i);
-        bj_list_init_default(bucket, p_instance->bytes_entry);
+        bj_list_init_default_with_size(bucket, p_instance->bytes_entry);
     }
     return p_instance;
 }

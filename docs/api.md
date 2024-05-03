@@ -7,13 +7,13 @@ All data types in Banjo API, such as #bj_array and #bj_htable, strictly follow t
 To create any object, the simplest is to use #bj_new:
 
 ```c
-bj_array* arr = bj_new(array, default, sizeof(int));
+bj_array* arr = bj_new(array, default, int);
 ```
 
 - The first parameter is the type of object to create, matches the pointer name without the `bj_` prefix (`array`: #bj_array).
 - The second parameter is a name used to determine which initializer is used.
   Here, we use `default`. All Banjo types are guaranteed to provide at least this initializer.
-- The following parameters (here `sizeof(int)`) depend on the object type and are forwarded to the initializer of the object.
+- The following parameters (here `int`) depend on the object type and are forwarded to the initializer of the object.
 
 Once the object is not needed anymore, you can call #bj_del to destroy the object:
 
@@ -47,7 +47,7 @@ The code in the previous section is the same as:
 
 \code{c}
 bj_array* arr = bj_malloc(sizeof(bj_array))
-bj_array_init_default(arr, sizeof(int));
+bj_array_init_default(arr, int);
 \endcode
 
 Conversely, the following code is the same as using #bj_del:
@@ -64,7 +64,7 @@ If you want to initialize an object directly from the stack, using only `init` a
 ```c
 bj_array array; 
 
-bj_array_init_with_len(&array, sizeof(int), 10);
+bj_array_init_with_capacity(&array, int, 10);
 
 // ... using the array ...
 
@@ -257,7 +257,7 @@ digraph workflow {
 \enddot
 
 
-For every type `BjType/bj_type` [`bj_array/bj_array`]:
+For every type `bj_type` [`bj_array`]:
 
 * The **reset** function is `bj_type* bj_type_reset(bj_type*)`
 * `bj_type_reset` **will** return an *nil* object.

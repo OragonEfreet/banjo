@@ -37,10 +37,24 @@ struct bj_list_t {
 /// \return `p_list`
 ///
 /// \see bj_list_del
-BANJO_EXPORT bj_list* bj_list_init_default(
+BANJO_EXPORT bj_list* bj_list_init_default_with_size(
     bj_list* p_list,
     usize   bytes_payload
 );
+
+////////////////////////////////////////////////////////////////////////////////
+/// Default initializer for \ref bj_list.
+///
+/// \param p_list  The list object.
+/// \param T       Value type
+///
+/// \return `p_list`
+///
+/// The function expands to a call to \ref bj_list_init_default_with_size, using
+/// `T` for the `bytes_payload` parameter.
+///
+/// \see bj_list_del
+#define bj_list_init_default(p_list, T) bj_list_init_default_with_size(p_list, sizeof(T))
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Reset a given list to invalid state
