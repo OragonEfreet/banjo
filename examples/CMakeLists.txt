@@ -7,6 +7,9 @@ foreach(_bin_source_path ${_bin_source_paths})
     set_target_properties(${_target} PROPERTIES FOLDER "Examples")
 
     if (BUILD_TESTING)
-        add_test(NAME "[Example] ${_target}" COMMAND ${_target})
+            add_test(NAME "[Example] ${_target}" COMMAND ${_target})
     endif()
 endforeach()
+
+add_subdirectory(sdl)
+

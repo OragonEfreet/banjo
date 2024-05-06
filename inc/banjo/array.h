@@ -105,7 +105,7 @@ BANJO_EXPORT bj_array* bj_array_init_with_capacity(
 ///
 /// This creates and empty array with initial capacity to _0_.
 ///
-/// The function expands to a call to \ref bj_array_init_with_size_and_capacity, 
+/// The function expands to a call to \ref bj_array_init_with_capacity, 
 /// using `T` for the `bytes_payload` parameter.
 ///
 /// \par Error Management
