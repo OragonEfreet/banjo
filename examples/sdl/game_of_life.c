@@ -4,16 +4,17 @@
 
 #include <SDL2/SDL.h>
 
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 800
 
-#define CANVAS_WIDTH 1000
-#define CANVAS_HEIGHT 1000
+#define CANVAS_WIDTH 500
+#define CANVAS_HEIGHT 500
 
-#define DRAW_COLOR BJ_COLOR_ORANGE
+#define DRAW_COLOR_1 BJ_COLOR_OLIVE
+#define DRAW_COLOR_2 BJ_COLOR_DARK_GREEN
 #define BACK_COLOR BJ_COLOR_DARK_GRAY
 
-#define STEP_MS 30
+#define STEP_MS 50
 
 // We will draw on `draw_fb` and display on `presentation_fb`
 bj_framebuffer* draw_fb         = 0;
@@ -45,11 +46,11 @@ void draw(usize step) {
                 if (alive_neigh > 3 || alive_neigh < 2) {
                     bj_framebuffer_put(draw_fb, x, y, BACK_COLOR);
                 } else {
-                    bj_framebuffer_put(draw_fb, x, y, DRAW_COLOR);
+                    bj_framebuffer_put(draw_fb, x, y, DRAW_COLOR_1);
                 }
             } else {
                 if (alive_neigh == 3) {
-                    bj_framebuffer_put(draw_fb, x, y, DRAW_COLOR);
+                    bj_framebuffer_put(draw_fb, x, y, DRAW_COLOR_2);
                 }
             }
         }
@@ -67,8 +68,6 @@ int main(int argc, char* argv[]) {
     draw_fb         = bj_new(framebuffer, default, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     bj_framebuffer_clear(presentation_fb, BACK_COLOR);
-    // Uncomment for a starting line
-    // bj_framebuffer_draw_line(presentation_fb, (bj_pixel){20, 500}, (bj_pixel){980, 500}, DRAW_COLOR);
 
     // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {

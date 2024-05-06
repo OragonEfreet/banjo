@@ -11,7 +11,7 @@
 #define S_X(x) (x)
 #define S_Y(y) (y)
 #endif
-#define XY(x, y) (S_Y(y) * p_framebuffer->height + S_X(x))
+#define XY(x, y) (S_Y(y) * p_framebuffer->width + S_X(x))
 #define at(fb, x, y) fb[XY(x, y)]
 #define put_pixel(fb, x, y, c) at(fb, x, y) = c
 
