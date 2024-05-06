@@ -17,7 +17,6 @@
 /// The first axis, usually noted X, extends positively to thr right while the
 /// second axis, Y, extends to the bottom.
 #include <banjo/api.h>
-#include <banjo/array.h>
 #include <banjo/color.h>
 
 /// Typedef for the \ref bj_framebuffer struct
