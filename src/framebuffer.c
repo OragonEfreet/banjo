@@ -1,7 +1,9 @@
 #include <banjo/error.h>
 #include <banjo/framebuffer.h>
+#include <banjo/log.h>
 #include <banjo/memory.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef CENTERED_AXIS
@@ -32,6 +34,72 @@ BANJO_EXPORT bj_framebuffer* bj_framebuffer_init_default(
     }
     return p_framebuffer;
 }
+
+bj_framebuffer* bj_framebuffer_init_from_file(
+    bj_framebuffer*   p_framebuffer,
+    const char*       p_path,
+    bj_error*         p_error
+) {
+    bj_memset(p_framebuffer, 0, sizeof(bj_framebuffer));
+    FILE* bmp_file = fopen(p_path, "rb");
+    if (!bmp_file) {
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
+        return p_framebuffer;
+    }
+
+    return p_framebuffer;
+}
+
+// Function to load a BMP file into the framebuffer
+// TODO remove this
+/* BANJO_EXPORT bj_framebuffer* bj_framebuffer_load_from_bmp( */
+/*     bj_framebuffer* p_framebuffer, */
+/*     const char* filename */
+/* ) { */
+/*     FILE* bmp_file = fopen(filename, "rb"); */
+/*     if (!bmp_file) { */
+/*         // Failed to open the BMP file */
+/*         return NULL; */
+/*     } */
+    
+/*     // Read BMP header */
+/*     fseek(bmp_file, 18, SEEK_SET); // Skip to width and height */
+/*     uint32_t bmp_width, bmp_height; */
+/*     fread(&bmp_width, sizeof(uint32_t), 1, bmp_file); */
+/*     fread(&bmp_height, sizeof(uint32_t), 1, bmp_file); */
+    
+/*     // Allocate memory for the framebuffer */
+/*     if (!p_framebuffer) { */
+/*         p_framebuffer = bj_malloc(sizeof(bj_framebuffer)); */
+/*         if (!p_framebuffer) { */
+/*             // Memory allocation failed */
+/*             fclose(bmp_file); */
+/*             return NULL; */
+/*         } */
+/*     } */
+    
+/*     // Initialize framebuffer with BMP dimensions */
+/*     bj_framebuffer_init_default(p_framebuffer, bmp_width, bmp_height); */
+    
+/*     // Read BMP pixel data */
+/*     fseek(bmp_file, 54, SEEK_SET); // Skip header */
+/*     for (size_t y = 0; y < bmp_height; y++) { */
+/*         for (size_t x = 0; x < bmp_width; x++) { */
+/*             uint8_t b, g, r; // BMP stores pixels in BGR order */
+/*             fread(&b, sizeof(uint8_t), 1, bmp_file); */
+/*             fread(&g, sizeof(uint8_t), 1, bmp_file); */
+/*             fread(&r, sizeof(uint8_t), 1, bmp_file); */
+            
+/*             // Set color in the framebuffer */
+/*             bj_framebuffer_put(p_framebuffer, x, y, BJ_RGB(r, g, b)); */
+/*         } */
+/*         // BMP rows are padded to multiples of 4 bytes */
+/*         fseek(bmp_file, (bmp_width * 3) % 4, SEEK_CUR); */
+/*     } */
+    
+/*     fclose(bmp_file); */
+/*     return p_framebuffer; */
+/* } */
 
 BANJO_EXPORT bj_framebuffer* bj_framebuffer_reset(
     bj_framebuffer* p_framebuffer
@@ -129,7 +197,4 @@ void bj_framebuffer_draw_triangle(
     bj_framebuffer_draw_line(fb, p1, p2, c);
     bj_framebuffer_draw_line(fb, p2, p0, c);
 }
-
-
-
 

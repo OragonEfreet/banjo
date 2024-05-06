@@ -5,6 +5,7 @@ foreach(_bin_source_path ${_bin_source_paths})
     add_executable(${_target} ${_bin_source_path})
     target_link_libraries(${_target} PRIVATE banjo)
     set_target_properties(${_target} PROPERTIES FOLDER "Examples")
+    target_compile_definitions(${_target} PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
 
     if (BUILD_TESTING)
             add_test(NAME "[Example] ${_target}" COMMAND ${_target})

@@ -69,6 +69,8 @@ target_include_directories(banjo PUBLIC inc PRIVATE src)
 set_property(TARGET banjo PROPERTY C_STANDARD 99) # TODO CHECK
 target_compile_features(banjo PUBLIC c_std_99)    # TODO CHECK
 
+set(BANJO_ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
+
 option(BANJO_BUILD_EXAMPLES "Build Banjo Examples" TRUE)
 if(BANJO_BUILD_EXAMPLES)
     add_subdirectory(examples)

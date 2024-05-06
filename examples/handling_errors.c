@@ -5,22 +5,22 @@
 #define CODE 101
 
 /// [Return Errors]
-void function_returning_error(BjError* error) {
+void function_returning_error(bj_error* error) {
     bj_set_error(error, DOMAIN, CODE);
 }
 /// [Return Errors]
 
 int main(int argc, char* argv[]) {
 
-    /// [Using BjError]
-    BjError error;
+    /// [Using bj_error]
+    bj_error error;
 
     function_returning_error(&error);
 
-    if(error.code) {
+    if(error) {
         bj_error("Error!");
     }
-    /// [Using BjError]
+    /// [Using bj_error]
 
     return 0;
 }

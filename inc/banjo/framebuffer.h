@@ -18,6 +18,7 @@
 /// second axis, Y, extends to the bottom.
 #include <banjo/api.h>
 #include <banjo/color.h>
+#include <banjo/error.h>
 
 /// Typedef for the \ref bj_framebuffer struct
 typedef struct bj_framebuffer_t bj_framebuffer;
@@ -51,6 +52,20 @@ BANJO_EXPORT bj_framebuffer* bj_framebuffer_init_default(
     bj_framebuffer*   p_framebuffer,
     usize             width,
     usize             height
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Initializes a new framebuffer by loading a BMP file
+///
+/// \param p_framebuffer The framebuffer object to initialize
+/// \param p_path        Path to the input file
+///
+/// \return `p_framebuffer`
+///
+BANJO_EXPORT bj_framebuffer* bj_framebuffer_init_from_file(
+    bj_framebuffer*   p_framebuffer,
+    const char*       p_path,
+    bj_error*         p_error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
