@@ -4,8 +4,6 @@
 
 #include <string.h>
 
-bj_array array;
-
 TEST_CASE(init_with_0_width_makes_a_nil_object) {
     bj_framebuffer* fb = bj_new(framebuffer, default, 0, 10);
     REQUIRE_EMPTY(bj_framebuffer, fb);
