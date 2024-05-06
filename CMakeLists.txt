@@ -28,6 +28,8 @@ set(_interface_headers
 
 set(_sources
     src/array.c
+    src/bmp.c
+    src/bmp.h
     src/error.c
     src/framebuffer.c
     src/htable.c

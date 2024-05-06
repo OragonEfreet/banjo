@@ -2,6 +2,7 @@
 #include <banjo/framebuffer.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
+#include "bmp.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +36,7 @@ BANJO_EXPORT bj_framebuffer* bj_framebuffer_init_default(
     return p_framebuffer;
 }
 
+
 bj_framebuffer* bj_framebuffer_init_from_file(
     bj_framebuffer*   p_framebuffer,
     const char*       p_path,
@@ -47,6 +49,36 @@ bj_framebuffer* bj_framebuffer_init_from_file(
         return p_framebuffer;
     }
 
+    u8 buffer[BMP_INFO_HEADER_SIZE];
+
+    fread(buffer, sizeof(u8), BMP_HEADER_SIZE, bmp_file);
+    bmp_header header;
+    bmp_read_header(buffer, &header, p_error);
+    if(p_error) {
+        fclose(bmp_file);
+        return p_framebuffer;
+    }
+
+
+    fread(buffer, sizeof(u8), BMP_INFO_HEADER_SIZE, bmp_file);
+    bmp_info_header info_header;
+    bmp_read_info_header(buffer, &info_header, p_error);
+    if(p_error) {
+        fclose(bmp_file);
+        return p_framebuffer;
+    }
+
+    usize bufsize = info_header.width * info_header.height;
+    if(bufsize == 0) {
+        fclose(bmp_file);
+        return p_framebuffer;
+    }
+    p_framebuffer->width       = info_header.width;
+    p_framebuffer->height      = info_header.height;
+    p_framebuffer->buffer      = bj_malloc(sizeof(bj_color) * bufsize);
+    p_framebuffer->clear_color = BJ_COLOR_BLACK;
+
+    fclose(bmp_file);
     return p_framebuffer;
 }
 
