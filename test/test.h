@@ -2,12 +2,6 @@
 
 #include "mock_memory.h"
 
-// TODO: + No need to name tests anymore
-// TODO: + Tag system
-// TODO: + ShouldFail system
-// TODO: + Use __COUNTER__ to get rid of RUN_TEST(x)?
-
-
 // Symbol overrides
 #define SM_NS(SM) test_ ## SM
 #define SM_TST_FN(NAME) NAME

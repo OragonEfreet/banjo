@@ -3,21 +3,24 @@
 #include <banjo/log.h>
 
 // Source: https://gibberlings3.github.io/iesdp/file_formats/ie_formats/bmp.htm
+// TODO Rewrite DIB loading using the new stream object
 
 void dib_read_header(const u8* buffer, dib_file_header* header, bj_error* p_error) {
+    
 
-// Read signature
+
+    // Read signature
 #ifdef BANJO_PEDANTIC
-    if (*(u16*)buffer != BMP_SIGNATURE) {
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
-        return;
-    }
+        if (*(u16*)buffer != BMP_SIGNATURE) {
+            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+            return;
+        }
 #endif
-    buffer += sizeof(u16);
+        buffer += sizeof(u16);
 
-    header->file_size = *(u32*)buffer;  buffer += sizeof(u32);
-    buffer += sizeof(u32); // Skip reserved
-    header->data_offset = *(u32*)buffer;
+        header->file_size = *(u32*)buffer;  buffer += sizeof(u32);
+        buffer += sizeof(u32); // Skip reserved
+        header->data_offset = *(u32*)buffer;
 }
 
 void dib_read_info_header(const u8* buffer, dib_info_header* info_header, bj_error* p_error) {

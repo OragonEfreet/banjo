@@ -5,8 +5,8 @@ project(banjo C)
 include(CTest)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set(CMAKE_C_STANDARD 99)              # TODO CHECK
-set(CMAKE_C_STANDARD_REQUIRED TRUE)   # TODO CHECK
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(CheckCXXCompilerFlag)
@@ -71,8 +71,8 @@ banjo_compile_option(pedantic "Banjo runtime will make costly extra checks" OFF)
 banjo_compile_option(log_color "Banjo logs will have colored output" ON)
 
 target_include_directories(banjo PUBLIC inc PRIVATE src)
-set_property(TARGET banjo PROPERTY C_STANDARD 99) # TODO CHECK
-target_compile_features(banjo PUBLIC c_std_99)    # TODO CHECK
+set_property(TARGET banjo PROPERTY C_STANDARD 99)
+target_compile_features(banjo PUBLIC c_std_99)
 
 set(BANJO_ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
 

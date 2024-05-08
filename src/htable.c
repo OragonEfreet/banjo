@@ -71,7 +71,7 @@ bj_htable* bj_htable_reset(
 void bj_htable_clear(
     bj_htable* htable
 ) {
-    // TODO?
+    // TODO Implement code for htable clear
     bj_assert(htable != 0);
 }
 

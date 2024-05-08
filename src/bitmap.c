@@ -74,6 +74,9 @@ bj_bitmap* bj_bitmap_init_from_file(
         fclose(bmp_file);
         return p_bitmap;
     }
+
+    // TODO Finish bitmap loading code once dib loading is done
+
     p_bitmap->width       = info_header.width;
     p_bitmap->height      = info_header.height;
     p_bitmap->buffer      = bj_malloc(sizeof(bj_color) * bufsize);
@@ -82,57 +85,6 @@ bj_bitmap* bj_bitmap_init_from_file(
     fclose(bmp_file);
     return p_bitmap;
 }
-
-// Function to load a BMP file into the bitmap
-// TODO remove this
-/* BANJO_EXPORT bj_bitmap* bj_bitmap_load_from_bmp( */
-/*     bj_bitmap* p_bitmap, */
-/*     const char* filename */
-/* ) { */
-/*     FILE* bmp_file = fopen(filename, "rb"); */
-/*     if (!bmp_file) { */
-/*         // Failed to open the BMP file */
-/*         return NULL; */
-/*     } */
-    
-/*     // Read BMP header */
-/*     fseek(bmp_file, 18, SEEK_SET); // Skip to width and height */
-/*     uint32_t bmp_width, bmp_height; */
-/*     fread(&bmp_width, sizeof(uint32_t), 1, bmp_file); */
-/*     fread(&bmp_height, sizeof(uint32_t), 1, bmp_file); */
-    
-/*     // Allocate memory for the bitmap */
-/*     if (!p_bitmap) { */
-/*         p_bitmap = bj_malloc(sizeof(bj_bitmap)); */
-/*         if (!p_bitmap) { */
-/*             // Memory allocation failed */
-/*             fclose(bmp_file); */
-/*             return NULL; */
-/*         } */
-/*     } */
-    
-/*     // Initialize bitmap with BMP dimensions */
-/*     bj_bitmap_init_default(p_bitmap, bmp_width, bmp_height); */
-    
-/*     // Read BMP pixel data */
-/*     fseek(bmp_file, 54, SEEK_SET); // Skip header */
-/*     for (size_t y = 0; y < bmp_height; y++) { */
-/*         for (size_t x = 0; x < bmp_width; x++) { */
-/*             uint8_t b, g, r; // BMP stores pixels in BGR order */
-/*             fread(&b, sizeof(uint8_t), 1, bmp_file); */
-/*             fread(&g, sizeof(uint8_t), 1, bmp_file); */
-/*             fread(&r, sizeof(uint8_t), 1, bmp_file); */
-            
-/*             // Set color in the bitmap */
-/*             bj_bitmap_put(p_bitmap, x, y, BJ_RGB(r, g, b)); */
-/*         } */
-/*         // BMP rows are padded to multiples of 4 bytes */
-/*         fseek(bmp_file, (bmp_width * 3) % 4, SEEK_CUR); */
-/*     } */
-    
-/*     fclose(bmp_file); */
-/*     return p_bitmap; */
-/* } */
 
 BANJO_EXPORT bj_bitmap* bj_bitmap_reset(
     bj_bitmap* p_bitmap
