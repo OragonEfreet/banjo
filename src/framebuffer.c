@@ -2,7 +2,8 @@
 #include <banjo/framebuffer.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
-#include "bmp.h"
+
+#include "dib.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,8 +53,8 @@ bj_framebuffer* bj_framebuffer_init_from_file(
     u8 buffer[BMP_INFO_HEADER_SIZE];
 
     fread(buffer, sizeof(u8), BMP_HEADER_SIZE, bmp_file);
-    bmp_header header;
-    bmp_read_header(buffer, &header, p_error);
+    dib_file_header header;
+    dib_read_header(buffer, &header, p_error);
     if(p_error) {
         fclose(bmp_file);
         return p_framebuffer;
@@ -61,8 +62,8 @@ bj_framebuffer* bj_framebuffer_init_from_file(
 
 
     fread(buffer, sizeof(u8), BMP_INFO_HEADER_SIZE, bmp_file);
-    bmp_info_header info_header;
-    bmp_read_info_header(buffer, &info_header, p_error);
+    dib_info_header info_header;
+    dib_read_info_header(buffer, &info_header, p_error);
     if(p_error) {
         fclose(bmp_file);
         return p_framebuffer;
