@@ -6,13 +6,13 @@
 
 TEST_CASE(init_with_0_width_makes_a_nil_object) {
     bj_bitmap* bmp = bj_new(bitmap, default, 0, 10);
-    REQUIRE_EMPTY(bj_bitmap, bmp);
+    REQUIRE_NIL(bj_bitmap, bmp);
     bj_del(bitmap, bmp);
 }
 
 TEST_CASE(init_with_0_height_makes_a_nil_object) {
     bj_bitmap* bmp = bj_new(bitmap, default, 10, 0);
-    REQUIRE_EMPTY(bj_bitmap, bmp);
+    REQUIRE_NIL(bj_bitmap, bmp);
     bj_del(bitmap, bmp);
 }
 
@@ -33,7 +33,7 @@ TEST_CASE(default_init_sets_the_clear_color_to_black) {
 TEST_CASE(resetting_a_bitmap_sets_it_to_nil) {
     bj_bitmap* bmp = bj_new(bitmap, default, 10, 10);
     bj_bitmap_reset(bmp);
-    REQUIRE_EMPTY(bj_bitmap, bmp);
+    REQUIRE_NIL(bj_bitmap, bmp);
     bj_del(bitmap, bmp);
 }
 

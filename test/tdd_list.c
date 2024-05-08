@@ -14,7 +14,7 @@ typedef struct {
 
 TEST_CASE(initialize_with_no_payload_gives_nil) {
     bj_list_init_default(&list, 0);
-    REQUIRE_EMPTY(bj_list, &list);
+    REQUIRE_NIL(bj_list, &list);
 }
 
 TEST_CASE(initialize_with_payload_gives_empty_list) {
@@ -30,7 +30,7 @@ TEST_CASE(clear_nil_does_nothing) {
     bj_list_init_default(&list, 0);
 
     bj_list_clear(&list);
-    REQUIRE_EMPTY(bj_list, &list);
+    REQUIRE_NIL(bj_list, &list);
 }
 
 TEST_CASE(clear_empty_does_nothing) {
