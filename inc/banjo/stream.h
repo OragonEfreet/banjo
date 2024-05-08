@@ -22,13 +22,13 @@ struct bj_stream_t {
 
 BANJO_EXPORT bj_stream* bj_stream_init_default(
     bj_stream* p_instance,
-    usize           size
+    usize      size
 );
 
 BANJO_EXPORT bj_stream* bj_stream_init_read(
     bj_stream* p_instance,
-    u8*             p_data,
-    usize           length
+    void*        p_data,
+    usize      length
 );
 
 BANJO_EXPORT bj_stream* bj_stream_reset(
@@ -37,8 +37,8 @@ BANJO_EXPORT bj_stream* bj_stream_reset(
 
 BANJO_EXPORT usize bj_stream_read_byte(
     bj_stream* p_instance,
-    usize           count,
-    u8*             p_buffer
+    usize      count,
+    void*      p_dest
 );
 
 #define bj_stream_read(stream, type, buffer) bj_stream_read_byte(stream, sizeof(type), buffer)

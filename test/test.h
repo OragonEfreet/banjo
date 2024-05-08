@@ -10,7 +10,7 @@
 
 // Symbol overrides
 #define SM_NS(SM) test_ ## SM
-#define SM_TST_FN(NAME) SM_NS(fn_ ## NAME) 
+#define SM_TST_FN(NAME) NAME
 #define TST_FLAGS(NAME) SM_NS(flags_ ## NAME) 
 #define TST_STRUCT_T(NAME) struct SM_NS(data_ ## NAME) 
 #define SM_CTX() SM_NS(context) 

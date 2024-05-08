@@ -14,8 +14,8 @@ bj_stream* bj_stream_init_default(
 
 bj_stream* bj_stream_init_read(
     bj_stream* p_stream,
-    u8*             p_data,
-    usize           length
+    void*      p_data,
+    usize      length
 ){
     bj_memset(p_stream, 0, sizeof(bj_stream));
     if(p_data != 0 && length > 0) {
@@ -38,10 +38,20 @@ bj_stream* bj_stream_reset(
 }
 
 usize bj_stream_read_byte(
-    bj_stream* p_instance,
-    usize           count,
-    u8*             p_buffer
+    bj_stream* p_stream,
+    usize      count,
+    void*      p_buffer
 ) {
-    return 0;
+   usize position = p_stream->position;
+   usize len = p_stream->len;
+   usize remaining = (position < len) ? (len - position) : 0;
+   usize bytes_to_read = (remaining < count) ? remaining : count;
+
+   if(p_buffer != 0) {
+       bj_memcpy(p_buffer, p_stream->p_data + p_stream->position, bytes_to_read);
+   }
+
+   p_stream->position += bytes_to_read; 
+   return bytes_to_read;
 }
 

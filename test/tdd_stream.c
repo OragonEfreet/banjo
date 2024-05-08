@@ -88,6 +88,51 @@ TEST_CASE(reading_from_end_does_not_change_the_destination_buffer) {
     bj_del(stream, stream);
 }
 
+TEST_CASE(reading_n_bytes_shift_the_position_to_n_bytes) {
+    u8 buffer[88];
+    u8 dest;
+    usize read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
+    usize pos_after_read[] = {0, 1, 2, 4, 7, 12, 20, 33, 54, 88};
+
+    bj_stream* stream = bj_new(stream, read, buffer, 88);
+
+    for(usize i = 0 ; i < 10 ; ++i) {
+        bj_stream_read_byte(stream, read_sizes[i], &dest);
+        REQUIRE_EQ(stream->position, pos_after_read[i]);
+    }
+
+    bj_del(stream, stream);
+}
+
+TEST_CASE(reading_n_bytes_returns_the_number_of_read_bytes) {
+    u8 buffer[88];
+    usize read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
+
+    bj_stream* stream = bj_new(stream, read, buffer, 88);
+
+    for(usize i = 0 ; i < 10 ; ++i) {
+        usize read = bj_stream_read_byte(stream, read_sizes[i], 0);
+        REQUIRE_EQ(read, read_sizes[i]);
+    }
+
+    bj_del(stream, stream);
+}
+
+TEST_CASE(reading_to_get_values) {
+    usize src[] = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
+    usize test_value[] = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
+    usize dest = 100;
+
+    bj_stream* stream = bj_new(stream, read, src, 10);
+
+    for(usize i = 0 ; i < 10 ; ++i) {
+        bj_stream_read(stream, usize, &dest);
+        REQUIRE_EQ(dest, test_value[i]);
+    }
+
+    bj_del(stream, stream);
+}
+
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
@@ -103,6 +148,9 @@ int main(int argc, char* argv[]) {
     RUN_TEST(reading_from_nil_object_does_not_change_the_destination_buffer);
     RUN_TEST(reading_from_end_returns_0);
     RUN_TEST(reading_from_end_does_not_change_the_destination_buffer);
+    RUN_TEST(reading_n_bytes_shift_the_position_to_n_bytes);
+    RUN_TEST(reading_n_bytes_returns_the_number_of_read_bytes);
+    RUN_TEST(reading_to_get_values);
 
     END_TESTS();
 }
