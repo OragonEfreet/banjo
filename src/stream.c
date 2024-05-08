@@ -37,17 +37,17 @@ bj_stream* bj_stream_reset(
     return p_stream;
 }
 
-usize bj_stream_read_byte(
+usize bj_stream_read(
     bj_stream* p_stream,
-    usize      count,
-    void*      p_buffer
+    void*      p_buffer,
+    usize      count
 ) {
    usize position = p_stream->position;
    usize len = p_stream->len;
    usize remaining = (position < len) ? (len - position) : 0;
    usize bytes_to_read = (remaining < count) ? remaining : count;
 
-   if(p_buffer != 0) {
+   if(bytes_to_read > 0 && p_buffer != 0) {
        bj_memcpy(p_buffer, p_stream->p_data + p_stream->position, bytes_to_read);
    }
 

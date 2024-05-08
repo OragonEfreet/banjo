@@ -35,13 +35,14 @@ BANJO_EXPORT bj_stream* bj_stream_reset(
     bj_stream* p_instance
 );
 
-BANJO_EXPORT usize bj_stream_read_byte(
+BANJO_EXPORT usize bj_stream_read(
     bj_stream* p_instance,
-    usize      count,
-    void*      p_dest
+    void*      p_dest,
+    usize      count
 );
 
-#define bj_stream_read(stream, type, buffer) bj_stream_read_byte(stream, sizeof(type), buffer)
+#define bj_stream_read_t(stream, type, buffer) bj_stream_read(stream, buffer, sizeof(type))
+#define bj_stream_skip_t(stream, type) bj_stream_read(stream, 0, sizeof(type))
 
 
 
