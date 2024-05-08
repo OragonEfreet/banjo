@@ -1,8 +1,12 @@
 #include "bmp.h"
 
+#include <banjo/log.h>
+
+// Source: https://gibberlings3.github.io/iesdp/file_formats/ie_formats/bmp.htm
+
 void bmp_read_header(const u8* buffer, bmp_header* header, bj_error* p_error) {
 
-    // Read signature
+// Read signature
 #ifdef BANJO_PEDANTIC
     if (*(u16*)buffer != BMP_SIGNATURE) {
         bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
@@ -37,40 +41,29 @@ void bmp_read_info_header(const u8* buffer, bmp_info_header* info_header, bj_err
 #endif
     buffer += sizeof(u16);
 
-    
+    info_header->bit_count  = *(u16*)buffer;  buffer += sizeof(u16);
+    switch(info_header->bit_count) {
+        case BIT_COUNT_1:
+        case BIT_COUNT_4:
+        case BIT_COUNT_8:
+        case BIT_COUNT_16:
+        case BIT_COUNT_24:
+            break;
+        default:
+            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+            return;
+    }
 
+    info_header->compression  = *(u32*)buffer;  buffer += sizeof(u32);
+    switch(info_header->compression) {
+        case BI_RGB:
+        case BI_RGB8:
+        case BI_RGB4:
+            break;
+        default:
+            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+            return;
+    }
 
 }
 
-
-    /* u32 bmp_data_offset = 0; */
-    /* fread(&bmp_data_offset, sizeof(u32), 1, bmp_file); */
-    /* if(bmp_data_offset == 0) { */
-    /*     bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT); */
-    /*     fclose(bmp_file); */
-    /*     return p_framebuffer; */
-    /* } */
-
-    /* u32 bmp_infoheader_size = 0; */
-    /* fread(&bmp_infoheader_size, sizeof(u32), 1, bmp_file); */
-    /* if(bmp_infoheader_size != 40) { */
-    /*     bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT); */
-    /*     fclose(bmp_file); */
-    /*     return p_framebuffer; */
-    /* } */
-
-    /* u32 bmp_infoheader_width = 0; */
-    /* fread(&bmp_infoheader_width, sizeof(u32), 1, bmp_file); */
-    /* if(bmp_infoheader_width == 0) { */
-    /*     bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT); */
-    /*     fclose(bmp_file); */
-    /*     return p_framebuffer; */
-    /* } */
-
-    /* u32 bmp_infoheader_height = 0; */
-    /* fread(&bmp_infoheader_height, sizeof(u32), 1, bmp_file); */
-    /* if(bmp_infoheader_height == 0) { */
-    /*     bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT); */
-    /*     fclose(bmp_file); */
-    /*     return p_framebuffer; */
-    /* } */
