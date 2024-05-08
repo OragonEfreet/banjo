@@ -132,6 +132,70 @@ TEST_CASE(reading_to_get_values) {
     bj_del(stream, stream);
 }
 
+TEST_CASE(seeking_in_nil_always_return_0) {
+    bj_stream* stream = bj_new(stream, default, 0);
+
+    for(int to = -5 ; to < 5 ; ++to) {
+        for(int from = 0; from < 2 ; ++from) {
+            usize res = bj_stream_seek(stream, to, from);
+            REQUIRE_EQ(res, 0);
+        }
+    }
+
+    bj_del(stream, stream);
+}
+
+
+TEST_CASE(seeking_in_nil_sets_position_to_0) {
+    bj_stream* stream = bj_new(stream, default, 0);
+
+    for(int to = -5 ; to < 5 ; ++to) {
+        for(int from = 0; from < 2 ; ++from) {
+            bj_stream_seek(stream, to, from);
+            REQUIRE_EQ(stream->position, 0);
+        }
+    }
+
+    bj_del(stream, stream);
+}
+
+TEST_CASE(seeking_past_end_returns_end) {
+    bj_stream* stream = bj_new(stream, default, 1);
+
+    for(int to = 1 ; to < 10 ; ++to) {
+        for(int from = 0; from < 2 ; ++from) {
+            usize res = bj_stream_seek(stream, to, from);
+            REQUIRE_EQ(res, stream->len);
+        }
+    }
+
+    bj_del(stream, stream);
+}
+
+TEST_CASE(seeking_past_end_sets_position_to_end) {
+    bj_stream* stream = bj_new(stream, default, 1);
+
+    for(int to = 1 ; to < 10 ; ++to) {
+        for(int from = 0; from < 2 ; ++from) {
+            bj_stream_seek(stream, to, from);
+            REQUIRE_EQ(stream->position, stream->len);
+        }
+    }
+
+    bj_del(stream, stream);
+}
+
+TEST_CASE(seeking_before_begin_sets_position_to_0) {
+    bj_stream* stream = bj_new(stream, default, 1);
+
+    for(int to = -1 ; to < -10 ; --to) {
+        bj_stream_seek(stream, to, BJ_SEEK_END);
+        REQUIRE_EQ(stream->position, 0);
+    }
+
+    bj_del(stream, stream);
+}
+
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
@@ -150,6 +214,11 @@ int main(int argc, char* argv[]) {
     RUN_TEST(reading_n_bytes_shift_the_position_to_n_bytes);
     RUN_TEST(reading_n_bytes_returns_the_number_of_read_bytes);
     RUN_TEST(reading_to_get_values);
+    RUN_TEST(seeking_in_nil_always_return_0);
+    RUN_TEST(seeking_in_nil_sets_position_to_0);
+    RUN_TEST(seeking_past_end_returns_end);
+    RUN_TEST(seeking_past_end_sets_position_to_end);
+    RUN_TEST(seeking_before_begin_sets_position_to_0);
 
     END_TESTS();
 }

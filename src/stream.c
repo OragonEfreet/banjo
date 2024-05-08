@@ -55,3 +55,18 @@ usize bj_stream_read(
    return bytes_to_read;
 }
 
+
+usize bj_stream_seek(bj_stream* b, size offset, bj_seek_origin from) {
+    usize new_position = (from == BJ_SEEK_CURRENT) ? b->position + offset :
+                         (from == BJ_SEEK_BEGIN)   ? (usize)offset :
+                         b->len + offset;
+
+    if ((size)new_position < 0) {
+        new_position = 0;
+    } else if (new_position > b->len) {
+        new_position = b->len;
+    }
+
+    b->position = new_position;
+    return new_position;
+}

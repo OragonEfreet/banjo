@@ -2,6 +2,10 @@
 
 #include "mock_memory.h"
 
+#include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
+
 // Symbol overrides
 #define SM_NS(SM) test_ ## SM
 #define SM_TST_FN(NAME) NAME
@@ -47,13 +51,14 @@ void initialize_context(Context* context, int argc, char* argv[]) {
     bj_memory_set_defaults(&allocators);
 }
 
+
+
 // Called after each test ends
 // Returns 1 means "terminate program"
 int record_test_result(Context* context, const char* test_name, int status_flag) {
-    ++context->n_run;
     if ((status_flag & FAIL) > 0) {
         ++context->n_fail;
-        PRINT("[FAIL] | %s\n", test_name);
+        PRINT("[FAIL] | %s\n\n", test_name);
         return 1 & context->stop_at_err;
     }
     PRINT("[OK]   | %s\n", test_name);
