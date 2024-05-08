@@ -1,4 +1,4 @@
-#include <banjo/framebuffer.h>
+#include <banjo/bitmap.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
@@ -27,9 +27,9 @@ int main(int argc, char* argv[]) {
         sprintf(bmp_path, "%s/%s", folder, bmp_file);
 
         bj_info("Opening %s", bmp_path); 
-        bj_framebuffer* fb = bj_new(framebuffer, from_file, bmp_path, 0);
+        bj_bitmap* bmp = bj_new(bitmap, from_file, bmp_path, 0);
 
-        bj_info("Size: %d x %d", fb->width, fb->height);
+        bj_info("Size: %d x %d", bmp->width, bmp->height);
 
         bj_free(bmp_path);
     }

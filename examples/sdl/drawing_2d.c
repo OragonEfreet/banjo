@@ -1,5 +1,5 @@
 #include "banjo/color.h"
-#include <banjo/framebuffer.h>
+#include <banjo/bitmap.h>
 #include <banjo/memory.h>
 
 #include <SDL2/SDL.h>
@@ -10,13 +10,13 @@
 #define CANVAS_WIDTH 500
 #define CANVAS_HEIGHT 500
 
-void draw(bj_framebuffer* fb) {
-    bj_framebuffer_clear(fb);
+void draw(bj_bitmap* bmp) {
+    bj_bitmap_clear(bmp);
 
     // Draw pixels individually
     for (usize x = 10 ; x < 490 ; ++x) {
         if(x % 7 == 0) {
-            bj_framebuffer_put(fb, x, 10, BJ_COLOR_AQUAMARINE);
+            bj_bitmap_put(bmp, x, 10, BJ_COLOR_AQUAMARINE);
         }
     }
 
@@ -28,7 +28,7 @@ void draw(bj_framebuffer* fb) {
     };
 
     for(usize p = 0 ; p < 18 ; ++p) {
-        bj_framebuffer_draw_line(fb,
+        bj_bitmap_draw_line(bmp,
             points[p],
             points[(p+1)%18],
             BJ_COLOR_CYAN
@@ -50,7 +50,7 @@ void draw(bj_framebuffer* fb) {
 
 
     for(usize t = 0 ; t < 13 ; ++t) {
-        bj_framebuffer_draw_triangle(fb,
+        bj_bitmap_draw_triangle(bmp,
             verts[tris[t][0]], verts[tris[t][1]], verts[tris[t][2]],
             BJ_COLOR_WHITE
         );
@@ -58,8 +58,8 @@ void draw(bj_framebuffer* fb) {
 }
 
 int main(int argc, char* argv[]) {
-    bj_framebuffer* fb = bj_new(framebuffer, default, CANVAS_WIDTH, CANVAS_HEIGHT);
-    bj_framebuffer_set_clear_color(fb, BJ_COLOR_DARK_GRAY);
+    bj_bitmap* bmp = bj_new(bitmap, default, CANVAS_WIDTH, CANVAS_HEIGHT);
+    bj_bitmap_set_clear_color(bmp, BJ_COLOR_DARK_GRAY);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         return 1;
@@ -69,9 +69,9 @@ int main(int argc, char* argv[]) {
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_Texture* texture   = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    draw(fb);
+    draw(bmp);
 
-    SDL_UpdateTexture(texture, 0, bj_framebuffer_data(fb), CANVAS_WIDTH * sizeof (u32));
+    SDL_UpdateTexture(texture, 0, bj_bitmap_data(bmp), CANVAS_WIDTH * sizeof (u32));
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);

@@ -14,10 +14,10 @@ include(CheckCXXCompilerFlag)
 set(_interface_headers
     inc/banjo/api.h
     inc/banjo/array.h
+    inc/banjo/bitmap.h
     inc/banjo/color.h
     inc/banjo/containers.h
     inc/banjo/error.h
-    inc/banjo/framebuffer.h
     inc/banjo/graphics.h
     inc/banjo/htable.h
     inc/banjo/list.h
@@ -28,10 +28,10 @@ set(_interface_headers
 
 set(_sources
     src/array.c
+    src/bitmap.c
     src/dib.c
     src/dib.h
     src/error.c
-    src/framebuffer.c
     src/htable.c
     src/list.c
     src/log.c
