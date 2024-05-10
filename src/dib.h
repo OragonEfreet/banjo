@@ -1,40 +1,55 @@
 #pragma once
 
-#include <banjo/error.h>
 #include <banjo/api.h>
+#include <banjo/array.h>
+#include <banjo/error.h>
+#include <banjo/stream.h>
 
 #define DIB_SIGNATURE 0x4D42
 #define DIB_HEADER_SIZE 14
 #define DIB_INFO_HEADER_SIZE 40
+
 
 typedef struct {
     u32 file_size;
     u32 data_offset;
 } dib_file_header;
 
-typedef enum {
-    BIT_COUNT_UNKNOWN = 0x00,
-    BIT_COUNT_1       = 0x01, // Monochrome, 1bit per pixel.
-    BIT_COUNT_4       = 0x04, // 4 bits palletized. 16 colors.
-    BIT_COUNT_8       = 0x08, // 8 bits palletized, 256 colors.
-    BIT_COUNT_16      = 0x10, // 16 bits RGB 65536 colors.
-    BIT_COUNT_24      = 0x18, // 24 bits palletized, 16M colors.
-} dib_bit_count ;
+#define DIB_BIT_COUNT_1 (0x01) //!< Monochrome, 1bit per pixel.
+#define DIB_BIT_COUNT_4 (0x04) //!< 4 bits palletized. 16 colors.
+#define DIB_BIT_COUNT_8 (0x08) //!< 8 bits palletized, 256 colors.
+#define DIB_BIT_COUNT_16 (0x10) //!< 16 bits RGB 65536 colors.
+#define DIB_BIT_COUNT_24 (0x18) //!< 24 bits palletized, 16M colors.
 
-typedef enum {
-    BI_RGB  = 0x00, // No compression.
-    BI_RGB8 = 0x01, // 8bit RLE encoding.
-    BI_RGB4 = 0x02, // 4bit RLE encoding.
-} dib_compression;
+#define DIB_BI_RGB (0x00) //!< No compression.
+#define DIB_BI_RGB8 (0x01) //!< 8bit RLE encoding.
+#define DIB_BI_RGB4 (0x02) //!< 4bit RLE encoding.
 
 typedef struct {
-    u32             width;
-    u32             height;
-    dib_bit_count   bit_count;
-    dib_compression compression;
+    u8 red;
+    u8 green;
+    u8 blue;
+} dib_table_color;
+
+typedef struct {
+    u32 width;
+    u32 height;
+    u16 planes;
+    u16 bit_count;
+    u32 compression;
+    u32 image_size;
+    u32 x_pixels_per_m;
+    u32 y_pixels_per_m;
+    u32 colors_used;
+    u32 colors_important;
 } dib_info_header;
 
-void dib_read_header(const u8* buffer, dib_file_header* header, bj_error* p_error);
-void dib_read_info_header(const u8* buffer, dib_info_header* header, bj_error* p_error);
+typedef struct {
+    dib_file_header header;
+    dib_info_header info_header;
+    bj_array        p_color_table;
+} dib;
+
+void dib_read_file(const char* fname, dib* p_dib, bj_error* p_error);
 
 

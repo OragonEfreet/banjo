@@ -24,6 +24,7 @@
 /// \brief Erorr domain values
 enum bj_error_domain {
     BJ_NO_DOMAIN,
+    BJ_DOMAIN_SYSTEM,
     BJ_DOMAIN_IO,
 };
 
@@ -31,6 +32,7 @@ enum bj_error_domain {
 /// \brief Erorr domain values
 enum bj_error_code {
     BJ_NO_ERROR,
+    BJ_CANNOT_ALLOCATE,
     BJ_CANNOT_OPEN_FILE,
     BJ_INVALID_FORMAT,
 };

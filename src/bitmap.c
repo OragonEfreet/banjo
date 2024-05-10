@@ -40,49 +40,53 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
 
 bj_bitmap* bj_bitmap_init_from_file(
     bj_bitmap*   p_bitmap,
-    const char*       p_path,
-    bj_error*         p_error
+    const char*  p_path,
+    bj_error*    p_error
 ) {
     bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
-    FILE* bmp_file = fopen(p_path, "rb");
-    if (!bmp_file) {
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
-        return p_bitmap;
-    }
 
-    u8 buffer[DIB_INFO_HEADER_SIZE];
+    dib dib_file;
+    dib_read_file(p_path, &dib_file, p_error);
 
-    fread(buffer, sizeof(u8), DIB_HEADER_SIZE, bmp_file);
-    dib_file_header header;
-    dib_read_header(buffer, &header, p_error);
-    if(p_error) {
-        fclose(bmp_file);
-        return p_bitmap;
-    }
-
-
-    fread(buffer, sizeof(u8), DIB_INFO_HEADER_SIZE, bmp_file);
-    dib_info_header info_header;
-    dib_read_info_header(buffer, &info_header, p_error);
-    if(p_error) {
-        fclose(bmp_file);
-        return p_bitmap;
-    }
-
-    usize bufsize = info_header.width * info_header.height;
-    if(bufsize == 0) {
-        fclose(bmp_file);
-        return p_bitmap;
-    }
-
-    // TODO Finish bitmap loading code once dib loading is done
-
-    p_bitmap->width       = info_header.width;
-    p_bitmap->height      = info_header.height;
-    p_bitmap->buffer      = bj_malloc(sizeof(bj_color) * bufsize);
+    p_bitmap->width       = dib_file.info_header.width;
+    p_bitmap->height      = dib_file.info_header.height;
+    /* p_bitmap->buffer      = bj_malloc(sizeof(bj_color) * bufsize); */
     p_bitmap->clear_color = BJ_COLOR_BLACK;
 
-    fclose(bmp_file);
+
+
+
+    /* u8 buffer[DIB_INFO_HEADER_SIZE]; */
+
+    /* fread(buffer, sizeof(u8), DIB_HEADER_SIZE, bmp_file); */
+    /* dib_file_header header; */
+    /* dib_read_header(buffer, &header, p_error); */
+    /* if(p_error) { */
+    /*     fclose(bmp_file); */
+    /*     return p_bitmap; */
+    /* } */
+
+    /* fread(buffer, sizeof(u8), DIB_INFO_HEADER_SIZE, bmp_file); */
+    /* dib_info_header info_header; */
+    /* dib_read_info_header(buffer, &info_header, p_error); */
+    /* if(p_error) { */
+    /*     fclose(bmp_file); */
+    /*     return p_bitmap; */
+    /* } */
+
+    /* usize bufsize = info_header.width * info_header.height; */
+    /* if(bufsize == 0) { */
+    /*     fclose(bmp_file); */
+    /*     return p_bitmap; */
+    /* } */
+
+    /* bj_array* p_color_table = bj_new(array, default_t, dib_table_color); */ 
+    /* dib_read_color_table( */
+
+
+
+
+
     return p_bitmap;
 }
 
