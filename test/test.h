@@ -56,6 +56,7 @@ void initialize_context(Context* context, int argc, char* argv[]) {
 // Called after each test ends
 // Returns 1 means "terminate program"
 int record_test_result(Context* context, const char* test_name, int status_flag) {
+    ++context->n_run;
     if ((status_flag & FAIL) > 0) {
         ++context->n_fail;
         PRINT("[FAIL] | %s\n\n", test_name);

@@ -6,7 +6,7 @@
 /// 
 /// When a function may fail, it takes a \ref bj_error pointer as a parameter.
 /// The failing function may fill in this value to communicate error while
-/// the caller can check for the value of \ref bj_error.code to check if 
+/// the caller can check for the value of \ref bj_error_code to check if 
 /// any error occurred:
 /// 
 /// \snippet handling_errors.c Using bj_error

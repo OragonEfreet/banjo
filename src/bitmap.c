@@ -50,9 +50,9 @@ bj_bitmap* bj_bitmap_init_from_file(
         return p_bitmap;
     }
 
-    u8 buffer[BMP_INFO_HEADER_SIZE];
+    u8 buffer[DIB_INFO_HEADER_SIZE];
 
-    fread(buffer, sizeof(u8), BMP_HEADER_SIZE, bmp_file);
+    fread(buffer, sizeof(u8), DIB_HEADER_SIZE, bmp_file);
     dib_file_header header;
     dib_read_header(buffer, &header, p_error);
     if(p_error) {
@@ -61,7 +61,7 @@ bj_bitmap* bj_bitmap_init_from_file(
     }
 
 
-    fread(buffer, sizeof(u8), BMP_INFO_HEADER_SIZE, bmp_file);
+    fread(buffer, sizeof(u8), DIB_INFO_HEADER_SIZE, bmp_file);
     dib_info_header info_header;
     dib_read_info_header(buffer, &info_header, p_error);
     if(p_error) {

@@ -7,19 +7,19 @@ bj_stream* bj_stream_init_default(
 ) {
     bj_memset(p_stream, 0, sizeof(bj_stream));
     if(size > 0) {
-        p_stream->p_data = bj_malloc(p_stream->len = size);
+        p_stream->p_data.r = bj_malloc(p_stream->len = size);
     }
     return p_stream;
 }
 
 bj_stream* bj_stream_init_read(
-    bj_stream* p_stream,
-    void*      p_data,
-    usize      length
+    bj_stream*   p_stream,
+    const void*  p_data,
+    usize        length
 ){
     bj_memset(p_stream, 0, sizeof(bj_stream));
     if(p_data != 0 && length > 0) {
-        p_stream->p_data = p_data;
+        p_stream->p_data.r = p_data;
         p_stream->weak   = true;
         p_stream->len    = length;
     }
@@ -30,8 +30,8 @@ bj_stream* bj_stream_reset(
     bj_stream* p_stream
 ) {
     bj_assert(p_stream != 0);
-    if(!p_stream->weak && p_stream->p_data != 0) {
-        bj_free(p_stream->p_data);
+    if(!p_stream->weak && p_stream->p_data.r != 0) {
+        bj_free((void*)p_stream->p_data.r);
     }
     bj_memset(p_stream, 0, sizeof(bj_stream));
     return p_stream;
@@ -48,7 +48,7 @@ usize bj_stream_read(
    usize bytes_to_read = (remaining < count) ? remaining : count;
 
    if(bytes_to_read > 0 && p_buffer != 0) {
-       bj_memcpy(p_buffer, p_stream->p_data + p_stream->position, bytes_to_read);
+       bj_memcpy(p_buffer, p_stream->p_data.r + p_stream->position, bytes_to_read);
    }
 
    p_stream->position += bytes_to_read; 
@@ -56,17 +56,27 @@ usize bj_stream_read(
 }
 
 
-usize bj_stream_seek(bj_stream* b, size offset, bj_seek_origin from) {
-    usize new_position = (from == BJ_SEEK_CURRENT) ? b->position + offset :
+usize bj_stream_seek(
+    bj_stream*     p_stream,
+    size           offset,
+    bj_seek_origin from
+) {
+    usize new_position = (from == BJ_SEEK_CURRENT) ? p_stream->position + offset :
                          (from == BJ_SEEK_BEGIN)   ? (usize)offset :
-                         b->len + offset;
+                         p_stream->len + offset;
 
     if ((size)new_position < 0) {
         new_position = 0;
-    } else if (new_position > b->len) {
-        new_position = b->len;
+    } else if (new_position > p_stream->len) {
+        new_position = p_stream->len;
     }
 
-    b->position = new_position;
+    p_stream->position = new_position;
     return new_position;
+}
+
+usize bj_stream_tell(
+    bj_stream*     p_stream
+) {
+    return p_stream->position;
 }

@@ -50,20 +50,21 @@ struct bj_bitmap_t {
 /// This can be changed with \ref bj_bitmap_set_clear_color.
 BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
     bj_bitmap*   p_bitmap,
-    usize             width,
-    usize             height
+    usize        width,
+    usize        height
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Initializes a new bitmap by loading a BMP file
 ///
-/// \param p_bitmap The bitmap object to initialize
+/// \param p_bitmap      The bitmap object to initialize
 /// \param p_path        Path to the input file
+/// \param p_error       Error object
 ///
 /// \return `p_bitmap`
 ///
 BANJO_EXPORT bj_bitmap* bj_bitmap_init_from_file(
-    bj_bitmap*   p_bitmap,
+    bj_bitmap*        p_bitmap,
     const char*       p_path,
     bj_error*         p_error
 );

@@ -3,13 +3,13 @@
 #include <banjo/error.h>
 #include <banjo/api.h>
 
-#define BMP_SIGNATURE 0x4D42
-#define BMP_HEADER_SIZE 14
-#define BMP_INFO_HEADER_SIZE 40
+#define DIB_SIGNATURE 0x4D42
+#define DIB_HEADER_SIZE 14
+#define DIB_INFO_HEADER_SIZE 40
 
 typedef struct {
-    u16 file_size;
-    u16 data_offset;
+    u32 file_size;
+    u32 data_offset;
 } dib_file_header;
 
 typedef enum {

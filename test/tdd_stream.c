@@ -11,7 +11,7 @@ TEST_CASE(default_init_gives_nil_stream) {
 
 TEST_CASE(default_init_with_size_creates_internal_buffer) {
     bj_stream* stream = bj_new(stream, default, 1);
-    REQUIRE_VALUE(stream->p_data);
+    REQUIRE_VALUE(stream->p_data.r);
     REQUIRE_EQ(stream->len, 1);
     bj_del(stream, stream);
 }
@@ -31,7 +31,7 @@ TEST_CASE(init_with_size_created_data_owned_by_the_object) {
 TEST_CASE(init_from_buffer_contains_pointer_to_the_buffer) {
     u8 buffer;
     bj_stream* stream = bj_new(stream, read, &buffer, 1);
-    REQUIRE_EQ(stream->p_data, &buffer);
+    REQUIRE_EQ(stream->p_data.r, &buffer);
     bj_del(stream, stream);
 }
 
@@ -196,6 +196,32 @@ TEST_CASE(seeking_before_begin_sets_position_to_0) {
     bj_del(stream, stream);
 }
 
+TEST_CASE(tell_on_a_nil_stream_returns_0) {
+    bj_stream* stream = bj_new(stream, default, 0);
+
+    usize pos = bj_stream_tell(stream);
+    REQUIRE_EQ(pos, 0);
+
+    bj_del(stream, stream);
+}
+
+TEST_CASE(reading_n_bytes_shift_tell_return_to_n_bytes) {
+    u8 src[88];
+    usize read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
+    usize pos_after_read[] = {0, 1, 2, 4, 7, 12, 20, 33, 54, 88};
+
+    bj_stream* stream = bj_new(stream, read, src, 88);
+
+    for(usize i = 0 ; i < 10 ; ++i) {
+        bj_stream_read(stream, 0, read_sizes[i]);
+        usize pos = bj_stream_tell(stream);
+        REQUIRE_EQ(pos, pos_after_read[i]);
+    }
+
+    bj_del(stream, stream);
+}
+
+
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
@@ -219,6 +245,9 @@ int main(int argc, char* argv[]) {
     RUN_TEST(seeking_past_end_returns_end);
     RUN_TEST(seeking_past_end_sets_position_to_end);
     RUN_TEST(seeking_before_begin_sets_position_to_0);
+    RUN_TEST(tell_on_a_nil_stream_returns_0);
+    RUN_TEST(reading_n_bytes_shift_tell_return_to_n_bytes);
+    
 
     END_TESTS();
 }

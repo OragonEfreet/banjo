@@ -23,11 +23,15 @@ typedef enum {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Structure representing a stream of data
 ///
+/// \todo Add write features
 struct bj_stream_t {
     bool    weak;       //!< True if memory buffer is not managed by the object
-    u8*     p_data;     //!< Array of stream data
     usize   len;        //!< Size of the stream (in bytes)
     usize   position;   //!< Current position within the stream
+    /// Array of stream data
+    union {
+        const u8* r;    //!< Read-only access
+    } p_data;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,12 +39,12 @@ struct bj_stream_t {
 ///
 /// The stream is filled with and uninitialized buffer of `size` bytes.
 ///
-/// \param p_instance Pointer to the stream instance
+/// \param p_stream Pointer to the stream instance
 /// \param size       Size of the stream
 /// \return Pointer to the initialized stream instance
 ///
 BANJO_EXPORT bj_stream* bj_stream_init_default(
-    bj_stream* p_instance,
+    bj_stream* p_stream,
     usize      size
 );
 
@@ -49,25 +53,25 @@ BANJO_EXPORT bj_stream* bj_stream_init_default(
 ///
 /// The underlying buffer is not copied into the object.
 ///
-/// \param p_instance Pointer to the stream instance
+/// \param p_stream Pointer to the stream instance
 /// \param p_data     Pointer to the data to be read
 /// \param length     Length of the data in bytes
 /// \return Pointer to the initialized stream instance
 ///
 BANJO_EXPORT bj_stream* bj_stream_init_read(
-    bj_stream* p_instance,
-    void*      p_data,
-    usize      length
+    bj_stream*   p_stream,
+    const void*  p_data,
+    usize        length
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Resets the stream to nil state
 ///
-/// \param p_instance Pointer to the stream instance
+/// \param p_stream Pointer to the stream instance
 /// \return Pointer to the stream instance after resetting
 ///
 BANJO_EXPORT bj_stream* bj_stream_reset(
-    bj_stream* p_instance
+    bj_stream* p_stream
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,25 +85,55 @@ BANJO_EXPORT bj_stream* bj_stream_reset(
 /// In this case, if `size > 0`, this means the expected value is probably
 /// incomplete.
 ///
-/// \param p_instance Pointer to the stream instance
+/// \par Memory Safety
+///
+/// This function does not perform any memory checking, meaning that is it up
+/// to the caller to ensure that `p_dest` if large enough to hold the read
+/// data.
+/// If `count` is larger than the data buffer, there wwill be buffer overflow.
+///
+/// \param p_stream Pointer to the stream instance
 /// \param p_dest     Pointer to the destination buffer
 /// \param count      Number of bytes to read
 ///
 /// \return Number of bytes read
 ///
 BANJO_EXPORT usize bj_stream_read(
-    bj_stream* p_instance,
+    bj_stream* p_stream,
     void*      p_dest,
     usize      count
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Seeks to a new position in the stream, based on the specified origin.
+///
+/// This function adjusts the current position of the stream by a given offset,
+/// starting from a specified origin.
+/// The new position is clamped to ensure it remains within the valid range of
+/// the stream, from 0 to the length of the stream.
+///
+/// \param p_stream Pointer to the instance of bj_stream.
+/// \param position   Offset for the new position. Can be positive or negative.
+/// \param from       Origin relative to which the position should be calculated.
+///
+/// \return The new position within the stream after seeking.
+///
 BANJO_EXPORT usize bj_stream_seek(
-    bj_stream*     p_instance,
+    bj_stream*     p_stream,
     size           position,
     bj_seek_origin from
 );
 
-/// Returns a new position
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Returns the position of the cursor in the given stream.
+///
+/// \param p_stream The stream to get positiion from.
+///
+/// \return The position within the stream.
+BANJO_EXPORT usize bj_stream_tell(
+    bj_stream*     p_stream
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Reads data of a specified type from the stream
 ///
