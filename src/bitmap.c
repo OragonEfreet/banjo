@@ -2,9 +2,11 @@
 #include <banjo/bitmap.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
-#include <banjo/dib.h>
+
+#include "dib.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef CENTERED_AXIS
 #define S_X(x) ((p_bitmap->width / 2) + x)
@@ -35,6 +37,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
     return p_bitmap;
 }
 
+#define BJ_DIB_INFO_HEADER_SIZE 40
 
 bj_bitmap* bj_bitmap_init_from_file(
     bj_bitmap*   p_bitmap,
@@ -43,48 +46,51 @@ bj_bitmap* bj_bitmap_init_from_file(
 ) {
     bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
 
-    bj_dib* p_dib = bj_new(dib, from_file, p_path, 0);
+    FILE* fstream  = fopen(p_path, "rb");
+    if (!fstream ) {
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
+        return p_bitmap;
+    }
 
-    p_bitmap->width       = p_dib->info_header.width;
-    p_bitmap->height      = p_dib->info_header.height;
-    /* p_bitmap->buffer      = bj_malloc(sizeof(bj_color) * bufsize); */
-    p_bitmap->clear_color = BJ_COLOR_BLACK;
+    // Load header onto memory
+    u8* buffer = bj_malloc(BJ_DIB_INFO_HEADER_SIZE); // Allocate to header size to avoid 1 allocation
+    fread(buffer, 1, BJ_DIB_HEADER_SIZE, fstream); 
 
-    bj_del(dib, p_dib);
+    dib_file_header file_header;
+    dib_read_file_header(&file_header, buffer, p_error);
+
+    // Load Info Header
+    fread(buffer, 1, BJ_DIB_INFO_HEADER_SIZE, fstream);
+    dib_info_header info_header;
+    dib_read_info_header(&info_header, buffer, p_error);
+
+    // Load Color table
+    bj_array* p_color_table = bj_new(array, default_t, table_color);
+
+    dib_read_color_table(p_color_table, buffer, p_error);
+
+    bj_del(array, p_color_table);
+    bj_free(buffer);
+
+
+
+
+
+
+
+
+    /* p_bitmap->width       = p_dib->info_header.width; */
+    /* p_bitmap->height      = p_dib->info_header.height; */
+    /* /1* p_bitmap->buffer      = bj_malloc(sizeof(bj_color) * bufsize); *1/ */
+    /* p_bitmap->clear_color = BJ_COLOR_BLACK; */
+
+    /* bj_del(dib, p_dib); */
 
     /* bj_dib bj_dib_file; */
     /* bj_dib_read_file(p_path, &bj_dib_file, p_error); */
 
 
 
-
-
-    /* u8 buffer[BJ_DIB_INFO_HEADER_SIZE]; */
-
-    /* fread(buffer, sizeof(u8), BJ_DIB_HEADER_SIZE, bmp_file); */
-    /* bj_dib_file_header header; */
-    /* bj_dib_read_header(buffer, &header, p_error); */
-    /* if(p_error) { */
-    /*     fclose(bmp_file); */
-    /*     return p_bitmap; */
-    /* } */
-
-    /* fread(buffer, sizeof(u8), BJ_DIB_INFO_HEADER_SIZE, bmp_file); */
-    /* bj_dib_info_header info_header; */
-    /* bj_dib_read_info_header(buffer, &info_header, p_error); */
-    /* if(p_error) { */
-    /*     fclose(bmp_file); */
-    /*     return p_bitmap; */
-    /* } */
-
-    /* usize bufsize = info_header.width * info_header.height; */
-    /* if(bufsize == 0) { */
-    /*     fclose(bmp_file); */
-    /*     return p_bitmap; */
-    /* } */
-
-    /* bj_array* p_color_table = bj_new(array, default_t, bj_dib_table_color); */ 
-    /* bj_dib_read_color_table( */
 
 
 
