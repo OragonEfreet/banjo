@@ -40,7 +40,7 @@ typedef struct {
         u32 colors_important;
     } info_header;
 
-    bj_array p_color_table;
+    bj_array color_table;
 } bj_dib;
 
 BANJO_EXPORT bj_dib* bj_dib_init_from_file(

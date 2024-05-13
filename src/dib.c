@@ -1,3 +1,4 @@
+#include "banjo/array.h"
 #include <banjo/dib.h>
 
 #include <banjo/log.h>
@@ -76,7 +77,7 @@ static void read_color_table(bj_stream* p_stream, bj_dib* p_dib, bj_error* p_err
     usize n_colors = 0;
     switch(p_dib->info_header.bit_count) {
         case BJ_DIB_BIT_COUNT_1:
-            n_colors = 1;
+            n_colors = 2;
             break;
         case BJ_DIB_BIT_COUNT_4:
             n_colors = 16;
@@ -85,9 +86,22 @@ static void read_color_table(bj_stream* p_stream, bj_dib* p_dib, bj_error* p_err
             n_colors = 256;
             break;
         default:
-            break;
+            return;
     }
 
+    bj_array* p_color_table = &p_dib->color_table;
+
+    const usize n_bytes = n_colors * 3;
+    bj_array_init_with_capacity_t(p_color_table, byte, n_bytes);
+
+    for(usize i = 0 ; i < n_colors ; ++i) {
+        byte value = 0;
+        for(usize c = 0 ; c < 3 ; ++c) {
+            bj_stream_read_t(p_stream, byte, &value);
+            bj_array_push(p_color_table, &value);
+        }
+        bj_stream_skip_t(p_stream, byte);
+    }
 }
 
 bj_dib* bj_dib_init_from_file(
@@ -121,6 +135,14 @@ bj_dib* bj_dib_init_from_file(
     read_info_header(stream, p_dib, p_error);
     read_color_table(stream, p_dib, p_error);
 
+#ifdef BANJO_PEDANTIC
+    if(p_dib->header.data_offset != bj_stream_tell(stream)) {
+        fclose(bmp_file);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+        return p_dib;
+    }
+#endif
+
     bj_del(stream, stream);
 
     fclose(bmp_file);
@@ -132,7 +154,7 @@ bj_dib* bj_dib_init_from_file(
 BANJO_EXPORT bj_dib* bj_dib_reset(
     bj_dib* p_dib
 ) {
-    bj_array_reset(&p_dib->p_color_table);
+    bj_array_reset(&p_dib->color_table);
     bj_memset(p_dib, 0, sizeof(bj_dib));
     return p_dib;
 }
