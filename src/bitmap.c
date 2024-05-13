@@ -2,10 +2,8 @@
 #include <banjo/bitmap.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
+#include <banjo/dib.h>
 
-#include "dib.h"
-
-#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef CENTERED_AXIS
@@ -45,30 +43,35 @@ bj_bitmap* bj_bitmap_init_from_file(
 ) {
     bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
 
-    dib dib_file;
-    dib_read_file(p_path, &dib_file, p_error);
+    bj_dib* p_dib = bj_new(dib, from_file, p_path, 0);
 
-    p_bitmap->width       = dib_file.info_header.width;
-    p_bitmap->height      = dib_file.info_header.height;
+    p_bitmap->width       = p_dib->info_header.width;
+    p_bitmap->height      = p_dib->info_header.height;
     /* p_bitmap->buffer      = bj_malloc(sizeof(bj_color) * bufsize); */
     p_bitmap->clear_color = BJ_COLOR_BLACK;
 
+    bj_del(dib, p_dib);
+
+    /* bj_dib bj_dib_file; */
+    /* bj_dib_read_file(p_path, &bj_dib_file, p_error); */
 
 
 
-    /* u8 buffer[DIB_INFO_HEADER_SIZE]; */
 
-    /* fread(buffer, sizeof(u8), DIB_HEADER_SIZE, bmp_file); */
-    /* dib_file_header header; */
-    /* dib_read_header(buffer, &header, p_error); */
+
+    /* u8 buffer[BJ_DIB_INFO_HEADER_SIZE]; */
+
+    /* fread(buffer, sizeof(u8), BJ_DIB_HEADER_SIZE, bmp_file); */
+    /* bj_dib_file_header header; */
+    /* bj_dib_read_header(buffer, &header, p_error); */
     /* if(p_error) { */
     /*     fclose(bmp_file); */
     /*     return p_bitmap; */
     /* } */
 
-    /* fread(buffer, sizeof(u8), DIB_INFO_HEADER_SIZE, bmp_file); */
-    /* dib_info_header info_header; */
-    /* dib_read_info_header(buffer, &info_header, p_error); */
+    /* fread(buffer, sizeof(u8), BJ_DIB_INFO_HEADER_SIZE, bmp_file); */
+    /* bj_dib_info_header info_header; */
+    /* bj_dib_read_info_header(buffer, &info_header, p_error); */
     /* if(p_error) { */
     /*     fclose(bmp_file); */
     /*     return p_bitmap; */
@@ -80,8 +83,8 @@ bj_bitmap* bj_bitmap_init_from_file(
     /*     return p_bitmap; */
     /* } */
 
-    /* bj_array* p_color_table = bj_new(array, default_t, dib_table_color); */ 
-    /* dib_read_color_table( */
+    /* bj_array* p_color_table = bj_new(array, default_t, bj_dib_table_color); */ 
+    /* bj_dib_read_color_table( */
 
 
 

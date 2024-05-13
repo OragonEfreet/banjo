@@ -17,6 +17,7 @@ set(_interface_headers
     inc/banjo/bitmap.h
     inc/banjo/color.h
     inc/banjo/containers.h
+    inc/banjo/dib.h
     inc/banjo/error.h
     inc/banjo/graphics.h
     inc/banjo/htable.h
@@ -32,7 +33,6 @@ set(_sources
     src/array.c
     src/bitmap.c
     src/dib.c
-    src/dib.h
     src/error.c
     src/htable.c
     src/list.c
