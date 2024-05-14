@@ -65,35 +65,31 @@ bj_bitmap* bj_bitmap_init_from_file(
     dib_read_info_header(&info_header, buffer, p_error);
 
     // Load Color table
-    bj_array* p_color_table = bj_new(array, default_t, table_color);
+    usize n_colors = dib_color_table_size(info_header.bit_count);
+    usize table_color_size = (sizeof(u8)*4) * n_colors;
 
-    dib_read_color_table(p_color_table, buffer, p_error);
+    buffer = bj_realloc(buffer, table_color_size);
+    fread(buffer, 1, table_color_size, fstream);
+
+#ifdef BANJO_PEDANTIC
+    if(ftell(fstream) != file_header.data_offset) {
+        bj_free(buffer);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
+        return p_bitmap;
+    }
+#endif
+
+    bj_array* p_color_table = bj_new(array, default_t, table_color);
+    dib_read_color_table(p_color_table, buffer, n_colors, p_error);
+
+    p_bitmap = bj_bitmap_init_default(p_bitmap, info_header.width, info_header.height);
+    bj_bitmap_set_clear_color(p_bitmap, BJ_COLOR_BLACK);
+
+    fseek(fstream, file_header.data_offset, SEEK_SET);
+    dib_read_raster(p_bitmap, &info_header, p_color_table, p_error);
 
     bj_del(array, p_color_table);
     bj_free(buffer);
-
-
-
-
-
-
-
-
-    /* p_bitmap->width       = p_dib->info_header.width; */
-    /* p_bitmap->height      = p_dib->info_header.height; */
-    /* /1* p_bitmap->buffer      = bj_malloc(sizeof(bj_color) * bufsize); *1/ */
-    /* p_bitmap->clear_color = BJ_COLOR_BLACK; */
-
-    /* bj_del(dib, p_dib); */
-
-    /* bj_dib bj_dib_file; */
-    /* bj_dib_read_file(p_path, &bj_dib_file, p_error); */
-
-
-
-
-
-
 
 
     return p_bitmap;

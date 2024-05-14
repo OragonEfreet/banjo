@@ -5,6 +5,9 @@
 #include <banjo/memory.h>
 #include <assert.h>
 
+
+#include <stdio.h>
+
 int main(int argc, char* argv[]) {
 
     bj_array* array = bj_new(array, default_t, int);
