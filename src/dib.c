@@ -105,7 +105,7 @@ void dib_read_color_table(bj_array* p_color_table, const u8* buffer, usize n_col
 
 void dib_read_raster(bj_bitmap* p_bmp, const dib_info_header* p_info_header, const bj_array* p_color_table, bj_error* p_error) {
     for(usize x = 0 ; x < p_bmp->width ; ++x) {
-        for(usize y = 0 ; y < p_bmp->width ; ++y) {
+        for(usize y = 0 ; y < p_bmp->height ; ++y) {
             bj_bitmap_put(p_bmp, x, y, BJ_COLOR_CRIMSON);
         }
     }

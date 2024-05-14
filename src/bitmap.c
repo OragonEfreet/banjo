@@ -68,8 +68,13 @@ bj_bitmap* bj_bitmap_init_from_file(
     usize n_colors = dib_color_table_size(info_header.bit_count);
     usize table_color_size = (sizeof(u8)*4) * n_colors;
 
-    buffer = bj_realloc(buffer, table_color_size);
-    fread(buffer, 1, table_color_size, fstream);
+    bj_array* p_color_table = bj_new(array, default_t, table_color);
+    if(n_colors > 0) {
+        buffer = bj_realloc(buffer, table_color_size);
+        fread(buffer, 1, table_color_size, fstream);
+
+        dib_read_color_table(p_color_table, buffer, n_colors, p_error);
+    }
 
 #ifdef BANJO_PEDANTIC
     if(ftell(fstream) != file_header.data_offset) {
@@ -78,14 +83,11 @@ bj_bitmap* bj_bitmap_init_from_file(
         return p_bitmap;
     }
 #endif
-
-    bj_array* p_color_table = bj_new(array, default_t, table_color);
-    dib_read_color_table(p_color_table, buffer, n_colors, p_error);
+    fseek(fstream, file_header.data_offset, SEEK_SET);
 
     p_bitmap = bj_bitmap_init_default(p_bitmap, info_header.width, info_header.height);
     bj_bitmap_set_clear_color(p_bitmap, BJ_COLOR_BLACK);
 
-    fseek(fstream, file_header.data_offset, SEEK_SET);
     dib_read_raster(p_bitmap, &info_header, p_color_table, p_error);
 
     bj_del(array, p_color_table);
