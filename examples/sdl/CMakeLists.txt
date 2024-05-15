@@ -9,6 +9,7 @@ if(TARGET SDL2::SDL2main)
             add_executable(${_target} ${_bin_source_path})
             target_link_libraries(${_target} PRIVATE banjo SDL2::SDL2main SDL2::SDL2 m)
             set_target_properties(${_target} PROPERTIES FOLDER "Examples")
+            target_compile_definitions(${_target} PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
         endforeach()
 
 endif()
