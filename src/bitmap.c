@@ -76,7 +76,7 @@ bj_bitmap* bj_bitmap_init_from_file(
         dib_read_color_table(p_color_table, buffer, n_colors, p_error);
     }
 
-#ifdef BANJO_PEDANTIC
+#ifdef BJ_FEAT_PEDANTIC_ENABLED
     if(ftell(fstream) != file_header.data_offset) {
         bj_free(buffer);
         bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);

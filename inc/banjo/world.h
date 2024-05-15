@@ -14,12 +14,10 @@ typedef struct BjWorldInfo {
 /// Typedef for the BjWorld_t struct
 typedef struct BjWorld_t BjWorld;
 
-#ifdef BJ_NO_OPAQUE
 struct BjWorld_t {
     const bj_memory_callbacks* p_allocator;
     BjWorldInfo                  info;
 };
-#endif
 
 /// Create a new instance of \ref BjWorld.
 ///

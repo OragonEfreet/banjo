@@ -38,7 +38,7 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
     bj_stream_read_t(p_stream, u32, &p_info_header->height);
 
     bj_stream_read_t(p_stream, u16, &p_info_header->planes);
-#ifdef BANJO_PEDANTIC
+#ifdef BJ_FEAT_PEDANTIC_ENABLED
     if (p_info_header->planes != 0x01) { // Planes
         bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
         return;

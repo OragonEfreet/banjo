@@ -16,9 +16,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define BJ_VERSION_MAJOR 0 ///< Banjo Major Version
-#define BJ_VERSION_MINOR 0 ///< Banjo Minor Version
-#define BJ_VERSION_PATCH 1 ///< Banjo Patch version
+/// Extracts the major version number from a 32-bit version number.
+#define BJ_VERSION_MAJOR(version) (((version) >> 22U) & 0x3FFU)
+
+/// Extracts the minor version number from a 32-bit version number.
+#define BJ_VERSION_MINOR(version) (((version) >> 12U) & 0x3FFU)
+
+/// Extracts the patch version number from a 32-bit version number.
+#define BJ_VERSION_PATCH(version) ((version) & 0xFFFU)
 
 /// Constructs an API version number into 32bits.
 ///
@@ -28,8 +33,12 @@
 #define BJ_MAKE_VERSION(major, minor, patch) \
     ((((uint32_t)(major)) << 22U) | (((uint32_t)(minor)) << 12U) | ((uint32_t)(patch)))
 
+#define BJ_VERSION_MAJOR_NUMBER 0 ///< Banjo current major version
+#define BJ_VERSION_MINOR_NUMBER 1 ///< Banjo current minor version
+#define BJ_VERSION_PATCH_NUMBER 0 ///< Banjo current patch version
+                           ///
 /// Expands to a 32bits representatin of the current version the API.
-#define BJ_VERSION BJ_MAKE_VERSION(BJ_VERSION_MAJOR, BJ_VERSION_MINOR, BJ_VERSION_PATCH)
+#define BJ_VERSION BJ_MAKE_VERSION(BJ_VERSION_MAJOR_NUMBER, BJ_VERSION_MINOR_NUMBER, BJ_VERSION_PATCH_NUMBER)
 
 /// Name of the library.
 #define BJ_NAME "Banjo"
@@ -95,5 +104,16 @@ typedef uintptr_t uptr;  ///< Representation of a pointer value as an int
 #else
 #    define bj_assert(cond) assert(cond)
 #endif
+
+/// Structure holding build information of the binary
+typedef struct {
+    const char* p_name;           ///< API Name (\ref BJ_NAME)
+    uint32_t    version;          ///< Built version (\ref BJ_VERSION)
+    bool        debug;            ///< Built with debug information
+    bool        pedantic;         ///< If `true`, the API was build in pedantic mode
+    bool        log_color;        ///< Logs are colored
+} bj_build_info;
+
+BANJO_EXPORT const bj_build_info* bj_get_build_info(void);
 
 /// \} End of core
