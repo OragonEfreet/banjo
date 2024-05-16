@@ -52,6 +52,7 @@ bj_bitmap* bj_bitmap_init_from_file(
         return p_bitmap;
     }
 
+
     // Load header onto memory
     u8* buffer = bj_malloc(BJ_DIB_INFO_HEADER_SIZE); // Allocate to header size to avoid 1 allocation
     fread(buffer, 1, BJ_DIB_HEADER_SIZE, fstream); 
@@ -82,8 +83,21 @@ bj_bitmap* bj_bitmap_init_from_file(
         bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
         return p_bitmap;
     }
+
+    if(file_header.file_size <= file_header.data_offset) {
+        bj_free(buffer);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
+        return p_bitmap;
+    }
 #endif
+
     fseek(fstream, file_header.data_offset, SEEK_SET);
+
+    const usize raster_byte_size = file_header.file_size - file_header.data_offset;
+    bj_trace("Depth: 0x%x", info_header.bit_count);
+    bj_trace("Compression: 0x%x", info_header.compression);
+    bj_trace("Raster size: %ld", raster_byte_size);
+    buffer = bj_realloc(buffer, 0);
 
     p_bitmap = bj_bitmap_init_default(p_bitmap, info_header.width, info_header.height);
     bj_bitmap_set_clear_color(p_bitmap, BJ_COLOR_BLACK);
