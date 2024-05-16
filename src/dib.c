@@ -7,14 +7,14 @@
 
 // Source: https://gibberlings3.github.io/iesdp/file_formats/ie_formats/bmp.htm
 
-void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_error* p_error) {
+void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_error** p_error) {
     bj_stream* p_stream = bj_new(stream, read, buffer, BJ_DIB_HEADER_SIZE);
 
     u16 signature = 0;
     bj_stream_read_t(p_stream, u16, &signature);
 
     if (signature != BJ_DIB_SIGNATURE) {
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Invalid BMP signature. Only 'BM' is supported");
         return;
     }
 
@@ -24,13 +24,13 @@ void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_e
     bj_del(stream, p_stream);
 }
 
-void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_error* p_error) {
+void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_error** p_error) {
     bj_stream* p_stream = bj_new(stream, read, buffer, BJ_DIB_INFO_HEADER_SIZE);
 
     u32 info_header_size = 0;
     bj_stream_read_t(p_stream, u32, &info_header_size);
     if (info_header_size != BJ_DIB_INFO_HEADER_SIZE) {
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Unsupported BMP Header. Only 'BITMAPINFOHEADER' is supported");
         return;
     }
 
@@ -40,7 +40,7 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
     bj_stream_read_t(p_stream, u16, &p_info_header->planes);
 #ifdef BJ_FEAT_PEDANTIC_ENABLED
     if (p_info_header->planes != 0x01) { // Planes
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Invalid BMP planes number");
         return;
     }
 #endif
@@ -54,7 +54,7 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
         case BJ_DIB_BIT_COUNT_24:
             break;
         default:
-            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Unknown bit count");
             return;
     }
 
@@ -65,7 +65,7 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
         case BJ_DIB_BI_RGB4:
             break;
         default:
-            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT);
+            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Unknown compression mode");
             return;
     }
 
@@ -88,7 +88,7 @@ usize dib_color_table_size(u16 bit_count) {
     return 0;
 }
 
-void dib_read_color_table(bj_array* p_color_table, const u8* buffer, usize n_colors, bj_error* p_error) {
+void dib_read_color_table(bj_array* p_color_table, const u8* buffer, usize n_colors, bj_error** p_error) {
     bj_array_reserve(p_color_table, n_colors);
 
     bj_with(stream, p_stream, read, buffer, n_colors * 4) {
@@ -103,7 +103,7 @@ void dib_read_color_table(bj_array* p_color_table, const u8* buffer, usize n_col
     }
 }
 
-void dib_read_raster(bj_bitmap* p_bmp, const dib_info_header* p_info_header, const bj_array* p_color_table, bj_error* p_error) {
+void dib_read_raster(bj_bitmap* p_bmp, const dib_info_header* p_info_header, const bj_array* p_color_table, bj_error** p_error) {
     for(usize x = 0 ; x < p_bmp->width ; ++x) {
         for(usize y = 0 ; y < p_bmp->height ; ++y) {
             bj_bitmap_put(p_bmp, x, y, BJ_COLOR_CRIMSON);

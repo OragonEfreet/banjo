@@ -38,12 +38,11 @@ enum bj_error_code {
 };
 
 
-////////////////////////////////////////////////////////////////////////////////
-/// The error object.
-///
-/// `domain` and `code` are user defined.
-/// An error object is considered as representing an error if `code != 0`.
-typedef u32 bj_error;
+typedef struct {
+    u16 domain;
+    u16 code;
+    const char* message;
+}bj_error;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Fills in a \ref bj_error object with given domain and code.
@@ -57,9 +56,23 @@ typedef u32 bj_error;
 /// If `p_error` is not null, the function only stored the error if `code == 0`.
 /// Otherwise, `code` and `domain` are only reported as logs.
 BANJO_EXPORT void bj_set_error(
-    bj_error* p_error,
-    u16      domain,
-    u16      code
+    bj_error**  p_error,
+    u16         domain,
+    u16         code,
+    const char* message
 );
 
+BANJO_EXPORT bool bj_error_check(
+    const bj_error* p_error,
+    u16 domain,
+    u16 code
+);
 
+BANJO_EXPORT void bj_propagate_error(
+    bj_error*  p_source,
+    bj_error** p_destination
+);
+
+BANJO_EXPORT void bj_clear_error(
+    bj_error** p_error
+);

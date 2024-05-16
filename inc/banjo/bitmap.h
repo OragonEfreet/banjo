@@ -66,7 +66,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
 BANJO_EXPORT bj_bitmap* bj_bitmap_init_from_file(
     bj_bitmap*        p_bitmap,
     const char*       p_path,
-    bj_error*         p_error
+    bj_error**        p_error
 );
 
 ////////////////////////////////////////////////////////////////////////////////

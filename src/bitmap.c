@@ -42,13 +42,13 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
 bj_bitmap* bj_bitmap_init_from_file(
     bj_bitmap*   p_bitmap,
     const char*  p_path,
-    bj_error*    p_error
+    bj_error**   p_error
 ) {
     bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
 
     FILE* fstream  = fopen(p_path, "rb");
     if (!fstream ) {
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE, "Cannot open BMP file");
         return p_bitmap;
     }
 
@@ -80,13 +80,13 @@ bj_bitmap* bj_bitmap_init_from_file(
 #ifdef BJ_FEAT_PEDANTIC_ENABLED
     if(ftell(fstream) != file_header.data_offset) {
         bj_free(buffer);
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Inconsistent BMP raster offset");
         return p_bitmap;
     }
 
     if(file_header.file_size <= file_header.data_offset) {
         bj_free(buffer);
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE);
+        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE, "Inconsistent BMP file size");
         return p_bitmap;
     }
 #endif
