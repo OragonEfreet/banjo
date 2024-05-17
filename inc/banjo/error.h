@@ -20,55 +20,50 @@
 #include <banjo/api.h>
 #include <banjo/memory.h>
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Erorr domain values
-enum bj_error_domain {
-    BJ_NO_DOMAIN,
-    BJ_DOMAIN_SYSTEM,
-    BJ_DOMAIN_IO,
-};
+#define BJ_ERROR_MESSAGE_MAX_LEN 127
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Erorr domain values
-enum bj_error_code {
-    BJ_NO_ERROR,
-    BJ_CANNOT_ALLOCATE,
-    BJ_CANNOT_OPEN_FILE,
-    BJ_INVALID_FORMAT,
-};
+typedef enum {
+    BJ_ERROR_NONE                = 0x00000000, ///< No Error
+    BJ_ERROR                     = 0x00000001, ///< General Error (unspecified)
 
+    BJ_ERROR_OS                  = 0x00000002, ///< Generic OS error
+    BJ_ERROR_FILE_NOT_FOUND      = 0x00000102, ///< The request file was not found
+
+    BJ_ERROR_INVALID_DATA        = 0x00000003, ///< Incorrect data
+    BJ_ERROR_INVALID_FORMAT      = 0x00000103, ///< Associated data does not fit expected format
+    BJ_ERROR_INCORRECT_VALUE     = 0x00000203, ///< Expected value mismatch
+} bj_error_code;
+
+#define bj_error_code_is_user (c) (((c >> 24) & 0xFF) > 0x00)
+#define bj_error_code_category(c) (c & 0x000000FF)
 
 typedef struct {
-    u16 domain;
-    u16 code;
-    const char* message;
-}bj_error;
+    u32         code;
+    char        message[BJ_ERROR_MESSAGE_MAX_LEN+1];
+} bj_error;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Fills in a \ref bj_error object with given domain and code.
+/// Fills in a \ref bj_error object with given code and message
 ///
 /// \param p_error The error to fill in.
-/// \param domain  Domain identifier.
 /// \param code    Error code.
 ///
 /// If `p_error` is null, the function does nothing.
 ///
 /// If `p_error` is not null, the function only stored the error if `code == 0`.
-/// Otherwise, `code` and `domain` are only reported as logs.
+/// Otherwise, `code` and `message` are only reported as logs.
 BANJO_EXPORT void bj_set_error(
     bj_error**  p_error,
-    u16         domain,
-    u16         code,
+    u32         code,
     const char* message
 );
 
 BANJO_EXPORT bool bj_error_check(
     const bj_error* p_error,
-    u16 domain,
-    u16 code
+    u32 code
 );
 
-BANJO_EXPORT void bj_propagate_error(
+BANJO_EXPORT void bj_forward_error(
     bj_error*  p_source,
     bj_error** p_destination
 );

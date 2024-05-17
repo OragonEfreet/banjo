@@ -46,7 +46,8 @@ typedef struct {
 
 void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_error** p_error);
 void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_error** p_error);
-usize dib_color_table_size(u16 bit_count);
+usize dib_color_table_len(const dib_info_header* p_info_header);
+usize dib_color_table_memsize(const dib_info_header* p_info_header);
 void dib_read_color_table(bj_array* p_color_table, const u8* buffer, usize n_colors, bj_error** p_error);
 void dib_read_raster(bj_bitmap* p_bmp, const dib_info_header* p_info_header, const bj_array* p_color_table, bj_error** p_error);
 

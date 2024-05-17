@@ -14,7 +14,7 @@ void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_e
     bj_stream_read_t(p_stream, u16, &signature);
 
     if (signature != BJ_DIB_SIGNATURE) {
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Invalid BMP signature. Only 'BM' is supported");
+        bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, "Invalid BMP signature. Only 'BM' is supported");
         return;
     }
 
@@ -30,7 +30,7 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
     u32 info_header_size = 0;
     bj_stream_read_t(p_stream, u32, &info_header_size);
     if (info_header_size != BJ_DIB_INFO_HEADER_SIZE) {
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Unsupported BMP Header. Only 'BITMAPINFOHEADER' is supported");
+        bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, "Unsupported BMP Header. Only 'BITMAPINFOHEADER' is supported");
         return;
     }
 
@@ -40,7 +40,7 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
     bj_stream_read_t(p_stream, u16, &p_info_header->planes);
 #ifdef BJ_FEAT_PEDANTIC_ENABLED
     if (p_info_header->planes != 0x01) { // Planes
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Invalid BMP planes number");
+        bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, "Invalid BMP planes number");
         return;
     }
 #endif
@@ -54,7 +54,7 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
         case BJ_DIB_BIT_COUNT_24:
             break;
         default:
-            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Unknown bit count");
+            bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, "Unknown bit count");
             return;
     }
 
@@ -65,7 +65,7 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
         case BJ_DIB_BI_RGB4:
             break;
         default:
-            bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Unknown compression mode");
+            bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, "Unknown compression mode");
             return;
     }
 
@@ -78,15 +78,23 @@ void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_e
     bj_del(stream, p_stream);
 }
 
-usize dib_color_table_size(u16 bit_count) {
-    switch(bit_count) {
-        case BJ_DIB_BIT_COUNT_1: return 2;
-        case BJ_DIB_BIT_COUNT_4: return 16;
-        case BJ_DIB_BIT_COUNT_8: return 256;
-        default: break;
+usize dib_color_table_len(const dib_info_header* p_info_header) {
+    if(p_info_header->colors_used == 0) {
+        switch(p_info_header->bit_count) {
+            case BJ_DIB_BIT_COUNT_1: return 2;
+            case BJ_DIB_BIT_COUNT_4: return 16;
+            case BJ_DIB_BIT_COUNT_8: return 256;
+            default: break;
+        }
+        return 0;
     }
-    return 0;
+    return p_info_header->colors_used;
 }
+
+usize dib_color_table_memsize(const dib_info_header* p_info_header) {
+    return dib_color_table_len(p_info_header) * sizeof(u8)*4;
+}
+
 
 void dib_read_color_table(bj_array* p_color_table, const u8* buffer, usize n_colors, bj_error** p_error) {
     bj_array_reserve(p_color_table, n_colors);

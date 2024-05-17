@@ -4,38 +4,37 @@
 
 void bj_set_error(
     bj_error**  p_error,
-    u16         domain,
-    u16         code,
+    u32         code,
     const char* message
 ) {
     // Don't report anything if the user is not interested
     if(p_error == NULL) {
 #ifndef NDEBUG
-        bj_error("Uncaught error: 0x%hx/0x%hx", domain, code);
+        bj_error("Uncaught error: 0x%08X", code);
 #endif
-        return; // TODO Still report in debug mode
+        return;
     }
 
     if(*p_error == NULL) {
         *p_error           = bj_malloc(sizeof(bj_error));
-        (*p_error)->domain = domain;
         (*p_error)->code   = code;
+        bj_memcpy((*p_error)->message, message, BJ_ERROR_MESSAGE_MAX_LEN + 1);
+        ((*p_error)->message)[BJ_ERROR_MESSAGE_MAX_LEN] = '\0';
     } else {
-        bj_error("Error code [0x%hx:0x%hx] overwritten by [0x%hx:0x%hx]",
-            (*p_error)->domain, (*p_error)->code, domain, code
+        bj_error("Error code 0x%08X overwritten by 0x%08X",
+            (*p_error)->code, code
         );
     }
 }
 
 bool bj_error_check(
     const bj_error* p_error,
-    u16 domain,
-    u16 code
+    u32 code
 ) {
-    return p_error && domain == p_error->domain && code == p_error->code;
+    return p_error && code == p_error->code;
 }
 
-void bj_propagate_error(
+void bj_forward_error(
     bj_error*  p_source,
     bj_error** p_destination
 ) {
@@ -48,9 +47,8 @@ void bj_propagate_error(
         return;
     } else {
         if (*p_destination != 0) {
-            // TODO
-            bj_error("Error code [0x%hx:0x%hx] overwritten by [0x%hx:0x%hx]",
-                (*p_destination)->domain, (*p_destination)->code, p_source->domain, p_source->code
+            bj_error("Error code 0x%08X overwritten by 0x%08X",
+                (*p_destination)->code, p_source->code
             );
             bj_free (p_source);
         } else {

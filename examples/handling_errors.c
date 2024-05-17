@@ -1,12 +1,11 @@
 #include <banjo/error.h>
 #include <banjo/log.h>
 
-#define DOMAIN 42
 #define CODE 101
 
 /// [Return Errors]
 void function_returning_error(bj_error** error) {
-    bj_set_error(error, DOMAIN, CODE, "An error occured");
+    bj_set_error(error, CODE, "An error occured");
 }
 /// [Return Errors]
 
@@ -16,12 +15,11 @@ void function_calling_failing_function(bj_error** error) {
     function_returning_error(&sub_err);
 
     if(sub_err != 0) {
-        bj_propagate_error(sub_err, error);
+        bj_forward_error(sub_err, error);
         return;
     }
 
     bj_info("This should not be printed\n");
-
 }
 
 
@@ -40,7 +38,7 @@ int main(int argc, char* argv[]) {
     }
     /// [Using bj_error]
     
-    if (bj_error_check(error, DOMAIN, CODE)) {
+    if (bj_error_check(error, CODE)) {
         bj_info("Error domain and code match");
     }
 
@@ -48,12 +46,9 @@ int main(int argc, char* argv[]) {
 
     function_calling_failing_function(&error);
 
-    if(bj_error_check(error, DOMAIN, CODE)) {
+    if (bj_error_check(error, CODE)) {
         bj_info("Error from nested function");
     }
-
-    
-
 
     return 0;
 }

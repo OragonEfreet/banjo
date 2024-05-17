@@ -37,8 +37,6 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
     return p_bitmap;
 }
 
-#define BJ_DIB_INFO_HEADER_SIZE 40
-
 bj_bitmap* bj_bitmap_init_from_file(
     bj_bitmap*   p_bitmap,
     const char*  p_path,
@@ -48,65 +46,81 @@ bj_bitmap* bj_bitmap_init_from_file(
 
     FILE* fstream  = fopen(p_path, "rb");
     if (!fstream ) {
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE, "Cannot open BMP file");
+        bj_set_error(p_error, BJ_ERROR_FILE_NOT_FOUND, "Cannot open BMP file");
         return p_bitmap;
     }
 
+    bj_error* p_inner_error = 0;
 
     // Load header onto memory
     u8* buffer = bj_malloc(BJ_DIB_INFO_HEADER_SIZE); // Allocate to header size to avoid 1 allocation
     fread(buffer, 1, BJ_DIB_HEADER_SIZE, fstream); 
 
     dib_file_header file_header;
-    dib_read_file_header(&file_header, buffer, p_error);
+    dib_read_file_header(&file_header, buffer, &p_inner_error);
+    if(p_inner_error) {
+        fclose(fstream);
+        bj_forward_error(p_inner_error, p_error);
+        return p_bitmap;
+    }
 
     // Load Info Header
     fread(buffer, 1, BJ_DIB_INFO_HEADER_SIZE, fstream);
     dib_info_header info_header;
-    dib_read_info_header(&info_header, buffer, p_error);
+    dib_read_info_header(&info_header, buffer, &p_inner_error);
+    if(p_inner_error) {
+        fclose(fstream);
+        bj_forward_error(p_inner_error, p_error);
+        return p_bitmap;
+    }
 
     // Load Color table
-    usize n_colors = dib_color_table_size(info_header.bit_count);
-    usize table_color_size = (sizeof(u8)*4) * n_colors;
-
+    usize n_colors = dib_color_table_len(&info_header);
     bj_array* p_color_table = bj_new(array, default_t, table_color);
     if(n_colors > 0) {
+        usize table_color_size = dib_color_table_memsize(&info_header);;
         buffer = bj_realloc(buffer, table_color_size);
         fread(buffer, 1, table_color_size, fstream);
 
-        dib_read_color_table(p_color_table, buffer, n_colors, p_error);
+        dib_read_color_table(p_color_table, buffer, n_colors, &p_inner_error);
+        if(p_inner_error) {
+            fclose(fstream);
+            bj_forward_error(p_inner_error, p_error);
+            return p_bitmap;
+        }
     }
 
 #ifdef BJ_FEAT_PEDANTIC_ENABLED
     if(ftell(fstream) != file_header.data_offset) {
         bj_free(buffer);
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_INVALID_FORMAT, "Inconsistent BMP raster offset");
+        bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, "Inconsistent BMP raster offset");
         return p_bitmap;
     }
 
     if(file_header.file_size <= file_header.data_offset) {
         bj_free(buffer);
-        bj_set_error(p_error, BJ_DOMAIN_IO, BJ_CANNOT_OPEN_FILE, "Inconsistent BMP file size");
+        bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, "Inconsistent BMP file size");
         return p_bitmap;
     }
 #endif
 
     fseek(fstream, file_header.data_offset, SEEK_SET);
 
-    const usize raster_byte_size = file_header.file_size - file_header.data_offset;
-    bj_trace("Depth: 0x%x", info_header.bit_count);
-    bj_trace("Compression: 0x%x", info_header.compression);
-    bj_trace("Raster size: %ld", raster_byte_size);
+    //TODO
     buffer = bj_realloc(buffer, 0);
 
     p_bitmap = bj_bitmap_init_default(p_bitmap, info_header.width, info_header.height);
     bj_bitmap_set_clear_color(p_bitmap, BJ_COLOR_BLACK);
 
-    dib_read_raster(p_bitmap, &info_header, p_color_table, p_error);
+    dib_read_raster(p_bitmap, &info_header, p_color_table, &p_inner_error);
+    if(p_inner_error) {
+        fclose(fstream);
+        bj_forward_error(p_inner_error, p_error);
+        return p_bitmap;
+    }
 
     bj_del(array, p_color_table);
     bj_free(buffer);
-
 
     return p_bitmap;
 }
