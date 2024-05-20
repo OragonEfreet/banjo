@@ -28,10 +28,14 @@ typedef enum {
 
     BJ_ERROR_OS                  = 0x00000002, ///< Generic OS error
     BJ_ERROR_FILE_NOT_FOUND      = 0x00000102, ///< The request file was not found
+    BJ_ERROR_CANNOT_ALLOCATE     = 0x00000202, ///< Cannot allocate the specified memory block
 
-    BJ_ERROR_INVALID_DATA        = 0x00000003, ///< Incorrect data
-    BJ_ERROR_INVALID_FORMAT      = 0x00000103, ///< Associated data does not fit expected format
-    BJ_ERROR_INCORRECT_VALUE     = 0x00000203, ///< Expected value mismatch
+    BJ_ERROR_IO                  = 0x00000003, ///< IO-related errors
+    BJ_ERROR_CANNOT_READ_FILE    = 0x00000103, ///< IO-related errors
+
+    BJ_ERROR_INVALID_DATA        = 0x00000004, ///< Incorrect data
+    BJ_ERROR_INVALID_FORMAT      = 0x00000104, ///< Associated data does not fit expected format
+    BJ_ERROR_INCORRECT_VALUE     = 0x00000204, ///< Expected value mismatch
 } bj_error_code;
 
 #define bj_error_code_is_user (c) (((c >> 24) & 0xFF) > 0x00)

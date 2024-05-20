@@ -45,6 +45,8 @@ typedef struct {
 } table_color;
 
 void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_error** p_error);
+void dib_read(dib_info_header* p_info_header, bj_array* p_color_table, const u8 buffer, usize buffer_size, bj_error** p_error);
+
 void dib_read_info_header(dib_info_header* p_info_header, const u8* buffer, bj_error** p_error);
 usize dib_color_table_len(const dib_info_header* p_info_header);
 usize dib_color_table_memsize(const dib_info_header* p_info_header);

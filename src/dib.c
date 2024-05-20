@@ -118,3 +118,7 @@ void dib_read_raster(bj_bitmap* p_bmp, const dib_info_header* p_info_header, con
         }
     }
 }
+
+void dib_read(dib_info_header* p_info_header, bj_array* p_color_table, const u8 buffer, usize buffer_size, bj_error** p_error) {
+
+}
