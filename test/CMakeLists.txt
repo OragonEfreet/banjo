@@ -11,12 +11,13 @@ macro(gen_test category pattern)
         set_target_properties(${_target} PROPERTIES OUTPUT_NAME ${_test_name})
         add_test(NAME "[${category}] ${_test_name}" COMMAND ${_target})
         set_target_properties(${_target} PROPERTIES FOLDER "Tests")
-        target_compile_definitions(${_target} PRIVATE BJ_NO_OPAQUE)
+        target_compile_definitions(${_target} PRIVATE BJ_NO_OPAQUE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
     endforeach()
 endmacro()
 
 gen_test(TDD "${CMAKE_CURRENT_SOURCE_DIR}/tdd_*.c")
 gen_test(Unit "${CMAKE_CURRENT_SOURCE_DIR}/obj_*.c")
 gen_test(Unit "${CMAKE_CURRENT_SOURCE_DIR}/unit_*.c")
+gen_test(Validation "${CMAKE_CURRENT_SOURCE_DIR}/valid_*.c")
 
 

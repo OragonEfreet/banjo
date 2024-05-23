@@ -1,5 +1,6 @@
 #include <banjo/error.h>
 #include <banjo/list.h>
+#include <banjo/log.h>
 #include <banjo/memory.h>
 
 bj_list* bj_list_init_default(
@@ -19,7 +20,7 @@ bj_list* bj_list_init_default(
 bj_list* bj_list_reset(
     bj_list* list
 ) {
-    bj_assert(list != 0);
+    bj_check_or_return(list, list);
     bj_list_clear(list);
     bj_memset(list, 0, sizeof(bj_list));
     return list; 
@@ -28,7 +29,7 @@ bj_list* bj_list_reset(
 void bj_list_clear(
     bj_list* list
 ) {
-    bj_assert(list != 0);
+    bj_check(list != 0);
 
     void** p_next_block = list->p_head;
     while(p_next_block != 0) {
@@ -59,7 +60,7 @@ void* bj_list_insert(
     usize index,
     void* p_data
 ) {
-    bj_assert(list != 0);
+    bj_check_or_0(list != 0);
 
     void* p_previous_block = &list->p_head;
     void** p_next_block    = list->p_head;
@@ -126,7 +127,7 @@ void* bj_list_head(
 bj_list_iterator* bj_list_iterator_new(
     bj_list* list
 ) {
-    bj_assert(list);
+    bj_check_or_0(list);
     bj_list_iterator* it = bj_malloc(sizeof(struct bj_list_iterator_t));
     bj_list_iterator_init(list, it);
     return it;
@@ -140,13 +141,13 @@ void bj_list_iterator_del(
 }
 
 void bj_list_iterator_init(bj_list* list, bj_list_iterator* iterator) {
-    bj_assert(iterator);
+    bj_check(iterator);
     iterator->list        = list;
     iterator->p_current   = &list->p_head;
 }
 
 void bj_list_iterator_reset(bj_list_iterator* iterator) {
-    bj_assert(iterator);
+    bj_check(iterator);
     iterator->list      = 0;
     iterator->p_current = 0;
 }
@@ -154,14 +155,14 @@ void bj_list_iterator_reset(bj_list_iterator* iterator) {
 bool bj_list_iterator_has_next(
     bj_list_iterator* iterator
 ) {
-    bj_assert(iterator);
+    bj_check_or_return(iterator, false);
     return *(iterator->p_current) != 0;
 }
 
 void* bj_list_iterator_next(
     bj_list_iterator* iterator
 ) {
-    bj_assert(iterator);
+    bj_check_or_0(iterator);
     iterator->p_current = *iterator->p_current;
     void* p_value = ((byte*)iterator->p_current)+sizeof(void*);
     if(iterator->list->weak_owning) {

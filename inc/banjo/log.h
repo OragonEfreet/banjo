@@ -4,6 +4,10 @@
 
 #include <banjo/api.h>
 
+#ifdef BJ_FEAT_ABORT_ON_CHECKS_ENABLED
+#   include <stdlib.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Log Levels.
 /// Level values are ordered from 0.
@@ -170,4 +174,25 @@ BANJO_EXPORT int bj_log_get_level(void);
 BANJO_EXPORT void bj_message(int level, const char* p_file, int line, const char* p_format, ...);
 
 
+#ifdef BJ_FEAT_CHECKS_ENABLED
+#   ifdef NDEBUG
+#      define bj_check_err_msg(cond) bj_error("Unrecoverable Error (Failed Check)")
+#   else
+#      define bj_check_err_msg(cond) bj_error("Failed check: " #cond)
+#   endif
+#   ifdef BJ_FEAT_ABORT_ON_CHECKS_ENABLED
+#      define bj_check(cond) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
+#      define bj_check_or_return(cond, retval) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
+#      define bj_check_or_0(cond) bj_check_or_return(cond, 0)
+#   else
+#      define bj_check(cond) if(!(cond)) {bj_check_err_msg(cond) ; return;}
+#      define bj_check_or_return(cond, retval) if(!(cond)) {bj_check_err_msg(cond) ; return(retval);}
+#      define bj_check_or_0(cond) bj_check_or_return(cond, 0)
+#   endif
+#   undef _bj_check_err_msg
+#else
+#   define bj_check(cond)
+#   define bj_check_or_return(cond, retval)
+#   define bj_check_or_0(cond)
+#endif
 

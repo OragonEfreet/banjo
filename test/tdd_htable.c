@@ -14,12 +14,12 @@ typedef int key_t;
 
 TEST_CASE(init_with_zero_bytes_value_gives_nil) {
     bj_htable_init_default(&htable, sizeof(key_t), 0);
-    REQUIRE_EMPTY(bj_htable, &htable);
+    REQUIRE_NIL(bj_htable, &htable);
 }
 
 TEST_CASE(init_with_zero_bytes_key_gives_nil) {
     bj_htable_init_default(&htable, 0, sizeof(value_t));
-    REQUIRE_EMPTY(bj_htable, &htable);
+    REQUIRE_NIL(bj_htable, &htable);
 }
 
 TEST_CASE(init_with_no_hash_gives_default_hash) {
@@ -47,7 +47,7 @@ TEST_CASE(clear_nil_does_nothing) {
     bj_htable_init_default(&htable, 0, 0);
     CHECK_EMPTY(bj_htable, &htable);
     bj_htable_clear(&htable);
-    REQUIRE_EMPTY(bj_htable, &htable);
+    REQUIRE_NIL(bj_htable, &htable);
     bj_htable_reset(&htable);
 }
 

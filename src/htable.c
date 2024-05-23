@@ -1,8 +1,9 @@
-#include "banjo/array.h"
-#include "banjo/list.h"
-#include "banjo/memory.h"
+#include <banjo/array.h>
 #include <banjo/error.h>
 #include <banjo/htable.h>
+#include <banjo/list.h>
+#include <banjo/log.h>
+#include <banjo/memory.h>
 
 #include <string.h>
 
@@ -71,8 +72,8 @@ bj_htable* bj_htable_reset(
 void bj_htable_clear(
     bj_htable* htable
 ) {
-    // TODO?
-    bj_assert(htable != 0);
+    // TODO Implement code for htable clear
+    bj_check(htable != 0);
 }
 
 

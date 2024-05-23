@@ -3,18 +3,65 @@
 #include <banjo/memory.h>
 
 void bj_set_error(
-    BjError* p_error,
-    u32 domain,
-    u32 code
+    bj_error**  p_error,
+    u32         code,
+    const char* message
 ) {
+    // Don't report anything if the user is not interested
     if(p_error == 0) {
+#ifndef NDEBUG
+        bj_error("Uncaught error: 0x%08X", code);
+#endif
         return;
     }
 
-    if(p_error->code == 0) {
-        p_error->domain = domain;
-        p_error->code = code;
+    if(*p_error == 0) {
+        *p_error           = bj_malloc(sizeof(bj_error));
+        (*p_error)->code   = code;
+        bj_memcpy((*p_error)->message, message, BJ_ERROR_MESSAGE_MAX_LEN + 1);
+        ((*p_error)->message)[BJ_ERROR_MESSAGE_MAX_LEN] = '\0';
     } else {
-        bj_error("Error %d/%d", domain, code);
+        bj_error("Error code 0x%08X overwritten by 0x%08X",
+            (*p_error)->code, code
+        );
+    }
+}
+
+bool bj_error_check(
+    const bj_error* p_error,
+    u32 code
+) {
+    return p_error && code == p_error->code;
+}
+
+void bj_forward_error(
+    bj_error*  p_source,
+    bj_error** p_destination
+) {
+    bj_check(p_source != 0);
+
+    if (p_destination == 0) {
+        if (p_source) {
+            bj_free (p_source);
+        }
+        return;
+    } else {
+        if (*p_destination != 0) {
+            bj_error("Error code 0x%08X overwritten by 0x%08X",
+                (*p_destination)->code, p_source->code
+            );
+            bj_free (p_source);
+        } else {
+            *p_destination = p_source;
+        }
+    }
+}
+
+void bj_clear_error(
+    bj_error** p_error
+) {
+    if(p_error && *p_error) {
+        bj_free(*p_error);
+        *p_error = 0;
     }
 }

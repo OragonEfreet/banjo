@@ -166,12 +166,10 @@ BANJO_EXPORT void* bj_list_head(
 /// Typedef for the bj_list_iterator_t structure
 typedef struct bj_list_iterator_t bj_list_iterator;
 
-#ifdef BJ_NO_OPAQUE
 struct bj_list_iterator_t {
     bj_list*  list;
     void**   p_current;
 };
-#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////

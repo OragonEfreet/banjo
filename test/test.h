@@ -2,15 +2,13 @@
 
 #include "mock_memory.h"
 
-// TODO: + No need to name tests anymore
-// TODO: + Tag system
-// TODO: + ShouldFail system
-// TODO: + Use __COUNTER__ to get rid of RUN_TEST(x)?
-
+#include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
 
 // Symbol overrides
 #define SM_NS(SM) test_ ## SM
-#define SM_TST_FN(NAME) SM_NS(fn_ ## NAME) 
+#define SM_TST_FN(NAME) NAME
 #define TST_FLAGS(NAME) SM_NS(flags_ ## NAME) 
 #define TST_STRUCT_T(NAME) struct SM_NS(data_ ## NAME) 
 #define SM_CTX() SM_NS(context) 
@@ -53,16 +51,18 @@ void initialize_context(Context* context, int argc, char* argv[]) {
     bj_memory_set_defaults(&allocators);
 }
 
+
+
 // Called after each test ends
 // Returns 1 means "terminate program"
 int record_test_result(Context* context, const char* test_name, int status_flag) {
     ++context->n_run;
     if ((status_flag & FAIL) > 0) {
         ++context->n_fail;
-        PRINT("[FAIL] | %s...\n", test_name);
+        PRINT("[FAIL] | %s\n\n", test_name);
         return 1 & context->stop_at_err;
     }
-    PRINT("[OK]   | %s...\n", test_name);
+    PRINT("[OK]   | %s\n", test_name);
     return 0;
 }
 
@@ -104,7 +104,8 @@ bool all_zero(void* ptr, usize byte_size) {
 // INTERNAL MACROS
 #define DEFINE_TST_FN(NAME) void SM_TST_FN(NAME)(Context* SM_CTX(), StatusFlag* SM_FLAGS_PARAM())
 #define DEFINE_TST_FN_ARGS(NAME) void SM_TST_FN(NAME)(Context* SM_CTX(), StatusFlag* SM_FLAGS_PARAM(), TST_STRUCT_T(NAME)* SM_DATA_PARAM())
-#define DECL_TST_FLAGS(NAME) static StatusFlag TST_FLAGS(NAME) = 0
+#define RESET_TST_FLAGS(NAME) TST_FLAGS(NAME) = 0
+#define DECL_TST_FLAGS(NAME) static StatusFlag RESET_TST_FLAGS(NAME)
 #define DECL_TST_DATASTRUCT(NAME, CONTENT) TST_STRUCT_T(NAME) CONTENT
 
 #define TRACE(NAME, STR, ...) PRINT("         %s:%d: FAILED (%s): " STR "\n", SM_CTX()->prog_name, __LINE__, #NAME, __VA_ARGS__);
@@ -128,8 +129,8 @@ bool all_zero(void* ptr, usize byte_size) {
 #define TEST_CASE_ARGS(NAME, DATA) DECL_TST_DATASTRUCT(NAME, DATA); DECL_TST_FLAGS(NAME); DEFINE_TST_FN_ARGS(NAME)
 #define TEST_CASE(NAME) DECL_TST_FLAGS(NAME); DEFINE_TST_FN(NAME)
 
-#define RUN_TEST_ARGS(NAME, ...) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME), &(TST_STRUCT_T(NAME)){__VA_ARGS__});CHECK_TEST(NAME, #NAME " {" #__VA_ARGS__ "}");//PRINT("%s\n", #__VA_ARGS__);
-#define RUN_TEST(NAME) SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME));CHECK_TEST(NAME, #NAME);
+#define RUN_TEST_ARGS(NAME, ...) RESET_TST_FLAGS(NAME); SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME), &(TST_STRUCT_T(NAME)){__VA_ARGS__});CHECK_TEST(NAME, #NAME " {" #__VA_ARGS__ "}");//PRINT("%s\n", #__VA_ARGS__);
+#define RUN_TEST(NAME) RESET_TST_FLAGS(NAME); SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME));CHECK_TEST(NAME, #NAME);
 
 
 // Weak assertions
@@ -146,4 +147,4 @@ bool all_zero(void* ptr, usize byte_size) {
 #define REQUIRE_NEQ(EXPR, EXPECTED) DO_CHECK_NEQ(REQUIRE_NEQ, EXPR, EXPECTED, STOP)
 #define REQUIRE_NULL(EXPR) DO_CHECK_NULL(REQUIRE_NULL, EXPR, STOP)
 #define REQUIRE_VALUE(EXPR) DO_CHECK_VALUE(REQUIRE_VALUE, EXPR, STOP)
-#define REQUIRE_EMPTY(T, OBJ) DO_CHECK_EMPTY(REQUIRE_EMPTY, T, OBJ, STOP)
+#define REQUIRE_NIL(T, OBJ) DO_CHECK_EMPTY(REQUIRE_NIL, T, OBJ, STOP)
