@@ -1,0 +1,15 @@
+/// \file
+/// Aggregate include for IO-related API
+#pragma once
+
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup io IO
+///
+#include <banjo/stream.h>
+
+
+
+
+
+
+

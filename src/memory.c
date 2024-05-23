@@ -46,9 +46,7 @@ void bj_memory_set_defaults(
             .fn_free         = fallback_free,
         };
     } else {
-        bj_assert(p_allocator != 0);
-        bj_assert(p_allocator != 0);
-        bj_assert(p_allocator != 0);
+        bj_check(p_allocator != 0);
         s_default = (bj_memory_callbacks) {
             .fn_allocation   = p_allocator->fn_allocation,
             .fn_reallocation = p_allocator->fn_reallocation,

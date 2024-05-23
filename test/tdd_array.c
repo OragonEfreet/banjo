@@ -44,7 +44,7 @@ TEST_CASE(clear_nil_does_nothing) {
     bj_array_init_default(&array, 0);
     CHECK_EMPTY(bj_array, &array);
     bj_array_clear(&array);
-    REQUIRE_EMPTY(bj_array, &array);
+    REQUIRE_NIL(bj_array, &array);
     bj_array_reset(&array);
 }
 
@@ -204,7 +204,7 @@ TEST_CASE(pop_nil_does_nothing) {
     bj_array_init_default(&array, 0);
     CHECK_EMPTY(bj_array, &array);
     bj_array_pop(&array);
-    REQUIRE_EMPTY(bj_array, &array);
+    REQUIRE_NIL(bj_array, &array);
 }
 
 TEST_CASE(pop_empty_does_nothing) {

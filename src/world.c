@@ -1,5 +1,6 @@
 #include <banjo/array.h>
 #include <banjo/error.h>
+#include <banjo/log.h>
 #include <banjo/world.h>
 
 /* #include "internal.h" */
@@ -10,7 +11,7 @@ BjWorld* bj_world_new(
     const BjWorldInfo*           p_info,
     const bj_memory_callbacks* p_allocator
 ) {
-    bj_assert(p_info != 0);
+    bj_check_or_0(p_info != 0);
 
     BjWorld* world = bj_malloc(sizeof(struct BjWorld_t));
     world->p_allocator = p_allocator;
@@ -23,7 +24,7 @@ BjWorld* bj_world_new(
 void bj_world_del(
     BjWorld* world
 ) {
-    bj_assert(world != 0);
+    bj_check(world != 0);
     bj_free(world);
 }
 

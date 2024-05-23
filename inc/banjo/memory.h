@@ -194,4 +194,44 @@ BANJO_EXPORT void bj_memset(
 /// using the custom allocators (see \ref bj_memory_callbacks).
 #define bj_del(typ, ptr) bj_free(bj_ ## typ ## _reset(ptr))
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// \def bj_with(typ, var, initlzr, ...)
+///
+/// \brief Scoped resource management macro for Banjo objects.
+///
+/// This macro simplifies resource management for Banjo objects by encapsulating
+/// their initialization and disposal within a scoped block. It initializes a
+/// Banjo object using the specified initializer and optional arguments, and
+/// automatically disposes of it at the end of the block.
+///
+/// \param typ     The type of the Banjo object.
+/// \param var     The name of the variable representing the Banjo object.
+/// \param initlzr The initializer for the Banjo object.
+/// \param ...     Optional additional arguments required by the initializer.
+///
+/// Usage:
+/// \code{.c}
+/// bj_with(array, arr, default_t, int) {
+///     // Use 'arr' within this block
+/// }
+/// // 'arr' is automatically disposed after the block
+/// \endcode
+///
+/// \warning Early return
+/// This macro does not perform auto-free on early return.
+/// If you ever return from inside the block, you need to manually dispose the
+/// object again:
+/// \code{.c}
+/// bj_with(array, arr, default_t, int) {
+///     bj_del(array, arr);
+///     return;
+/// }
+/// \endcode
+///
+#define bj_with(typ, var, initlzr, ...) \
+    for(bj_ ## typ* var = bj_new(typ, initlzr, __VA_ARGS__); \
+    !!(var); \
+    bj_del(typ, var), var=0)
+
 /// \} End of memory
