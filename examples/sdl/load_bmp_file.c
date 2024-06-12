@@ -19,13 +19,16 @@ int main(int argc, char* argv[]) {
     usize folder_len = strlen(folder);
 
     const char* bmp_files[] = {
+ "bmp/test/valid/32bpp-optimalpalette-320x240.bmp",
+ /* "bmp/test/valid/32bpp-1x1.bmp", */
+ /*     "bmp/test/valid/32bpp-320x240.bmp", */
         /* "bmp/all_gray.bmp", */
-        "bmp/blackbuck.bmp",
-        "bmp/bmp_24.bmp",
-        "bmp/dots.bmp",
-        "bmp/greenland_grid_velo.bmp",
-        "bmp/lena.bmp",
-        "bmp/snail.bmp",
+        /* "bmp/blackbuck.bmp", */
+        /* "bmp/bmp_24.bmp", */
+        /* "bmp/dots.bmp", */
+        /* "bmp/greenland_grid_velo.bmp", */
+        /* "bmp/lena.bmp", */
+        /* "bmp/snail.bmp", */
     };
 
 
