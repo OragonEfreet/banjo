@@ -4,6 +4,9 @@
 
 #include "dib.h"
 
+#define _ABS(x) ((x) < 0 ? -(x) : (x))
+#define _TOP_DOWN(x) ((x) < 0)
+
 void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_error** p_error) {
     bj_stream* p_stream = bj_new(stream, read, buffer, BJ_DIB_HEADER_SIZE);
 
@@ -32,7 +35,7 @@ static void dib_read_info_header(bj_stream* p_stream, dib_info_header* p_info_he
     }
 
     bj_stream_read_t(p_stream, u32, &p_info_header->width);
-    bj_stream_read_t(p_stream, u32, &p_info_header->height);
+    bj_stream_read_t(p_stream, i32, &p_info_header->height);
     bj_stream_read_t(p_stream, u16, &p_info_header->planes);
 
 #ifdef BJ_FEAT_PEDANTIC_ENABLED
@@ -49,6 +52,7 @@ static void dib_read_info_header(bj_stream* p_stream, dib_info_header* p_info_he
         case BJ_DIB_BIT_COUNT_8:
         case BJ_DIB_BIT_COUNT_16:
         case BJ_DIB_BIT_COUNT_24:
+        case BJ_DIB_BIT_COUNT_32:
             break;
         default:
             bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, "Unknown bit count");
@@ -123,8 +127,8 @@ static void dib_read(dib* p_dib, const u8* buffer, usize buffer_size, usize offs
     bj_del(stream, p_stream);
 }
 
-static usize dib_raster_row_size(u32 width, u16 bit_count) {
-    return (((width * bit_count + 7) / 8) + 3) & ~3;
+static usize dib_uncompressed_stride(u32 width, u16 bit_count) {
+    return ((((width * bit_count) + 31) & ~31) >> 3);
 }
 
 static void dib_read_raster_1bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
@@ -139,7 +143,7 @@ static void dib_read_raster_1bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_s
 
     const u8* row = buffer;
     for (usize y = 0; y < p_bmp->height; ++y) {
-        const usize py = p_bmp->height - y - 1;
+        const usize py = p_dib->info_header.height < 0 ? y : p_bmp->height - y - 1;
         const u8* pixel8_data = row;
 
         usize x = 0;
@@ -163,7 +167,7 @@ static void dib_read_raster_4bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_s
 
     const u8* row = buffer;
     for (usize y = 0; y < p_bmp->height; ++y) {
-        const usize py = p_bmp->height - y - 1;
+        const usize py = p_dib->info_header.height < 0 ? y : p_bmp->height - y - 1;
         const u8* pixel2_data = row;
 
         usize x = 0;
@@ -179,7 +183,7 @@ static void dib_read_raster_4bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_s
 static void dib_read_raster_8bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
     const u8* row = buffer;
     for (usize y = 0; y < p_bmp->height; ++y) {
-        const usize py = p_bmp->height - y - 1;
+        const usize py = p_dib->info_header.height < 0 ? y : p_bmp->height - y - 1;
         const u8* pixel_data = row;
         for (usize x = 0; x < p_bmp->width; ++x) {
             const table_color* color = bj_array_at(&p_dib->color_table, *pixel_data++);
@@ -192,7 +196,7 @@ static void dib_read_raster_8bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_s
 static void dib_read_raster_24bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
     const u8* row = buffer;
     for (usize y = 0; y < p_bmp->height; ++y) {
-        const usize py = p_bmp->height - y - 1;
+        const usize py = p_dib->info_header.height < 0 ? y : p_bmp->height - y - 1;
         const u8* pixel_data = row;
         for (usize x = 0; x < p_bmp->width; ++x) {
             bj_bitmap_put(p_bmp, x, py, BJ_RGB(pixel_data[2], pixel_data[1], pixel_data[0]));
@@ -202,8 +206,24 @@ static void dib_read_raster_24bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_
     }
 }
 
+static void dib_read_raster_32bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
+    const u8* row = buffer;
+    for (usize y = 0; y < p_bmp->height; ++y) {
+        const usize py = p_dib->info_header.height < 0 ? y : p_bmp->height - y - 1;
+        const u8* pixel_data = row;
+        for (usize x = 0; x < p_bmp->width; ++x) {
+            bj_bitmap_put(p_bmp, x, py, BJ_RGBA(
+                pixel_data[0], pixel_data[1],
+                pixel_data[2], pixel_data[3]
+            ));
+            pixel_data += 4;
+        }
+        row += row_size;
+    }
+}
+
 static void dib_read_raster(bj_bitmap* p_bmp, const u8* buffer, usize buffer_size, const dib* p_dib, bj_error** p_error) {
-    const usize row_size = dib_raster_row_size(p_dib->info_header.width, p_dib->info_header.bit_count);
+    const usize row_size = dib_uncompressed_stride(p_dib->info_header.width, p_dib->info_header.bit_count);
     switch (p_dib->info_header.bit_count) {
         case BJ_DIB_BIT_COUNT_1:
             dib_read_raster_1bpp(p_bmp, buffer, row_size, p_dib, p_error);
@@ -216,6 +236,9 @@ static void dib_read_raster(bj_bitmap* p_bmp, const u8* buffer, usize buffer_siz
             break;
         case BJ_DIB_BIT_COUNT_24:
             dib_read_raster_24bpp(p_bmp, buffer, row_size, p_dib, p_error);
+            break;
+        case BJ_DIB_BIT_COUNT_32:
+            dib_read_raster_32bpp(p_bmp, buffer, row_size, p_dib, p_error);
             break;
         default:
             bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, "Unsupported DIB raster bit count");
@@ -232,10 +255,11 @@ void dib_read_bitmap(bj_bitmap* p_bmp, const u8* buffer, usize buffer_size, usiz
         return;
     }
 
-    bj_bitmap_init_default(p_bmp, dib_data.info_header.width, dib_data.info_header.height);
+    const u32 dib_height = _ABS(dib_data.info_header.height);
+    bj_bitmap_init_default(p_bmp, dib_data.info_header.width, dib_height);
     bj_bitmap_set_clear_color(p_bmp, BJ_COLOR_BLACK);
 
-    const usize raster_size = dib_raster_row_size(dib_data.info_header.width, dib_data.info_header.bit_count) * dib_data.info_header.height;
+    const usize raster_size = dib_uncompressed_stride(dib_data.info_header.width, dib_data.info_header.bit_count) * dib_height;
 
     if (buffer_size != data_offset + raster_size) {
         bj_array_reset(&dib_data.color_table);

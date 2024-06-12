@@ -15,6 +15,7 @@
 #define BJ_DIB_BIT_COUNT_8 (0x08)  //!< 8 bits palletized, 256 colors.
 #define BJ_DIB_BIT_COUNT_16 (0x10) //!< 16 bits RGB 65536 colors.
 #define BJ_DIB_BIT_COUNT_24 (0x18) //!< 24 bits palletized, 16M colors.
+#define BJ_DIB_BIT_COUNT_32 (0x20) //!< 24 bits palletized, 16M colors.
 
 #define BJ_DIB_BI_RGB (0x00) //!< No compression.
 #define BJ_DIB_BI_RGB8 (0x01) //!< 8bit RLE encoding.
@@ -27,7 +28,7 @@ typedef struct {
 
 typedef struct {
     u32 width;
-    u32 height;
+    i32 height; // Signed because <0 means Y coordinate is upside down
     u16 planes;
     u16 bit_count;
     u32 compression;
