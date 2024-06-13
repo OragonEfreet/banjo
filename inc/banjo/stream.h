@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file bj_stream.h
+/// \file stream.h
 /// \brief Header file for bj_stream_t struct and related functions
 ///
 #pragma once

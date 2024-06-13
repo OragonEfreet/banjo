@@ -24,8 +24,8 @@ set(_interface_headers
     inc/banjo/list.h
     inc/banjo/log.h
     inc/banjo/memory.h
+    inc/banjo/rect.h
     inc/banjo/stream.h
-    inc/banjo/world.h
 )
 
 set(_sources
@@ -39,8 +39,8 @@ set(_sources
     src/list.c
     src/log.c
     src/memory.c
+    src/rect.c
     src/stream.c
-    src/world.c
 )
 
 if(MSVC)

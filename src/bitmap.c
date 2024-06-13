@@ -21,8 +21,8 @@
 
 BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
     bj_bitmap*   p_bitmap,
-    usize             width,
-    usize             height
+    usize        width,
+    usize        height
 ) {
     bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
     usize bufsize = width * height;
@@ -34,6 +34,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
         }
         p_bitmap->clear_color = BJ_COLOR_BLACK;
     }
+    bj_bitmap_clear(p_bitmap);
     return p_bitmap;
 }
 
@@ -150,9 +151,9 @@ void bj_bitmap_put(
 }
 
 bj_color bj_bitmap_get(
-    bj_bitmap* p_bitmap,
-    usize x,
-    usize y
+    const bj_bitmap* p_bitmap,
+    usize            x,
+    usize            y
 ) {
     return at(p_bitmap->buffer, x, y);
 }
@@ -203,3 +204,41 @@ void bj_bitmap_draw_triangle(
     bj_bitmap_draw_line(bmp, p2, p0, c);
 }
 
+bool bj_bitmap_blit(
+    const bj_bitmap* p_src,
+    const bj_rect*   p_src_rect,
+    bj_bitmap*       p_dest,
+    bj_rect*         p_dest_rect
+) {
+
+    // Clip the source rect
+    bj_rect blit_rect;
+    if( bj_rect_intersect(
+        &(bj_rect){.w = p_src->width, .h = p_src->width, },
+        p_src_rect, &blit_rect) == true
+    ) {
+        p_dest_rect->w = blit_rect.w;
+        p_dest_rect->h = blit_rect.h;
+
+        if( bj_rect_intersect(
+            &(bj_rect) {.w = p_dest->width, .h = p_dest->height, },
+            p_dest_rect, p_dest_rect) == true
+        ) {
+            for(usize r = 0 ; r < p_dest_rect->h ; ++r) {
+                const usize from_y = blit_rect.y + r;
+                const usize to_y = p_dest_rect->y + r;
+                for(usize c = 0 ; c < p_dest_rect->w ; ++c) {
+                    bj_bitmap_put(p_dest,
+                        p_dest_rect->x + c,
+                        to_y,
+                        bj_bitmap_get(p_src, blit_rect.x + c, from_y)
+                    );
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}

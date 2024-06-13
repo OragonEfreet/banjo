@@ -9,7 +9,7 @@ void bj_set_error(
 ) {
     // Don't report anything if the user is not interested
     if(p_error == 0) {
-#ifndef NDEBUG
+#ifndef NDEBUG // Still output the error in Debug mode
         bj_error("Uncaught error: 0x%08X", code);
 #endif
         return;

@@ -19,6 +19,7 @@
 #include <banjo/api.h>
 #include <banjo/color.h>
 #include <banjo/error.h>
+#include <banjo/rect.h>
 
 /// Typedef for the \ref bj_bitmap struct
 typedef struct bj_bitmap_t bj_bitmap;
@@ -28,8 +29,8 @@ typedef usize bj_pixel[2];
 
 /// \brief The internal data structure for the \ref bj_bitmap type.
 struct bj_bitmap_t {
-    usize width;           ///< Width of the bitmap (X axis).
-    usize height;          ///< Height of the bitmap (Y axis).
+    usize     width;       ///< Width of the bitmap (X axis).
+    usize     height;      ///< Height of the bitmap (Y axis).
     bj_color  clear_color; ///< Framebuffer data
     bj_color* buffer;      ///< Framebuffer data
 };
@@ -152,9 +153,9 @@ BANJO_EXPORT void bj_bitmap_put(
 /// a corrupted memory access.
 ///
 BANJO_EXPORT bj_color bj_bitmap_get(
-    bj_bitmap* p_bitmap,
-    usize x,
-    usize y
+    const bj_bitmap* p_bitmap,
+    usize            x,
+    usize            y
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,5 +206,35 @@ BANJO_EXPORT void bj_bitmap_draw_triangle(
     bj_pixel p1,
     bj_pixel p2,
     bj_color color
+);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// Bitmap blitting operation from a source to a destination bitmap
+///
+/// \param p_source The \ref bj_bitmap to copy from.
+/// \param p_source_area The area to copy from in the source bitmap.
+/// \param p_destination The destination bitmap.
+/// \param p_destination_area The area to copy to in the destination bitmap.
+///
+/// \return _true_ if a blit actuall happened, _false_ otherwise.
+///
+/// If `p_source_area` is _0_, the entire bitmap is copied.
+/// `p_destination_area` can also be set to _0_, which is equivalent to
+/// using an area at _.x = 0, .y = 0_.
+///
+/// \par Clipping
+///
+/// The resulting blit can be clipped it is performed partially or totally
+/// outside of the destination bitmap.
+///
+/// `p_destination_area.w` and `p_destination_area.h` are ignored for reading
+/// but are set to the actual dimensions of the blit.
+///
+BANJO_EXPORT bool bj_bitmap_blit(
+    const bj_bitmap* p_source,
+    const bj_rect*   p_source_area,
+    bj_bitmap*       p_destination,
+    bj_rect*         p_destination_area
 );
 
