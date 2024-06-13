@@ -106,6 +106,14 @@ typedef struct {
     bool        abort_on_checks;  ///< Program aborts when checks fails
 } bj_build_info;
 
+////////////////////////////////////////////////////////////////////////////////
+/// Returns the build information of the runtime Banjo binaries.
+///
+/// The function returns a pointer to \ref bj_build_info that is always the same
+/// in between different calls.
+///
+/// \return A description of runtime build information
+///
 BANJO_EXPORT const bj_build_info* bj_get_build_info(void);
 
 
