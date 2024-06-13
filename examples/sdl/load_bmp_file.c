@@ -1,16 +1,23 @@
 #include <banjo/bitmap.h>
 #include <banjo/color.h>
+#include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
 #include <SDL2/SDL.h>
 
-#define WINDOW_W 512
-#define WINDOW_H 512
+#define WINDOW_W 168
+#define WINDOW_H 24
 
 int main(int argc, char* argv[]) {
 
-    bj_bitmap* bmp_lena_512_512 = bj_new(bitmap, from_file, BANJO_ASSETS_DIR"/bmp/lena.bmp", 0);
+    bj_error* error = 0;
+    bj_bitmap* bmp_lena_512_512 = bj_new(bitmap, from_file, BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", &error);
+
+    if(error) {
+        bj_error("Error %x: %s", error->code, error->message);
+        return 1;
+    }
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         return 1;
