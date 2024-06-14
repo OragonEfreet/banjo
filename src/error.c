@@ -10,7 +10,7 @@ void bj_set_error(
     // Don't report anything if the user is not interested
     if(p_error == 0) {
 #ifndef NDEBUG // Still output the error in Debug mode
-        bj_error("Uncaught error: 0x%08X", code);
+        bj_err("Uncaught error: 0x%08X", code);
 #endif
         return;
     }
@@ -21,7 +21,7 @@ void bj_set_error(
         bj_memcpy((*p_error)->message, message, BJ_ERROR_MESSAGE_MAX_LEN + 1);
         ((*p_error)->message)[BJ_ERROR_MESSAGE_MAX_LEN] = '\0';
     } else {
-        bj_error("Error code 0x%08X overwritten by 0x%08X",
+        bj_err("Error code 0x%08X overwritten by 0x%08X",
             (*p_error)->code, code
         );
     }
@@ -47,7 +47,7 @@ void bj_forward_error(
         return;
     } else {
         if (*p_destination != 0) {
-            bj_error("Error code 0x%08X overwritten by 0x%08X",
+            bj_err("Error code 0x%08X overwritten by 0x%08X",
                 (*p_destination)->code, p_source->code
             );
             bj_free (p_source);

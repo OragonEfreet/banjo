@@ -36,7 +36,7 @@ enum {
 /// \param LEVEL The log level to report the message in.
 /// \param ...   Arguments forwarded to \ref bj_message.
 ///
-/// \see bj_message, bj_trace, bj_debug, bj_info, bj_warn, bj_error, bj_fatal.
+/// \see bj_message, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
 #define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, __FILE__, __LINE__, __VA_ARGS__)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ enum {
 ///
 /// \param ... The string formatting, forwarded to the last arguments of \ref bj_message.
 ///
-/// \see bj_log, bj_trace, bj_debug, bj_info, bj_warn, bj_error, bj_fatal.
+/// \see bj_log, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
 #define bj_trace(...)      bj_log(TRACE, __VA_ARGS__) ///< Log using BJ_LOG_TRACE level.
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ enum {
 ///
 /// \param ... The string formatting, forwarded to the last arguments of \ref bj_message.
 ///
-/// \see bj_trace, bj_trace, bj_debug, bj_info, bj_warn, bj_error, bj_fatal.
+/// \see bj_trace, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
 #define bj_debug(...)      bj_log(DEBUG, __VA_ARGS__) ///< Log using BJ_LOG_DEBUG level.
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ enum {
 ///
 /// \param ... The string formatting, forwarded to the last arguments of \ref bj_message.
 ///
-/// \see bj_debug, bj_trace, bj_debug, bj_info, bj_warn, bj_error, bj_fatal.
+/// \see bj_debug, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
 #define bj_info(...)       bj_log(INFO, __VA_ARGS__)  ///< Log using BJ_LOG_INFO level.
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ enum {
 ///
 /// \param ... The string formatting, forwarded to the last arguments of \ref bj_message.
 ///
-/// \see bj_info, bj_trace, bj_debug, bj_info, bj_warn, bj_error, bj_fatal.
+/// \see bj_info, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
 #define bj_warn(...)       bj_log(WARN, __VA_ARGS__)  ///< Log using BJ_LOG_WARN level.
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,8 +106,8 @@ enum {
 ///
 /// \param ... The string formatting, forwarded to the last arguments of \ref bj_message.
 ///
-/// \see bj_warn, bj_trace, bj_debug, bj_info, bj_warn, bj_error, bj_fatal.
-#define bj_error(...)      bj_log(ERROR, __VA_ARGS__)  ///< Log using BJ_LOG_ERROR level.
+/// \see bj_warn, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
+#define bj_err(...)      bj_log(ERROR, __VA_ARGS__)  ///< Log using BJ_LOG_ERROR level.
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Log a message using the `BJ_LOG_FATAL` level.
@@ -120,7 +120,7 @@ enum {
 ///
 /// \param ... The string formatting, forwarded to the last arguments of \ref bj_message.
 ///
-/// \see bj_error, bj_trace, bj_debug, bj_info, bj_warn, bj_error, bj_fatal.
+/// \see bj_err, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
 #define bj_fatal(...)      bj_log(FATAL, __VA_ARGS__)  ///< Log using BJ_LOG_FATAL level.
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -170,15 +170,15 @@ BANJO_EXPORT int bj_log_get_level(void);
 /// \param line            The line number the message is reported from.
 /// \param p_format, ...   The formatted string to report.
 ///
-/// \see bj_log, bj_trace, bj_debug, bj_info, bj_warn, bj_error, bj_fatal
+/// \see bj_log, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal
 BANJO_EXPORT void bj_message(int level, const char* p_file, int line, const char* p_format, ...);
 
 
 #ifdef BJ_FEAT_CHECKS_ENABLED
 #   ifdef NDEBUG
-#      define bj_check_err_msg(cond) bj_error("Unrecoverable Error (Failed Check)")
+#      define bj_check_err_msg(cond) bj_err("Unrecoverable Error (Failed Check)")
 #   else
-#      define bj_check_err_msg(cond) bj_error("Failed check: " #cond)
+#      define bj_check_err_msg(cond) bj_err("Failed check: " #cond)
 #   endif
 #   ifdef BJ_FEAT_ABORT_ON_CHECKS_ENABLED
 #      define bj_check(cond) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
