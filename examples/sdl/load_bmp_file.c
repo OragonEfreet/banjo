@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     bj_bitmap* bmp_lena_512_512 = bj_new(bitmap, from_file, BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", &error);
 
     if(error) {
-        bj_error("Error %x: %s", error->code, error->message);
+        bj_err("Error %x: %s", error->code, error->message);
         return 1;
     }
 
