@@ -1,92 +1,80 @@
 #include "test.h"
 
-#include <banjo/bitmap.h>
+#include "bitmap_t.h"
 
 #include <string.h>
 
-TEST_CASE(init_with_0_width_makes_a_nil_object) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 0, 10);
-    REQUIRE_NIL(bj_bitmap, bmp);
-    bj_del(bitmap, bmp);
+TEST_CASE(init_with_0_width_returns_0) {
+    bj_bitmap* p_bmp = bj_bitmap_new(0, 10);
+    REQUIRE_NULL(p_bmp);
 }
 
-TEST_CASE(init_with_0_height_makes_a_nil_object) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 10, 0);
-    REQUIRE_NIL(bj_bitmap, bmp);
-    bj_del(bitmap, bmp);
+TEST_CASE(init_with_0_height_returns_0) {
+    bj_bitmap* p_bmp = bj_bitmap_new(10, 0);
+    REQUIRE_NULL(p_bmp);
 }
 
 TEST_CASE(init_with_non_null_size_creates_a_buffer) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 10, 12);
-    REQUIRE_VALUE(bmp->buffer);
-    REQUIRE_EQ(bmp->width, 10);
-    REQUIRE_EQ(bmp->height, 12);
-    bj_del(bitmap, bmp);
+    bj_bitmap* p_bmp = bj_bitmap_new(10, 12);
+    REQUIRE_VALUE(p_bmp->buffer);
+    REQUIRE_EQ(p_bmp->width, 10);
+    REQUIRE_EQ(p_bmp->height, 12);
+    bj_bitmap_del(p_bmp);
 }
 
 TEST_CASE(default_init_sets_the_clear_color_to_black) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 10, 10);
-    REQUIRE_EQ(bmp->clear_color, BJ_COLOR_BLACK);
-    bj_del(bitmap, bmp);
-}
-
-TEST_CASE(resetting_a_bitmap_sets_it_to_nil) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 10, 10);
-    bj_bitmap_reset(bmp);
-    REQUIRE_NIL(bj_bitmap, bmp);
-    bj_del(bitmap, bmp);
+    bj_bitmap* p_bmp = bj_bitmap_new(10, 10);
+    REQUIRE_EQ(p_bmp->clear_color, BJ_COLOR_BLACK);
+    bj_bitmap_del(p_bmp);
 }
 
 TEST_CASE(all_pixels_of_a_cleared_bitmap_have_the_clear_color) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 4, 4);
+    bj_bitmap* p_bmp = bj_bitmap_new(4, 4);
 
-    bj_bitmap_set_clear_color(bmp, BJ_COLOR_AQUAMARINE);
-    bj_bitmap_clear(bmp);
+    bj_bitmap_set_clear_color(p_bmp, BJ_COLOR_AQUAMARINE);
+    bj_bitmap_clear(p_bmp);
 
     for(usize p = 0 ; p < 16 ; ++p) {
-        REQUIRE_EQ(bmp->buffer[p], BJ_COLOR_AQUAMARINE);
+        REQUIRE_EQ(p_bmp->buffer[p], BJ_COLOR_AQUAMARINE);
     }
 
-    bj_del(bitmap, bmp);
+    bj_bitmap_del(p_bmp);
 }
 
 TEST_CASE(changing_clear_color_updates_the_clear_color_field) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 1, 1);
-    bj_bitmap_set_clear_color(bmp, BJ_COLOR_AQUAMARINE);
-    REQUIRE_EQ(bmp->clear_color, BJ_COLOR_AQUAMARINE);
-    bj_del(bitmap, bmp);
+    bj_bitmap* p_bmp = bj_bitmap_new(1, 1);
+    bj_bitmap_set_clear_color(p_bmp, BJ_COLOR_AQUAMARINE);
+    REQUIRE_EQ(p_bmp->clear_color, BJ_COLOR_AQUAMARINE);
+    bj_bitmap_del(p_bmp);
 }
 
 TEST_CASE(the_data_can_be_retrieved) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 10, 10);
-    bj_color* data = bj_bitmap_data(bmp);
-    REQUIRE_EQ(data, bmp->buffer);
-    bj_del(bitmap, bmp);
+    bj_bitmap* p_bmp = bj_bitmap_new(10, 10);
+    bj_color* data = bj_bitmap_data(p_bmp);
+    REQUIRE_EQ(data, p_bmp->buffer);
+    bj_bitmap_del(p_bmp);
 }
 
-
-
-
 TEST_CASE_ARGS(draw_lines, {bj_pixel a; bj_pixel b; bj_color buf[25];}) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 5, 5);
+    bj_bitmap* p_bmp = bj_bitmap_new(5, 5);
 
-    bj_bitmap_clear(bmp);
-    bj_bitmap_draw_line(bmp, test_data->a, test_data->b, BJ_COLOR_WHITE);
-    int differences = memcmp(test_data->buf, bmp->buffer, sizeof(bj_color) * 25);
+    bj_bitmap_clear(p_bmp);
+    bj_bitmap_draw_line(p_bmp, test_data->a, test_data->b, BJ_COLOR_WHITE);
+    int differences = memcmp(test_data->buf, p_bmp->buffer, sizeof(bj_color) * 25);
     REQUIRE_EQ(differences, 0);
 
-    bj_del(bitmap, bmp);
+    bj_bitmap_del(p_bmp);
 }
 
 TEST_CASE_ARGS(draw_triangles, {bj_pixel a; bj_pixel b; bj_pixel c;bj_color buf[25];}) {
-    bj_bitmap* bmp = bj_new(bitmap, default, 5, 5);
+    bj_bitmap* p_bmp = bj_bitmap_new(5, 5);
 
-    bj_bitmap_clear(bmp);
-    bj_bitmap_draw_triangle(bmp, test_data->a, test_data->b, test_data->c, BJ_COLOR_WHITE);
-    int differences = memcmp(test_data->buf, bmp->buffer, sizeof(bj_color) * 25);
+    bj_bitmap_clear(p_bmp);
+    bj_bitmap_draw_triangle(p_bmp, test_data->a, test_data->b, test_data->c, BJ_COLOR_WHITE);
+    int differences = memcmp(test_data->buf, p_bmp->buffer, sizeof(bj_color) * 25);
     REQUIRE_EQ(differences, 0);
 
-    bj_del(bitmap, bmp);
+    bj_bitmap_del(p_bmp);
 }
 
 
@@ -126,13 +114,12 @@ TEST_CASE_ARGS(draw_triangles, {bj_pixel a; bj_pixel b; bj_pixel c;bj_color buf[
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(init_with_0_width_makes_a_nil_object);
-    RUN_TEST(init_with_0_height_makes_a_nil_object);
-    RUN_TEST(init_with_non_null_size_creates_a_buffer);
-    RUN_TEST(default_init_sets_the_clear_color_to_black);
-    RUN_TEST(resetting_a_bitmap_sets_it_to_nil);
+    RUN_TEST(init_with_0_width_returns_0);
+    RUN_TEST(init_with_0_height_returns_0);
     RUN_TEST(all_pixels_of_a_cleared_bitmap_have_the_clear_color);
     RUN_TEST(changing_clear_color_updates_the_clear_color_field);
+    RUN_TEST(default_init_sets_the_clear_color_to_black);
+    RUN_TEST(init_with_non_null_size_creates_a_buffer);
     RUN_TEST(the_data_can_be_retrieved);
 
     RUN_TEST_ARGS(draw_lines, .a = {0, 0}, .b = {0, 0}, .buf = {F,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,});

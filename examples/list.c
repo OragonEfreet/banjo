@@ -1,10 +1,14 @@
+////////////////////////////////////////////////////////////////////////////////
+/// \example list.c
+/// Single chained list example.
+////////////////////////////////////////////////////////////////////////////////
 #include <assert.h>
 #include <banjo/list.h>
 
 int main() {
 
     // Create a new list
-    bj_list* list = bj_new(list, default_t, int); // No custom allocator
+    bj_list* list = bj_list_new_t(int); // No custom allocator
     assert(list); // Ensure list creation was successful
 
     // Insert elements into the list
@@ -32,11 +36,8 @@ int main() {
     bj_list_clear(list);
     assert(bj_list_len(list) == 0); // Ensure the list is cleared
 
-    // Resetting the list
-    bj_list_reset(list);
-
     // Deleting the list
-    bj_del(list, list);
+    bj_list_del(list);
 
     return 0;
 }

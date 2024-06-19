@@ -1,3 +1,9 @@
+////////////////////////////////////////////////////////////////////////////////
+/// \example load_bmp_file.c
+/// Loading BMP files into \ref bj_bitmap.
+///
+/// \details Use \ref bj_bitmap_new_from_file to load bitmap data into a \ref bj_bitmap.
+////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
 #include <banjo/color.h>
 #include <banjo/error.h>
@@ -12,7 +18,7 @@
 int main(int argc, char* argv[]) {
 
     bj_error* error = 0;
-    bj_bitmap* bmp_lena_512_512 = bj_new(bitmap, from_file, BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", &error);
+    bj_bitmap* bmp_lena_512_512 = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", &error);
 
     if(error) {
         bj_err("Error %x: %s", error->code, error->message);
@@ -34,7 +40,7 @@ int main(int argc, char* argv[]) {
     SDL_RenderCopy(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);
 
-    bj_del(bitmap, bmp_lena_512_512);
+    bj_bitmap_del(bmp_lena_512_512);
 
     bool quit = false;
     SDL_Event e;

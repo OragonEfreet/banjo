@@ -1,3 +1,7 @@
+////////////////////////////////////////////////////////////////////////////////
+/// \example htable.c
+/// Hash Table example.
+////////////////////////////////////////////////////////////////////////////////
 #include <assert.h>
 
 #include <banjo/htable.h>
@@ -5,7 +9,7 @@
 int main()
 {
     // Create a new hash table
-    bj_htable* table = bj_new(htable, default_t, int, int); // No custom allocator
+    bj_htable* table = bj_htable_new_t(int, int); // No custom allocator
     assert(table); // Ensure table creation was successful
 
     // Insert values into the table
@@ -22,14 +26,8 @@ int main()
     int* retrieved_value2 = (int*)bj_htable_get(table, &key2, 0);
     assert(retrieved_value2 && *retrieved_value2 == value2); // Ensure value retrieval was successful
 
-    // Clear the table
-    bj_htable_clear(table);
-
-    // Reset the table
-    bj_htable_reset(table);
-
     // Delete the table
-    bj_del(htable, table);
+    bj_htable_del(table);
 
     return 0;
 }

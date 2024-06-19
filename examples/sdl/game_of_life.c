@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////////////////////////
+/// \example game_of_life.c
+/// Complete example of the classical Game of Life.
+///
+/// Once the screen displays, click on any surface to draw "alive" cells and
+/// release to let the simulation animate.
+////////////////////////////////////////////////////////////////////////////////
 #include "banjo/color.h"
 #include <banjo/bitmap.h>
 #include <banjo/memory.h>
@@ -64,8 +71,8 @@ void draw(usize step) {
 }
 
 int main(int argc, char* argv[]) {
-    presentation_fb = bj_new(bitmap, default, CANVAS_WIDTH, CANVAS_HEIGHT);
-    draw_fb         = bj_new(bitmap, default, CANVAS_WIDTH, CANVAS_HEIGHT);
+    presentation_fb = bj_bitmap_new(CANVAS_WIDTH, CANVAS_HEIGHT);
+    draw_fb         = bj_bitmap_new(CANVAS_WIDTH, CANVAS_HEIGHT);
 
     bj_bitmap_set_clear_color(presentation_fb, BACK_COLOR);
     bj_bitmap_set_clear_color(draw_fb, BACK_COLOR);

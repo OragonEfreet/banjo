@@ -1,28 +1,29 @@
-#include <banjo/array.h>
 #include <banjo/log.h>
 #include <banjo/stream.h>
 
 #include "dib.h"
+#include "bitmap_t.h"
 
 #define _ABS(x) ((x) < 0 ? -(x) : (x))
 #define _TOP_DOWN(x) ((x) < 0)
 
 void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_error** p_error) {
-    bj_stream* p_stream = bj_new(stream, read, buffer, BJ_DIB_HEADER_SIZE);
+    bj_stream* p_stream = bj_stream_new_read(buffer, BJ_DIB_HEADER_SIZE);
 
     u16 signature = 0;
     bj_stream_read_t(p_stream, u16, &signature);
 
     if (signature != BJ_DIB_SIGNATURE) {
         bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, "Invalid BMP signature. Only 'BM' is supported");
-        bj_del(stream, p_stream);
+        bj_stream_del(p_stream);
         return;
     }
 
     bj_stream_read_t(p_stream, u32, &p_file_header->file_size);
     bj_stream_skip_t(p_stream, u32);
     bj_stream_read_t(p_stream, u32, &p_file_header->data_offset);
-    bj_del(stream, p_stream);
+
+    bj_stream_del(p_stream);
 }
 
 static void dib_read_info_header(bj_stream* p_stream, dib_info_header* p_info_header, bj_error** p_error) {
@@ -73,7 +74,7 @@ static void dib_read_info_header(bj_stream* p_stream, dib_info_header* p_info_he
 }
 
 static void dib_read_color_table(bj_stream* p_stream, bj_array* p_color_table, usize n_colors, bj_error** p_error) {
-    bj_array_init_with_capacity_t(p_color_table, table_color, n_colors);
+    bj_array_init(p_color_table, sizeof(table_color), n_colors);
 
     for (usize c = 0; c < n_colors; ++c) {
         table_color color;
@@ -98,12 +99,12 @@ static usize dib_color_table_len(const dib_info_header* p_info_header) {
 }
 
 static void dib_read(dib* p_dib, const u8* buffer, usize buffer_size, usize offset_check, bj_error** p_error) {
-    bj_stream* p_stream = bj_new(stream, read, buffer, buffer_size);
+    bj_stream* p_stream = bj_stream_new_read(buffer, buffer_size);
 
     bj_error* p_inner_error = 0;
     dib_read_info_header(p_stream, &p_dib->info_header, &p_inner_error);
     if (p_inner_error) {
-        bj_del(stream, p_stream);
+        bj_stream_del(p_stream);
         bj_forward_error(p_inner_error, p_error);
         return;
     }
@@ -112,7 +113,7 @@ static void dib_read(dib* p_dib, const u8* buffer, usize buffer_size, usize offs
     dib_read_color_table(p_stream, &p_dib->color_table, n_colors, &p_inner_error);
     if (p_inner_error) {
         bj_array_reset(&p_dib->color_table);
-        bj_del(stream, p_stream);
+        bj_stream_del(p_stream);
         bj_forward_error(p_inner_error, p_error);
         return;
     }
@@ -120,11 +121,11 @@ static void dib_read(dib* p_dib, const u8* buffer, usize buffer_size, usize offs
     if (bj_stream_tell(p_stream) != offset_check) {
         bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, "Unexpected DIB size");
         bj_array_reset(&p_dib->color_table);
-        bj_del(stream, p_stream);
-        return;
+        /* bj_stream_del(p_stream); */
+        /* return; */
     }
 
-    bj_del(stream, p_stream);
+    bj_stream_del(p_stream);
 }
 
 static usize dib_uncompressed_stride(u32 width, u16 bit_count) {
@@ -256,9 +257,6 @@ void dib_read_bitmap(bj_bitmap* p_bmp, const u8* buffer, usize buffer_size, usiz
     }
 
     const u32 dib_height = _ABS(dib_data.info_header.height);
-    bj_bitmap_init_default(p_bmp, dib_data.info_header.width, dib_height);
-    bj_bitmap_set_clear_color(p_bmp, BJ_COLOR_BLACK);
-
     const usize raster_size = dib_uncompressed_stride(dib_data.info_header.width, dib_data.info_header.bit_count) * dib_height;
 
     if (buffer_size != data_offset + raster_size) {
@@ -267,10 +265,15 @@ void dib_read_bitmap(bj_bitmap* p_bmp, const u8* buffer, usize buffer_size, usiz
         return;
     }
 
+    bj_bitmap_init(p_bmp, dib_data.info_header.width, dib_height);
+    bj_bitmap_set_clear_color(p_bmp, BJ_COLOR_BLACK);
+
     dib_read_raster(p_bmp, buffer + data_offset, raster_size, &dib_data, &p_inner_error);
     if (p_inner_error) {
+        bj_bitmap_reset(p_bmp);
         bj_forward_error(p_inner_error, p_error);
     }
 
     bj_array_reset(&dib_data.color_table);
 }
+

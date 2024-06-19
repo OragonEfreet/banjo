@@ -1,16 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// Demonstrate how to use `bj_array`, the vector-like structure.
-///
+/// \example array.c
+/// Demonstrates how to use the \ref bj_array container, the vector-like structure.
+////////////////////////////////////////////////////////////////////////////////
 #include <banjo/array.h>
 #include <banjo/memory.h>
 #include <assert.h>
 
-
-#include <stdio.h>
-
 int main(int argc, char* argv[]) {
 
-    bj_array* array = bj_new(array, default_t, int);
+    bj_array* array = bj_array_new_t(int);
 
     // Add a new element in the array
     int a = 42;
@@ -56,5 +54,5 @@ int main(int argc, char* argv[]) {
     assert(*data++ == val_1);
     assert(*data++ == val_2);
 
-    bj_del(array, array);
+    bj_array_del(array);
 }

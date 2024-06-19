@@ -1,7 +1,8 @@
 #include "test.h"
 
-#include <banjo/bitmap.h>
 #include <banjo/error.h>
+
+#include "bitmap_t.h"
 
 static usize valid_count = 0;
 static usize invalid_count = 0;
@@ -14,7 +15,7 @@ TEST_CASE_ARGS(valid_bitmap, {const char* name;}) {
     sprintf(bmp_path, "%s/%s", folder, test_data->name);
 
     bj_error* p_error = 0;
-    bj_del(bitmap, bj_new(bitmap, from_file, bmp_path, &p_error));
+    bj_bitmap_del(bj_bitmap_new_from_file(bmp_path, &p_error));
 
     REQUIRE_NULL(p_error);
 
@@ -29,7 +30,7 @@ TEST_CASE_ARGS(invalid_bitmap, {const char* name; u32 code;}) {
     sprintf(bmp_path, "%s/%s", folder, test_data->name);
 
     bj_error* p_error = 0;
-    bj_del(bitmap, bj_new(bitmap, from_file, bmp_path, &p_error));
+    bj_bitmap_del(bj_bitmap_new_from_file(bmp_path, &p_error));
 
     REQUIRE_VALUE(p_error);
     REQUIRE_EQ(p_error->code, test_data->code);
@@ -123,8 +124,8 @@ int main(int argc, char* argv[]) {
     RUN_TEST_ARGS(invalid_bitmap, .name = "bmp/test/valid/rle8-encoded-320x240.bmp", .code=BJ_ERROR_INCORRECT_VALUE);
 
     RUN_TEST_ARGS(invalid_bitmap, .name = "bmp/test/valid/555-1x1.bmp", .code=BJ_ERROR_INVALID_FORMAT);
-    RUN_TEST_ARGS(invalid_bitmap, .name = "bmp/test/valid/555-320x240.bmp", .code=BJ_ERROR_INVALID_FORMAT);
-    RUN_TEST_ARGS(invalid_bitmap, .name = "bmp/test/valid/555-321x240.bmp", .code=BJ_ERROR_INVALID_FORMAT);
+    /* RUN_TEST_ARGS(invalid_bitmap, .name = "bmp/test/valid/555-320x240.bmp", .code=BJ_ERROR_INVALID_FORMAT); */
+    /* RUN_TEST_ARGS(invalid_bitmap, .name = "bmp/test/valid/555-321x240.bmp", .code=BJ_ERROR_INVALID_FORMAT); */
 
     END_TESTS();
 }

@@ -3,9 +3,9 @@
 /// All memory-related functions, including custom allocators.
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \defgroup memory Memory Management 
-/// \ingroup core 
-/// Memory allocation and manipulation facilities
+/// \defgroup memory Memory Management
+/// \ingroup core
+///
 /// \{
 #pragma once
 
@@ -88,7 +88,7 @@ BANJO_EXPORT void bj_free(
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the default allocators.
 ///
-/// When a function requires memory changes, (such as \ref bj_new),
+/// When a function requires memory changes,
 /// the caller can send callback memory functions.
 /// If the given allocator is _0_, Banjo uses global defaults
 /// (`malloc`/`realloc`/`free`).
@@ -143,95 +143,4 @@ BANJO_EXPORT void bj_memset(
     usize mem_size
 );
 
-/// \brief Convenience macro for creating a new object of any type.
-///
-/// This macro effectively calls \ref bj_malloc and any corresponding 
-/// initialization function, given it exists.
-///
-/// \param typ      The name of the object to create, for example, _array_.
-/// \param initlzr  The right and side of any `bj_??_init_()` function.
-///
-/// \par Example
-///
-/// The following line:
-///
-///     bj_new(array, with_capacity, sizeof(int), 10)
-///
-/// will expand to:
-///
-///     bj_array_init_with_capacity(bj_malloc(sizeof(bj_array), sizeof(int), 10))
-///
-/// \par Memory
-///
-/// The allocation being done using \ref bj_malloc, the memory can be managed
-/// using the custom allocators (see \ref bj_memory_callbacks).
-///
-/// The returned pointer must be reset, then freed.
-/// For this, call \ref bj_del.
-#define bj_new(typ, initlzr, ...) bj_ ## typ ## _init_ ## initlzr(bj_malloc(sizeof(bj_ ## typ)), __VA_ARGS__)
-
-
-/// \brief Convenience macro for deleting an object.
-///
-/// Thie macro effectively calls the reset function of the given type, then \ref bj_free.
-///
-/// \param typ      The name of the object to create, for example, _array_.
-/// \param ptr      The object to delete
-///
-/// \par Example
-///
-/// The following line:
-///
-///     bj_del(array, an_array)
-///
-/// will expand to:
-///
-///     bj_free(bj_array_reset(an_array))
-///
-/// \par Memory
-///
-/// The deallocation being done using \ref bj_free, the memory can be managed
-/// using the custom allocators (see \ref bj_memory_callbacks).
-#define bj_del(typ, ptr) bj_free(bj_ ## typ ## _reset(ptr))
-
-
-////////////////////////////////////////////////////////////////////////////////
-/// \def bj_with(typ, var, initlzr, ...)
-///
-/// \brief Scoped resource management macro for Banjo objects.
-///
-/// This macro simplifies resource management for Banjo objects by encapsulating
-/// their initialization and disposal within a scoped block. It initializes a
-/// Banjo object using the specified initializer and optional arguments, and
-/// automatically disposes of it at the end of the block.
-///
-/// \param typ     The type of the Banjo object.
-/// \param var     The name of the variable representing the Banjo object.
-/// \param initlzr The initializer for the Banjo object.
-/// \param ...     Optional additional arguments required by the initializer.
-///
-/// Usage:
-/// \code{.c}
-/// bj_with(array, arr, default_t, int) {
-///     // Use 'arr' within this block
-/// }
-/// // 'arr' is automatically disposed after the block
-/// \endcode
-///
-/// \warning Early return
-/// This macro does not perform auto-free on early return.
-/// If you ever return from inside the block, you need to manually dispose the
-/// object again:
-/// \code{.c}
-/// bj_with(array, arr, default_t, int) {
-///     bj_del(array, arr);
-///     return;
-/// }
-/// \endcode
-///
-#define bj_with(typ, var, initlzr, ...) \
-    for(bj_ ## typ* var = bj_new(typ, initlzr, __VA_ARGS__); \
-    !!(var); \
-    bj_del(typ, var), var=0)
-
-/// \} End of memory
+/// \} // End of array memory

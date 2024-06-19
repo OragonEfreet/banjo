@@ -1,5 +1,9 @@
-#include "banjo/color.h"
+////////////////////////////////////////////////////////////////////////////////
+/// \example drawing_2d.c
+/// Drawing functions demo.
+////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
+#include <banjo/color.h>
 #include <banjo/memory.h>
 
 #include <SDL2/SDL.h>
@@ -58,7 +62,7 @@ void draw(bj_bitmap* bmp) {
 }
 
 int main(int argc, char* argv[]) {
-    bj_bitmap* bmp = bj_new(bitmap, default, CANVAS_WIDTH, CANVAS_HEIGHT);
+    bj_bitmap* bmp = bj_bitmap_new(CANVAS_WIDTH, CANVAS_HEIGHT);
     bj_bitmap_set_clear_color(bmp, BJ_COLOR_DARK_GRAY);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {

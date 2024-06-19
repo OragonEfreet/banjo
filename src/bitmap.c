@@ -3,6 +3,7 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
+#include "bitmap_t.h"
 #include "dib.h"
 
 #include <stdlib.h>
@@ -19,37 +20,59 @@
 #define at(bmp, x, y) bmp[XY(x, y)]
 #define put_pixel(bmp, x, y, c) at(bmp, x, y) = c
 
-BANJO_EXPORT bj_bitmap* bj_bitmap_init_default(
-    bj_bitmap*   p_bitmap,
-    usize        width,
-    usize        height
+bj_bitmap* bj_bitmap_init(
+    bj_bitmap* p_bitmap,
+    usize      width,
+    usize      height
 ) {
-    bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
-    usize bufsize = width * height;
-    if(bufsize > 0) {
+    if(p_bitmap) {
+        bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
+        usize bufsize = width * height;
+        if(bufsize == 0) {
+            return 0;
+        }
+
         p_bitmap->width = width;
         p_bitmap->height = height;
-        if(bufsize > 0) {
-            p_bitmap->buffer = bj_malloc(sizeof(bj_color) * bufsize);
-        }
+        p_bitmap->buffer = bj_malloc(sizeof(bj_color) * bufsize);
         p_bitmap->clear_color = BJ_COLOR_BLACK;
+        bj_bitmap_clear(p_bitmap);
     }
-    bj_bitmap_clear(p_bitmap);
     return p_bitmap;
 }
 
-bj_bitmap* bj_bitmap_init_from_file(
-    bj_bitmap*   p_bitmap,
+void bj_bitmap_reset(
+    bj_bitmap* p_bitmap
+) {
+    bj_check(p_bitmap);
+
+    if(p_bitmap->buffer != 0) {
+        bj_free(p_bitmap->buffer);
+    }
+#ifdef BJ_FEAT_PEDANTIC
+    bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
+#endif
+}
+
+BANJO_EXPORT bj_bitmap* bj_bitmap_new(
+    usize        width,
+    usize        height
+) {
+    bj_bitmap bitmap;
+    if (bj_bitmap_init(&bitmap, width, height) == 0) {
+        return 0;
+    }
+    return bj_memcpy(bj_malloc(sizeof(bj_bitmap)), &bitmap, sizeof(bitmap));
+}
+
+bj_bitmap* bj_bitmap_new_from_file(
     const char*  p_path,
     bj_error**   p_error
 ) {
-    bj_check_or_0(p_bitmap);
-    bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
-
     FILE* fstream  = fopen(p_path, "rb");
     if (!fstream ) {
         bj_set_error(p_error, BJ_ERROR_FILE_NOT_FOUND, "Cannot open BMP file");
-        return p_bitmap;
+        return 0;
     }
 
     u8* buffer = bj_malloc(BJ_DIB_HEADER_SIZE);
@@ -57,7 +80,7 @@ bj_bitmap* bj_bitmap_init_from_file(
         bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "Cannot allocate buffer");
         bj_free(buffer);
         fclose(fstream);
-        return p_bitmap;
+        return 0;
     }
 
     size_t bytes_read = fread(buffer, 1, BJ_DIB_HEADER_SIZE, fstream);
@@ -65,7 +88,7 @@ bj_bitmap* bj_bitmap_init_from_file(
         bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, "BMP File does not meet expected size");
         bj_free(buffer);
         fclose(fstream);
-        return p_bitmap;
+        return 0;
     }
 
     bj_error* p_inner_error = 0;
@@ -76,7 +99,7 @@ bj_bitmap* bj_bitmap_init_from_file(
         bj_free(buffer);
         fclose(fstream);
         bj_forward_error(p_inner_error, p_error);
-        return p_bitmap;
+        return 0;
     }
     bj_free(buffer);
 
@@ -85,7 +108,7 @@ bj_bitmap* bj_bitmap_init_from_file(
     if(buffer == 0) {
         bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "Cannot allocate buffer");
         fclose(fstream);
-        return p_bitmap;
+        return 0;
     }
 
     bytes_read = fread(buffer, 1, dib_size, fstream);
@@ -93,31 +116,26 @@ bj_bitmap* bj_bitmap_init_from_file(
     if(bytes_read != dib_size) {
         bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, "BMP File does not meet expected size");
         bj_free(buffer);
-        return p_bitmap;
+        return 0;
     }
 
-    dib_read_bitmap(p_bitmap, buffer, dib_size, file_header.data_offset - BJ_DIB_HEADER_SIZE, &p_inner_error);
+    bj_bitmap bitmap;
+    dib_read_bitmap(&bitmap, buffer, dib_size, file_header.data_offset - BJ_DIB_HEADER_SIZE, &p_inner_error);
+
     bj_free(buffer);
     if(p_inner_error) {
         bj_forward_error(p_inner_error, p_error);
+        return 0;
     }
 
-    return p_bitmap;
+    return bj_memcpy(bj_malloc(sizeof(bj_bitmap)), &bitmap, sizeof(bj_bitmap));
 }
 
-BANJO_EXPORT bj_bitmap* bj_bitmap_reset(
+BANJO_EXPORT void bj_bitmap_del(
     bj_bitmap* p_bitmap
 ) {
-    if(p_bitmap != 0) {
-        if(p_bitmap->buffer != 0) {
-            bj_free(p_bitmap->buffer);
-            p_bitmap->buffer = 0;
-        }
-        p_bitmap->width       = 0;
-        p_bitmap->height      = 0;
-        p_bitmap->clear_color = 0;
-    }
-    return p_bitmap;
+    bj_bitmap_reset(p_bitmap);
+    bj_free(p_bitmap);
 }
 
 void bj_bitmap_clear(
