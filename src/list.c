@@ -1,29 +1,46 @@
 #include <banjo/error.h>
-#include <banjo/list.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-bj_list* bj_list_init_default(
+#include "list_t.h"
+
+bj_list* bj_list_new(
+    usize bytes_payload
+) {
+    bj_list list;
+    if(bj_list_init(&list, bytes_payload) == 0) {
+        return 0;
+    }
+    return bj_memcpy(bj_malloc(sizeof(bj_list)), &list, sizeof(bj_list));
+}
+
+void bj_list_del(
+    bj_list* p_list
+) {
+    bj_list_reset(p_list);
+    bj_free(p_list);
+}
+
+bj_list* bj_list_init(
     bj_list* p_instance,
     usize    bytes_payload
 ) {
+    bj_check_or_return(bytes_payload > 0, 0);
+
     bj_memset(p_instance, 0, sizeof(bj_list));
-    if(bytes_payload > 0) {
-        p_instance->bytes_payload = bytes_payload;
-        p_instance->weak_owning   = false;
-        p_instance->bytes_entry   = p_instance->weak_owning ? sizeof(void*) * 2 : bytes_payload + sizeof(void*);
-        p_instance->p_head        = 0;
-    }
+    p_instance->bytes_payload = bytes_payload;
+    p_instance->weak_owning   = false;
+    p_instance->bytes_entry   = p_instance->weak_owning ? sizeof(void*) * 2 : bytes_payload + sizeof(void*);
+    p_instance->p_head        = 0;
     return p_instance;
 }
 
-bj_list* bj_list_reset(
+void bj_list_reset(
     bj_list* list
 ) {
-    bj_check_or_return(list, list);
+    bj_check(list);
     bj_list_clear(list);
     bj_memset(list, 0, sizeof(bj_list));
-    return list; 
 }
 
 void bj_list_clear(
@@ -44,6 +61,7 @@ void bj_list_clear(
 usize bj_list_len(
     bj_list* list
 ) {
+    bj_check_or_0(list);
     usize result = 0;
 
     void** p_next_block = list->p_head;
@@ -104,6 +122,7 @@ void* bj_list_at(
     bj_list* list,
     usize index
 ) {
+    bj_check_or_0(list);
     void** p_next_block = list->p_head;
     while(p_next_block != 0) {
         if(index-- == 0) {

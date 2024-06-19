@@ -12,11 +12,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(CheckCXXCompilerFlag)
 
 set(_interface_headers
+    inc/banjo/algorithms.h
     inc/banjo/api.h
     inc/banjo/array.h
     inc/banjo/bitmap.h
     inc/banjo/color.h
-    inc/banjo/containers.h
     inc/banjo/error.h
     inc/banjo/graphics.h
     inc/banjo/htable.h
@@ -28,12 +28,17 @@ set(_interface_headers
     inc/banjo/stream.h
 )
 
+set(_private_headers
+    src/dib.h
+    src/htable_t.h
+    src/list_t.h
+)
+
 set(_sources
     src/api.c
     src/array.c
     src/bitmap.c
     src/dib.c
-    src/dib.h
     src/error.c
     src/htable.c
     src/list.c
@@ -48,7 +53,7 @@ if(MSVC)
     set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/runtime")
 endif()
 
-add_library(banjo ${_interface_headers} ${_sources})
+add_library(banjo ${_interface_headers} ${_private_headers} ${_sources})
 
 macro(banjo_feature _name _desc _default)
     string(TOUPPER  "banjo_feature_${_name}" _optmacro)
@@ -60,8 +65,9 @@ macro(banjo_feature _name _desc _default)
 endmacro()
 
 banjo_feature(checks "Banjo Performs runtim checks and assertions" ON)
-banjo_feature(abort_on_checks "When checks feature is on, a failed check will abort execution" ON)
+banjo_feature(log_checks "If checks feature is on, failed check with log" OFF)
 banjo_feature(pedantic "Banjo runtime will make costly extra checks" ON)
+banjo_feature(abort_on_checks "When checks feature is on, a failed check will abort execution" OFF)
 banjo_feature(log_color "Banjo logs will have colored output" ON)
 
 if(NOT MSVC)
@@ -75,7 +81,7 @@ else()
 endif()
 
 
-target_include_directories(banjo PUBLIC inc PRIVATE src)
+target_include_directories(banjo PUBLIC inc)
 set_property(TARGET banjo PROPERTY C_STANDARD 99)
 target_compile_features(banjo PUBLIC c_std_99)
 

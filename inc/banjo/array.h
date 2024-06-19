@@ -1,299 +1,195 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file
 /// Header file for \ref array container type.
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup array Array
-/// \ingroup containers
+/// \ingroup algo
 ///
-/// \ref bj_array is a sequence container that encapsulate dynamic C-Style arrays.
-/// The elements are stored contiguously, which means that they can be accessed
-/// using offsets.
+/// \brief bj_array is a sequence container that encapsulates dynamic C-style arrays.
+///        The elements are stored contiguously, allowing access using offsets.
 ///
-/// The storage of the array is expanded as needed.
+///        The storage of the array is expanded as needed.
 /// \{
+////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <banjo/api.h>
 
-typedef struct bj_array_t bj_array; ///< Typedef for the bj_array_t struct
-
-/// \brief The internal data structure for the \ref bj_array type.
-struct bj_array_t {
-    usize bytes_payload; ///< Size in bytes, of each item in the array.
-    usize len;           ///< Number of elements in the array.
-    usize capacity;      ///< Number of allocated elements in the array.
-    void* p_buffer;      ///< Data buffer
-};
+////////////////////////////////////////////////////////////////////////////////
+/// Typedef for the bj_array_t struct
+typedef struct bj_array_t bj_array;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Initializes a new \ref bj_array.
+/// Creates a new bj_array with a payload size specified in bytes.
 ///
-/// \param p_instance     The array object
-/// \param bytes_payload  The size in byte of each element in the array.
-///
-/// This creates and empty array with initial capacity to _0_.
-///
-/// \par Error Management
-///
-/// If `p_instance` is _0_, the function does nothing.
-/// 
-/// If `bytes_payload` is _0_, `p_instance` is set to \nil.
-///
-/// \return `p_instance`.
-///
-/// \see bj_array_del
-BANJO_EXPORT bj_array* bj_array_init_default(
-    bj_array* p_instance,
-    usize     bytes_payload
+/// \param bytes_payload Size of each element in bytes.
+/// \return A pointer to the newly created bj_array object.
+BANJO_EXPORT bj_array* bj_array_new(
+    usize bytes_payload
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Initializes a new \ref bj_array.
+/// Creates a new bj_array with a payload size inferred from the type T.
 ///
-/// \param p_instance   The array object
-/// \param T            Value type
-///
-/// This creates and empty array with initial capacity to _0_.
-///
-/// The function expands to a call to \ref bj_array_init_default, using
-/// `T` for the `bytes_payload` parameter.
-///
-/// \par Error Management
-///
-/// If `p_instance` is _0_, the function does nothing.
-/// 
-/// If `bytes_payload` is _0_, `p_instance` is set to \nil.
-///
-/// \return `p_instance`.
-///
-/// \see bj_array_del
-#define bj_array_init_default_t(p_instance, T) bj_array_init_default(p_instance, sizeof(T))
+/// \param T Type of elements.
+/// \return A pointer to the newly created bj_array object.
+#define bj_array_new_t(T) bj_array_new(sizeof(T))
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Initializes a new \ref bj_array byt setting its initial capacity.
+/// Creates a new bj_array with a specified capacity and payload size.
 ///
-/// \param p_instance     The array object
-/// \param bytes_payload  The size in byte of each element in the array.
-/// \param capacity       The requested initial capacity.
-///
-/// The internal memory will effectively be allocated to contain at least
-/// `capacity` times `bytes_payload` bytes.
-/// The array itself is still empty at initialization.
-///
-/// \par Error Management
-///
-/// If `p_instance` is _0_, the function does nothing.
-/// 
-/// If `bytes_payload` is _0_, `p_instance` is set to \nil.
-///
-/// \return `p_instance`.
-///
-/// \see bj_array_del
-BANJO_EXPORT bj_array* bj_array_init_with_capacity(
-    bj_array* p_instance,
-    usize     bytes_payload,
-    usize     capacity
+/// \param bytes_payload Size of each element in bytes.
+/// \param capacity Initial capacity of the array.
+/// \return A pointer to the newly created bj_array object.
+BANJO_EXPORT bj_array* bj_array_new_with_capacity(
+    usize bytes_payload,
+    usize capacity
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Initializes a new \ref bj_array.
+/// Creates a new bj_array with a specified capacity and payload size inferred from type T.
 ///
-/// \param p_instance   The array object
-/// \param T            Value type
-/// \param capacity     The requested initial capacity.
-///
-/// This creates and empty array with initial capacity to _0_.
-///
-/// The function expands to a call to \ref bj_array_init_with_capacity, 
-/// using `T` for the `bytes_payload` parameter.
-///
-/// \par Error Management
-///
-/// If `p_instance` is _0_, the function does nothing.
-/// 
-/// If `bytes_payload` is _0_, `p_instance` is set to \nil.
-///
-/// \return `p_instance`.
-///
-/// \see bj_array_del
-#define bj_array_init_with_capacity_t(p_instance, T, capacity) bj_array_init_with_capacity(p_instance, sizeof(T), capacity)
+/// \param T Type of elements.
+/// \param capacity Initial capacity of the array.
+/// \return A pointer to the newly created bj_array object.
+#define bj_array_new_with_capacity_t(T, capacity) bj_array_new_with_capacity(sizeof(T), capacity)
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Resets a \ref bj_array to a nil state
+/// Deletes a bj_array object and releases associated memory.
 ///
-/// \param p_array The array object
-///
-/// \return `p_array`
-BANJO_EXPORT bj_array* bj_array_reset(
+/// \param p_array Pointer to the bj_array object to delete.
+BANJO_EXPORT void bj_array_del(
     bj_array* p_array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Clear all data in the array.
+/// Clears all elements in the array.
 ///
-/// \param array The array object.
-///
+/// \param array The array object to clear.
+/// 
 /// If the array is already empty, this function does nothing.
-/// After calling this function, the array is considered as empty, but the
-/// internal memory is not released.
-/// To effectively free the memory used by the array, call \ref bj_array_shrink
-/// after have called this function.
+/// To release the internal memory, call \ref bj_array_shrink after clearing.
 ///
-/// When called on an  nil object, the function does nothing.
-///
-/// The function fails is `array` is _0_.
+/// \note When called on a null object, this function does nothing.
 BANJO_EXPORT void bj_array_clear(
     bj_array* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Reallocated the used memory to match the array length.
+/// Shrinks the memory allocation to fit the current array length.
 ///
-/// \param array The array object.
+/// \param array The array object to shrink.
 ///
-/// \ref bj_array usually occupies more space in memory than needed.
-/// This is due to array size growth policy that always allocated two times
-/// the required space.
-/// 
-/// This function reallocated the memory used by the array to fit the current 
-/// array length.
+/// This function reallocates the memory used by the array to fit its current length.
 ///
-/// When called on an nil object, the function does nothing.
-///
-/// The function fails is `array` is _0_.
-///
-/// \note This function effectively invalidates the array data pointer.
+/// \note When called on a null object, this function does nothing.
+///       This function invalidates the array data pointer.
 BANJO_EXPORT void bj_array_shrink(
     bj_array* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Resize the array.
+/// Resizes the array to the specified length.
 ///
-/// If needed, the array will reserve up to twice the requested length in memory.
-/// 
-/// \param array The array object.
-/// \param len The number of element in the new array.
+/// \param array The array object to resize.
+/// \param len   New length of the array.
 ///
-/// If `len == 0`, this function is the same as calling \ref bj_array_clear.
+/// If `len == 0`, this function is equivalent to calling \ref bj_array_clear.
 ///
-/// When called on an nil, the function does nothing.
-///
-/// \note This function will invalidate the array data pointer if the resize
-/// required a new reallocation.
+/// \note When called on a null object, this function does nothing.
+///       This function invalidates the array data pointer if reallocation is necessary.
 BANJO_EXPORT void bj_array_set_len(
     bj_array* array,
-    usize   len
+    usize     len
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Reserve up to `capacity` elements in memory.
+/// Reserves memory for up to `capacity` elements in the array.
 ///
-/// \param array    The array object.
-/// \param capacity The number of element to reserve in the new array.
+/// \param array    The array object to reserve memory for.
+/// \param capacity Number of elements to reserve space for.
 ///
-/// If `capacity` is smaller than the array current capacity, this function does
-/// nothing.
-/// Otherwise, the array in-memory is reallocated to fit the new capacity.
+/// If `capacity` is smaller than the current capacity, this function does nothing.
+/// Otherwise, it reallocates memory to fit the new capacity.
 ///
-/// When called on an nil, the function does nothing.
-///
-/// \note This function will invalidate the array data pointer if the reserve
-/// if performed.
+/// \note When called on a null object, this function does nothing.
+///       This function invalidates the array data pointer if reallocation is performed.
 BANJO_EXPORT void bj_array_reserve(
     bj_array* array,
-    usize   capacity
+    usize     capacity
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Pushes a new value in the array.
+/// Appends a value to the end of the array.
 ///
-/// \param array The array object.
-/// \param value A pointer to the value to push.
+/// \param array The array object to push the value into.
+/// \param value Pointer to the value to append.
 ///
-/// The memory pointed at `value` is copied into the in-memory array using
-/// \ref bj_memcpy.
+/// Copies the memory pointed to by `value` into the array using \ref bj_memcpy.
 ///
-/// Calling this function effectively grow array len by _1_.
-/// The newly added object can be retrieved by calling \ref bj_array_at with
-/// an index of `len` - _1_.
-///
-/// When called on an nil, the function does nothing.
-///
-/// \note If needed, the function will reserve more space in the array,
-/// which invalidates the data pointer.
+/// \note Calling this function may reserve more space in the array, which invalidates the data pointer.
+/// \note When called on a null object, this function does nothing.
 BANJO_EXPORT void bj_array_push(
-    bj_array* array,
+    bj_array*   array,
     const void* value
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Deletes the last value of the array.
+/// Removes the last value from the array.
 ///
-/// \param array The array object.
+/// \param array The array object to remove the last value from.
 ///
-/// This function does nothing else than reducing the array size by _1_.
+/// This function reduces the array size by one.
 ///
-/// When called on an nil, the function does nothing.
+/// \note When called on a null object, this function does nothing.
 BANJO_EXPORT void bj_array_pop(
     bj_array* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Returns the stored value given the index `at`.
+/// Retrieves the value stored at the specified index in the array.
 ///
-/// \param array The array object.
-/// \param at    Position of the element to return.
+/// \param array The array object to retrieve the value from.
+/// \param at    Index of the element to retrieve.
+/// \return Pointer to the value at the specified index.
 ///
-/// \return A pointer to the value.
-///
-/// \retval 0 if `array` is nil.
-///
+/// \retval 0 if `array` is null.
 BANJO_EXPORT void* bj_array_at(
     const bj_array* array,
-    usize   at
+    usize           at
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Returns a pointer to the underlying data.
+/// Retrieves a pointer to the underlying data of the array.
 ///
-/// \param array The array object
+/// \param array The array object to get the data pointer from.
+/// \return Pointer to the underlying data.
 ///
-/// \return a pointer to the underlying data.
-///
-/// \retval 0 if `array` is nil.
-///
+/// \retval 0 if `array` is null.
 BANJO_EXPORT void* bj_array_data(
     const bj_array* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Returns the number of elements in the given array.
+/// Retrieves the number of elements in the array.
 ///
-/// \param array The array object.
+/// \param array The array object to get the length from.
+/// \return Number of elements in the array.
 ///
-/// \return a integer indicating the number of elements in the array.
-///
-/// \retval 0 if `array` is nil.
-///
+/// \retval 0 if `array` is null.
 BANJO_EXPORT usize bj_array_len(
     const bj_array* array
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Returns the number of elements the array can hold without reallocating.
+/// Retrieves the current capacity of the array.
 ///
-/// \param array The array object.
+/// \param array The array object to get the capacity from.
+/// \return Current capacity of the array.
 ///
-/// \return a integer indicating the capacity of the array.
-///
-/// \retval 0 if `array` is nil.
-///
+/// \retval 0 if `array` is null.
 BANJO_EXPORT usize bj_array_capacity(
     const bj_array* array
 );
 
-/// \} End of array group
-
-
+/// \} // End of array group

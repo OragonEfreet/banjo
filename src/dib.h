@@ -1,10 +1,11 @@
 #pragma once
 
 #include <banjo/api.h>
-#include <banjo/array.h>
 #include <banjo/bitmap.h>
 #include <banjo/error.h>
 #include <banjo/stream.h>
+
+#include "array_t.h"
 
 #define BJ_DIB_SIGNATURE 0x4D42
 #define BJ_DIB_HEADER_SIZE 14

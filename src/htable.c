@@ -1,11 +1,11 @@
-#include <banjo/array.h>
 #include <banjo/error.h>
-#include <banjo/htable.h>
-#include <banjo/list.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
 #include <string.h>
+
+#include "htable_t.h"
+#include "list_t.h"
 
 #define BUCKET_COUNT 10
 
@@ -26,37 +26,37 @@ u32 fnv1a_hash(const void *data, size_t size) {
     return hash;
 }
 
-bj_htable* bj_htable_init_default(
-    bj_htable*                 p_instance,
+BANJO_EXPORT bj_htable* bj_htable_new(
     usize bytes_key,
     usize bytes_value
 ) {
-    bj_memset(p_instance, 0, sizeof(bj_htable));
-    if(bytes_key == 0 || bytes_value == 0) {
-        return p_instance;
+    bj_check_or_0(bytes_key);
+    bj_check_or_0(bytes_value);
+
+    bj_htable* p_table = bj_malloc(sizeof(bj_htable));
+    bj_memset(p_table, 0, sizeof(bj_htable));
+
+    p_table->weak_owning = false;
+    /* p_table->fn_hash     = p_info->fn_hash ? p_info->fn_hash : fnv1a_hash; */
+    p_table->fn_hash     = fnv1a_hash;
+    p_table->bytes_key   = bytes_key;
+    p_table->bytes_value = bytes_value;
+    p_table->bytes_entry = p_table->weak_owning ? sizeof(void*) * 2 : p_table->bytes_key + p_table->bytes_value;
+
+    bj_array_init(&p_table->buckets, sizeof(bj_list), BUCKET_COUNT);
+    bj_array_set_len(&p_table->buckets, BUCKET_COUNT);
+
+    for(usize i = 0 ; i < bj_array_len(&p_table->buckets) ; ++i) {
+        bj_list* bucket = bj_array_at(&p_table->buckets, i);
+        bj_list_init(bucket, p_table->bytes_entry);
     }
-
-    p_instance->weak_owning = false;
-    /* p_instance->fn_hash     = p_info->fn_hash ? p_info->fn_hash : fnv1a_hash; */
-    p_instance->fn_hash     = fnv1a_hash;
-    p_instance->bytes_key   = bytes_key;
-    p_instance->bytes_value = bytes_value;
-    p_instance->bytes_entry = p_instance->weak_owning ? sizeof(void*) * 2 : p_instance->bytes_key + p_instance->bytes_value;
-
-    bj_array_init_with_capacity_t(&p_instance->buckets, bj_list, BUCKET_COUNT);
-    bj_array_set_len(&p_instance->buckets, BUCKET_COUNT);
-
-    for(usize i = 0 ; i < bj_array_len(&p_instance->buckets) ; ++i) {
-        bj_list* bucket = bj_array_at(&p_instance->buckets, i);
-        bj_list_init_default(bucket, p_instance->bytes_entry);
-    }
-    return p_instance;
+    return p_table;
 }
 
-bj_htable* bj_htable_reset(
+void bj_htable_del(
     bj_htable* htable
 ) {
-    bj_htable_clear(htable);
+    bj_check(htable != 0);
     bj_list* bucket = bj_array_data(&htable->buckets);
     for(usize i = 0 ; i < bj_array_len(&htable->buckets) ; ++i) {
         if(bucket != 0) {
@@ -65,17 +65,11 @@ bj_htable* bj_htable_reset(
         ++bucket;
     }
     bj_array_reset(&htable->buckets);
-    return htable;
+#ifdef BJ_FEAT_PEDANTIC
+    bj_memset(p_table, 0, sizeof(bj_htable));
+#endif
+    bj_free(htable);
 }
-
-
-void bj_htable_clear(
-    bj_htable* htable
-) {
-    // TODO Implement code for htable clear
-    bj_check(htable != 0);
-}
-
 
 void* bj_htable_set(
     bj_htable* table,

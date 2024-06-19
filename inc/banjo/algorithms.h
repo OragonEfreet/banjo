@@ -3,10 +3,11 @@
 #pragma once
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \defgroup containers Containers
+/// \defgroup algo Algorithms
 /// Data manipulation objects
 /// 
-/// Banjo API provides a set of containers used for memory storage and manipulation.
+/// Banjo API provides a set of containers and algorithm used for memory 
+/// storage and manipulation.
 /// 
 /// | Name            | Summary                         | 
 /// |-----------------|---------------------------------|
@@ -14,7 +15,7 @@
 /// | #bj_list        | Forward-only linked list        |
 /// | #bj_htable      | Unordered associative container |
 ///
-/// Containers purpose is to provide your code with organized memory.
+/// Algorithms purpose is to provide your code with organized memory.
 /// Choosing the right container for the right purpose entirely depends upon your
 /// expected interface and complexity.
 ///

@@ -1,5 +1,14 @@
+////////////////////////////////////////////////////////////////////////////////
 /// \file
 /// Logging utility functions
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup log Logging
+/// \ingroup core
+///
+/// \brief Logging utility functions
+/// \{
 #pragma once
 
 #include <banjo/api.h>
@@ -175,10 +184,14 @@ BANJO_EXPORT void bj_message(int level, const char* p_file, int line, const char
 
 
 #ifdef BJ_FEAT_CHECKS_ENABLED
-#   ifdef NDEBUG
-#      define bj_check_err_msg(cond) bj_err("Unrecoverable Error (Failed Check)")
+#   ifdef BJ_FEAT_LOG_CHECKS_ENABLED
+#       ifdef NDEBUG
+#          define bj_check_err_msg(cond) bj_err("Unrecoverable Error (Failed Check)")
+#       else
+#          define bj_check_err_msg(cond) bj_err("Failed check: " #cond)
+#       endif
 #   else
-#      define bj_check_err_msg(cond) bj_err("Failed check: " #cond)
+#       define bj_check_err_msg(cond)
 #   endif
 #   ifdef BJ_FEAT_ABORT_ON_CHECKS_ENABLED
 #      define bj_check(cond) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
@@ -196,3 +209,4 @@ BANJO_EXPORT void bj_message(int level, const char* p_file, int line, const char
 #   define bj_check_or_0(cond)
 #endif
 
+/// \} // End of array log

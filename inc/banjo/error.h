@@ -1,6 +1,12 @@
 /// \file
 /// Recoverable error handling
 ///
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup error Error Management
+/// \ingroup core
+///
+/// \brief Recoverable error handling facilities
+///
 /// This API provides a simple mechanism for communicating recoverable errors
 /// from callee to caller.
 /// 
@@ -15,6 +21,8 @@
 /// error:
 ///
 /// \snippet handling_errors.c Return Errors
+///
+/// \{
 #pragma once
 
 #include <banjo/api.h>
@@ -181,3 +189,4 @@ BANJO_EXPORT void bj_clear_error(
     bj_error** p_error
 );
 
+/// \} // End of error Error Management

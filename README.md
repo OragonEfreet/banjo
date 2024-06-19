@@ -48,16 +48,6 @@ Here, "testing" corresponds to building the entire project and running all tests
 You can browse a full work set of examples from the _examples_ folder in the repository.
 
 
-### Dta Structures
-
-\example array.c
-\example htable.c
-\example list.c
-
-### Worlflows
-
-\example handling_errors.c
-
 
 
 

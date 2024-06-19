@@ -1,20 +1,34 @@
-#include <banjo/array.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-bj_array* bj_array_init_default(
-    bj_array* p_instance,
-    usize bytes_payload
+#include "array_t.h"
+
+BANJO_EXPORT bj_array* bj_array_new(
+    usize     bytes_payload
 ) {
-    bj_memset(p_instance, 0, sizeof(bj_array));
-    if(bytes_payload > 0) {
-        p_instance->bytes_payload = bytes_payload;
-    }
-    return p_instance;
+    return bj_array_new_with_capacity(bytes_payload, 0);
 }
 
-bj_array* bj_array_init_with_capacity(
+bj_array* bj_array_new_with_capacity(
+    usize     bytes_payload,
+    usize     capacity
+) {
+    bj_array array;
+    if(bj_array_init(&array, bytes_payload, capacity) == 0) {
+        return 0;
+    }
+    return bj_memcpy(bj_malloc(sizeof(bj_array)), &array, sizeof(bj_array));
+}
+
+void bj_array_del(
+    bj_array* p_array
+) {
+    bj_array_reset(p_array);
+    bj_free(p_array);
+}
+
+bj_array* bj_array_init(
     bj_array* p_instance,
     usize bytes_payload,
     usize capacity
@@ -27,13 +41,12 @@ bj_array* bj_array_init_with_capacity(
     return p_instance;
 }
 
-bj_array* bj_array_reset(
+void bj_array_reset(
     bj_array* array
 ) {
-    bj_check_or_0(array != 0);
+    bj_check(array != 0);
     bj_free(array->p_buffer);
     bj_memset(array, 0, sizeof(bj_array));
-    return array;
 }
 
 void bj_array_clear(

@@ -1,3 +1,11 @@
+////////////////////////////////////////////////////////////////////////////////
+/// \example sprite_animation.c
+/// A quick example of animating a sprite.
+///
+/// This sprite animation is performed using \ref bj_bitmap_new_from_file to
+/// load the sprite sheet in memory and \ref bj_bitmap_blit to display each
+/// frame over time.
+////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
 #include <banjo/color.h>
 #include <banjo/log.h>
@@ -15,11 +23,11 @@
 
 int main(int argc, char* argv[]) {
 
-    bj_bitmap* bmp_rendering = bj_new(bitmap, default, SPRITE_W, SPRITE_H);
+    bj_bitmap* bmp_rendering = bj_bitmap_new(SPRITE_W, SPRITE_H);
     bj_bitmap_set_clear_color(bmp_rendering, BJ_COLOR_RED);
     bj_bitmap_clear(bmp_rendering);
 
-    bj_bitmap* bmp_sprite_sheet = bj_new(bitmap, from_file, BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
+    bj_bitmap* bmp_sprite_sheet = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
 
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -63,8 +71,8 @@ int main(int argc, char* argv[]) {
 
     SDL_Quit();
 
-    bj_del(bitmap, bmp_sprite_sheet);
-    bj_del(bitmap, bmp_rendering);
+    bj_bitmap_del(bmp_sprite_sheet);
+    bj_bitmap_del(bmp_rendering);
 
 
 

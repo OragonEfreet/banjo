@@ -1,5 +1,11 @@
+////////////////////////////////////////////////////////////////////////////////
 /// \file
 /// Defines the bj_rect struct representing a rectangle with position and dimensions.
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup rect Rectangle
+/// \ingroup graphics
+/// \{
+////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <banjo/api.h>
@@ -28,7 +34,7 @@ struct bj_rect_t {
 /// \return Non-zero if the rectangles intersect and neither input is *0*, *0* otherwise.
 ///
 /// \note Both input rectangles must be valid and properly initialized. If either 
-///       \p_rect_a or \p_rect_b is *0*, the function returns *0*. If \p p_result
+///       `p_rect_a` or `p_rect_b` is *0*, the function returns *0*. If \p p_result
 ///       is *0*, the function only checks for intersection presence and does not 
 ///       compute the intersection rectangle.
 ///
@@ -47,4 +53,6 @@ BANJO_EXPORT int bj_rect_intersect(
     const bj_rect* p_rect_b,
     bj_rect*       p_result
 );
+
+/// \} // End of rect group
 
