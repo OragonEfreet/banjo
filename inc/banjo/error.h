@@ -70,10 +70,14 @@
 typedef enum {
     BJ_ERROR_NONE                = 0x00000000, ///< No Error
     BJ_ERROR                     = 0x00000001, ///< General Error (unspecified)
+    BJ_ERROR_UNSUPPORTED         = 0x00000101, ///< Unsupported operation error
+    BJ_ERROR_NOT_IMPLEMENTED     = 0x00000201, ///< Unsupported operation error
 
-    BJ_ERROR_OS                  = 0x00000002, ///< Generic OS error
+    BJ_ERROR_SYSTEM              = 0x00000002, ///< Generic OS error
     BJ_ERROR_FILE_NOT_FOUND      = 0x00000102, ///< The requested file was not found
     BJ_ERROR_CANNOT_ALLOCATE     = 0x00000202, ///< Cannot allocate the specified memory block
+    BJ_ERROR_INITIALIZE          = 0x00000302, ///< A system component cannot be initalized
+    BJ_ERROR_DISPOSE             = 0x00000302, ///< A system component cannot be terminated properly
 
     BJ_ERROR_IO                  = 0x00000003, ///< IO-related errors
     BJ_ERROR_CANNOT_READ_FILE    = 0x00000103, ///< Error while attempting to read a file

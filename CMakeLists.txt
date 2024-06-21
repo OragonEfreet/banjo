@@ -26,6 +26,8 @@ set(_interface_headers
     inc/banjo/memory.h
     inc/banjo/rect.h
     inc/banjo/stream.h
+    inc/banjo/system.h
+    inc/banjo/window.h
 )
 
 set(_private_headers
@@ -46,6 +48,10 @@ set(_sources
     src/memory.c
     src/rect.c
     src/stream.c
+    src/system.c
+    src/window.c
+    src/window_backend.c
+    src/window_backend.h
 )
 
 if(MSVC)
@@ -54,6 +60,13 @@ if(MSVC)
 endif()
 
 add_library(banjo ${_interface_headers} ${_private_headers} ${_sources})
+
+find_package(X11 REQUIRED)
+if(X11_FOUND)
+    target_sources(banjo PRIVATE src/x11.c)
+    target_compile_definitions(banjo PRIVATE "BANJO_HAVE_X11")
+    target_link_libraries(banjo PRIVATE X11::X11)
+endif()
 
 macro(banjo_feature _name _desc _default)
     string(TOUPPER  "banjo_feature_${_name}" _optmacro)
@@ -95,4 +108,5 @@ endif()
 if (BUILD_TESTING)
     add_subdirectory(test)
 endif()
+
 
