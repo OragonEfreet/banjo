@@ -159,3 +159,5 @@ dkms.conf
 .cache/
 
 docs/html
+
+.vs
