@@ -93,7 +93,7 @@ static bj_window_backend* x11_init_backend(
 }
 
 bj_window_backend_create_info x11_backend_create_info = {
-    .name = "X11",
+    .name = "x11",
     .create = x11_init_backend,
 };
 
