@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \example bitmap_blitting.c
-/// Demonstration on bitmap blit function.
+/// \example oldbmp_blitting.c
+/// Demonstration on oldbmp blit function.
 ///
-/// Blitting a \ref bj_bitmap into another is done by calling \ref bj_bitmap_blit.
-/// This example blits 3 bitmaps onto another and displays the result on screen.
+/// Blitting a \ref bj_oldbmp into another is done by calling \ref bj_oldbmp_blit.
+/// This example blits 3 oldbmps onto another and displays the result on screen.
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/bitmap.h>
+#include <banjo/oldbmp.h>
 #include <banjo/color.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
@@ -17,38 +17,38 @@
 
 int main(int argc, char* argv[]) {
 
-    bj_bitmap* bmp_rendering = bj_bitmap_new(WINDOW_W, WINDOW_H);
-    bj_bitmap_set_clear_color(bmp_rendering, BJ_COLOR_RED);
-    bj_bitmap_clear(bmp_rendering);
+    bj_oldbmp* bmp_rendering = bj_oldbmp_new(WINDOW_W, WINDOW_H);
+    bj_oldbmp_set_clear_color(bmp_rendering, BJ_COLOR_RED);
+    bj_oldbmp_clear(bmp_rendering);
 
-    bj_bitmap* bmp_blackbuck_512_512 = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/blackbuck.bmp", 0);
-    bj_bitmap* bmp_greenland_grid_velo_762_1309 = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/greenland_grid_velo.bmp", 0);
-    bj_bitmap* bmp_lena_512_512 = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/lena.bmp", 0);
-    bj_bitmap* bmp_snail_256_256 = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/snail.bmp", 0);
+    bj_oldbmp* bmp_blackbuck_512_512 = bj_oldbmp_new_from_file(BANJO_ASSETS_DIR"/bmp/blackbuck.bmp", 0);
+    bj_oldbmp* bmp_greenland_grid_velo_762_1309 = bj_oldbmp_new_from_file(BANJO_ASSETS_DIR"/bmp/greenland_grid_velo.bmp", 0);
+    bj_oldbmp* bmp_lena_512_512 = bj_oldbmp_new_from_file(BANJO_ASSETS_DIR"/bmp/lena.bmp", 0);
+    bj_oldbmp* bmp_snail_256_256 = bj_oldbmp_new_from_file(BANJO_ASSETS_DIR"/bmp/snail.bmp", 0);
 
-    bj_bitmap_blit(bmp_greenland_grid_velo_762_1309, &(bj_rect){.x = 0, .y = 0, .w = 762, .h = 1309}, bmp_rendering, &(bj_rect){.x = 20, .y = 0});
-    bj_bitmap_blit(bmp_blackbuck_512_512, &(bj_rect){.x = 100, .y = 100, .w = 512, .h = 512}, bmp_rendering, &(bj_rect){.x = 100, .y = 200});
-    bj_bitmap_blit(bmp_snail_256_256, &(bj_rect){.x = 0, .y = 0, .w = 256, .h = 256}, bmp_rendering, &(bj_rect){.x = 500, .y = 130});
+    bj_oldbmp_blit(bmp_greenland_grid_velo_762_1309, &(bj_rect){.x = 0, .y = 0, .w = 762, .h = 1309}, bmp_rendering, &(bj_rect){.x = 20, .y = 0});
+    bj_oldbmp_blit(bmp_blackbuck_512_512, &(bj_rect){.x = 100, .y = 100, .w = 512, .h = 512}, bmp_rendering, &(bj_rect){.x = 100, .y = 200});
+    bj_oldbmp_blit(bmp_snail_256_256, &(bj_rect){.x = 0, .y = 0, .w = 256, .h = 256}, bmp_rendering, &(bj_rect){.x = 500, .y = 130});
 
-    bj_bitmap_del(bmp_snail_256_256);
-    bj_bitmap_del(bmp_lena_512_512);
-    bj_bitmap_del(bmp_greenland_grid_velo_762_1309);
-    bj_bitmap_del(bmp_blackbuck_512_512);
+    bj_oldbmp_del(bmp_snail_256_256);
+    bj_oldbmp_del(bmp_lena_512_512);
+    bj_oldbmp_del(bmp_greenland_grid_velo_762_1309);
+    bj_oldbmp_del(bmp_blackbuck_512_512);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         return 1;
     }
 
-    SDL_Window* window     = SDL_CreateWindow("bitmap_blitting - Banjo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
+    SDL_Window* window     = SDL_CreateWindow("oldbmp_blitting - Banjo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_Texture* texture   = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WINDOW_W, WINDOW_H);
 
-    SDL_UpdateTexture(texture, 0, bj_bitmap_data(bmp_rendering), WINDOW_W * sizeof (u32));
+    SDL_UpdateTexture(texture, 0, bj_oldbmp_data(bmp_rendering), WINDOW_W * sizeof (u32));
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);
 
-    bj_bitmap_del(bmp_rendering);
+    bj_oldbmp_del(bmp_rendering);
 
     bool quit = false;
     SDL_Event e;

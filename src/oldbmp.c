@@ -1,71 +1,71 @@
 #include <banjo/error.h>
-#include <banjo/bitmap.h>
+#include <banjo/oldbmp.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-#include "bitmap_t.h"
+#include "oldbmp_t.h"
 #include "dib.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #ifdef CENTERED_AXIS
-#define S_X(x) ((p_bitmap->width / 2) + x)
-#define S_Y(y) ((p_bitmap->height / 2) - y)
+#define S_X(x) ((p_oldbmp->width / 2) + x)
+#define S_Y(y) ((p_oldbmp->height / 2) - y)
 #else
 #define S_X(x) (x)
 #define S_Y(y) (y)
 #endif
-#define XY(x, y) (S_Y(y) * p_bitmap->width + S_X(x))
+#define XY(x, y) (S_Y(y) * p_oldbmp->width + S_X(x))
 #define at(bmp, x, y) bmp[XY(x, y)]
 #define put_pixel(bmp, x, y, c) at(bmp, x, y) = c
 
-bj_bitmap* bj_bitmap_init(
-    bj_bitmap* p_bitmap,
+bj_oldbmp* bj_oldbmp_init(
+    bj_oldbmp* p_oldbmp,
     usize      width,
     usize      height
 ) {
-    if(p_bitmap) {
-        bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
+    if(p_oldbmp) {
+        bj_memset(p_oldbmp, 0, sizeof(bj_oldbmp));
         usize bufsize = width * height;
         if(bufsize == 0) {
             return 0;
         }
 
-        p_bitmap->width = width;
-        p_bitmap->height = height;
-        p_bitmap->buffer = bj_malloc(sizeof(bj_color) * bufsize);
-        p_bitmap->clear_color = BJ_COLOR_BLACK;
-        bj_bitmap_clear(p_bitmap);
+        p_oldbmp->width = width;
+        p_oldbmp->height = height;
+        p_oldbmp->buffer = bj_malloc(sizeof(bj_color) * bufsize);
+        p_oldbmp->clear_color = BJ_COLOR_BLACK;
+        bj_oldbmp_clear(p_oldbmp);
     }
-    return p_bitmap;
+    return p_oldbmp;
 }
 
-void bj_bitmap_reset(
-    bj_bitmap* p_bitmap
+void bj_oldbmp_reset(
+    bj_oldbmp* p_oldbmp
 ) {
-    bj_check(p_bitmap);
+    bj_check(p_oldbmp);
 
-    if(p_bitmap->buffer != 0) {
-        bj_free(p_bitmap->buffer);
+    if(p_oldbmp->buffer != 0) {
+        bj_free(p_oldbmp->buffer);
     }
 #ifdef BJ_FEAT_PEDANTIC
-    bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
+    bj_memset(p_oldbmp, 0, sizeof(bj_oldbmp));
 #endif
 }
 
-BANJO_EXPORT bj_bitmap* bj_bitmap_new(
+BANJO_EXPORT bj_oldbmp* bj_oldbmp_new(
     usize        width,
     usize        height
 ) {
-    bj_bitmap bitmap;
-    if (bj_bitmap_init(&bitmap, width, height) == 0) {
+    bj_oldbmp oldbmp;
+    if (bj_oldbmp_init(&oldbmp, width, height) == 0) {
         return 0;
     }
-    return bj_memcpy(bj_malloc(sizeof(bj_bitmap)), &bitmap, sizeof(bitmap));
+    return bj_memcpy(bj_malloc(sizeof(bj_oldbmp)), &oldbmp, sizeof(oldbmp));
 }
 
-bj_bitmap* bj_bitmap_new_from_file(
+bj_oldbmp* bj_oldbmp_new_from_file(
     const char*  p_path,
     bj_error**   p_error
 ) {
@@ -119,8 +119,8 @@ bj_bitmap* bj_bitmap_new_from_file(
         return 0;
     }
 
-    bj_bitmap bitmap;
-    dib_read_bitmap(&bitmap, buffer, dib_size, file_header.data_offset - BJ_DIB_HEADER_SIZE, &p_inner_error);
+    bj_oldbmp oldbmp;
+    dib_read_oldbmp(&oldbmp, buffer, dib_size, file_header.data_offset - BJ_DIB_HEADER_SIZE, &p_inner_error);
 
     bj_free(buffer);
     if(p_inner_error) {
@@ -128,59 +128,59 @@ bj_bitmap* bj_bitmap_new_from_file(
         return 0;
     }
 
-    return bj_memcpy(bj_malloc(sizeof(bj_bitmap)), &bitmap, sizeof(bj_bitmap));
+    return bj_memcpy(bj_malloc(sizeof(bj_oldbmp)), &oldbmp, sizeof(bj_oldbmp));
 }
 
-BANJO_EXPORT void bj_bitmap_del(
-    bj_bitmap* p_bitmap
+BANJO_EXPORT void bj_oldbmp_del(
+    bj_oldbmp* p_oldbmp
 ) {
-    bj_bitmap_reset(p_bitmap);
-    bj_free(p_bitmap);
+    bj_oldbmp_reset(p_oldbmp);
+    bj_free(p_oldbmp);
 }
 
-void bj_bitmap_clear(
-    bj_bitmap* p_bitmap
+void bj_oldbmp_clear(
+    bj_oldbmp* p_oldbmp
 ) {
-    usize bufsize = p_bitmap->width * p_bitmap->height;
+    usize bufsize = p_oldbmp->width * p_oldbmp->height;
     for(usize i = 0 ; i < bufsize; ++i) {
-        p_bitmap->buffer[i] = p_bitmap->clear_color;
+        p_oldbmp->buffer[i] = p_oldbmp->clear_color;
     }
 }
 
-void bj_bitmap_set_clear_color(
-    bj_bitmap* p_bitmap,
+void bj_oldbmp_set_clear_color(
+    bj_oldbmp* p_oldbmp,
     bj_color clear_color
 ) {
-    p_bitmap->clear_color = clear_color;
+    p_oldbmp->clear_color = clear_color;
 }
 
-bj_color* bj_bitmap_data(
-    bj_bitmap* p_bitmap
+bj_color* bj_oldbmp_data(
+    bj_oldbmp* p_oldbmp
 ) {
-    return p_bitmap->buffer;
+    return p_oldbmp->buffer;
 }
 
-void bj_bitmap_put(
-    bj_bitmap* p_bitmap,
+void bj_oldbmp_put(
+    bj_oldbmp* p_oldbmp,
     usize x, usize y,
     bj_color color
 ) {
-    put_pixel(p_bitmap->buffer, x, y, color);
+    put_pixel(p_oldbmp->buffer, x, y, color);
 }
 
-bj_color bj_bitmap_get(
-    const bj_bitmap* p_bitmap,
+bj_color bj_oldbmp_get(
+    const bj_oldbmp* p_oldbmp,
     usize            x,
     usize            y
 ) {
-    return at(p_bitmap->buffer, x, y);
+    return at(p_oldbmp->buffer, x, y);
 }
 
 #define X 0
 #define Y 1
 
-void bj_bitmap_draw_line(
-    bj_bitmap* bmp,
+void bj_oldbmp_draw_line(
+    bj_oldbmp* bmp,
     bj_pixel p0,
     bj_pixel p1,
     bj_color c
@@ -196,7 +196,7 @@ void bj_bitmap_draw_line(
     int err = dx - dy;
 
     while (1) {
-        bj_bitmap_put(bmp, x0, y0, c);
+        bj_oldbmp_put(bmp, x0, y0, c);
         if (x0 == x1 && y0 == y1) break;
         const int e2 = 2 * err;
         if (e2 > -dy) {
@@ -210,22 +210,22 @@ void bj_bitmap_draw_line(
     }
 }
 
-void bj_bitmap_draw_triangle(
-    bj_bitmap* bmp,
+void bj_oldbmp_draw_triangle(
+    bj_oldbmp* bmp,
     bj_pixel p0,
     bj_pixel p1,
     bj_pixel p2,
     bj_color c
 ) {
-    bj_bitmap_draw_line(bmp, p0, p1, c);
-    bj_bitmap_draw_line(bmp, p1, p2, c);
-    bj_bitmap_draw_line(bmp, p2, p0, c);
+    bj_oldbmp_draw_line(bmp, p0, p1, c);
+    bj_oldbmp_draw_line(bmp, p1, p2, c);
+    bj_oldbmp_draw_line(bmp, p2, p0, c);
 }
 
-bool bj_bitmap_blit(
-    const bj_bitmap* p_src,
+bool bj_oldbmp_blit(
+    const bj_oldbmp* p_src,
     const bj_rect*   p_src_rect,
-    bj_bitmap*       p_dest,
+    bj_oldbmp*       p_dest,
     bj_rect*         p_dest_rect
 ) {
 
@@ -246,10 +246,10 @@ bool bj_bitmap_blit(
                 const usize from_y = blit_rect.y + r;
                 const usize to_y = p_dest_rect->y + r;
                 for(usize c = 0 ; c < p_dest_rect->w ; ++c) {
-                    bj_bitmap_put(p_dest,
+                    bj_oldbmp_put(p_dest,
                         p_dest_rect->x + c,
                         to_y,
-                        bj_bitmap_get(p_src, blit_rect.x + c, from_y)
+                        bj_oldbmp_get(p_src, blit_rect.x + c, from_y)
                     );
                 }
             }

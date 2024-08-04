@@ -2,7 +2,7 @@
 /// \example drawing_2d.c
 /// Drawing functions demo.
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/bitmap.h>
+#include <banjo/oldbmp.h>
 #include <banjo/color.h>
 #include <banjo/memory.h>
 
@@ -14,13 +14,13 @@
 #define CANVAS_WIDTH 500
 #define CANVAS_HEIGHT 500
 
-void draw(bj_bitmap* bmp) {
-    bj_bitmap_clear(bmp);
+void draw(bj_oldbmp* bmp) {
+    bj_oldbmp_clear(bmp);
 
     // Draw pixels individually
     for (usize x = 10 ; x < 490 ; ++x) {
         if(x % 7 == 0) {
-            bj_bitmap_put(bmp, x, 10, BJ_COLOR_AQUAMARINE);
+            bj_oldbmp_put(bmp, x, 10, BJ_COLOR_AQUAMARINE);
         }
     }
 
@@ -32,7 +32,7 @@ void draw(bj_bitmap* bmp) {
     };
 
     for(usize p = 0 ; p < 18 ; ++p) {
-        bj_bitmap_draw_line(bmp,
+        bj_oldbmp_draw_line(bmp,
             points[p],
             points[(p+1)%18],
             BJ_COLOR_CYAN
@@ -54,7 +54,7 @@ void draw(bj_bitmap* bmp) {
 
 
     for(usize t = 0 ; t < 13 ; ++t) {
-        bj_bitmap_draw_triangle(bmp,
+        bj_oldbmp_draw_triangle(bmp,
             verts[tris[t][0]], verts[tris[t][1]], verts[tris[t][2]],
             BJ_COLOR_WHITE
         );
@@ -62,8 +62,8 @@ void draw(bj_bitmap* bmp) {
 }
 
 int main(int argc, char* argv[]) {
-    bj_bitmap* bmp = bj_bitmap_new(CANVAS_WIDTH, CANVAS_HEIGHT);
-    bj_bitmap_set_clear_color(bmp, BJ_COLOR_DARK_GRAY);
+    bj_oldbmp* bmp = bj_oldbmp_new(CANVAS_WIDTH, CANVAS_HEIGHT);
+    bj_oldbmp_set_clear_color(bmp, BJ_COLOR_DARK_GRAY);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         return 1;
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 
     draw(bmp);
 
-    SDL_UpdateTexture(texture, 0, bj_bitmap_data(bmp), CANVAS_WIDTH * sizeof (u32));
+    SDL_UpdateTexture(texture, 0, bj_oldbmp_data(bmp), CANVAS_WIDTH * sizeof (u32));
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);

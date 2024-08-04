@@ -2,7 +2,7 @@
 #include <banjo/stream.h>
 
 #include "dib.h"
-#include "bitmap_t.h"
+#include "oldbmp_t.h"
 
 #define _ABS(x) ((x) < 0 ? -(x) : (x))
 #define _TOP_DOWN(x) ((x) < 0)
@@ -132,7 +132,7 @@ static usize dib_uncompressed_stride(u32 width, u16 bit_count) {
     return ((((width * bit_count) + 31) & ~31) >> 3);
 }
 
-static void dib_read_raster_1bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
+static void dib_read_raster_1bpp(bj_oldbmp* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
     bj_color palette[2] = { BJ_COLOR_BLACK, BJ_COLOR_WHITE };
     usize palette_size = bj_array_len(&p_dib->color_table);
     if (palette_size >= 2) {
@@ -151,14 +151,14 @@ static void dib_read_raster_1bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_s
         while (x < p_bmp->width) {
             u8 byte = *pixel8_data++;
             for (usize b = 0; b < 8 && x < p_bmp->width; ++b, ++x) {
-                bj_bitmap_put(p_bmp, x, py, palette[(byte >> (7 - b)) & 0x01]);
+                bj_oldbmp_put(p_bmp, x, py, palette[(byte >> (7 - b)) & 0x01]);
             }
         }
         row += row_size;
     }
 }
 
-static void dib_read_raster_4bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
+static void dib_read_raster_4bpp(bj_oldbmp* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
     bj_color palette[16] = { BJ_COLOR_BLACK };
     usize palette_size = bj_array_len(&p_dib->color_table);
     for(usize c = 0 ; c < palette_size ; ++c) {
@@ -174,46 +174,46 @@ static void dib_read_raster_4bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_s
         usize x = 0;
         while (x < p_bmp->width) {
             u8 byte = *pixel2_data++;
-            bj_bitmap_put(p_bmp, x++, py, palette[(byte >> 4) & 0x0F]);
-            bj_bitmap_put(p_bmp, x++, py, palette[byte & 0x0F]);
+            bj_oldbmp_put(p_bmp, x++, py, palette[(byte >> 4) & 0x0F]);
+            bj_oldbmp_put(p_bmp, x++, py, palette[byte & 0x0F]);
         }
         row += row_size;
     }
 }
 
-static void dib_read_raster_8bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
+static void dib_read_raster_8bpp(bj_oldbmp* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
     const u8* row = buffer;
     for (usize y = 0; y < p_bmp->height; ++y) {
         const usize py = p_dib->info_header.height < 0 ? y : p_bmp->height - y - 1;
         const u8* pixel_data = row;
         for (usize x = 0; x < p_bmp->width; ++x) {
             const table_color* color = bj_array_at(&p_dib->color_table, *pixel_data++);
-            bj_bitmap_put(p_bmp, x, py, BJ_RGB(color->red, color->green, color->blue));
+            bj_oldbmp_put(p_bmp, x, py, BJ_RGB(color->red, color->green, color->blue));
         }
         row += row_size;
     }
 }
 
-static void dib_read_raster_24bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
+static void dib_read_raster_24bpp(bj_oldbmp* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
     const u8* row = buffer;
     for (usize y = 0; y < p_bmp->height; ++y) {
         const usize py = p_dib->info_header.height < 0 ? y : p_bmp->height - y - 1;
         const u8* pixel_data = row;
         for (usize x = 0; x < p_bmp->width; ++x) {
-            bj_bitmap_put(p_bmp, x, py, BJ_RGB(pixel_data[2], pixel_data[1], pixel_data[0]));
+            bj_oldbmp_put(p_bmp, x, py, BJ_RGB(pixel_data[2], pixel_data[1], pixel_data[0]));
             pixel_data += 3;
         }
         row += row_size;
     }
 }
 
-static void dib_read_raster_32bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
+static void dib_read_raster_32bpp(bj_oldbmp* p_bmp, const u8* buffer, usize row_size, const dib* p_dib, bj_error** p_error) {
     const u8* row = buffer;
     for (usize y = 0; y < p_bmp->height; ++y) {
         const usize py = p_dib->info_header.height < 0 ? y : p_bmp->height - y - 1;
         const u8* pixel_data = row;
         for (usize x = 0; x < p_bmp->width; ++x) {
-            bj_bitmap_put(p_bmp, x, py, BJ_RGBA(
+            bj_oldbmp_put(p_bmp, x, py, BJ_RGBA(
                 pixel_data[0], pixel_data[1],
                 pixel_data[2], pixel_data[3]
             ));
@@ -223,7 +223,7 @@ static void dib_read_raster_32bpp(bj_bitmap* p_bmp, const u8* buffer, usize row_
     }
 }
 
-static void dib_read_raster(bj_bitmap* p_bmp, const u8* buffer, usize buffer_size, const dib* p_dib, bj_error** p_error) {
+static void dib_read_raster(bj_oldbmp* p_bmp, const u8* buffer, usize buffer_size, const dib* p_dib, bj_error** p_error) {
     const usize row_size = dib_uncompressed_stride(p_dib->info_header.width, p_dib->info_header.bit_count);
     switch (p_dib->info_header.bit_count) {
         case BJ_DIB_BIT_COUNT_1:
@@ -246,7 +246,7 @@ static void dib_read_raster(bj_bitmap* p_bmp, const u8* buffer, usize buffer_siz
     }
 }
 
-void dib_read_bitmap(bj_bitmap* p_bmp, const u8* buffer, usize buffer_size, usize data_offset, bj_error** p_error) {
+void dib_read_oldbmp(bj_oldbmp* p_bmp, const u8* buffer, usize buffer_size, usize data_offset, bj_error** p_error) {
     dib dib_data = {0};
     bj_error* p_inner_error = 0;
 
@@ -265,12 +265,12 @@ void dib_read_bitmap(bj_bitmap* p_bmp, const u8* buffer, usize buffer_size, usiz
         return;
     }
 
-    bj_bitmap_init(p_bmp, dib_data.info_header.width, dib_height);
-    bj_bitmap_set_clear_color(p_bmp, BJ_COLOR_BLACK);
+    bj_oldbmp_init(p_bmp, dib_data.info_header.width, dib_height);
+    bj_oldbmp_set_clear_color(p_bmp, BJ_COLOR_BLACK);
 
     dib_read_raster(p_bmp, buffer + data_offset, raster_size, &dib_data, &p_inner_error);
     if (p_inner_error) {
-        bj_bitmap_reset(p_bmp);
+        bj_oldbmp_reset(p_bmp);
         bj_forward_error(p_inner_error, p_error);
     }
 

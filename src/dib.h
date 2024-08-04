@@ -1,7 +1,7 @@
 #pragma once
 
 #include <banjo/api.h>
-#include <banjo/bitmap.h>
+#include <banjo/oldbmp.h>
 #include <banjo/error.h>
 #include <banjo/stream.h>
 
@@ -52,6 +52,6 @@ typedef struct {
 } dib;
 
 void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_error** p_error);
-void dib_read_bitmap(bj_bitmap* p_bmp, const u8* buffer, usize buffer_size, usize data_offset, bj_error** p_error);
+void dib_read_oldbmp(bj_oldbmp* p_bmp, const u8* buffer, usize buffer_size, usize data_offset, bj_error** p_error);
 
 

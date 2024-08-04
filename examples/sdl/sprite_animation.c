@@ -2,11 +2,11 @@
 /// \example sprite_animation.c
 /// A quick example of animating a sprite.
 ///
-/// This sprite animation is performed using \ref bj_bitmap_new_from_file to
-/// load the sprite sheet in memory and \ref bj_bitmap_blit to display each
+/// This sprite animation is performed using \ref bj_oldbmp_new_from_file to
+/// load the sprite sheet in memory and \ref bj_oldbmp_blit to display each
 /// frame over time.
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/bitmap.h>
+#include <banjo/oldbmp.h>
 #include <banjo/color.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
@@ -23,11 +23,11 @@
 
 int main(int argc, char* argv[]) {
 
-    bj_bitmap* bmp_rendering = bj_bitmap_new(SPRITE_W, SPRITE_H);
-    bj_bitmap_set_clear_color(bmp_rendering, BJ_COLOR_RED);
-    bj_bitmap_clear(bmp_rendering);
+    bj_oldbmp* bmp_rendering = bj_oldbmp_new(SPRITE_W, SPRITE_H);
+    bj_oldbmp_set_clear_color(bmp_rendering, BJ_COLOR_RED);
+    bj_oldbmp_clear(bmp_rendering);
 
-    bj_bitmap* bmp_sprite_sheet = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
+    bj_oldbmp* bmp_sprite_sheet = bj_oldbmp_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
 
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -50,12 +50,12 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        bj_bitmap_blit(bmp_sprite_sheet, &(bj_rect){
+        bj_oldbmp_blit(bmp_sprite_sheet, &(bj_rect){
             .x = frame_count * SPRITE_W,
             .w = 24, .h = 24
         }, bmp_rendering, &(bj_rect){.x = 0, .y = 0});
 
-        SDL_UpdateTexture(texture, 0, bj_bitmap_data(bmp_rendering), SPRITE_W * sizeof (u32));
+        SDL_UpdateTexture(texture, 0, bj_oldbmp_data(bmp_rendering), SPRITE_W * sizeof (u32));
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, 0, 0);
         SDL_RenderPresent(renderer);
@@ -71,8 +71,8 @@ int main(int argc, char* argv[]) {
 
     SDL_Quit();
 
-    bj_bitmap_del(bmp_sprite_sheet);
-    bj_bitmap_del(bmp_rendering);
+    bj_oldbmp_del(bmp_sprite_sheet);
+    bj_oldbmp_del(bmp_rendering);
 
 
 

@@ -1,10 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example load_bmp_file.c
-/// Loading BMP files into \ref bj_bitmap.
+/// Loading BMP files into \ref bj_oldbmp.
 ///
-/// \details Use \ref bj_bitmap_new_from_file to load bitmap data into a \ref bj_bitmap.
+/// \details Use \ref bj_oldbmp_new_from_file to load oldbmp data into a \ref bj_oldbmp.
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/bitmap.h>
+#include <banjo/oldbmp.h>
 #include <banjo/color.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
@@ -18,7 +18,7 @@
 int main(int argc, char* argv[]) {
 
     bj_error* error = 0;
-    bj_bitmap* bmp_lena_512_512 = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", &error);
+    bj_oldbmp* bmp_lena_512_512 = bj_oldbmp_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", &error);
 
     if(error) {
         bj_err("Error %x: %s", error->code, error->message);
@@ -34,13 +34,13 @@ int main(int argc, char* argv[]) {
     SDL_Texture* texture   = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WINDOW_W, WINDOW_H);
 
     SDL_UpdateTexture(texture, 0, 
-        bj_bitmap_data(bmp_lena_512_512),
+        bj_oldbmp_data(bmp_lena_512_512),
     WINDOW_W * sizeof (u32));
     SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);
 
-    bj_bitmap_del(bmp_lena_512_512);
+    bj_oldbmp_del(bmp_lena_512_512);
 
     bool quit = false;
     SDL_Event e;
