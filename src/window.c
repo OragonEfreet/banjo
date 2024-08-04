@@ -8,10 +8,10 @@ extern bj_window_backend_create_info x11_backend_create_info;
 extern bj_window_backend_create_info fake_backend_create_info;
 
 static const bj_window_backend_create_info* backend_create_infos[] = {
+    &fake_backend_create_info,
 #ifdef BANJO_HAVE_X11
     &x11_backend_create_info,
 #endif
-    &fake_backend_create_info,
 };
 
 static bj_window_backend* s_backend = 0;
