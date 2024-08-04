@@ -20,6 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Log Levels.
 /// Level values are ordered from 0.
+///
 enum {
     BJ_LOG_TRACE, ///< Fine-grained diagnostic details.
     BJ_LOG_DEBUG, ///< Detailed information for debugging.
