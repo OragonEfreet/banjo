@@ -10,7 +10,7 @@ struct bj_window_t {
 };
 
 static bj_window* fake_window_new(
-    bj_window_backend_data* p_data,
+    bj_window_backend* p_backend,
     const char* p_title,
     u16 x,
     u16 y,
@@ -22,7 +22,7 @@ static bj_window* fake_window_new(
 }
 
 static void fake_window_del(
-    bj_window_backend_data* p_data,
+    bj_window_backend* p_backend,
     bj_window* p_window
 ) {
     // EMPTY
@@ -42,7 +42,6 @@ static bj_window_backend* fake_init_backend(
     p_backend->dispose           = fake_dispose_backend;
     p_backend->create_window     = fake_window_new;
     p_backend->delete_window     = fake_window_del;
-    p_backend->p_data = 0;
     return p_backend;
 }
 
