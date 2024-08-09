@@ -11,7 +11,8 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 
 #define SPRITE_W 24
 #define SPRITE_H 24
@@ -34,9 +35,10 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Window* window     = SDL_CreateWindow("sprite sheet - Banjo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Window* window     = SDL_CreateWindow("sprite sheet - Banjo", WINDOW_W, WINDOW_H, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, 0);
     SDL_Texture* texture   = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SPRITE_W, SPRITE_H);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 
 
     usize frame_count = 1;
@@ -45,7 +47,7 @@ int main(int argc, char* argv[]) {
     SDL_Event e;
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
-            if(e.type == SDL_KEYUP) {
+            if(e.type == SDL_EVENT_KEY_UP) {
                 quit = true;
             }
         }
@@ -57,7 +59,7 @@ int main(int argc, char* argv[]) {
 
         SDL_UpdateTexture(texture, 0, bj_oldbmp_data(bmp_rendering), SPRITE_W * sizeof (u32));
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, 0, 0);
+        SDL_RenderTexture(renderer, texture, 0, 0);
         SDL_RenderPresent(renderer);
 
         SDL_Delay(120);

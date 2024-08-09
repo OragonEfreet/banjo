@@ -15,6 +15,7 @@ set(_interface_headers
     inc/banjo/algorithms.h
     inc/banjo/api.h
     inc/banjo/array.h
+    inc/banjo/bitmap.h
     inc/banjo/color.h
     inc/banjo/error.h
     inc/banjo/graphics.h
@@ -32,6 +33,7 @@ set(_interface_headers
 
 set(_private_headers
     src/array_t.h
+    src/bitmap_t.h
     src/htable_t.h
     src/list_t.h
     src/oldbmp_t.h
@@ -41,13 +43,15 @@ set(_private_headers
 set(_sources
     src/api.c
     src/array.c
-    src/oldbmp.c
+    src/bitmap.c
     src/dib.c
+    src/dib_oldbmp.c
     src/error.c
     src/htable.c
     src/list.c
     src/log.c
     src/memory.c
+    src/oldbmp.c
     src/rect.c
     src/stream.c
     src/system.c

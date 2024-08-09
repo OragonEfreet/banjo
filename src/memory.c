@@ -5,15 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-static inline void* fallback_malloc(void* user_data, usize size) {
+static void* fallback_malloc(void* user_data, usize size) {
     return malloc(size);
 }
 
-static inline void* fallback_realloc(void* user_data, void* original, usize size) {
+static void* fallback_realloc(void* user_data, void* original, usize size) {
     return realloc(original, size);
 }
 
-static inline void fallback_free(void* user_data, void* ptr) {
+static void fallback_free(void* user_data, void* ptr) {
     free(ptr);
 }
 

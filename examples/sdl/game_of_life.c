@@ -9,7 +9,8 @@
 #include <banjo/oldbmp.h>
 #include <banjo/memory.h>
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
@@ -84,13 +85,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Window* window     = SDL_CreateWindow("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Window* window     = SDL_CreateWindow("Game of Life", SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, 0);
     SDL_Texture* texture   = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, CANVAS_WIDTH, CANVAS_HEIGHT);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 
     bool quit = false;
     SDL_Event e;
-    Uint64 ticks = SDL_GetTicks64();
+    Uint64 ticks = SDL_GetTicks();
     usize step = 0;
     bool painting = false;
     while (!quit) {
@@ -99,17 +101,17 @@ int main(int argc, char* argv[]) {
 
             switch(e.type) {
                 // User requests quit
-                case SDL_KEYUP:
+                case SDL_EVENT_KEY_UP:
                     if(painting) {
                         painting = false;
                     } else {
                         quit = true;
                     }
                     break;
-                case SDL_MOUSEBUTTONDOWN:
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     painting = true;
                     break;
-                case SDL_MOUSEMOTION:
+                case SDL_EVENT_MOUSE_MOTION:
                     if(painting) {
                         bj_oldbmp_put(presentation_fb,
                             ((float)e.button.x / (float)SCREEN_WIDTH) * CANVAS_WIDTH,
@@ -118,14 +120,14 @@ int main(int argc, char* argv[]) {
                         );
                     }
                     break;
-                case SDL_MOUSEBUTTONUP:
+                case SDL_EVENT_MOUSE_BUTTON_UP:
                     if(e.button.button == SDL_BUTTON_LEFT) {
                         painting = false;
                     }
                     break;
                 }
         }
-        Uint64 current_ticks    = SDL_GetTicks64();
+        Uint64 current_ticks    = SDL_GetTicks();
         Uint64 ticks_since_last = current_ticks - ticks;
 
         bool need_update = false;
@@ -138,7 +140,7 @@ int main(int argc, char* argv[]) {
         if(need_update || painting) {
             SDL_UpdateTexture(texture, 0, bj_oldbmp_data(presentation_fb), CANVAS_WIDTH * sizeof (u32));
             SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, texture, 0, 0);
+            SDL_RenderTexture(renderer, texture, 0, 0);
             SDL_RenderPresent(renderer);
         }
     }

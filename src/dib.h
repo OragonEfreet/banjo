@@ -49,9 +49,14 @@ typedef struct {
 typedef struct {
     dib_info_header info_header;
     bj_array        color_table;
+    void*           storage;
 } dib;
 
+void dib_read_file(dib* p_dib, const char* p_path, bj_error** p_error);
 void dib_read_file_header(dib_file_header* p_file_header, const u8* buffer, bj_error** p_error);
+int dib_pixel_format(dib* p_dib);
+usize dib_row_size(const dib* p_dib);
+usize dib_pixel_array_size(const dib* p_dib);
+void dib_reset(dib* p_dib);
+
 void dib_read_oldbmp(bj_oldbmp* p_bmp, const u8* buffer, usize buffer_size, usize data_offset, bj_error** p_error);
-
-

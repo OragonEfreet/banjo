@@ -1,6 +1,5 @@
 include(FetchContent)
 
-
 set(SDL_AUDIO      OFF CACHE BOOL "Override SDL_AUDIO option"      FORCE)
 set(SDL_FILE       OFF CACHE BOOL "Override SDL_FILE option"       FORCE)
 set(SDL_FILESYSTEM OFF CACHE BOOL "Override SDL_FILESYSTEM option" FORCE)
@@ -23,26 +22,26 @@ set(SDL_VIDEO      ON  CACHE BOOL "Override SDL_VIDEO option"      FORCE)
 set(SDL_STATIC     ON  CACHE BOOL "Override SDL_VIDEO option"      FORCE)
 
 FetchContent_Declare(
-    SDL2
-    URL "https://github.com/libsdl-org/SDL/archive/refs/tags/release-2.30.3.zip"
+    SDL3
+    # URL "https://github.com/libsdl-org/SDL/archive/refs/tags/release-2.30.3.zip"
+    URL "https://github.com/libsdl-org/SDL/archive/refs/heads/main.zip"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
-FetchContent_MakeAvailable(SDL2)
+FetchContent_MakeAvailable(SDL3)
 
-if(TARGET SDL2::SDL2main)
-        file(GLOB _bin_source_paths CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
+file(GLOB _bin_source_paths CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
+list(REMOVE_ITEM _bin_source_paths ${CMAKE_CURRENT_SOURCE_DIR}/sdl_helpers.c)
 
-        foreach(_bin_source_path ${_bin_source_paths})
-            get_filename_component(_target ${_bin_source_path} NAME_WE)
-            add_executable(${_target} ${_bin_source_path})
-            target_link_libraries(${_target} PRIVATE banjo SDL2::SDL2main SDL2::SDL2-static)
-            if(NOT MSVC)
-                target_link_libraries(${_target} PRIVATE m)
-            endif()
-            set_target_properties(${_target} PROPERTIES FOLDER "Examples")
-            target_compile_definitions(${_target} PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
-        endforeach()
-endif()
+foreach(_bin_source_path ${_bin_source_paths})
+    get_filename_component(_target ${_bin_source_path} NAME_WE)
+    add_executable(${_target} sdl_helpers.c ${_bin_source_path})
+    target_link_libraries(${_target} PRIVATE banjo SDL3::SDL3-static)
+    if(NOT MSVC)
+        target_link_libraries(${_target} PRIVATE m)
+    endif()
+    set_target_properties(${_target} PROPERTIES FOLDER "Examples")
+    target_compile_definitions(${_target} PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
+endforeach()
 
 
 

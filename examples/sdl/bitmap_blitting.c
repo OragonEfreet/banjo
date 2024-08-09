@@ -10,7 +10,8 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 
 #define WINDOW_W 800
 #define WINDOW_H 600
@@ -39,13 +40,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Window* window     = SDL_CreateWindow("oldbmp_blitting - Banjo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Window* window     = SDL_CreateWindow("oldbmp_blitting - Banjo", WINDOW_W, WINDOW_H, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, 0);
     SDL_Texture* texture   = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, WINDOW_W, WINDOW_H);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 
     SDL_UpdateTexture(texture, 0, bj_oldbmp_data(bmp_rendering), WINDOW_W * sizeof (u32));
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, 0, 0);
+    SDL_RenderTexture(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);
 
     bj_oldbmp_del(bmp_rendering);
@@ -54,7 +56,7 @@ int main(int argc, char* argv[]) {
     SDL_Event e;
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
-            if(e.type == SDL_KEYUP) {
+            if(e.type == SDL_EVENT_KEY_UP) {
                 quit = true;
             }
         }

@@ -6,7 +6,8 @@
 #include <banjo/color.h>
 #include <banjo/memory.h>
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
@@ -69,22 +70,23 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Window* window     = SDL_CreateWindow("Banjo - 2D drawing", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Window* window     = SDL_CreateWindow("Banjo - 2D drawing", SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, 0);
     SDL_Texture* texture   = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, CANVAS_WIDTH, CANVAS_HEIGHT);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 
     draw(bmp);
 
     SDL_UpdateTexture(texture, 0, bj_oldbmp_data(bmp), CANVAS_WIDTH * sizeof (u32));
     SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, 0, 0);
+    SDL_RenderTexture(renderer, texture, 0, 0);
     SDL_RenderPresent(renderer);
 
     bool quit = false;
     SDL_Event e;
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
-            if(e.type == SDL_KEYUP) {
+            if(e.type == SDL_EVENT_KEY_UP) {
                 quit = true;
             }
         }
