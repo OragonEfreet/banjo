@@ -5,14 +5,14 @@
 #include "array_t.h"
 
 BANJO_EXPORT bj_array* bj_array_new(
-    usize     bytes_payload
+    size_t     bytes_payload
 ) {
     return bj_array_new_with_capacity(bytes_payload, 0);
 }
 
 bj_array* bj_array_new_with_capacity(
-    usize     bytes_payload,
-    usize     capacity
+    size_t     bytes_payload,
+    size_t     capacity
 ) {
     bj_array array;
     if(bj_array_init(&array, bytes_payload, capacity) == 0) {
@@ -30,8 +30,8 @@ void bj_array_del(
 
 bj_array* bj_array_init(
     bj_array* p_instance,
-    usize bytes_payload,
-    usize capacity
+    size_t bytes_payload,
+    size_t capacity
 ) {
     bj_memset(p_instance, 0, sizeof(bj_array));
     if(bytes_payload > 0) {
@@ -73,7 +73,7 @@ void bj_array_shrink(
 
 void bj_array_set_len(
     bj_array* array,
-    usize   len
+    size_t   len
 ) {
     bj_check(array != 0);
     array->len = array->bytes_payload == 0 ? 0 : len;
@@ -84,10 +84,10 @@ void bj_array_set_len(
 
 void bj_array_reserve(
     bj_array* array,
-    usize   capacity
+    size_t   capacity
 ) {
     bj_check(array != 0);
-    const usize bytes_capacity_req = array->bytes_payload * capacity;
+    const size_t bytes_capacity_req = array->bytes_payload * capacity;
     if(bytes_capacity_req > array->bytes_payload * array->capacity) {
         if(array->p_buffer == 0) {
             array->p_buffer = bj_malloc(bytes_capacity_req);
@@ -109,7 +109,7 @@ void bj_array_push(
     if(array->len + 1 > array->capacity) {
         bj_array_reserve(array, (array->len + 1) * 2); 
     }
-    void* dest = ((byte*)array->p_buffer) + array->bytes_payload * array->len;
+    void* dest = ((char*)array->p_buffer) + array->bytes_payload * array->len;
     if(bj_memcpy(dest, value, array->bytes_payload)) {
         ++array->len;
     }
@@ -126,11 +126,11 @@ void bj_array_pop(
 
 void* bj_array_at(
     const bj_array* array,
-    usize   at
+    size_t   at
 ) {
     bj_check_or_0(array);
     if(at < array->len) {
-        return ((byte*)array->p_buffer) + array->bytes_payload * at;
+        return ((char*)array->p_buffer) + array->bytes_payload * at;
     }
     return 0;
 }
@@ -142,14 +142,14 @@ void* bj_array_data(
     return array->p_buffer;
 }
 
-usize bj_array_len(
+size_t bj_array_len(
     const bj_array* array
 ) {
     bj_check_or_0(array);
     return array->len;
 }
 
-usize bj_array_capacity(
+size_t bj_array_capacity(
     const bj_array* array
 ) {
     bj_check_or_0(array);

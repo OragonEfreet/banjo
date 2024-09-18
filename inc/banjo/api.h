@@ -9,8 +9,7 @@
 /// \{
 #pragma once
 
-#ifndef NDEBUG
-#endif
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -79,21 +78,6 @@
 
 
 #endif
-
-typedef char      byte;  ///< Single byte integer
-typedef uint16_t  c16;   ///< 16-bit char type
-typedef float     f32;   ///< IEEE-754 single precision floating point number.
-typedef double    f64;   ///< IEEE-754 double precision floating point number.
-typedef int8_t    i8;    ///< 8 bit signed integer.
-typedef uint8_t   u8;    ///< 8 bit unsigned integer.
-typedef int16_t   i16;   ///< 16 signed integer.
-typedef uint16_t  u16;   ///< 16 unsigned integer.
-typedef int32_t   i32;   ///< 32 signed integer.
-typedef uint32_t  u32;   ///< 32 unsigned integer.
-typedef int64_t   i64;   ///< 64 signed integer.
-typedef ptrdiff_t size;  ///< Signed integer type used for signed representatin of memory sizes.
-typedef size_t    usize; ///< Unsigned integer type which can hold the size of any memory allocation or data structure.
-typedef uintptr_t uptr;  ///< Representation of a pointer value as an int
 
 /// Structure holding build information of the binary
 typedef struct {

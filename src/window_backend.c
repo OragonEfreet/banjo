@@ -12,10 +12,10 @@ struct bj_window_t {
 static bj_window* fake_window_new(
     bj_window_backend* p_backend,
     const char* p_title,
-    u16 x,
-    u16 y,
-    u16 width,
-    u16 height
+    uint16_t x,
+    uint16_t y,
+    uint16_t width,
+    uint16_t height
 ) {
     static bj_window window;
     return &window;

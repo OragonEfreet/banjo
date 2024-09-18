@@ -9,6 +9,7 @@
 #pragma once
 
 #include <banjo/api.h>
+#include <banjo/error.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Structure representing a stream of data
@@ -25,6 +26,20 @@ typedef enum {
 } bj_seek_origin;
 
 ////////////////////////////////////////////////////////////////////////////////
+/// \brief Creates a new bj_stream for reading from a file.
+///
+/// \param p_path  The file path to open
+/// \param p_error Optional error object
+/// \return A pointer to an error object
+///
+/// The file memory is entirely copied to internal memory buffer.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT bj_stream* bj_stream_new_read_from_file(
+    const char*       p_path,
+    bj_error**        p_error
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// \brief Creates a new bj_stream for reading from a memory buffer.
 ///
 /// \param p_data Pointer to the data buffer.
@@ -33,7 +48,7 @@ typedef enum {
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_stream* bj_stream_new_read(
     const void* p_data,
-    usize length
+    size_t length
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,10 +77,20 @@ BANJO_EXPORT void bj_stream_del(
 /// It is the caller's responsibility to ensure `p_dest` has enough space
 /// to hold `count` bytes.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT usize bj_stream_read(
+BANJO_EXPORT size_t bj_stream_read(
     bj_stream* p_stream,
     void* p_dest,
-    usize count
+    size_t count
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Get the size of the stream.
+///
+/// \param p_stream Pointer to the stream instance.
+/// \return The size of the stream, in bytes
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT size_t bj_stream_len(
+    bj_stream* p_stream
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,9 +104,9 @@ BANJO_EXPORT usize bj_stream_read(
 /// The function clamps the new position to stay within the valid range
 /// of the stream, from 0 to the length of the stream.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT usize bj_stream_seek(
+BANJO_EXPORT size_t bj_stream_seek(
     bj_stream* p_stream,
-    size position,
+    ptrdiff_t position,
     bj_seek_origin from
 );
 
@@ -91,7 +116,7 @@ BANJO_EXPORT usize bj_stream_seek(
 /// \param p_stream Pointer to the stream instance.
 /// \return The current position within the stream.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT usize bj_stream_tell(
+BANJO_EXPORT size_t bj_stream_tell(
     bj_stream* p_stream
 );
 

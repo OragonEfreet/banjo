@@ -31,7 +31,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief A numeric representation of an error in Banjo.
 ///
-/// Within a \ref bj_error object, the first field is a `u32` value indicating
+/// Within a \ref bj_error object, the first field is a `uint32_t` value indicating
 /// the type of error encountered.
 ///
 /// An error code is a 32-bit value composed as follows:
@@ -61,7 +61,7 @@
 /// For example, `BJ_ERROR_INVALID_FORMAT` and `BJ_ERROR_INCORRECT_VALUE` have
 /// the same kind, which is equal to _0x04_.
 ///
-/// Every error kind has its own error code, represented by a `u32` with only
+/// Every error kind has its own error code, represented by a `uint32_t` with only
 /// the least significant byte set.
 /// For example: `BJ_ERROR_INVALID_DATA`.
 ///
@@ -125,7 +125,7 @@ typedef enum {
 /// Banjo-internals guarantee `code` to be a value of \ref bj_error_code.
 ///
 typedef struct {
-    u32         code;                                ///< Error code.
+    uint32_t         code;                                ///< Error code.
     char        message[BJ_ERROR_MESSAGE_MAX_LEN+1]; ///< Optional error description.
 } bj_error;
 
@@ -147,7 +147,7 @@ typedef struct {
 /// and the nul pointer is enforced.
 BANJO_EXPORT void bj_set_error(
     bj_error**  p_error,
-    u32         code,
+    uint32_t         code,
     const char* message
 );
 
@@ -164,7 +164,7 @@ BANJO_EXPORT void bj_set_error(
 ///
 BANJO_EXPORT bool bj_error_check(
     const bj_error* p_error,
-    u32 code
+    uint32_t code
 );
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -31,27 +31,30 @@ set(_interface_headers
 )
 
 set(_private_headers
-    src/dib.h
+    src/array_t.h
+    src/bitmap_t.h
     src/htable_t.h
     src/list_t.h
+    src/stream_t.h
+    src/window_backend.h
 )
 
 set(_sources
     src/api.c
     src/array.c
     src/bitmap.c
-    src/dib.c
+    src/bitmap_dib.c
     src/error.c
     src/htable.c
     src/list.c
     src/log.c
     src/memory.c
+    src/pixel.c
     src/rect.c
     src/stream.c
     src/system.c
     src/window.c
     src/window_backend.c
-    src/window_backend.h
 )
 
 if(MSVC)

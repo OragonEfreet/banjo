@@ -22,9 +22,16 @@ This section only shows the currently available features.
 
 ### Container types
 
-- `BjArray`: *Sequence container* that wraps a classic C-Style array.
-- `BjList`: Forward-only *linked list*.
-- `BjHashTable`: Associative array.
+- `bj_array`: *Sequence container* that wraps a classic C-Style array.
+- `bj_list`: Forward-only *linked list*.
+- `bj_htable`: Associative array.
+
+### Graphics
+
+- `bj_bitmap`, along with `bj_pixel`, used to manage various bitmap formats, including:
+  - BMP file loading
+  - Simple drawing (pixels, lines and triangles)
+  - Basic bitmap blitting
 
 ### Misc
 

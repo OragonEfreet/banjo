@@ -11,7 +11,8 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-#include <SDL2/SDL.h>
+#include "sdl_helpers.h"
+#include <SDL3/SDL_main.h>
 
 #define SPRITE_W 24
 #define SPRITE_H 24
@@ -23,29 +24,31 @@
 
 int main(int argc, char* argv[]) {
 
-    bj_bitmap* bmp_rendering = bj_bitmap_new(SPRITE_W, SPRITE_H);
-    bj_bitmap_set_clear_color(bmp_rendering, BJ_COLOR_RED);
+
+    bj_bitmap* bmp_rendering = bj_bitmap_new(SPRITE_W, SPRITE_H, BJ_PIXEL_MODE_BGR24, 0);
+    bj_bitmap_set_clear_color(bmp_rendering, bj_bitmap_pixel_value(bmp_rendering, 0xFF, 0x00, 0x00));
     bj_bitmap_clear(bmp_rendering);
 
     bj_bitmap* bmp_sprite_sheet = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
-
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         return 1;
     }
 
-    SDL_Window* window     = SDL_CreateWindow("sprite sheet - Banjo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_W, WINDOW_H, SDL_WINDOW_SHOWN);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
-    SDL_Texture* texture   = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, SPRITE_W, SPRITE_H);
+    SDL_Window* window     = SDL_CreateWindow("sprite sheet - Banjo", WINDOW_W, WINDOW_H, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, 0);
+    SDL_PixelFormat pixel_format = bj_pixel_mode_to_sdl(bj_bitmap_mode(bmp_rendering));
+    SDL_Texture* texture         = SDL_CreateTexture(renderer, pixel_format, SDL_TEXTUREACCESS_STREAMING, SPRITE_W, SPRITE_H);
+    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
 
 
-    usize frame_count = 1;
+    size_t frame_count = 1;
 
     bool quit = false;
     SDL_Event e;
     while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
-            if(e.type == SDL_KEYUP) {
+            if(e.type == SDL_EVENT_KEY_UP) {
                 quit = true;
             }
         }
@@ -55,9 +58,9 @@ int main(int argc, char* argv[]) {
             .w = 24, .h = 24
         }, bmp_rendering, &(bj_rect){.x = 0, .y = 0});
 
-        SDL_UpdateTexture(texture, 0, bj_bitmap_data(bmp_rendering), SPRITE_W * sizeof (u32));
+        SDL_UpdateTexture(texture, 0, bj_bitmap_pixels(bmp_rendering), bj_bitmap_stride(bmp_rendering));
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, 0, 0);
+        SDL_RenderTexture(renderer, texture, 0, 0);
         SDL_RenderPresent(renderer);
 
         SDL_Delay(120);
@@ -73,8 +76,6 @@ int main(int argc, char* argv[]) {
 
     bj_bitmap_del(bmp_sprite_sheet);
     bj_bitmap_del(bmp_rendering);
-
-
 
     return 0;
 }

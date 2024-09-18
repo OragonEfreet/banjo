@@ -5,7 +5,7 @@
 #include "list_t.h"
 
 bj_list* bj_list_new(
-    usize bytes_payload
+    size_t bytes_payload
 ) {
     bj_list list;
     if(bj_list_init(&list, bytes_payload) == 0) {
@@ -23,7 +23,7 @@ void bj_list_del(
 
 bj_list* bj_list_init(
     bj_list* p_instance,
-    usize    bytes_payload
+    size_t    bytes_payload
 ) {
     bj_check_or_return(bytes_payload > 0, 0);
 
@@ -58,11 +58,11 @@ void bj_list_clear(
 }
 
 
-usize bj_list_len(
+size_t bj_list_len(
     bj_list* list
 ) {
     bj_check_or_0(list);
-    usize result = 0;
+    size_t result = 0;
 
     void** p_next_block = list->p_head;
     while(p_next_block != 0) {
@@ -75,14 +75,14 @@ usize bj_list_len(
 
 void* bj_list_insert(
     bj_list* list,
-    usize index,
+    size_t index,
     void* p_data
 ) {
     bj_check_or_0(list != 0);
 
     void* p_previous_block = &list->p_head;
     void** p_next_block    = list->p_head;
-    for(usize i = 0 ; i < index && (p_next_block != 0) ; ++i) {
+    for(size_t i = 0 ; i < index && (p_next_block != 0) ; ++i) {
         p_previous_block = p_next_block;
         p_next_block     = *p_next_block;
     }
@@ -92,7 +92,7 @@ void* bj_list_insert(
     // p_previous_block gets the address of the memory holding the newly current element.
 
     // We create the new block, its first bytes must contain the address of the next block
-    u8* p_block = bj_malloc(list->bytes_entry);
+    uint8_t* p_block = bj_malloc(list->bytes_entry);
     bj_memcpy(p_block, &p_next_block, sizeof(void*));
     // While in previous block, we put the adress of the current block
     bj_memcpy(p_previous_block, &p_block, sizeof(void*)); 
@@ -120,13 +120,13 @@ void* bj_list_prepend(
 
 void* bj_list_at(
     bj_list* list,
-    usize index
+    size_t index
 ) {
     bj_check_or_0(list);
     void** p_next_block = list->p_head;
     while(p_next_block != 0) {
         if(index-- == 0) {
-            void* p_value = ((byte*)p_next_block)+sizeof(void*);
+            void* p_value = ((char*)p_next_block)+sizeof(void*);
             if(list->weak_owning) {
                 return *(void**)p_value;
             }
@@ -183,7 +183,7 @@ void* bj_list_iterator_next(
 ) {
     bj_check_or_0(iterator);
     iterator->p_current = *iterator->p_current;
-    void* p_value = ((byte*)iterator->p_current)+sizeof(void*);
+    void* p_value = ((char*)iterator->p_current)+sizeof(void*);
     if(iterator->list->weak_owning) {
         return *(void**)p_value;
     }

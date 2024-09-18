@@ -2,7 +2,7 @@
 #include "test.h"
 #include "mock_memory.h"
 
-static usize s_mem_size = sizeof(int);
+static size_t s_mem_size = sizeof(int);
 
 TEST_CASE(fallback_allocator_works) {
     void* blocks = bj_malloc(s_mem_size);
@@ -68,19 +68,19 @@ TEST_CASE(test_custom_default_allocators) {
 
     // Stack the allocated ptrs
     void* ptrs_fifo[n_ops];
-    usize ptrs_fifo_len = 0;
+    size_t ptrs_fifo_len = 0;
 
     // Stack the allocated sizes
-    usize size_fifo[n_ops];
-    usize size_fifo_len = 0;
+    size_t size_fifo[n_ops];
+    size_t size_fifo_len = 0;
 
-    for(usize i = 0 ; i < n_ops ; ++i) {
+    for(size_t i = 0 ; i < n_ops ; ++i) {
         if(allocations[i] == 0) {
             bj_free(ptrs_fifo[--ptrs_fifo_len]);
             expected.n_free += 1;
             expected.application_current_allocated -= size_fifo[(--size_fifo_len)];
         } else if(allocations[i] < 0) {
-            usize size = -allocations[i];
+            size_t size = -allocations[i];
             ptrs_fifo[ptrs_fifo_len-1] = bj_realloc(ptrs_fifo[ptrs_fifo_len-1], size);
             expected.n_reallocations += 1;
             expected.application_current_allocated += size;
@@ -90,7 +90,7 @@ TEST_CASE(test_custom_default_allocators) {
             expected.application_current_allocated -= size_fifo[size_fifo_len-1];
             size_fifo[size_fifo_len-1] = size;
         } else {
-            usize size = allocations[i];
+            size_t size = allocations[i];
             ptrs_fifo[ptrs_fifo_len++] = bj_malloc(size);
             expected.n_allocations += 1;
             expected.application_current_allocated += size;

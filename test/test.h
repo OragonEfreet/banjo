@@ -32,7 +32,7 @@ typedef struct {
     const char*           prog_name;   // Name of the curernt test progrm
     unsigned char         n_run;       // Number of test cases already finished
     unsigned char         n_fail;      // Number of failed test cases
-    usize                 n_asserts;   // Total number of checked assertions
+    size_t                 n_asserts;   // Total number of checked assertions
     int                   stop_at_err; // If 0, program continues on error
     void*                 user_data;   // User data
     sAllocationData       allocations; // Allocation Data
@@ -90,8 +90,8 @@ int terminate_context(Context* SM_CTX()) {
     return SM_CTX()->n_fail;
 }
 
-bool all_zero(void* ptr, usize byte_size) {
-    byte* b = ptr;
+bool all_zero(void* ptr, size_t byte_size) {
+    char* b = ptr;
     while(byte_size-- > 0) {
         if((*b++) != 0) {
             return false;

@@ -22,10 +22,10 @@ struct bj_window_t {
 static bj_window* x11_create_window(
     bj_window_backend* p_backend,
     const char* p_title,
-    u16 x,
-    u16 y,
-    u16 width,
-    u16 height
+    uint16_t x,
+    uint16_t y,
+    uint16_t width,
+    uint16_t height
 ) {
     x11_backend* p_x11 = (x11_backend*)p_backend;
     Window root_window = RootWindow(p_x11->display, p_x11->screen);
@@ -81,7 +81,7 @@ static bj_window_backend* x11_init_backend(
 ) {
     Display* display = XOpenDisplay(0);
     if(display == 0) {
-        bj_set_error(p_error, BJ_ERROR_INITIALIZE | X11_CANNOT_OPEN_DISPLAY, "Cannot open X11 display");
+        bj_set_error(p_error, BJ_ERROR_INITIALIZE | X11_CANNOT_OPEN_DISPLAY, "cannot open X11 display");
         return 0;
     }
 
