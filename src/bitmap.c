@@ -286,6 +286,8 @@ bool bj_bitmap_blit(
         p_dest_rect->w = blit_rect.w;
         p_dest_rect->h = blit_rect.h;
 
+        uint8_t red, green, blue;
+
         if( bj_rect_intersect(
             &(bj_rect) {.w = p_dest->width, .h = p_dest->height, },
             p_dest_rect, p_dest_rect) == true
@@ -294,10 +296,11 @@ bool bj_bitmap_blit(
                 const size_t from_y = blit_rect.y + r;
                 const size_t to_y = p_dest_rect->y + r;
                 for(size_t c = 0 ; c < p_dest_rect->w ; ++c) {
+                    bj_bitmap_rgb(p_src, blit_rect.x + c, from_y, &red, &green, &blue);
                     bj_bitmap_put_pixel(p_dest,
                         p_dest_rect->x + c,
                         to_y,
-                        bj_bitmap_get(p_src, blit_rect.x + c, from_y)
+                        bj_bitmap_pixel_value(p_dest, red, green, blue)
                     );
                 }
             }
@@ -308,3 +311,22 @@ bool bj_bitmap_blit(
 
     return false;
 }
+
+void bj_bitmap_rgb(
+    const bj_bitmap* p_bitmap,
+    size_t           x,
+    size_t           y,
+    uint8_t*         p_red,
+    uint8_t*         p_green,
+    uint8_t*         p_blue
+) {
+    bj_check(p_bitmap);
+    bj_pixel_rgb(
+        p_bitmap->mode,
+        bj_bitmap_get(p_bitmap, x, y),
+        p_red,
+        p_green,
+        p_blue
+    );
+}
+

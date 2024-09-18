@@ -34,7 +34,49 @@ static struct bitfield bitfields[] = {
     },
 };
 
-BANJO_EXPORT uint32_t bj_pixel_value(
+void bj_pixel_rgb(
+    bj_pixel_mode mode,
+    uint32_t      value,
+    uint8_t*      p_red,
+    uint8_t*      p_green,
+    uint8_t*      p_blue
+) {
+    const uint8_t type = BJ_PIXEL_GET_TYPE(mode);
+
+    switch(type) {
+        case BJ_PIXEL_TYPE_BYTES:
+        {
+            bj_check(BJ_PIXEL_GET_BPP(mode) == 24);
+
+#ifdef BJ_BIG_ENDIAN
+            *p_red   = (uint8_t)(value & 0xFF);
+            *p_green = (uint8_t)((value >> 8) & 0xFF);
+            *p_blue  = (uint8_t)((value >> 16) & 0xFF);
+#else
+            *p_blue  = (uint8_t)(value & 0xFF);
+            *p_green = (uint8_t)((value >> 8) & 0xFF);
+            *p_red   = (uint8_t)((value >> 16) & 0xFF);
+#endif
+        }
+        break;
+
+        case BJ_PIXEL_TYPE_BITFIELD:
+        {
+            const struct bitfield bf = bitfields[BJ_PIXEL_GET_LAYOUT(mode)];
+
+            *p_red   = (uint8_t)((value >> bf.red.shift) & ((1 << bf.red.bits) - 1)) << (8 - bf.red.bits);
+            *p_green = (uint8_t)((value >> bf.green.shift) & ((1 << bf.green.bits) - 1)) << (8 - bf.green.bits);
+            *p_blue  = (uint8_t)((value >> bf.blue.shift) & ((1 << bf.blue.bits) - 1)) << (8 - bf.blue.bits);
+        }
+        break;
+
+        default:
+            *p_red = *p_green = *p_blue = 0;
+            break;
+    }
+}
+
+uint32_t bj_pixel_value(
     bj_pixel_mode mode, 
     uint8_t red,
     uint8_t green,

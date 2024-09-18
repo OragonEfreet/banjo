@@ -26,6 +26,24 @@ typedef enum {
 } bj_pixel_mode;
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Gets the RGB value of a pixel given its 32-bits representation.
+///
+/// \param mode       The pixel mode
+/// \param value      The opaque pixel value
+/// \param p_red      A location to the red component
+/// \param p_green    A location to the green component
+/// \param p_blue     A location to the blue component
+///
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_pixel_rgb(
+    bj_pixel_mode mode,
+    uint32_t      value,
+    uint8_t*      p_red,
+    uint8_t*      p_green,
+    uint8_t*      p_blue
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Returns an opaque value representing a pixel color, given its RGB composition.
 ///
 /// \param mode     The pixel mode
