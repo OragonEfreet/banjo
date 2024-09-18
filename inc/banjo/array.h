@@ -25,7 +25,7 @@ typedef struct bj_array_t bj_array;
 /// \param bytes_payload Size of each element in bytes.
 /// \return A pointer to the newly created bj_array object.
 BANJO_EXPORT bj_array* bj_array_new(
-    usize bytes_payload
+    size_t bytes_payload
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,8 +42,8 @@ BANJO_EXPORT bj_array* bj_array_new(
 /// \param capacity Initial capacity of the array.
 /// \return A pointer to the newly created bj_array object.
 BANJO_EXPORT bj_array* bj_array_new_with_capacity(
-    usize bytes_payload,
-    usize capacity
+    size_t bytes_payload,
+    size_t capacity
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ BANJO_EXPORT void bj_array_shrink(
 ///       This function invalidates the array data pointer if reallocation is necessary.
 BANJO_EXPORT void bj_array_set_len(
     bj_array* array,
-    usize     len
+    size_t     len
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ BANJO_EXPORT void bj_array_set_len(
 ///       This function invalidates the array data pointer if reallocation is performed.
 BANJO_EXPORT void bj_array_reserve(
     bj_array* array,
-    usize     capacity
+    size_t     capacity
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ BANJO_EXPORT void bj_array_pop(
 /// \retval 0 if `array` is null.
 BANJO_EXPORT void* bj_array_at(
     const bj_array* array,
-    usize           at
+    size_t           at
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ BANJO_EXPORT void* bj_array_data(
 /// \return Number of elements in the array.
 ///
 /// \retval 0 if `array` is null.
-BANJO_EXPORT usize bj_array_len(
+BANJO_EXPORT size_t bj_array_len(
     const bj_array* array
 );
 
@@ -188,7 +188,7 @@ BANJO_EXPORT usize bj_array_len(
 /// \return Current capacity of the array.
 ///
 /// \retval 0 if `array` is null.
-BANJO_EXPORT usize bj_array_capacity(
+BANJO_EXPORT size_t bj_array_capacity(
     const bj_array* array
 );
 

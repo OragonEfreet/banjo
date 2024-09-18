@@ -29,7 +29,7 @@ typedef struct bj_list_t bj_list;
 /// \return A pointer to the newly created bj_list object.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_list* bj_list_new(
-    usize bytes_payload
+    size_t bytes_payload
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ BANJO_EXPORT void bj_list_clear(
 /// \param list The list object.
 /// \return An integer indicating the number of elements in the list.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT usize bj_list_len(
+BANJO_EXPORT size_t bj_list_len(
     bj_list* list
 );
 
@@ -92,7 +92,7 @@ BANJO_EXPORT usize bj_list_len(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_list_insert(
     bj_list* list,
-    usize    index,
+    size_t    index,
     void*    p_data
 );
 
@@ -129,7 +129,7 @@ BANJO_EXPORT void* bj_list_prepend(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_list_at(
     bj_list* list,
-    usize    index
+    size_t    index
 );
 
 ////////////////////////////////////////////////////////////////////////////////

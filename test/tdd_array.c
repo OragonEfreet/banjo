@@ -19,7 +19,7 @@ TEST_CASE(initialize_with_payload_gives_empty_array) {
 }
 
 TEST_CASE(nonzero_capacity_allocates_buffer) {
-    const usize capacity = 10;
+    const size_t capacity = 10;
     bj_array* p_array = bj_array_new_with_capacity_t(payload, capacity);
     REQUIRE_EQ(p_array->bytes_payload, sizeof(payload));
     REQUIRE_EQ(p_array->capacity, capacity);
@@ -51,7 +51,7 @@ TEST_CASE(clear_filled_reduces_size_to_zero) {
 TEST_CASE(clear_filled_does_not_change_capacity) {
     bj_array* p_array = bj_array_new_t(payload);
     bj_array_push(p_array, &(payload){.elem0 = 0});
-    usize capacity = bj_array_capacity(p_array);
+    size_t capacity = bj_array_capacity(p_array);
     bj_array_clear(p_array);
     REQUIRE_EQ(capacity, bj_array_capacity(p_array));
     bj_array_del(p_array);
@@ -73,14 +73,14 @@ TEST_CASE(shrink_sets_capacity_to_size) {
     payload p;
     bj_array* p_array = bj_array_new_t(payload);
 
-    for(usize len = 1 ; len <= 10 ; ++len) {
+    for(size_t len = 1 ; len <= 10 ; ++len) {
         bj_array_push(p_array, &p);
         CHECK_EQ(p_array->len, len);
         CHECK(p_array->capacity >= len);
 
         bj_array_shrink(p_array);
-        usize got_len = bj_array_len(p_array);
-        usize got_capacity = bj_array_capacity(p_array);
+        size_t got_len = bj_array_len(p_array);
+        size_t got_capacity = bj_array_capacity(p_array);
         REQUIRE_EQ(got_len, got_capacity);
     }
     bj_array_del(p_array);
@@ -89,7 +89,7 @@ TEST_CASE(shrink_sets_capacity_to_size) {
 TEST_CASE(set_greater_len_changes_len_and_capacity) {
     bj_array* p_array = bj_array_new_t(payload);
 
-    for(usize len = 0 ; len < 10 ; ++len) {
+    for(size_t len = 0 ; len < 10 ; ++len) {
         bj_array_set_len(p_array, len);
         REQUIRE_EQ(p_array->len, len);
         REQUIRE(p_array->capacity >= len);
@@ -100,7 +100,7 @@ TEST_CASE(set_greater_len_changes_len_and_capacity) {
 TEST_CASE(set_lower_len_changes_len_but_not_capacity) {
     bj_array* p_array = bj_array_new_t(payload);
 
-    usize len = 9;
+    size_t len = 9;
     do {
         bj_array_set_len(p_array, len);
         REQUIRE_EQ(p_array->len, len);
@@ -160,7 +160,7 @@ TEST_CASE(push_growth_len_by_1) {
     payload p;
     bj_array* p_array = bj_array_new_t(payload);
 
-    for(usize i = 1 ; i < 9 ; ++i) {
+    for(size_t i = 1 ; i < 9 ; ++i) {
         bj_array_push(p_array, &p);
         REQUIRE_EQ(p_array->len, i);
     }
@@ -172,9 +172,9 @@ TEST_CASE(push_growth_capacity_only_if_equals_to_len) {
     payload p;
     bj_array* p_array = bj_array_new_t(payload);
 
-    for(usize i = 1 ; i < 90 ; ++i) {
-        usize before_capacity  = p_array->capacity;
-        usize capacity_resized = (before_capacity == p_array->len);
+    for(size_t i = 1 ; i < 90 ; ++i) {
+        size_t before_capacity  = p_array->capacity;
+        size_t capacity_resized = (before_capacity == p_array->len);
 
         bj_array_push(p_array, &p);
 
@@ -204,10 +204,10 @@ TEST_CASE(pop_empty_does_nothing) {
 TEST_CASE(pop_nonempty_reduces_len_but_not_capacity_nor_pointer) {
     bj_array* p_array = bj_array_new_t(payload);
 
-    usize len = 10;
+    size_t len = 10;
     bj_array_set_len(p_array, len);
     void* buffer  = p_array->p_buffer;
-    usize capacity = p_array->capacity;
+    size_t capacity = p_array->capacity;
 
     do {
         bj_array_pop(p_array);
@@ -239,7 +239,7 @@ TEST_CASE(at_empty_returns_0) {
 TEST_CASE(at_nonempty_returns_indexed_value) {
     bj_array* p_array = bj_array_new_t(payload);
 
-    for(usize i = 0 ; i < 10 ; ++i) {
+    for(size_t i = 0 ; i < 10 ; ++i) {
 
         payload p = {.elem0 = i * 2, .elem1 = -i};
         bj_array_push(p_array, &p);

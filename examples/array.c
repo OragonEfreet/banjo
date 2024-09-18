@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
     bj_array_push(array, &a);
 
     // Get array length
-    usize len = bj_array_len(array);
+    size_t len = bj_array_len(array);
     assert(len == 1);
 
     // Remove the last element from the array
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     bj_array_clear(array);
 
     // Clearing the array doesn't change the array memory usage
-    usize capacity = bj_array_capacity(array);
+    size_t capacity = bj_array_capacity(array);
     assert(capacity >= 1);
 
     // It's possible to reallocate the array so that it only uses the necessary

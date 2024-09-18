@@ -4,7 +4,7 @@
 
 void bj_set_error(
     bj_error**  p_error,
-    u32         code,
+    uint32_t         code,
     const char* message
 ) {
     // Don't report anything if the user is not interested
@@ -29,7 +29,7 @@ void bj_set_error(
 
 bool bj_error_check(
     const bj_error* p_error,
-    u32 code
+    uint32_t code
 ) {
     return p_error && code == p_error->code;
 }

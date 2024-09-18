@@ -16,7 +16,7 @@
 /// Used in \ref bj_memory_callbacks to set the function used for custom allocations.
 typedef void* (*bj_malloc_fn)(
     void* p_user_data, //< General purpose context data.
-    usize size         //< Allocation size in bytes requested by the caller.
+    size_t size         //< Allocation size in bytes requested by the caller.
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ typedef void* (*bj_malloc_fn)(
 typedef void* (*bj_realloc_fn)(
     void* p_user_data, //< General purpose context data.
     void* p_original,  //< Initial object to reallocate.
-    usize size         //< Allocation size in bytes requested by the caller.
+    size_t size         //< Allocation size in bytes requested by the caller.
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@ typedef struct bj_memory_callbacks {
 ///
 /// \return The memory address of the newly allocated block.
 BANJO_EXPORT void* bj_malloc(
-    usize size
+    size_t size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ BANJO_EXPORT void* bj_malloc(
 /// \return The memory address of the newly allocated block.
 BANJO_EXPORT void* bj_realloc(
     void*                        p_memory,
-    usize                        size
+    size_t                        size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ BANJO_EXPORT void bj_memory_unset_defaults(void);
 BANJO_EXPORT void* bj_memcpy(
     void*       p_dest,
     const void* p_src,
-    usize       mem_size
+    size_t       mem_size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,8 +139,8 @@ BANJO_EXPORT void* bj_memcpy(
 /// \param[in] mem_size    number of bytes to fill.
 BANJO_EXPORT void bj_memset(
     void* p_dest,
-    u8    value,
-    usize mem_size
+    uint8_t    value,
+    size_t mem_size
 );
 
 /// \} // End of array memory

@@ -17,10 +17,10 @@ typedef struct bj_rect_t bj_rect;
 ////////////////////////////////////////////////////////////////////////////////
 /// Represents a rectangle with position and dimensions.
 struct bj_rect_t {
-    i16 x; ///< The x-coordinate of the rectangle's top-left corner.
-    i16 y; ///< The y-coordinate of the rectangle's top-left corner.
-    u16 w; ///< The width of the rectangle.
-    u16 h; ///< The height of the rectangle.
+    int16_t x; ///< The x-coordinate of the rectangle's top-left corner.
+    int16_t y; ///< The y-coordinate of the rectangle's top-left corner.
+    uint16_t w; ///< The width of the rectangle.
+    uint16_t h; ///< The height of the rectangle.
 };
 
 ////////////////////////////////////////////////////////////////////////////////

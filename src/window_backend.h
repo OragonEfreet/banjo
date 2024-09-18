@@ -5,7 +5,7 @@
 
 typedef struct bj_window_backend_t {
     void (*dispose)(struct bj_window_backend_t*, bj_error** p_error);
-    bj_window* (*create_window)(struct bj_window_backend_t*, const char*, u16, u16, u16, u16);
+    bj_window* (*create_window)(struct bj_window_backend_t*, const char*, uint16_t, uint16_t, uint16_t, uint16_t);
     void (*delete_window)(struct bj_window_backend_t*, bj_window*);
 } bj_window_backend;
 

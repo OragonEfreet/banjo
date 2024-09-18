@@ -1,42 +1,65 @@
-#include <banjo/error.h>
-#include <banjo/bitmap.h>
 #include <banjo/log.h>
-#include <banjo/memory.h>
+#include <banjo/stream.h>
 
 #include "bitmap_t.h"
-#include "dib.h"
+#include "pixel_t.h"
 
-#include <stdlib.h>
 #include <stdio.h>
 
-#ifdef CENTERED_AXIS
-#define S_X(x) ((p_bitmap->width / 2) + x)
-#define S_Y(y) ((p_bitmap->height / 2) - y)
-#else
-#define S_X(x) (x)
-#define S_Y(y) (y)
-#endif
-#define XY(x, y) (S_Y(y) * p_bitmap->width + S_X(x))
-#define at(bmp, x, y) bmp[XY(x, y)]
-#define put_pixel(bmp, x, y, c) at(bmp, x, y) = c
+#define ABS_INT(x) ((x) < 0 ? -(x) : (x))
+
+bj_bitmap* dib_create_bitmap_from_stream(bj_stream*, bj_error**);
+
+static size_t bitmap_stride(
+    size_t width,
+    bj_pixel_mode mode
+) {
+    switch(mode) {
+        case BJ_PIXEL_MODE_INDEXED_1:
+            return ((width + 7) / 8 + 3) & ~3;
+        case BJ_PIXEL_MODE_INDEXED_4:
+            return ((width + 1) / 2 + 3) & ~3;
+        case BJ_PIXEL_MODE_INDEXED_8:
+            return (width + 3) & ~3;
+        case BJ_PIXEL_MODE_RGB565:
+        case BJ_PIXEL_MODE_XRGB1555:
+            return (width * 2 + 3) & ~3;
+        case BJ_PIXEL_MODE_BGR24:
+            return (width * 3 + 3) & ~3;
+        case BJ_PIXEL_MODE_XRGB8888:
+            return width * 4;
+        default: break;
+
+    }
+    return 0;
+}
 
 bj_bitmap* bj_bitmap_init(
-    bj_bitmap* p_bitmap,
-    usize      width,
-    usize      height
+    bj_bitmap*      p_bitmap,
+    size_t           width,
+    size_t           height,
+    bj_pixel_mode   mode,
+    size_t           stride
 ) {
+    const size_t computed_stride = bitmap_stride(width, mode);
+    if(stride < computed_stride) {
+        stride = computed_stride;
+    }
+
     if(p_bitmap) {
         bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
-        usize bufsize = width * height;
-        if(bufsize == 0) {
-            return 0;
-        }
 
-        p_bitmap->width = width;
-        p_bitmap->height = height;
-        p_bitmap->buffer = bj_malloc(sizeof(bj_color) * bufsize);
-        p_bitmap->clear_color = BJ_COLOR_BLACK;
-        bj_bitmap_clear(p_bitmap);
+        if(stride > 0) {
+            size_t bufsize = stride * height;
+
+            p_bitmap->width = width;
+            p_bitmap->height = height;
+            p_bitmap->stride = stride;
+            p_bitmap->buffer = bj_malloc(bufsize);
+            p_bitmap->mode = mode;
+            p_bitmap->clear_color = 0x00000000;
+            bj_memset(p_bitmap->buffer, 0x00, bufsize);
+        }
     }
     return p_bitmap;
 }
@@ -50,153 +73,171 @@ void bj_bitmap_reset(
         bj_free(p_bitmap->buffer);
     }
 #ifdef BJ_FEAT_PEDANTIC
-    bj_memset(p_bitmap, 0, sizeof(bj_bitmap));
+    bj_memset(p_bitmap, 0, sizeof(bj_oldbmp));
 #endif
 }
 
-BANJO_EXPORT bj_bitmap* bj_bitmap_new(
-    usize        width,
-    usize        height
+bj_bitmap* bj_bitmap_new(
+    size_t           width,
+    size_t           height,
+    bj_pixel_mode    mode,
+    size_t           stride
 ) {
     bj_bitmap bitmap;
-    if (bj_bitmap_init(&bitmap, width, height) == 0) {
+    if(bj_bitmap_init(&bitmap, width, height, mode, stride) == 0) {
         return 0;
     }
-    return bj_memcpy(bj_malloc(sizeof(bj_bitmap)), &bitmap, sizeof(bitmap));
-}
-
-bj_bitmap* bj_bitmap_new_from_file(
-    const char*  p_path,
-    bj_error**   p_error
-) {
-    FILE* fstream  = fopen(p_path, "rb");
-    if (!fstream ) {
-        bj_set_error(p_error, BJ_ERROR_FILE_NOT_FOUND, "Cannot open BMP file");
-        return 0;
-    }
-
-    u8* buffer = bj_malloc(BJ_DIB_HEADER_SIZE);
-    if(buffer == 0) {
-        bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "Cannot allocate buffer");
-        bj_free(buffer);
-        fclose(fstream);
-        return 0;
-    }
-
-    size_t bytes_read = fread(buffer, 1, BJ_DIB_HEADER_SIZE, fstream);
-    if(bytes_read != BJ_DIB_HEADER_SIZE) {
-        bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, "BMP File does not meet expected size");
-        bj_free(buffer);
-        fclose(fstream);
-        return 0;
-    }
-
-    bj_error* p_inner_error = 0;
-
-    dib_file_header file_header;
-    dib_read_file_header(&file_header, buffer, &p_inner_error);
-    if(p_inner_error) {
-        bj_free(buffer);
-        fclose(fstream);
-        bj_forward_error(p_inner_error, p_error);
-        return 0;
-    }
-    bj_free(buffer);
-
-    const usize dib_size = file_header.file_size - BJ_DIB_HEADER_SIZE;
-    buffer = bj_malloc(dib_size); 
-    if(buffer == 0) {
-        bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "Cannot allocate buffer");
-        fclose(fstream);
-        return 0;
-    }
-
-    bytes_read = fread(buffer, 1, dib_size, fstream);
-    fclose(fstream);
-    if(bytes_read != dib_size) {
-        bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, "BMP File does not meet expected size");
-        bj_free(buffer);
-        return 0;
-    }
-
-    bj_bitmap bitmap;
-    dib_read_bitmap(&bitmap, buffer, dib_size, file_header.data_offset - BJ_DIB_HEADER_SIZE, &p_inner_error);
-
-    bj_free(buffer);
-    if(p_inner_error) {
-        bj_forward_error(p_inner_error, p_error);
-        return 0;
-    }
-
     return bj_memcpy(bj_malloc(sizeof(bj_bitmap)), &bitmap, sizeof(bj_bitmap));
 }
 
-BANJO_EXPORT void bj_bitmap_del(
-    bj_bitmap* p_bitmap
+void bj_bitmap_del(
+    bj_bitmap*     p_bitmap
 ) {
     bj_bitmap_reset(p_bitmap);
     bj_free(p_bitmap);
 }
 
-void bj_bitmap_clear(
-    bj_bitmap* p_bitmap
+size_t bj_bitmap_width(
+    bj_bitmap*     p_bitmap
 ) {
-    usize bufsize = p_bitmap->width * p_bitmap->height;
-    for(usize i = 0 ; i < bufsize; ++i) {
-        p_bitmap->buffer[i] = p_bitmap->clear_color;
-    }
+    bj_check_or_0(p_bitmap);
+    return p_bitmap->width;
 }
 
-void bj_bitmap_set_clear_color(
-    bj_bitmap* p_bitmap,
-    bj_color clear_color
+size_t bj_bitmap_height(
+    bj_bitmap*     p_bitmap
 ) {
-    p_bitmap->clear_color = clear_color;
+    bj_check_or_0(p_bitmap);
+    return p_bitmap->height;
 }
 
-bj_color* bj_bitmap_data(
+int bj_bitmap_mode( 
     bj_bitmap* p_bitmap
 ) {
+    bj_check_or_0(p_bitmap);
+    return p_bitmap->mode;
+}
+
+int bj_bitmap_stride( 
+    bj_bitmap* p_bitmap
+) {
+    bj_check_or_0(p_bitmap);
+    return p_bitmap->stride;
+}
+
+
+void* bj_bitmap_pixels(
+    bj_bitmap*     p_bitmap
+) {
+    bj_check_or_0(p_bitmap);
     return p_bitmap->buffer;
 }
 
-void bj_bitmap_put(
+uint32_t bj_bitmap_pixel_value(
     bj_bitmap* p_bitmap,
-    usize x, usize y,
-    bj_color color
+    uint8_t red,
+    uint8_t green,
+    uint8_t blue
 ) {
-    put_pixel(p_bitmap->buffer, x, y, color);
+    bj_check_or_0(p_bitmap);
+    return bj_pixel_value(p_bitmap->mode, red, green, blue);
 }
 
-bj_color bj_bitmap_get(
-    const bj_bitmap* p_bitmap,
-    usize            x,
-    usize            y
+// TODO this code is potentially underperformant.
+// Doesn't take alignment into account, just uses bytes memcpy
+static void buffer_set_pixel(size_t x, size_t y, size_t stride, void* buffer, int32_t value, size_t bpp) {
+    const size_t   bit_offset        = y * stride * 8 + x * bpp;
+    const size_t   byte_offset       = bit_offset / 8;
+    const size_t   bit_in_first_byte = bit_offset % 8;
+    const uint32_t aligned_value     = value << bit_in_first_byte;
+    const size_t   bytes_to_copy     = (bit_in_first_byte + bpp + 7) / 8;
+    bj_memcpy((uint8_t*)buffer + byte_offset, &aligned_value, bytes_to_copy);
+}
+
+static uint32_t buffer_get_pixel(size_t x, size_t y, size_t stride, void* buffer, size_t bpp) {
+    const size_t bit_offset = y * stride * 8 + x * bpp;
+    const size_t byte_offset = bit_offset / 8;
+    const size_t bit_in_first_byte = bit_offset % 8;
+    size_t bytes_to_copy = (bit_in_first_byte + bpp + 7) / 8;
+    uint32_t pixel_value = 0;
+    bj_memcpy(&pixel_value, (uint8_t*)buffer + byte_offset, bytes_to_copy);
+    pixel_value >>= bit_in_first_byte;
+    pixel_value &= (1u << bpp) - 1;
+    return pixel_value;
+}
+
+void bj_bitmap_put_pixel(
+    bj_bitmap* p_bitmap,
+    size_t x,
+    size_t y,
+    uint32_t pixel
 ) {
-    return at(p_bitmap->buffer, x, y);
+    bj_check(p_bitmap);
+    bj_check(x < p_bitmap->width && y < p_bitmap->height);
+    buffer_set_pixel(x, y, p_bitmap->stride, p_bitmap->buffer, pixel, BJ_PIXEL_GET_BPP(p_bitmap->mode));
+}
+
+uint32_t bj_bitmap_get(
+    const bj_bitmap* p_bitmap,
+    size_t           x,
+    size_t           y
+) {
+    bj_check_or_0(p_bitmap);
+    bj_check_or_0(x < p_bitmap->width && y < p_bitmap->height);
+    return buffer_get_pixel(x, y, p_bitmap->stride, p_bitmap->buffer, BJ_PIXEL_GET_BPP(p_bitmap->mode));
+}
+
+bj_bitmap* bj_bitmap_new_from_file(
+    const char*       p_path,
+    bj_error**        p_error
+) {
+    bj_error* p_inner_error = 0;
+
+    bj_stream* p_stream = bj_stream_new_read_from_file(p_path, &p_inner_error);
+    if(p_inner_error) {
+        bj_forward_error(p_inner_error, p_error);
+        return 0;
+    }
+
+    bj_bitmap* p_bitmap = dib_create_bitmap_from_stream(p_stream, p_error);
+    bj_stream_del(p_stream);
+    return p_bitmap;
+}
+
+void bj_bitmap_clear(bj_bitmap* p_bitmap) {
+    bj_check(p_bitmap);
+
+    bj_bitmap_draw_line(p_bitmap, (bj_pixel){0, 0}, (bj_pixel){p_bitmap->width - 1, 0}, p_bitmap->clear_color);
+    if (p_bitmap->height > 1) {
+        void* first_row = p_bitmap->buffer;
+        for (size_t y = 1; y < p_bitmap->height; ++y) {
+            void* dest_row = (uint8_t*)p_bitmap->buffer + (p_bitmap->stride * y);
+            bj_memcpy(dest_row, first_row, p_bitmap->stride);
+        }
+    }
 }
 
 #define X 0
 #define Y 1
 
-void bj_bitmap_draw_line(
-    bj_bitmap* bmp,
-    bj_pixel p0,
-    bj_pixel p1,
-    bj_color c
+BANJO_EXPORT void bj_bitmap_draw_line(
+    bj_bitmap*     bmp,
+    bj_pixel       p0,
+    bj_pixel       p1,
+    uint32_t       c
 ) {
     /// Bresenham's line algorithm
     int x0 = p0[X]; int y0 = p0[Y];
     const int x1 = p1[X]; const int y1 = p1[Y];
 
-    const int dx = abs(x1 - x0);
-    const int dy = abs(y1 - y0);
+    const int dx = ABS_INT(x1 - x0);
+    const int dy = ABS_INT(y1 - y0);
     const int sx = (x0 < x1) ? 1 : -1;
     const int sy = (y0 < y1) ? 1 : -1;
     int err = dx - dy;
 
     while (1) {
-        bj_bitmap_put(bmp, x0, y0, c);
+        bj_bitmap_put_pixel(bmp, x0, y0, c);
         if (x0 == x1 && y0 == y1) break;
         const int e2 = 2 * err;
         if (e2 > -dy) {
@@ -215,20 +256,27 @@ void bj_bitmap_draw_triangle(
     bj_pixel p0,
     bj_pixel p1,
     bj_pixel p2,
-    bj_color c
+    uint32_t c
 ) {
     bj_bitmap_draw_line(bmp, p0, p1, c);
     bj_bitmap_draw_line(bmp, p1, p2, c);
     bj_bitmap_draw_line(bmp, p2, p0, c);
 }
 
-bool bj_bitmap_blit(
-    const bj_bitmap* p_src,
-    const bj_rect*   p_src_rect,
-    bj_bitmap*       p_dest,
-    bj_rect*         p_dest_rect
+void bj_bitmap_set_clear_color(
+    bj_bitmap* p_bitmap,
+    uint32_t clear_color
 ) {
+    bj_check(p_bitmap);
+    p_bitmap->clear_color = clear_color;
+}
 
+bool bj_bitmap_blit(
+    const bj_bitmap*  p_src,
+    const bj_rect*    p_src_rect,
+    bj_bitmap*        p_dest,
+    bj_rect*          p_dest_rect
+) {
     // Clip the source rect
     bj_rect blit_rect;
     if( bj_rect_intersect(
@@ -242,11 +290,11 @@ bool bj_bitmap_blit(
             &(bj_rect) {.w = p_dest->width, .h = p_dest->height, },
             p_dest_rect, p_dest_rect) == true
         ) {
-            for(usize r = 0 ; r < p_dest_rect->h ; ++r) {
-                const usize from_y = blit_rect.y + r;
-                const usize to_y = p_dest_rect->y + r;
-                for(usize c = 0 ; c < p_dest_rect->w ; ++c) {
-                    bj_bitmap_put(p_dest,
+            for(size_t r = 0 ; r < p_dest_rect->h ; ++r) {
+                const size_t from_y = blit_rect.y + r;
+                const size_t to_y = p_dest_rect->y + r;
+                for(size_t c = 0 ; c < p_dest_rect->w ; ++c) {
+                    bj_bitmap_put_pixel(p_dest,
                         p_dest_rect->x + c,
                         to_y,
                         bj_bitmap_get(p_src, blit_rect.x + c, from_y)

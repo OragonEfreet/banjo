@@ -5,15 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-static inline void* fallback_malloc(void* user_data, usize size) {
+static void* fallback_malloc(void* user_data, size_t size) {
     return malloc(size);
 }
 
-static inline void* fallback_realloc(void* user_data, void* original, usize size) {
+static void* fallback_realloc(void* user_data, void* original, size_t size) {
     return realloc(original, size);
 }
 
-static inline void fallback_free(void* user_data, void* ptr) {
+static void fallback_free(void* user_data, void* ptr) {
     free(ptr);
 }
 
@@ -23,11 +23,11 @@ static bj_memory_callbacks s_default = {
     .fn_free         = fallback_free,
 };
 
-void* bj_malloc(usize size) {
+void* bj_malloc(size_t size) {
     return s_default.fn_allocation(s_default.p_user_data, size);
 }
 
-void* bj_realloc(void* p_memory, usize size) {
+void* bj_realloc(void* p_memory, size_t size) {
     return s_default.fn_reallocation(s_default.p_user_data, p_memory, size);
 }
 
@@ -63,15 +63,15 @@ void bj_memory_unset_defaults(void) {
 void* bj_memcpy(
     void*       p_dest,
     const void* p_src,
-    usize       mem_size
+    size_t       mem_size
 ) {
     return memcpy(p_dest, p_src, mem_size);
 }
 
 void bj_memset(
     void* p_dest,
-    u8    value,
-    usize num
+    uint8_t    value,
+    size_t num
 ) {
     memset(p_dest, value, num);
 }

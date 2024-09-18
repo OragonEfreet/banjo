@@ -19,8 +19,8 @@
 #include <banjo/memory.h>
 
 /// Function type for hashing keys.
-typedef u32 (*bj_hash_fn)(
-    const void* p_data, usize size
+typedef uint32_t (*bj_hash_fn)(
+    const void* p_data, size_t size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,8 +35,8 @@ typedef struct bj_htable_t bj_htable;
 /// \return A pointer to the newly created bj_htable object.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_htable* bj_htable_new(
-    usize bytes_key,
-    usize bytes_value
+    size_t bytes_key,
+    size_t bytes_value
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ BANJO_EXPORT void* bj_htable_get(
 /// \param table The table object.
 /// \return The number of elements in the table.
 ///
-BANJO_EXPORT usize bj_htable_len(
+BANJO_EXPORT size_t bj_htable_len(
     const bj_htable* table
 );
 

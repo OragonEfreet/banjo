@@ -6,13 +6,13 @@
 #include <stdlib.h>
 
 typedef struct  {
-    usize actual_max_allocated;
-    usize actual_current_allocated;
-    usize application_max_allocated;
-    usize application_current_allocated;
-    u16   n_allocations;
-    u16   n_reallocations;
-    u16   n_free;
+    size_t actual_max_allocated;
+    size_t actual_current_allocated;
+    size_t application_max_allocated;
+    size_t application_current_allocated;
+    uint16_t   n_allocations;
+    uint16_t   n_reallocations;
+    uint16_t   n_free;
 } sAllocationData;
 
 #define CHECK_CLEAN_ALLOC(ALLOC) \
@@ -32,18 +32,18 @@ typedef struct  {
 /* } */
 
 typedef struct {
-    usize appsize;
+    size_t appsize;
     void* ptr;
 } block_allocation;
 
-static usize block_allocation_size = sizeof(block_allocation);
+static size_t block_allocation_size = sizeof(block_allocation);
 
-static void* mock_malloc(void* p_user_data, usize appsize) {
+static void* mock_malloc(void* p_user_data, size_t appsize) {
     if (p_user_data == 0) {
         return malloc(appsize);
     }
 
-    usize memsize = appsize + block_allocation_size;
+    size_t memsize = appsize + block_allocation_size;
 
     block_allocation* meta = malloc(memsize);
     bj_memset(meta, 0, memsize);
@@ -77,8 +77,8 @@ void mock_free(void* p_user_data, void* pAppPtr) {
         block_allocation* meta = pAppPtr;
         meta -= 1;
 
-        usize appsize = meta->appsize;
-        usize memsize = appsize + block_allocation_size;
+        size_t appsize = meta->appsize;
+        size_t memsize = appsize + block_allocation_size;
 
         bj_memset(meta, 0, memsize);
         free(meta);
@@ -92,7 +92,7 @@ void mock_free(void* p_user_data, void* pAppPtr) {
     }
 }
 
-static void* mock_realloc(void* p_user_data, void* pAppPtr, usize appsize) {
+static void* mock_realloc(void* p_user_data, void* pAppPtr, size_t appsize) {
     if(p_user_data == 0) {
         return realloc(pAppPtr, appsize);
     }
