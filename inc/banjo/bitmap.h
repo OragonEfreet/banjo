@@ -173,6 +173,26 @@ BANJO_EXPORT int bj_bitmap_stride(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Gets the RGB value of a pixel given its 32-bits representation.
+///
+/// \param p_bitmap   The bitmap object
+/// \param x          The X coordinate of the pixel.
+/// \param y          The Y coordinate of the pixel.
+/// \param p_red      A location to the red component
+/// \param p_green    A location to the green component
+/// \param p_blue     A location to the blue component
+///
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_bitmap_rgb(
+    const bj_bitmap* p_bitmap,
+    size_t           x,
+    size_t           y,
+    uint8_t*         p_red,
+    uint8_t*         p_green,
+    uint8_t*         p_blue
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Returns an opaque value representing a pixel color, given its RGB composition.
 ///
 /// \param p_bitmap The bitmap object.
