@@ -55,3 +55,16 @@ void bj_window_del(
     bj_trace("Deleting Window");
     s_backend->delete_window(s_backend, p_window);
 }
+
+BANJO_EXPORT void bj_poll_events(
+    void
+) {
+    s_backend->poll_events(s_backend);
+}
+
+bool bj_window_must_close(
+    bj_window* p_window
+) {
+    return s_backend->must_close(s_backend, p_window);
+
+}

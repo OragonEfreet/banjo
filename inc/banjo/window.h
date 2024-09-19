@@ -40,14 +40,15 @@ BANJO_EXPORT void bj_window_del(
     bj_window* p_window
 );
 
-////////////////////////////////////////////////////////////////////////////////
-/// Deletes a bj_window object and releases associated memory.
-///
-/// \param p_window Pointer to the window object to delete.
-////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_window_del(
+
+BANJO_EXPORT void bj_poll_events(
+    void
+);
+
+BANJO_EXPORT bool bj_window_must_close(
     bj_window* p_window
 );
+
 
 
 

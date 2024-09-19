@@ -18,6 +18,10 @@ int main(int argc, char* argv[]) {
 
     bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600);
 
+    while(!bj_window_must_close(window)) {
+        bj_poll_events();
+    }
+
     bj_window_del(window);
 
     bj_system_dispose(0);

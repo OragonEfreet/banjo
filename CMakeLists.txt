@@ -18,7 +18,6 @@ set(_interface_headers
     inc/banjo/bitmap.h
     inc/banjo/color.h
     inc/banjo/error.h
-    inc/banjo/event.h
     inc/banjo/graphics.h
     inc/banjo/htable.h
     inc/banjo/io.h
