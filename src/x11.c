@@ -11,13 +11,15 @@
 
 typedef struct {
     bj_window_backend fns;
-    Display* display;
-    int screen;
+    Display*          display;
+    int               screen;
+    Atom              wm_delete_window;
 } x11_backend;
 
 struct bj_window_t {
     Window handle;
 };
+
 
 static bj_window* x11_create_window(
     bj_window_backend* p_backend,
@@ -30,15 +32,17 @@ static bj_window* x11_create_window(
     x11_backend* p_x11 = (x11_backend*)p_backend;
     Window root_window = RootWindow(p_x11->display, p_x11->screen);
 
-    XSetWindowAttributes attributes;
-    attributes.background_pixel = WhitePixel(p_x11->display, p_x11->screen);
-    attributes.border_pixel     = BlackPixel(p_x11->display, p_x11->screen);
-    attributes.event_mask       = ButtonPress;
+    XSetWindowAttributes attributes = {
+        .background_pixel = BlackPixel(p_x11->display, p_x11->screen),
+        .border_pixel     = BlackPixel(p_x11->display, p_x11->screen),
+        .event_mask       = KeyReleaseMask | KeyPressMask,
+    };
 
     bj_window window = { 
         .handle = XCreateWindow(
             p_x11->display, root_window,
-            x, y, width, height, 1,
+            x, y,
+            width, height, 1,
             DefaultDepth(p_x11->display, p_x11->screen),
             InputOutput,
             DefaultVisual(p_x11->display, p_x11->screen),
@@ -46,13 +50,43 @@ static bj_window* x11_create_window(
         )
     };
 
+    XSetWMProtocols(
+        p_x11->display, window.handle,
+        &p_x11->wm_delete_window, 1
+    );
+
+
     XMapWindow(p_x11->display, window.handle);
     XSync(p_x11->display, 0);
 
-    // Check errors
     
     bj_window* p_window = bj_malloc(sizeof(bj_window));
     bj_memcpy(p_window, &window, sizeof(bj_window));
+
+    ///----------------------------------------------
+    int quit = 0;
+    while(!quit) {
+        XEvent event = {0};
+        XNextEvent(p_x11->display, &event);
+
+        switch(event.type) {
+            case KeyRelease:
+                bj_info("Some key is released");
+                break;
+            case KeyPress:
+                bj_info("Some key is pressed");
+                break;
+            case ClientMessage:
+                if((Atom)event.xclient.data.l[0] == p_x11->wm_delete_window) {
+                    quit = true;
+                }
+                break;
+            default:
+                break;
+
+        }
+    }
+    ///----------------------------------------------
 
     return p_window;
 }
@@ -95,6 +129,7 @@ static bj_window_backend* x11_init_backend(
 
     p_x11->display = display;
     p_x11->screen = DefaultScreen(display);
+    p_x11->wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
     return (bj_window_backend*)p_x11;
 }
 

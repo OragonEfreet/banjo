@@ -3,6 +3,10 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
+#include <unistd.h>
+
+#include <X11/Xlib.h>
+
 int main(int argc, char* argv[]) {
 
     bj_error* p_error = 0;
