@@ -18,6 +18,7 @@ set(_interface_headers
     inc/banjo/bitmap.h
     inc/banjo/color.h
     inc/banjo/error.h
+    inc/banjo/event.h
     inc/banjo/graphics.h
     inc/banjo/htable.h
     inc/banjo/io.h
@@ -36,6 +37,7 @@ set(_private_headers
     src/htable_t.h
     src/list_t.h
     src/stream_t.h
+    src/window_t.h
     src/window_backend.h
 )
 

@@ -40,10 +40,10 @@ void system_dispose_window(
 
 bj_window* bj_window_new(
     const char* p_title,
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height
+    uint16_t    x,
+    uint16_t    y,
+    uint16_t    width,
+    uint16_t    height
 ) {
     bj_trace("Creating Window");
     return s_backend->create_window(s_backend, p_title, x, y, width, height);
@@ -67,4 +67,12 @@ bool bj_window_must_close(
 ) {
     return s_backend->must_close(s_backend, p_window);
 
+}
+
+BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
+    bj_window*              p_window,
+    bj_window_key_event_t   p_callback
+) {
+
+    return 0;
 }

@@ -7,6 +7,7 @@
 #include <X11/Xutil.h>
 
 #include "window_backend.h"
+#include "window_t.h"
 
 #define X11_CANNOT_OPEN_DISPLAY 0x00010000
 
@@ -19,10 +20,12 @@ typedef struct {
     XContext          window_context;
 } x11_backend;
 
-struct bj_window_t {
-    Window handle;
-    bool   must_close;
-};
+typedef struct {
+    struct bj_window_t common;
+    Window             handle;
+    bool               must_close;
+} x11_window;
+
 
 static bj_window* x11_create_window(
     bj_window_backend* p_backend,
@@ -41,7 +44,7 @@ static bj_window* x11_create_window(
         .event_mask       = KeyReleaseMask | KeyPressMask,
     };
 
-    bj_window window = { 
+    x11_window window = { 
         .handle = XCreateWindow(
             p_x11->display, root_window,
             x, y,
@@ -64,8 +67,8 @@ static bj_window* x11_create_window(
     XSync(p_x11->display, 0);
 
     
-    bj_window* p_window = bj_malloc(sizeof(bj_window));
-    bj_memcpy(p_window, &window, sizeof(bj_window));
+    x11_window* p_window = bj_malloc(sizeof(x11_window));
+    bj_memcpy(p_window, &window, sizeof(x11_window));
 
     XSaveContext(
         p_x11->display,
@@ -99,13 +102,14 @@ static bj_window* x11_create_window(
     /* } */
     /* ///---------------------------------------------- */
 
-    return p_window;
+    return (bj_window*)p_window;
 }
 
 static void x11_delete_window(
     bj_window_backend* p_backend,
-    bj_window* p_window
+    bj_window* p_abstract_window
 ) {
+    x11_window* p_window = (x11_window*)p_abstract_window;
     x11_backend* p_x11 = (x11_backend*)p_backend;
     XDeleteContext(p_x11->display, p_window->handle, p_x11->window_context);
     XUnmapWindow(p_x11->display, p_window->handle);
@@ -138,7 +142,7 @@ static void x11_poll_events(
 
         // Here switch events that do not need window
 
-        bj_window* p_window = 0;
+        x11_window* p_window = 0;
         const int context_res = XFindContext(
             p_x11->display,
             event.xany.window,
@@ -176,9 +180,9 @@ static void x11_poll_events(
 
 static bool x11_must_close(
     bj_window_backend* p_backend,
-    bj_window* p_window
+    bj_window* p_abstract_window
 ) {
-    return p_window->must_close;
+    return ((x11_window*)p_abstract_window)->must_close;
 }
 
 static bj_window_backend* x11_init_backend(

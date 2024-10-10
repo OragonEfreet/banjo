@@ -10,7 +10,6 @@
 /// Opaque typedef for the window type
 typedef struct bj_window_t bj_window;
 
-
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new bj_window with the specified attributes
 ///
@@ -49,7 +48,12 @@ BANJO_EXPORT bool bj_window_must_close(
     bj_window* p_window
 );
 
+typedef void(* bj_window_key_event_t)(bj_window*);
 
+BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
+    bj_window*              p_window,
+    bj_window_key_event_t   p_callback
+);
 
 
 
