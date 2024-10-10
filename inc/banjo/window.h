@@ -5,6 +5,7 @@
 #pragma once
 
 #include <banjo/api.h>
+#include <banjo/event.h>
 #include <banjo/memory.h>
 
 /// Opaque typedef for the window type
@@ -44,11 +45,15 @@ BANJO_EXPORT void bj_poll_events(
     void
 );
 
-BANJO_EXPORT bool bj_window_must_close(
+BANJO_EXPORT void bj_window_set_should_close(
     bj_window* p_window
 );
 
-typedef void(* bj_window_key_event_t)(bj_window*);
+BANJO_EXPORT bool bj_window_should_close(
+    bj_window* p_window
+);
+
+typedef void(* bj_window_key_event_t)(bj_window*, bj_key_event_mode mode);
 
 BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
     bj_window*              p_window,

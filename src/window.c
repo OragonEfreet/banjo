@@ -2,6 +2,7 @@
 #include <banjo/log.h>
 #include <banjo/window.h>
 
+#include "window_t.h"
 #include "window_backend.h"
 
 extern bj_window_backend_create_info x11_backend_create_info;
@@ -62,17 +63,35 @@ BANJO_EXPORT void bj_poll_events(
     s_backend->poll_events(s_backend);
 }
 
-bool bj_window_must_close(
+bool bj_window_should_close(
     bj_window* p_window
 ) {
-    return s_backend->must_close(s_backend, p_window);
-
+    return p_window->must_close;
 }
 
-BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
+bj_window_key_event_t bj_window_set_key_event(
     bj_window*              p_window,
-    bj_window_key_event_t   p_callback
+    bj_window_key_event_t   p_event
 ) {
+    bj_check_or_0(p_window);
+    bj_window_key_event_t p_replaced = p_window->p_key_event;
+    p_window->p_key_event = p_event;
+    return p_replaced;
+}
 
-    return 0;
+void bj_window_set_should_close(
+    bj_window* p_window
+) {
+    bj_check(p_window);
+    p_window->must_close = true;
+}
+
+void bj_window_input_key(
+    bj_window* p_window,
+    bj_key_event_mode mode
+) {
+    bj_check(p_window);
+    if(!!p_window->p_key_event) {
+        p_window->p_key_event(p_window, mode);
+    }
 }

@@ -23,7 +23,6 @@ typedef struct {
 typedef struct {
     struct bj_window_t common;
     Window             handle;
-    bool               must_close;
 } x11_window;
 
 
@@ -45,6 +44,9 @@ static bj_window* x11_create_window(
     };
 
     x11_window window = { 
+        .common = {
+            .must_close = false,
+        },
         .handle = XCreateWindow(
             p_x11->display, root_window,
             x, y,
@@ -54,7 +56,6 @@ static bj_window* x11_create_window(
             DefaultVisual(p_x11->display, p_x11->screen),
             CWBackPixel | CWBorderPixel | CWEventMask, &attributes
         ),
-        .must_close = false,
     };
 
     XSetWMProtocols(
@@ -83,7 +84,7 @@ static bj_window* x11_create_window(
     /*     XEvent event = {0}; */
     /*     XNextEvent(p_x11->display, &event); */
 
-    /*     switch(event.type) { */
+    /*     switch(event->type) { */
     /*         case KeyRelease: */
     /*             bj_info("Some key is released"); */
     /*             break; */
@@ -91,7 +92,7 @@ static bj_window* x11_create_window(
     /*             bj_info("Some key is pressed"); */
     /*             break; */
     /*         case ClientMessage: */
-    /*             if((Atom)event.xclient.data.l[0] == p_x11->wm_delete_window) { */
+    /*             if((Atom)event->xclient.data.l[0] == p_x11->wm_delete_window) { */
     /*                 quit = true; */
     /*             } */
     /*             break; */
@@ -127,6 +128,61 @@ static void x11_dispose_backend(
     bj_free(p_backend);
 }
 
+static void x11_dispatch_event(
+    x11_backend*  p_x11,
+    const XEvent* event
+) {
+    // Here switch events that do not need window
+
+    x11_window* p_window = 0;
+    const int context_res = XFindContext(
+        p_x11->display,
+        event->xany.window,
+        p_x11->window_context,
+        (XPointer*) &p_window
+    );
+
+    if (context_res != 0) {
+        return;
+    }
+
+    switch(event->type) {
+
+        case ClientMessage:
+
+            if (event->xclient.message_type == p_x11->wm_protocols) {
+                
+                if (event->xclient.data.l[0] == p_x11->wm_delete_window) {
+                    bj_window_set_should_close(&p_window->common);
+                }
+            }
+            return;
+
+        case KeyRelease:
+            if (XEventsQueued(p_x11->display, QueuedAfterReading))
+            {
+                XEvent next;
+                XPeekEvent(p_x11->display, &next);
+
+                if (next.type == KeyPress &&
+                    next.xkey.window == event->xkey.window &&
+                    next.xkey.keycode == event->xkey.keycode)
+                {
+                    if ((next.xkey.time - event->xkey.time) < 20)
+                    {
+                        return;
+                    }
+                }
+            }
+            bj_window_input_key((bj_window*)p_window, BJ_KEY_RELEASED);
+            return;
+        case KeyPress:
+            bj_window_input_key((bj_window*)p_window, BJ_KEY_PRESSED);
+            return;
+    }
+
+}
+
 
 static void x11_poll_events(
     bj_window_backend* p_backend
@@ -139,50 +195,10 @@ static void x11_poll_events(
     while(XQLength(p_x11->display)) {
         XEvent event;
         XNextEvent(p_x11->display, &event);
-
-        // Here switch events that do not need window
-
-        x11_window* p_window = 0;
-        const int context_res = XFindContext(
-            p_x11->display,
-            event.xany.window,
-            p_x11->window_context,
-            (XPointer*) &p_window
-        );
-
-        if (context_res != 0) {
-            break;
-        }
-
-        switch(event.type) {
-
-            case ClientMessage:
-
-                if (event.xclient.message_type == p_x11->wm_protocols) {
-                    
-
-                    if (event.xclient.data.l[0] == p_x11->wm_delete_window)
-                    {
-                        p_window->must_close = true;
-                        /* _glfwInputWindowCloseRequest(window); */
-                    }
-                }
-                                
-                break;
-
-            default:
-                break;
-        }
+        x11_dispatch_event(p_x11, &event);
     }
     XFlush(p_x11->display);
 
-}
-
-static bool x11_must_close(
-    bj_window_backend* p_backend,
-    bj_window* p_abstract_window
-) {
-    return ((x11_window*)p_abstract_window)->must_close;
 }
 
 static bj_window_backend* x11_init_backend(
@@ -198,11 +214,10 @@ static bj_window_backend* x11_init_backend(
 
     x11_backend* p_x11 = bj_malloc(sizeof(x11_backend));
 
-    p_x11->fns.dispose = x11_dispose_backend;
+    p_x11->fns.dispose       = x11_dispose_backend;
     p_x11->fns.create_window = x11_create_window;
     p_x11->fns.delete_window = x11_delete_window;
     p_x11->fns.poll_events   = x11_poll_events;
-    p_x11->fns.must_close    = x11_must_close;
 
     p_x11->display = display;
     p_x11->screen = DefaultScreen(display);
@@ -211,7 +226,6 @@ static bj_window_backend* x11_init_backend(
     p_x11->window_context = XUniqueContext();
     return (bj_window_backend*)p_x11;
 }
-
 
 bj_window_backend_create_info x11_backend_create_info = {
     .name = "x11",
