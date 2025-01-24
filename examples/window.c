@@ -3,10 +3,6 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
-#include <unistd.h>
-
-#include <X11/Xlib.h>
-
 void key_event(bj_window* p_window, bj_event_action mode, unsigned int) {
     switch(mode) {
         case BJ_PRESS:
