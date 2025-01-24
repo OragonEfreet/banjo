@@ -3,7 +3,6 @@
 #include <banjo/window.h>
 
 #include <stdio.h>
-#include <unistd.h>
 
 void cursor_event(bj_window* p_window, int x, int y) {
     printf("Cursor event, window %p, (%d,%d)\n",
