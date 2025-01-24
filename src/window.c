@@ -2,16 +2,17 @@
 #include <banjo/log.h>
 #include <banjo/window.h>
 
+#include "window_t.h"
 #include "window_backend.h"
 
 extern bj_window_backend_create_info x11_backend_create_info;
 extern bj_window_backend_create_info fake_backend_create_info;
 
 static const bj_window_backend_create_info* backend_create_infos[] = {
-    &fake_backend_create_info,
 #ifdef BANJO_HAVE_X11
     &x11_backend_create_info,
 #endif
+    &fake_backend_create_info,
 };
 
 static bj_window_backend* s_backend = 0;
@@ -40,10 +41,10 @@ void system_dispose_window(
 
 bj_window* bj_window_new(
     const char* p_title,
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height
+    uint16_t    x,
+    uint16_t    y,
+    uint16_t    width,
+    uint16_t    height
 ) {
     bj_trace("Creating Window");
     return s_backend->create_window(s_backend, p_title, x, y, width, height);
@@ -54,4 +55,110 @@ void bj_window_del(
 ) {
     bj_trace("Deleting Window");
     s_backend->delete_window(s_backend, p_window);
+}
+
+bool bj_window_should_close(
+    bj_window* p_window
+) {
+    return p_window->must_close;
+}
+
+bj_window_key_event_t bj_window_set_key_event(
+    bj_window* p_window,
+    bj_window_key_event_t   p_event
+) {
+    bj_check_or_0(p_window);
+    bj_window_key_event_t p_replaced = p_window->p_key_event;
+    p_window->p_key_event = p_event;
+    return p_replaced;
+}
+
+void bj_window_set_should_close(
+    bj_window* p_window
+) {
+    bj_check(p_window);
+    p_window->must_close = true;
+}
+
+BANJO_EXPORT void bj_poll_events(
+    void
+) {
+    s_backend->poll_events(s_backend);
+}
+
+bj_window_cursor_event_t bj_window_set_cursor_event(
+    bj_window*                 p_window,
+    bj_window_cursor_event_t   p_event
+) {
+    bj_check_or_0(p_window);
+    bj_window_cursor_event_t p_replaced = p_window->p_cursor_event;
+    p_window->p_cursor_event = p_event;
+    return p_replaced;
+}
+
+void bj_window_input_cursor(
+    bj_window* p_window,
+    int x,
+    int y
+) {
+    bj_check(p_window);
+    if(!!p_window->p_cursor_event) {
+        p_window->p_cursor_event(p_window, x, y);
+    }
+}
+
+bj_window_button_event_t bj_window_set_button_event(
+    bj_window*                 p_window,
+    bj_window_button_event_t   p_event
+) {
+    bj_check_or_0(p_window);
+    bj_window_button_event_t p_replaced = p_window->p_button_event;
+    p_window->p_button_event = p_event;
+    return p_replaced;
+}
+
+void bj_window_input_key(
+    bj_window*   p_window,
+    bj_event_action action,
+    unsigned int keycode
+) {
+    bj_check(p_window);
+    if(!!p_window->p_key_event) {
+        p_window->p_key_event(p_window, action, keycode);
+    }
+}
+
+void bj_window_input_button(
+    bj_window* p_window,
+    int button,
+    bj_event_action action,
+    int x,
+    int y
+) {
+    bj_check(p_window);
+    if(!!p_window->p_button_event) {
+        p_window->p_button_event(p_window, button, action, x, y);
+    }
+}
+
+bj_window_enter_event_t bj_window_set_enter_event(
+    bj_window*                 p_window,
+    bj_window_enter_event_t    p_event
+) {
+    bj_check_or_0(p_window);
+    bj_window_enter_event_t p_replaced = p_window->p_enter_event;
+    p_window->p_enter_event = p_event;
+    return p_replaced;
+}
+
+void bj_window_input_enter(
+    bj_window* p_window,
+    bool enter,
+    int x,
+    int y
+) {
+    bj_check(p_window);
+    if(!!p_window->p_enter_event) {
+        p_window->p_enter_event(p_window, enter, x, y);
+    }
 }

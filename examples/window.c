@@ -3,6 +3,26 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
+#include <unistd.h>
+
+#include <X11/Xlib.h>
+
+void key_event(bj_window* p_window, bj_event_action mode, unsigned int) {
+    switch(mode) {
+        case BJ_PRESS:
+            bj_info("Pressed");
+            break;
+        case BJ_RELEASE:
+            bj_info("Released");
+            bj_window_set_should_close(p_window);
+            break;
+        case BJ_REPEAT:
+            bj_info("Repeat");
+            break;
+
+    }
+}
+
 int main(int argc, char* argv[]) {
 
     bj_error* p_error = 0;
@@ -13,6 +33,12 @@ int main(int argc, char* argv[]) {
     } 
 
     bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600);
+
+    bj_window_set_key_event(window, key_event);
+
+    while(!bj_window_should_close(window)) {
+        bj_poll_events();
+    }
 
     bj_window_del(window);
 
