@@ -17,7 +17,7 @@ static const bj_window_backend_create_info* backend_create_infos[] = {
 
 static bj_window_backend* s_backend = 0;
 
-#define FORCED_BACKEND 0
+#define FORCED_BACKEND 1
 
 void system_init_window(
     bj_error** p_error

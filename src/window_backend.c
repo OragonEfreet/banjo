@@ -1,13 +1,9 @@
 #include <banjo/error.h>
-#include <banjo/memory.h>
-#include <banjo/window.h>
 #include <banjo/log.h>
+#include <banjo/memory.h>
 
 #include "window_backend.h"
-
-struct bj_window_t {
-    int handle;
-};
+#include "window_t.h"
 
 static bj_window* fake_window_new(
     bj_window_backend* p_backend,
@@ -17,15 +13,16 @@ static bj_window* fake_window_new(
     uint16_t width,
     uint16_t height
 ) {
-    static bj_window window;
-    return &window;
+    bj_window* window = bj_malloc(sizeof(bj_window));
+    window->must_close = true;
+    return window;
 }
 
 static void fake_window_del(
     bj_window_backend* p_backend,
     bj_window* p_window
 ) {
-    // EMPTY
+    bj_free(p_window);
 }
 
 static void fake_dispose_backend(
@@ -35,6 +32,12 @@ static void fake_dispose_backend(
     bj_free(p_backend);
 }
 
+static void fake_window_poll(
+    bj_window_backend* p_backend
+) {
+    // EMPTY
+}
+
 static bj_window_backend* fake_init_backend(
     bj_error** p_error
 ) {
@@ -42,6 +45,7 @@ static bj_window_backend* fake_init_backend(
     p_backend->dispose           = fake_dispose_backend;
     p_backend->create_window     = fake_window_new;
     p_backend->delete_window     = fake_window_del;
+    p_backend->poll_events       = fake_window_poll;
     return p_backend;
 }
 
