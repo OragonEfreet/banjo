@@ -3,7 +3,7 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
-void key_event(bj_window* p_window, bj_event_action mode, unsigned int) {
+void key_event(bj_window* p_window, bj_event_action mode, unsigned int keycode) {
     switch(mode) {
         case BJ_PRESS:
             bj_info("Pressed");
