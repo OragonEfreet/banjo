@@ -66,7 +66,7 @@ endif()
 
 add_library(banjo ${_interface_headers} ${_private_headers} ${_sources})
 
-find_package(X11 REQUIRED)
+find_package(X11)
 if(X11_FOUND)
     target_sources(banjo PRIVATE src/x11.c)
     target_compile_definitions(banjo PRIVATE "BANJO_HAVE_X11")
