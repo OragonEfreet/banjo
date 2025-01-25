@@ -18,16 +18,6 @@ TEST_CASE(initialize_with_payload_gives_empty_array) {
     bj_array_del(p_array);
 }
 
-TEST_CASE(nonzero_capacity_allocates_buffer) {
-    const size_t capacity = 10;
-    bj_array* p_array = bj_array_new_with_capacity_t(payload, capacity);
-    REQUIRE_EQ(p_array->bytes_payload, sizeof(payload));
-    REQUIRE_EQ(p_array->capacity, capacity);
-    REQUIRE_EQ(p_array->len, 0);
-    REQUIRE_VALUE(p_array->p_buffer);
-    bj_array_del(p_array);
-};
-
 TEST_CASE(clear_empty_does_nothing) {
     bj_array* p_array = bj_array_new_t(payload);
     CHECK_EQ(p_array->len, 0);
@@ -260,7 +250,6 @@ int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
     /* RUN_TEST(initialize_with_payload_gives_empty_array); */
-    /* RUN_TEST(nonzero_capacity_allocates_buffer); */
     /* RUN_TEST(clear_empty_does_nothing); */
     /* RUN_TEST(clear_0_does_nothing); */
     /* RUN_TEST(clear_filled_reduces_size_to_zero); */

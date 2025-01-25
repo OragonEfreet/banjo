@@ -25,18 +25,18 @@ typedef enum {
     BJ_SEEK_END     = 0x02, //!< The end of the stream
 } bj_seek_origin;
 
+
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a new bj_stream for reading from a file.
+/// Allocate a new \ref bj_stream object
 ///
-/// \param p_path  The file path to open
-/// \param p_error Optional error object
-/// \return A pointer to an error object
+/// \return A pointer to a new \ref bj_stream
 ///
-/// The file memory is entirely copied to internal memory buffer.
+/// \par Memory Management
+///
+/// The object pointed by the returned value must be deleted using bj_free.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_stream* bj_stream_new_read_from_file(
-    const char*       p_path,
-    bj_error**        p_error
+BANJO_EXPORT bj_stream* bj_stream_alloc(
+    void
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -49,6 +49,20 @@ BANJO_EXPORT bj_stream* bj_stream_new_read_from_file(
 BANJO_EXPORT bj_stream* bj_stream_new_read(
     const void* p_data,
     size_t length
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Creates a new bj_stream for reading from a file.
+///
+/// \param p_path  The file path to open
+/// \param p_error Optional error object
+/// \return A pointer to an error object
+///
+/// The file memory is entirely copied to internal memory buffer.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT bj_stream* bj_stream_new_read_from_file(
+    const char*       p_path,
+    bj_error**        p_error
 );
 
 ////////////////////////////////////////////////////////////////////////////////

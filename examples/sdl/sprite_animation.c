@@ -7,7 +7,6 @@
 /// frame over time.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
-#include <banjo/color.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 

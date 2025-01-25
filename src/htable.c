@@ -43,7 +43,7 @@ BANJO_EXPORT bj_htable* bj_htable_new(
     p_table->bytes_value = bytes_value;
     p_table->bytes_entry = p_table->weak_owning ? sizeof(void*) * 2 : p_table->bytes_key + p_table->bytes_value;
 
-    bj_array_init(&p_table->buckets, sizeof(bj_list), BUCKET_COUNT);
+    bj_array_init(&p_table->buckets, sizeof(bj_list));
     bj_array_set_len(&p_table->buckets, BUCKET_COUNT);
 
     for(size_t i = 0 ; i < bj_array_len(&p_table->buckets) ; ++i) {

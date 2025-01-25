@@ -12,16 +12,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(CheckCXXCompilerFlag)
 
 set(_interface_headers
-    inc/banjo/algorithms.h
     inc/banjo/api.h
     inc/banjo/array.h
     inc/banjo/bitmap.h
-    inc/banjo/color.h
     inc/banjo/error.h
     inc/banjo/event.h
-    inc/banjo/graphics.h
     inc/banjo/htable.h
-    inc/banjo/io.h
     inc/banjo/list.h
     inc/banjo/log.h
     inc/banjo/memory.h

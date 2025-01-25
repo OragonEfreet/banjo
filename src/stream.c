@@ -5,11 +5,17 @@
 
 #include <stdio.h>
 
+bj_stream* bj_stream_alloc(
+    void
+) {
+    return bj_malloc(sizeof(bj_stream));
+}
+
 bj_stream* bj_stream_new_read(
     const void*  p_data,
     size_t        length
 ){
-    bj_stream* p_stream = bj_malloc(sizeof(bj_stream));
+    bj_stream* p_stream = bj_stream_alloc();
     if(p_stream != 0) {
         bj_memset(p_stream, 0, sizeof(bj_stream));
         p_stream->p_data.r = p_data;

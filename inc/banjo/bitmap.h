@@ -22,6 +22,15 @@ typedef size_t bj_pixel[2];
 typedef struct bj_bitmap_t bj_bitmap;
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Allocate a new bitmap object
+///
+/// \return A new \ref bj_bitmap instance
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
+    void
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Creates a new bj_bitmap with the specified width and height.
 ///
 /// \param width  Width of the bitmap.
@@ -40,6 +49,15 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new(
     size_t           height,
     bj_pixel_mode    mode,
     size_t           stride
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Deletes a bj_bitmap object and releases associated memory.
+///
+/// \param p_bitmap Pointer to the bj_bitmap object to delete.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_bitmap_del(
+    bj_bitmap*     p_bitmap
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -114,12 +132,35 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Deletes a bj_bitmap object and releases associated memory.
+/// Initializes a new bj_bitmap with the specified width and height.
 ///
-/// \param p_bitmap Pointer to the bj_bitmap object to delete.
+/// \param p_bitmap  The bitmap object.
+/// \param width     Width of the bitmap.
+/// \param height    Height of the bitmap.
+/// \param mode      The pixel mode.
+/// \param stride    The suggested bitmap stride.
+///
+/// \return A pointer to the newly created bj_bitmap object.
+///
+/// The stride corresponds to the size in bytes of a row.
+/// If the value is less than the required stride, the actual minimum stride
+/// is used.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_del(
-    bj_bitmap*     p_bitmap
+BANJO_EXPORT bj_bitmap* bj_bitmap_init(
+    bj_bitmap* p_bitmap,
+    size_t width,
+    size_t height,
+    bj_pixel_mode mode,
+    size_t stride
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Resets a bj_bitmap object making it ready for a new init or free.
+///
+/// \param p_bitmap Pointer to the bj_bitmap object to reset.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_bitmap_reset(
+    bj_bitmap* p_bitmap
 );
 
 ////////////////////////////////////////////////////////////////////////////////
