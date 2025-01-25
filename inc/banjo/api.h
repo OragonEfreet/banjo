@@ -100,5 +100,4 @@ typedef struct {
 ///
 BANJO_EXPORT const bj_build_info* bj_get_build_info(void);
 
-
 /// \} End of core

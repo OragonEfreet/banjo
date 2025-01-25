@@ -5,7 +5,8 @@
 /// \defgroup array Array
 /// \ingroup algo
 ///
-/// \brief bj_array is a sequence container that encapsulates dynamic C-style arrays.
+/// \brief The \ref bj_array type is a sequence container that encapsulates 
+///        dynamic C-style arrays.
 ///        The elements are stored contiguously, allowing access using offsets.
 ///
 ///        The storage of the array is expanded as needed.
@@ -20,7 +21,18 @@
 typedef struct bj_array_t bj_array;
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Creates a new bj_array with a payload size inferred from the type T.
+///
+/// \param T Type of elements.
+/// \return A pointer to the newly created bj_array object.
+///
+/// \see bj_array_new
+#define bj_array_new_t(T) bj_array_new(sizeof(T))
+
+////////////////////////////////////////////////////////////////////////////////
 /// Creates a new bj_array with a payload size specified in bytes.
+///
+/// The function effectively uses \ref bj_array_alloc and \ref bj_array_init.
 ///
 /// \param bytes_payload Size of each element in bytes.
 /// \return A pointer to the newly created bj_array object.
@@ -29,38 +41,47 @@ BANJO_EXPORT bj_array* bj_array_new(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Creates a new bj_array with a payload size inferred from the type T.
-///
-/// \param T Type of elements.
-/// \return A pointer to the newly created bj_array object.
-#define bj_array_new_t(T) bj_array_new(sizeof(T))
-
-////////////////////////////////////////////////////////////////////////////////
-/// Creates a new bj_array with a specified capacity and payload size.
-///
-/// \param bytes_payload Size of each element in bytes.
-/// \param capacity Initial capacity of the array.
-/// \return A pointer to the newly created bj_array object.
-BANJO_EXPORT bj_array* bj_array_new_with_capacity(
-    size_t bytes_payload,
-    size_t capacity
-);
-
-////////////////////////////////////////////////////////////////////////////////
-/// Creates a new bj_array with a specified capacity and payload size inferred from type T.
-///
-/// \param T Type of elements.
-/// \param capacity Initial capacity of the array.
-/// \return A pointer to the newly created bj_array object.
-#define bj_array_new_with_capacity_t(T, capacity) bj_array_new_with_capacity(sizeof(T), capacity)
-
-////////////////////////////////////////////////////////////////////////////////
 /// Deletes a bj_array object and releases associated memory.
 ///
 /// \param p_array Pointer to the bj_array object to delete.
 BANJO_EXPORT void bj_array_del(
     bj_array* p_array
 );
+
+////////////////////////////////////////////////////////////////////////////////
+/// Allocate enough memory to hold an \ref array object
+///
+/// \return A pointer to the newly allocated memory.
+///
+/// \par Memory Management
+///
+/// The memory returned by the function must be freed with \ref bj_free
+///
+/// \see bj_array_new, bj_array_init, bj_array_reset, bj_array_del
+BANJO_EXPORT bj_array* bj_array_alloc(
+    void
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Initialize a new array with given size.
+///
+/// \param p_instance A pointer to an array object.
+/// \param bytes_payload Size of each element in bytes.
+///
+/// \return A pointer to the newly created bj_array object.
+BANJO_EXPORT bj_array* bj_array_init(
+    bj_array* p_instance, 
+    size_t    bytes_payload
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Resets the entire array object, making it suitable for free.
+///
+/// \param p_array The array object to reset.
+BANJO_EXPORT void bj_array_reset(
+    bj_array* p_array
+);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Clears all elements in the array.

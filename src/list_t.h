@@ -9,5 +9,3 @@ struct bj_list_t {
     bool   weak_owning;
 };
 
-bj_list* bj_list_init(bj_list* p_list, size_t  bytes_payload);
-void bj_list_reset(bj_list* p_list);

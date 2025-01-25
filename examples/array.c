@@ -2,6 +2,7 @@
 /// \example array.c
 /// Demonstrates how to use the \ref bj_array container, the vector-like structure.
 ////////////////////////////////////////////////////////////////////////////////
+#include <banjo/api.h>
 #include <banjo/array.h>
 #include <banjo/memory.h>
 #include <assert.h>

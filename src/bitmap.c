@@ -1,8 +1,8 @@
 #include <banjo/log.h>
+#include <banjo/pixel.h>
 #include <banjo/stream.h>
 
 #include "bitmap_t.h"
-#include "pixel_t.h"
 
 #include <stdio.h>
 
@@ -34,14 +34,21 @@ static size_t bitmap_stride(
     return 0;
 }
 
+BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
+    void
+) {
+    return bj_malloc(sizeof(bj_bitmap));
+}
+
 bj_bitmap* bj_bitmap_init(
-    bj_bitmap*      p_bitmap,
+    bj_bitmap*       p_bitmap,
     size_t           width,
     size_t           height,
-    bj_pixel_mode   mode,
+    bj_pixel_mode    mode,
     size_t           stride
 ) {
     const size_t computed_stride = bitmap_stride(width, mode);
+bj_bitmap* bj_bitmap_init_with(bj_bitmap* p_bitmap, size_t width, size_t height, bj_pixel_mode mode, size_t stride);
     if(stride < computed_stride) {
         stride = computed_stride;
     }
@@ -87,7 +94,7 @@ bj_bitmap* bj_bitmap_new(
     if(bj_bitmap_init(&bitmap, width, height, mode, stride) == 0) {
         return 0;
     }
-    return bj_memcpy(bj_malloc(sizeof(bj_bitmap)), &bitmap, sizeof(bj_bitmap));
+    return bj_memcpy(bj_bitmap_alloc(), &bitmap, sizeof(bj_bitmap));
 }
 
 void bj_bitmap_del(

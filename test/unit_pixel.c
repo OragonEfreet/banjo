@@ -1,7 +1,5 @@
 #include <banjo/pixel.h>
 
-#include "pixel_t.h"
-
 #include "test.h"
 
 TEST_CASE(conversion) {

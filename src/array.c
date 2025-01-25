@@ -4,21 +4,20 @@
 
 #include "array_t.h"
 
-BANJO_EXPORT bj_array* bj_array_new(
-    size_t     bytes_payload
+bj_array* bj_array_alloc(
+    void
 ) {
-    return bj_array_new_with_capacity(bytes_payload, 0);
+    return bj_malloc(sizeof(bj_array));
 }
 
-bj_array* bj_array_new_with_capacity(
-    size_t     bytes_payload,
-    size_t     capacity
+bj_array* bj_array_new(
+    size_t     bytes_payload
 ) {
     bj_array array;
-    if(bj_array_init(&array, bytes_payload, capacity) == 0) {
+    if(bj_array_init(&array, bytes_payload) == 0) {
         return 0;
     }
-    return bj_memcpy(bj_malloc(sizeof(bj_array)), &array, sizeof(bj_array));
+    return bj_memcpy(bj_array_alloc(), &array, sizeof(bj_array));
 }
 
 void bj_array_del(
@@ -30,13 +29,11 @@ void bj_array_del(
 
 bj_array* bj_array_init(
     bj_array* p_instance,
-    size_t bytes_payload,
-    size_t capacity
+    size_t bytes_payload
 ) {
     bj_memset(p_instance, 0, sizeof(bj_array));
     if(bytes_payload > 0) {
         p_instance->bytes_payload = bytes_payload;
-        bj_array_reserve(p_instance, capacity);
     }
     return p_instance;
 }

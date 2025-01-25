@@ -5,7 +5,6 @@
 /// Once the screen displays, click on any surface to draw "alive" cells and
 /// release to let the simulation animate.
 ////////////////////////////////////////////////////////////////////////////////
-#include "banjo/color.h"
 #include <banjo/bitmap.h>
 #include <banjo/memory.h>
 
@@ -122,7 +121,7 @@ int main(int argc, char* argv[]) {
                         bj_bitmap_put_pixel(presentation_fb,
                             ((float)e.button.x / (float)SCREEN_WIDTH) * CANVAS_WIDTH,
                             ((float)e.button.y / (float)SCREEN_HEIGHT) * CANVAS_HEIGHT,
-                            BJ_COLOR_GREEN
+                            draw_color_1
                         );
                     }
                     break;

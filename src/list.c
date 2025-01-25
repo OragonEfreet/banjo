@@ -4,6 +4,12 @@
 
 #include "list_t.h"
 
+BANJO_EXPORT bj_list* bj_list_alloc(
+    void
+) {
+    return bj_malloc(sizeof(bj_list));
+}
+
 bj_list* bj_list_new(
     size_t bytes_payload
 ) {
@@ -11,7 +17,7 @@ bj_list* bj_list_new(
     if(bj_list_init(&list, bytes_payload) == 0) {
         return 0;
     }
-    return bj_memcpy(bj_malloc(sizeof(bj_list)), &list, sizeof(bj_list));
+    return bj_memcpy(bj_list_alloc(), &list, sizeof(bj_list));
 }
 
 void bj_list_del(

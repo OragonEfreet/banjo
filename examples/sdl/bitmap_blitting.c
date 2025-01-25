@@ -6,7 +6,6 @@
 /// This example blits 3 bitmaps onto another and displays the result on screen.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
-#include <banjo/color.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 

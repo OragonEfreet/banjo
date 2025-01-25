@@ -2,13 +2,13 @@
 /// \file
 /// Header file for general pixel manipulation facilities.
 ////////////////////////////////////////////////////////////////////////////////
+/// \defgroup pixel Pixel Definition
 /// \ingroup graphics
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <banjo/api.h>
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Representation of a pixel encoding.
@@ -60,5 +60,100 @@ BANJO_EXPORT uint32_t bj_pixel_value(
     uint8_t blue
 );
 
+
+/// Pixel type: Indexed (palette-based).
+#define BJ_PIXEL_TYPE_INDEX    0x01
+/// Pixel type: Bitfield representation (e.g., RGB565).
+#define BJ_PIXEL_TYPE_BITFIELD 0x02
+/// Pixel type: Byte-packed representation (e.g., RGBA8888).
+#define BJ_PIXEL_TYPE_BYTES    0x03
+
+/// Pixel order: Red-Green-Blue (RGB).
+#define BJ_PIXEL_ORDER_RGB  0x01
+/// Pixel order: Same as BJ_PIXEL_ORDER_RGB with unused alpha.
+#define BJ_PIXEL_ORDER_XRGB BJ_PIXEL_ORDER_RGB
+/// Pixel order: Blue-Green-Red (BGR).
+#define BJ_PIXEL_ORDER_BGR  0x02
+/// Pixel order: Same as BJ_PIXEL_ORDER_BGR with unused alpha.
+#define BJ_PIXEL_ORDER_XBGR BJ_PIXEL_ORDER_BGR
+/// Pixel order: Red-Green-Blue with padding byte (RGBX).
+#define BJ_PIXEL_ORDER_RGBX 0x03
+/// Pixel order: Blue-Green-Red with padding byte (BGRX).
+#define BJ_PIXEL_ORDER_BGRX 0x04
+/// Pixel order: Alpha-Red-Green-Blue (ARGB).
+#define BJ_PIXEL_ORDER_ARGB 0x05
+/// Pixel order: Alpha-Blue-Green-Red (ABGR).
+#define BJ_PIXEL_ORDER_ABGR 0x06
+/// Pixel order: Red-Green-Blue-Alpha (RGBA).
+#define BJ_PIXEL_ORDER_RGBA 0x07
+/// Pixel order: Blue-Green-Red-Alpha (BGRA).
+#define BJ_PIXEL_ORDER_BGRA 0x08
+
+/// Pixel layout: 16-bit with 1-bit alpha, 5-bit red, green, and blue (1555).
+#define BJ_PIXEL_LAYOUT_1555 0x00
+/// Pixel layout: 32-bit with 8 bits per channel (8888).
+#define BJ_PIXEL_LAYOUT_8888 0x01
+/// Pixel layout: 16-bit with 5 bits for red and blue, 6 bits for green (565).
+#define BJ_PIXEL_LAYOUT_565  0x02
+
+////////////////////////////////////////////////////////////////////////////////
+/// Creates a pixel format mode from bits-per-pixel, type, layout, and order.
+///
+/// \param bpp Bits-per-pixel.
+/// \param type Pixel type (e.g., indexed, bitfield, or bytes).
+/// \param layout Pixel layout (e.g., 1555, 8888, or 565).
+/// \param order Pixel order (e.g., RGB, ARGB, etc.).
+#define BJ_PIXEL_MODE_MAKE(bpp, type, layout, order) (((order & 0xFF) << 24) | ((layout & 0xFF) << 16) | ((type & 0xFF) << 8) | (bpp & 0xFF))
+
+////////////////////////////////////////////////////////////////////////////////
+/// Creates a pixel format for indexed (palette-based) pixels.
+///
+/// \param bpp Bits-per-pixel.
+#define BJ_PIXEL_MODE_MAKE_INDEXED(bpp)               BJ_PIXEL_MODE_MAKE(bpp, BJ_PIXEL_TYPE_INDEX, 0, 0)
+
+////////////////////////////////////////////////////////////////////////////////
+/// Creates a 16-bit bitfield pixel format.
+///
+/// \param layout Pixel layout (e.g., 1555, 565).
+/// \param order Pixel order (e.g., RGB, ARGB).
+#define BJ_PIXEL_MODE_MAKE_BITFIELD_16(layout, order) BJ_PIXEL_MODE_MAKE(16, BJ_PIXEL_TYPE_BITFIELD, layout, order)
+
+////////////////////////////////////////////////////////////////////////////////
+/// Creates a 32-bit bitfield pixel format.
+///
+/// \param layout Pixel layout (e.g., 8888).
+/// \param order Pixel order (e.g., RGB, ARGB).
+#define BJ_PIXEL_MODE_MAKE_BITFIELD_32(layout, order) BJ_PIXEL_MODE_MAKE(32, BJ_PIXEL_TYPE_BITFIELD, layout, order)
+
+////////////////////////////////////////////////////////////////////////////////
+/// Creates a byte-packed pixel format.
+///
+/// \param bpp Bits-per-pixel.
+/// \param order Pixel order (e.g., RGB, ARGB).
+#define BJ_PIXEL_MODE_MAKE_BYTES(bpp, order)          BJ_PIXEL_MODE_MAKE(bpp, BJ_PIXEL_TYPE_BYTES, 0, order)
+
+////////////////////////////////////////////////////////////////////////////////
+/// Extracts the bits-per-pixel from a pixel format.
+///
+/// \param fmt Pixel format value.
+#define BJ_PIXEL_GET_BPP(fmt)    ((fmt) & 0xFF)
+
+////////////////////////////////////////////////////////////////////////////////
+/// Extracts the pixel type from a pixel format.
+///
+/// \param fmt Pixel format value.
+#define BJ_PIXEL_GET_TYPE(fmt)   (((fmt) >> 8) & 0xFF)
+
+////////////////////////////////////////////////////////////////////////////////
+/// Extracts the pixel layout from a pixel format.
+///
+/// \param fmt Pixel format value.
+#define BJ_PIXEL_GET_LAYOUT(fmt) (((fmt) >> 16) & 0xFF)
+
+////////////////////////////////////////////////////////////////////////////////
+/// Extracts the pixel order from a pixel format.
+///
+/// \param fmt Pixel format value.
+#define BJ_PIXEL_GET_ORDER(fmt)  (((fmt) >> 24) & 0xFF)
 
 /// \} 
