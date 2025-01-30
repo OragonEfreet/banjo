@@ -2,15 +2,16 @@
 #include <banjo/memory.h>
 #include <banjo/window.h>
 #include <banjo/log.h>
-
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
 
+#include "internals.h"
 #include "window_backend.h"
 #include "window_t.h"
 
 #define X11_CANNOT_OPEN_DISPLAY 0x00010000
+
 
 typedef struct {
     bj_window_backend fns;
@@ -19,6 +20,12 @@ typedef struct {
     Atom              wm_protocols;
     Atom              wm_delete_window;
     XContext          window_context;
+
+    Display* (* XOpenDisplay)(const char*);
+    Window   (* XCreateWindow)(Display*,Window,int,int,unsigned int,unsigned int,unsigned int,int,unsigned int,Visual*,unsigned long,XSetWindowAttributes*);
+    Status (* XSetWMProtocols)(Display*,Window,Atom*,int);
+    
+    
 } x11_backend;
 
 typedef struct {
@@ -50,7 +57,7 @@ static bj_window* x11_create_window(
         .common = {
             .must_close = false,
         },
-        .handle = XCreateWindow(
+        .handle = p_x11->XCreateWindow(
             p_x11->display, root_window,
             x, y,
             width, height, 1,
@@ -61,7 +68,7 @@ static bj_window* x11_create_window(
         ),
     };
 
-    XSetWMProtocols(
+    p_x11->XSetWMProtocols(
         p_x11->display, window.handle,
         &p_x11->wm_delete_window, 1
     );
@@ -241,15 +248,24 @@ static void x11_init_keycodes(
 static bj_window_backend* x11_init_backend(
     bj_error** p_error
 ) {
-    Display* display = XOpenDisplay(0);
+
+    void* p_handle = bj_load_library("libX11.so.6");
+    if(p_handle == 0) {
+        return 0;
+    }
+
+    x11_backend* p_x11 = bj_malloc(sizeof(x11_backend));
+    p_x11->XOpenDisplay = bj_get_symbol(p_handle, "XOpenDisplay");
+    p_x11->XCreateWindow = bj_get_symbol(p_handle, "XCreateWindow");
+    p_x11->XSetWMProtocols = bj_get_symbol(p_handle, "XSetWMProtocols");
+
+    Display* display = p_x11->XOpenDisplay(0);
     if(display == 0) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE | X11_CANNOT_OPEN_DISPLAY, "cannot open X11 display");
         return 0;
     }
 
     bj_debug("X11 display connection: %d", XConnectionNumber(display));
-
-    x11_backend* p_x11 = bj_malloc(sizeof(x11_backend));
 
     p_x11->fns.dispose       = x11_dispose_backend;
     p_x11->fns.create_window = x11_create_window;
