@@ -31,10 +31,11 @@ set(_private_headers
     src/array_t.h
     src/bitmap_t.h
     src/htable_t.h
+    src/internals.h
     src/list_t.h
     src/stream_t.h
-    src/window_t.h
     src/window_backend.h
+    src/window_t.h
 )
 
 set(_sources
@@ -44,6 +45,7 @@ set(_sources
     src/bitmap_dib.c
     src/error.c
     src/htable.c
+    src/internals.c
     src/list.c
     src/log.c
     src/memory.c
@@ -66,7 +68,7 @@ find_package(X11)
 if(X11_FOUND)
     target_sources(banjo PRIVATE src/x11.c)
     target_compile_definitions(banjo PRIVATE "BANJO_HAVE_X11")
-    target_link_libraries(banjo PRIVATE X11::X11)
+    # target_link_libraries(banjo PRIVATE X11::X11)
 endif()
 
 macro(banjo_feature _name _desc _default)

@@ -16,3 +16,4 @@ void bj_system_dispose(
 ) {
     system_dispose_window(p_error);
 }
+

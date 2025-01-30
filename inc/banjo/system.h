@@ -30,4 +30,5 @@ BANJO_EXPORT void bj_system_dispose(
     bj_error** p_error
 );
 
+
 /// \} // End of system group
