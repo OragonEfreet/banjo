@@ -34,7 +34,7 @@ set(_private_headers
     src/internals.h
     src/list_t.h
     src/stream_t.h
-    src/window_backend.h
+    src/system_t.h
     src/window_t.h
 )
 
@@ -44,6 +44,7 @@ set(_sources
     src/bitmap.c
     src/bitmap_dib.c
     src/error.c
+    src/fake.c
     src/htable.c
     src/internals.c
     src/list.c
@@ -54,7 +55,6 @@ set(_sources
     src/stream.c
     src/system.c
     src/window.c
-    src/window_backend.c
 )
 
 if(MSVC)
