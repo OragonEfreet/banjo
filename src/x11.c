@@ -7,7 +7,7 @@
 #include <X11/Xutil.h>
 
 #include "internals.h"
-#include "window_backend.h"
+#include "system_t.h"
 #include "window_t.h"
 
 #define X11_CANNOT_OPEN_DISPLAY 0x00010000
@@ -36,7 +36,7 @@ typedef int       (* pfn_XSync)(Display*,Bool);
 typedef int       (* pfn_XUnmapWindow)(Display*,Window);
 
 typedef struct {
-    bj_window_backend fns;
+    bj_system_backend fns;
     Display*          display;
     int               screen;
     Atom              wm_protocols;
@@ -74,7 +74,7 @@ typedef struct {
 } x11_window;
 
 static bj_window* x11_create_window(
-    bj_window_backend* p_backend,
+    bj_system_backend* p_backend,
     const char* p_title,
     uint16_t x,
     uint16_t y,
@@ -132,7 +132,7 @@ static bj_window* x11_create_window(
 }
 
 static void x11_delete_window(
-    bj_window_backend* p_backend,
+    bj_system_backend* p_backend,
     bj_window* p_abstract_window
 ) {
     x11_window* p_window = (x11_window*)p_abstract_window;
@@ -145,7 +145,7 @@ static void x11_delete_window(
 }
 
 static void x11_dispose_backend(
-    bj_window_backend* p_backend,
+    bj_system_backend* p_backend,
     bj_error** p_error
 ) {
     x11_backend* p_x11 = (x11_backend*)p_backend;
@@ -250,7 +250,7 @@ static void x11_dispatch_event(
 
 
 static void x11_poll_events(
-    bj_window_backend* p_backend
+    bj_system_backend* p_backend
 ) {
     assert(p_backend);
     x11_backend* p_x11 = (x11_backend*)p_backend;
@@ -285,7 +285,7 @@ static void x11_init_keycodes(
     p_x11->XFree(keysyms);
 }
 
-static bj_window_backend* x11_init_backend(
+static bj_system_backend* x11_init_backend(
     bj_error** p_error
 ) {
 
@@ -340,10 +340,10 @@ static bj_window_backend* x11_init_backend(
 
     x11_init_keycodes(p_x11);
 
-    return (bj_window_backend*)p_x11;
+    return (bj_system_backend*)p_x11;
 }
 
-bj_window_backend_create_info x11_backend_create_info = {
+bj_system_backend_create_info x11_backend_create_info = {
     .name = "x11",
     .create = x11_init_backend,
 };

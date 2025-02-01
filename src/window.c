@@ -2,42 +2,10 @@
 #include <banjo/log.h>
 #include <banjo/window.h>
 
+#include "system_t.h"
 #include "window_t.h"
-#include "window_backend.h"
 
-extern bj_window_backend_create_info x11_backend_create_info;
-extern bj_window_backend_create_info fake_backend_create_info;
-
-static const bj_window_backend_create_info* backend_create_infos[] = {
-    &fake_backend_create_info,
-#ifdef BANJO_HAVE_X11
-    &x11_backend_create_info,
-#endif
-};
-
-static bj_window_backend* s_backend = 0;
-
-#define FORCED_BACKEND 1
-
-void system_init_window(
-    bj_error** p_error
-) {
-    // TODO Smarter Backend selection
-    // For now, the backend is forced by taking the first available.
-    // What I want is the possibility to test each backend initialization in
-    // order of favorited, and return on the first that worked.
-    const bj_window_backend_create_info* p_create_info = backend_create_infos[FORCED_BACKEND];
-    s_backend = p_create_info->create(p_error);
-    bj_info("Initialized %s window backend", p_create_info->name);
-}
-
-void system_dispose_window(
-    bj_error** p_error
-) {
-    void (*dispose)(struct bj_window_backend_t*, bj_error** p_error) = s_backend->dispose;
-    dispose(s_backend, p_error);
-    bj_info("Disposed window backend");
-}
+extern bj_system_backend* s_backend;
 
 bj_window* bj_window_new(
     const char* p_title,
