@@ -87,7 +87,7 @@ banjo_feature(abort_on_checks "When checks feature is on, a failed check will ab
 banjo_feature(log_color "Banjo logs will have colored output" ON)
 
 if(NOT MSVC)
-    target_compile_options(banjo PRIVATE -Wall -pedantic)
+    target_compile_options(banjo PRIVATE -Wall)
 endif()
 
 if(BUILD_SHARED_LIBS)

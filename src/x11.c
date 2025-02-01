@@ -12,6 +12,28 @@
 
 #define X11_CANNOT_OPEN_DISPLAY 0x00010000
 
+typedef Atom      (* pfn_XInternAtom)(Display*,const char*,Bool);
+typedef Display*  (* pfn_XOpenDisplay)(const char*);
+typedef KeySym*   (* pfn_XGetKeyboardMapping)(Display*,KeyCode,int,int*);
+typedef Status    (* pfn_XSetWMProtocols)(Display*,Window,Atom*,int);
+typedef Window    (* pfn_XCreateWindow)(Display*,Window,int,int,unsigned int,unsigned int,unsigned int,int,unsigned int,Visual*,unsigned long,XSetWindowAttributes*);
+typedef XrmQuark  (* pfn_XrmUniqueQuark)(void);
+typedef int       (* pfn_XQLength)(Display*);
+typedef int       (* pfn_XCloseDisplay)(Display*);
+typedef int       (* pfn_XDeleteContext)(Display*,XID,XContext);
+typedef int       (* pfn_XDestroyWindow)(Display*,Window);
+typedef int       (* pfn_XDisplayKeycodes)(Display*,int*,int*);
+typedef int       (* pfn_XEventsQueued)(Display*,int);
+typedef int       (* pfn_XFindContext)(Display*,XID,XContext,XPointer*);
+typedef int       (* pfn_XFlush)(Display*);
+typedef int       (* pfn_XFree)(void*);
+typedef int       (* pfn_XMapWindow)(Display*,Window);
+typedef int       (* pfn_XNextEvent)(Display*,XEvent*);
+typedef int       (* pfn_XPeekEvent)(Display*,XEvent*);
+typedef int       (* pfn_XPending)(Display*);
+typedef int       (* pfn_XSaveContext)(Display*,XID,XContext,const char*);
+typedef int       (* pfn_XSync)(Display*,Bool);
+typedef int       (* pfn_XUnmapWindow)(Display*,Window);
 
 typedef struct {
     bj_window_backend fns;
@@ -21,11 +43,29 @@ typedef struct {
     Atom              wm_delete_window;
     XContext          window_context;
 
-    Display* (* XOpenDisplay)(const char*);
-    Window   (* XCreateWindow)(Display*,Window,int,int,unsigned int,unsigned int,unsigned int,int,unsigned int,Visual*,unsigned long,XSetWindowAttributes*);
-    Status (* XSetWMProtocols)(Display*,Window,Atom*,int);
-    
-    
+    pfn_XCloseDisplay       XCloseDisplay;
+    pfn_XCreateWindow       XCreateWindow;
+    pfn_XDeleteContext      XDeleteContext;
+    pfn_XDestroyWindow      XDestroyWindow;
+    pfn_XDisplayKeycodes    XDisplayKeycodes;
+    pfn_XEventsQueued       XEventsQueued;
+    pfn_XFindContext        XFindContext;
+    pfn_XFlush              XFlush;
+    pfn_XFree               XFree;
+    pfn_XGetKeyboardMapping XGetKeyboardMapping;
+    pfn_XInternAtom         XInternAtom;
+    pfn_XMapWindow          XMapWindow;
+    pfn_XNextEvent          XNextEvent;
+    pfn_XOpenDisplay        XOpenDisplay;
+    pfn_XPeekEvent          XPeekEvent;
+    pfn_XPending            XPending;
+    pfn_XQLength            XQLength;
+    pfn_XSaveContext        XSaveContext;
+    pfn_XSetWMProtocols     XSetWMProtocols;
+    pfn_XSync               XSync;
+    pfn_XUnmapWindow        XUnmapWindow;
+    pfn_XrmUniqueQuark      XrmUniqueQuark;
+
 } x11_backend;
 
 typedef struct {
@@ -74,14 +114,14 @@ static bj_window* x11_create_window(
     );
 
 
-    XMapWindow(p_x11->display, window.handle);
-    XSync(p_x11->display, 0);
+    p_x11->XMapWindow(p_x11->display, window.handle);
+    p_x11->XSync(p_x11->display, 0);
 
     
     x11_window* p_window = bj_malloc(sizeof(x11_window));
     bj_memcpy(p_window, &window, sizeof(x11_window));
 
-    XSaveContext(
+    p_x11->XSaveContext(
         p_x11->display,
         window.handle,
         p_x11->window_context,
@@ -97,10 +137,10 @@ static void x11_delete_window(
 ) {
     x11_window* p_window = (x11_window*)p_abstract_window;
     x11_backend* p_x11 = (x11_backend*)p_backend;
-    XDeleteContext(p_x11->display, p_window->handle, p_x11->window_context);
-    XUnmapWindow(p_x11->display, p_window->handle);
-    XDestroyWindow(p_x11->display, p_window->handle);
-    XFlush(p_x11->display);
+    p_x11->XDeleteContext(p_x11->display, p_window->handle, p_x11->window_context);
+    p_x11->XUnmapWindow(p_x11->display, p_window->handle);
+    p_x11->XDestroyWindow(p_x11->display, p_window->handle);
+    p_x11->XFlush(p_x11->display);
     bj_free(p_window);
 }
 
@@ -109,7 +149,7 @@ static void x11_dispose_backend(
     bj_error** p_error
 ) {
     x11_backend* p_x11 = (x11_backend*)p_backend;
-    XCloseDisplay(p_x11->display);
+    p_x11->XCloseDisplay(p_x11->display);
     bj_free(p_backend);
 }
 
@@ -120,7 +160,7 @@ static void x11_dispatch_event(
     // Here switch events that do not need window
 
     x11_window* p_window = 0;
-    const int context_res = XFindContext(
+    const int context_res = p_x11->XFindContext(
         p_x11->display,
         event->xany.window,
         p_x11->window_context,
@@ -175,10 +215,10 @@ static void x11_dispatch_event(
             return;
 
         case KeyRelease:
-            if (XEventsQueued(p_x11->display, QueuedAfterReading))
+            if (p_x11->XEventsQueued(p_x11->display, QueuedAfterReading))
             {
                 XEvent next;
-                XPeekEvent(p_x11->display, &next);
+                p_x11->XPeekEvent(p_x11->display, &next);
 
                 if (next.type == KeyPress &&
                     next.xkey.window == event->xkey.window &&
@@ -215,14 +255,14 @@ static void x11_poll_events(
     assert(p_backend);
     x11_backend* p_x11 = (x11_backend*)p_backend;
 
-    XPending(p_x11->display);
+    p_x11->XPending(p_x11->display);
 
-    while(XQLength(p_x11->display)) {
+    while(p_x11->XQLength(p_x11->display)) {
         XEvent event;
-        XNextEvent(p_x11->display, &event);
+        p_x11->XNextEvent(p_x11->display, &event);
         x11_dispatch_event(p_x11, &event);
     }
-    XFlush(p_x11->display);
+    p_x11->XFlush(p_x11->display);
 
 }
 
@@ -232,17 +272,17 @@ static void x11_init_keycodes(
     int min_keycodes = 0;
     int max_keycodes = 0;
 
-    XDisplayKeycodes(p_x11->display, &min_keycodes, &max_keycodes);
+    p_x11->XDisplayKeycodes(p_x11->display, &min_keycodes, &max_keycodes);
 
     int keysym_per_keycode;
-    KeySym* keysyms = XGetKeyboardMapping(
+    KeySym* keysyms = p_x11->XGetKeyboardMapping(
         p_x11->display,
         min_keycodes,
         max_keycodes - min_keycodes + 1,
         &keysym_per_keycode
     );
 
-    XFree(keysyms);
+    p_x11->XFree(keysyms);
 }
 
 static bj_window_backend* x11_init_backend(
@@ -255,9 +295,28 @@ static bj_window_backend* x11_init_backend(
     }
 
     x11_backend* p_x11 = bj_malloc(sizeof(x11_backend));
-    p_x11->XOpenDisplay = bj_get_symbol(p_handle, "XOpenDisplay");
-    p_x11->XCreateWindow = bj_get_symbol(p_handle, "XCreateWindow");
-    p_x11->XSetWMProtocols = bj_get_symbol(p_handle, "XSetWMProtocols");
+    p_x11->XCloseDisplay       = bj_get_symbol(p_handle, "XCloseDisplay");
+    p_x11->XCreateWindow       = bj_get_symbol(p_handle, "XCreateWindow");
+    p_x11->XDeleteContext      = bj_get_symbol(p_handle, "XDeleteContext");
+    p_x11->XDestroyWindow      = bj_get_symbol(p_handle, "XDestroyWindow");
+    p_x11->XDisplayKeycodes    = bj_get_symbol(p_handle, "XDisplayKeycodes");
+    p_x11->XEventsQueued       = bj_get_symbol(p_handle, "XEventsQueued");
+    p_x11->XFindContext        = bj_get_symbol(p_handle, "XFindContext");
+    p_x11->XFlush              = bj_get_symbol(p_handle, "XFlush");
+    p_x11->XFree               = bj_get_symbol(p_handle, "XFree");
+    p_x11->XGetKeyboardMapping = bj_get_symbol(p_handle, "XGetKeyboardMapping");
+    p_x11->XInternAtom         = bj_get_symbol(p_handle, "XInternAtom");
+    p_x11->XMapWindow          = bj_get_symbol(p_handle, "XMapWindow");
+    p_x11->XNextEvent          = bj_get_symbol(p_handle, "XNextEvent");
+    p_x11->XOpenDisplay        = bj_get_symbol(p_handle, "XOpenDisplay");
+    p_x11->XPeekEvent          = bj_get_symbol(p_handle, "XPeekEvent");
+    p_x11->XPending            = bj_get_symbol(p_handle, "XPending");
+    p_x11->XQLength            = bj_get_symbol(p_handle, "XQLength");
+    p_x11->XSaveContext        = bj_get_symbol(p_handle, "XSaveContext");
+    p_x11->XSetWMProtocols     = bj_get_symbol(p_handle, "XSetWMProtocols");
+    p_x11->XSync               = bj_get_symbol(p_handle, "XSync");
+    p_x11->XUnmapWindow        = bj_get_symbol(p_handle, "XUnmapWindow");
+    p_x11->XrmUniqueQuark      = bj_get_symbol(p_handle, "XrmUniqueQuark");
 
     Display* display = p_x11->XOpenDisplay(0);
     if(display == 0) {
@@ -265,7 +324,8 @@ static bj_window_backend* x11_init_backend(
         return 0;
     }
 
-    bj_debug("X11 display connection: %d", XConnectionNumber(display));
+    /* bj_debug("X11 display connection: %d", XConnectionNumber(display)); */
+    bj_debug("X11 connected");
 
     p_x11->fns.dispose       = x11_dispose_backend;
     p_x11->fns.create_window = x11_create_window;
@@ -274,9 +334,9 @@ static bj_window_backend* x11_init_backend(
 
     p_x11->display = display;
     p_x11->screen = DefaultScreen(display);
-    p_x11->wm_delete_window = XInternAtom(display, "WM_DELETE_WINDOW", False);
-    p_x11->wm_protocols = XInternAtom(display, "WM_PROTOCOLS", False);
-    p_x11->window_context = XUniqueContext();
+    p_x11->wm_delete_window = p_x11->XInternAtom(display, "WM_DELETE_WINDOW", False);
+    p_x11->wm_protocols = p_x11->XInternAtom(display, "WM_PROTOCOLS", False);
+    p_x11->window_context = p_x11->XrmUniqueQuark();
 
     x11_init_keycodes(p_x11);
 
