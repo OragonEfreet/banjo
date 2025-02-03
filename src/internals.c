@@ -1,9 +1,29 @@
 
 #include "internals.h"
 
+// TODO extract these in a platform-specific part of the project.
+
+#ifdef WIN32
+void* bj_load_library(
+    const char* p_path
+) {
+    return 0;
+}
+
+void bj_unload_library(
+    void* p_handle
+) {
+}
+
+void* bj_get_symbol(
+    void*       p_handle,
+    const char* p_name
+) {
+    return 0;
+}
+#else
 #include <dlfcn.h> 
 
-// TODO extract these in a platform-specific part of the project.
 
 void* bj_load_library(
     const char* p_path
@@ -23,3 +43,4 @@ void* bj_get_symbol(
 ) {
     return dlsym(p_handle, p_name);
 }
+#endif
