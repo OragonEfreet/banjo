@@ -347,7 +347,7 @@ static bj_system_backend* x11_init_backend(
     p_x11->default_screen   = x11_XDefaultScreen(display);
     p_x11->default_depth    = x11_XDefaultDepth(display, p_x11->default_screen);
     p_x11->default_visual   = x11_XDefaultVisual(display, p_x11->default_screen),
-    p_x11->black_pixel      = x11_XDefaultVisual(display, p_x11->default_screen),
+    p_x11->black_pixel      = x11_XBlackPixel(display, p_x11->default_screen),
 
     p_x11->wm_delete_window = x11_XInternAtom(display, "WM_DELETE_WINDOW", False);
     p_x11->wm_protocols     = x11_XInternAtom(display, "WM_PROTOCOLS", False);
