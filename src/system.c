@@ -16,7 +16,7 @@ static const bj_system_backend_create_info* backend_create_infos[] = {
 
 bj_system_backend* s_backend = 0;
 
-#define FORCED_BACKEND 1
+#define FORCED_BACKEND 0
 
 bool bj_system_init(
     bj_error** p_error
