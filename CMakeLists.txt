@@ -68,7 +68,7 @@ find_package(X11)
 if(X11_FOUND)
     target_sources(banjo PRIVATE src/x11.c)
     target_compile_definitions(banjo PRIVATE "BANJO_HAVE_X11")
-    # target_link_libraries(banjo PRIVATE X11::X11)
+    target_include_directories(banjo PRIVATE ${X11_INCLUDE_DIR})
 endif()
 
 macro(banjo_feature _name _desc _default)
