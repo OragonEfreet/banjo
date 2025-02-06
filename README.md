@@ -1,42 +1,31 @@
-# Banjo API
+# Banjo C99 API
 
 ![Documentation](https://github.com/OragonEfreet/banjo/actions/workflows/documentation.yml/badge.svg)
 ![BuildTest](https://github.com/OragonEfreet/banjo/actions/workflows/cmake-multi-platform.yml/badge.svg)
 
-Banjo is a small projet in making myself a C99 framework for game development.
-The work aims at the following objectives:
+Banjo is a lightweight, self-contained C99 framework built on four core principles:  
 
-- **Little to no dependency**: The API must implement everything by itself and rely on the least amount of dependencies. Even the testing framework is local.
-- **Simple**:                  Easy to grasp for newcomers as long as they know C.
-- **Self-Documented**:         Documentation is fully available from header files, making code API sufficient to learn.
-- **Fast compile times**:      Banjo **must** compile fast.
+- **Simple** – If you know C, you can use Banjo.  
+- **Minimal** – Avoids external dependencies, even for testing.  
+- **Self-Documented** – Learn directly from the header files.  
+- **Fast** – Banjo **must compile fast**.  
 
-Current status of the projet is **early draft**, consisting in:
-- Designing the API
-- Providing most standard core features (base containers, memory function)
-- Developping an Entity-Component-System framework
+## Project Status  
 
-## Features
+**Early Draft** – Currently focused on:  
+- Designing the API.  
+- Implementing core features (containers, memory functions).  
+- Developing base system features (windowing, events).  
+- Creating an Entity-Component-System (ECS) framework.  
 
-This section only shows the currently available features.
+## Features At a Glance
 
-### Container types
-
-- `bj_array`: *Sequence container* that wraps a classic C-Style array.
-- `bj_list`: Forward-only *linked list*.
-- `bj_htable`: Associative array.
-
-### Graphics
-
-- `bj_bitmap`, along with `bj_pixel`, used to manage various bitmap formats, including:
-  - BMP file loading
-  - Simple drawing (pixels, lines and triangles)
-  - Basic bitmap blitting
-
-### Misc
-
-* Simple *logging* system with _log.h_.
-* Custom allocators with `BjAllocationCallbacks`.
+- Basic container types (sequential array, linked list, hash map)
+- Bitmap manipulation and loading, blitting
+- Basic primitive drawings
+- Windowing and Event
+- Logging system
+- Custom allocators
 
 ## Support
 
