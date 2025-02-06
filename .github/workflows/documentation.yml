@@ -37,12 +37,12 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt install --yes graphviz
-          wget https://github.com/doxygen/doxygen/releases/download/Release_1_10_0/doxygen-1.10.0.linux.bin.tar.gz
-          tar -xzf ./doxygen-1.10.0.linux.bin.tar.gz
+          wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz
+          tar -xzf ./doxygen-1.13.2.linux.bin.tar.gz
 
       - name: Doxygen
         run: |
-          ./doxygen-1.10.0/bin/doxygen
+          ./doxygen-1.13.2/bin/doxygen
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
