@@ -2667,3 +2667,10 @@ h2:hover a.anchorlink, h1:hover a.anchorlink, h3:hover a.anchorlink, h4:hover a.
         border-radius: 0 var(--border-radius-medium) var(--border-radius-medium) 0;
     }
 }
+
+li.unchecked:before {
+  content: "\25FC\A0";
+}
+li.checked:before {
+  content: "\2705\A0";
+}
