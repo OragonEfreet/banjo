@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#define DESC_FEAT(mode) printf("%c %s\n", info->mode ? '+' : '-', #mode)
+#define DESC(mode) printf("%c %s\n", info->mode ? '+' : '-', #mode)
 
 int main(int argc, char* argv[]) {
     const bj_build_info* info = bj_get_build_info();
@@ -20,8 +20,9 @@ int main(int argc, char* argv[]) {
         info->debug ? "Debug" : "Release"
     );
 
-    DESC_FEAT(abort_on_checks);
-    DESC_FEAT(checks);
-    DESC_FEAT(log_color);
-    DESC_FEAT(pedantic);
+    DESC(config_checks);
+    DESC(config_checks_abort);
+    DESC(config_checks_log);
+    DESC(config_log_color);
+    DESC(config_pedantic);
 }
