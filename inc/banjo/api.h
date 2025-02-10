@@ -81,13 +81,18 @@
 
 /// Structure holding build information of the binary
 typedef struct {
-    const char* p_name;           ///< API Name (\ref BJ_NAME)
-    uint32_t    version;          ///< Built version (\ref BJ_VERSION)
-    bool        debug;            ///< Built with debug information
-    bool        pedantic;         ///< If `true`, the API was build in pedantic mode
-    bool        log_color;        ///< Logs are colored
-    bool        checks;           ///< Programming error checking
-    bool        abort_on_checks;  ///< Program aborts when checks fails
+    const char* p_name;              ///< API Name (\ref BJ_NAME)
+    uint32_t    version;             ///< Built version (\ref BJ_VERSION)
+    bool        debug;               ///< Built with debug information
+    bool        pedantic;            ///< If `true`, the API was build in pedantic mode
+    bool        log_color;           ///< Logs are colored
+    bool        checks;              ///< Programming error checking
+    bool        abort_on_checks;     ///< Program aborts when checks fails
+    bool        config_checks;       ///< Banjo performs runtime checks and assertions
+    bool        config_checks_log;   ///< If checks feature is on, failed check with log
+    bool        config_checks_abort; ///< When checks feature is on, a failed check will abort execution
+    bool        config_pedantic;     ///< Banjo runtime will make costly extra checks
+    bool        config_log_color;    ///< Banjo logs will have colored output
 } bj_build_info;
 
 ////////////////////////////////////////////////////////////////////////////////

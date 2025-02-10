@@ -1,5 +1,7 @@
 # Architecture {#architecture}
 
+\brief Banjo API presentation
+
 Being a C Library, Banjo has the possibility of being built, distributed and consumed in two ways: either a **static** or a **shared** library.
 
 The build type is set by CMake options and communicated to producing as well as consuming code through C macro definitions (defined in _api.h_):

@@ -10,13 +10,13 @@
 #   define INFO_EXPECT_DEBUG true
 #endif
 
-#ifdef BJ_FEAT_PEDANTIC_ENABLED
+#ifdef BJ_CONFIG_PEDANTIC
 #   define INFO_EXPECT_PEDANTIC true
 #else
 #   define INFO_EXPECT_PEDANTIC false
 #endif
 
-#ifdef BJ_FEAT_LOG_COLOR_ENABLED
+#ifdef BJ_CONFIG_LOG_COLOR
 #   define INFO_EXPECT_COLOR_LOG true
 #else
 #   define INFO_EXPECT_COLOR_LOG false
@@ -28,8 +28,8 @@ TEST_CASE(get_build_info) {
     REQUIRE_EQ(cmp, 0);
     REQUIRE_EQ(info->version, BJ_VERSION);
     REQUIRE_EQ(info->debug, INFO_EXPECT_DEBUG);
-    REQUIRE_EQ(info->pedantic, INFO_EXPECT_PEDANTIC);
-    REQUIRE_EQ(info->log_color, INFO_EXPECT_COLOR_LOG);
+    REQUIRE_EQ(info->config_pedantic, INFO_EXPECT_PEDANTIC);
+    REQUIRE_EQ(info->config_log_color, INFO_EXPECT_COLOR_LOG);
 }
 
 int main(int argc, char* argv[]) {
