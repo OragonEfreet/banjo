@@ -15,7 +15,7 @@ static const char* level_strings[] = {
 };
 
 #ifndef NSOURCE
-    #ifdef BJ_FEAT_LOG_COLOR_ENABLED
+    #ifdef BJ_CONFIG_LOG_COLOR
         #define HEADER_FMT_EXTRA " \x1b[90m%s:%d:\x1b[0m "
     #else
         #define HEADER_FMT_EXTRA ": "
@@ -24,13 +24,13 @@ static const char* level_strings[] = {
     #define HEADER_FMT_EXTRA ""
 #endif
 
-#ifdef BJ_FEAT_LOG_COLOR_ENABLED
+#ifdef BJ_CONFIG_LOG_COLOR
     static const char* level_colors[] = {
         "\x1b[94m", "\x1b[36m", "\x1b[32m", "\x1b[33m", "\x1b[31m", "\x1b[35m"
     };
 #endif
 
-static const char* header_fmt = "%s %s%-5s \x1b[0m" HEADER_FMT_EXTRA;
+static const char* header_fmt = "%s %s %-5s \x1b[0m" HEADER_FMT_EXTRA;
 
 const char* bj_log_get_level_string(int level) {
     return level_strings[level];
@@ -55,7 +55,7 @@ void bj_message(int level, const char* p_file, int line, const char* p_format, .
         size_t eol_i = strftime(buffer, sizeof(buffer), "%H:%M:%S", pTime);
         buffer[eol_i] = '\0';
 
-#ifdef BJ_FEAT_LOG_COLOR_ENABLED
+#ifdef BJ_CONFIG_LOG_COLOR
 #ifdef NSOURCE
         printf(header_fmt, buffer, level_colors[level], level_strings[level]);
 #else

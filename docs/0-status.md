@@ -1,13 +1,12 @@
-# Development Status and Roadmap {#roadmap}
+# Development Status {#roadmap}
 
 \brief The features i'm working on
 
+\todo Project is in "early draft" status: designing API, implementing core features.
 This list primarily serves as a **development status tracker**, helping to keep track of progress while switching between branches.  
-
-- It provides a rough vision of the project's direction but is **not exhaustive**.  
-- Features are added over time and are **not listed in priority order**.  
-- Some features may exist in the API but not be listed here, and vice versa.  
-
+It provides a rough vision of the project's direction but is **not exhaustive**.  
+Features are added over time and are **not listed in priority order**.  
+Some features may exist in the API but not be listed here, and vice versa.  
 - [ ] Basic System Layer
   - [ ] Window management (\ref window.c)
     - [ ] Windows API
@@ -40,8 +39,6 @@ This list primarily serves as a **development status tracker**, helping to keep 
     - [ ] Wayland
     - [ ] Cocoa
     - [ ] X11
-- [ ] Code Architecture
-  - [ ] config.h header file used to define and document compilation options
 - [ ] Software Rendering
   - [ ] 3D Rendering
     - [ ] Simple Programmable Pipeline
@@ -58,7 +55,9 @@ This list primarily serves as a **development status tracker**, helping to keep 
   - [X] Sequential Array (\ref array.c)
   - [X] Hash Map (\ref htable.c)
   - [X] Linked List (\ref list.c)
+- [X] Make CMake not mandatory.
 - [X] Custom Allocators (\ref memory_callbacks.c)
 - [X] Logging System (\ref logging.c)
+
 
 

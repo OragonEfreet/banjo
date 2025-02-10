@@ -4,12 +4,14 @@
 
 #include "system_t.h"
 
-extern bj_system_backend_create_info x11_backend_create_info;
 extern bj_system_backend_create_info fake_backend_create_info;
+#ifdef BANJO_FEATURE_X11
+extern bj_system_backend_create_info x11_backend_create_info;
+#endif
 
 static const bj_system_backend_create_info* backend_create_infos[] = {
     &fake_backend_create_info,
-#ifdef BANJO_HAVE_X11
+#ifdef BANJO_FEATURE_X11
     &x11_backend_create_info,
 #endif
 };
