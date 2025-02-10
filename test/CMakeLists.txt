@@ -11,7 +11,7 @@ macro(gen_test category pattern)
         set_target_properties(${_target} PROPERTIES OUTPUT_NAME ${_test_name})
         add_test(NAME "[${category}] ${_test_name}" COMMAND ${_target})
         set_target_properties(${_target} PROPERTIES FOLDER "Tests")
-        target_compile_definitions(${_target} PRIVATE BJ_NO_OPAQUE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
+        target_compile_definitions(${_target} PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
     endforeach()
 endmacro()
 
