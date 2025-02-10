@@ -1,4 +1,3 @@
-#include <banjo/config.h>
 #include <banjo/log.h>
 
 #include <stdarg.h>

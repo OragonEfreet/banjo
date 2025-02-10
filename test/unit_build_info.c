@@ -1,5 +1,4 @@
 #include "banjo/api.h"
-#include "banjo/config.h"
 
 #include "test.h"
 

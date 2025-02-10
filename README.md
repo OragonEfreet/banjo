@@ -10,14 +10,6 @@ Banjo is a lightweight, self-contained C99 framework built on four core principl
 - **Self-Documented** – Learn directly from the header files.  
 - **Fast** – Banjo **must compile fast**.  
 
-## Project Status  
-
-**Early Draft** – Currently focused on:  
-- Designing the API.  
-- Implementing core features (containers, memory functions).  
-- Developing base system features (windowing, events).  
-- Creating an Entity-Component-System (ECS) framework.  
-
 ## Features At a Glance
 
 - Basic container types (sequential array, linked list, hash map)
@@ -41,7 +33,8 @@ Here, "testing" corresponds to building the entire project and running all tests
 
 ## Demo Code
 
-You can browse a full work set of examples from the _examples_ folder in the repository.
+See [Examples](examples.html)
+
 
 
 

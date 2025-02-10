@@ -1,5 +1,4 @@
 #include <banjo/api.h>
-#include <banjo/config.h>
 
 #ifdef NDEBUG
 #   define BJ_BUILD_DEBUG false

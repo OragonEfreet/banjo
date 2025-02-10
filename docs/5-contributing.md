@@ -1,5 +1,7 @@
 # Contributing to Banjo {#contributing}
 
+\brief Rules and guidelines
+
 ## Language
 
 The code is entirely in _C99_.

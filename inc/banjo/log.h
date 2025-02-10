@@ -12,7 +12,6 @@
 #pragma once
 
 #include <banjo/api.h>
-#include <banjo/config.h>
 
 #ifdef BJ_CONFIG_CHECKS_ABORT
 #   include <stdlib.h>
