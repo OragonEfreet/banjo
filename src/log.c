@@ -11,8 +11,8 @@ static struct {
 } s_context = {.level=0};
 
 static const struct {
-    char*  name;
-    char*  color;
+    const char* name;
+    const char* color;
     size_t payload;
 } level_info[] = { 
     { .name = "TRACE", .color = "\x1b[94m", .payload = 5, }, 
@@ -23,19 +23,18 @@ static const struct {
     { .name = "FATAL", .color = "\x1b[35m", .payload = 5, }, 
 };
 
-const char* bj_log_get_level_string(int level) {
+inline const char* bj_log_get_level_string(int level) {
     return level_info[level].name;
 }
 
-void bj_log_set_level(int level) {
+inline void bj_log_set_level(int level) {
     s_context.level = level;
 }
 
-int bj_log_get_level(void) {
+inline int bj_log_get_level(void) {
     return s_context.level;
 }
 
-// The number of bytes it takes to change the color onces
 #define COLOR_SET_PAYLOAD 5
 #define COLOR_END_PAYLOAD 4
 #define COLORED_CHUNK_PAYLOAD (COLOR_SET_PAYLOAD + COLOR_END_PAYLOAD)
@@ -48,13 +47,12 @@ static const bool use_colors = true;
 static const bool use_colors = false;
 #endif
 
-
 #define BUFFER_WRAP 50
 
 size_t bj_message(
-    int         level,
+    int level,
     const char* p_file,
-    int         line,
+    int line,
     const char* p_format, ...
 ) {
     if(level >= s_context.level) {
@@ -63,38 +61,25 @@ size_t bj_message(
 
         char buf[BUFFER_SIZE];
 
-        // First, write the message in the buffer
         va_list ap;
         va_start(ap, p_format);
-        int msg_payload = vsnprintf(
-            buf, BUFFER_SIZE, p_format, ap
-        );
+        int msg_payload = vsnprintf(buf, BUFFER_SIZE, p_format, ap);
         va_end(ap);
 
-        if(msg_payload < 0) { // Guess it can happen
-            return 0;
-        }
-        if(msg_payload > BJ_MAXIMUM_LOG_LEN) {
-            msg_payload = BJ_MAXIMUM_LOG_LEN;
-        }
+        if (msg_payload < 0) return 0;
+        if (msg_payload > BJ_MAXIMUM_LOG_LEN) msg_payload = BJ_MAXIMUM_LOG_LEN;
 
         const size_t header_max_len = BJ_MAXIMUM_LOG_LEN - msg_payload;
 
         size_t header_size = 0;
-        if(header_max_len > 0) {
-            for(size_t c = 0 ; c <= msg_payload ; ++c) {
-                buf[BJ_MAXIMUM_LOG_LEN - c] = buf[msg_payload - c];
-            }
-
+        if (header_max_len > 0) {
+            memmove(buf + header_max_len, buf, msg_payload);
 
             size_t source_payload = 0;
-            if(p_file != 0) {
+            if (p_file) {
                 source_payload = snprintf(buf, header_max_len, "(%s:%d)", p_file, line) + 1;
-                if(source_payload > header_max_len) {
-                    source_payload = 0;
-                } else {
-                    buf[source_payload-1] = ' ';
-                }
+                if (source_payload > header_max_len) source_payload = 0;
+                else buf[source_payload-1] = ' ';
             }
 
             size_t level_payload = level_info[level].payload + 1;
@@ -103,49 +88,45 @@ size_t bj_message(
             bool with_level = header_max_len >= level_payload;
             bool with_source = with_level && ((source_payload + level_payload) <= header_max_len);
             bool with_timestamp = with_source && ((level_payload + source_payload + timestamp_payload) <= header_max_len);
-            bool colored_level = use_colors && with_timestamp && ( (level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD) <= header_max_len);
-            bool colored_source = use_colors && colored_level && ( (level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD * 2) <= header_max_len);
+            bool colored_level = use_colors && with_timestamp && ((level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD) <= header_max_len);
+            bool colored_source = use_colors && colored_level && ((level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD * 2) <= header_max_len);
 
-
-            if(with_source) {
+            if (with_source) {
                 size_t shift = header_max_len - source_payload;
-                if(colored_source) {
-                    bj_memcpy(buf+header_max_len-COLOR_END_PAYLOAD, color_end, COLOR_END_PAYLOAD);
+                if (colored_source) {
+                    memcpy(buf + header_max_len - COLOR_END_PAYLOAD, color_end, COLOR_END_PAYLOAD);
                     shift -= COLOR_END_PAYLOAD;
                     header_size += COLOR_END_PAYLOAD;
                 }
-                for(size_t c = 0 ; c < source_payload ; ++c) {
-                    buf[source_payload - 1 - c + shift] = buf[source_payload - 1 - c];
-                }
+                memmove(buf + shift, buf, source_payload);
                 header_size += source_payload;
-                if(colored_source) {
-                    bj_memcpy(buf+header_max_len-COLOR_END_PAYLOAD-COLOR_SET_PAYLOAD-source_payload, color_source, COLOR_SET_PAYLOAD);
+                if (colored_source) {
+                    memcpy(buf + header_max_len - COLOR_END_PAYLOAD - COLOR_SET_PAYLOAD - source_payload, color_source, COLOR_SET_PAYLOAD);
                     header_size += COLOR_SET_PAYLOAD;
                 }
             }
 
-            if(with_level) {
-                if(colored_level) {
-                    bj_memcpy(buf+header_max_len-header_size-COLOR_END_PAYLOAD, color_end, COLOR_END_PAYLOAD);
+            if (with_level) {
+                if (colored_level) {
+                    memcpy(buf + header_max_len - header_size - COLOR_END_PAYLOAD, color_end, COLOR_END_PAYLOAD);
                     header_size += COLOR_END_PAYLOAD;
                 }
                 snprintf(buf + header_max_len - header_size - level_payload, level_payload, "%s", level_info[level].name);
                 buf[header_max_len - header_size - 1] = ' ';
                 header_size += level_payload;
-                if(colored_level) {
-                    bj_memcpy(buf+header_max_len-header_size-COLOR_SET_PAYLOAD, level_info[level].color, COLOR_SET_PAYLOAD);
+                if (colored_level) {
+                    memcpy(buf + header_max_len - header_size - COLOR_SET_PAYLOAD, level_info[level].color, COLOR_SET_PAYLOAD);
                     header_size += COLOR_SET_PAYLOAD;
                 }
             }
 
-            if(with_timestamp) {
+            if (with_timestamp) {
                 time_t now = time(0);
                 struct tm* pTime = localtime(&now);
                 strftime(buf + header_max_len - header_size - timestamp_payload, timestamp_payload, "%H:%M:%S", pTime);
                 buf[header_max_len - header_size - 1] = ' ';
                 header_size += timestamp_payload;
             }
-
         }
 
         puts(buf + header_max_len - header_size);
@@ -153,4 +134,3 @@ size_t bj_message(
     }
     return 0;
 }
-
