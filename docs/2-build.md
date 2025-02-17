@@ -13,11 +13,11 @@ The full set of requirements varies according to the development environment and
 
 Banjo API uses CMake as its primary development environment, although it's not a mandatory step.
 The use of CMake is not different from the standard configure-generate-build workflow.
-Thus if you are already familiar with CMake, you can directly jump to \ref cmake_options.
+Thus if you are already familiar with CMake, you can directly jump to CMake Options below.
 
 \todo Complete the CMake section
 
-### CMake Options {#cmake_options}
+### CMake Options 
 
 All build options listed in \ref build_options are available as CMake options with the same names.
 As such, to configure with colored logging support, use `-DBJ_CONFIG_LOG_COLOR` when calling CMake, or select it in CMake user interface.

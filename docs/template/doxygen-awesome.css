@@ -2674,3 +2674,7 @@ li.unchecked:before {
 li.checked:before {
   content: "\2705\A0";
 }
+
+.paramname em {
+  color: #41a22c;
+}
