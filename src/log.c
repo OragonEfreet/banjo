@@ -23,15 +23,15 @@ static const struct {
     { .name = "FATAL", .color = "\x1b[35m", .payload = 5, }, 
 };
 
-inline const char* bj_log_get_level_string(int level) {
+const char* bj_log_get_level_string(int level) {
     return level_info[level].name;
 }
 
-inline void bj_log_set_level(int level) {
+void bj_log_set_level(int level) {
     s_context.level = level;
 }
 
-inline int bj_log_get_level(void) {
+int bj_log_get_level(void) {
     return s_context.level;
 }
 
