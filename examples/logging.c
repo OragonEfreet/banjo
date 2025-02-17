@@ -25,6 +25,13 @@ int main(int argc, char* argv[]) {
     bj_log(TRACE, "Trace level (won't display)");
     bj_log(INFO, "Information level message");
     bj_log(WARN, "Warning level message");
+    // Also ther is bj_info(), bj_trace(), etc:
+    bj_err("This is an error message");
 
-    // Also ther is bj_info(), bj_trace(), etc.
+
+    // Logging functions accept variable arguments and string formatting a-la printf:
+    size_t written = bj_warn("Room #%d is closed, but you have '%s'", 42, "The Key Item"); 
+
+    // Written contains the number of characters actually written:
+    bj_info("Previous log message was written in %ld characters (excluding '\\0')", written);
 }
