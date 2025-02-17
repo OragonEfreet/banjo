@@ -22,9 +22,9 @@ int main(int argc, char* argv[]) {
 
     // Any message sent in a level equal to higher than the current will
     // output:
-    bj_log(TRACE, "Trace level won't display");
-    bj_log(INFO, "Information level will display");
-    bj_log(WARN, "Warning level will display");
+    bj_log(TRACE, "Trace level (won't display)");
+    bj_log(INFO, "Information level message");
+    bj_log(WARN, "Warning level message");
 
     // Also ther is bj_info(), bj_trace(), etc.
 }

@@ -13,9 +13,20 @@
 
 #include <banjo/api.h>
 
+
 #ifdef BJ_CONFIG_CHECKS_ABORT
 #   include <stdlib.h>
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
+/// Maximum length of log messages
+///
+/// Log messages, including header information such as timestamp and log level,
+/// cannot have a size in bytes larger than `BJ_MAXIMUM_LOG_LEN`, excluding the
+/// null character.
+/// In case a message is longer than this limit, the content is truncated in
+/// order of priority as described in \ref bj_message.
+#define BJ_MAXIMUM_LOG_LEN 120
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Log Levels.
@@ -47,7 +58,11 @@ enum {
 /// \param ...   Arguments forwarded to \ref bj_message.
 ///
 /// \see bj_message, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
-#define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, __FILE__, __LINE__, __VA_ARGS__)
+#ifdef NDEBUG
+#   define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, 0, 0, __VA_ARGS__)
+#else
+#   define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, __FILE__, __LINE__, __VA_ARGS__)
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Log a message using the `BJ_LOG_TRACE` level.
@@ -144,7 +159,7 @@ enum {
 /// \param level The log level to get the description from.
 ///
 /// \return A C-String describing `level`.
-BANJO_EXPORT const char* bj_log_get_levelString(int level);
+BANJO_EXPORT const char* bj_log_get_level_string(int level);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Sets the default log level.
@@ -180,8 +195,44 @@ BANJO_EXPORT int bj_log_get_level(void);
 /// \param line            The line number the message is reported from.
 /// \param p_format, ...   The formatted string to report.
 ///
+/// \return The actual number of characters written,
+///         excluding the null-terminating symbol.
+///
+/// \par Format and Behavior
+///
+/// The log message will have the following format:
+/// - `TIME LEVEL: (SOURCE) MESSAGE`
+/// Where:
+/// - `TIME` is in the format "HH:MM:SS" and takes 8 characters
+/// - `LEVEL`, in square brackets, is the result of calling
+///   \ref bj_log_get_level_string. It takes up to 4 to 5 characters.
+/// - `SOURCE` is in the format "FILE:LINE" and takes an undetermined number of 
+///   characters. This is only present in a debug build.
+/// - `MESSAGE` is the result of calling `snprintf(p_format, ...)` and the number
+///   of character varies.
+///
+/// For example: `12:23:34 WARN: logging.c:27 Warning level message`
+///
+/// The maximum length a log message will take is hardcoded to the value set
+/// for `BJ_MAXIMUM_LOG_LEN`.
+///
+/// A first buffer is filled in with the expansion of the message.
+/// This message is truncated to fit the \ref BJ_MAXIMUM_LOG_LEN characters 
+/// limit entirely.
+/// If this limit is already reached, the message is logged as-is.
+///
+/// Then, in the order of below priority:
+/// - If `BJ_CONFIG_LOG_COLOR` is set and but is not enough space for colored 
+///   source (Debug only), `SOURCE` is not colored.
+/// - If `BJ_CONFIG_LOG_COLOR` is set and but is not enough space for colored 
+///   level, `LEVEL` is not colored.
+/// - If there is not enough space left for `TIME`, it is not present.
+/// - If there is not enough space for `SOURCE` (Debug only), it is not 
+///   present.
+/// - If there is not enough space for `LEVEL`, it is not present.
+///
 /// \see bj_log, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal
-BANJO_EXPORT void bj_message(int level, const char* p_file, int line, const char* p_format, ...);
+BANJO_EXPORT size_t bj_message(int level, const char* p_file, int line, const char* p_format, ...);
 
 
 #ifdef BJ_CONFIG_CHECKS
