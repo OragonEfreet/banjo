@@ -5,15 +5,15 @@
 #include "system_t.h"
 
 extern bj_system_backend_create_info fake_backend_create_info;
-#ifdef BANJO_FEATURE_X11
+#ifdef BJ_FEATURE_X11
 extern bj_system_backend_create_info x11_backend_create_info;
 #endif
 
 static const bj_system_backend_create_info* backend_create_infos[] = {
-    &fake_backend_create_info,
-#ifdef BANJO_FEATURE_X11
+#ifdef BJ_FEATURE_X11
     &x11_backend_create_info,
 #endif
+    &fake_backend_create_info,
 };
 
 bj_system_backend* s_backend = 0;
@@ -23,14 +23,19 @@ bj_system_backend* s_backend = 0;
 bool bj_system_init(
     bj_error** p_error
 ) {
-    // TODO Smarter Backend selection
-    // For now, the backend is forced by taking the first available.
-    // What I want is the possibility to test each backend initialization in
-    // order of favorited, and return on the first that worked.
-    const bj_system_backend_create_info* p_create_info = backend_create_infos[FORCED_BACKEND];
-    s_backend = p_create_info->create(p_error);
-    bj_info("Initialized %s system backend", p_create_info->name);
-    return true;
+    const size_t n_backends = sizeof(backend_create_infos) / sizeof(bj_system_backend_create_info*);
+
+    for(size_t b = 0 ; b < n_backends ; ++b) {
+        const bj_system_backend_create_info* p_create_info = backend_create_infos[b];
+        bj_trace("Will try to initialize %s system backend", p_create_info->name);
+        bj_system_backend* p_backend = p_create_info->create(p_error);
+        if(p_backend != 0) {
+            bj_info("Initialized %s system backend", p_create_info->name);
+            s_backend = p_backend;
+            return true;
+        }
+    }
+    return false;
 }
 
 void bj_system_dispose(

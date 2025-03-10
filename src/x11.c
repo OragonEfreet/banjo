@@ -1,4 +1,4 @@
-#ifdef BANJO_FEATURE_X11
+#ifdef BJ_FEATURE_X11
 
 #include <banjo/error.h>
 #include <banjo/memory.h>
@@ -372,4 +372,4 @@ bj_system_backend_create_info x11_backend_create_info = {
     .create = x11_init_backend,
 };
 
-#endif // BANJO_FEATURE_X11
+#endif // BJ_FEATURE_X11
