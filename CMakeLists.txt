@@ -5,8 +5,12 @@ project(banjo C)
 include(CTest)
 include(CheckCXXCompilerFlag)
 
-if(UNIX)
+if(MSVC)
     option(BJ_FEATURE_X11 "Add X11 support" ON)
+endif()
+
+if(UNIX)
+    option(BJ_FEATURE_WIN32 "Add Win32 support" OFF)
 endif()
 
 option(BJ_CONFIG_CHECKS       "Banjo performs runtime checks and assertions"                   ON)
@@ -76,6 +80,10 @@ else()
 endif()
 
 # Subsystem-specific configuration
+if(BJ_FEATURE_WIN32)
+    target_sources(banjo PRIVATE src/win32.c)
+endif()
+
 if(BJ_FEATURE_X11)
     target_sources(banjo PRIVATE src/x11.c)
     find_package(X11)
@@ -89,7 +97,7 @@ foreach(VAR ${ALL_CACHE_VARS})
     get_property(VAR_TYPE CACHE ${VAR} PROPERTY TYPE)
     if(VAR_TYPE STREQUAL "BOOL" AND VAR MATCHES "^BJ_")
         if(${VAR})
-            target_compile_definitions(banjo PRIVATE "${VAR}")
+            target_compile_definitions(banjo PUBLIC "${VAR}")
             message(STATUS "Added macro: ${VAR}")
         endif()
     endif()
