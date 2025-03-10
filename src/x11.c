@@ -1,10 +1,10 @@
-#ifdef BJ_FEATURE_X11
-
 #include <banjo/error.h>
-#include <banjo/memory.h>
-#include <banjo/window.h>
 #include <banjo/log.h>
-#include <banjo/os.h>
+#include <banjo/memory.h>
+#include <banjo/system.h>
+#include <banjo/window.h>
+
+#ifdef BJ_FEATURE_X11
 
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>

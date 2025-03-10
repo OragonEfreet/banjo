@@ -30,4 +30,17 @@ BANJO_EXPORT void bj_system_dispose(
     bj_error** p_error
 );
 
+BANJO_EXPORT void* bj_load_library(
+    const char* p_path
+);
+
+BANJO_EXPORT void bj_unload_library(
+    void* p_handle
+);
+
+BANJO_EXPORT void* bj_get_symbol(
+    void*       p_handle,
+    const char* p_name
+);
+
 /// \} // End of system group

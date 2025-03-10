@@ -86,8 +86,7 @@ size_t bj_message(
             const size_t timestamp_payload = 9;
 
             bool with_level = header_max_len >= level_payload;
-            /* bool with_source = with_level && ((source_payload + level_payload) <= header_max_len); */
-            bool with_source = false;
+            bool with_source = with_level && ((source_payload + level_payload) <= header_max_len);
             bool with_timestamp = with_source && ((level_payload + source_payload + timestamp_payload) <= header_max_len);
             bool colored_level = use_colors && with_timestamp && ((level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD) <= header_max_len);
             bool colored_source = use_colors && colored_level && ((level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD * 2) <= header_max_len);
@@ -130,7 +129,9 @@ size_t bj_message(
             }
         }
 
+        buf[header_max_len + msg_payload] = '\0';
         puts(buf + header_max_len - header_size);
+
         return msg_payload + header_size;
     }
     return 0;
