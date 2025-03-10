@@ -48,7 +48,6 @@ bj_bitmap* bj_bitmap_init(
     size_t           stride
 ) {
     const size_t computed_stride = bitmap_stride(width, mode);
-bj_bitmap* bj_bitmap_init_with(bj_bitmap* p_bitmap, size_t width, size_t height, bj_pixel_mode mode, size_t stride);
     if(stride < computed_stride) {
         stride = computed_stride;
     }
@@ -287,7 +286,7 @@ bool bj_bitmap_blit(
     // Clip the source rect
     bj_rect blit_rect;
     if( bj_rect_intersect(
-        &(bj_rect){.w = p_src->width, .h = p_src->width, },
+        &(bj_rect){.w = (uint16_t)p_src->width, .h = (uint16_t)p_src->width, },
         p_src_rect, &blit_rect) == true
     ) {
         p_dest_rect->w = blit_rect.w;
@@ -296,7 +295,7 @@ bool bj_bitmap_blit(
         uint8_t red, green, blue;
 
         if( bj_rect_intersect(
-            &(bj_rect) {.w = p_dest->width, .h = p_dest->height, },
+            &(bj_rect) {.w = (uint16_t)p_dest->width, .h = (uint16_t)p_dest->height, },
             p_dest_rect, p_dest_rect) == true
         ) {
             for(size_t r = 0 ; r < p_dest_rect->h ; ++r) {

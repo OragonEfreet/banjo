@@ -1,0 +1,21 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "base",
+            "description": "Sets build directory",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build"
+        },
+        {
+            "name": "x86-windows",
+            "description": "Sets generator, x86 arhc, compilers, build type",
+            "inherits": ["base"],
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "win32",
+                "strategy": "set"
+            }
+        }
+    ]
+}

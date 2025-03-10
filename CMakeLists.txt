@@ -6,7 +6,6 @@ include(CTest)
 include(CheckCXXCompilerFlag)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library(banjo)
 

@@ -31,7 +31,7 @@ struct bj_rect_t {
 /// \param p_result Pointer to the rectangle where the result will be stored. 
 ///                 Can be *0* if only checking intersection presence.
 ///
-/// \return Non-zero if the rectangles intersect and neither input is *0*, *0* otherwise.
+/// \return *true* if the rectangles intersect and neither input is *0*, *false*.
 ///
 /// \note Both input rectangles must be valid and properly initialized. If either 
 ///       `p_rect_a` or `p_rect_b` is *0*, the function returns *0*. If \p p_result
@@ -48,7 +48,7 @@ struct bj_rect_t {
 /// }
 /// \endcode
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT int bj_rect_intersect(
+BANJO_EXPORT bool bj_rect_intersect(
     const bj_rect* p_rect_a,
     const bj_rect* p_rect_b,
     bj_rect*       p_result
