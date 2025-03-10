@@ -3,21 +3,22 @@ cmake_minimum_required(VERSION 3.21)
 project(banjo C)
 
 include(CTest)
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED TRUE)
-# set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 include(CheckCXXCompilerFlag)
 
-# For MSVC, we put everything in the same folder
-if(MSVC)
-    set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/runtime")
-    set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/runtime")
-endif()
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(_interface_headers
+add_library(banjo)
+
+target_include_directories(banjo PUBLIC inc)
+target_compile_features(banjo PUBLIC c_std_99)
+
+set_target_properties(banjo PROPERTIES
+    C_STANDARD 99
+    C_STANDARD_REQUIRED TRUE
+)
+
+target_sources(banjo PRIVATE
     inc/banjo/api.h
     inc/banjo/array.h
     inc/banjo/bitmap.h
@@ -33,7 +34,7 @@ set(_interface_headers
     inc/banjo/window.h
 )
 
-set(_sources
+target_sources(banjo PRIVATE
     src/api.c
     src/array.c
     src/array_t.h
@@ -58,12 +59,9 @@ set(_sources
     src/system_t.h
     src/window.c
     src/window_t.h
-    src/x11.c
 )
 
-add_library(banjo ${_interface_headers} ${_sources})
-
-# --- Option-to-defines funcion ------------------------------------------------
+# --- All Banjo build options --------------------------------------------------
 macro(banjo_option _name _desc _default)
     string(TOUPPER  "BJ_${_name}" _optmacro)
     option(${_optmacro} "${_desc}" ${_default})
@@ -72,25 +70,27 @@ macro(banjo_option _name _desc _default)
     endif()
 endmacro()
 
-banjo_option(config_checks "Banjo performs runtim checks and assertions" ON)
+banjo_option(config_checks "Banjo performs runtime checks and assertions" ON)
 banjo_option(config_checks_log "If checks feature is on, failed check with log" ON)
 banjo_option(config_checks_abort "When checks feature is on, a failed check will abort execution" OFF)
 banjo_option(config_pedantic "Banjo runtime will make costly extra checks" ON)
 banjo_option(config_log_color "Banjo logs will have colored output" OFF)
 
-# --- X11 Detection - If found, feature is enabled by default ------------------
-# If X11 is found and feature is enabled, CMake adds proper include directories.
+# --- X11. If found, feature is enabled by default -----------------------------
+# If X11 is found, option to enable it is provided (defaults to ON)
 find_package(X11)
-banjo_option(feature_x11 "Add X11 support" "${X11_FOUND}")
-if(BANJO_FEATURE_X11)
-    if(X11_FOUND)
+if(X11_FOUND)
+    banjo_option(feature_x11 "Add X11 support" ON)
+    if(BANJO_FEATURE_X11)
         target_include_directories(banjo PRIVATE ${X11_INCLUDE_DIR})
+        target_sources(banjo PRIVATE src/x11.c)
     endif()
 endif()
 
-
-if(NOT MSVC)
-    target_compile_options(banjo PRIVATE -Wall)
+if (MSVC)
+    target_compile_options(banjo PRIVATE /W4)
+else()
+    target_compile_options(banjo PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -99,18 +99,11 @@ else()
     target_compile_definitions(banjo PUBLIC BANJO_STATIC)
 endif()
 
-
-target_include_directories(banjo PUBLIC inc)
-set_property(TARGET banjo PROPERTY C_STANDARD 99)
-target_compile_features(banjo PUBLIC c_std_99)
-
 set(BANJO_ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
-
 option(BANJO_BUILD_EXAMPLES "Build Banjo Examples" TRUE)
 if(BANJO_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
-
 if (BUILD_TESTING)
     add_subdirectory(test)
 endif()

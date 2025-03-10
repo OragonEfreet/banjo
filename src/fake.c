@@ -13,6 +13,13 @@ static bj_window* fake_window_new(
     uint16_t width,
     uint16_t height
 ) {
+    (void)p_backend;
+    (void)p_title;
+    (void)x;
+    (void)y;
+    (void)width;
+    (void)height;
+
     bj_window* window = bj_malloc(sizeof(bj_window));
     window->must_close = true;
     return window;
@@ -22,6 +29,8 @@ static void fake_window_del(
     bj_system_backend* p_backend,
     bj_window* p_window
 ) {
+    (void)p_backend;
+
     bj_free(p_window);
 }
 
@@ -29,18 +38,22 @@ static void fake_dispose_backend(
     bj_system_backend* p_backend,
     bj_error** p_error
 ) {
+    (void)p_error;
+
     bj_free(p_backend);
 }
 
 static void fake_window_poll(
     bj_system_backend* p_backend
 ) {
-    // EMPTY
+    (void)p_backend;
 }
 
 static bj_system_backend* fake_init_backend(
     bj_error** p_error
 ) {
+    (void)p_error;
+
     bj_system_backend* p_backend = bj_malloc(sizeof(bj_system_backend));
     p_backend->dispose           = fake_dispose_backend;
     p_backend->create_window     = fake_window_new;

@@ -170,13 +170,12 @@ static int dib_compute_pixel_mode(uint32_t dib_count, uint32_t red_mask, uint32_
 #undef RETURN_IF_MATCH
 
 static void dib_read_uncompressed_raster(
-    bj_stream* p_stream, 
-    uint8_t*        dst_pixels,     
-    size_t      dst_stride,
-    uint32_t        width,
-    int32_t        height,
-    uint16_t        dib_bit_count,
-    bj_error** p_error
+    bj_stream* p_stream,
+    uint8_t*   dst_pixels,
+    size_t     dst_stride,
+    uint32_t   width,
+    int32_t    height,
+    uint16_t   dib_bit_count
 ) {
     const bool is_top_down = height < 0;
 
@@ -471,7 +470,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
         return 0;
     }
 
-    if(dib_colors_used > (dib_bit_count <= DIB_BIT_COUNT_8 ? 0x01 << dib_bit_count : 256)) {
+    if(dib_colors_used > (dib_bit_count <= DIB_BIT_COUNT_8 ? 0x01u << dib_bit_count : 256u)) {
         bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, ERR_MSG_BAD_PALETTE_SIZE);
         return 0;
     }
@@ -580,8 +579,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
                 bj_bitmap_pixels(p_bitmap), // dst_pixels
                 bj_bitmap_stride(p_bitmap), // dst_stride
                 dib_width, dib_height,
-                dib_bit_count,
-                p_error
+                dib_bit_count
             );
             break;
         case DIB_BI_RLE4:
