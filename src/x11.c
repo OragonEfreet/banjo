@@ -4,11 +4,12 @@
 #include <banjo/memory.h>
 #include <banjo/window.h>
 #include <banjo/log.h>
+#include <banjo/os.h>
+
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
 
-#include "internals.h"
 #include "system_t.h"
 #include "window_t.h"
 

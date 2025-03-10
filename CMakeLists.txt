@@ -27,6 +27,7 @@ target_sources(banjo PRIVATE
     inc/banjo/list.h
     inc/banjo/log.h
     inc/banjo/memory.h
+    inc/banjo/os.h
     inc/banjo/rect.h
     inc/banjo/stream.h
     inc/banjo/system.h
@@ -44,8 +45,6 @@ target_sources(banjo PRIVATE
     src/fake.c
     src/htable.c
     src/htable_t.h
-    src/internals.c
-    src/internals.h
     src/list.c
     src/list_t.h
     src/log.c
@@ -59,6 +58,16 @@ target_sources(banjo PRIVATE
     src/window.c
     src/window_t.h
 )
+
+# OS-specific files
+if(MSVC)
+    target_sources(banjo PRIVATE src/os_windows.c)
+endif()
+if(UNIX)
+    target_sources(banjo PRIVATE src/os_unix.c)
+endif()
+
+
 
 # --- All Banjo build options --------------------------------------------------
 macro(banjo_option _name _desc _default)
