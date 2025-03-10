@@ -42,19 +42,26 @@ bj_stream* bj_stream_new_read_from_file(
 
     fseek(fstream, 0, SEEK_END);
     const long file_size = ftell(fstream);
+    if(file_size == -1L) {
+        bj_set_error(p_error, BJ_ERROR_IO, "Cannot get file cursor position");
+        fclose(fstream);
+        return 0;
+    }
     fseek(fstream, 0, SEEK_SET);
 
     if(file_size > 0) {
-        void *buffer = bj_malloc(file_size);
+        size_t file_byte_size = file_size;
+
+        void *buffer = bj_malloc(file_byte_size);
         if (buffer == 0) {
             bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot read file content");
             fclose(fstream);
             return 0;
         }
 
-        size_t bytes_read = fread(buffer, 1, file_size, fstream);
+        size_t bytes_read = fread(buffer, 1, file_byte_size, fstream);
         fclose(fstream);
-        if (bytes_read != file_size) {
+        if (bytes_read != file_byte_size) {
             bj_set_error(p_error, BJ_ERROR, "cannot read file content");
             return 0;
         }

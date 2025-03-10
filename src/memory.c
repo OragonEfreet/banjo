@@ -6,14 +6,20 @@
 #include <string.h>
 
 static void* fallback_malloc(void* user_data, size_t size) {
+    (void)user_data;
+
     return malloc(size);
 }
 
 static void* fallback_realloc(void* user_data, void* original, size_t size) {
+    (void)user_data;
+
     return realloc(original, size);
 }
 
 static void fallback_free(void* user_data, void* ptr) {
+    (void)user_data;
+
     free(ptr);
 }
 
