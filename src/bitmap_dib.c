@@ -396,13 +396,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
         return 0;
     }
 
-    const int32_t abs_dib_height = _ABS(dib_height);
-    if(abs_dib_height > (int32_t)UINT32_MAX) {
-        bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, ERR_MSG_BAD_BMP_SIZE);
-        return 0;
-    }
-
-    if (dib_width != 0 && (uint32_t)abs_dib_height > UINT32_MAX / dib_width) {
+    if (dib_width != 0 && (uint32_t)(_ABS(dib_height)) > UINT32_MAX / dib_width) {
         bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, ERR_MSG_BAD_BMP_SIZE);
         return 0;
     }
