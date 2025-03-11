@@ -34,27 +34,28 @@ bool bj_error_check(
     return p_error && code == p_error->code;
 }
 
-void bj_forward_error(
+bool bj_forward_error(
     bj_error*  p_source,
     bj_error** p_destination
 ) {
-    bj_check(p_source != 0);
+    bj_check_or_0(p_source != 0);
 
     if (p_destination == 0) {
         if (p_source) {
             bj_free (p_source);
         }
-        return;
-    } else {
-        if (*p_destination != 0) {
-            bj_err("Error code 0x%08X overwritten by 0x%08X",
-                (*p_destination)->code, p_source->code
-            );
-            bj_free (p_source);
-        } else {
-            *p_destination = p_source;
-        }
+        return false;
     }
+
+    if (*p_destination != 0) {
+        bj_err("Error code 0x%08X overwritten by 0x%08X",
+            (*p_destination)->code, p_source->code
+        );
+        bj_free (p_source);
+    } else {
+        *p_destination = p_source;
+    }
+    return true;
 }
 
 void bj_clear_error(

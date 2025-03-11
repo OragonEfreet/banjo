@@ -180,7 +180,11 @@ BANJO_EXPORT bool bj_error_check(
 /// \param p_source The source error.
 /// \param p_destination The destination error pointer.
 ///
-BANJO_EXPORT void bj_forward_error(
+/// \return `true` if both `p_source` and `p_destination` are non-zero.
+///         When this happens, this means there was an error to propagate and
+///         that the caller asked for it.
+///
+BANJO_EXPORT bool bj_forward_error(
     bj_error*  p_source,
     bj_error** p_destination
 );

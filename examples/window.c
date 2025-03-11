@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
+
     if(!bj_system_init(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return 1;
