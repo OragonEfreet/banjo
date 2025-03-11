@@ -121,28 +121,39 @@ static bj_system_backend* win32_init_backend(
     }
 
     //
-    const uint32_t window_style  = WS_OVERLAPPED  | WS_SYSMENU     | WS_CAPTION
-                                 | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
-    const uint32_t window_ex_style = WS_EX_APPWINDOW;
+    u32 client_x = x;
+    u32 client_y = y;
+    u32 client_width = width;
+    u32 client_height = height;
 
+    u32 window_x = client_x;
+    u32 window_y = client_y;
+    u32 window_width = client_width;
+    u32 window_height = client_height;
+
+    u32 window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
+    u32 window_ex_style = WS_EX_APPWINDOW;
+
+    window_style |= WS_MAXIMIZEBOX;
+    window_style |= WS_MINIMIZEBOX;
+    window_style |= WS_THICKFRAME;
+
+    // Obtain the size of the border.
     RECT border_rect = {0, 0, 0, 0};
     AdjustWindowRectEx(&border_rect, window_style, 0, window_ex_style);
 
-    const uint32_t client_x      = 400;
-    const uint32_t client_y      = 400;
-    const uint32_t client_width  = 400;
-    const uint32_t client_height = 400;
+    // In this case, the border rectangle is negative.
+    window_x += border_rect.left;
+    window_y += border_rect.top;
 
-    const uint32_t window_x      = client_x + border_rect.left;
-    const uint32_t window_y      = client_y + border_rect.right;
-    const uint32_t window_width  = client_width + border_rect.right - border_rect.left;
-    const uint32_t window_height = client_height + border_rect.bottom - border_rect.top;
+    // Grow by the size of the OS border.
+    window_width += border_rect.right - border_rect.left;
+    window_height += border_rect.bottom - border_rect.top;
 
-    HWND p_handle = CreateWindowExA(
-        window_ex_style, "banjo_window_class", "Hello",
+    HWND handle = CreateWindowExA(
+        window_ex_style, "kohi_window_class", application_name,
         window_style, window_x, window_y, window_width, window_height,
-        0, 0, p_instance, 0
-    );
+        0, 0, state->h_instance, 0);
 
     if(p_handle == 0) {
         MessageBoxA(NULL, "Window creation failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
