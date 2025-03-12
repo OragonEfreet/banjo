@@ -106,7 +106,7 @@ endforeach()
 if (MSVC)
     target_compile_options(banjo PRIVATE /W4)
 else()
-    target_compile_options(banjo PRIVATE -Wall -Wextra -Wpedantic)
+    target_compile_options(banjo PRIVATE -Wall -Wextra)
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -125,4 +125,6 @@ if (BUILD_TESTING)
 endif()
 
 
-add_executable(sandbox_win32 sandbox_win32.c)
+if(MSVC)
+    add_executable(sandbox_win32 sandbox_win32.c)
+endif()

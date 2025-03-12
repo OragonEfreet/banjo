@@ -23,7 +23,6 @@ typedef Visual*             (* pfn_XDefaultVisual)(Display*,int);
 typedef Window              (* pfn_XCreateWindow)(Display*,Window,int,int,unsigned int,unsigned int,unsigned int,int,unsigned int,Visual*,unsigned long,XSetWindowAttributes*);
 typedef XrmQuark            (* pfn_XrmUniqueQuark)(void);
 typedef int                 (* pfn_XCloseDisplay)(Display*);
-typedef unsigned long       (* pfn_XBlackPixel)(Display*,int);
 typedef int                 (* pfn_XDefaultDepth)(Display*,int);
 typedef int                 (* pfn_XDefaultScreen)(Display*);
 typedef int                 (* pfn_XDeleteContext)(Display*,XID,XContext);
@@ -41,6 +40,8 @@ typedef int                 (* pfn_XQLength)(Display*);
 typedef int                 (* pfn_XSaveContext)(Display*,XID,XContext,const char*);
 typedef int                 (* pfn_XSync)(Display*,Bool);
 typedef int                 (* pfn_XUnmapWindow)(Display*,Window);
+typedef unsigned long       (* pfn_XBlackPixel)(Display*,int);
+typedef void                (* pfn_XStoreName)(Display*, Window, char*);
 
 
 typedef struct {
@@ -68,6 +69,7 @@ typedef struct {
     pfn_XQLength            XQLength;
     pfn_XSaveContext        XSaveContext;
     pfn_XSetWMProtocols     XSetWMProtocols;
+    pfn_XStoreName          XStoreName;
     pfn_XSync               XSync;
     pfn_XUnmapWindow        XUnmapWindow;
 
@@ -120,6 +122,8 @@ static bj_window* x11_create_window(
             CWBackPixel | CWBorderPixel | CWEventMask, &attributes
         ),
     };
+
+    p_x11->XStoreName(p_x11->display, window.handle, (char*)p_title);
 
     p_x11->XSetWMProtocols(
         p_x11->display, window.handle,
@@ -211,7 +215,7 @@ static void x11_dispatch_event(
 
             if (event->xclient.message_type == p_x11->wm_protocols) {
                 
-                if (event->xclient.data.l[0] == p_x11->wm_delete_window) {
+                if ((Atom)event->xclient.data.l[0] == p_x11->wm_delete_window) {
                     bj_window_set_should_close(&p_window->common);
                 }
             }
@@ -295,6 +299,7 @@ static void x11_dispose_backend(
     bj_system_backend* p_backend,
     bj_error** p_error
 ) {
+    (void)p_error;
     x11_backend* p_x11 = (x11_backend*)p_backend;
     pfn_XCloseDisplay XCloseDisplay = x11_get_symbol(p_x11, "XCloseDisplay");
     XCloseDisplay(p_x11->display);
@@ -312,6 +317,7 @@ static bj_system_backend* x11_init_backend(
 
     x11_backend* p_x11 = bj_malloc(sizeof(x11_backend));
     p_x11->p_handle            = p_handle;
+
     p_x11->XCreateWindow       = x11_get_symbol(p_x11, "XCreateWindow");
     p_x11->XDeleteContext      = x11_get_symbol(p_x11, "XDeleteContext");
     p_x11->XDestroyWindow      = x11_get_symbol(p_x11, "XDestroyWindow");
@@ -325,6 +331,7 @@ static bj_system_backend* x11_init_backend(
     p_x11->XQLength            = x11_get_symbol(p_x11, "XQLength");
     p_x11->XSaveContext        = x11_get_symbol(p_x11, "XSaveContext");
     p_x11->XSetWMProtocols     = x11_get_symbol(p_x11, "XSetWMProtocols");
+    p_x11->XStoreName          = x11_get_symbol(p_x11, "XStoreName");
     p_x11->XSync               = x11_get_symbol(p_x11, "XSync");
     p_x11->XUnmapWindow        = x11_get_symbol(p_x11, "XUnmapWindow");
     
