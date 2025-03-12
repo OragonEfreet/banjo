@@ -102,11 +102,11 @@
 #endif
 
 #ifdef NDEBUG
-#   define BJ_BUILD_DEBUG 1
-#   define BJ_BUILD_RELEASE 0
-#else
 #   define BJ_BUILD_DEBUG 0
 #   define BJ_BUILD_RELEASE 1
+#else
+#   define BJ_BUILD_DEBUG 1
+#   define BJ_BUILD_RELEASE 0
 #endif
 
 #ifdef BANJO_STATIC
