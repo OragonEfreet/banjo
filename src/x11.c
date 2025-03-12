@@ -1,14 +1,15 @@
-#ifdef BANJO_FEATURE_X11
-
 #include <banjo/error.h>
-#include <banjo/memory.h>
-#include <banjo/window.h>
 #include <banjo/log.h>
+#include <banjo/memory.h>
+#include <banjo/system.h>
+#include <banjo/window.h>
+
+#ifdef BJ_FEATURE_X11
+
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
 
-#include "internals.h"
 #include "system_t.h"
 #include "window_t.h"
 
@@ -265,7 +266,6 @@ static void x11_poll_events(
         x11_dispatch_event(p_x11, &event);
     }
     p_x11->XFlush(p_x11->display);
-
 }
 
 static void x11_init_keycodes(
@@ -371,4 +371,4 @@ bj_system_backend_create_info x11_backend_create_info = {
     .create = x11_init_backend,
 };
 
-#endif // BANJO_FEATURE_X11
+#endif // BJ_FEATURE_X11

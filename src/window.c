@@ -28,6 +28,7 @@ void bj_window_del(
 bool bj_window_should_close(
     bj_window* p_window
 ) {
+    bj_check_or_return(p_window, true);
     return p_window->must_close;
 }
 

@@ -161,3 +161,4 @@ dkms.conf
 docs/html
 
 .vs
+.vscode/tasks.json

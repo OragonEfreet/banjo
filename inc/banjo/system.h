@@ -15,6 +15,9 @@
 ///
 /// \param p_error An optional location to an error object.
 ///
+/// The initialization process will iteratively try to initialize a subsystem
+/// among the ones available and returns on the first that succeeded.
+///
 /// \return _true_ if the system is properly initialized, false otherswise.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bool bj_system_init(
@@ -30,5 +33,17 @@ BANJO_EXPORT void bj_system_dispose(
     bj_error** p_error
 );
 
+BANJO_EXPORT void* bj_load_library(
+    const char* p_path
+);
+
+BANJO_EXPORT void bj_unload_library(
+    void* p_handle
+);
+
+BANJO_EXPORT void* bj_get_symbol(
+    void*       p_handle,
+    const char* p_name
+);
 
 /// \} // End of system group
