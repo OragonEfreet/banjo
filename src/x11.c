@@ -266,7 +266,6 @@ static void x11_poll_events(
         x11_dispatch_event(p_x11, &event);
     }
     p_x11->XFlush(p_x11->display);
-
 }
 
 static void x11_init_keycodes(

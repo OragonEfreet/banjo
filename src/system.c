@@ -39,8 +39,12 @@ bool bj_system_init(
         bj_trace("Will try to initialize %s system backend", p_create_info->name);
         bj_system_backend* p_backend = p_create_info->create(&sub_err);
 
-        if(bj_forward_error(sub_err, p_error)) {
-            return false;
+        if(sub_err) {
+            bj_message(p_backend == 0 ? 0 : 1, 0, 0,
+                "Error while initializing %s: %s (code 0x%08X)",
+                p_create_info->name, sub_err->message, sub_err->code
+            );
+            bj_clear_error(&sub_err);
         }
 
         if(p_backend != 0) {

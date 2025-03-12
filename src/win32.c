@@ -9,10 +9,17 @@
 #include "system_t.h"
 #include "window_t.h"
 
+#define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
+
 typedef struct {
     bj_system_backend fns;
-    HMODULE           p_instance;
+    HINSTANCE         p_instance;
 } win32_backend;
+
+typedef struct {
+    struct bj_window_t common;
+    HWND               handle;
+} win32_window;
 
 static bj_window* win32_window_new(
     bj_system_backend* p_backend,
@@ -30,44 +37,47 @@ static bj_window* win32_window_new(
 
     RECT border_rect = {0, 0, 0, 0};
     AdjustWindowRectEx(&border_rect, window_style, 0, window_ex_style);
+    const int window_x      = x + border_rect.left;
+    const int window_y      = y + border_rect.right;
+    const int window_width  = width + border_rect.right - border_rect.left;
+    const int window_height = height + border_rect.bottom - border_rect.top;
 
-    const uint32_t client_x      = x;
-    const uint32_t client_y      = y;
-    const uint32_t client_width  = width;
-    const uint32_t client_height = height;
-
-    const uint32_t window_x      = client_x + border_rect.left;
-    const uint32_t window_y      = client_y + border_rect.right;
-    const uint32_t window_width  = client_width + border_rect.right - border_rect.left;
-    const uint32_t window_height = client_height + border_rect.bottom - border_rect.top;
-
-    HWND p_handle = CreateWindowExA(
-        window_ex_style, "banjo_window_class", p_title,
-        window_style, window_x, window_y, window_width, window_height,
-        0, 0, p_win32->p_instance, 0
+    // Create the window
+    HWND hwnd = CreateWindowExA(
+        window_ex_style, WIN32_WINDOWCLASS_NAME, p_title, window_style,
+        window_x, window_y, window_width, window_height,
+        NULL, NULL, p_win32->p_instance, "Hello"
     );
 
-    if(p_handle == 0) {
-        MessageBoxA(NULL, "Window creation failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+    if (!hwnd) {
         return 0;
     }
-    
 
-    bj_window* window = bj_malloc(sizeof(bj_window));
-    window->p_button_event = 0;
-    window->p_cursor_event = 0;
-    window->p_enter_event = 0;
-    window->p_key_event = 0;
-    window->must_close = true;
-    return window;
+    win32_window window = { 
+        .common = {
+            .must_close = false,
+        },
+        .handle = hwnd,
+    };
+
+    ShowWindow(hwnd, SW_SHOW);
+    UpdateWindow(hwnd);
+
+    win32_window* p_window = bj_malloc(sizeof(win32_window));
+    bj_memcpy(p_window, &window, sizeof(win32_window));
+
+    SetWindowLongPtrA(hwnd, GWLP_USERDATA, (LONG_PTR)p_window);
+
+    return (bj_window*)p_window;
 }
 
 static void win32_window_del(
     bj_system_backend* p_backend,
-    bj_window* p_window
+    bj_window* p_abstract_window
 ) {
     (void)p_backend;
-
+    win32_window* p_window = (win32_window*)p_abstract_window;
+    DestroyWindow(p_window->handle);
     bj_free(p_window);
 }
 
@@ -77,91 +87,61 @@ static void win32_dispose_backend(
 ) {
     (void)p_error;
 
+    if(!UnregisterClassA(
+        WIN32_WINDOWCLASS_NAME,
+        ((win32_backend*)p_backend)->p_instance)
+    ) {
+        bj_set_error(p_error, BJ_ERROR_DISPOSE, "Failed to unregister window class");
+    }
+
     bj_free(p_backend);
 }
 
 static void win32_window_poll(
     bj_system_backend* p_backend
 ) {
-    bj_free((win32_backend*)p_backend);
+    (void)p_backend;
+    MSG msg;
+    if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessageA(&msg);
+    }
 }
 
-static LRESULT CALLBACK win32_process_message(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    win32_window* p_window = (win32_window*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
 
+    switch (uMsg) {
+        case WM_CLOSE:
+            bj_window_set_should_close((bj_window*)p_window);
+            break;
+        case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+        default:
+            return DefWindowProcA(hwnd, uMsg, wParam, lParam);
+    }
     return 0;
 }
 
 static bj_system_backend* win32_init_backend(
     bj_error** p_error
 ) {
-    win32_backend* p_win32 = bj_malloc(sizeof(win32_backend));
+    HINSTANCE hInstance = GetModuleHandleA(0);
 
-    HINSTANCE p_instance = GetModuleHandleA(0);
-
-    HICON icon = LoadIcon(p_instance, IDI_APPLICATION);
-    WNDCLASSA wc;
-    bj_memset(&wc, 0, sizeof(wc));
-    wc.style = CS_DBLCLKS;
-    wc.lpfnWndProc = win32_process_message;
-    wc.cbClsExtra = 0;
-    wc.cbWndExtra = 0;
-    // wc.lpszMenuName = 0;
-    wc.hInstance = p_instance;
-    wc.hIcon = icon;
-    wc.hCursor = LoadCursorA(NULL, IDC_ARROW);
-    wc.hbrBackground = NULL;
-    wc.lpszClassName = "banjo_window_class";
-
-    if(!RegisterClassA(&wc)) {
-        const char* p_msg = "Window Registration Failed";
-        MessageBoxA(0, p_msg, "Error", MB_ICONEXCLAMATION | MB_OK);
-        bj_set_error(p_error, BJ_ERROR_SYSTEM, p_msg);
-        return 0;
-
-    }
-
-    //
-    u32 client_x = x;
-    u32 client_y = y;
-    u32 client_width = width;
-    u32 client_height = height;
-
-    u32 window_x = client_x;
-    u32 window_y = client_y;
-    u32 window_width = client_width;
-    u32 window_height = client_height;
-
-    u32 window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
-    u32 window_ex_style = WS_EX_APPWINDOW;
-
-    window_style |= WS_MAXIMIZEBOX;
-    window_style |= WS_MINIMIZEBOX;
-    window_style |= WS_THICKFRAME;
-
-    // Obtain the size of the border.
-    RECT border_rect = {0, 0, 0, 0};
-    AdjustWindowRectEx(&border_rect, window_style, 0, window_ex_style);
-
-    // In this case, the border rectangle is negative.
-    window_x += border_rect.left;
-    window_y += border_rect.top;
-
-    // Grow by the size of the OS border.
-    window_width += border_rect.right - border_rect.left;
-    window_height += border_rect.bottom - border_rect.top;
-
-    HWND handle = CreateWindowExA(
-        window_ex_style, "kohi_window_class", application_name,
-        window_style, window_x, window_y, window_width, window_height,
-        0, 0, state->h_instance, 0);
-
-    if(p_handle == 0) {
-        MessageBoxA(NULL, "Window creation failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
+    if (!RegisterClassA(&(WNDCLASSA){
+        .lpfnWndProc   = WindowProc,
+        .hInstance     = hInstance,
+        .lpszClassName = WIN32_WINDOWCLASS_NAME,
+        .hbrBackground = (HBRUSH)(COLOR_WINDOW + 1),
+        .hCursor       = LoadCursor(NULL, IDC_ARROW),
+    })) {
+        bj_set_error(p_error, BJ_ERROR_INITIALIZE, "Failed to register window class");
         return 0;
     }
-    
+
     win32_backend win32 = {
-        .p_instance = p_instance,
+        .p_instance = hInstance,
         .fns = {
             .dispose           = win32_dispose_backend,
             .create_window     = win32_window_new,

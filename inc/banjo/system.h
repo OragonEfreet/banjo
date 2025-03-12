@@ -15,6 +15,9 @@
 ///
 /// \param p_error An optional location to an error object.
 ///
+/// The initialization process will iteratively try to initialize a subsystem
+/// among the ones available and returns on the first that succeeded.
+///
 /// \return _true_ if the system is properly initialized, false otherswise.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bool bj_system_init(

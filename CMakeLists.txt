@@ -103,13 +103,11 @@ foreach(VAR ${ALL_CACHE_VARS})
     endif()
 endforeach()
 
-
-
-# if (MSVC)
-#     target_compile_options(banjo PRIVATE /W4)
-# else()
-#     target_compile_options(banjo PRIVATE -Wall -Wextra -Wpedantic)
-# endif()
+if (MSVC)
+    target_compile_options(banjo PRIVATE /W4)
+else()
+    target_compile_options(banjo PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(banjo PRIVATE BANJO_EXPORTS)
@@ -127,3 +125,4 @@ if (BUILD_TESTING)
 endif()
 
 
+add_executable(sandbox_win32 sandbox_win32.c)

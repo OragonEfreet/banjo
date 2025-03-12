@@ -67,6 +67,8 @@ BANJO_EXPORT void bj_window_set_should_close(
 /// \param p_window Pointer to the window object to flag.
 /// \return _true_ if the close flag is set, _false_ otherwise.
 ///
+/// If `p_window` is *0*, the function returns *true*.
+///
 /// \see bj_window_set_should_close
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bool bj_window_should_close(
