@@ -41,6 +41,40 @@
 /// Name of the library.
 #define BJ_NAME "Banjo"
 
+/// Platform detection
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+#   define BJ_OS_WINDOWS
+#elif defined(__linux__) || defined(__gnu_linux__)
+#   define BJ_OS_LINUX
+#elif defined(__unix__)
+#   define BJ_OS_UNIX
+#elif defined(_POSIX_VERSION)
+#   define BJ_OS_POSIX
+#elif __APPLE__
+#   define BJ_OS_APPLE
+#   include <TargetConditionals.h>
+#   if TARGET_OS_IPHONE
+#       define BJ_OS_IOS
+#   elif TARGET_IPHONE_SIMULATOR
+#       define BJ_OS_IOS
+#       define BJ_OS_IOS_SIMULATOR
+#   elif TARGET_OS_MAC
+#       define BJ_OS_MACOS
+#   else
+#       error "unknown Apple operating system"
+#   endif
+#else
+#   error "unknown operating system"
+#endif
+
+#ifdef NDEBUG
+#   define BJ_BUILD_DEBUG 1
+#   define BJ_BUILD_RELEASE 0
+#else
+#   define BJ_BUILD_DEBUG 0
+#   define BJ_BUILD_RELEASE 1
+#endif
+
 #ifdef BANJO_STATIC
 #  define BANJO_EXPORT
 #  define BANJO_NO_EXPORT
