@@ -19,6 +19,7 @@ int main(int argc, char* argv[]) {
         info->version,
         info->debug ? "Debug" : "Release"
     );
+    printf("Compiler: %s %d\n", info->compiler_name, info->compiler_version);
 
     DESC(feature_win32);
     DESC(feature_x11);

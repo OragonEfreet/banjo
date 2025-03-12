@@ -55,6 +55,7 @@
 #       define BJ_OS_IOS_SIMULATOR 1
 #   elif TARGET_OS_MAC
 #       define BJ_OS_MACOS 1
+#       define BJ_OS_UNIX 1
 #   else
 #       define BJ_OS_APPLE_UNKNOWN 1
 #   endif
