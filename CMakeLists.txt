@@ -5,7 +5,19 @@ project(banjo C)
 include(CTest)
 include(CheckCXXCompilerFlag)
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+if(MSVC)
+    option(BJ_FEATURE_WIN32 "Add Win32 support" OFF)
+endif()
+
+if(UNIX)
+    option(BJ_FEATURE_X11 "Add X11 support" ON)
+endif()
+
+option(BJ_CONFIG_CHECKS       "Banjo performs runtime checks and assertions"                   ON)
+option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)
+option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 ON)
+option(BJ_CONFIG_LOG_COLOR    "Banjo logs will have colored output"                            OFF)
+option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    ON)
 
 add_library(banjo)
 
@@ -44,8 +56,6 @@ target_sources(banjo PRIVATE
     src/fake.c
     src/htable.c
     src/htable_t.h
-    src/internals.c
-    src/internals.h
     src/list.c
     src/list_t.h
     src/log.c
@@ -60,31 +70,38 @@ target_sources(banjo PRIVATE
     src/window_t.h
 )
 
-# --- All Banjo build options --------------------------------------------------
-macro(banjo_option _name _desc _default)
-    string(TOUPPER  "BJ_${_name}" _optmacro)
-    option(${_optmacro} "${_desc}" ${_default})
-    if(${_optmacro})
-        target_compile_definitions(banjo PUBLIC "${_optmacro}")
-    endif()
-endmacro()
+# OS-specific configuration
+if(MSVC)
+    target_sources(banjo PRIVATE src/system_win32.c)
+elseif(UNIX)
+    target_sources(banjo PRIVATE src/system_unix.c)
+else()
+    message(FATAL_ERROR "Source files for this system")
+endif()
 
-banjo_option(config_checks "Banjo performs runtime checks and assertions" ON)
-banjo_option(config_checks_log "If checks feature is on, failed check with log" ON)
-banjo_option(config_checks_abort "When checks feature is on, a failed check will abort execution" OFF)
-banjo_option(config_pedantic "Banjo runtime will make costly extra checks" ON)
-banjo_option(config_log_color "Banjo logs will have colored output" OFF)
+# Subsystem-specific configuration
+if(BJ_FEATURE_WIN32)
+    target_sources(banjo PRIVATE src/win32.c)
+endif()
 
-# --- X11. If found, feature is enabled by default -----------------------------
-# If X11 is found, option to enable it is provided (defaults to ON)
-find_package(X11)
-if(X11_FOUND)
-    banjo_option(feature_x11 "Add X11 support" ON)
-    if(BANJO_FEATURE_X11)
+if(BJ_FEATURE_X11)
+    target_sources(banjo PRIVATE src/x11.c)
+    find_package(X11)
+    if(X11_FOUND)
         target_include_directories(banjo PRIVATE ${X11_INCLUDE_DIR})
-        target_sources(banjo PRIVATE src/x11.c)
     endif()
 endif()
+
+get_cmake_property(ALL_CACHE_VARS CACHE_VARIABLES)
+foreach(VAR ${ALL_CACHE_VARS})
+    get_property(VAR_TYPE CACHE ${VAR} PROPERTY TYPE)
+    if(VAR_TYPE STREQUAL "BOOL" AND VAR MATCHES "^BJ_")
+        if(${VAR})
+            target_compile_definitions(banjo PUBLIC "${VAR}")
+            message(STATUS "Added macro: ${VAR}")
+        endif()
+    endif()
+endforeach()
 
 if (MSVC)
     target_compile_options(banjo PRIVATE /W4)
@@ -108,3 +125,4 @@ if (BUILD_TESTING)
 endif()
 
 
+add_executable(sandbox_win32 sandbox_win32.c)
