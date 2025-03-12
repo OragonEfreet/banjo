@@ -9,7 +9,6 @@
 /// \{
 #pragma once
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -43,28 +42,63 @@
 
 /// Platform detection
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-#   define BJ_OS_WINDOWS
+#   define BJ_OS_WINDOWS 1
 #elif defined(__linux__) || defined(__gnu_linux__)
-#   define BJ_OS_LINUX
+#   define BJ_OS_LINUX 1
 #elif defined(__unix__)
-#   define BJ_OS_UNIX
+#   define BJ_OS_UNIX 1
 #elif defined(_POSIX_VERSION)
-#   define BJ_OS_POSIX
+#   define BJ_OS_POSIX 1
 #elif __APPLE__
-#   define BJ_OS_APPLE
+#   define BJ_OS_APPLE 1
 #   include <TargetConditionals.h>
 #   if TARGET_OS_IPHONE
-#       define BJ_OS_IOS
+#       define BJ_OS_IOS 1
 #   elif TARGET_IPHONE_SIMULATOR
-#       define BJ_OS_IOS
-#       define BJ_OS_IOS_SIMULATOR
+#       define BJ_OS_IOS 1
+#       define BJ_OS_IOS_SIMULATOR 1
 #   elif TARGET_OS_MAC
-#       define BJ_OS_MACOS
+#       define BJ_OS_MACOS 1
 #   else
-#       error "unknown Apple operating system"
+#       define BJ_OS_APPLE_UNKNOWN 1
 #   endif
 #else
-#   error "unknown operating system"
+#   define BJ_OS_UNKNOWN 1
+#endif
+
+// Compiler Detection
+#if defined(__GNUC__) && !defined(__clang__)
+    #define BJ_COMPILER_GCC 1
+    #define BJ_COMPILER_NAME "GCC"
+    #define BJ_COMPILER_VERSION __GNUC__
+#elif defined(__clang__)
+    #define BJ_COMPILER_CLANG 1
+    #define BJ_COMPILER_NAME "Clang"
+    #define BJ_COMPILER_VERSION __clang_major__
+#elif defined(_MSC_VER)
+    #define BJ_COMPILER_MSVC 1
+    #define BJ_COMPILER_NAME "MSVC"
+    #define BJ_COMPILER_VERSION _MSC_VER
+#elif defined(__INTEL_COMPILER)
+    #define BJ_COMPILER_INTEL 1
+    #define BJ_COMPILER_NAME "Intel C++"
+    #define BJ_COMPILER_VERSION __INTEL_COMPILER
+#elif defined(__MINGW32__)
+    #define BJ_COMPILER_MINGW 1
+    #define BJ_COMPILER_NAME "MinGW"
+    #define BJ_COMPILER_VERSION 0
+#elif defined(__IBMC__) || defined(__IBMCPP__)
+    #define BJ_COMPILER_IBM 1
+    #define BJ_COMPILER_NAME "IBM XL C"
+    #define BJ_COMPILER_VERSION __IBMC__
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+    #define BJ_COMPILER_SUNPRO 1
+    #define BJ_COMPILER_NAME "SunPro"
+    #define BJ_COMPILER_VERSION __SUNPRO_C
+#else
+    #define BJ_COMPILER_UNKNOWN 1
+    #define BJ_COMPILER_NAME "Unknown"
+    #define BJ_COMPILER_VERSION 0
 #endif
 
 #ifdef NDEBUG
@@ -79,9 +113,7 @@
 #  define BANJO_EXPORT
 #  define BANJO_NO_EXPORT
 #else
-
 #ifdef _MSC_VER
-
 #  ifndef BANJO_EXPORT
 #    ifdef BANJO_EXPORTS
 #      define BANJO_EXPORT __declspec(dllexport)
@@ -89,13 +121,10 @@
 #      define BANJO_EXPORT  __declspec( dllexport )
 #    endif
 #  endif
-
 #  ifndef BANJO_NO_EXPORT
 #    define BANJO_NO_EXPORT 
 #  endif
-
 #else
-
 #  ifndef BANJO_EXPORT
 #    ifdef BANJO_EXPORTS
 #      define BANJO_EXPORT __attribute__((visibility("default")))
@@ -103,11 +132,9 @@
 #      define BANJO_EXPORT __attribute__((visibility("default")))
 #    endif
 #  endif
-
 #  ifndef BANJO_NO_EXPORT
 #    define BANJO_NO_EXPORT __attribute__((visibility("hidden")))
 #  endif
-
 #endif
 
 

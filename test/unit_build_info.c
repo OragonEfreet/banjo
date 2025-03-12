@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-#ifdef NDEBUG
+#if BJ_BUILD_RELEASE
 #   define INFO_EXPECT_DEBUG false
 #else
 #   define INFO_EXPECT_DEBUG true

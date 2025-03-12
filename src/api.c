@@ -1,11 +1,5 @@
 #include <banjo/api.h>
 
-#ifdef NDEBUG
-#   define BJ_BUILD_DEBUG false
-#else
-#   define BJ_BUILD_DEBUG true
-#endif
-
 #ifdef BJ_CONFIG_PEDANTIC
 #   define BJ_CONFIG_PEDANTIC_VALUE true
 #else
@@ -49,7 +43,9 @@ static const bj_build_info s_build_info = {
     .config_pedantic     = BJ_CONFIG_PEDANTIC_VALUE,
 };
 
+#include <banjo/log.h>
 const bj_build_info* bj_get_build_info(void) {
+    bj_info("%s %d", BJ_COMPILER_NAME, BJ_COMPILER_VERSION);
     return &s_build_info;
 }
 

@@ -58,7 +58,7 @@ enum {
 /// \param ...   Arguments forwarded to \ref bj_message.
 ///
 /// \see bj_message, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
-#ifdef NDEBUG
+#if BJ_BUILD_RELEASE
 #   define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, 0, 0, __VA_ARGS__)
 #else
 #   define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, __FILE__, __LINE__, __VA_ARGS__)
@@ -237,7 +237,7 @@ BANJO_EXPORT size_t bj_message(int level, const char* p_file, int line, const ch
 
 #ifdef BJ_CONFIG_CHECKS
 #   ifdef BJ_CONFIG_CHECKS_LOG
-#       ifdef NDEBUG
+#       if BJ_BUILD_RELEASE
 #          define bj_check_err_msg(cond) bj_err("Unrecoverable Error (Failed Check)")
 #       else
 #          define bj_check_err_msg(cond) bj_err("Failed check: " #cond)
