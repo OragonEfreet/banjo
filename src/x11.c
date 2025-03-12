@@ -4,7 +4,7 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
-#ifdef BJ_FEATURE_X11
+#if BJ_FEATURE_X11
 
 #include "system_t.h"
 #include "window_t.h"

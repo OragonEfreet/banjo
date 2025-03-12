@@ -14,7 +14,7 @@
 #include <banjo/api.h>
 
 
-#ifdef BJ_CONFIG_CHECKS_ABORT
+#if BJ_CONFIG_CHECKS_ABORT
 #   include <stdlib.h>
 #endif
 
@@ -235,8 +235,8 @@ BANJO_EXPORT int bj_log_get_level(void);
 BANJO_EXPORT size_t bj_message(int level, const char* p_file, int line, const char* p_format, ...);
 
 
-#ifdef BJ_CONFIG_CHECKS
-#   ifdef BJ_CONFIG_CHECKS_LOG
+#if BJ_CONFIG_CHECKS
+#   if BJ_CONFIG_CHECKS_LOG
 #       if BJ_BUILD_RELEASE
 #          define bj_check_err_msg(cond) bj_err("Unrecoverable Error (Failed Check)")
 #       else
@@ -245,7 +245,7 @@ BANJO_EXPORT size_t bj_message(int level, const char* p_file, int line, const ch
 #   else
 #       define bj_check_err_msg(cond)
 #   endif
-#   ifdef BJ_CONFIG_CHECKS_ABORT
+#   if BJ_CONFIG_CHECKS_ABORT
 #      define bj_check(cond) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
 #      define bj_check_or_return(cond, retval) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
 #      define bj_check_or_0(cond) bj_check_or_return(cond, 0)

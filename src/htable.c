@@ -65,9 +65,6 @@ void bj_htable_del(
         ++bucket;
     }
     bj_array_reset(&htable->buckets);
-#ifdef BJ_CONFIG_PEDANTIC
-    bj_memset(p_table, 0, sizeof(bj_htable));
-#endif
     bj_free(htable);
 }
 
