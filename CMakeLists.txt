@@ -5,13 +5,8 @@ project(banjo C)
 include(CTest)
 include(CheckCXXCompilerFlag)
 
-if(MSVC)
-    option(BJ_FEATURE_WIN32 "Add Win32 support" OFF)
-endif()
-
-if(UNIX)
-    option(BJ_FEATURE_X11 "Add X11 support" ON)
-endif()
+option(BJ_FEATURE_WIN32 "Add Win32 support" OFF)
+option(BJ_FEATURE_X11 "Add X11 support" OFF)
 
 option(BJ_CONFIG_CHECKS       "Banjo performs runtime checks and assertions"                   ON)
 option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)
