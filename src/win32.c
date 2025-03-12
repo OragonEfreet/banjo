@@ -101,10 +101,10 @@ static void win32_window_poll(
     bj_system_backend* p_backend
 ) {
     (void)p_backend;
-    MSG msg;
-    if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessageA(&msg);
+    MSG message;
+    while (PeekMessageA(&message, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&message);
+        DispatchMessageA(&message);
     }
 }
 

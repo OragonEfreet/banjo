@@ -9,7 +9,7 @@ Features are added over time and are **not listed in priority order**.
 Some features may exist in the API but not be listed here, and vice versa.  
 - [ ] Basic System Layer
   - [ ] Window management (\ref window.c)
-    - [ ] Windows API
+    - [X] Windows API
     - [ ] Wayland
     - [ ] Cocoa
     - [X] X11
