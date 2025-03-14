@@ -2,21 +2,22 @@
 #include <banjo/system.h>
 #include <banjo/log.h>
 
+#include "config.h"
 #include "system_t.h"
 
 extern bj_system_backend_create_info fake_backend_create_info;
-#ifdef BJ_FEATURE_X11
+#if BJ_HAS_FEATURE(X11)
 extern bj_system_backend_create_info x11_backend_create_info;
 #endif
-#ifdef BJ_FEATURE_WIN32
+#if BJ_HAS_FEATURE(WIN32)
 extern bj_system_backend_create_info win32_backend_create_info;
 #endif
 
 static const bj_system_backend_create_info* backend_create_infos[] = {
-#ifdef BJ_FEATURE_WIN32
+#if BJ_HAS_FEATURE(WIN32)
     &win32_backend_create_info,
 #endif
-#ifdef BJ_FEATURE_X11
+#if BJ_HAS_FEATURE(X11)
     &x11_backend_create_info,
 #endif
     &fake_backend_create_info,

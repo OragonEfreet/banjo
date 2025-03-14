@@ -2,7 +2,9 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-#ifdef BJ_FEATURE_WIN32
+#include "config.h"
+
+#if BJ_HAS_FEATURE(WIN32)
 
 #include <windows.h>
 

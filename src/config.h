@@ -15,12 +15,12 @@
 #define BJ_HAS_CONFIG(NAME) defined(BJ_CONFIG_ALL) || defined(BJ_CONFIG_ ## NAME)
 #define BJ_HAS_FEATURE(NAME) defined(BJ_FEATURE_ ## NAME)
 
-#ifdef BJ_CONFIG_CHECKS
-#    ifdef BJ_CONFIG_CHECKS_ABORT
+#if BJ_HAS_CONFIG(CHECKS)
+#    if BJ_HAS_CONFIG(CHECKS_ABORT)
 #       include <stdlib.h>
 #    endif
 #    include <banjo/log.h>
-#   ifdef BJ_CONFIG_CHECKS_LOG
+#   if BJ_HAS_CONFIG(CHECKS_LOG)
 #       ifdef BJ_BUILD_RELEASE
 #          define bj_check_err_msg(cond) bj_err("Unrecoverable Error (Failed Check)")
 #       else
@@ -29,7 +29,7 @@
 #   else
 #       define bj_check_err_msg(cond)
 #   endif
-#   ifdef BJ_CONFIG_CHECKS_ABORT
+#   if BJ_HAS_CONFIG(CHECKS_ABORT)
 #      define bj_check(cond) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
 #      define bj_check_or_return(cond, retval) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
 #      define bj_check_or_0(cond) bj_check_or_return(cond, 0)
