@@ -2,6 +2,8 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
+#include "config.h"
+
 void bj_set_error(
     bj_error**  p_error,
     uint32_t         code,

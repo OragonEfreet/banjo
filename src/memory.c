@@ -2,6 +2,7 @@
 #include <banjo/memory.h>
 #include <banjo/error.h>
 
+#include "config.h"
 #include <stdlib.h>
 #include <string.h>
 

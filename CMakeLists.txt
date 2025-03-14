@@ -34,6 +34,7 @@ add_library(banjo
     src/bitmap.c
     src/bitmap_dib.c
     src/bitmap_t.h
+    src/config.h
     src/error.c
     src/fake.c
     src/htable.c

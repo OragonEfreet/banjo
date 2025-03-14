@@ -96,17 +96,6 @@
 #   define BJ_BUILD_DEBUG
 #endif
 
-/// Features
-// #define BJ_FEATURE_WIN32
-// #define BJ_FEATURE_X11
-
-/// Configuration option
-// #define BJ_CONFIG_CHECKS
-// #define BJ_CONFIG_CHECKS_ABORT
-// #define BJ_CONFIG_CHECKS_LOG
-// #define BJ_CONFIG_LOG_COLOR
-// #define BJ_CONFIG_PEDANTIC
-
 #ifdef BANJO_STATIC
 #  define BANJO_EXPORT
 #  define BANJO_NO_EXPORT
@@ -161,7 +150,5 @@ typedef struct {
 /// \return A description of runtime build information
 ///
 BANJO_EXPORT const bj_build_info* bj_get_build_info(void);
-
-
 
 /// \} End of core

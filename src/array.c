@@ -2,6 +2,7 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
+#include "config.h"
 #include "array_t.h"
 
 bj_array* bj_array_alloc(
