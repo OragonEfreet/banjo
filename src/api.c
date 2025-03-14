@@ -35,11 +35,11 @@
 #   define BJ_CONFIG_LOG_COLOR false
 #endif
 
-#ifdef BJ_CONFIG_CHECK
-#   undef BJ_CONFIG_CHECK
-#   define BJ_CONFIG_CHECK true
+#ifdef BJ_CONFIG_CHECKS
+#   undef BJ_CONFIG_CHECKS
+#   define BJ_CONFIG_CHECKS true
 #else
-#   define BJ_CONFIG_CHECK false
+#   define BJ_CONFIG_CHECKS false
 #endif
 
 #ifdef BJ_CONFIG_CHECKS_ABORT
