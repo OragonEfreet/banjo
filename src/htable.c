@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-#include "config.h"
+#include "check.h"
 #include "htable_t.h"
 #include "list_t.h"
 

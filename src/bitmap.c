@@ -2,8 +2,8 @@
 #include <banjo/pixel.h>
 #include <banjo/stream.h>
 
-#include "config.h"
 #include "bitmap_t.h"
+#include "check.h"
 
 #include <stdio.h>
 

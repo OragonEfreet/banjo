@@ -3,7 +3,7 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-#include "config.h"
+#include "check.h"
 #include <stdio.h>
 
 bj_stream* bj_stream_alloc(

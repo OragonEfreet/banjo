@@ -2,7 +2,7 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-#include "config.h"
+#include "check.h"
 
 void bj_set_error(
     bj_error**  p_error,
