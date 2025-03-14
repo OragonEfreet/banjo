@@ -23,7 +23,6 @@ int main(int argc, char* argv[]) {
 
     DESC(feature_win32);
     DESC(feature_x11);
-    DESC(config_checks);
     DESC(config_checks_abort);
     DESC(config_checks_log);
     DESC(config_log_color);

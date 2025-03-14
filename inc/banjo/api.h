@@ -134,7 +134,6 @@ typedef struct {
     bool        debug;               ///< Built with debug information
     bool        feature_win32;       ///< Compiled with support for Win32 windows.
     bool        feature_x11;         ///< Compiled with support for Win32 windows.
-    bool        config_checks;       ///< Banjo performs runtime checks and assertions
     bool        config_checks_abort; ///< When checks feature is on, a failed check will abort execution
     bool        config_checks_log;   ///< If checks feature is on, failed check with log
     bool        config_log_color;    ///< Banjo logs will have colored output

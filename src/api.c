@@ -30,13 +30,6 @@
 #   define BJ_CONFIG_ALL 0
 #endif
 
-#ifdef BJ_CONFIG_CHECKS
-#   undef BJ_CONFIG_CHECKS
-#   define BJ_CONFIG_CHECKS 1
-#else
-#   define BJ_CONFIG_CHECKS 0
-#endif
-
 #ifdef BJ_CONFIG_CHECKS_ABORT
 #   undef BJ_CONFIG_CHECKS_ABORT
 #   define BJ_CONFIG_CHECKS_ABORT 1
@@ -80,7 +73,6 @@ static const bj_build_info s_build_info = {
     .feature_x11   = BJ_FEATURE_X11,
 
     // Options
-    .config_checks       = BJ_CONFIG_CHECKS,
     .config_checks_abort = BJ_CONFIG_CHECKS_ABORT,
     .config_checks_log   = BJ_CONFIG_CHECKS_LOG,
     .config_log_color    = BJ_CONFIG_LOG_COLOR,
