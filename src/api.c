@@ -1,67 +1,68 @@
 #include <banjo/api.h>
-#include "config.h"
 
-#ifdef BJ_BUILD_RELEASE
-#   undef BJ_BUILD_RELEASE
-#   define BJ_BUILD_RELEASE true
-#else
-#   define BJ_BUILD_RELEASE false
-#endif
+#include "config.h"
 
 #ifdef BJ_BUILD_DEBUG
 #   undef BJ_BUILD_DEBUG
-#   define BJ_BUILD_DEBUG true
+#   define BJ_BUILD_DEBUG 1
 #else
-#   define BJ_BUILD_DEBUG false
+#   define BJ_BUILD_DEBUG 0
 #endif
 
-#if BJ_HAS_FEATURE(WIN32)
+#ifdef BJ_FEATURE_WIN32
 #   undef BJ_FEATURE_WIN32
-#   define BJ_FEATURE_WIN32 true
+#   define BJ_FEATURE_WIN32 1
 #else
-#   define BJ_FEATURE_WIN32 false
+#   define BJ_FEATURE_WIN32 0
 #endif
 
-#if BJ_HAS_FEATURE(X11)
+#ifdef BJ_FEATURE_X11
 #   undef BJ_FEATURE_X11
-#   define BJ_FEATURE_X11 true
+#   define BJ_FEATURE_X11 1
 #else
-#   define BJ_FEATURE_X11 false
+#   define BJ_FEATURE_X11 0
 #endif
 
-#if BJ_HAS_CONFIG(LOG_COLOR)
-#   undef BJ_CONFIG_LOG_COLOR
-#   define BJ_CONFIG_LOG_COLOR true
+#ifdef BJ_CONFIG_ALL
+#   undef BJ_CONFIG_ALL
+#   define BJ_CONFIG_ALL 1
 #else
-#   define BJ_CONFIG_LOG_COLOR false
+#   define BJ_CONFIG_ALL 0
 #endif
 
-#if BJ_HAS_CONFIG(CHECKS)
+#ifdef BJ_CONFIG_CHECKS
 #   undef BJ_CONFIG_CHECKS
-#   define BJ_CONFIG_CHECKS true
+#   define BJ_CONFIG_CHECKS 1
 #else
-#   define BJ_CONFIG_CHECKS false
+#   define BJ_CONFIG_CHECKS 0
 #endif
 
-#if BJ_HAS_CONFIG(CHECKS_ABORT)
+#ifdef BJ_CONFIG_CHECKS_ABORT
 #   undef BJ_CONFIG_CHECKS_ABORT
-#   define BJ_CONFIG_CHECKS_ABORT true
+#   define BJ_CONFIG_CHECKS_ABORT 1
 #else
-#   define BJ_CONFIG_CHECKS_ABORT false
+#   define BJ_CONFIG_CHECKS_ABORT 0
 #endif
 
-#if BJ_HAS_CONFIG(CHECKS_LOG)
+#ifdef BJ_CONFIG_CHECKS_LOG
 #   undef BJ_CONFIG_CHECKS_LOG
-#   define BJ_CONFIG_CHECKS_LOG true
+#   define BJ_CONFIG_CHECKS_LOG 1
 #else
-#   define BJ_CONFIG_CHECKS_LOG false
+#   define BJ_CONFIG_CHECKS_LOG 0
 #endif
 
-#if BJ_HAS_CONFIG(PEDANTIC)
-#   undef BJ_CONFIG_PEDANTIC
-#   define BJ_CONFIG_PEDANTIC true
+#ifdef BJ_CONFIG_LOG_COLOR
+#   undef BJ_CONFIG_LOG_COLOR
+#   define BJ_CONFIG_LOG_COLOR 1
 #else
-#   define BJ_CONFIG_PEDANTIC false
+#   define BJ_CONFIG_LOG_COLOR 0
+#endif
+
+#ifdef BJ_CONFIG_PEDANTIC
+#   undef BJ_CONFIG_PEDANTIC
+#   define BJ_CONFIG_PEDANTIC 1
+#else
+#   define BJ_CONFIG_PEDANTIC 0
 #endif
 
 
@@ -87,7 +88,6 @@ static const bj_build_info s_build_info = {
 
 };
 
-#include <banjo/log.h>
 const bj_build_info* bj_get_build_info(void) {
     return &s_build_info;
 }

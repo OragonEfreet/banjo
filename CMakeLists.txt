@@ -8,11 +8,11 @@ include(CheckCXXCompilerFlag)
 option(BJ_FEATURE_WIN32 "Add Win32 support" OFF)
 option(BJ_FEATURE_X11 "Add X11 support" OFF)
 
-option(BJ_CONFIG_CHECKS       "Banjo performs runtime checks and assertions"                   ON)
+option(BJ_CONFIG_CHECKS       "Banjo performs runtime checks and assertions"                   OFF)
 option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)
-option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 ON)
+option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 OFF)
 option(BJ_CONFIG_LOG_COLOR    "Banjo logs will have colored output"                            OFF)
-option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    ON)
+option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    OFF)
 
 add_library(banjo
     inc/banjo/api.h
