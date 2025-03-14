@@ -33,7 +33,7 @@
 #define BJ_VERSION_MAJOR_NUMBER 0 ///< Banjo current major version
 #define BJ_VERSION_MINOR_NUMBER 1 ///< Banjo current minor version
 #define BJ_VERSION_PATCH_NUMBER 0 ///< Banjo current patch version
-                           ///
+
 /// Expands to a 32bits representatin of the current version the API.
 #define BJ_VERSION BJ_MAKE_VERSION(BJ_VERSION_MAJOR_NUMBER, BJ_VERSION_MINOR_NUMBER, BJ_VERSION_PATCH_NUMBER)
 
@@ -42,91 +42,70 @@
 
 /// Platform detection
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-#   define BJ_OS_WINDOWS 1
+#   define BJ_OS_WINDOWS
 #elif defined(__linux__) || defined(__gnu_linux__)
-#   define BJ_OS_LINUX 1
+#   define BJ_OS_LINUX
 #elif __APPLE__
-#   define BJ_OS_APPLE 1
+#   define BJ_OS_APPLE
 #   include <TargetConditionals.h>
 #   if TARGET_OS_IPHONE
-#       define BJ_OS_IOS 1
+#       define BJ_OS_IOS
 #   elif TARGET_IPHONE_SIMULATOR
-#       define BJ_OS_IOS 1
-#       define BJ_OS_IOS_SIMULATOR 1
+#       define BJ_OS_IOS
+#       define BJ_OS_IOS_SIMULATOR
 #   elif TARGET_OS_MAC
-#       define BJ_OS_MACOS 1
-#       define BJ_OS_UNIX 1
+#       define BJ_OS_MACOS
+#       define BJ_OS_UNIX
 #   else
-#       define BJ_OS_APPLE_UNKNOWN 1
+#       define BJ_OS_APPLE_UNKNOWN
 #   endif
 #else
-#   define BJ_OS_UNKNOWN 1
+#   define BJ_OS_UNKNOWN
 #endif
 
 #if defined(__unix__)
-#   define BJ_OS_UNIX 1
+#   define BJ_OS_UNIX
 #endif
 
 // Compiler Detection
 #if defined(__GNUC__) && !defined(__clang__)
-    #define BJ_COMPILER_GCC 1
+    #define BJ_COMPILER_GCC
     #define BJ_COMPILER_NAME "GCC"
     #define BJ_COMPILER_VERSION __GNUC__
 #elif defined(__clang__)
-    #define BJ_COMPILER_CLANG 1
+    #define BJ_COMPILER_CLANG
     #define BJ_COMPILER_NAME "Clang"
     #define BJ_COMPILER_VERSION __clang_major__
 #elif defined(_MSC_VER)
-    #define BJ_COMPILER_MSVC 1
+    #define BJ_COMPILER_MSVC
     #define BJ_COMPILER_NAME "MSVC"
     #define BJ_COMPILER_VERSION _MSC_VER
 #elif defined(__MINGW32__)
-    #define BJ_COMPILER_MINGW 1
+    #define BJ_COMPILER_MINGW
     #define BJ_COMPILER_NAME "MinGW"
     #define BJ_COMPILER_VERSION 0
 #else
-    #define BJ_COMPILER_UNKNOWN 1
+    #define BJ_COMPILER_UNKNOWN
     #define BJ_COMPILER_NAME "Unknown"
     #define BJ_COMPILER_VERSION 0
 #endif
 
 #ifdef NDEBUG
-#   define BJ_BUILD_DEBUG 0
-#   define BJ_BUILD_RELEASE 1
+#   define BJ_BUILD_RELEASE
 #else
-#   define BJ_BUILD_DEBUG 1
-#   define BJ_BUILD_RELEASE 0
+#   define BJ_BUILD_DEBUG
 #endif
 
 /// Features
-#ifndef BJ_FEATURE_WIN32
-#   define BJ_FEATURE_WIN32 0
-#endif
-
-#ifndef BJ_FEATURE_X11
-#   define BJ_FEATURE_X11 0
-#endif
+// #define BJ_FEATURE_WIN32
+// #define BJ_FEATURE_X11
 
 /// Configuration option
-#ifndef BJ_CONFIG_CHECKS
-#    define BJ_CONFIG_CHECKS 1
-#endif
-
-#ifndef BJ_CONFIG_CHECKS_ABORT
-#    define BJ_CONFIG_CHECKS_ABORT 0
-#endif
-
-#ifndef BJ_CONFIG_CHECKS_LOG
-#    define BJ_CONFIG_CHECKS_LOG 1
-#endif
-
-#ifndef BJ_CONFIG_LOG_COLOR
-#    define BJ_CONFIG_LOG_COLOR 0
-#endif
-
-#ifndef BJ_CONFIG_PEDANTIC
-#    define BJ_CONFIG_PEDANTIC 1
-#endif
+// #define BJ_CONFIG_CHECKS
+// #define BJ_CONFIG_CHECKS_ABORT
+// #define BJ_CONFIG_CHECKS_LOG
+// #define BJ_CONFIG_LOG_COLOR
+// #define BJ_CONFIG_PEDANTIC
 
 #ifdef BANJO_STATIC
 #  define BANJO_EXPORT

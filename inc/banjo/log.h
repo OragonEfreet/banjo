@@ -14,7 +14,7 @@
 #include <banjo/api.h>
 
 
-#if BJ_CONFIG_CHECKS_ABORT
+#ifdef BJ_CONFIG_CHECKS_ABORT
 #   include <stdlib.h>
 #endif
 
@@ -58,7 +58,7 @@ enum {
 /// \param ...   Arguments forwarded to \ref bj_message.
 ///
 /// \see bj_message, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal.
-#if BJ_BUILD_RELEASE
+#ifdef BJ_BUILD_RELEASE
 #   define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, 0, 0, __VA_ARGS__)
 #else
 #   define bj_log(LEVEL, ...) bj_message(BJ_LOG_ ## LEVEL, __FILE__, __LINE__, __VA_ARGS__)
@@ -235,9 +235,9 @@ BANJO_EXPORT int bj_log_get_level(void);
 BANJO_EXPORT size_t bj_message(int level, const char* p_file, int line, const char* p_format, ...);
 
 
-#if BJ_CONFIG_CHECKS
-#   if BJ_CONFIG_CHECKS_LOG
-#       if BJ_BUILD_RELEASE
+#ifdef BJ_CONFIG_CHECKS
+#   ifdef BJ_CONFIG_CHECKS_LOG
+#       ifdef BJ_BUILD_RELEASE
 #          define bj_check_err_msg(cond) bj_err("Unrecoverable Error (Failed Check)")
 #       else
 #          define bj_check_err_msg(cond) bj_err("Failed check: " #cond)
@@ -245,7 +245,7 @@ BANJO_EXPORT size_t bj_message(int level, const char* p_file, int line, const ch
 #   else
 #       define bj_check_err_msg(cond)
 #   endif
-#   if BJ_CONFIG_CHECKS_ABORT
+#   ifdef BJ_CONFIG_CHECKS_ABORT
 #      define bj_check(cond) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
 #      define bj_check_or_return(cond, retval) if(!(cond)) {bj_check_err_msg(cond) ; abort();}
 #      define bj_check_or_0(cond) bj_check_or_return(cond, 0)

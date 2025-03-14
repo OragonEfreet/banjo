@@ -5,18 +5,18 @@
 #include "system_t.h"
 
 extern bj_system_backend_create_info fake_backend_create_info;
-#if BJ_FEATURE_X11
+#ifdef BJ_FEATURE_X11
 extern bj_system_backend_create_info x11_backend_create_info;
 #endif
-#if BJ_FEATURE_WIN32
+#ifdef BJ_FEATURE_WIN32
 extern bj_system_backend_create_info win32_backend_create_info;
 #endif
 
 static const bj_system_backend_create_info* backend_create_infos[] = {
-#if BJ_FEATURE_WIN32
+#ifdef BJ_FEATURE_WIN32
     &win32_backend_create_info,
 #endif
-#if BJ_FEATURE_X11
+#ifdef BJ_FEATURE_X11
     &x11_backend_create_info,
 #endif
     &fake_backend_create_info,

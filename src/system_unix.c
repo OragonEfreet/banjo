@@ -1,6 +1,6 @@
 #include <banjo/system.h>
 
-#if BJ_OS_UNIX
+#ifdef BJ_OS_UNIX
 
 #include <dlfcn.h> 
 

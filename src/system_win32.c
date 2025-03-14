@@ -1,6 +1,6 @@
 #include <banjo/system.h>
 
-#if BJ_OS_WINDOWS
+#ifdef BJ_OS_WINDOWS
 
 void* bj_load_library(
     const char* p_path
