@@ -1,5 +1,7 @@
 #include <banjo/system.h>
 
+#ifdef BJ_OS_UNIX
+
 #include <dlfcn.h> 
 
 void* bj_load_library(
@@ -21,3 +23,4 @@ void* bj_get_symbol(
     return dlsym(p_handle, p_name);
 }
 
+#endif

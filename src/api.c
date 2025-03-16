@@ -1,55 +1,70 @@
 #include <banjo/api.h>
 
-#ifdef NDEBUG
-#   define BJ_BUILD_DEBUG false
+#include "check.h"
+
+#ifdef BJ_BUILD_DEBUG
+#   define BJ_BUILD_DEBUG_ENABLED 1
 #else
-#   define BJ_BUILD_DEBUG true
+#   define BJ_BUILD_DEBUG_ENABLED 0
 #endif
 
-#ifdef BJ_CONFIG_PEDANTIC
-#   define BJ_CONFIG_PEDANTIC_VALUE true
+#if BJ_HAS_FEATURE(WIN32)
+#   define BJ_INFO_WIN32 1
 #else
-#   define BJ_CONFIG_PEDANTIC_VALUE false
+#   define BJ_INFO_WIN32 0
 #endif
 
-#ifdef BJ_CONFIG_LOG_COLOR
-#   define BJ_CONFIG_LOG_COLOR_VALUE true
+#if BJ_HAS_FEATURE(X11)
+#   define BJ_INFO_X11 1
 #else
-#   define BJ_CONFIG_LOG_COLOR_VALUE false
+#   define BJ_INFO_X11 0
 #endif
 
-#ifdef BJ_CONFIG_CHECKS
-#   define BJ_CONFIG_CHECKS_VALUE true
+#if BJ_HAS_CONFIG(CHECKS_ABORT)
+#   define BJ_INFO_CHECKS_ABORT 1
 #else
-#   define BJ_CONFIG_CHECKS_VALUE false
+#   define BJ_INFO_CHECKS_ABORT 0
 #endif
 
-#ifdef BJ_CONFIG_CHECKS_LOG
-#   define BJ_CONFIG_CHECKS_LOG_VALUE true
+#if BJ_HAS_CONFIG(CHECKS_LOG)
+#   define BJ_INFO_CHECKS_LOG 1
 #else
-#   define BJ_CONFIG_CHECKS_LOG_VALUE false
+#   define BJ_INFO_CHECKS_LOG 0
 #endif
 
-#ifdef BJ_CONFIG_CHECKS_ABORT
-#   define BJ_CONFIG_CHECKS_ABORT_VALUE true
+#if BJ_HAS_CONFIG(LOG_COLOR)
+#   define BJ_INFO_LOG_COLOR 1
 #else
-#   define BJ_CONFIG_CHECKS_ABORT_VALUE false
+#   define BJ_INFO_LOG_COLOR 0
+#endif
+
+#if BJ_HAS_CONFIG(PEDANTIC)
+#   define BJ_INFO_PEDANTIC 1
+#else
+#   define BJ_INFO_PEDANTIC 0
 #endif
 
 static const bj_build_info s_build_info = {
-    .p_name          = BJ_NAME,
-    .version         = BJ_VERSION,
-    .debug           = BJ_BUILD_DEBUG,
+    .p_name           = BJ_NAME,
+    .version          = BJ_VERSION,
+    .compiler_name    = BJ_COMPILER_NAME,
+    .compiler_version = BJ_COMPILER_VERSION,
+    .debug            = BJ_BUILD_DEBUG_ENABLED,
+
+    // Features
+    .feature_win32 = BJ_INFO_WIN32,
+    .feature_x11   = BJ_INFO_X11,
 
     // Options
-    .config_checks       = BJ_CONFIG_CHECKS_VALUE,
-    .config_checks_abort = BJ_CONFIG_CHECKS_ABORT_VALUE,
-    .config_checks_log   = BJ_CONFIG_CHECKS_LOG_VALUE,
-    .config_log_color    = BJ_CONFIG_LOG_COLOR_VALUE,
-    .config_pedantic     = BJ_CONFIG_PEDANTIC_VALUE,
+    .config_checks_abort = BJ_INFO_CHECKS_ABORT,
+    .config_checks_log   = BJ_INFO_CHECKS_LOG,
+    .config_log_color    = BJ_INFO_LOG_COLOR,
+    .config_pedantic     = BJ_INFO_PEDANTIC,
+
 };
 
 const bj_build_info* bj_get_build_info(void) {
     return &s_build_info;
 }
+
 

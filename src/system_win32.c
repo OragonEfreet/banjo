@@ -1,5 +1,7 @@
 #include <banjo/system.h>
 
+#ifdef BJ_OS_WINDOWS
+
 void* bj_load_library(
     const char* p_path
 ) {
@@ -23,3 +25,5 @@ void* bj_get_symbol(
 
     return 0;
 }
+
+#endif
