@@ -103,7 +103,3 @@ if (BUILD_TESTING)
     add_subdirectory(test)
 endif()
 
-
-if(MSVC)
-    add_executable(sandbox_win32 sandbox_win32.c)
-endif()
