@@ -20,25 +20,25 @@
 #   define BJ_INFO_X11 0
 #endif
 
-#ifdef BJ_CONFIG_CHECKS_ABORT
+#if BJ_HAS_CONFIG(CHECKS_ABORT)
 #   define BJ_INFO_CHECKS_ABORT 1
 #else
 #   define BJ_INFO_CHECKS_ABORT 0
 #endif
 
-#ifdef BJ_CONFIG_CHECKS_LOG
+#if BJ_HAS_CONFIG(CHECKS_LOG)
 #   define BJ_INFO_CHECKS_LOG 1
 #else
 #   define BJ_INFO_CHECKS_LOG 0
 #endif
 
-#ifdef BJ_CONFIG_LOG_COLOR
+#if BJ_HAS_CONFIG(LOG_COLOR)
 #   define BJ_INFO_LOG_COLOR 1
 #else
 #   define BJ_INFO_LOG_COLOR 0
 #endif
 
-#ifdef BJ_CONFIG_PEDANTIC
+#if BJ_HAS_CONFIG(PEDANTIC)
 #   define BJ_INFO_PEDANTIC 1
 #else
 #   define BJ_INFO_PEDANTIC 0
