@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+#include "check.h"
 #include "htable_t.h"
 #include "list_t.h"
 
@@ -65,9 +66,6 @@ void bj_htable_del(
         ++bucket;
     }
     bj_array_reset(&htable->buckets);
-#ifdef BJ_FEAT_PEDANTIC
-    bj_memset(p_table, 0, sizeof(bj_htable));
-#endif
     bj_free(htable);
 }
 

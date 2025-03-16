@@ -2,6 +2,7 @@
 #include <banjo/log.h>
 #include <banjo/window.h>
 
+#include "check.h"
 #include "system_t.h"
 #include "window_t.h"
 

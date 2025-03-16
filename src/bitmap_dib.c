@@ -4,6 +4,7 @@
 #include <banjo/pixel.h>
 #include <banjo/stream.h>
 
+#include <assert.h>
 #include <stdio.h>
 
 #define ERR_MSG                         "unsupported"

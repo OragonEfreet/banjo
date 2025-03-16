@@ -4,14 +4,18 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
-#ifdef BJ_FEATURE_X11
+#include "config.h"
+
+#if BJ_HAS_FEATURE(X11)
+
+#include "system_t.h"
+#include "window_t.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
 
-#include "system_t.h"
-#include "window_t.h"
+#include <assert.h>
 
 #define X11_CANNOT_OPEN_DISPLAY 0x00010000
 

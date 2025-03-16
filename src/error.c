@@ -2,6 +2,8 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
+#include "check.h"
+
 void bj_set_error(
     bj_error**  p_error,
     uint32_t         code,
@@ -9,7 +11,7 @@ void bj_set_error(
 ) {
     // Don't report anything if the user is not interested
     if(p_error == 0) {
-#ifndef NDEBUG // Still output the error in Debug mode
+#ifdef BJ_BUILD_DEBUG
         bj_err("Uncaught error: 0x%08X", code);
 #endif
         return;

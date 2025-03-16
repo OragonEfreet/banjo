@@ -3,6 +3,7 @@
 #include <banjo/stream.h>
 
 #include "bitmap_t.h"
+#include "check.h"
 
 #include <stdio.h>
 
@@ -78,9 +79,6 @@ void bj_bitmap_reset(
     if(p_bitmap->buffer != 0) {
         bj_free(p_bitmap->buffer);
     }
-#ifdef BJ_FEAT_PEDANTIC
-    bj_memset(p_bitmap, 0, sizeof(bj_oldbmp));
-#endif
 }
 
 bj_bitmap* bj_bitmap_new(

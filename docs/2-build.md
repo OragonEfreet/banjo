@@ -51,7 +51,6 @@ Unlike feature options, these do **not** require third-party libraries.
 | Option Name             | Description                                                                 | CMake Defaults |
 |-------------------------|-----------------------------------------------------------------------------|----------------|
 | `BJ_CONFIG_LOG_COLOR`   | Enable support for colored log outputs with \ref bj_log                     | `ON`           |
-| `BJ_CONFIG_CHECK`       | Enable additional checks on function call parameters                        | `ON`           |
 | `BJ_CONFIG_CHECK_LOG`   | Failing checks are logged using \ref bj_err                                 | `ON`           |
 | `BJ_CONFIG_CHECK_ABORT` | Failing checks call `abort()` (after logging, if enabled)                   | `OFF`          |
 | `BJ_CONFIG_PEDANTIC`    | Codepaths prioritize safety over performance when there is a choice to make | `ON`           |

@@ -9,7 +9,6 @@
 /// \{
 #pragma once
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -34,65 +33,111 @@
 #define BJ_VERSION_MAJOR_NUMBER 0 ///< Banjo current major version
 #define BJ_VERSION_MINOR_NUMBER 1 ///< Banjo current minor version
 #define BJ_VERSION_PATCH_NUMBER 0 ///< Banjo current patch version
-                           ///
+
 /// Expands to a 32bits representatin of the current version the API.
 #define BJ_VERSION BJ_MAKE_VERSION(BJ_VERSION_MAJOR_NUMBER, BJ_VERSION_MINOR_NUMBER, BJ_VERSION_PATCH_NUMBER)
 
 /// Name of the library.
 #define BJ_NAME "Banjo"
 
+/// Platform detection
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+#   define BJ_OS_WINDOWS
+#elif defined(__linux__) || defined(__gnu_linux__)
+#   define BJ_OS_LINUX
+#elif __APPLE__
+#   define BJ_OS_APPLE
+#   include <TargetConditionals.h>
+#   if TARGET_OS_IPHONE
+#       define BJ_OS_IOS
+#   elif TARGET_IPHONE_SIMULATOR
+#       define BJ_OS_IOS
+#       define BJ_OS_IOS_SIMULATOR
+#   elif TARGET_OS_MAC
+#       define BJ_OS_MACOS
+#       define BJ_OS_UNIX
+#   else
+#       define BJ_OS_APPLE_UNKNOWN
+#   endif
+#else
+#   define BJ_OS_UNKNOWN
+#endif
+
+#if defined(__unix__)
+#   define BJ_OS_UNIX
+#endif
+
+// Compiler Detection
+#if defined(__GNUC__) && !defined(__clang__)
+    #define BJ_COMPILER_GCC
+    #define BJ_COMPILER_NAME "GCC"
+    #define BJ_COMPILER_VERSION __GNUC__
+#elif defined(__clang__)
+    #define BJ_COMPILER_CLANG
+    #define BJ_COMPILER_NAME "Clang"
+    #define BJ_COMPILER_VERSION __clang_major__
+#elif defined(_MSC_VER)
+    #define BJ_COMPILER_MSVC
+    #define BJ_COMPILER_NAME "MSVC"
+    #define BJ_COMPILER_VERSION _MSC_VER
+#elif defined(__MINGW32__)
+    #define BJ_COMPILER_MINGW
+    #define BJ_COMPILER_NAME "MinGW"
+    #define BJ_COMPILER_VERSION 0
+#else
+    #define BJ_COMPILER_UNKNOWN
+    #define BJ_COMPILER_NAME "Unknown"
+    #define BJ_COMPILER_VERSION 0
+#endif
+
+#ifdef NDEBUG
+#   define BJ_BUILD_RELEASE
+#else
+#   define BJ_BUILD_DEBUG
+#endif
+
 #ifdef BANJO_STATIC
 #  define BANJO_EXPORT
 #  define BANJO_NO_EXPORT
 #else
-
-#ifdef _MSC_VER
-
-#  ifndef BANJO_EXPORT
-#    ifdef BANJO_EXPORTS
-#      define BANJO_EXPORT __declspec(dllexport)
+#    ifdef _MSC_VER
+#      ifndef BANJO_EXPORT
+#        ifdef BANJO_EXPORTS
+#          define BANJO_EXPORT __declspec(dllexport)
+#        else
+#          define BANJO_EXPORT  __declspec( dllexport )
+#        endif
+#      endif
+#      ifndef BANJO_NO_EXPORT
+#        define BANJO_NO_EXPORT 
+#      endif
 #    else
-#      define BANJO_EXPORT  __declspec( dllexport )
+#      ifndef BANJO_EXPORT
+#        ifdef BANJO_EXPORTS
+#          define BANJO_EXPORT __attribute__((visibility("default")))
+#        else
+#          define BANJO_EXPORT __attribute__((visibility("default")))
+#        endif
+#      endif
+#      ifndef BANJO_NO_EXPORT
+#        define BANJO_NO_EXPORT __attribute__((visibility("hidden")))
+#      endif
 #    endif
-#  endif
-
-#  ifndef BANJO_NO_EXPORT
-#    define BANJO_NO_EXPORT 
-#  endif
-
-#else
-
-#  ifndef BANJO_EXPORT
-#    ifdef BANJO_EXPORTS
-#      define BANJO_EXPORT __attribute__((visibility("default")))
-#    else
-#      define BANJO_EXPORT __attribute__((visibility("default")))
-#    endif
-#  endif
-
-#  ifndef BANJO_NO_EXPORT
-#    define BANJO_NO_EXPORT __attribute__((visibility("hidden")))
-#  endif
-
-#endif
-
-
 #endif
 
 /// Structure holding build information of the binary
 typedef struct {
     const char* p_name;              ///< API Name (\ref BJ_NAME)
     uint32_t    version;             ///< Built version (\ref BJ_VERSION)
+    const char* compiler_name;       ///< Compiler C-String name
+    int         compiler_version;    ///< Compiler version specifier
     bool        debug;               ///< Built with debug information
-    bool        pedantic;            ///< If `true`, the API was build in pedantic mode
-    bool        log_color;           ///< Logs are colored
-    bool        checks;              ///< Programming error checking
-    bool        abort_on_checks;     ///< Program aborts when checks fails
-    bool        config_checks;       ///< Banjo performs runtime checks and assertions
-    bool        config_checks_log;   ///< If checks feature is on, failed check with log
+    bool        feature_win32;       ///< Compiled with support for Win32 windows.
+    bool        feature_x11;         ///< Compiled with support for Win32 windows.
     bool        config_checks_abort; ///< When checks feature is on, a failed check will abort execution
-    bool        config_pedantic;     ///< Banjo runtime will make costly extra checks
+    bool        config_checks_log;   ///< If checks feature is on, failed check with log
     bool        config_log_color;    ///< Banjo logs will have colored output
+    bool        config_pedantic;     ///< Banjo runtime will make costly extra checks
 } bj_build_info;
 
 ////////////////////////////////////////////////////////////////////////////////

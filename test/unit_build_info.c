@@ -4,19 +4,19 @@
 
 #include <string.h>
 
-#ifdef NDEBUG
+#ifdef BJ_BUILD_RELEASE
 #   define INFO_EXPECT_DEBUG false
 #else
 #   define INFO_EXPECT_DEBUG true
 #endif
 
-#ifdef BJ_CONFIG_PEDANTIC
+#if BJ_CONFIG_PEDANTIC
 #   define INFO_EXPECT_PEDANTIC true
 #else
 #   define INFO_EXPECT_PEDANTIC false
 #endif
 
-#ifdef BJ_CONFIG_LOG_COLOR
+#if BJ_CONFIG_LOG_COLOR
 #   define INFO_EXPECT_COLOR_LOG true
 #else
 #   define INFO_EXPECT_COLOR_LOG false

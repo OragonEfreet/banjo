@@ -2,6 +2,7 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
+#include "check.h"
 #include "list_t.h"
 
 BANJO_EXPORT bj_list* bj_list_alloc(

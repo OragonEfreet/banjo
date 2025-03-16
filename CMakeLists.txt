@@ -8,23 +8,12 @@ include(CheckCXXCompilerFlag)
 option(BJ_FEATURE_WIN32 "Add Win32 support" OFF)
 option(BJ_FEATURE_X11 "Add X11 support" OFF)
 
-option(BJ_CONFIG_CHECKS       "Banjo performs runtime checks and assertions"                   ON)
 option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)
-option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 ON)
+option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 OFF)
 option(BJ_CONFIG_LOG_COLOR    "Banjo logs will have colored output"                            OFF)
-option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    ON)
+option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    OFF)
 
-add_library(banjo)
-
-target_include_directories(banjo PUBLIC inc)
-target_compile_features(banjo PUBLIC c_std_99)
-
-set_target_properties(banjo PROPERTIES
-    C_STANDARD 99
-    C_STANDARD_REQUIRED TRUE
-)
-
-target_sources(banjo PRIVATE
+add_library(banjo
     inc/banjo/api.h
     inc/banjo/array.h
     inc/banjo/bitmap.h
@@ -38,15 +27,13 @@ target_sources(banjo PRIVATE
     inc/banjo/stream.h
     inc/banjo/system.h
     inc/banjo/window.h
-)
-
-target_sources(banjo PRIVATE
     src/api.c
     src/array.c
     src/array_t.h
     src/bitmap.c
     src/bitmap_dib.c
     src/bitmap_t.h
+    src/config.h
     src/error.c
     src/fake.c
     src/htable.c
@@ -61,26 +48,23 @@ target_sources(banjo PRIVATE
     src/stream_t.h
     src/system.c
     src/system_t.h
+    src/system_unix.c
+    src/system_win32.c
+    src/win32.c
     src/window.c
     src/window_t.h
+    src/x11.c
 )
 
-# OS-specific configuration
-if(MSVC)
-    target_sources(banjo PRIVATE src/system_win32.c)
-elseif(UNIX)
-    target_sources(banjo PRIVATE src/system_unix.c)
-else()
-    message(FATAL_ERROR "Source files for this system")
-endif()
+target_include_directories(banjo PUBLIC inc)
+target_compile_features(banjo PUBLIC c_std_99)
 
-# Subsystem-specific configuration
-if(BJ_FEATURE_WIN32)
-    target_sources(banjo PRIVATE src/win32.c)
-endif()
+set_target_properties(banjo PROPERTIES
+    C_STANDARD 99
+    C_STANDARD_REQUIRED TRUE
+)
 
 if(BJ_FEATURE_X11)
-    target_sources(banjo PRIVATE src/x11.c)
     find_package(X11)
     if(X11_FOUND)
         target_include_directories(banjo PRIVATE ${X11_INCLUDE_DIR})

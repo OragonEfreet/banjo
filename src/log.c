@@ -6,6 +6,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "config.h"
+
 static struct {
     int level;
 } s_context = {.level=0};
@@ -41,7 +43,7 @@ int bj_log_get_level(void) {
 
 #define BUFFER_SIZE (BJ_MAXIMUM_LOG_LEN + 1)
 
-#ifdef BJ_CONFIG_LOG_COLOR
+#if BJ_HAS_CONFIG(LOG_COLOR)
 static const bool use_colors = true;
 #else
 static const bool use_colors = false;
