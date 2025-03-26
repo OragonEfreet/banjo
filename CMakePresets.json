@@ -2,8 +2,14 @@
   "version": 3,
   "configurePresets": [
     {
+      "name": "common",
+      "hidden": true,
+      "binaryDir": "build/${presetName}"
+    },
+    {
       "name": "msvc",
       "hidden": true,
+      "inherits": "common",
       "generator": "Visual Studio 17 2022",
       "cacheVariables": {
         "BJ_FEATURE_WIN32": "ON"
@@ -29,7 +35,6 @@
       "name": "msvc-x64-debug",
       "displayName": "MSVC x64 Debug",
       "inherits": "msvc-x64",
-      "binaryDir": "${sourceDir}/build/msvc-x64-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -38,7 +43,6 @@
       "name": "msvc-x64-release",
       "displayName": "MSVC x64 Release",
       "inherits": "msvc-x64",
-      "binaryDir": "${sourceDir}/build/msvc-x64-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -73,7 +77,6 @@
       "name": "linux-gcc-debug",
       "displayName": "Linux GCC Debug",
       "inherits": "linux-gcc",
-      "binaryDir": "${sourceDir}/build/linux-gcc-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -82,7 +85,6 @@
       "name": "linux-gcc-release",
       "displayName": "Linux GCC Release",
       "inherits": "linux-gcc",
-      "binaryDir": "${sourceDir}/build/linux-gcc-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -91,7 +93,6 @@
       "name": "linux-clang-debug",
       "displayName": "Linux Clang Debug",
       "inherits": "linux-clang",
-      "binaryDir": "${sourceDir}/build/linux-clang-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -100,7 +101,6 @@
       "name": "linux-clang-release",
       "displayName": "Linux Clang Release",
       "inherits": "linux-clang",
-      "binaryDir": "${sourceDir}/build/linux-clang-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -119,7 +119,6 @@
       "name": "macos-debug",
       "displayName": "macOS Debug",
       "inherits": "macos",
-      "binaryDir": "${sourceDir}/build/macos-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -128,7 +127,6 @@
       "name": "macos-release",
       "displayName": "macOS Release",
       "inherits": "macos",
-      "binaryDir": "${sourceDir}/build/macos-release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
