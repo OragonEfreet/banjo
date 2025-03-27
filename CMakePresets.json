@@ -1,169 +1,79 @@
 {
-  "version": 3,
+  "version": 6,
   "configurePresets": [
     {
-      "name": "common",
-      "hidden": true,
-      "binaryDir": "build/${presetName}"
+      "name": "generic-any-any",
+      "binaryDir": "build/${presetName}",
+      "cacheVariables": {
+        "BJ_CONFIG_ALL": "ON"
+      }
     },
     {
-      "name": "msvc",
-      "hidden": true,
-      "inherits": "common",
+      "name": "linux-clang-any",
+      "inherits": "generic-any-any",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "BJ_FEATURE_X11": "ON"
+      }
+    },
+    {
+      "name": "macos-clang-any",
+      "inherits": "generic-any-any",
+      "generator": "Xcode"
+    },
+    {
+      "name": "windows-msvc-any",
+      "inherits": "generic-any-any",
       "generator": "Visual Studio 17 2022",
       "cacheVariables": {
         "BJ_FEATURE_WIN32": "ON"
-      }
-    },
-    {
-      "name": "msvc-x64",
-      "hidden": true,
-      "inherits": "msvc",
-      "architecture": {
-        "value": "x64"
-      }
-    },
-    {
-      "name": "msvc-x86",
-      "hidden": true,
-      "inherits": "msvc",
-      "architecture": {
-        "value": "x86"
-      }
-    },
-    {
-      "name": "msvc-x64-debug",
-      "displayName": "MSVC x64 Debug",
-      "inherits": "msvc-x64",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "msvc-x64-release",
-      "displayName": "MSVC x64 Release",
-      "inherits": "msvc-x64",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "linux",
-      "hidden": true,
-      "generator": "Unix Makefiles",
-      "cacheVariables": {
-        "BJ_FEATURE_WIN32": "OFF"
-      }
-    },
-    {
-      "name": "linux-gcc",
-      "hidden": true,
-      "inherits": "linux",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++"
-      }
-    },
-    {
-      "name": "linux-clang",
-      "hidden": true,
-      "inherits": "linux",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
-      }
-    },
-    {
-      "name": "linux-gcc-debug",
-      "displayName": "Linux GCC Debug",
-      "inherits": "linux-gcc",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "linux-gcc-release",
-      "displayName": "Linux GCC Release",
-      "inherits": "linux-gcc",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "linux-clang-debug",
-      "displayName": "Linux Clang Debug",
-      "inherits": "linux-clang",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "linux-clang-release",
-      "displayName": "Linux Clang Release",
-      "inherits": "linux-clang",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "macos",
-      "hidden": true,
-      "generator": "Unix Makefiles",
-      "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "BJ_FEATURE_WIN32": "OFF"
-      }
-    },
-    {
-      "name": "macos-debug",
-      "displayName": "macOS Debug",
-      "inherits": "macos",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "macos-release",
-      "displayName": "macOS Release",
-      "inherits": "macos",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ],
   "buildPresets": [
     {
-      "name": "msvc-x64-debug",
-      "configurePreset": "msvc-x64-debug"
+      "name": "linux-clang-any",
+      "displayName": "Build for GNU/Linux with Clang",
+      "configurePreset": "linux-clang-any"
     },
     {
-      "name": "msvc-x64-release",
-      "configurePreset": "msvc-x64-release"
+      "name": "macos-clang-any",
+      "displayName": "Build for macOS with Clang",
+      "configurePreset": "macos-clang-any"
     },
     {
-      "name": "linux-gcc-debug",
-      "configurePreset": "linux-gcc-debug"
-    },
-    {
-      "name": "linux-gcc-release",
-      "configurePreset": "linux-gcc-release"
-    },
-    {
-      "name": "linux-clang-debug",
-      "configurePreset": "linux-clang-debug"
-    },
-    {
-      "name": "linux-clang-release",
-      "configurePreset": "linux-clang-release"
-    },
-    {
-      "name": "macos-debug",
-      "configurePreset": "macos-debug"
-    },
-    {
-      "name": "macos-release",
-      "configurePreset": "macos-release"
+      "name": "windows-msvc-any",
+      "displayName": "Build for Windows with Microsoft Visual Studio 17 2022",
+      "configurePreset": "windows-msvc-any"
     }
+  ],
+  "workflowPresets": [
+    {
+      "name": "linux",
+      "displayName": "Standard GNU/Linux build with make and Clang",
+      "steps": [
+        { "type": "configure", "name": "linux-clang-any" },
+        { "type": "build", "name": "linux-clang-any" }
+      ]
+    },
+    {
+      "name": "macos",
+      "displayName": "Standard macOS build with XCode",
+      "steps": [
+        { "type": "configure", "name": "macos-clang-any" },
+        { "type": "build", "name": "macos-clang-any" }
+      ]
+    },
+    {
+      "name": "windows",
+      "displayName": "Standard Windows build with Visual Studio",
+      "steps": [
+        { "type": "configure", "name": "windows-msvc-any" },
+        { "type": "build", "name": "windows-msvc-any" }
+      ]
+    }
+
   ]
 }
+

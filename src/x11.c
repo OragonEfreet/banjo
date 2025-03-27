@@ -382,4 +382,4 @@ bj_system_backend_create_info x11_backend_create_info = {
     .create = x11_init_backend,
 };
 
-#endif // BJ_FEATURE_X11
+#endif

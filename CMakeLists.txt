@@ -5,6 +5,7 @@ include(CTest)
 
 option(BJ_FEATURE_WIN32       "Add Win32 support"                                              OFF)
 option(BJ_FEATURE_X11         "Add X11 support"                                                OFF)
+option(BJ_CONFIG_ALL          "Enable all CONFIG options at once"                              OFF)
 option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)
 option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 OFF)
 option(BJ_CONFIG_LOG_COLOR    "Banjo logs will have colored output"                            OFF)
