@@ -1,68 +1,20 @@
 cmake_minimum_required(VERSION 3.21)
-
 project(banjo C)
 
 include(CTest)
-include(CheckCXXCompilerFlag)
 
-option(BJ_FEATURE_WIN32 "Add Win32 support" OFF)
-option(BJ_FEATURE_X11 "Add X11 support" OFF)
-
+option(BJ_FEATURE_WIN32       "Add Win32 support"                                              OFF)
+option(BJ_FEATURE_X11         "Add X11 support"                                                OFF)
+option(BJ_CONFIG_ALL          "Enable all CONFIG options at once"                              OFF)
 option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)
 option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 OFF)
 option(BJ_CONFIG_LOG_COLOR    "Banjo logs will have colored output"                            OFF)
 option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    OFF)
 
-add_library(banjo
-    inc/banjo/api.h
-    inc/banjo/array.h
-    inc/banjo/bitmap.h
-    inc/banjo/error.h
-    inc/banjo/event.h
-    inc/banjo/htable.h
-    inc/banjo/list.h
-    inc/banjo/log.h
-    inc/banjo/memory.h
-    inc/banjo/rect.h
-    inc/banjo/stream.h
-    inc/banjo/system.h
-    inc/banjo/window.h
-    src/api.c
-    src/array.c
-    src/array_t.h
-    src/bitmap.c
-    src/bitmap_dib.c
-    src/bitmap_t.h
-    src/config.h
-    src/error.c
-    src/fake.c
-    src/htable.c
-    src/htable_t.h
-    src/list.c
-    src/list_t.h
-    src/log.c
-    src/memory.c
-    src/pixel.c
-    src/rect.c
-    src/stream.c
-    src/stream_t.h
-    src/system.c
-    src/system_t.h
-    src/system_unix.c
-    src/system_win32.c
-    src/win32.c
-    src/window.c
-    src/window_t.h
-    src/x11.c
-)
-
+file(GLOB SOURCES "${CMAKE_SOURCE_DIR}/src/*.c")
+add_library(banjo ${SOURCES})
 target_include_directories(banjo PUBLIC inc)
-target_compile_features(banjo PUBLIC c_std_99)
-
-set_target_properties(banjo PROPERTIES
-    C_STANDARD 99
-    C_STANDARD_REQUIRED TRUE
-)
+set_target_properties(banjo PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED TRUE)
 
 if(BJ_FEATURE_X11)
     find_package(X11)

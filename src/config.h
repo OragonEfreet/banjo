@@ -1,17 +1,61 @@
 #pragma once
 
 /// Features
-#define BJ_FEATURE_WIN32 0
-#define BJ_FEATURE_X11   0
+// #define BJ_FEATURE_WIN32
+// #define BJ_FEATURE_X11
 
 /// Configuration option
-#define BJ_CONFIG_ALL          1
-#define BJ_CONFIG_CHECKS_ABORT 0
-#define BJ_CONFIG_CHECKS_LOG   0
-#define BJ_CONFIG_LOG_COLOR    0
-#define BJ_CONFIG_PEDANTIC     0
+// #define BJ_CONFIG_ALL
+// #define BJ_CONFIG_CHECKS_ABORT
+// #define BJ_CONFIG_CHECKS_LOG
+// #define BJ_CONFIG_LOG_COLOR
+// #define BJ_CONFIG_PEDANTIC
 
-#define BJ_HAS_CONFIG(NAME) BJ_CONFIG_ALL || BJ_CONFIG_ ## NAME
-#define BJ_HAS_FEATURE(NAME) BJ_FEATURE_ ## NAME
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef BJ_FEATURE_WIN32
+#   define _BJ_HAS_FEATURE_WIN32 1
+#else
+#   define _BJ_HAS_FEATURE_WIN32 0
+#endif
+
+#ifdef BJ_FEATURE_X11
+#   define _BJ_HAS_FEATURE_X11 1
+#else
+#   define _BJ_HAS_FEATURE_X11 0
+#endif
+
+#ifdef BJ_CONFIG_ALL
+#   define _BJ_HAS_CONFIG_ALL 1
+#else
+#   define _BJ_HAS_CONFIG_ALL 0
+#endif
+
+#ifdef BJ_CONFIG_CHECKS_ABORT
+#   define _BJ_HAS_CONFIG_CHECKS_ABORT 1
+#else
+#   define _BJ_HAS_CONFIG_CHECKS_ABORT 0
+#endif
+
+#ifdef BJ_CONFIG_CHECKS_LOG
+#   define _BJ_HAS_CONFIG_CHECKS_LOG 1
+#else
+#   define _BJ_HAS_CONFIG_CHECKS_LOG 0
+#endif
+
+#ifdef BJ_CONFIG_LOG_COLOR
+#   define _BJ_HAS_CONFIG_LOG_COLOR 1
+#else
+#   define _BJ_HAS_CONFIG_LOG_COLOR 0
+#endif
+
+#ifdef BJ_CONFIG_PEDANTIC
+#   define _BJ_HAS_CONFIG_PEDANTIC 1
+#else
+#   define _BJ_HAS_CONFIG_PEDANTIC 0
+#endif
+
+#define BJ_HAS_CONFIG(NAME) _BJ_HAS_CONFIG_ALL || _BJ_HAS_CONFIG_ ## NAME
+#define BJ_HAS_FEATURE(NAME) _BJ_HAS_FEATURE_ ## NAME
 
 
