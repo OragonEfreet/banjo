@@ -1,11 +1,31 @@
 {
-  "version": 3,
+  "version": 6,
   "configurePresets": [
     {
-      "name": "msvc",
-      "description": "Build using Visual Studio 2022",
+      "name": "generic-any-any",
+      "binaryDir": "build/${presetName}",
+      "cacheVariables": {
+        "BJ_CONFIG_ALL": "ON"
+      }
+    },
+    {
+      "name": "linux-clang-any",
+      "inherits": "generic-any-any",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "BJ_FEATURE_X11": "ON"
+      }
+    },
+    {
+      "name": "macos-clang-any",
+      "inherits": "generic-any-any",
+      "generator": "Xcode"
+    },
+    {
+      "name": "windows-msvc-any",
+      "inherits": "generic-any-any",
       "generator": "Visual Studio 17 2022",
-      "binaryDir": "${sourceDir}/build/msvc",
       "cacheVariables": {
         "BJ_FEATURE_WIN32": "ON"
       }
@@ -13,8 +33,47 @@
   ],
   "buildPresets": [
     {
-      "name": "msvc",
-      "configurePreset": "msvc"
+      "name": "linux-clang-any",
+      "displayName": "Build for GNU/Linux with Clang",
+      "configurePreset": "linux-clang-any"
+    },
+    {
+      "name": "macos-clang-any",
+      "displayName": "Build for macOS with Clang",
+      "configurePreset": "macos-clang-any"
+    },
+    {
+      "name": "windows-msvc-any",
+      "displayName": "Build for Windows with Microsoft Visual Studio 17 2022",
+      "configurePreset": "windows-msvc-any"
     }
+  ],
+  "workflowPresets": [
+    {
+      "name": "linux",
+      "displayName": "Standard GNU/Linux build with make and Clang",
+      "steps": [
+        { "type": "configure", "name": "linux-clang-any" },
+        { "type": "build", "name": "linux-clang-any" }
+      ]
+    },
+    {
+      "name": "macos",
+      "displayName": "Standard macOS build with XCode",
+      "steps": [
+        { "type": "configure", "name": "macos-clang-any" },
+        { "type": "build", "name": "macos-clang-any" }
+      ]
+    },
+    {
+      "name": "windows",
+      "displayName": "Standard Windows build with Visual Studio",
+      "steps": [
+        { "type": "configure", "name": "windows-msvc-any" },
+        { "type": "build", "name": "windows-msvc-any" }
+      ]
+    }
+
   ]
 }
+
