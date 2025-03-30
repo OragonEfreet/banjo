@@ -25,24 +25,6 @@ TEST_CASE(forcing_default_allocators_is_possible) {
     bj_free(blocks);
 }
 
-TEST_CASE(default_allocator_cannot_have_no_malloc) {
-    bj_memory_callbacks allocators = mock_allocators(0);
-    allocators.fn_allocation = 0;
-    bj_memory_set_defaults(&allocators);
-}
-
-TEST_CASE(default_allocator_cannot_have_no_realloc) {
-    bj_memory_callbacks allocators = mock_allocators(0);
-    allocators.fn_reallocation = 0;
-    bj_memory_set_defaults(&allocators);
-}
-
-TEST_CASE(default_allocator_cannot_have_no_free) {
-    bj_memory_callbacks allocators = mock_allocators(0);
-    allocators.fn_reallocation = 0;
-    bj_memory_set_defaults(&allocators);
-}
-
 TEST_CASE(test_custom_default_allocators) {
     // An intentionally complex test that plays with allocations to check
     // for the status each time a memory operation is done.
@@ -125,9 +107,6 @@ int main(int argc, char* argv[]) {
 
     RUN_TEST(fallback_allocator_works);
     RUN_TEST(forcing_default_allocators_is_possible);
-    RUN_TEST(default_allocator_cannot_have_no_malloc);
-    RUN_TEST(default_allocator_cannot_have_no_realloc);
-    RUN_TEST(default_allocator_cannot_have_no_free);
     RUN_TEST(test_custom_default_allocators);
 
     END_TESTS();

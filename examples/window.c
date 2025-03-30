@@ -8,6 +8,7 @@
 #include <banjo/window.h>
 
 void key_event(bj_window* p_window, bj_event_action mode, unsigned int keycode) {
+    (void)keycode;
     switch(mode) {
         case BJ_PRESS:
             bj_info("Pressed");
@@ -23,7 +24,7 @@ void key_event(bj_window* p_window, bj_event_action mode, unsigned int keycode) 
     }
 }
 
-int main(int argc, char* argv[]) {
+int main() {
 
     bj_error* p_error = 0;
 

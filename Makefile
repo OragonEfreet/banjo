@@ -1,21 +1,18 @@
-LIB ?= static
-BUILD ?= debug
-VERBOSE ?= false
+LIB     ?= static
+BUILD   ?= debug
 
 # Define directories
-OUTDIR = build/make-$(LIB)-$(BUILD)
-INCDIR = inc
-SRCDIR = src
+OUTDIR = build-$(LIB)-$(BUILD)
 
-# Define source and object files
-SRCS = $(wildcard $(SRCDIR)/*.c)
-OBJS = $(patsubst $(SRCDIR)/%.c, $(OUTDIR)/%.o, $(SRCS))
-DEPS = $(OBJS:.o=.d)
-
+# Compiler settings
 CC = cc
-CFLAGS = -Wall -Wextra -std=c99
+CPPFLAGS     = -Iinc -DBJ_CONFIG_ALL
+CFLAGS       = -Wall -Wextra -std=c99 -MMD -MP 
+LIB_CPPFLAGS =
+LIB_CFLAGS   =
+EXE_CPPFLAGS = -DBANJO_ASSETS_DIR=\"$(ASSETS_DIR)\" 
+EXE_CFLAGS   =
 
-# Define flags for debug and release builds
 ifeq ($(BUILD), release)
 CFLAGS += -O2
 else ifeq ($(BUILD), debug)
@@ -24,52 +21,80 @@ else
 $(error BUILD must be either 'release' or 'debug')
 endif
 
-# Define target based on library type
 ifeq ($(LIB), static)
-TARGET = $(OUTDIR)/libbanjo.a
+BANJO = $(OUTDIR)/libbanjo.a
+CPPFLAGS += -DBANJO_STATIC
 else ifeq ($(LIB), shared)
-TARGET = $(OUTDIR)/libbanjo.so
+BANJO = $(OUTDIR)/libbanjo.so
+LIB_CPPFLAGS += -DBANJO_EXPORTS
 else
 $(error LIB must be either 'static' or 'shared')
 endif
 
-# Define command prefix based on verbose mode
-ifeq ($(VERBOSE), 1)
-V =
-else
-V = @
-endif
+V = $(if $(VERBOSE), , @)
 
 # Default target
-all: banjo
+all: banjo tests examples
+
+################################################################################
+### Banjo ######################################################################
+
+LIB_SRCS = $(wildcard src/*.c)
+LIB_OBJS = $(LIB_SRCS:%.c=$(OUTDIR)/%.o)
 
 # Alias target
-banjo: $(TARGET)
-	@echo "Project built in $(OUTDIR)/"
+banjo: $(BANJO)
 
 # Create static library
-$(OUTDIR)/libbanjo.a: $(OBJS)
-	@mkdir -p $(OUTDIR)
+$(OUTDIR)/libbanjo.a: $(LIB_OBJS)
+	@mkdir -p $(dir $@)
 	$(V)ar rcs $@ $^
-	@$(info Generated $(notdir $@))
 
 # Create shared library
-$(OUTDIR)/libbanjo.so: $(OBJS)
-	@mkdir -p $(OUTDIR)
-	$(V)$(CC) -shared -o $@ $^
-	@$(info Generated $(notdir $@))
+$(OUTDIR)/libbanjo.so: $(LIB_OBJS)
+	@mkdir -p $(dir $@)
+	$(V)$(CC) -shared -fPIC -o $@ $^
 
-# Compile source files to object files
-$(OUTDIR)/%.o: $(SRCDIR)/%.c
-	@mkdir -p $(OUTDIR)
-	$(V)$(CC) $(CFLAGS) -I$(INCDIR) -MMD -MP -c -o $@ $<
-	@$(info Compiled $(notdir $<))
+$(OUTDIR)/src/%.o: src/%.c
+	@mkdir -p $(dir $@)
+	$(V)$(CC) $(CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(LIB_CFLAGS) -c -o $@ $<
 
-# Clean up
+################################################################################
+### Tests & Examples ###########################################################
+
+TST_SRCS = $(wildcard test/*.c)
+TST_BINS = $(TST_SRCS:%.c=$(OUTDIR)/%)
+TST_OBJS = $(TST_SRCS:%.c=$(OUTDIR)/%.o)
+
+EXM_SRCS = $(wildcard examples/*.c)
+EXM_BINS = $(EXM_SRCS:%.c=$(OUTDIR)/%)
+EXM_OBJS = $(EXM_SRCS:%.c=$(OUTDIR)/%.o)
+
+ASSETS_DIR = $(abspath assets)
+
+$(OUTDIR)/test/%: test/%.c $(BANJO)
+	@mkdir -p $(dir $@)
+	$(V)$(CC) $(CPPFLAGS) $(EXE_CPPFLAGS) $(CFLAGS) $(EXE_CFLAGS) -Isrc -o $@ $< -L$(OUTDIR) -lbanjo
+
+tests: $(TST_BINS)
+
+test: banjo tests
+	@for test in $(TST_BINS); do \
+		echo "Running $$test"; \
+		$$test || exit 1; \
+	done
+
+$(OUTDIR)/examples/%: examples/%.c $(BANJO)
+	@mkdir -p $(dir $@)
+	$(V)$(CC) $(CPPFLAGS) $(EXE_CPPFLAGS) $(CFLAGS) $(EXE_CFLAGS) -o $@ $< -L$(OUTDIR) -lbanjo
+
+examples: $(EXM_BINS)
+
+################################################################################
+### Clean up ###################################################################
 clean:
-	$(V)rm -rf $(OUTDIR)
-	@$(info Cleaned project)
+	$(V)rm -rf $(OUTDIR) $(LIB_OBJS:.o=.d) $(TST_OBJS:.o=.d) $(EXM_OBJS:.o=.d)
 
-.PHONY: all clean banjo
+.PHONY: all clean banjo tests examples test
 
--include $(DEPS)
+-include $(LIB_OBJS:.o=.d) $(TST_OBJS:.o=.d) $(EXM_OBJS:.o=.d)
