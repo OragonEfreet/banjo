@@ -65,3 +65,11 @@ docs/html
 
 .vs
 .vscode/tasks.json
+
+################################################################################
+# Build
+################################################################################
+build-static-debug/
+build-static-release/
+build-shared-debug/
+build-shared-release/
