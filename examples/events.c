@@ -23,6 +23,8 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
 }
 
 void key_event(bj_window* p_window, bj_event_action action, unsigned int keycode) {
+    (void)action;
+
     printf("Key event, window %p, keycode %u\n",
         p_window, keycode
     );
@@ -36,7 +38,7 @@ void enter_event(bj_window* p_window, bool enter, int x, int y) {
     );
 }
 
-int main(int argc, char* argv[]) {
+int main() {
 
     bj_error* p_error = 0;
 

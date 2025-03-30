@@ -26,10 +26,6 @@ TEST_CASE(clear_empty_does_nothing) {
     bj_array_del(p_array);
 }
 
-TEST_CASE(clear_0_does_nothing) {
-    bj_array_clear(0);
-}
-
 TEST_CASE(clear_filled_reduces_size_to_zero) {
     bj_array* p_array = bj_array_new_t(payload);
     bj_array_push(p_array, &(payload){.elem0 = 0});
@@ -55,9 +51,6 @@ TEST_CASE(shrink_empty_does_nothing) {
     bj_array_del(p_array);
 }
 
-TEST_CASE(shrink_0_does_nothing) {
-    bj_array_clear(0);
-}
 
 TEST_CASE(shrink_sets_capacity_to_size) {
     payload p;
@@ -178,10 +171,6 @@ TEST_CASE(push_growth_capacity_only_if_equals_to_len) {
     bj_array_del(p_array);
 }
 
-TEST_CASE(pop_0_does_nothing) {
-    bj_array_pop(0);
-}
-
 TEST_CASE(pop_empty_does_nothing) {
     bj_array* p_array = bj_array_new_t(payload);
     bj_array_pop(p_array);
@@ -249,27 +238,24 @@ TEST_CASE(at_nonempty_returns_indexed_value) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    /* RUN_TEST(initialize_with_payload_gives_empty_array); */
-    /* RUN_TEST(clear_empty_does_nothing); */
-    /* RUN_TEST(clear_0_does_nothing); */
-    /* RUN_TEST(clear_filled_reduces_size_to_zero); */
-    /* RUN_TEST(clear_filled_does_not_change_capacity); */
-    /* RUN_TEST(shrink_empty_does_nothing); */
-    /* RUN_TEST(shrink_0_does_nothing); */
-    /* RUN_TEST(shrink_sets_capacity_to_size); */
-    /* RUN_TEST(set_greater_len_changes_len_and_capacity); */
-    /* RUN_TEST(set_lower_len_changes_len_but_not_capacity); */
-    /* RUN_TEST(reserve_greater_capacity_growth_buffer); */
-    /* RUN_TEST(reserve_smaller_or_equal_capacity_does_nothing); */
-    /* RUN_TEST(push_into_empty_array_creates_new_buffer); */
-    /* RUN_TEST(push_growth_len_by_1); */
-    /* RUN_TEST(push_growth_capacity_only_if_equals_to_len); */
-    /* RUN_TEST(pop_0_does_nothing); */
-    /* RUN_TEST(pop_empty_does_nothing); */
-    /* RUN_TEST(pop_nonempty_reduces_len_but_not_capacity_nor_pointer); */
-    /* RUN_TEST(at_0_returns_0); */
-    /* RUN_TEST(at_empty_returns_0); */
-    /* RUN_TEST(at_nonempty_returns_indexed_value); */
+    RUN_TEST(initialize_with_payload_gives_empty_array);
+    RUN_TEST(clear_empty_does_nothing);
+    RUN_TEST(clear_filled_reduces_size_to_zero);
+    RUN_TEST(clear_filled_does_not_change_capacity);
+    RUN_TEST(shrink_empty_does_nothing);
+    RUN_TEST(shrink_sets_capacity_to_size);
+    RUN_TEST(set_greater_len_changes_len_and_capacity);
+    RUN_TEST(set_lower_len_changes_len_but_not_capacity);
+    RUN_TEST(reserve_greater_capacity_growth_buffer);
+    RUN_TEST(reserve_smaller_or_equal_capacity_does_nothing);
+    RUN_TEST(push_into_empty_array_creates_new_buffer);
+    RUN_TEST(push_growth_len_by_1);
+    RUN_TEST(push_growth_capacity_only_if_equals_to_len);
+    RUN_TEST(pop_empty_does_nothing);
+    RUN_TEST(pop_nonempty_reduces_len_but_not_capacity_nor_pointer);
+    RUN_TEST(at_0_returns_0);
+    RUN_TEST(at_empty_returns_0);
+    RUN_TEST(at_nonempty_returns_indexed_value);
 
     END_TESTS();
 }

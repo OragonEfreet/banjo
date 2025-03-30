@@ -62,7 +62,7 @@ TEST_CASE(set_a_value_with_new_key_growth_len_by_one) {
 
     for(key_t count = 1 ; count < 9 ; ++count) {
         bj_htable_set(htable, &count, &value);
-        REQUIRE_EQ(bj_htable_len(htable), count);
+        REQUIRE_EQ(bj_htable_len(htable), (size_t)count);
     }
     bj_htable_del(htable);
 }
@@ -156,18 +156,18 @@ int main(int argc, char* argv[]) {
 
     RUN_TEST(empty_valid_initialization);
     RUN_TEST(init_with_zero_bytes_value_gives_0);
-    /* RUN_TEST(init_with_zero_bytes_key_gives_0); */
-    /* RUN_TEST(init_with_no_hash_gives_default_hash); */
-    /* RUN_TEST(len_0_returns_0); */
-    /* RUN_TEST(len_empty_returns_0); */
-    /* RUN_TEST(set_a_value_with_new_key_growth_len_by_one); */
-    /* RUN_TEST(set_a_value_with_existing_key_does_not_change_len); */
-    /* RUN_TEST(set_a_value_with_existing_key_returns_same_address); */
-    /* RUN_TEST(set_a_value_with_new_key_returns_new_address); */
-    /* RUN_TEST(get_from_0_returns_0); */
-    /* RUN_TEST(get_empty_returns_0); */
-    /* RUN_TEST(get_existing_key_returns_associated_value); */
-    /* RUN_TEST(get_nonexisting_key_returns_0); */
+    RUN_TEST(init_with_zero_bytes_key_gives_0);
+    RUN_TEST(init_with_no_hash_gives_default_hash);
+    RUN_TEST(len_0_returns_0);
+    RUN_TEST(len_empty_returns_0);
+    RUN_TEST(set_a_value_with_new_key_growth_len_by_one);
+    RUN_TEST(set_a_value_with_existing_key_does_not_change_len);
+    RUN_TEST(set_a_value_with_existing_key_returns_same_address);
+    RUN_TEST(set_a_value_with_new_key_returns_new_address);
+    RUN_TEST(get_from_0_returns_0);
+    RUN_TEST(get_empty_returns_0);
+    RUN_TEST(get_existing_key_returns_associated_value);
+    RUN_TEST(get_nonexisting_key_returns_0);
 
     END_TESTS();
 }

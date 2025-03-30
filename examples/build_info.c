@@ -8,7 +8,7 @@
 
 #define DESC(mode) printf("%c %s\n", info->mode ? '+' : '-', #mode)
 
-int main(int argc, char* argv[]) {
+int main() {
     const bj_build_info* info = bj_get_build_info();
 
     printf("%s API Version %d.%d.%d (0x%08X), %s build\n",

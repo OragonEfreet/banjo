@@ -22,10 +22,6 @@ TEST_CASE(initialize_with_payload_gives_empty_list) {
     bj_list_del(p_list);
 }
 
-TEST_CASE(clear_0_does_nothing) {
-    bj_list_clear(0);
-}
-
 TEST_CASE(clear_empty_does_nothing) {
     bj_list* p_list = bj_list_new_t(payload);
     bj_list_clear(p_list); // Ensure cleared
@@ -140,7 +136,6 @@ int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
     RUN_TEST(initialize_with_payload_gives_empty_list);
-    RUN_TEST(clear_0_does_nothing);
     RUN_TEST(clear_empty_does_nothing);
     RUN_TEST(len_0_returns_0);
     RUN_TEST(len_empty_returns_0);

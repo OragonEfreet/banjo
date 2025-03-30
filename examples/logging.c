@@ -6,7 +6,7 @@
 
 #include <assert.h>
 
-int main(int argc, char* argv[]) {
+int main() {
 
     // Usually, log levels go from 0 to 5 in that order:
     // BJ_LOG_TRACE < BJ_LOG_DEBUG < BJ_LOG_INFO,
