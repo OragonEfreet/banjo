@@ -59,6 +59,11 @@ $(OUTDIR)/src/%.o: src/%.c
 	@mkdir -p $(dir $@)
 	$(V)$(CC) $(CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(LIB_CFLAGS) -c -o $@ $<
 
+
+$(OUTDIR)/src/%.i: src/%.c
+	@mkdir -p $(dir $@)
+	$(V)$(CC) $(CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(LIB_CFLAGS) -E -P -o $@ $<
+
 ################################################################################
 ### Tests & Examples ###########################################################
 

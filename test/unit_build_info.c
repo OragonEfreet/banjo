@@ -1,4 +1,5 @@
-#include "banjo/api.h"
+#include <banjo/api.h>
+#include "config.h"
 
 #include "test.h"
 
@@ -10,13 +11,7 @@
 #   define INFO_EXPECT_DEBUG true
 #endif
 
-#if BJ_CONFIG_PEDANTIC
-#   define INFO_EXPECT_PEDANTIC true
-#else
-#   define INFO_EXPECT_PEDANTIC false
-#endif
-
-#if BJ_CONFIG_LOG_COLOR
+#if BJ_HAS_CONFIG(LOG_COLOR)
 #   define INFO_EXPECT_COLOR_LOG true
 #else
 #   define INFO_EXPECT_COLOR_LOG false
@@ -28,7 +23,6 @@ TEST_CASE(get_build_info) {
     REQUIRE_EQ(cmp, 0);
     REQUIRE_EQ(info->version, BJ_VERSION);
     REQUIRE_EQ(info->debug, INFO_EXPECT_DEBUG);
-    REQUIRE_EQ(info->config_pedantic, INFO_EXPECT_PEDANTIC);
     REQUIRE_EQ(info->config_log_color, INFO_EXPECT_COLOR_LOG);
 }
 
