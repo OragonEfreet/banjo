@@ -7,7 +7,8 @@ OUTDIR = build-$(LIB)-$(BUILD)
 # Compiler settings
 CC = cc
 CPPFLAGS     = -Iinc -DBJ_CONFIG_ALL
-CFLAGS       = -Wall -Wextra -std=c99 -MMD -MP 
+CFLAGS       = -Wall -Wextra -std=c99
+CFLAGS_EXTRA = -MMD -MP 
 LIB_CPPFLAGS =
 LIB_CFLAGS   =
 EXE_CPPFLAGS = -DBANJO_ASSETS_DIR=\"$(ASSETS_DIR)\" 
@@ -57,12 +58,18 @@ $(OUTDIR)/libbanjo.so: $(LIB_OBJS)
 
 $(OUTDIR)/src/%.o: src/%.c
 	@mkdir -p $(dir $@)
-	$(V)$(CC) $(CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(LIB_CFLAGS) -c -o $@ $<
+	$(V)$(CC) $(CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(LIB_CFLAGS) $(CFLAGS_EXTRA) -c -o $@ $<
 
 
 $(OUTDIR)/src/%.i: src/%.c
 	@mkdir -p $(dir $@)
-	$(V)$(CC) $(CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(LIB_CFLAGS) -E -P -o $@ $<
+	$(V)$(CC) $(CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(LIB_CFLAGS) $(CFLAGS_EXTRA) -E -P -o $@ $<
+
+flags:
+	@echo "$(CPPFLAGS) $(LIB_CPPFLAGS) $(CFLAGS) $(LIB_CFLAGS)"
+
+outdir:
+	@echo "$(OUTDIR)"
 
 ################################################################################
 ### Tests & Examples ###########################################################
@@ -79,7 +86,7 @@ ASSETS_DIR = $(abspath assets)
 
 $(OUTDIR)/test/%: test/%.c $(BANJO)
 	@mkdir -p $(dir $@)
-	$(V)$(CC) $(CPPFLAGS) $(EXE_CPPFLAGS) $(CFLAGS) $(EXE_CFLAGS) -Isrc -o $@ $< -L$(OUTDIR) -lbanjo
+	$(V)$(CC) $(CPPFLAGS) $(EXE_CPPFLAGS) $(CFLAGS) $(EXE_CFLAGS) $(CFLAGS_EXTRA) -Isrc -o $@ $< -L$(OUTDIR) -lbanjo
 
 tests: $(TST_BINS)
 
@@ -91,7 +98,7 @@ test: banjo tests
 
 $(OUTDIR)/examples/%: examples/%.c $(BANJO)
 	@mkdir -p $(dir $@)
-	$(V)$(CC) $(CPPFLAGS) $(EXE_CPPFLAGS) $(CFLAGS) $(EXE_CFLAGS) -o $@ $< -L$(OUTDIR) -lbanjo
+	$(V)$(CC) $(CPPFLAGS) $(EXE_CPPFLAGS) $(CFLAGS) $(EXE_CFLAGS) $(CFLAGS_EXTRA) -o $@ $< -L$(OUTDIR) -lbanjo
 
 examples: $(EXM_BINS)
 
@@ -100,6 +107,26 @@ examples: $(EXM_BINS)
 clean:
 	$(V)rm -rf $(OUTDIR) $(LIB_OBJS:.o=.d) $(TST_OBJS:.o=.d) $(EXM_OBJS:.o=.d)
 
-.PHONY: all clean banjo tests examples test
+.PHONY: all clean banjo tests examples test flags help outdir
+
+help:
+	@echo "Main targets:"
+	@echo "  all         - [Default] Build banjo, tests, and examples"
+	@echo "  banjo       - Build banjo library"
+	@echo "  examples    - Build example code"
+	@echo "  test        - Build tests"
+	@echo ""
+	@echo "Tools & Object File Targets:"
+	@echo "  tests              - Run tests"
+	@echo "  clean              - Clean all build files"
+	@echo "  flags              - Display the CPPFLAGS and CFLAGS"
+	@echo "  outdir             - Display OUTDIR"
+	@echo "  OUTDIR/.../file.o  - Build object file for .../file.c"
+	@echo "  OUTDIR/.../file.i  - Generate preprocessor output for .../file.c"
+	@echo ""
+	@echo "Configuration:"
+	@echo "  VERBOSE [0 | 1]             - Enable verbose output (default: 0)"
+	@echo "  LIB     [static | shared]   - Choose static or shared library (default: static)"
+	@echo "  BUILD   [debug | release]   - Set build type (default: debug)"
 
 -include $(LIB_OBJS:.o=.d) $(TST_OBJS:.o=.d) $(EXM_OBJS:.o=.d)
