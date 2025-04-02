@@ -105,6 +105,9 @@ void* bj_htable_get(
     const void*       p_key,
     void*             p_default
 ) {
+    bj_check_or_0(table);
+    bj_check_or_0(p_key);
+
     uint32_t hash = 0;
     if (table->fn_hash) {
         hash = table->fn_hash(p_key, table->bytes_key) % BUCKET_COUNT;
@@ -133,8 +136,9 @@ void* bj_htable_get(
 size_t bj_htable_len(
     const bj_htable* p_table
 ) {
-    size_t len = 0;
+    bj_check_or_0(p_table);
 
+    size_t len = 0;
     for(size_t i = 0 ; i < bj_array_len(&p_table->buckets) ; ++i) {
         bj_list* bucket = bj_array_at(&p_table->buckets, i);
         len += bj_list_len(bucket);
