@@ -43,6 +43,7 @@ typedef struct {
 } Context;
 
 void PRINT(Context* context, const char *format, ...) {
+    (void)context;
     // stdout = context->standard_out;
     va_list args;
     va_start(args, format);
