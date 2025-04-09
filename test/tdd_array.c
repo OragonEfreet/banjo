@@ -218,9 +218,9 @@ TEST_CASE(at_empty_returns_0) {
 TEST_CASE(at_nonempty_returns_indexed_value) {
     bj_array* p_array = bj_array_new_t(payload);
 
-    for(size_t i = 0 ; i < 10 ; ++i) {
+    for(short i = 0 ; i < 10 ; ++i) {
 
-        payload p = {.elem0 = i * 2, .elem1 = -i};
+        payload p = {.elem0 = i * 2, .elem1 = -((long)i)};
         bj_array_push(p_array, &p);
 
         payload* got = bj_array_at(p_array, i);
