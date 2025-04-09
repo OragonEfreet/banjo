@@ -14,14 +14,6 @@ LIB_CFLAGS   =
 EXE_CPPFLAGS = -DBANJO_ASSETS_DIR=\"$(ASSETS_DIR)\" 
 EXE_CFLAGS   =
 
-ifeq ($(BUILD), release)
-CFLAGS += -O2
-else ifeq ($(BUILD), debug)
-CFLAGS += -g
-else
-$(error BUILD must be either 'release' or 'debug')
-endif
-
 ifeq ($(LIB), static)
 BANJO = $(OUTDIR)/libbanjo.a
 CPPFLAGS += -DBANJO_STATIC
@@ -31,6 +23,15 @@ LIB_CPPFLAGS += -DBANJO_EXPORTS
 else
 $(error LIB must be either 'static' or 'shared')
 endif
+
+ifeq ($(BUILD), release)
+CFLAGS += -O2
+else ifeq ($(BUILD), debug)
+CFLAGS += -g
+else
+$(error BUILD must be either 'release' or 'debug')
+endif
+
 
 V = $(if $(VERBOSE), , @)
 
