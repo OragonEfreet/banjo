@@ -43,12 +43,12 @@ typedef struct {
 } Context;
 
 void PRINT(Context* context, const char *format, ...) {
-    stdout = context->standard_out;
+    // stdout = context->standard_out;
     va_list args;
     va_start(args, format);
     vprintf(format, args);
     va_end(args);
-    stdout = context->null_out;
+    // stdout = context->null_out;
 }
 
 // Parses ARGC/ARGV and builds the Context object
@@ -64,8 +64,8 @@ void initialize_context(Context* context, int argc, char* argv[]) {
     bj_memory_set_defaults(&allocators);
 
     context->standard_out = stdout;
-    context->null_out = fopen(NUL_STDOUT, "w");
-    stdout = context->null_out;
+    // context->null_out = fopen(NUL_STDOUT, "w");
+    // stdout = context->null_out;
 }
 
 // Called after each test ends
