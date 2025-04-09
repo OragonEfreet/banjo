@@ -1,43 +1,58 @@
 @echo off
 SETLOCAL ENABLEDELAYEDEXPANSION
 
+:: Validate parameters
+IF /I "%~1" neq "static" if /i "%~1" neq "shared" (
+    echo Usage: %~nx0 "[static|shared] [release|debug]"
+    exit /b 1
+)
+set LIB=%~1
+SHIFT
+
+:: Validate parameters
+IF /I "%~1" neq "release" if /i "%~1" neq "debug" (
+    echo Usage: %~nx0 "[static|shared] [release|debug]"
+    exit /b 1
+)
+set BUILD=%~1
+SHIFT
+
+SET OUTDIR=build-!LIB!-!BUILD!
+SET BASENAME=libbanjo
+
+
 :: Compiler settings
-SET CC=clang
-SET CPPFLAGS=-Iinc -DBJ_CONFIG_ALL
-SET CFLAGS=-Wall -Wextra -std=c99 -D_CRT_SECURE_NO_WARNINGS
-SET CFLAGS_EXTRA=
-SET LIB_CPPFLAGS=
-SET LIB_CFLAGS=
-SET EXE_CPPFLAGS=-DBANJO_ASSETS_DIR=\"$(ASSETS_DIR)\"
-SET EXE_CFLAGS=
+SET CC=cl
 
-:: Validate the LIB parameter
-IF /I "%~1"=="static" (
-    SET LIB=static
-    SET CPPFLAGS=!CPPFLAGS! -DBANJO_STATIC
-) ELSE IF /I "%~1"=="shared" (
-    SET LIB=shared
-    SET LIB_CPPFLAGS=!LIB_CPPFLAGS! -DBANJO_EXPORTS
-) ELSE (
-    echo Usage: %~nx0 "[static|shared] [release|debug]"
-    exit /b 1
-)
-SHIFT
 
-:: Validate the BUILD parameter
-IF /I "%~1"=="release" (
-    SET BUILD=release
-    SET CFLAGS=!CFLAGS! -O2
-) ELSE IF /I "%~1"=="debug" (
-    SET BUILD=debug
-    SET CFLAGS=!CFLAGS! -g
-) ELSE (
-    echo Usage: %~nx0 "[static|shared] [release|debug]"
-    exit /b 1
-)
-SHIFT
+@REM Common flags set for all targets
+@REM It is also possible to provide per BUILD CPPFLAGS, CFLAGS and CFLAGS_EXTRA by appending _release or _debug
+@REM _EXTRA flags are passed while compiling like any other flags but they don't appear when calling the 'flags' command.
+SET CPPFLAGS=/Iinc /D "BJ_CONFIG_ALL"
+SET CFLAGS=/W4 /Zc:forScope /Zc:wchar_t /Zc:inline /fp:precise /GS /Gd
+SET CFLAGS_EXTRA=/errorReport:prompt /nologo /diagnostics:column
 
-SET OUTDIR=build-%LIB%-%BUILD%
+SET CFLAGS_debug=/Od /Ob0 /Zi /RTC1 /MDd 
+SET CFLAGS_EXTRA_debug=/Fd"!OUTDIR!\!BASENAME!.pdb"
+
+@REM Flags specific to building Banjo
+SET CPPFLAGS_BANJO=
+SET CFLAGS_BANJO=
+
+@REM flags specific to targets building against Banjo (tests and examples)
+SET CPPFLAGS_EXE=
+SET CFLAGS_EXE=
+
+IF /I "!LIB!"=="static" SET CPPFLAGS=!CPPFLAGS! /D "BJ_STATIC"
+IF /I "!LIB!"=="shared" SET CPPFLAGS_BANJO=!CPPFLAGS_BANJO! /D "BJ_EXPORTS"
+SET CPPFLAGS=!CPPFLAGS! !CPPFLAGS_%BUILD%!
+SET CFLAGS=!CFLAGS! !CFLAGS_%BUILD%!
+SET CFLAGS_EXTRA=!CFLAGS_EXTRA! !CFLAGS_EXTRA_%BUILD%!
+
+@REM TODO
+@REM SET CPPFLAGS_EXE=-DBANJO_ASSETS_DIR=\"$(ASSETS_DIR)\"
+@REM SET CFLAGS=-Wall -Wextra -std=c99 -D_CRT_SECURE_NO_WARNINGS
+
 
 @REM :: Display the output directory
 @REM echo OUTDIR: !OUTDIR!
@@ -45,10 +60,10 @@ SET OUTDIR=build-%LIB%-%BUILD%
 @REM echo CPPFLAGS: !CPPFLAGS!
 @REM echo CFLAGS: !CFLAGS!
 @REM echo CFLAGS_EXTRA: !CFLAGS_EXTRA!
-@REM echo LIB_CPPFLAGS: !LIB_CPPFLAGS!
-@REM echo LIB_CFLAGS: !LIB_CFLAGS!
-@REM echo EXE_CPPFLAGS: !EXE_CPPFLAGS!
-@REM echo EXE_CFLAGS: !EXE_CFLAGS!
+@REM echo CPPFLAGS_BANJO: !CPPFLAGS_BANJO!
+@REM echo CFLAGS_BANJO: !CFLAGS_BANJO!
+@REM echo CPPFLAGS_EXE: !CPPFLAGS_EXE!
+@REM echo CFLAGS_EXE: !CFLAGS_EXE!
 
 IF "%~1"=="" (SET TARGET=all) ELSE (SET TARGET=%~1)
 
@@ -72,6 +87,9 @@ IF /I "!TARGET!"=="tests" goto make_tests
 IF /I "!TARGET!"=="clean" goto make_clean
 :ret_clean
 
+IF /I "!TARGET!"=="flags" goto make_flags
+:ret_flags
+
 SHIFT
 SET TARGET=%~1
 GOTO make_target
@@ -82,14 +100,14 @@ echo "Building Banjo..."
 SET OBJS=
 MKDIR !OUTDIR!\src
 FOR %%f in (src\*.c) do (
-    SET OBJ=!OUTDIR!\src\%%~nf.o
+    SET OBJ=!OUTDIR!\src\%%~nf.obj
     SET OBJS=!OBJS! !OBJ!
-    @REM !CC! %CPPFLAGS% %LIB_CPPFLAGS% %CFLAGS% %LIB_CFLAGS% %CFLAGS_EXTRA% -c -o !OBJ! %%f
-    echo !CC! %CPPFLAGS% %LIB_CPPFLAGS% %CFLAGS% %LIB_CFLAGS% %CFLAGS_EXTRA% -c -o !OBJ! %%f
-    @REM echo Compiled %%~f
+    SET COMMAND_LINE=!CPPFLAGS! !CPPFLAGS_BANJO! !CFLAGS! !CFLAGS_BANJO! !CFLAGS_EXTRA! /Fo"!OBJ!"
+    !CC! !COMMAND_LINE! /c %%~f
+    IF !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
-    @REM !CC! %CPPFLAGS% %LIB_CPPFLAGS% %CFLAGS% %LIB_CFLAGS% %CFLAGS_EXTRA% -c -o !OBJ! %%f
+echo "All good"
 
 goto ret_banjo
 
@@ -101,8 +119,13 @@ goto ret_examples
 echo "Building Tests..."
 goto ret_tests
 
+:make_flags
+echo !CPPFLAGS! !CPPFLAGS_BANJO! !CFLAGS! !CFLAGS_BANJO!
+goto ret_flags
+
 :make_clean
 RMDIR /S /Q !OUTDIR!
+echo Project Cleaned
 goto ret_clean
 
 :end
