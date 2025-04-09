@@ -122,7 +122,7 @@ int bj_bitmap_mode(
     return p_bitmap->mode;
 }
 
-int bj_bitmap_stride( 
+size_t bj_bitmap_stride( 
     bj_bitmap* p_bitmap
 ) {
     bj_check_or_0(p_bitmap);
@@ -231,7 +231,8 @@ BANJO_EXPORT void bj_bitmap_draw_line(
     uint32_t       c
 ) {
     /// Bresenham's line algorithm
-    int x0 = p0[X]; int y0 = p0[Y];
+    int x0 = p0[X];
+    int y0 = p0[Y];
     const int x1 = p1[X]; const int y1 = p1[Y];
 
     const int dx = ABS_INT(x1 - x0);

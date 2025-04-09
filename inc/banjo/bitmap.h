@@ -16,7 +16,7 @@
 #include <banjo/stream.h>
 
 /// Represents a pixel position in a bitmap.
-typedef size_t bj_pixel[2];
+typedef int bj_pixel[2];
 
 /// Typedef for the \ref bj_bitmap struct
 typedef struct bj_bitmap_t bj_bitmap;
@@ -209,7 +209,7 @@ BANJO_EXPORT int bj_bitmap_mode(
 /// \param p_bitmap The bitmap object.
 /// \return The bitmap stride
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT int bj_bitmap_stride( 
+BANJO_EXPORT size_t bj_bitmap_stride( 
     bj_bitmap* p_bitmap
 );
 

@@ -1,22 +1,8 @@
 @ECHO off
 SETLOCAL ENABLEDELAYEDEXPANSION
 
-REM ##########################################################################################
-REM ### CHECKING PARAMETERS ##################################################################
-IF /I "%~1" neq "static" if /i "%~1" neq "shared" (
-    ECHO Invalid first parameter %~1
-    ECHO Usage: %~nx0 "[static|shared] [release|debug] tgt0 tgt1..."
-    exit /b 1
-)
-SET TYPE=%~1
-SHIFT
-IF /I "%~1" neq "release" if /i "%~1" neq "debug" (
-    ECHO Invalid second parameter %~1
-    ECHO Usage: %~nx0 "[static|shared] [release|debug] tgt0 tgt1..."
-    exit /b 1
-)
-SET CONFIG=%~1
-SHIFT
+IF NOT DEFINED TYPE SET TYPE=static
+IF NOT DEFINED CONFIG SET CONFIG=release
 
 REM ##########################################################################################
 REM ### GENERAL CONFIGURATION ################################################################
@@ -29,6 +15,7 @@ SET LIBPATH=!OUTDIR!\!LIBNAME!
 SET DLLPATH=!OUTDIR!\!DLLNAME!
 SET PDBPATH=!OUTDIR!\!PDBNAME!
 for %%F in ("assets") do SET "ASSETS_DIR=%%~fF"
+SET "ASSETS_DIR=!ASSETS_DIR:\=/!"
 SET CC=cl
 SET AR=lib
 SET LD=link
@@ -45,7 +32,7 @@ REM ### LINKFLAGS          : Options passed to the linker
 REM ### LINKFLAGS_EXTRA    : Additional LINKFLAGS that do not impact resulting binary
 REM ###
 REM ### CFLAGS, CFLAGS_EXTRA, LINKFLAGS and LINKFLAGS_EXTRA are also available with the _debug
-REM ### or _release suffir (for example LINKFLAG_EXTRA_debug) to enable these options only in
+REM ### or _release suffix (for example LINKFLAG_EXTRA_debug) to enable these options only in
 REM ### debug or release configuration respectively.
 SET CPPFLAGS=/Iinc /D "BJ_CONFIG_ALL" /D_CRT_SECURE_NO_WARNINGS
 SET CFLAGS=/W4 /Zc:forScope /Zc:wchar_t /Zc:inline /fp:precise /GS /Gd
@@ -105,6 +92,8 @@ IF /I "!TARGET!"=="linkflags" goto make_linkflags
 :ret_linkflags
 IF /I "!TARGET!"=="outdir" goto make_outdir
 :ret_outdir
+IF /I "!TARGET!"=="help" goto make_help
+:ret_help
 SHIFT
 SET TARGET=%~1
 GOTO make_target
@@ -113,7 +102,7 @@ REM ############################################################################
 REM ### BANJO LIBRARY ########################################################################
 :make_banjo
 SET OBJS=
-MKDIR !OUTDIR!\src
+MKDIR !OUTDIR!\src 2>nul
 FOR %%f in (src\*.c) do (
     SET OBJ=!OUTDIR!\src\%%~nf.obj
     SET OBJS=!OBJS! !OBJ!
@@ -135,7 +124,7 @@ goto ret_banjo
 REM ##########################################################################################
 REM ### EXAMPLE CODES ########################################################################
 :make_examples
-MKDIR !OUTDIR!\examples
+MKDIR !OUTDIR!\examples 2>nul
 FOR %%f in (examples\*.c) do (
     SET OBJ=!OUTDIR!\examples\%%~nf.obj
     SET EXE=!OUTDIR!\%%~nf.exe
@@ -149,7 +138,7 @@ goto ret_examples
 REM ##########################################################################################
 REM ### TESTS ################################################################################
 :make_tests
-MKDIR !OUTDIR!\test
+MKDIR !OUTDIR!\test 2>nul
 FOR %%f in (test\*.c) do (
     SET OBJ=!OUTDIR!\test\%%~nf.obj
     SET EXE=!OUTDIR!\%%~nf.exe
@@ -195,6 +184,13 @@ REM ### CLEAN PROJECT (DELETE OUTPUT DIRECTORY) ################################
 RMDIR /S /Q !OUTDIR!
 ECHO Project cleaned
 goto ret_clean
+
+REM ##########################################################################################
+REM ### HELP #################################################################################
+:make_help
+ECHO Usage: Make.bat "tgt0 tgt1..."
+echo Targets: all, banjo, examples, tests, test, clean, flags, linkflags, outdir, help
+goto ret_help
 
 :end
 ENDLOCAL
