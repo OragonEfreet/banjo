@@ -82,7 +82,7 @@ TEST_CASE(prepend_to_makes_item_available_at_index_0) {
     bj_list* p_list = bj_list_new_t(payload);
 
     for(size_t i = 1 ; i < 10 ; ++i) {
-        payload p = {.elem0 = 42, .elem1 = -(i*3)};
+        payload p = {.elem0 = 42, .elem1 = (i*3)};
         bj_list_prepend(p_list, &p);
         REQUIRE_EQ(bj_list_len(p_list), i);
 
@@ -118,7 +118,7 @@ TEST_CASE(head_is_at_0) {
     bj_list* p_list = bj_list_new_t(payload);
 
     for(size_t i = 1 ; i < 10 ; ++i) {
-        payload p = {.elem0 = 42, .elem1 = -(i*3)};
+        payload p = {.elem0 = 42, .elem1 = (i*3)};
         bj_list_prepend(p_list, &p);
         REQUIRE_EQ(bj_list_len(p_list), i);
 
