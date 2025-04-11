@@ -27,7 +27,7 @@ TEST_CASE_ARGS(is_corrupt_bmp, {const char* name;bj_error_code code;}) {
     bj_bitmap_del(bj_bitmap_new_from_file(bmp_path, &p_error));
 
     REQUIRE_VALUE(p_error);
-    REQUIRE_EQ(p_error->code, test_data->code);
+    REQUIRE_EQ(p_error->code, (uint32_t)test_data->code);
 
     bj_clear_error(&p_error);
     
