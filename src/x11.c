@@ -19,16 +19,12 @@
 
 #define X11_CANNOT_OPEN_DISPLAY 0x00010000
 
-typedef Atom                (* pfn_XInternAtom)(Display*,const char*,Bool);
-typedef Display*            (* pfn_XOpenDisplay)(const char*);
-typedef KeySym*             (* pfn_XGetKeyboardMapping)(Display*,KeyCode,int,int*);
-typedef Status              (* pfn_XSetWMProtocols)(Display*,Window,Atom*,int);
-typedef Visual*             (* pfn_XDefaultVisual)(Display*,int);
-typedef Window              (* pfn_XCreateWindow)(Display*,Window,int,int,unsigned int,unsigned int,unsigned int,int,unsigned int,Visual*,unsigned long,XSetWindowAttributes*);
-typedef XrmQuark            (* pfn_XrmUniqueQuark)(void);
+typedef unsigned long       (* pfn_XBlackPixel)(Display*,int);
 typedef int                 (* pfn_XCloseDisplay)(Display*);
+typedef Window              (* pfn_XCreateWindow)(Display*,Window,int,int,unsigned int,unsigned int,unsigned int,int,unsigned int,Visual*,unsigned long,XSetWindowAttributes*);
 typedef int                 (* pfn_XDefaultDepth)(Display*,int);
 typedef int                 (* pfn_XDefaultScreen)(Display*);
+typedef Visual*             (* pfn_XDefaultVisual)(Display*,int);
 typedef int                 (* pfn_XDeleteContext)(Display*,XID,XContext);
 typedef int                 (* pfn_XDestroyWindow)(Display*,Window);
 typedef int                 (* pfn_XDisplayKeycodes)(Display*,int*,int*);
@@ -36,16 +32,20 @@ typedef int                 (* pfn_XEventsQueued)(Display*,int);
 typedef int                 (* pfn_XFindContext)(Display*,XID,XContext,XPointer*);
 typedef int                 (* pfn_XFlush)(Display*);
 typedef int                 (* pfn_XFree)(void*);
+typedef KeySym*             (* pfn_XGetKeyboardMapping)(Display*,KeyCode,int,int*);
+typedef Atom                (* pfn_XInternAtom)(Display*,const char*,Bool);
 typedef int                 (* pfn_XMapWindow)(Display*,Window);
 typedef int                 (* pfn_XNextEvent)(Display*,XEvent*);
+typedef Display*            (* pfn_XOpenDisplay)(const char*);
 typedef int                 (* pfn_XPeekEvent)(Display*,XEvent*);
 typedef int                 (* pfn_XPending)(Display*);
 typedef int                 (* pfn_XQLength)(Display*);
 typedef int                 (* pfn_XSaveContext)(Display*,XID,XContext,const char*);
+typedef Status              (* pfn_XSetWMProtocols)(Display*,Window,Atom*,int);
+typedef void                (* pfn_XStoreName)(Display*, Window, char*);
 typedef int                 (* pfn_XSync)(Display*,Bool);
 typedef int                 (* pfn_XUnmapWindow)(Display*,Window);
-typedef unsigned long       (* pfn_XBlackPixel)(Display*,int);
-typedef void                (* pfn_XStoreName)(Display*, Window, char*);
+typedef XrmQuark            (* pfn_XrmUniqueQuark)(void);
 
 
 typedef struct {
@@ -279,9 +279,9 @@ static void x11_poll_events(
 static void x11_init_keycodes(
     x11_backend* p_x11
 ) {
-    pfn_XDisplayKeycodes    x11_XDisplayKeycodes    = x11_get_symbol(p_x11, "XDisplayKeycodes");
-    pfn_XFree               x11_XFree               = x11_get_symbol(p_x11, "XFree");
-    pfn_XGetKeyboardMapping x11_XGetKeyboardMapping = x11_get_symbol(p_x11, "XGetKeyboardMapping");
+    pfn_XDisplayKeycodes    x11_XDisplayKeycodes    = (pfn_XDisplayKeycodes)x11_get_symbol(p_x11, "XDisplayKeycodes");
+    pfn_XFree               x11_XFree               = (pfn_XFree)x11_get_symbol(p_x11, "XFree");
+    pfn_XGetKeyboardMapping x11_XGetKeyboardMapping = (pfn_XGetKeyboardMapping)x11_get_symbol(p_x11, "XGetKeyboardMapping");
 
     int min_keycodes = 0;
     int max_keycodes = 0;
@@ -305,7 +305,7 @@ static void x11_dispose_backend(
 ) {
     (void)p_error;
     x11_backend* p_x11 = (x11_backend*)p_backend;
-    pfn_XCloseDisplay XCloseDisplay = x11_get_symbol(p_x11, "XCloseDisplay");
+    pfn_XCloseDisplay XCloseDisplay = (pfn_XCloseDisplay)x11_get_symbol(p_x11, "XCloseDisplay");
     XCloseDisplay(p_x11->display);
     bj_free(p_backend);
 }
@@ -322,30 +322,30 @@ static bj_system_backend* x11_init_backend(
     x11_backend* p_x11 = bj_malloc(sizeof(x11_backend));
     p_x11->p_handle            = p_handle;
 
-    p_x11->XCreateWindow       = x11_get_symbol(p_x11, "XCreateWindow");
-    p_x11->XDeleteContext      = x11_get_symbol(p_x11, "XDeleteContext");
-    p_x11->XDestroyWindow      = x11_get_symbol(p_x11, "XDestroyWindow");
-    p_x11->XEventsQueued       = x11_get_symbol(p_x11, "XEventsQueued");
-    p_x11->XFindContext        = x11_get_symbol(p_x11, "XFindContext");
-    p_x11->XFlush              = x11_get_symbol(p_x11, "XFlush");
-    p_x11->XMapWindow          = x11_get_symbol(p_x11, "XMapWindow");
-    p_x11->XNextEvent          = x11_get_symbol(p_x11, "XNextEvent");
-    p_x11->XPeekEvent          = x11_get_symbol(p_x11, "XPeekEvent");
-    p_x11->XPending            = x11_get_symbol(p_x11, "XPending");
-    p_x11->XQLength            = x11_get_symbol(p_x11, "XQLength");
-    p_x11->XSaveContext        = x11_get_symbol(p_x11, "XSaveContext");
-    p_x11->XSetWMProtocols     = x11_get_symbol(p_x11, "XSetWMProtocols");
-    p_x11->XStoreName          = x11_get_symbol(p_x11, "XStoreName");
-    p_x11->XSync               = x11_get_symbol(p_x11, "XSync");
-    p_x11->XUnmapWindow        = x11_get_symbol(p_x11, "XUnmapWindow");
+    p_x11->XCreateWindow       = (pfn_XCreateWindow)x11_get_symbol(p_x11, "XCreateWindow");
+    p_x11->XDeleteContext      = (pfn_XDeleteContext)x11_get_symbol(p_x11, "XDeleteContext");
+    p_x11->XDestroyWindow      = (pfn_XDestroyWindow)x11_get_symbol(p_x11, "XDestroyWindow");
+    p_x11->XEventsQueued       = (pfn_XEventsQueued)x11_get_symbol(p_x11, "XEventsQueued");
+    p_x11->XFindContext        = (pfn_XFindContext)x11_get_symbol(p_x11, "XFindContext");
+    p_x11->XFlush              = (pfn_XFlush)x11_get_symbol(p_x11, "XFlush");
+    p_x11->XMapWindow          = (pfn_XMapWindow)x11_get_symbol(p_x11, "XMapWindow");
+    p_x11->XNextEvent          = (pfn_XNextEvent)x11_get_symbol(p_x11, "XNextEvent");
+    p_x11->XPeekEvent          = (pfn_XPeekEvent)x11_get_symbol(p_x11, "XPeekEvent");
+    p_x11->XPending            = (pfn_XPending)x11_get_symbol(p_x11, "XPending");
+    p_x11->XQLength            = (pfn_XQLength)x11_get_symbol(p_x11, "XQLength");
+    p_x11->XSaveContext        = (pfn_XSaveContext)x11_get_symbol(p_x11, "XSaveContext");
+    p_x11->XSetWMProtocols     = (pfn_XSetWMProtocols)x11_get_symbol(p_x11, "XSetWMProtocols");
+    p_x11->XStoreName          = (pfn_XStoreName)x11_get_symbol(p_x11, "XStoreName");
+    p_x11->XSync               = (pfn_XSync)x11_get_symbol(p_x11, "XSync");
+    p_x11->XUnmapWindow        = (pfn_XUnmapWindow)x11_get_symbol(p_x11, "XUnmapWindow");
     
-    pfn_XBlackPixel         x11_XBlackPixel    = x11_get_symbol(p_x11, "XBlackPixel");
-    pfn_XDefaultScreen      x11_XDefaultScreen = x11_get_symbol(p_x11, "XDefaultScreen");
-    pfn_XDefaultDepth       x11_XDefaultDepth  = x11_get_symbol(p_x11, "XDefaultDepth");
-    pfn_XDefaultVisual      x11_XDefaultVisual = x11_get_symbol(p_x11, "XDefaultVisual");
-    pfn_XInternAtom         x11_XInternAtom    = x11_get_symbol(p_x11, "XInternAtom");
-    pfn_XOpenDisplay        x11_XOpenDisplay   = x11_get_symbol(p_x11, "XOpenDisplay");
-    pfn_XrmUniqueQuark      x11_XrmUniqueQuark = x11_get_symbol(p_x11, "XrmUniqueQuark");
+    pfn_XBlackPixel         x11_XBlackPixel    = (pfn_XBlackPixel)x11_get_symbol(p_x11, "XBlackPixel");
+    pfn_XDefaultScreen      x11_XDefaultScreen = (pfn_XDefaultScreen)x11_get_symbol(p_x11, "XDefaultScreen");
+    pfn_XDefaultDepth       x11_XDefaultDepth  = (pfn_XDefaultDepth)x11_get_symbol(p_x11, "XDefaultDepth");
+    pfn_XDefaultVisual      x11_XDefaultVisual = (pfn_XDefaultVisual)x11_get_symbol(p_x11, "XDefaultVisual");
+    pfn_XInternAtom         x11_XInternAtom    = (pfn_XInternAtom)x11_get_symbol(p_x11, "XInternAtom");
+    pfn_XOpenDisplay        x11_XOpenDisplay   = (pfn_XOpenDisplay)x11_get_symbol(p_x11, "XOpenDisplay");
+    pfn_XrmUniqueQuark      x11_XrmUniqueQuark = (pfn_XrmUniqueQuark)x11_get_symbol(p_x11, "XrmUniqueQuark");
 
     Display* display = x11_XOpenDisplay(0);
     if(display == 0) {

@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include <banjo/htable.h>
+#include <banjo/log.h>
 
 int main(void)
 {
@@ -22,9 +23,9 @@ int main(void)
 
     // Retrieve values from the table
     int* retrieved_value1 = (int*)bj_htable_get(table, &key1, 0);
-    assert(retrieved_value1 && *retrieved_value1 == value1); // Ensure value retrieval was successful
+    bj_info("{%d} = %s", key1, *retrieved_value1);
     int* retrieved_value2 = (int*)bj_htable_get(table, &key2, 0);
-    assert(retrieved_value2 && *retrieved_value2 == value2); // Ensure value retrieval was successful
+    bj_info("{%d} = %s", key2, *retrieved_value2);
 
     // Delete the table
     bj_htable_del(table);

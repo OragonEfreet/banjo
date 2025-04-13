@@ -49,6 +49,7 @@ typedef struct {
 } dib_table_rgb;
 
 static bj_bitmap* unpalletized(bj_bitmap* p_original, dib_table_rgb* p_color_table, size_t color_table_size) {
+    (void)color_table_size; 
     bj_pixel_mode mode = bj_bitmap_mode(p_original);
 
     switch(mode) {

@@ -7,6 +7,7 @@
 #if BJ_HAS_FEATURE(WIN32)
 
 #include <windows.h>
+#include <windowsx.h>
 
 #include "system_t.h"
 #include "window_t.h"
@@ -21,6 +22,7 @@ typedef struct {
 typedef struct {
     struct bj_window_t common;
     HWND               handle;
+    int                cursor_in_window;
 } win32_window;
 
 static bj_window* win32_window_new(
@@ -60,6 +62,7 @@ static bj_window* win32_window_new(
             .must_close = false,
         },
         .handle = hwnd,
+        .cursor_in_window = false,
     };
 
     ShowWindow(hwnd, SW_SHOW);
@@ -120,6 +123,42 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
+        case WM_ERASEBKGND:
+            return 1; // We handle it
+        case WM_KEYDOWN:        bj_trace("WM_KEYDOWN");     break;
+        case WM_KEYUP:          bj_trace("WM_KEYUP");       break;
+        case WM_LBUTTONDOWN:    bj_trace("WM_LBUTTONDOWN"); break;
+        case WM_LBUTTONUP:      bj_trace("WM_LBUTTONUP");   break;
+        case WM_MBUTTONDOWN:    bj_trace("WM_MBUTTONDOWN"); break;
+        case WM_MBUTTONUP:      bj_trace("WM_MBUTTONUP");   break;
+
+        case WM_MOUSEMOVE: {
+
+            const int x = GET_X_LPARAM(lParam);
+            const int y = GET_Y_LPARAM(lParam);
+
+            if(!p_window->cursor_in_window) {
+                p_window->cursor_in_window = 1;
+                bj_window_input_enter((bj_window*)p_window, 1, x, y);
+            }
+            TRACKMOUSEEVENT tme = {0};
+            tme.cbSize = sizeof(TRACKMOUSEEVENT);
+            tme.dwFlags = TME_LEAVE;
+            tme.hwndTrack = hwnd;
+            TrackMouseEvent(&tme);
+            break;
+        }
+        case WM_MOUSELEAVE: {
+            p_window->cursor_in_window = 0;
+            bj_window_input_enter((bj_window*)p_window, 0, 0, 0);
+            break;
+        }
+        case WM_MOUSEWHEEL:     bj_trace("WM_MOUSEWHEEL");  break;
+        case WM_RBUTTONDOWN:    bj_trace("WM_RBUTTONDOWN"); break;
+        case WM_RBUTTONUP:      bj_trace("WM_RBUTTONUP");   break;
+        case WM_SIZE:           bj_trace("WM_SIZE");        break;
+        case WM_SYSKEYDOWN:     bj_trace("WM_SYSDOWN");     break;
+        case WM_SYSKEYUP:       bj_trace("WM_SYSUP");       break;
         default:
             return DefWindowProcA(hwnd, uMsg, wParam, lParam);
     }
