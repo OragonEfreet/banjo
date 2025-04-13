@@ -7,7 +7,7 @@
 #include <banjo/memory.h>
 #include <assert.h>
 
-int main() {
+int main(void) {
 
     bj_array* array = bj_array_new_t(int);
 

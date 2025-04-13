@@ -24,7 +24,7 @@ void key_event(bj_window* p_window, bj_event_action mode, unsigned int keycode) 
     }
 }
 
-int main() {
+int main(void) {
 
     bj_error* p_error = 0;
 

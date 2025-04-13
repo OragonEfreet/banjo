@@ -36,3 +36,4 @@ BANJO_EXPORT bool bj_rect_intersect(
 
     return true; // Intersection exists
 }
+
