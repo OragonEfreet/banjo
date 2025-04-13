@@ -35,8 +35,7 @@ jobs:
             c_compiler: cl
 
     env:
-      - BUILD_SHARED_LIBS=ON
-      - BUILD_SHARED_LIBS=OFF
+      BUILD_SHARED_LIBS: ON
 
     steps:
     - uses: actions/checkout@v3
