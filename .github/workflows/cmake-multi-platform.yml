@@ -14,9 +14,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        config: [Release]
         c_compiler: [gcc, clang, cl]
-        shared: [ON, OFF]
+        build_type: [static, shared]
         include:
           - os: windows-latest
             c_compiler: cl
@@ -48,17 +47,18 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
-      run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.config }}
-        -DBUILD_SHARED_LIBS=${{ matrix.shared }}
-        -S ${{ github.workspace }}
+      shell: bash
+      run: |
+        BUILD_SHARED_LIBS=$([[ "${{ matrix.shared }}" == "shared" ]] && echo ON || echo OFF)
+        cmake -B "${{ steps.strings.outputs.build-output-dir }}" \
+              -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS \
+              -S "${{ github.workspace }}"
 
     - name: Build
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.config }}
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: ctest --build-config ${{ matrix.config }} --output-on-failure
+      run: ctest --build-config Release --output-on-failure
