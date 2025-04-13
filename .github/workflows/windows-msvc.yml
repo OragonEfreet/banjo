@@ -2,35 +2,31 @@ name: Build/Windows/MSVC
 
 on:
   push:
-    branches:
-      - main  # Trigger the workflow on push to the main branch
+    branches: [win_ci]
   pull_request:
-    branches:
-      - main  # Trigger the workflow on pull requests targeting the main branch
+    branches: [win_ci]
 
 jobs:
   build:
-    runs-on: windows-latest  # Use the latest Windows runner
+    runs-on: windows-latest
     
     strategy:
       matrix:
-        config: [debug, release]  # Matrix for the CONFIG variable
-        type: [shared, static]    # Matrix for the TYPE variable
-      fail-fast: false  # Optionally set fail-fast to false if you want to run all combinations even if one fails
-    
+        config: [debug, release]
+        type: [shared, static]
+      fail-fast: false
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2  # Checkout the repository
-
-    - name: Set up Visual Studio 2022 Build Tools
-      uses: microsoft/setup-msbuild@v1.0.2  # Set up MSBuild with Visual Studio 2022
+      uses: actions/checkout@v2
 
     - name: Set environment variables
       run: |
-        echo "CONFIG=${{ matrix.config }}" >> $GITHUB_ENV
-        echo "TYPE=${{ matrix.type }}" >> $GITHUB_ENV
+        echo CONFIG=${{ matrix.config }} >> $GITHUB_ENV
+        echo TYPE=${{ matrix.type }} >> $GITHUB_ENV
 
-    - name: Run Make.bat
+    - name: Run Make.bat with VS environment
+      shell: cmd
       run: |
-        echo "Building with CONFIG=${{ matrix.config }} and TYPE=${{ matrix.type }}"
-        ./Make.bat  # Run your custom Make.bat script
+        call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+        call Make.bat
