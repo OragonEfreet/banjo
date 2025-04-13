@@ -24,13 +24,7 @@ jobs:
         lfs: true
 
     - name: Build
-      run: make
-      env:
-        LIB: ${{ matrix.lib }}
-        CC: ${{ matrix.compiler }}
+      run: make LIB=${{ matrix.lib }} CC={{ matrix.compiler }} VERBOSE=1
 
     - name: Test
-      run: make test
-      env:
-        LIB: ${{ matrix.lib }}
-        CC: ${{ matrix.compiler }}
+      run: make test LIB=${{ matrix.lib }} CC={{ matrix.compiler }} VERBOSE=1
