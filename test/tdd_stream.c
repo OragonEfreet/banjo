@@ -5,14 +5,14 @@
 #include "stream_t.h"
 
 TEST_CASE(init_from_buffer_contains_pointer_to_the_buffer) {
-    uint8_t buffer;
+    uint8_t buffer = 0;
     bj_stream* p_stream = bj_stream_new_read(&buffer, 1);
     REQUIRE_EQ(p_stream->p_data.r, &buffer);
     bj_stream_del(p_stream);
 }
 
 TEST_CASE(init_from_buffer_but_zero_size_returns_valid_object) {
-    uint8_t buffer;
+    uint8_t buffer = 0;
     bj_stream* p_stream = bj_stream_new_read(&buffer, 0);
     REQUIRE_VALUE(p_stream);
     REQUIRE_EQ(p_stream->p_data.r, &buffer);
@@ -40,7 +40,7 @@ TEST_CASE(init_from_null_buffer_returns_valid) {
 }
 
 TEST_CASE(reading_n_bytes_shift_the_position_to_n_bytes) {
-    uint8_t src[88];
+    uint8_t src[88] = {0};
     size_t read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
     size_t pos_after_read[] = {0, 1, 2, 4, 7, 12, 20, 33, 54, 88};
 
@@ -55,7 +55,7 @@ TEST_CASE(reading_n_bytes_shift_the_position_to_n_bytes) {
 }
 
 TEST_CASE(reading_n_bytes_returns_the_number_of_read_bytes) {
-    uint8_t buffer[88];
+    uint8_t buffer[88] = {0};
     size_t read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
 
     bj_stream* p_stream = bj_stream_new_read(buffer, 88);
@@ -84,7 +84,7 @@ TEST_CASE(reading_to_get_values) {
 }
 
 TEST_CASE(reading_n_bytes_shift_tell_return_to_n_bytes) {
-    uint8_t src[88];
+    uint8_t src[88] = {0};
     size_t read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
     size_t pos_after_read[] = {0, 1, 2, 4, 7, 12, 20, 33, 54, 88};
 
