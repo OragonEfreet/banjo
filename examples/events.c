@@ -10,13 +10,13 @@
 
 void cursor_event(bj_window* p_window, int x, int y) {
     printf("Cursor event, window %p, (%d,%d)\n",
-        p_window, x, y
+        (void*)p_window, x, y
     );
 }
 
 void button_event(bj_window* p_window, int button, bj_event_action action, int x, int y) {
     printf("Button event, window %p, button %d, %s, (%d,%d)\n",
-        p_window, button, 
+        (void*)p_window, button, 
         action == BJ_PRESS ? "pressed" : "released",
         x, y
     );
@@ -26,13 +26,13 @@ void key_event(bj_window* p_window, bj_event_action action, unsigned int keycode
     (void)action;
 
     printf("Key event, window %p, keycode %u\n",
-        p_window, keycode
+        (void*)p_window, keycode
     );
 }
 
 void enter_event(bj_window* p_window, bool enter, int x, int y) {
     printf("Enter event, window %p, %s, (%d,%d)\n",
-        p_window, 
+        (void*)p_window, 
         enter ? "entered" : "left",
         x, y
     );

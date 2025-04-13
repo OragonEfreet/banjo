@@ -7,7 +7,7 @@ OUTDIR = build-$(LIB)-$(BUILD)
 # Compiler settings
 CC = cc
 CPPFLAGS     = -Iinc -DBJ_CONFIG_ALL
-CFLAGS       = -Wall -Wextra -std=c99
+CFLAGS       = -Wall -Wextra -std=c99 -pedantic
 CFLAGS_EXTRA = -MMD -MP 
 LIB_CPPFLAGS =
 LIB_CFLAGS   =
