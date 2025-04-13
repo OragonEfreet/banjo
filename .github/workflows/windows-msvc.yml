@@ -2,9 +2,9 @@ name: Build/Windows/MSVC
 
 on:
   push:
-    branches: [win_cui]
+    branches: [win_ci]
   pull_request:
-    branches: [win_cui]
+    branches: [win_ci]
 
 jobs:
   build:
@@ -28,5 +28,6 @@ jobs:
     - name: Run Make.bat with VS environment
       shell: cmd
       run: |
-        call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+        for /f "tokens=*" %%i in ('"C:\Program Files\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath') do set VSPATH=%%i
+        call "%VSPATH%\VC\Auxiliary\Build\vcvars64.bat"
         call Make.bat
