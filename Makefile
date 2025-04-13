@@ -20,6 +20,7 @@ CPPFLAGS += -DBANJO_STATIC
 else ifeq ($(LIB), shared)
 BANJO = $(OUTDIR)/libbanjo.so
 LIB_CPPFLAGS += -DBANJO_EXPORTS
+CFLAGS += -fPIC
 else
 $(error LIB must be either 'static' or 'shared')
 endif
