@@ -20,6 +20,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: x64
+
     - name: Set environment variables
       run: |
         echo CONFIG=${{ matrix.config }} >> $GITHUB_ENV
@@ -28,6 +33,4 @@ jobs:
     - name: Run Make.bat with VS environment
       shell: cmd
       run: |
-        for /f "tokens=*" %%i in ('"C:\Program Files\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath') do set VSPATH=%%i
-        call "%VSPATH%\VC\Auxiliary\Build\vcvars64.bat"
         call Make.bat
