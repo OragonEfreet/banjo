@@ -2,9 +2,9 @@ name: Build/Windows/MSVC
 
 on:
   push:
-    branches: [win_cui]
+    branches: [main]
   pull_request:
-    branches: [win_cui]
+    branches: [main]
 
 jobs:
   build:
