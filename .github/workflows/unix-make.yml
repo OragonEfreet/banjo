@@ -24,7 +24,7 @@ jobs:
         lfs: true
 
     - name: Build
-      run: make LIB=${{ matrix.lib }} CC={{ matrix.compiler }} VERBOSE=1
+      run: make LIB=${{ matrix.lib }} CC=${{ matrix.compiler }}
 
     - name: Test
-      run: make test LIB=${{ matrix.lib }} CC={{ matrix.compiler }} VERBOSE=1
+      run: make test LIB=${{ matrix.lib }} CC=${{ matrix.compiler }}
