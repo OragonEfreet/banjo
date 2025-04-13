@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <banjo/list.h>
 
-int main() {
+int main(void) {
 
     // Create a new list
     bj_list* list = bj_list_new_t(int); // No custom allocator

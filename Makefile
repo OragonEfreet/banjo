@@ -1,14 +1,14 @@
 LIB     ?= static
 BUILD   ?= debug
+CC      ?= clang
 
 # Define directories
 OUTDIR = build-$(LIB)-$(BUILD)
 
 # Compiler settings
-CC = cc
 CPPFLAGS     = -Iinc -DBJ_CONFIG_ALL
 CFLAGS       = -Wall -Wextra -std=c99 -pedantic
-CFLAGS_EXTRA = -MMD -MP -Werror
+CFLAGS_EXTRA = -MMD -MP
 LIB_CPPFLAGS =
 LIB_CFLAGS   =
 EXE_CPPFLAGS = -DBANJO_ASSETS_DIR=\"$(ASSETS_DIR)\" 

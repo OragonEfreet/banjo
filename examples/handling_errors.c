@@ -27,7 +27,7 @@ void function_calling_failing_function(bj_error** error) {
 }
 
 
-int main() {
+int main(void) {
 
     // If you are not interested by an error, pass 0 to the bj_error* pointer:
     function_returning_error(0);

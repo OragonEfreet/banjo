@@ -16,7 +16,7 @@ void display_value(bj_pixel_mode mode, uint8_t red, uint8_t green, uint8_t blue)
     );
 }
 
-int main() {
+int main(void) {
 
     display_value(BJ_PIXEL_MODE_RGB565, 255, 0, 0);
     display_value(BJ_PIXEL_MODE_RGB565, 0, 255, 0);

@@ -8,7 +8,7 @@
 
 #define DESC(mode) printf("%c %s\n", info->mode ? '+' : '-', #mode)
 
-int main() {
+int main(void) {
 
     printf("%s\n", BANJO_ASSETS_DIR);
     const bj_build_info* info = bj_get_build_info();

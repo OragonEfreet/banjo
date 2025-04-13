@@ -38,7 +38,7 @@ void enter_event(bj_window* p_window, bool enter, int x, int y) {
     );
 }
 
-int main() {
+int main(void) {
 
     bj_error* p_error = 0;
 

@@ -6,7 +6,7 @@
 
 #include <banjo/htable.h>
 
-int main()
+int main(void)
 {
     // Create a new hash table
     bj_htable* table = bj_htable_new_t(int, int); // No custom allocator
