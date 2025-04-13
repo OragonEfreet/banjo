@@ -3,10 +3,11 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 
 IF NOT DEFINED TYPE SET TYPE=static
 IF NOT DEFINED CONFIG SET CONFIG=release
+IF NOT DEFINED TOOLCHAIN SET TOOLCHAIN=msvc
 
 REM ##########################################################################################
 REM ### GENERAL CONFIGURATION ################################################################
-SET OUTDIR=build-!TYPE!-!CONFIG!
+SET OUTDIR=build-!TYPE!-!CONFIG!-!TOOLCHAIN!
 SET BASENAME=banjo
 SET LIBNAME=!BASENAME!.lib
 SET DLLNAME=!BASENAME!.dll
@@ -16,9 +17,6 @@ SET DLLPATH=!OUTDIR!\!DLLNAME!
 SET PDBPATH=!OUTDIR!\!PDBNAME!
 for %%F in ("assets") do SET "ASSETS_DIR=%%~fF"
 SET "ASSETS_DIR=!ASSETS_DIR:\=/!"
-SET CC=cl
-SET AR=lib
-SET LD=link
 
 REM ##########################################################################################
 REM ### COMPILER AND LINKER OPTIONS ##########################################################
@@ -34,28 +32,46 @@ REM ###
 REM ### CFLAGS, CFLAGS_EXTRA, LINKFLAGS and LINKFLAGS_EXTRA are also available with the _debug
 REM ### or _release suffix (for example LINKFLAG_EXTRA_debug) to enable these options only in
 REM ### debug or release configuration respectively.
-SET CPPFLAGS=/Iinc /D "BJ_CONFIG_ALL" /D_CRT_SECURE_NO_WARNINGS
-SET CFLAGS=/W4 /Zc:forScope /Zc:wchar_t /Zc:inline /fp:precise /GS /Gd
-SET CFLAGS_EXTRA=/errorReport:prompt /nologo /diagnostics:column /Fd"!PDBPATH!"
+SET CPPFLAGS=/Iinc /D "BJ_CONFIG_ALL" /D "BJ_FEATURE_WIN32" /D_CRT_SECURE_NO_WARNINGS
+SET CFLAGS=/W4 /fp:precise /GS /Gd
+SET CFLAGS_EXTRA=/nologo /diagnostics:column
 SET CFLAGS_debug=/Od /Ob0 /Zi /RTC1 /MDd 
 SET CFLAGS_release=/O2 /Ob2 /MD
-SET ARFLAGS=
+SET ARFLAGS=/MACHINE:X64
 SET ARFLAGS_EXTRA=/NOLOGO
-SET LINKFLAGS= /NXCOMPAT "kernel32.lib" "user32.lib" /TLBID:1
+SET LINKFLAGS= /NXCOMPAT "kernel32.lib" "user32.lib" "gdi32.lib" 
 SET LINKFLAGS_EXTRA=/NOLOGO /ERRORREPORT:PROMPT /PDB:"!PDBPATH!"
 SET LINKFLAGS_debug=/DEBUG
 SET LINKFLAGS_EXTRA_debug=
-SET LINKFLAGS_release=/INCREMENTAL
 
 REM ### ADDITIONAL FLAGS SPECIFIC FOR BUILDING BANJO LIBRARY #################################
 SET CPPFLAGS_BANJO=
 SET CFLAGS_BANJO=
-SET LINKFLAGS_BANJO=/IMPLIB:"!LIBPATH!" /MANIFEST /DLL
+SET LINKFLAGS_BANJO=/IMPLIB:"!LIBPATH!" /DLL /SUBSYSTEM:CONSOLE /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
 
 REM ### ADDITIONAL FLAGS SPECIFIC FOR BUILDING TESTS AND EXAMPLES ############################
 SET CPPFLAGS_EXE=/DBANJO_ASSETS_DIR="\"!ASSETS_DIR!\""
 SET CFLAGS_EXE=
 SET LINKFLAGS_EXE=/LIBPATH:"!OUTDIR!" "!LIBNAME!" /SUBSYSTEM:CONSOLE
+
+REM ### AUTOMATICALLY SET FLAGS ACCORDING TO CONTEXT #########################################
+REM ### FLAGS SPECIFIC TO THE TOOLCHAIN ######################################################
+IF /I "!TOOLCHAIN!"=="msvc" (
+    SET CC=cl
+    SET AR=lib
+    SET LD=link
+
+    SET CFLAGS=!CFLAGS! /Zc:wchar_t /Zc:forScope /Zc:inline
+    SET CFLAGS_EXTRA=!CFLAGS_EXTRA! /Fd"!PDBPATH!" /errorReport:prompt 
+    SET CFLAGS_debug=!CFLAGS_debug! /RTC1
+    SET LINKFLAGS=!LINKFLAGS! /TLBID:1 /LTCGOUT:"!BASENAME!.iobj"
+)
+echo "!OUTDIR!"
+IF /I "!TOOLCHAIN!"=="clang" (
+    SET CC=clang-cl
+    SET AR=llvm-lib
+    SET LD=lld-link
+)
 
 REM ### OTHER FLAGS ##########################################################################
 IF /I "!TYPE!"=="static" SET CPPFLAGS=!CPPFLAGS! /D "BJ_STATIC"
@@ -106,17 +122,23 @@ MKDIR !OUTDIR!\src 2>nul
 FOR %%f in (src\*.c) do (
     SET OBJ=!OUTDIR!\src\%%~nf.obj
     SET OBJS=!OBJS! !OBJ!
-    !CC! !CPPFLAGS! !CPPFLAGS_BANJO! !CFLAGS! !CFLAGS_BANJO! !CFLAGS_EXTRA! /Fo"!OBJ!" /c %%~f
+    SET RUNCMD=!CC! !CPPFLAGS! !CPPFLAGS_BANJO! !CFLAGS! !CFLAGS_BANJO! !CFLAGS_EXTRA! /Fo"!OBJ!" /c %%~f
+    ECHO !RUNCMD!
+    !RUNCMD!
     IF !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
 IF /I "!TYPE!"=="static" (
-    !AR! !ARFLAGS! !ARFLAGS_BANJO! !ARFLAGS_EXTRA! /OUT:!LIBPATH! !OBJS!
+    SET RUNCMD=!AR! !ARFLAGS! !ARFLAGS_BANJO! !ARFLAGS_EXTRA! /OUT:!LIBPATH! !OBJS!
+    ECHO !RUNCMD!
+    !RUNCMD!
     IF !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
 IF /I "!TYPE!"=="shared" (
-    !LD! !LINKFLAGS! !LINKFLAGS_BANJO! !LINKFLAGS_EXTRA! /OUT:"!DLLPATH!" !OBJS!
+    SET RUNCMD=!LD! !LINKFLAGS! !LINKFLAGS_BANJO! !LINKFLAGS_EXTRA! /OUT:"!DLLPATH!" !OBJS!
+    ECHO !RUNCMD!
+    !RUNCMD!
     IF !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 goto ret_banjo
@@ -128,9 +150,13 @@ MKDIR !OUTDIR!\examples 2>nul
 FOR %%f in (examples\*.c) do (
     SET OBJ=!OUTDIR!\examples\%%~nf.obj
     SET EXE=!OUTDIR!\%%~nf.exe
-    !CC! !CPPFLAGS! !CPPFLAGS_EXE! !CFLAGS! !CFLAGS_EXE! !CFLAGS_EXTRA! /Fo"!OBJ!" /c %%~f
+    SET RUNCMD=!CC! !CPPFLAGS! !CPPFLAGS_EXE! !CFLAGS! !CFLAGS_EXE! !CFLAGS_EXTRA! /Fo"!OBJ!" /c %%~f
+    ECHO !RUNCMD!
+    !RUNCMD!
     IF !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-    !LD! !LINKFLAGS! !LINKFLAGS_EXE! !LINKFLAGS_EXTRA! /OUT:!EXE! !OBJ!
+    SET RUNCMD=!LD! !LINKFLAGS! !LINKFLAGS_EXE! !LINKFLAGS_EXTRA! /OUT:!EXE! !OBJ!
+    ECHO !RUNCMD!
+    !RUNCMD!
     IF !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 goto ret_examples
@@ -142,9 +168,13 @@ MKDIR !OUTDIR!\test 2>nul
 FOR %%f in (test\*.c) do (
     SET OBJ=!OUTDIR!\test\%%~nf.obj
     SET EXE=!OUTDIR!\%%~nf.exe
-    !CC! !CPPFLAGS! !CPPFLAGS_EXE! !CFLAGS! !CFLAGS_EXE! !CFLAGS_EXTRA! /Fo"!OBJ!" /Isrc /c %%~f
+    SET RUNCMD=!CC! !CPPFLAGS! !CPPFLAGS_EXE! !CFLAGS! !CFLAGS_EXE! !CFLAGS_EXTRA! /Fo"!OBJ!" /Isrc /c %%~f
+    ECHO !RUNCMD!
+    !RUNCMD!
     IF !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-    !LD! !LINKFLAGS! !LINKFLAGS_EXE! !LINKFLAGS_EXTRA! /OUT:!EXE! !OBJ!
+    SET RUNCMD=!LD! !LINKFLAGS! !LINKFLAGS_EXE! !LINKFLAGS_EXTRA! /OUT:!EXE! !OBJ!
+    ECHO !RUNCMD!
+    !RUNCMD!
     IF !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 goto ret_tests
