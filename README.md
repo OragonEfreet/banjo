@@ -1,8 +1,7 @@
 # Banjo C99 API
 
 ![Documentation](https://github.com/OragonEfreet/banjo/actions/workflows/documentation.yml/badge.svg)
-![Build:Windows](https://github.com/OragonEfreet/banjo/actions/workflows/windows-msvc.yml/badge.svg)
-![Build:Unix](https://github.com/OragonEfreet/banjo/actions/workflows/unix-make.yml/badge.svg)
+[![Tests](https://github.com/OragonEfreet/banjo/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/OragonEfreet/banjo/actions/workflows/cmake-multi-platform.yml)
 
 Banjo is a lightweight, self-contained C99 framework built on four core principles:  
 
