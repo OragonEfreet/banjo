@@ -12,25 +12,30 @@ jobs:
     
     strategy:
       matrix:
-        config: [debug, release]
+        config: [release]
         type: [shared, static]
       fail-fast: false
 
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Set up Visual Studio shell
+    - name: Configure (MSVC)
       uses: egor-tensin/vs-shell@v2
       with:
         arch: x64
 
-    - name: Set environment variables
+    - name: Configure (Env)
       run: |
         echo CONFIG=${{ matrix.config }} >> $GITHUB_ENV
         echo TYPE=${{ matrix.type }} >> $GITHUB_ENV
 
-    - name: Run Make.bat with VS environment
+    - name: Build
       shell: cmd
       run: |
         call Make.bat
+
+    - name: Test
+      shell: cmd
+      run: |
+        call Make.bat test
