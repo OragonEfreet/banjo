@@ -95,7 +95,7 @@ tests: $(TST_BINS)
 test: banjo tests
 	@for test in $(TST_BINS); do \
 		echo "Running $$test"; \
-		$$test || exit 1; \
+		LD_LIBRARY_PATH="$(OUTDIR)" $$test || exit 1; \
 	done
 
 $(OUTDIR)/examples/%: examples/%.c $(BANJO)
