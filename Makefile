@@ -8,7 +8,7 @@ OUTDIR = build-$(LIB)-$(BUILD)
 CC = cc
 CPPFLAGS     = -Iinc -DBJ_CONFIG_ALL
 CFLAGS       = -Wall -Wextra -std=c99 -pedantic
-CFLAGS_EXTRA = -MMD -MP 
+CFLAGS_EXTRA = -MMD -MP -Werror
 LIB_CPPFLAGS =
 LIB_CFLAGS   =
 EXE_CPPFLAGS = -DBANJO_ASSETS_DIR=\"$(ASSETS_DIR)\" 
