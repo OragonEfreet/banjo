@@ -23,20 +23,14 @@ jobs:
       with:
         lfs: true
 
-    - name: Set up compiler (C only)
-      run: |
-        if [ "${{ matrix.compiler }}" = "clang" ]; then
-          echo "CC=clang" >> $GITHUB_ENV
-        else
-          echo "CC=gcc" >> $GITHUB_ENV
-        fi
-
-    - name: Build (LIB=${{ matrix.lib }}, CC=${{ matrix.compiler }})
+    - name: Build
       run: make
       env:
         LIB: ${{ matrix.lib }}
+        CC: ${{ matrix.compiler }}
 
     - name: Test
       run: make test
       env:
         LIB: ${{ matrix.lib }}
+        CC: ${{ matrix.compiler }}
