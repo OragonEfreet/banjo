@@ -1,4 +1,4 @@
-name: Build/Windows/MSVC
+name: Build/Windows
 
 on:
   push:

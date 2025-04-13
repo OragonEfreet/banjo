@@ -1,0 +1,39 @@
+name: Build/Unix
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        lib: [static, shared]
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up compiler (C only)
+      run: |
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          echo "CC=clang" >> $GITHUB_ENV
+        else
+          echo "CC=gcc" >> $GITHUB_ENV
+        fi
+
+    - name: Build (LIB=${{ matrix.lib }}, CC=${{ matrix.compiler }})
+      run: make
+      env:
+        LIB: ${{ matrix.lib }}
+
+    - name: Test
+      run: make test
+      env:
+        LIB: ${{ matrix.lib }}
