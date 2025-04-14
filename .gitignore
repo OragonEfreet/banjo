@@ -69,7 +69,5 @@ docs/html
 ################################################################################
 # Build
 ################################################################################
-build-static-debug/
-build-static-release/
-build-shared-debug/
-build-shared-release/
+build/
+
