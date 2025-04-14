@@ -4,7 +4,7 @@ project(banjo C)
 include(CTest)
 
 if (MSVC)
-    add_compile_options(/W4)
+    add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
 else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
