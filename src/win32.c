@@ -113,24 +113,62 @@ static void win32_window_poll(
     }
 }
 
+#include <stdio.h>
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     win32_window* p_window = (win32_window*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
 
     switch (uMsg) {
+
         case WM_CLOSE:
             bj_window_set_should_close((bj_window*)p_window);
             break;
+
         case WM_DESTROY:
             PostQuitMessage(0);
             break;
+
         case WM_ERASEBKGND:
             return 1; // We handle it
+
+        case WM_CHAR:
+            {
+                WCHAR ch = (WCHAR)wParam; // UTF-16 code unit
+                wchar_t buf[100];
+                swprintf(buf, 100, L"You typed: '%c' (Code unit: 0x%04X)", ch, ch);
+                MessageBoxW(hwnd, buf, L"WM_CHAR Unicode", MB_OK);
+            }
+            break;
+
+        case WM_UNICHAR:
+            bj_trace("WM_UNICHAR");
+            break;
+
         case WM_KEYDOWN:        bj_trace("WM_KEYDOWN");     break;
+
         case WM_KEYUP:          bj_trace("WM_KEYUP");       break;
-        case WM_LBUTTONDOWN:    bj_trace("WM_LBUTTONDOWN"); break;
-        case WM_LBUTTONUP:      bj_trace("WM_LBUTTONUP");   break;
-        case WM_MBUTTONDOWN:    bj_trace("WM_MBUTTONDOWN"); break;
-        case WM_MBUTTONUP:      bj_trace("WM_MBUTTONUP");   break;
+
+        case WM_LBUTTONDOWN:
+
+        case WM_LBUTTONUP:
+            bj_window_input_button((bj_window*)p_window, 
+                BJ_BUTTON_LEFT,
+                uMsg == WM_LBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
+                GET_X_LPARAM(lParam),
+                GET_Y_LPARAM(lParam)
+            );
+            break;
+
+        case WM_MBUTTONDOWN:
+
+        case WM_MBUTTONUP:
+            bj_window_input_button((bj_window*)p_window, 
+                BJ_BUTTON_MIDDLE,
+                uMsg == WM_MBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
+                GET_X_LPARAM(lParam),
+                GET_Y_LPARAM(lParam)
+            );
+            break;
 
         case WM_MOUSEMOVE: {
 
@@ -146,18 +184,40 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             tme.dwFlags = TME_LEAVE;
             tme.hwndTrack = hwnd;
             TrackMouseEvent(&tme);
+            bj_window_input_cursor((bj_window*)p_window, x, y);
             break;
         }
+
         case WM_MOUSELEAVE: {
             p_window->cursor_in_window = 0;
             bj_window_input_enter((bj_window*)p_window, 0, 0, 0);
             break;
         }
-        case WM_MOUSEWHEEL:     bj_trace("WM_MOUSEWHEEL");  break;
-        case WM_RBUTTONDOWN:    bj_trace("WM_RBUTTONDOWN"); break;
-        case WM_RBUTTONUP:      bj_trace("WM_RBUTTONUP");   break;
+
+        case WM_MOUSEWHEEL:
+            bj_window_input_button((bj_window*)p_window, 
+                GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? BJ_BUTTON_UP : BJ_BUTTON_DOWN,
+                BJ_PRESS,
+                GET_X_LPARAM(lParam),
+                GET_Y_LPARAM(lParam)
+            );
+            break;
+
+        case WM_RBUTTONDOWN:
+
+        case WM_RBUTTONUP:
+            bj_window_input_button((bj_window*)p_window, 
+                BJ_BUTTON_RIGHT,
+                uMsg == WM_RBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
+                GET_X_LPARAM(lParam),
+                GET_Y_LPARAM(lParam)
+            );
+            break;
+
         case WM_SIZE:           bj_trace("WM_SIZE");        break;
+
         case WM_SYSKEYDOWN:     bj_trace("WM_SYSDOWN");     break;
+
         case WM_SYSKEYUP:       bj_trace("WM_SYSUP");       break;
         default:
             return DefWindowProcA(hwnd, uMsg, wParam, lParam);
