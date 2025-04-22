@@ -22,12 +22,14 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
     );
 }
 
-void key_event(bj_window* p_window, bj_event_action action, unsigned int keycode) {
+void key_event(bj_window* p_window, bj_event_action action, int scancode) {
     (void)action;
 
-    printf("Key event, window %p, keycode %u\n",
-        (void*)p_window, keycode
-    );
+    printf("Key event, window %p, scancode %d", (void*)p_window, scancode);
+    if(action == BJ_RELEASE) printf(", state release");
+    if(action == BJ_PRESS) printf(", state press");
+    if(action == BJ_REPEAT) printf(", state repeat");
+    printf("\n");
 }
 
 void enter_event(bj_window* p_window, bool enter, int x, int y) {
@@ -46,12 +48,12 @@ int main(void) {
         return 1;
     } 
 
-    bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600);
+    bj_window* window = bj_window_new("Simple Banjo Window", 10, 10, 100, 100);
 
-    /* bj_window_set_key_event(window, key_event); */
-    bj_window_set_button_event(window, button_event);
-    bj_window_set_cursor_event(window, cursor_event);
-    bj_window_set_enter_event(window, enter_event);
+    bj_window_set_key_event(window, key_event);
+    // bj_window_set_button_event(window, button_event);
+    // bj_window_set_cursor_event(window, cursor_event);
+    // bj_window_set_enter_event(window, enter_event);
 
     while(!bj_window_should_close(window)) {
         bj_poll_events();

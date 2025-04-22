@@ -6,7 +6,7 @@ include(CTest)
 if (MSVC)
     add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
 else()
-    add_compile_options(-Wall -Wextra -pedantic)
+    add_compile_options(-Wall -Wextra)
 endif()
 
 option(BJ_FEATURE_WIN32       "Add Win32 support"                                              OFF)

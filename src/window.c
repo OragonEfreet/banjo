@@ -90,11 +90,11 @@ bj_window_button_event_t bj_window_set_button_event(
 void bj_window_input_key(
     bj_window*   p_window,
     bj_event_action action,
-    unsigned int keycode
+    int scancode
 ) {
     bj_check(p_window);
     if(!!p_window->p_key_event) {
-        p_window->p_key_event(p_window, action, keycode);
+        p_window->p_key_event(p_window, action, scancode);
     }
 }
 

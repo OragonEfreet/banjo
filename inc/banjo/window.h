@@ -10,7 +10,7 @@
 #pragma once
 
 #include <banjo/api.h>
-#include <banjo/event.h>
+#include <banjo/input.h>
 #include <banjo/memory.h>
 
 /// Opaque typedef for the window type
@@ -115,12 +115,12 @@ typedef void(* bj_window_button_event_t)(bj_window* p_window, int, bj_event_acti
 ///
 /// \param p_window Window handle
 /// \param action   Sets if the button is pressed or released
-/// \param keycode  Key code
+/// \param scancode Manufacturer-dependent representation of the key that has been
+///                 pressed or released.
 ///
 /// \see bj_window_set_key_event
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action action, unsigned int keycode);
-
+typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action action, int scancode);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for cursor events.

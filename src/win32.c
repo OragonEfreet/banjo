@@ -113,8 +113,6 @@ static void win32_window_poll(
     }
 }
 
-#include <stdio.h>
-
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     win32_window* p_window = (win32_window*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
 
@@ -131,25 +129,25 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case WM_ERASEBKGND:
             return 1; // We handle it
 
-        case WM_CHAR:
-            {
-                WCHAR ch = (WCHAR)wParam; // UTF-16 code unit
-                wchar_t buf[100];
-                swprintf(buf, 100, L"You typed: '%c' (Code unit: 0x%04X)", ch, ch);
-                MessageBoxW(hwnd, buf, L"WM_CHAR Unicode", MB_OK);
-            }
+        // TODO
+        // case WM_CHAR: bj_trace("WM_CHAR"); break;
+        // case WM_UNICHAR: bj_trace("WM_UNICHAR"); break;
+
+        case WM_SYSKEYDOWN:
+        case WM_KEYDOWN:
+        case WM_SYSKEYUP:
+        case WM_KEYUP: {
+            bj_window_input_key(
+                (bj_window*)p_window,
+                (uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN) ? BJ_PRESS : BJ_RELEASE,
+                (lParam >> 16) & 0xFF
+            );
+            
             break;
+        }
 
-        case WM_UNICHAR:
-            bj_trace("WM_UNICHAR");
-            break;
-
-        case WM_KEYDOWN:        bj_trace("WM_KEYDOWN");     break;
-
-        case WM_KEYUP:          bj_trace("WM_KEYUP");       break;
 
         case WM_LBUTTONDOWN:
-
         case WM_LBUTTONUP:
             bj_window_input_button((bj_window*)p_window, 
                 BJ_BUTTON_LEFT,
@@ -216,9 +214,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
         case WM_SIZE:           bj_trace("WM_SIZE");        break;
 
-        case WM_SYSKEYDOWN:     bj_trace("WM_SYSDOWN");     break;
-
-        case WM_SYSKEYUP:       bj_trace("WM_SYSUP");       break;
         default:
             return DefWindowProcA(hwnd, uMsg, wParam, lParam);
     }
