@@ -120,7 +120,7 @@ typedef void(* bj_window_button_event_t)(bj_window* p_window, int, bj_event_acti
 ///
 /// \see bj_window_set_key_event
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action action, int scancode);
+typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action action, int key, int scancode);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for cursor events.

@@ -244,6 +244,7 @@ static void x11_dispatch_event(
             bj_window_input_key(
                 (bj_window*)p_window,
                 BJ_RELEASE,
+                BJ_KEY_UNKNOWN,
                 event->xkey.keycode
             );
             return;
@@ -252,6 +253,7 @@ static void x11_dispatch_event(
             bj_window_input_key(
                 (bj_window*)p_window,
                 BJ_PRESS,
+                BJ_KEY_UNKNOWN,
                 event->xkey.keycode
             );
             return;

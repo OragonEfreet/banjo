@@ -8,6 +8,21 @@
 
 #include <stdio.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+    #include <windows.h>
+    void sleep_ms(int milliseconds) {
+        Sleep(milliseconds);
+    }
+#else
+    #include <time.h>
+    void sleep_ms(int milliseconds) {
+        struct timespec ts;
+        ts.tv_sec = milliseconds / 1000;
+        ts.tv_nsec = (milliseconds % 1000) * 1000000;
+        nanosleep(&ts, NULL);
+    }
+#endif
+
 void cursor_event(bj_window* p_window, int x, int y) {
     printf("Cursor event, window %p, (%d,%d)\n",
         (void*)p_window, x, y
@@ -22,14 +37,15 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
     );
 }
 
-void key_event(bj_window* p_window, bj_event_action action, int scancode) {
-    (void)action;
+void key_event(bj_window* p_window, bj_event_action action, int key, int scancode) {
 
-    printf("Key event, window %p, scancode %d", (void*)p_window, scancode);
-    if(action == BJ_RELEASE) printf(", state release");
-    if(action == BJ_PRESS) printf(", state press");
-    if(action == BJ_REPEAT) printf(", state repeat");
-    printf("\n");
+    printf("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s\n", 
+        key, bj_get_key_name(key), scancode, action == BJ_PRESS ? "pressed" : "released"
+    );
+
+//     if(key == BJ_KEY_ESCAPE) {
+//         bj_window_set_should_close(p_window);
+//     }
 }
 
 void enter_event(bj_window* p_window, bool enter, int x, int y) {
@@ -57,6 +73,7 @@ int main(void) {
 
     while(!bj_window_should_close(window)) {
         bj_poll_events();
+        sleep_ms(300);
     }
 
     bj_window_del(window);
