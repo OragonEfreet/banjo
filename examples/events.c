@@ -74,7 +74,7 @@ int main(void) {
 
     while(!bj_window_should_close(window)) {
         bj_poll_events();
-        sleep_ms(300);
+        /* sleep_ms(300); */
     }
 
     bj_window_del(window);

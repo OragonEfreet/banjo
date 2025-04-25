@@ -299,18 +299,18 @@ static int translate_keysyms(const KeySym* keysyms, int width) {
     {
         switch (keysyms[1])
         {
-            case XK_KP_0:           return BJ_KEY_PAD_0;
-            case XK_KP_1:           return BJ_KEY_PAD_1;
-            case XK_KP_2:           return BJ_KEY_PAD_2;
-            case XK_KP_3:           return BJ_KEY_PAD_3;
-            case XK_KP_4:           return BJ_KEY_PAD_4;
-            case XK_KP_5:           return BJ_KEY_PAD_5;
-            case XK_KP_6:           return BJ_KEY_PAD_6;
-            case XK_KP_7:           return BJ_KEY_PAD_7;
-            case XK_KP_8:           return BJ_KEY_PAD_8;
-            case XK_KP_9:           return BJ_KEY_PAD_9;
+            case XK_KP_0:           return BJ_KEY_NUMPAD0;
+            case XK_KP_1:           return BJ_KEY_NUMPAD1;
+            case XK_KP_2:           return BJ_KEY_NUMPAD2;
+            case XK_KP_3:           return BJ_KEY_NUMPAD3;
+            case XK_KP_4:           return BJ_KEY_NUMPAD4;
+            case XK_KP_5:           return BJ_KEY_NUMPAD5;
+            case XK_KP_6:           return BJ_KEY_NUMPAD6;
+            case XK_KP_7:           return BJ_KEY_NUMPAD7;
+            case XK_KP_8:           return BJ_KEY_NUMPAD8;
+            case XK_KP_9:           return BJ_KEY_NUMPAD9;
             case XK_KP_Separator:
-            case XK_KP_Decimal:     return BJ_KEY_PAD_DECIMAL;
+            case XK_KP_Decimal:     return BJ_KEY_DECIMAL;
             default:                break;
         }
     }
@@ -319,22 +319,22 @@ static int translate_keysyms(const KeySym* keysyms, int width) {
     {
         case XK_Escape:         return BJ_KEY_ESCAPE;
         case XK_Tab:            return BJ_KEY_TAB;
-        case XK_Shift_L:        return BJ_KEY_SHIFT_LEFT;
-        case XK_Shift_R:        return BJ_KEY_SHIFT_RIGHT;
-        case XK_Control_L:      return BJ_KEY_CONTROL_LEFT;
-        case XK_Control_R:      return BJ_KEY_CONTROL_RIGHT;
+        case XK_Shift_L:        return BJ_KEY_LSHIFT;
+        case XK_Shift_R:        return BJ_KEY_RSHIFT;
+        case XK_Control_L:      return BJ_KEY_LCONTROL;
+        case XK_Control_R:      return BJ_KEY_RCONTROL;
         case XK_Meta_L:
-        case XK_Alt_L:          return BJ_KEY_ALT_LEFT;
+        case XK_Alt_L:          return BJ_KEY_LMENU;
         case XK_Mode_switch: // Mapped to Alt_R on many keyboards
         case XK_ISO_Level3_Shift: // AltGr on at least some machines
         case XK_Meta_R:
-        case XK_Alt_R:          return BJ_KEY_ALT_RIGHT;
-        case XK_Super_L:        return BJ_KEY_OS_LEFT;
-        case XK_Super_R:        return BJ_KEY_OS_RIGHT;
+        case XK_Alt_R:          return BJ_KEY_RMENU;
+        case XK_Super_L:        return BJ_KEY_LWIN;
+        case XK_Super_R:        return BJ_KEY_RWIN;
         case XK_Menu:           return BJ_KEY_MENU;
         case XK_Num_Lock:       return BJ_KEY_NUMLOCK;
-        case XK_Caps_Lock:      return BJ_KEY_CAPSLOCK;
-        case XK_Print:          return BJ_KEY_PRINTSCREEN;
+        case XK_Caps_Lock:      return BJ_KEY_CAPITAL;
+        case XK_Print:          return BJ_KEY_SNAPSHOT;
         case XK_Scroll_Lock:    return BJ_KEY_SCROLL;
         case XK_Pause:          return BJ_KEY_PAUSE;
         case XK_Delete:         return BJ_KEY_DELETE;
@@ -375,22 +375,22 @@ static int translate_keysyms(const KeySym* keysyms, int width) {
         case XK_F24:            return BJ_KEY_F24;
 
         // Numeric keypad
-        case XK_KP_Divide:      return BJ_KEY_PAD_DIVIDE;
-        case XK_KP_Multiply:    return BJ_KEY_PAD_MULTIPLY;
-        case XK_KP_Subtract:    return BJ_KEY_PAD_SUBTRACT;
-        case XK_KP_Add:         return BJ_KEY_PAD_ADD;
+        case XK_KP_Divide:      return BJ_KEY_DIVIDE;
+        case XK_KP_Multiply:    return BJ_KEY_MULTIPLY;
+        case XK_KP_Subtract:    return BJ_KEY_SUBTRACT;
+        case XK_KP_Add:         return BJ_KEY_ADD;
 
         // These should have been detected in secondary keysym test above!
-        case XK_KP_Insert:      return BJ_KEY_PAD_0;
-        case XK_KP_End:         return BJ_KEY_PAD_1;
-        case XK_KP_Down:        return BJ_KEY_PAD_2;
-        case XK_KP_Page_Down:   return BJ_KEY_PAD_3;
-        case XK_KP_Left:        return BJ_KEY_PAD_4;
-        case XK_KP_Right:       return BJ_KEY_PAD_6;
-        case XK_KP_Home:        return BJ_KEY_PAD_7;
-        case XK_KP_Up:          return BJ_KEY_PAD_8;
-        case XK_KP_Page_Up:     return BJ_KEY_PAD_9;
-        case XK_KP_Delete:      return BJ_KEY_PAD_DECIMAL;
+        case XK_KP_Insert:      return BJ_KEY_NUMPAD0;
+        case XK_KP_End:         return BJ_KEY_NUMPAD1;
+        case XK_KP_Down:        return BJ_KEY_NUMPAD2;
+        case XK_KP_Page_Down:   return BJ_KEY_NUMPAD3;
+        case XK_KP_Left:        return BJ_KEY_NUMPAD4;
+        case XK_KP_Right:       return BJ_KEY_NUMPAD6;
+        case XK_KP_Home:        return BJ_KEY_NUMPAD7;
+        case XK_KP_Up:          return BJ_KEY_NUMPAD8;
+        case XK_KP_Page_Up:     return BJ_KEY_NUMPAD9;
+        case XK_KP_Delete:      return BJ_KEY_DECIMAL;
 
         // Last resort: Check for printable keys (should not happen if the XKB
         // extension is available). This will give a layout dependent mapping
@@ -434,7 +434,7 @@ static int translate_keysyms(const KeySym* keysyms, int width) {
         case XK_0:              return BJ_KEY_0;
         case XK_space:          return BJ_KEY_SPACE;
         case XK_minus:          return BJ_KEY_MINUS;
-        case XK_equal:          return BJ_KEY_EQUAL;
+        case XK_equal:          return BJ_KEY_OEM_PLUS;
         case XK_bracketleft:    return BJ_KEY_LEFT_BRACKET;
         case XK_bracketright:   return BJ_KEY_RIGHT_BRACKET;
         case XK_backslash:      return BJ_KEY_BACKSLASH;
