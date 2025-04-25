@@ -103,7 +103,8 @@ static bj_window* x11_create_window(
     uint16_t x,
     uint16_t y,
     uint16_t width,
-    uint16_t height
+    uint16_t height,
+    uint8_t  flags
 ) {
     x11_backend* p_x11 = (x11_backend*)p_backend;
     Window root_window = RootWindow(p_x11->display, p_x11->default_screen);
@@ -120,6 +121,7 @@ static bj_window* x11_create_window(
     x11_window window = { 
         .common = {
             .must_close = false,
+            .flags      = flags,
         },
         .handle = p_x11->XCreateWindow(
             p_x11->display, root_window,

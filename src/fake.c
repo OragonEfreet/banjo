@@ -11,7 +11,8 @@ static bj_window* fake_window_new(
     uint16_t x,
     uint16_t y,
     uint16_t width,
-    uint16_t height
+    uint16_t height,
+    uint8_t  flags
 ) {
     (void)p_backend;
     (void)p_title;
@@ -19,6 +20,7 @@ static bj_window* fake_window_new(
     (void)y;
     (void)width;
     (void)height;
+    (void)flags;
 
     bj_window* window = bj_malloc(sizeof(bj_window));
     window->must_close = true;

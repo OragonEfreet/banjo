@@ -40,13 +40,19 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
 void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
     (void)p_window;
 
+    const char* action_str = "pressed";
+    if(action != BJ_PRESS) {
+        action_str = action == BJ_RELEASE ? "released" : "repeated";
+    }
+
+
     printf("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s\n", 
-        key, bj_get_key_name(key), scancode, action == BJ_PRESS ? "pressed" : "released"
+        key, bj_get_key_name(key), scancode, action_str
     );
 
-//     if(key == BJ_KEY_ESCAPE) {
-//         bj_window_set_should_close(p_window);
-//     }
+    if(key == BJ_KEY_ESCAPE) {
+        bj_window_set_should_close(p_window);
+    }
 }
 
 void enter_event(bj_window* p_window, bool enter, int x, int y) {
@@ -65,7 +71,7 @@ int main(void) {
         return 1;
     } 
 
-    bj_window* window = bj_window_new("Simple Banjo Window", 10, 10, 100, 100);
+    bj_window* window = bj_window_new("Simple Banjo Window", 10, 10, 100, 100, 0);
 
     bj_window_set_key_event(window, key_event);
     // bj_window_set_button_event(window, button_event);

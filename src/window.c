@@ -13,10 +13,11 @@ bj_window* bj_window_new(
     uint16_t    x,
     uint16_t    y,
     uint16_t    width,
-    uint16_t    height
+    uint16_t    height,
+    uint8_t     window_flags
 ) {
     bj_trace("Creating Window");
-    return s_backend->create_window(s_backend, p_title, x, y, width, height);
+    return s_backend->create_window(s_backend, p_title, x, y, width, height, window_flags);
 }
 
 void bj_window_del(
@@ -94,7 +95,28 @@ void bj_window_input_key(
     int             scancode
 ) {
     bj_check(p_window);
-    if(!!p_window->p_key_event) {
+    bj_check(key >= 0x00 && key < 0xFF);
+    bj_check(action == BJ_PRESS || action == BJ_RELEASE);
+
+    char* keystate = &p_window->keystates[key];
+    
+    if (action == BJ_PRESS) {
+        if (*keystate == BJ_PRESS) {
+            if(!bj_window_get_flags(p_window, BJ_WINDOW_FLAG_KEY_REPEAT)) {
+                return;
+            }
+            action = BJ_REPEAT;
+        } else {
+            *keystate = BJ_PRESS;
+        }
+    } else {
+        if (*keystate == BJ_RELEASE) {
+            return;
+        }
+        *keystate = BJ_RELEASE;
+    }
+
+    if (p_window->p_key_event) {
         p_window->p_key_event(p_window, action, key, scancode);
     }
 }
@@ -132,4 +154,12 @@ void bj_window_input_enter(
     if(!!p_window->p_enter_event) {
         p_window->p_enter_event(p_window, enter, x, y);
     }
+}
+
+uint8_t bj_window_get_flags(
+    bj_window* p_window,
+    uint8_t    flags
+) {
+    bj_check_or_0(p_window);
+    return (p_window->flags & flags);
 }

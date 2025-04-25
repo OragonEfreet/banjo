@@ -37,7 +37,7 @@ int main(void) {
         return 1;
     } 
 
-    bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600);
+    bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
 
     bj_window_set_key_event(window, key_event);
 

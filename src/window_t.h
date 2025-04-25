@@ -9,6 +9,10 @@ struct bj_window_t {
     bj_window_cursor_event_t p_cursor_event;
     bj_window_enter_event_t  p_enter_event;
     bj_window_key_event_t    p_key_event;
+
+    char                     keystates[0xFF];
+    char                     key_repeat_enabled;
+    uint8_t                  flags;
 };
 
 void bj_window_input_key(bj_window* p_window, bj_event_action action, bj_key key, int scancode);

@@ -16,6 +16,8 @@
 /// Opaque typedef for the window type
 typedef struct bj_window_t bj_window;
 
+#define BJ_WINDOW_FLAG_KEY_REPEAT 0x01
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new bj_window with the specified attributes
 ///
@@ -24,8 +26,14 @@ typedef struct bj_window_t bj_window;
 /// \param y  Vertical position of the window on-screen, expressed in pixels
 /// \param width  Width of the window.
 /// \param height Height of the window.
+/// \param flags  A set of options
 ///
 /// \return A pointer to the newly created bj_window object.
+///
+/// \par Option Flags
+///
+/// - *BJ_WINDOW_FLAG_KEY_REPEAT*: Enables trigerring key events with
+///   \ref BJ_REPEAT action.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_window* bj_window_new(
@@ -33,7 +41,8 @@ BANJO_EXPORT bj_window* bj_window_new(
     uint16_t x,
     uint16_t y,
     uint16_t width,
-    uint16_t height
+    uint16_t height,
+    uint8_t  flags
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -204,6 +213,12 @@ BANJO_EXPORT bj_window_enter_event_t bj_window_set_enter_event(
     bj_window*                p_window,
     bj_window_enter_event_t   p_callback
 );
+
+BANJO_EXPORT uint8_t bj_window_get_flags(
+    bj_window* p_window,
+    uint8_t    flags
+);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Polls all pending events and dispatch them to callbacks.
