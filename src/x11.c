@@ -25,6 +25,7 @@ typedef int                 (* pfn_XCloseDisplay)(Display*);
 typedef int                 (* pfn_XDefaultScreen)(Display*);
 typedef int                 (* pfn_XFlush)(Display*);
 typedef int                 (* pfn_XPending)(Display*);
+typedef XSizeHints*         (* pfn_XAllocSizeHints)(void);
 typedef int                 (* pfn_XQLength)(Display*);
 typedef void                (* pfn_XStoreName)(Display*, Window, char*);
 typedef int                 (* pfn_XSync)(Display*,Bool);
@@ -48,7 +49,8 @@ typedef int                 (* pfn_XDisplayKeycodes)(Display*,int*,int*);
 typedef Display*            (* pfn_XOpenDisplay)(const char*);
 typedef XrmQuark            (* pfn_XrmUniqueQuark)(void);
 typedef int                 (* pfn_XFree)(void*);
-typedef char* (*pfn_XKeysymToString)(KeySym);
+typedef void                (* pfn_XSetWMNormalHints)(Display*,Window,XSizeHints*);
+typedef char*               (* pfn_XKeysymToString)(KeySym);
 
 #define N_KEYCODES 256
 
@@ -66,18 +68,21 @@ typedef struct {
 
     bj_key*           keymap;
 
+    pfn_XAllocSizeHints     XAllocSizeHints;
     pfn_XCreateWindow       XCreateWindow;
     pfn_XDeleteContext      XDeleteContext;
     pfn_XDestroyWindow      XDestroyWindow;
     pfn_XEventsQueued       XEventsQueued;
     pfn_XFindContext        XFindContext;
     pfn_XFlush              XFlush;
+    pfn_XFree               XFree;
     pfn_XMapWindow          XMapWindow;
     pfn_XNextEvent          XNextEvent;
     pfn_XPeekEvent          XPeekEvent;
     pfn_XPending            XPending;
     pfn_XQLength            XQLength;
     pfn_XSaveContext        XSaveContext;
+    pfn_XSetWMNormalHints   XSetWMNormalHints;
     pfn_XSetWMProtocols     XSetWMProtocols;
     pfn_XStoreName          XStoreName;
     pfn_XSync               XSync;
@@ -133,6 +138,18 @@ static bj_window* x11_create_window(
         ),
     };
 
+    // For now we don't want to make the window resizable
+    XSizeHints *size_hints = p_x11->XAllocSizeHints();
+    if (size_hints) {
+        size_hints->flags      = PMinSize | PMaxSize;
+        size_hints->min_width  = width;
+        size_hints->min_height = height;
+        size_hints->max_width  = width;
+        size_hints->max_height = height;
+        p_x11->XSetWMNormalHints(p_x11->display, window.handle, size_hints);
+        p_x11->XFree(size_hints);
+    }
+
     p_x11->XStoreName(p_x11->display, window.handle, (char*)p_title);
 
     p_x11->XSetWMProtocols(
@@ -175,8 +192,9 @@ static int get_key(
     x11_backend* p_x11,
     int          keycode
 ) {
-    if (keycode < 0 || keycode > 255)
+    if (keycode < 0 || keycode > 255) {
         return BJ_KEY_UNKNOWN;
+    }
 
     return p_x11->keymap[keycode];
 }
@@ -460,7 +478,6 @@ static void x11_init_keycodes(
     int max_keycode = 0;
 
     pfn_XDisplayKeycodes    x11_XDisplayKeycodes    = (pfn_XDisplayKeycodes)x11_get_symbol(p_x11, "XDisplayKeycodes");
-    pfn_XFree               x11_XFree               = (pfn_XFree)x11_get_symbol(p_x11, "XFree");
     pfn_XGetKeyboardMapping x11_XGetKeyboardMapping = (pfn_XGetKeyboardMapping)x11_get_symbol(p_x11, "XGetKeyboardMapping");
 
 
@@ -484,7 +501,7 @@ static void x11_init_keycodes(
         }
     }
 
-    x11_XFree(keysyms);
+    p_x11->XFree(keysyms);
 }
 
 
@@ -512,26 +529,29 @@ static bj_system_backend* x11_init_backend(
     x11_backend* p_x11 = bj_malloc(sizeof(x11_backend));
     p_x11->p_handle            = p_handle;
 
+    p_x11->XAllocSizeHints     = (pfn_XAllocSizeHints)x11_get_symbol(p_x11, "XAllocSizeHints");
     p_x11->XCreateWindow       = (pfn_XCreateWindow)x11_get_symbol(p_x11, "XCreateWindow");
     p_x11->XDeleteContext      = (pfn_XDeleteContext)x11_get_symbol(p_x11, "XDeleteContext");
     p_x11->XDestroyWindow      = (pfn_XDestroyWindow)x11_get_symbol(p_x11, "XDestroyWindow");
     p_x11->XEventsQueued       = (pfn_XEventsQueued)x11_get_symbol(p_x11, "XEventsQueued");
     p_x11->XFindContext        = (pfn_XFindContext)x11_get_symbol(p_x11, "XFindContext");
     p_x11->XFlush              = (pfn_XFlush)x11_get_symbol(p_x11, "XFlush");
+    p_x11->XFree               = (pfn_XFree)x11_get_symbol(p_x11, "XFree");
     p_x11->XMapWindow          = (pfn_XMapWindow)x11_get_symbol(p_x11, "XMapWindow");
     p_x11->XNextEvent          = (pfn_XNextEvent)x11_get_symbol(p_x11, "XNextEvent");
     p_x11->XPeekEvent          = (pfn_XPeekEvent)x11_get_symbol(p_x11, "XPeekEvent");
     p_x11->XPending            = (pfn_XPending)x11_get_symbol(p_x11, "XPending");
     p_x11->XQLength            = (pfn_XQLength)x11_get_symbol(p_x11, "XQLength");
     p_x11->XSaveContext        = (pfn_XSaveContext)x11_get_symbol(p_x11, "XSaveContext");
+    p_x11->XSetWMNormalHints   = (pfn_XSetWMNormalHints)x11_get_symbol(p_x11, "XSetWMNormalHints");
     p_x11->XSetWMProtocols     = (pfn_XSetWMProtocols)x11_get_symbol(p_x11, "XSetWMProtocols");
     p_x11->XStoreName          = (pfn_XStoreName)x11_get_symbol(p_x11, "XStoreName");
     p_x11->XSync               = (pfn_XSync)x11_get_symbol(p_x11, "XSync");
     p_x11->XUnmapWindow        = (pfn_XUnmapWindow)x11_get_symbol(p_x11, "XUnmapWindow");
     
     pfn_XBlackPixel         x11_XBlackPixel       = (pfn_XBlackPixel)x11_get_symbol(p_x11, "XBlackPixel");
-    pfn_XDefaultScreen      x11_XDefaultScreen    = (pfn_XDefaultScreen)x11_get_symbol(p_x11, "XDefaultScreen");
     pfn_XDefaultDepth       x11_XDefaultDepth     = (pfn_XDefaultDepth)x11_get_symbol(p_x11, "XDefaultDepth");
+    pfn_XDefaultScreen      x11_XDefaultScreen    = (pfn_XDefaultScreen)x11_get_symbol(p_x11, "XDefaultScreen");
     pfn_XDefaultVisual      x11_XDefaultVisual    = (pfn_XDefaultVisual)x11_get_symbol(p_x11, "XDefaultVisual");
     pfn_XInternAtom         x11_XInternAtom       = (pfn_XInternAtom)x11_get_symbol(p_x11, "XInternAtom");
     pfn_XOpenDisplay        x11_XOpenDisplay      = (pfn_XOpenDisplay)x11_get_symbol(p_x11, "XOpenDisplay");
