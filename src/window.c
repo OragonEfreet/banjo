@@ -30,8 +30,7 @@ void bj_window_del(
 bool bj_window_should_close(
     bj_window* p_window
 ) {
-    bj_check_or_return(p_window, true);
-    return p_window->must_close;
+    return bj_window_get_flags(p_window, BJ_WINDOW_FLAG_CLOSE) > 0;
 }
 
 bj_window_key_event_t bj_window_set_key_event(
@@ -48,7 +47,7 @@ void bj_window_set_should_close(
     bj_window* p_window
 ) {
     bj_check(p_window);
-    p_window->must_close = true;
+    p_window->flags |= BJ_WINDOW_FLAG_CLOSE;
 }
 
 BANJO_EXPORT void bj_poll_events(

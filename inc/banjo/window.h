@@ -16,7 +16,8 @@
 /// Opaque typedef for the window type
 typedef struct bj_window_t bj_window;
 
-#define BJ_WINDOW_FLAG_KEY_REPEAT 0x01
+#define BJ_WINDOW_FLAG_CLOSE      0x01
+#define BJ_WINDOW_FLAG_KEY_REPEAT 0x02
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new bj_window with the specified attributes

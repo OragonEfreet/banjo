@@ -120,7 +120,6 @@ static bj_window* x11_create_window(
 
     x11_window window = { 
         .common = {
-            .must_close = false,
             .flags      = flags,
         },
         .handle = p_x11->XCreateWindow(

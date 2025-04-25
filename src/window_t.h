@@ -4,14 +4,12 @@
 #include <banjo/window.h>
 
 struct bj_window_t {
-    bool                     must_close;
     bj_window_button_event_t p_button_event;
     bj_window_cursor_event_t p_cursor_event;
     bj_window_enter_event_t  p_enter_event;
     bj_window_key_event_t    p_key_event;
 
     char                     keystates[0xFF];
-    char                     key_repeat_enabled;
     uint8_t                  flags;
 };
 

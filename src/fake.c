@@ -20,10 +20,11 @@ static bj_window* fake_window_new(
     (void)y;
     (void)width;
     (void)height;
-    (void)flags;
+
+    flags |= BJ_WINDOW_FLAG_CLOSE;
 
     bj_window* window = bj_malloc(sizeof(bj_window));
-    window->must_close = true;
+    window->flags = flags;
     return window;
 }
 

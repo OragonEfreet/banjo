@@ -71,12 +71,12 @@ int main(void) {
         return 1;
     } 
 
-    bj_window* window = bj_window_new("Simple Banjo Window", 10, 10, 100, 100, 0);
+    bj_window* window = bj_window_new("Simple Banjo Window", 10, 10, 100, 100, BJ_WINDOW_FLAG_KEY_REPEAT);
 
     bj_window_set_key_event(window, key_event);
-    // bj_window_set_button_event(window, button_event);
-    // bj_window_set_cursor_event(window, cursor_event);
-    // bj_window_set_enter_event(window, enter_event);
+    bj_window_set_button_event(window, button_event);
+    bj_window_set_cursor_event(window, cursor_event);
+    bj_window_set_enter_event(window, enter_event);
 
     while(!bj_window_should_close(window)) {
         bj_poll_events();
