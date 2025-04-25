@@ -20,7 +20,7 @@ Some features may exist in the API but not be listed here, and vice versa.
       - [ ] X11
       - [ ] Cocoa
     - [ ] Keycode (\ref bj_window_key_event_t)
-      - [ ] Windows API
+      - [X] Windows API
       - [ ] Wayland
       - [ ] Cocoa
       - [X] X11

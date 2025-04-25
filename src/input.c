@@ -116,6 +116,7 @@ const char* bj_get_key_name(int key) {
         case BJ_KEY_ALT_RIGHT: return "Right ALT";
         case BJ_KEY_OS_LEFT: return "Left SYS";
         case BJ_KEY_OS_RIGHT: return "Right SYS";
+        case BJ_KEY_MENU: return "Menu";
     }
     return "Unknown";
 }

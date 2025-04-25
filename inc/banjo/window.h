@@ -115,12 +115,13 @@ typedef void(* bj_window_button_event_t)(bj_window* p_window, int, bj_event_acti
 ///
 /// \param p_window Window handle
 /// \param action   Sets if the button is pressed or released
-/// \param scancode Manufacturer-dependent representation of the key that has been
-///                 pressed or released.
+/// \param key      Layout-dependent representation of the pressed key
+/// \param scancode Implementation-dependent / Layout-independent representation 
+///                 of the key that has been pressed or released.
 ///
 /// \see bj_window_set_key_event
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action action, int key, int scancode);
+typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for cursor events.

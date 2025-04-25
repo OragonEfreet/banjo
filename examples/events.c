@@ -37,7 +37,7 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
     );
 }
 
-void key_event(bj_window* p_window, bj_event_action action, int key, int scancode) {
+void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
     (void)p_window;
 
     printf("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s\n", 
