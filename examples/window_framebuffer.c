@@ -107,7 +107,6 @@ int main(void) {
         sleep_ms(300);
     }
 
-    bj_bitmap_del(framebuffer);
     bj_window_del(window);
 
     bj_system_dispose(0);
