@@ -8,21 +8,6 @@
 
 #include <stdio.h>
 
-#if defined(_WIN32) || defined(_WIN64)
-    #include <windows.h>
-    void sleep_ms(int milliseconds) {
-        Sleep(milliseconds);
-    }
-#else
-    #include <time.h>
-    void sleep_ms(int milliseconds) {
-        struct timespec ts;
-        ts.tv_sec = milliseconds / 1000;
-        ts.tv_nsec = (milliseconds % 1000) * 1000000;
-        nanosleep(&ts, NULL);
-    }
-#endif
-
 void cursor_event(bj_window* p_window, int x, int y) {
     printf("Cursor event, window %p, (%d,%d)\n",
         (void*)p_window, x, y
@@ -80,7 +65,7 @@ int main(void) {
 
     while(!bj_window_should_close(window)) {
         bj_poll_events();
-        /* sleep_ms(300); */
+        bj_sleep(30); 
     }
 
     bj_window_del(window);

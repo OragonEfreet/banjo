@@ -46,4 +46,8 @@ BANJO_EXPORT void* bj_get_symbol(
     const char* p_name
 );
 
+BANJO_EXPORT void bj_sleep(
+    int milliseconds
+);
+
 /// \} // End of system group

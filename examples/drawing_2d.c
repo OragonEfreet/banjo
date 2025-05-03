@@ -8,22 +8,6 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
-
-#if defined(_WIN32) || defined(_WIN64)
-#include <windows.h>
-void sleep_ms(int milliseconds) {
-    Sleep(milliseconds);
-}
-#else
-#include <time.h>
-void sleep_ms(int milliseconds) {
-    struct timespec ts;
-    ts.tv_sec = milliseconds / 1000;
-    ts.tv_nsec = (milliseconds % 1000) * 1000000;
-    nanosleep(&ts, NULL);
-}
-#endif
-
 void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
     (void)p_window;
     (void)scancode;
@@ -104,7 +88,7 @@ int main(void) {
 
     while (!bj_window_should_close(window)) {
         bj_poll_events();
-        sleep_ms(300);
+        bj_sleep(300);
     }
 
     bj_window_del(window);

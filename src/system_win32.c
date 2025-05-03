@@ -26,4 +26,10 @@ void* bj_get_symbol(
     return 0;
 }
 
+void bj_sleep(
+    int milliseconds
+) {
+    Sleep(milliseconds);
+}
+
 #endif

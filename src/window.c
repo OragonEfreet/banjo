@@ -15,14 +15,12 @@ bj_window* bj_window_new(
     uint16_t    height,
     uint8_t     window_flags
 ) {
-    bj_trace("Creating Window");
     return s_backend->create_window(s_backend, p_title, x, y, width, height, window_flags);
 }
 
 void bj_window_del(
     bj_window* p_window
 ) {
-    bj_trace("Deleting Window");
     bj_bitmap_del(p_window->p_framebuffer);
     s_backend->delete_window(s_backend, p_window);
 }

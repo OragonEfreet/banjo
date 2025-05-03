@@ -3,6 +3,7 @@
 #ifdef BJ_OS_UNIX
 
 #include <dlfcn.h> 
+#include <time.h>
 
 void* bj_load_library(
     const char* p_path
@@ -21,6 +22,15 @@ void* bj_get_symbol(
     const char* p_name
 ) {
     return dlsym(p_handle, p_name);
+}
+
+void bj_sleep(
+    int milliseconds
+) {
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
 }
 
 #endif

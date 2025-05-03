@@ -11,30 +11,6 @@
 
 bj_bitmap* dib_create_bitmap_from_stream(bj_stream*, bj_error**);
 
-//static size_t bitmap_stride(
-//    size_t width,
-//    bj_pixel_mode mode
-//) {
-//    switch(mode) {
-//        case BJ_PIXEL_MODE_INDEXED_1:
-//            return ((width + 7) / 8 + 3) & ~3;
-//        case BJ_PIXEL_MODE_INDEXED_4:
-//            return ((width + 1) / 2 + 3) & ~3;
-//        case BJ_PIXEL_MODE_INDEXED_8:
-//            return (width + 3) & ~3;
-//        case BJ_PIXEL_MODE_RGB565:
-//        case BJ_PIXEL_MODE_XRGB1555:
-//            return (width * 2 + 3) & ~3;
-//        case BJ_PIXEL_MODE_BGR24:
-//            return (width * 3 + 3) & ~3;
-//        case BJ_PIXEL_MODE_XRGB8888:
-//            return width * 4;
-//        default: break;
-//
-//    }
-//    return 0;
-//}
-
 BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
     void
 ) {
@@ -114,6 +90,46 @@ bj_bitmap* bj_bitmap_new_from_pixels(
         return 0;
     }
     return bj_memcpy(bj_bitmap_alloc(), &bitmap, sizeof(bj_bitmap));
+}
+
+bj_bitmap* bj_bitmap_copy(
+    const bj_bitmap* p_bitmap
+) {
+    bj_check_or_0(p_bitmap);
+    bj_bitmap bitmap;
+    if (bj_bitmap_init(&bitmap, 0, p_bitmap->width, p_bitmap->height, p_bitmap->mode, p_bitmap->stride) == 0) {
+        return 0;
+    }
+    bj_memcpy(bitmap.buffer, p_bitmap->buffer, bitmap.stride * bitmap.height);
+    return bj_memcpy(bj_bitmap_alloc(), &bitmap, sizeof(bj_bitmap));
+}
+
+bj_bitmap* bj_bitmap_convert(
+    const bj_bitmap* p_src,
+    bj_pixel_mode    mode
+) {
+    bj_check_or_0(p_src);
+    bj_check_or_0(mode);
+
+    if (p_src->mode == mode) {
+        return bj_bitmap_copy(p_src);
+    }
+    bj_bitmap dst;
+    if (bj_bitmap_init(&dst, 0, p_src->width, p_src->height, p_src->mode, p_src->stride) == 0) {
+        return 0;
+    }
+    
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
+    for (size_t y = 0; y < dst.height; ++y) {
+        for (size_t x = 0; x < dst.width; ++x) {
+            bj_bitmap_rgb(p_src, x, y, &r, &g, &b);
+            bj_bitmap_put_pixel(&dst, x, y, bj_bitmap_pixel_value(&dst, r, g, b));
+        }
+    }
+
+    return bj_memcpy(bj_bitmap_alloc(), &dst, sizeof(bj_bitmap));
 }
 
 void bj_bitmap_del(

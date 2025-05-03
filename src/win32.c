@@ -56,7 +56,7 @@ static bj_window* win32_window_new(
     HWND hwnd = CreateWindowExA(
         window_ex_style, WIN32_WINDOWCLASS_NAME, p_title, window_style,
         window_x, window_y, window_width, window_height,
-        NULL, NULL, p_win32->p_instance, "Hello"
+        NULL, NULL, p_win32->p_instance, 0
     );
 
     if (!hwnd) {
@@ -368,7 +368,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             );
             break;
 
-        case WM_SIZE:           bj_trace("WM_SIZE");        break;
+        case WM_SIZE:           /*bj_trace("WM_SIZE");*/        break;
 
         default:
             return DefWindowProcA(hwnd, uMsg, wParam, lParam);

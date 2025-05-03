@@ -139,6 +139,15 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_pixels(
     size_t           stride
 );
 
+BANJO_EXPORT bj_bitmap* bj_bitmap_copy(
+    const bj_bitmap* p_bitmap
+);
+
+BANJO_EXPORT bj_bitmap* bj_bitmap_convert(
+    const bj_bitmap* p_bitmap,
+    bj_pixel_mode    mode
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes a new bj_bitmap with the specified width and height.
 ///
