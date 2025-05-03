@@ -131,14 +131,25 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
     bj_error**        p_error
 );
 
+BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_pixels(
+    void*            p_pixels,
+    size_t           width,
+    size_t           height,
+    bj_pixel_mode    mode,
+    size_t           stride
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes a new bj_bitmap with the specified width and height.
 ///
 /// \param p_bitmap  The bitmap object.
+/// \param p_pixels  The pixel buffer data.
 /// \param width     Width of the bitmap.
 /// \param height    Height of the bitmap.
 /// \param mode      The pixel mode.
 /// \param stride    The suggested bitmap stride.
+/// 
+/// If the pixel buffer provided by `p_pixels` is _0_, the buffer will allocate
 ///
 /// \return A pointer to the newly created bj_bitmap object.
 ///
@@ -148,6 +159,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_bitmap_init(
     bj_bitmap* p_bitmap,
+    void* p_pixels,
     size_t width,
     size_t height,
     bj_pixel_mode mode,

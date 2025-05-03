@@ -9,8 +9,8 @@
 #include "sdl_helpers.h"
 #include <SDL3/SDL_main.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 800
+#define SCREEN_WIDTH 500
+#define SCREEN_HEIGHT 500
 
 #define CANVAS_WIDTH 500
 #define CANVAS_HEIGHT 500
@@ -65,7 +65,6 @@ void draw(bj_bitmap* bmp) {
             color_white
         );
     }
-
 }
 
 int main(int argc, char* argv[]) {

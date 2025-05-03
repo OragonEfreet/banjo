@@ -11,29 +11,29 @@
 
 bj_bitmap* dib_create_bitmap_from_stream(bj_stream*, bj_error**);
 
-static size_t bitmap_stride(
-    size_t width,
-    bj_pixel_mode mode
-) {
-    switch(mode) {
-        case BJ_PIXEL_MODE_INDEXED_1:
-            return ((width + 7) / 8 + 3) & ~3;
-        case BJ_PIXEL_MODE_INDEXED_4:
-            return ((width + 1) / 2 + 3) & ~3;
-        case BJ_PIXEL_MODE_INDEXED_8:
-            return (width + 3) & ~3;
-        case BJ_PIXEL_MODE_RGB565:
-        case BJ_PIXEL_MODE_XRGB1555:
-            return (width * 2 + 3) & ~3;
-        case BJ_PIXEL_MODE_BGR24:
-            return (width * 3 + 3) & ~3;
-        case BJ_PIXEL_MODE_XRGB8888:
-            return width * 4;
-        default: break;
-
-    }
-    return 0;
-}
+//static size_t bitmap_stride(
+//    size_t width,
+//    bj_pixel_mode mode
+//) {
+//    switch(mode) {
+//        case BJ_PIXEL_MODE_INDEXED_1:
+//            return ((width + 7) / 8 + 3) & ~3;
+//        case BJ_PIXEL_MODE_INDEXED_4:
+//            return ((width + 1) / 2 + 3) & ~3;
+//        case BJ_PIXEL_MODE_INDEXED_8:
+//            return (width + 3) & ~3;
+//        case BJ_PIXEL_MODE_RGB565:
+//        case BJ_PIXEL_MODE_XRGB1555:
+//            return (width * 2 + 3) & ~3;
+//        case BJ_PIXEL_MODE_BGR24:
+//            return (width * 3 + 3) & ~3;
+//        case BJ_PIXEL_MODE_XRGB8888:
+//            return width * 4;
+//        default: break;
+//
+//    }
+//    return 0;
+//}
 
 BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
     void
@@ -43,12 +43,13 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
 
 bj_bitmap* bj_bitmap_init(
     bj_bitmap*       p_bitmap,
+    void*            p_pixels,
     size_t           width,
     size_t           height,
     bj_pixel_mode    mode,
     size_t           stride
 ) {
-    const size_t computed_stride = bitmap_stride(width, mode);
+    const size_t computed_stride = bj_compute_bitmap_stride(width, mode);
     if(stride < computed_stride) {
         stride = computed_stride;
     }
@@ -62,10 +63,17 @@ bj_bitmap* bj_bitmap_init(
             p_bitmap->width = width;
             p_bitmap->height = height;
             p_bitmap->stride = stride;
-            p_bitmap->buffer = bj_malloc(bufsize);
             p_bitmap->mode = mode;
             p_bitmap->clear_color = 0x00000000;
-            bj_memset(p_bitmap->buffer, 0x00, bufsize);
+            p_bitmap->weak = (p_pixels != 0);
+
+            if (p_bitmap->weak) {
+                p_bitmap->buffer = p_pixels;
+            } else {
+                p_bitmap->buffer = bj_malloc(bufsize);
+                bj_memset(p_bitmap->buffer, 0x00, bufsize);
+            }
+            
         }
     }
     return p_bitmap;
@@ -76,7 +84,7 @@ void bj_bitmap_reset(
 ) {
     bj_check(p_bitmap);
 
-    if(p_bitmap->buffer != 0) {
+    if(p_bitmap->weak == 0) {
         bj_free(p_bitmap->buffer);
     }
 }
@@ -88,7 +96,21 @@ bj_bitmap* bj_bitmap_new(
     size_t           stride
 ) {
     bj_bitmap bitmap;
-    if(bj_bitmap_init(&bitmap, width, height, mode, stride) == 0) {
+    if(bj_bitmap_init(&bitmap, 0, width, height, mode, stride) == 0) {
+        return 0;
+    }
+    return bj_memcpy(bj_bitmap_alloc(), &bitmap, sizeof(bj_bitmap));
+}
+
+bj_bitmap* bj_bitmap_new_from_pixels(
+    void*            p_pixels,
+    size_t           width,
+    size_t           height,
+    bj_pixel_mode    mode,
+    size_t           stride
+) {
+    bj_bitmap bitmap;
+    if (bj_bitmap_init(&bitmap, p_pixels, width, height, mode, stride) == 0) {
         return 0;
     }
     return bj_memcpy(bj_bitmap_alloc(), &bitmap, sizeof(bj_bitmap));

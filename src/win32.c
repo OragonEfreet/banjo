@@ -12,6 +12,8 @@
 #include "system_t.h"
 #include "window_t.h"
 
+#include <assert.h>
+
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
 
 typedef struct {
@@ -23,6 +25,9 @@ typedef struct {
     struct bj_window_t common;
     HWND               handle;
     int                cursor_in_window;
+    HDC                hdc;
+    HDC                fbdc;
+    HBITMAP            fbmp;
 } win32_window;
 
 static bj_window* win32_window_new(
@@ -36,8 +41,8 @@ static bj_window* win32_window_new(
 ) {
     win32_backend* p_win32 = (win32_backend*)p_backend;
 
-    const uint32_t window_style  = WS_OVERLAPPED  | WS_SYSMENU     | WS_CAPTION
-                                 | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
+    const uint32_t window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
+                                 //| WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
     const uint32_t window_ex_style = WS_EX_APPWINDOW;
 
     RECT border_rect = {0, 0, 0, 0};
@@ -63,6 +68,7 @@ static bj_window* win32_window_new(
             .flags = flags,
         },
         .handle = hwnd,
+        .hdc = GetDC(hwnd),
         .cursor_in_window = false,
     };
 
@@ -77,14 +83,129 @@ static bj_window* win32_window_new(
     return (bj_window*)p_window;
 }
 
+static void win32_delete_window_framebuffer(
+    win32_window* p_window
+) {
+    if (p_window->fbdc) {
+        DeleteDC(p_window->fbdc);
+    }
+    if (p_window->fbmp) {
+        DeleteObject(p_window->fbmp);
+    }
+}
+
 static void win32_window_del(
     bj_system_backend* p_backend,
     bj_window* p_abstract_window
 ) {
     (void)p_backend;
     win32_window* p_window = (win32_window*)p_abstract_window;
+    win32_delete_window_framebuffer(p_window);
+    ReleaseDC(p_window->handle, p_window->hdc);
     DestroyWindow(p_window->handle);
     bj_free(p_window);
+}
+
+bj_bitmap* win32_create_window_framebuffer(
+    bj_system_backend* p_backend,
+    const bj_window* p_abstract_window,
+    bj_error** p_error
+) {
+    win32_window* p_window = (win32_window*)p_abstract_window;
+
+    int width = 0;
+    int height = 0;
+    if (!win32_get_window_size(p_backend, p_window, &width, &height)) {
+        bj_set_error(p_error, BJ_ERROR_BACKEND, "Cannot get window dimension");
+        return 0;
+    }
+
+    win32_delete_window_framebuffer(p_window);
+    
+    const size_t info_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
+    LPBITMAPINFO p_bmp_info = bj_malloc(info_size);
+    bj_memset(p_bmp_info, 0, info_size);
+    p_bmp_info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+
+    HBITMAP h_bmp = CreateCompatibleBitmap(p_window->hdc, 1, 1);
+    GetDIBits(p_window->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
+    GetDIBits(p_window->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
+    DeleteObject(h_bmp);
+
+    bj_pixel_mode pixel_mode = BJ_PIXEL_MODE_UNKNOWN;
+    if (p_bmp_info->bmiHeader.biCompression == BI_BITFIELDS) {
+        int bpp = p_bmp_info->bmiHeader.biPlanes * p_bmp_info->bmiHeader.biBitCount;
+        int32_t* masks = (int32_t*)((int8_t*)p_bmp_info + p_bmp_info->bmiHeader.biSize);
+        pixel_mode = bj_compute_pixel_mode(bpp, masks[0], masks[1], masks[2]);
+    }
+    if (pixel_mode == BJ_PIXEL_MODE_UNKNOWN) {
+        pixel_mode = BJ_PIXEL_MODE_XRGB8888;
+        bj_memset(p_bmp_info, 0, info_size);
+        p_bmp_info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        p_bmp_info->bmiHeader.biPlanes = 1;
+        p_bmp_info->bmiHeader.biBitCount = 32;
+        p_bmp_info->bmiHeader.biCompression = BI_RGB;
+    }
+
+    const size_t stride = bj_compute_bitmap_stride(width, pixel_mode);
+
+    if(stride == 0) {
+        bj_set_error(p_error, BJ_ERROR_BACKEND, "Invalid window pixel format");
+        bj_free(p_bmp_info);
+        return 0;
+    }
+
+    p_bmp_info->bmiHeader.biWidth = width;
+    p_bmp_info->bmiHeader.biHeight = -height;
+    p_bmp_info->bmiHeader.biSizeImage = (DWORD)height * stride;
+
+    void* pixels = 0;
+    p_window->fbdc = CreateCompatibleDC(p_window->hdc);
+    p_window->fbmp = CreateDIBSection(p_window->hdc, p_bmp_info, DIB_RGB_COLORS, &pixels, NULL, 0);
+
+    bj_free(p_bmp_info);
+
+    if (!p_window->fbmp) {
+        bj_set_error(p_error, BJ_ERROR_BACKEND, "Cannot create DIB section");
+        return 0;
+    }
+    SelectObject(p_window->fbdc, p_window->fbmp);
+
+    return bj_bitmap_new_from_pixels(pixels, width, height, pixel_mode, stride);
+}
+
+static int win32_get_window_size(
+    bj_system_backend* p_backend,
+    const bj_window* p_abstract_window,
+    int* width,
+    int* height
+) {
+    (void)p_backend;
+    win32_window* p_window = (win32_window*)p_abstract_window;
+    HWND handle = p_window->handle;
+    RECT rect;
+
+    if (GetClientRect(p_window->handle, &rect)) {
+        *width = rect.right;
+        *height = rect.bottom;
+        return 1;
+    }
+
+    return 0;
+}
+
+static void win32_flush_window_framebuffer(
+    bj_system_backend* p_backend,
+    const bj_window*   p_abstract_window
+) {
+    win32_window* p_window = (win32_window*)p_abstract_window;
+    assert(p_window->common.p_framebuffer != 0);
+
+    int width = 0;
+    int height = 0;
+    if (win32_get_window_size(p_backend, p_window, &width, &height)) {
+        BitBlt(p_window->hdc, 0, 0, width, height, p_window->fbdc, 0, 0, SRCCOPY);
+    }
 }
 
 static void win32_dispose_backend(
@@ -271,15 +392,16 @@ static bj_system_backend* win32_init_backend(
         return 0;
     }
 
-
-
     win32_backend win32 = {
         .p_instance = hInstance,
         .fns = {
-            .dispose           = win32_dispose_backend,
-            .create_window     = win32_window_new,
-            .delete_window     = win32_window_del,
-            .poll_events       = win32_window_poll,
+            .dispose                   = win32_dispose_backend,
+            .create_window             = win32_window_new,
+            .delete_window             = win32_window_del,
+            .poll_events               = win32_window_poll,
+            .get_window_size           = win32_get_window_size,
+            .create_window_framebuffer = win32_create_window_framebuffer,
+            .flush_window_framebuffer  = win32_flush_window_framebuffer,
         },
     };
     return bj_memcpy(bj_malloc(sizeof(win32_backend)), &win32, sizeof(win32_backend));

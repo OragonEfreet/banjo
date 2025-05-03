@@ -132,45 +132,6 @@ static size_t dib_color_table_len(uint16_t bit_count, uint32_t override) {
     return override;
 }
 
-#define RETURN_IF_MATCH(r,g,b, fmt) if(red_mask == r && green_mask == g && blue_mask == b) {return fmt;}
-static int dib_compute_pixel_mode(uint32_t dib_count, uint32_t red_mask, uint32_t green_mask, uint32_t blue_mask) {
-    const bool have_masks = (red_mask | green_mask | blue_mask) > 0;
-    switch(dib_count) {
-        case DIB_BIT_COUNT_1:
-            assert(!have_masks);
-            return BJ_PIXEL_MODE_INDEXED_1;
-
-        case DIB_BIT_COUNT_4:
-            assert(!have_masks);
-            return BJ_PIXEL_MODE_INDEXED_4;
-
-        case DIB_BIT_COUNT_8:
-            assert(!have_masks);
-            return BJ_PIXEL_MODE_INDEXED_8;
-
-        case DIB_BIT_COUNT_16:
-            /* print_masks_instructions(red_mask, green_mask, blue_mask); */
-
-            RETURN_IF_MATCH(0x0000F800, 0x000007E0, 0x0000001F, BJ_PIXEL_MODE_RGB565);
-            
-            return have_masks ? BJ_PIXEL_MODE_UNKNOWN : BJ_PIXEL_MODE_XRGB1555;
-
-        case DIB_BIT_COUNT_24:
-            assert(!have_masks);
-            return BJ_PIXEL_MODE_BGR24;
-
-        case DIB_BIT_COUNT_32:
-            RETURN_IF_MATCH(0x00FF0000, 0x0000FF00, 0x000000FF, BJ_PIXEL_MODE_XRGB8888);
-            return have_masks ? BJ_PIXEL_MODE_UNKNOWN : BJ_PIXEL_MODE_XRGB8888;
-
-        default:
-            break;
-    }
-
-    return BJ_PIXEL_MODE_UNKNOWN;
-}
-#undef RETURN_IF_MATCH
-
 static void dib_read_uncompressed_raster(
     bj_stream* p_stream,
     uint8_t*   dst_pixels,
@@ -525,7 +486,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
     }
 
     // Now we got the bitmasks and all, we can get the mode.
-    const bj_pixel_mode src_mode = dib_compute_pixel_mode(dib_bit_count, red_mask, green_mask, blue_mask);
+    const bj_pixel_mode src_mode = bj_compute_pixel_mode(dib_bit_count, red_mask, green_mask, blue_mask);
 
     // Read the color table
     dib_table_rgb* color_table = 0;

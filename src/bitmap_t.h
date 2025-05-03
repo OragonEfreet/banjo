@@ -9,6 +9,7 @@ struct bj_bitmap_t {
     bj_pixel_mode   mode;
     uint32_t        clear_color;
     void*           buffer;
+    int             weak;
 };
 
 

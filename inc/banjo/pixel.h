@@ -60,6 +60,17 @@ BANJO_EXPORT uint32_t bj_pixel_value(
     uint8_t blue
 );
 
+BANJO_EXPORT int bj_compute_pixel_mode(
+    uint8_t  bpp,
+    uint32_t red_mask,
+    uint32_t green_mask,
+    uint32_t blue_mask
+);
+
+BANJO_EXPORT size_t bj_compute_bitmap_stride(
+    size_t width,
+    bj_pixel_mode mode
+);
 
 /// Pixel type: Indexed (palette-based).
 #define BJ_PIXEL_TYPE_INDEX    0x01
