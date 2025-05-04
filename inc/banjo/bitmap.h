@@ -405,10 +405,17 @@ BANJO_EXPORT void bj_bitmap_set_clear_color(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bool bj_bitmap_blit(
-    const bj_bitmap*  p_source,
-    const bj_rect*    p_source_area,
-    bj_bitmap*        p_destination,
-    bj_rect*          p_destination_area
+    const bj_bitmap* p_source,
+    const bj_rect* p_source_area,
+    bj_bitmap* p_destination,
+    const bj_rect* p_destination_area
+);
+
+BANJO_EXPORT bool bj_bitmap_blit_stretched(
+    const bj_bitmap* p_source,
+    const bj_rect* p_source_area,
+    bj_bitmap* p_destination,
+    const bj_rect* p_destination_area
 );
 
 /// \} // End of bitmap group

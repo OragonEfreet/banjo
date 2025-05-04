@@ -27,9 +27,9 @@ int display_bitmap(const bj_bitmap* p_bitmap, const char* title, int pause_on_di
     const size_t bitmap_w = bj_bitmap_width(p_bitmap);
     const size_t bitmap_h = bj_bitmap_height(p_bitmap);
 
+    // Just make the window larger for small images
     size_t window_w = bitmap_w;
     size_t window_h = bitmap_h;
-
     while ((window_w + window_h) * (window_w + window_h) < 800 * 800) {
         window_w *= 2;
         window_h *= 2;
@@ -38,12 +38,8 @@ int display_bitmap(const bj_bitmap* p_bitmap, const char* title, int pause_on_di
     bj_window* window = bj_window_new(title, 100, 100, window_w, window_h, 0);
 
     bj_bitmap* p_window_framebuffer = bj_window_get_framebuffer(window, 0);
-    bj_bitmap_blit(
-        p_bitmap,
-        &(bj_rect){ 0, 0, bitmap_w, bitmap_h },
-        p_window_framebuffer,
-        & (bj_rect){ 0, 0, window_w, window_h }
-    );
+    bj_bitmap_blit_stretched(p_bitmap, 0, p_window_framebuffer, 0);
+
     bj_window_update_framebuffer(window);
 
     bj_window_set_key_event(window, key_event);
@@ -74,8 +70,8 @@ int main(int argc, char* argv[]) {
     size_t total_tries       = 0;
     size_t total_ok          = 0;
     const char* bmp_files[] = {
-        "/bmp/all_gray.bmp",
         "/bmp/blackbuck.bmp",
+        "/bmp/all_gray.bmp",
         "/bmp/bmp_24.bmp",
         "/bmp/dots.bmp",
         "/bmp/gabe-idle-run.bmp",
