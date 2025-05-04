@@ -6,6 +6,9 @@
 
 #if BJ_HAS_FEATURE(WIN32)
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif
 #include <windows.h>
 #include <windowsx.h>
 
@@ -314,7 +317,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             break;
 
         case WM_MBUTTONDOWN:
-
         case WM_MBUTTONUP:
             bj_window_input_button((bj_window*)p_window, 
                 BJ_BUTTON_MIDDLE,
@@ -325,7 +327,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             break;
 
         case WM_MOUSEMOVE: {
-
             const int x = GET_X_LPARAM(lParam);
             const int y = GET_Y_LPARAM(lParam);
 

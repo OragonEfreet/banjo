@@ -6,6 +6,7 @@
 /// release to let the simulation animate.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
+#include <banjo/log.h>
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/window.h>
@@ -13,10 +14,8 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
 
-#define CANVAS_WIDTH 200
-#define CANVAS_HEIGHT 200
-
-#define STEP_MS 50
+#define CANVAS_WIDTH 80
+#define CANVAS_HEIGHT 80
 
 // We will draw on `draw_fb` and display on `presentation_fb`
 bj_bitmap* draw_fb = 0;
@@ -138,24 +137,26 @@ int main(int argc, char* argv[]) {
     bj_bitmap_clear(presentation_fb);
     
     size_t step = 0;
+    double time = bj_get_time();
     while (!bj_window_should_close(window)) {
         bj_poll_events();
 
+        double current_time = bj_get_time();
+        double time_since_last = current_time - time;
+
         bool need_update = false;
-        if (!painting /* && ticks_since_last >= STEP_MS*/) {
+        if (!painting && time_since_last >= 0.05) {
             draw(step++);
-            //ticks = current_ticks;
             need_update = true;
         }
 
         if (need_update || painting) {
             bj_bitmap_blit_stretched(presentation_fb, 0, framebuffer, 0);
             bj_window_update_framebuffer(window);
-
-            //SDL_RenderClear(renderer);
+            time = current_time;
         }
 
-        bj_sleep(STEP_MS); // TODO Use a better timer system
+        bj_sleep(10);
     }
 
 

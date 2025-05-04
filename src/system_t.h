@@ -21,6 +21,8 @@ typedef struct bj_system_backend_t {
     bj_window_get_size_fn                get_window_size;
     bj_window_create_framebuffer_fn      create_window_framebuffer;
     bj_window_flush_framebuffer_fn       flush_window_framebuffer;
+
+    uint64_t                             timer_base;
 } bj_system_backend;
 
 typedef struct {

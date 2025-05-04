@@ -6,6 +6,7 @@
 /// release to let the simulation animate.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
+#include <banjo/log.h>
 #include <banjo/memory.h>
 
 #include "sdl_helpers.h"

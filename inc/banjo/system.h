@@ -50,4 +50,20 @@ BANJO_EXPORT void bj_sleep(
     int milliseconds
 );
 
+BANJO_EXPORT double bj_get_time(
+    void
+);
+
+BANJO_EXPORT uint64_t bj_get_time_counter(
+    void
+);
+
+BANJO_EXPORT uint64_t bj_get_time_frequency(
+    void
+);
+
+
+
+
+
 /// \} // End of system group
