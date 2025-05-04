@@ -204,7 +204,7 @@ static uint32_t buffer_get_pixel(size_t x, size_t y, size_t stride, void* buffer
     uint32_t pixel_value = 0;
     bj_memcpy(&pixel_value, (uint8_t*)buffer + byte_offset, bytes_to_copy);
     pixel_value >>= bit_in_first_byte;
-    pixel_value &= (1u << bpp) - 1;
+    //pixel_value &= (1u << bpp) - 1; // TODO This does not work
     return pixel_value;
 }
 

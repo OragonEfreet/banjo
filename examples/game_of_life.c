@@ -16,8 +16,6 @@
 #define CANVAS_WIDTH 200
 #define CANVAS_HEIGHT 200
 
-#define BMP_MODE BJ_PIXEL_MODE_BGR24
-
 #define STEP_MS 50
 
 // We will draw on `draw_fb` and display on `presentation_fb`
@@ -68,7 +66,7 @@ void draw(size_t step) {
     bj_bitmap_clear(draw_fb);
 
     for (size_t x = 0; x < CANVAS_WIDTH; ++x) {
-        for (size_t y = 0; y < CANVAS_HEIGHT; ++y) {
+         for (size_t y = 0; y < CANVAS_HEIGHT; ++y) {
             size_t alive_neigh = 0;
 
             // Define the range of neighboring cells
@@ -110,17 +108,7 @@ void draw(size_t step) {
 }
 
 int main(int argc, char* argv[]) {
-    presentation_fb = bj_bitmap_new(CANVAS_WIDTH, CANVAS_HEIGHT, BMP_MODE, 0);
-    draw_fb = bj_bitmap_new(CANVAS_WIDTH, CANVAS_HEIGHT, BMP_MODE, 0);
-
-    draw_color_1 = bj_pixel_value(BMP_MODE, 0x80, 0x80, 0x00);
-    draw_color_2 = bj_pixel_value(BMP_MODE, 0x00, 0x80, 0x00);
-    back_color = bj_pixel_value(BMP_MODE, 0x40, 0x40, 0x40);
-
-    bj_bitmap_set_clear_color(presentation_fb, back_color);
-    bj_bitmap_set_clear_color(draw_fb, back_color);
-
-    bj_bitmap_clear(presentation_fb);
+    
 
     bj_error* p_error = 0;
 
@@ -132,10 +120,23 @@ int main(int argc, char* argv[]) {
     bj_window_set_key_event(window, key_event);
     bj_window_set_button_event(window, button_event);
     bj_window_set_cursor_event(window, cursor_event);
-
-
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
 
+    const bj_pixel_mode bmp_mode = bj_bitmap_mode(framebuffer);// TODO Doesn't work with framebuffer's mode.
+    //const bj_pixel_mode bmp_mode = BJ_PIXEL_MODE_BGR24;
+
+    presentation_fb = bj_bitmap_new(CANVAS_WIDTH, CANVAS_HEIGHT, bmp_mode, 0);
+    draw_fb = bj_bitmap_new(CANVAS_WIDTH, CANVAS_HEIGHT, bmp_mode, 0);
+
+    draw_color_1 = bj_pixel_value(bmp_mode, 0x80, 0x80, 0x00);
+    draw_color_2 = bj_pixel_value(bmp_mode, 0x00, 0x80, 0x00);
+    back_color = bj_pixel_value(bmp_mode, 0x40, 0x40, 0x40);
+
+    bj_bitmap_set_clear_color(presentation_fb, back_color);
+    bj_bitmap_set_clear_color(draw_fb, back_color);
+
+    bj_bitmap_clear(presentation_fb);
+    
     size_t step = 0;
     while (!bj_window_should_close(window)) {
         bj_poll_events();
@@ -154,7 +155,7 @@ int main(int argc, char* argv[]) {
             //SDL_RenderClear(renderer);
         }
 
-        bj_sleep(16); // TODO Use a better timer system
+        bj_sleep(STEP_MS); // TODO Use a better timer system
     }
 
 
