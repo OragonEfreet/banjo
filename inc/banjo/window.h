@@ -195,6 +195,12 @@ BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
     bj_window_key_event_t   p_callback
 );
 
+BANJO_EXPORT void bj_close_on_escape(
+    bj_window* p_window,
+    bj_event_action action,
+    bj_key key,
+    int scancode
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for enter events.

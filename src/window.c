@@ -31,6 +31,20 @@ bool bj_window_should_close(
     return bj_window_get_flags(p_window, BJ_WINDOW_FLAG_CLOSE) > 0;
 }
 
+void bj_close_on_escape(
+    bj_window* p_window,
+    bj_event_action action,
+    bj_key key,
+    int scancode
+) {
+    (void)p_window;
+    (void)scancode;
+
+    if (key == BJ_KEY_ESCAPE && action == BJ_RELEASE) {
+        bj_window_set_should_close(p_window);
+    }
+}
+
 bj_window_key_event_t bj_window_set_key_event(
     bj_window* p_window,
     bj_window_key_event_t   p_event

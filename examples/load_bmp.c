@@ -13,15 +13,6 @@
 
 #include <string.h>
 
-void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
-    (void)p_window;
-    (void)scancode;
-
-    if (key == BJ_KEY_ESCAPE && action == BJ_RELEASE) {
-        bj_window_set_should_close(p_window);
-    }
-}
-
 int display_bitmap(const bj_bitmap* p_bitmap, const char* title, int pause_on_display) {
 
     const size_t bitmap_w = bj_bitmap_width(p_bitmap);
@@ -42,7 +33,7 @@ int display_bitmap(const bj_bitmap* p_bitmap, const char* title, int pause_on_di
 
     bj_window_update_framebuffer(window);
 
-    bj_window_set_key_event(window, key_event);
+    bj_window_set_key_event(window, bj_close_on_escape);
 
     if (pause_on_display) {
         while (!bj_window_should_close(window)) {

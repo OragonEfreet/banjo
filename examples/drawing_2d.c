@@ -8,15 +8,6 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
-void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
-    (void)p_window;
-    (void)scancode;
-
-    if (key == BJ_KEY_ESCAPE && action == BJ_RELEASE) {
-        bj_window_set_should_close(p_window);
-    }
-}
-
 void draw(bj_bitmap* bmp) {
     bj_bitmap_clear(bmp);
 
@@ -80,7 +71,7 @@ int main(void) {
 
     bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 500, 500, 0);
 
-    bj_window_set_key_event(window, key_event);
+    bj_window_set_key_event(window, bj_close_on_escape);
 
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
 
