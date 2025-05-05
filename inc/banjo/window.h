@@ -10,6 +10,7 @@
 #pragma once
 
 #include <banjo/api.h>
+#include <banjo/bitmap.h>
 #include <banjo/input.h>
 #include <banjo/memory.h>
 
@@ -194,6 +195,12 @@ BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
     bj_window_key_event_t   p_callback
 );
 
+BANJO_EXPORT void bj_close_on_escape(
+    bj_window* p_window,
+    bj_event_action action,
+    bj_key key,
+    int scancode
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for enter events.
@@ -229,6 +236,21 @@ BANJO_EXPORT uint8_t bj_window_get_flags(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_poll_events(
     void
+);
+
+BANJO_EXPORT bj_bitmap* bj_window_get_framebuffer(
+    bj_window* p_window,
+    bj_error** p_error
+);
+
+BANJO_EXPORT int bj_window_get_size(
+    const bj_window* p_window,
+    int* width,
+    int* height
+);
+
+BANJO_EXPORT void bj_window_update_framebuffer(
+    bj_window* p_window
 );
 
 /// \} // End of window group

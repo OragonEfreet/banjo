@@ -11,6 +11,8 @@ struct bj_window_t {
 
     char                     keystates[0xFF];
     uint8_t                  flags;
+
+    bj_bitmap*               p_framebuffer;
 };
 
 void bj_window_input_key(bj_window* p_window, bj_event_action action, bj_key key, int scancode);

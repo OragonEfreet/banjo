@@ -131,14 +131,34 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
     bj_error**        p_error
 );
 
+BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_pixels(
+    void*            p_pixels,
+    size_t           width,
+    size_t           height,
+    bj_pixel_mode    mode,
+    size_t           stride
+);
+
+BANJO_EXPORT bj_bitmap* bj_bitmap_copy(
+    const bj_bitmap* p_bitmap
+);
+
+BANJO_EXPORT bj_bitmap* bj_bitmap_convert(
+    const bj_bitmap* p_bitmap,
+    bj_pixel_mode    mode
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes a new bj_bitmap with the specified width and height.
 ///
 /// \param p_bitmap  The bitmap object.
+/// \param p_pixels  The pixel buffer data.
 /// \param width     Width of the bitmap.
 /// \param height    Height of the bitmap.
 /// \param mode      The pixel mode.
 /// \param stride    The suggested bitmap stride.
+/// 
+/// If the pixel buffer provided by `p_pixels` is _0_, the buffer will allocate
 ///
 /// \return A pointer to the newly created bj_bitmap object.
 ///
@@ -148,6 +168,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_bitmap_init(
     bj_bitmap* p_bitmap,
+    void* p_pixels,
     size_t width,
     size_t height,
     bj_pixel_mode mode,
@@ -384,10 +405,20 @@ BANJO_EXPORT void bj_bitmap_set_clear_color(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bool bj_bitmap_blit(
-    const bj_bitmap*  p_source,
-    const bj_rect*    p_source_area,
-    bj_bitmap*        p_destination,
-    bj_rect*          p_destination_area
+    const bj_bitmap* p_source,
+    const bj_rect* p_source_area,
+    bj_bitmap* p_destination,
+    const bj_rect* p_destination_area
 );
+
+BANJO_EXPORT bool bj_bitmap_blit_stretched(
+    const bj_bitmap* p_source,
+    const bj_rect* p_source_area,
+    bj_bitmap* p_destination,
+    const bj_rect* p_destination_area
+);
+
+
+
 
 /// \} // End of bitmap group

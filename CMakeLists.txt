@@ -4,6 +4,7 @@ project(banjo C)
 include(CTest)
 
 if (MSVC)
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
 else()
     add_compile_options(-Wall -Wextra)
@@ -17,7 +18,11 @@ option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"  
 option(BJ_CONFIG_LOG_COLOR    "Banjo logs will have colored output"                            OFF)
 option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    OFF)
 
-file(GLOB SOURCES "${CMAKE_SOURCE_DIR}/src/*.c")
+file(GLOB SOURCES
+    "${CMAKE_SOURCE_DIR}/src/*.c"
+    "${CMAKE_SOURCE_DIR}/src/*.h"
+    "${CMAKE_SOURCE_DIR}/inc/banjo/*.h"
+)
 add_library(banjo ${SOURCES})
 target_include_directories(banjo PUBLIC inc)
 

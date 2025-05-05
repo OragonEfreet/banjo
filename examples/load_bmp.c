@@ -8,23 +8,61 @@
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
-
-#include "sdl_helpers.h"
-#include <SDL3/SDL_main.h>
+#include <banjo/system.h>
+#include <banjo/window.h>
 
 #include <string.h>
 
+int display_bitmap(const bj_bitmap* p_bitmap, const char* title, int pause_on_display) {
+
+    const size_t bitmap_w = bj_bitmap_width(p_bitmap);
+    const size_t bitmap_h = bj_bitmap_height(p_bitmap);
+
+    // Just make the window larger for small images
+    size_t window_w = bitmap_w;
+    size_t window_h = bitmap_h;
+    while ((window_w + window_h) * (window_w + window_h) < 800 * 800) {
+        window_w *= 2;
+        window_h *= 2;
+    }
+
+    bj_window* window = bj_window_new(title, 100, 100, window_w, window_h, 0);
+
+    bj_bitmap* p_window_framebuffer = bj_window_get_framebuffer(window, 0);
+    bj_bitmap_blit_stretched(p_bitmap, 0, p_window_framebuffer, 0);
+
+    bj_window_update_framebuffer(window);
+
+    bj_window_set_key_event(window, bj_close_on_escape);
+
+    if (pause_on_display) {
+        while (!bj_window_should_close(window)) {
+            bj_poll_events();
+            bj_sleep(30);
+        }
+    } else {
+        bj_sleep(100);
+    }
+
+    bj_window_del(window);
+
+    return 1;
+}
+
 int main(int argc, char* argv[]) {
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    bj_error* p_error = 0;
+
+    if (!bj_system_init(&p_error)) {
+        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return 1;
     }
 
     size_t total_tries       = 0;
     size_t total_ok          = 0;
     const char* bmp_files[] = {
-        "/bmp/all_gray.bmp",
         "/bmp/blackbuck.bmp",
+        "/bmp/all_gray.bmp",
         "/bmp/bmp_24.bmp",
         "/bmp/dots.bmp",
         "/bmp/gabe-idle-run.bmp",
@@ -118,8 +156,6 @@ int main(int argc, char* argv[]) {
         bj_memcpy(bmp_path, BANJO_ASSETS_DIR, asset_dir_strlen);
         bj_memcpy(bmp_path+asset_dir_strlen, bmp_file, bmp_file_strlen);
 
-        /* sdl_what_is_the_format(bmp_path); */
-
         bj_error* error = 0;
         bj_bitmap* p_bitmap = bj_bitmap_new_from_file(bmp_path, &error);
         bj_free(bmp_path);
@@ -135,7 +171,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        if(sdl_display_bitmap(p_bitmap, bmp_file, pause_on_display)) {
+        if(display_bitmap(p_bitmap, bmp_file, pause_on_display)) {
             bj_info("%s OK", bmp_file);
             total_ok +=1;
         }
@@ -145,7 +181,7 @@ int main(int argc, char* argv[]) {
 
     bj_info("%d/%d files read (%2.2f%)", total_ok, total_tries, ((float)total_ok / (float)total_tries) * 100.f);
 
-    SDL_Quit();
+    bj_system_dispose(0);
     return 0;
 }
 

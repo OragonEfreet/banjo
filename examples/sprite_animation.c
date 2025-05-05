@@ -9,9 +9,8 @@
 #include <banjo/bitmap.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
-
-#include "sdl_helpers.h"
-#include <SDL3/SDL_main.h>
+#include <banjo/system.h>
+#include <banjo/window.h>
 
 #define SPRITE_W 24
 #define SPRITE_H 24
@@ -19,7 +18,6 @@
 
 #define WINDOW_W 240
 #define WINDOW_H 240
-
 
 int main(int argc, char* argv[]) {
 
@@ -30,48 +28,38 @@ int main(int argc, char* argv[]) {
 
     bj_bitmap* bmp_sprite_sheet = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    bj_error* p_error = 0;
+
+    if (!bj_system_init(&p_error)) {
+        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return 1;
     }
 
-    SDL_Window* window     = SDL_CreateWindow("sprite sheet - Banjo", WINDOW_W, WINDOW_H, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, 0);
-    SDL_PixelFormat pixel_format = bj_pixel_mode_to_sdl(bj_bitmap_mode(bmp_rendering));
-    SDL_Texture* texture         = SDL_CreateTexture(renderer, pixel_format, SDL_TEXTUREACCESS_STREAMING, SPRITE_W, SPRITE_H);
-    SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+    bj_window* window     = bj_window_new("sprite sheet - Banjo", 0, 0, WINDOW_W, WINDOW_H, 0);
+    bj_window_set_key_event(window, bj_close_on_escape);
 
+    bj_bitmap* p_window_framebuffer = bj_window_get_framebuffer(window, 0);
 
     size_t frame_count = 1;
 
-    bool quit = false;
-    SDL_Event e;
-    while (!quit) {
-        while (SDL_PollEvent(&e) != 0) {
-            if(e.type == SDL_EVENT_KEY_UP) {
-                quit = true;
-            }
-        }
+    while (!bj_window_should_close(window)) {
+        bj_poll_events();
 
         bj_bitmap_blit(bmp_sprite_sheet, &(bj_rect){
             .x = frame_count * SPRITE_W,
-            .w = 24, .h = 24
-        }, bmp_rendering, &(bj_rect){.x = 0, .y = 0});
+                .w = 24, .h = 24
+        }, bmp_rendering, & (bj_rect){.x = 0, .y = 0});
 
-        SDL_UpdateTexture(texture, 0, bj_bitmap_pixels(bmp_rendering), bj_bitmap_stride(bmp_rendering));
-        SDL_RenderClear(renderer);
-        SDL_RenderTexture(renderer, texture, 0, 0);
-        SDL_RenderPresent(renderer);
+        bj_bitmap_blit_stretched(bmp_rendering, 0, p_window_framebuffer, 0);
+        bj_window_update_framebuffer(window);
 
-        SDL_Delay(120);
-        if(++frame_count >= FRAMES) {
+        bj_sleep(120);
+        if (++frame_count >= FRAMES) {
             frame_count = 1;
         }
     }
 
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-
-    SDL_Quit();
+    bj_system_dispose(0);
 
     bj_bitmap_del(bmp_sprite_sheet);
     bj_bitmap_del(bmp_rendering);

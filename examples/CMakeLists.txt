@@ -12,5 +12,5 @@ foreach(_bin_source_path ${_bin_source_paths})
     endif()
 endforeach()
 
-# add_subdirectory(sdl)
+
 

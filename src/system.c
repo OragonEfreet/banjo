@@ -27,6 +27,8 @@ bj_system_backend* s_backend = 0;
 
 #define FORCED_BACKEND 0
 
+void bj_init_timer(void);
+
 bool bj_system_init(
     bj_error** p_error
 ) {
@@ -51,6 +53,9 @@ bool bj_system_init(
         if(p_backend != 0) {
             bj_info("Initialized %s system backend", p_create_info->name);
             s_backend = p_backend;
+
+            bj_init_timer();
+            s_backend->timer_base = bj_get_time_counter();
             return true;
         }
     }
@@ -66,4 +71,11 @@ void bj_system_dispose(
     dispose(s_backend, p_error);
     bj_info("Disposed system backend");
 }
+
+double bj_get_time(
+    void
+) {
+    return (double)(bj_get_time_counter() - s_backend->timer_base) / bj_get_time_frequency();
+}
+
 
