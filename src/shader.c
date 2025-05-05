@@ -27,6 +27,13 @@ float bj_smoothstep(
     return t * t * (3.0f - 2.0f * t);
 }
 
+bj_mod(
+    float x,
+    float y
+) {
+    return x - y * floorf(x / y);
+}
+
 float bj_fract(
     float x
 ) {

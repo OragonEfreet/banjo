@@ -26,6 +26,12 @@ BANJO_EXPORT float bj_fract(
     float x
 );
 
+BANJO_EXPORT bj_mod(
+    float x,
+    float y
+);
+
+
 
 #define BJ_SHADER_INVERT_X 0x01
 #define BJ_SHADER_INVERT_Y 0x02
