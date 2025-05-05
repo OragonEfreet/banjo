@@ -418,4 +418,7 @@ BANJO_EXPORT bool bj_bitmap_blit_stretched(
     const bj_rect* p_destination_area
 );
 
+
+
+
 /// \} // End of bitmap group

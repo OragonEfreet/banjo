@@ -568,3 +568,4 @@ void bj_bitmap_rgb(
     );
 }
 
+
