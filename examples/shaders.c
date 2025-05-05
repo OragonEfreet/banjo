@@ -9,67 +9,82 @@
 #include <banjo/window.h>
 #include <banjo/shader.h>
 
-#define CANVAS_W 500
-#define CANVAS_H 500
+#define CANVAS_W 512
+#define CANVAS_H 512
 
-typedef struct uniform_t {
-    struct { float w; float h; } resolution;
-    struct { float x; float y; } mouse;
-    float time;
-} uniform;
-static uniform s_uniform;
-
-float plot(const bj_vec2 st, float pct) {
-    return bj_smoothstep(pct - 0.02f, pct, st[1]) - bj_smoothstep(pct, pct + 0.02f, st[1]);
+// This shader comes from https://www.shadertoy.com/view/mtyGWy
+// Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
+void palette(bj_vec3 res, float t, const bj_vec3 a, const bj_vec3 b, const bj_vec3 c, const bj_vec3 d) {
+    const float f = 6.28318f;
+    res[0] = a[0] + b[0] * cosf(f * (c[0] * t + d[0]));
+    res[1] = a[1] + b[1] * cosf(f * (c[1] * t + d[1]));
+    res[2] = a[2] + b[2] * cosf(f * (c[2] * t + d[2]));
 }
 
-int shader_code(const bj_vec2 frag_coords, bj_vec3 frag_color, const uniform* u) {
+void my_palette(bj_vec3 res, float t) {
+    palette(res, t,
+        (bj_vec3){.5f, .5f, .5f },
+        (bj_vec3){.5f, .5f, .5f },
+        (bj_vec3){1.f, 1.f, 1.f },
+        (bj_vec3){.263f, .416f, .557f }
+     );
+}
 
-    bj_vec2 st = {frag_coords[0] / u->resolution.w,(u->resolution.h - frag_coords[1]) / u->resolution.h};
-    
-    float y = bj_smoothstep(0.1f, 0.9f, st[0]);
+int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
+    float time = *(float*)data;
 
-    float pct = plot(st, y);
+    bj_vec2 uv;
+    bj_vec2_copy(uv, frag_coords);
+    bj_vec2 uv0;
+    bj_vec2_copy(uv0, frag_coords);
+    bj_vec3 final_color = { 0 };
 
-    bj_vec3_set(frag_color,
-        (1.0f - pct) * y,
-        (1.0f - pct) * y + pct,
-        (1.0f - pct) * y
-    );
+    for(float i = 0.f ; i < 4.f ; ++i) {
+        
+        bj_vec2_scale(uv, uv, 1.5f);
+        bj_vec2_apply(uv, uv, bj_fract);
+        bj_vec2_sub(uv, uv, (bj_vec2) { .5f, .5f });
+
+        float d = bj_vec2_len(uv) * expf(-bj_vec2_len(uv0));
+
+        bj_vec3 col;
+        my_palette(col, bj_vec2_len(uv0) + i * .4f + time * .4f);
+
+        d = sinf(d * 8.f + time) / 8.f;
+        d = fabsf(d);
+        
+        d = powf(0.01f / d, 1.2f);
+
+        bj_vec3_scale(col, col, d);
+        bj_vec3_add(final_color, final_color, col);
+    }
+
+    bj_vec3_copy(frag_color, final_color);
     
     return 1;
 }
 
-void cursor_event(bj_window* p_window, int x, int y) {
-    (void)p_window;
-    s_uniform.mouse.x = (float)x;
-    s_uniform.mouse.y = (float)y;
-}
 
 int main(void) {
 
    if (bj_system_init(0)) {    
 
-        bj_window* window = bj_window_new("The Book of Shaders", 1000, 500, CANVAS_W, CANVAS_H, 0);
+        bj_window* window = bj_window_new("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
         bj_window_set_key_event(window, bj_close_on_escape);
-        bj_window_set_cursor_event(window, cursor_event);
 
         bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
-
-        s_uniform.resolution.w = (float)CANVAS_W;
-        s_uniform.resolution.h = (float)CANVAS_H;
 
         bj_bitmap_shading_fn_t current_shader = shader_code;
         
         while (!bj_window_should_close(window)) {
             bj_poll_events();
 
-            s_uniform.time = (float)bj_get_time();
+            float time = (float)bj_get_time();
 
-            bj_bitmap_apply_shader(framebuffer, current_shader, &s_uniform);
+            bj_bitmap_apply_shader(framebuffer, current_shader, &time, BJ_SHADER_STANDARD_FLAGS);
 
             bj_window_update_framebuffer(window);
-            bj_sleep(30);
+            bj_sleep(15);
         }
 
         bj_window_del(window);

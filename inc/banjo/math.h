@@ -20,6 +20,11 @@ BJ_INLINE void bj_vec2_set(bj_vec2 res, bj_real_t a, bj_real_t b) {
     res[0] = a; res[1] = b;
 }
 
+BJ_INLINE void bj_vec2_apply(bj_vec2 res, const bj_vec2 a, bj_real_t(*f)(bj_real_t)) {
+    res[0] = f(a[0]);
+    res[1] = f(a[1]);
+}
+
 BJ_INLINE void bj_vec2_add(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
     res[0] = lhs[0] + rhs[0];
     res[1] = lhs[1] + rhs[1];
@@ -33,6 +38,11 @@ BJ_INLINE void bj_vec2_sub(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
 BJ_INLINE void bj_vec2_scale(bj_vec2 res, const bj_vec2 v, bj_real_t s) {
     res[0] = v[0] * s;
     res[1] = v[1] * s;
+}
+
+BJ_INLINE void bj_vec2_scale_each(bj_vec2 res, const bj_vec2 v, const bj_vec2 s) {
+    res[0] = v[0] * s[0];
+    res[1] = v[1] * s[1];
 }
 
 BJ_INLINE bj_real_t bj_vec2_dot(const bj_vec2 a, const bj_vec2 b) {
@@ -69,6 +79,13 @@ BJ_INLINE void bj_vec2_copy(bj_vec2 res, const bj_vec2 src) {
 BJ_INLINE void bj_vec3_set(bj_vec2 res, bj_real_t a, bj_real_t b, bj_real_t c) {
     res[0] = a; res[1] = b; res[2] = c;
 }
+
+BJ_INLINE void bj_vec3_apply(bj_vec3 res, const bj_vec3 a, bj_real_t(*f)(bj_real_t)) {
+    res[0] = f(a[0]);
+    res[1] = f(a[1]);
+    res[2] = f(a[2]);
+}
+
 
 BJ_INLINE void bj_vec3_add(bj_vec3 res, const bj_vec3 lhs, const bj_vec3 rhs) {
     res[0] = lhs[0] + rhs[0];
@@ -125,6 +142,13 @@ BJ_INLINE void bj_vec3_copy(bj_vec3 res, const bj_vec3 src) {
 
 BJ_INLINE void bj_vec4_set(bj_vec2 res, bj_real_t a, bj_real_t b, bj_real_t c, bj_real_t d) {
     res[0] = a; res[1] = b; res[2] = c; res[3] = d;
+}
+
+BJ_INLINE void bj_vec4_apply(bj_vec4 res, const bj_vec4 a, bj_real_t(*f)(bj_real_t)) {
+    res[0] = f(a[0]);
+    res[1] = f(a[1]);
+    res[2] = f(a[2]);
+    res[3] = f(a[4]);
 }
 
 BJ_INLINE void bj_vec4_add(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
