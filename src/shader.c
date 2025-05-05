@@ -27,7 +27,7 @@ float bj_smoothstep(
     return t * t * (3.0f - 2.0f * t);
 }
 
-bj_mod(
+int bj_mod(
     float x,
     float y
 ) {
