@@ -40,6 +40,9 @@ void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scan
 }
 
 void button_event(bj_window* p_window, int button, bj_event_action action, int x, int y) {
+    (void)p_window;
+    (void)x;
+    (void)y;
     if (action == BJ_PRESS) {
         painting = true;
     }
@@ -51,6 +54,7 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
 }
 
 void cursor_event(bj_window* p_window, int x, int y) {
+    (void)p_window;
     if (painting) {
         bj_bitmap_put_pixel(presentation_fb,
             ((float)x / (float)SCREEN_WIDTH) * CANVAS_WIDTH,
@@ -62,6 +66,7 @@ void cursor_event(bj_window* p_window, int x, int y) {
 
 
 void draw(size_t step) {
+    (void)step;
     bj_bitmap_clear(draw_fb);
 
     for (size_t x = 0; x < CANVAS_WIDTH; ++x) {
@@ -106,7 +111,7 @@ void draw(size_t step) {
     draw_fb = temp;
 }
 
-int main(int argc, char* argv[]) {
+int main() {
     
 
     bj_error* p_error = 0;

@@ -49,7 +49,7 @@ int display_bitmap(const bj_bitmap* p_bitmap, const char* title, int pause_on_di
     return 1;
 }
 
-int main(int argc, char* argv[]) {
+int main() {
 
     bj_error* p_error = 0;
 

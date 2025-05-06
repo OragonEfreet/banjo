@@ -140,14 +140,14 @@ void bj_bitmap_del(
 }
 
 size_t bj_bitmap_width(
-    bj_bitmap*     p_bitmap
+    const bj_bitmap*     p_bitmap
 ) {
     bj_check_or_0(p_bitmap);
     return p_bitmap->width;
 }
 
 size_t bj_bitmap_height(
-    bj_bitmap*     p_bitmap
+    const bj_bitmap*     p_bitmap
 ) {
     bj_check_or_0(p_bitmap);
     return p_bitmap->height;
