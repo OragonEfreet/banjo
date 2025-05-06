@@ -43,6 +43,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
 /// The stride corresponds to the size in bytes of a row.
 /// If the value is less than the required stride, the actual minimum stride
 /// is used.
+/// Set it to _0_ to automatically compute the stride.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_bitmap_new(
     size_t           width,
@@ -201,7 +202,7 @@ BANJO_EXPORT void* bj_bitmap_pixels(
 /// \return The bitmap width as number of pixels.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT size_t bj_bitmap_width(
-    bj_bitmap*     p_bitmap
+    const bj_bitmap*     p_bitmap
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +212,7 @@ BANJO_EXPORT size_t bj_bitmap_width(
 /// \return The bitmap height as number of pixels.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT size_t bj_bitmap_height(
-    bj_bitmap*     p_bitmap
+    const bj_bitmap*     p_bitmap
 );
 
 ////////////////////////////////////////////////////////////////////////////////

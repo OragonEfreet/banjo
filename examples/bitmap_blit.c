@@ -15,7 +15,7 @@
 #define WINDOW_W 800
 #define WINDOW_H 600
 
-int main(int argc, char* argv[]) {
+int main() {
 
     bj_bitmap* bmp_rendering = bj_bitmap_new(WINDOW_W, WINDOW_H, BJ_PIXEL_MODE_BGR24, 0);
     bj_bitmap_set_clear_color(bmp_rendering, bj_bitmap_pixel_value(bmp_rendering, 0xFF, 0x00, 0x00));

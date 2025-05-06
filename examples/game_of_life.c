@@ -11,11 +11,13 @@
 #include <banjo/system.h>
 #include <banjo/window.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 800
+#include <stdlib.h>
 
-#define CANVAS_WIDTH 80
-#define CANVAS_HEIGHT 80
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+
+#define CANVAS_WIDTH 160
+#define CANVAS_HEIGHT 120
 
 // We will draw on `draw_fb` and display on `presentation_fb`
 bj_bitmap* draw_fb = 0;
@@ -40,6 +42,9 @@ void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scan
 }
 
 void button_event(bj_window* p_window, int button, bj_event_action action, int x, int y) {
+    (void)p_window;
+    (void)x;
+    (void)y;
     if (action == BJ_PRESS) {
         painting = true;
     }
@@ -51,6 +56,7 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
 }
 
 void cursor_event(bj_window* p_window, int x, int y) {
+    (void)p_window;
     if (painting) {
         bj_bitmap_put_pixel(presentation_fb,
             ((float)x / (float)SCREEN_WIDTH) * CANVAS_WIDTH,
@@ -62,51 +68,52 @@ void cursor_event(bj_window* p_window, int x, int y) {
 
 
 void draw(size_t step) {
+    (void)step;
     bj_bitmap_clear(draw_fb);
 
     for (size_t x = 0; x < CANVAS_WIDTH; ++x) {
-         for (size_t y = 0; y < CANVAS_HEIGHT; ++y) {
+        for (size_t y = 0; y < CANVAS_HEIGHT; ++y) {
             size_t alive_neigh = 0;
 
-            // Define the range of neighboring cells
+            // Define neighbor bounds (no wraparound)
             size_t xmin = x > 0 ? x - 1 : 0;
             size_t xmax = x < CANVAS_WIDTH - 1 ? x + 1 : CANVAS_WIDTH - 1;
             size_t ymin = y > 0 ? y - 1 : 0;
             size_t ymax = y < CANVAS_HEIGHT - 1 ? y + 1 : CANVAS_HEIGHT - 1;
 
-            // Count alive neighbors
             for (size_t nx = xmin; nx <= xmax; ++nx) {
                 for (size_t ny = ymin; ny <= ymax; ++ny) {
-                    if (!(nx == x && ny == y)) // Exclude the cell itself
-                        alive_neigh += bj_bitmap_get(presentation_fb, nx, ny) != back_color;
+                    if (!(nx == x && ny == y)) {
+                        if (bj_bitmap_get(presentation_fb, nx, ny) != back_color) {
+                            alive_neigh++;
+                        }
+                    }
                 }
             }
 
-            // Update cell state
-            if (bj_bitmap_get(presentation_fb, x, y) != back_color) {
-                if (alive_neigh > 3 || alive_neigh < 2) {
+            bool is_alive = bj_bitmap_get(presentation_fb, x, y) != back_color;
+
+            if (is_alive) {
+                if (alive_neigh == 2 || alive_neigh == 3) {
+                    bj_bitmap_put_pixel(draw_fb, x, y, draw_color_1);
+                } else {
                     bj_bitmap_put_pixel(draw_fb, x, y, back_color);
                 }
-                else {
-                    bj_bitmap_put_pixel(draw_fb, x, y, draw_color_1);
-                }
-            }
-            else {
+            } else {
                 if (alive_neigh == 3) {
-                    bj_bitmap_put_pixel(draw_fb, x, y, draw_color_2);
+                    bj_bitmap_put_pixel(draw_fb, x, y, draw_color_1);
                 }
             }
         }
     }
 
-
-    // Swap presentation and draw bitmap
+    // Swap buffers
     bj_bitmap* temp = presentation_fb;
     presentation_fb = draw_fb;
     draw_fb = temp;
 }
 
-int main(int argc, char* argv[]) {
+int main() {
     
 
     bj_error* p_error = 0;
@@ -135,7 +142,7 @@ int main(int argc, char* argv[]) {
     bj_bitmap_set_clear_color(draw_fb, back_color);
 
     bj_bitmap_clear(presentation_fb);
-    
+
     size_t step = 0;
     double time = bj_get_time();
     while (!bj_window_should_close(window)) {

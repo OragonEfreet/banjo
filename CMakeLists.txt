@@ -28,6 +28,10 @@ target_include_directories(banjo PUBLIC inc)
 
 set_target_properties(banjo PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED TRUE)
 
+if(NOT MSVC)
+    target_link_libraries(banjo PRIVATE m)
+endif()
+
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(banjo PRIVATE BANJO_EXPORTS)
 else()

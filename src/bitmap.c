@@ -140,14 +140,14 @@ void bj_bitmap_del(
 }
 
 size_t bj_bitmap_width(
-    bj_bitmap*     p_bitmap
+    const bj_bitmap*     p_bitmap
 ) {
     bj_check_or_0(p_bitmap);
     return p_bitmap->width;
 }
 
 size_t bj_bitmap_height(
-    bj_bitmap*     p_bitmap
+    const bj_bitmap*     p_bitmap
 ) {
     bj_check_or_0(p_bitmap);
     return p_bitmap->height;
@@ -368,11 +368,11 @@ int bj_bitmap_clipped_blit_stretched(
 
     for (int dy = 0; dy < p_dest_rect->h; ++dy) {
         int sy = (int)(p_src_rect->y + dy * scale_y);
-        if (sy < 0 || sy >= p_src->height) continue;
+        if (sy < 0 || sy >= (int)p_src->height) continue;
 
         for (int dx = 0; dx < p_dest_rect->w; ++dx) {
             int sx = (int)(p_src_rect->x + dx * scale_x);
-            if (sx < 0 || sx >= p_src->width) continue;
+            if (sx < 0 || sx >= (int)p_src->width) continue;
 
             bj_bitmap_rgb(p_src, sx, sy, &red, &green, &blue);
             bj_bitmap_put_pixel(

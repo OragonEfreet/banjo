@@ -26,7 +26,7 @@ BANJO_EXPORT float bj_fract(
     float x
 );
 
-BANJO_EXPORT bj_mod(
+BANJO_EXPORT int bj_mod(
     float x,
     float y
 );

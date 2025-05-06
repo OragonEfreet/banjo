@@ -21,6 +21,7 @@ bj_window* bj_window_new(
 void bj_window_del(
     bj_window* p_window
 ) {
+    bj_check(p_window);
     bj_bitmap_del(p_window->p_framebuffer);
     s_backend->delete_window(s_backend, p_window);
 }

@@ -19,7 +19,7 @@
 #define WINDOW_W 240
 #define WINDOW_H 240
 
-int main(int argc, char* argv[]) {
+int main() {
 
 
     bj_bitmap* bmp_rendering = bj_bitmap_new(SPRITE_W, SPRITE_H, BJ_PIXEL_MODE_BGR24, 0);

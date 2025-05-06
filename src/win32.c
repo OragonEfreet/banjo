@@ -109,7 +109,7 @@ static void win32_window_del(
     bj_free(p_window);
 }
 
-bj_bitmap* win32_create_window_framebuffer(
+static bj_bitmap* win32_create_window_framebuffer(
     bj_system_backend* p_backend,
     const bj_window* p_abstract_window,
     bj_error** p_error

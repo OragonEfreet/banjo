@@ -23,7 +23,6 @@ void key_event(bj_window* p_window, bj_event_action mode, bj_key key, int scanco
         case BJ_REPEAT:
             bj_info("Repeat");
             break;
-
     }
 }
 
