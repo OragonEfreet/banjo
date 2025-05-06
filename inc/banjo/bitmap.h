@@ -43,6 +43,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
 /// The stride corresponds to the size in bytes of a row.
 /// If the value is less than the required stride, the actual minimum stride
 /// is used.
+/// Set it to _0_ to automatically compute the stride.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_bitmap_new(
     size_t           width,

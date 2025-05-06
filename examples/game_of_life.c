@@ -12,10 +12,10 @@
 #include <banjo/window.h>
 
 #define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 800
+#define SCREEN_HEIGHT 600
 
-#define CANVAS_WIDTH 80
-#define CANVAS_HEIGHT 80
+#define CANVAS_WIDTH 400
+#define CANVAS_HEIGHT 300
 
 // We will draw on `draw_fb` and display on `presentation_fb`
 bj_bitmap* draw_fb = 0;
