@@ -13,25 +13,24 @@ static uint64_t s_performance_frequency = 0;
 void* bj_load_library(
     const char* p_path
 ) {
-    (void)p_path;
-
-    return 0;
+    bj_check_or_0(p_path);
+    return (void*)LoadLibraryA(p_path);
 }
 
 void bj_unload_library(
     void* p_handle
 ) {
-    (void)p_handle;
+    bj_check(p_handle);
+    FreeLibrary((HMODULE)p_handle);
 }
 
 void* bj_get_symbol(
     void*       p_handle,
     const char* p_name
 ) {
-    (void)p_handle;
-    (void)p_name;
-
-    return 0;
+    bj_check_or_0(p_handle);
+    bj_check_or_0(p_name);
+    return (void*)GetProcAddress((HMODULE)p_handle, p_name);
 }
 
 void bj_init_timer(
