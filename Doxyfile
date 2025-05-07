@@ -1028,9 +1028,7 @@ EXCLUDE_PATTERNS       =
 # wildcard * is used, a substring. Examples: ANamespace, AClass,
 # ANamespace::AClass, ANamespace::*Test
 
-EXCLUDE_SYMBOLS        = bj_check_or_return \
-                         bj_check_or_0 \
-                         bj_check
+EXCLUDE_SYMBOLS        = bj_check_* bj_check BJ_COMPILER_* BJ_BUILD_*
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or directories
 # that contain example code fragments that are included (see the \include
@@ -2351,7 +2349,8 @@ INCLUDE_FILE_PATTERNS  =
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 PREDEFINED             = BANJO_EXPORT= \
-                         BANJO_NO_EXPORT=
+                         BANJO_NO_EXPORT= \
+                         BJ_COMPILER_DOXYGEN
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

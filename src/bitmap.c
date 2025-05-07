@@ -36,12 +36,12 @@ bj_bitmap* bj_bitmap_init(
         if(stride > 0) {
             size_t bufsize = stride * height;
 
-            p_bitmap->width = width;
-            p_bitmap->height = height;
-            p_bitmap->stride = stride;
-            p_bitmap->mode = mode;
+            p_bitmap->width       = width;
+            p_bitmap->height      = height;
+            p_bitmap->stride      = stride;
+            p_bitmap->mode        = mode;
             p_bitmap->clear_color = 0x00000000;
-            p_bitmap->weak = (p_pixels != 0);
+            p_bitmap->weak        = (p_pixels != 0);
 
             if (p_bitmap->weak) {
                 p_bitmap->buffer = p_pixels;
@@ -85,6 +85,7 @@ bj_bitmap* bj_bitmap_new_from_pixels(
     bj_pixel_mode    mode,
     size_t           stride
 ) {
+    bj_check_or_0(p_pixels);
     bj_bitmap bitmap;
     if (bj_bitmap_init(&bitmap, p_pixels, width, height, mode, stride) == 0) {
         return 0;

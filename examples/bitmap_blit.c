@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \example bitmap_blitting.c
+/// \example bitmap_blit.c
 /// Demonstration on bitmap blit function.
 ///
 /// Blitting a \ref bj_bitmap into another is done by calling \ref bj_bitmap_blit.

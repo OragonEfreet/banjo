@@ -1,6 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \example window.c
-/// How to open and close windows.
+/// \example shaders.c
+/// A small example of using \ref bj_bitmap_apply_shader to generate animated
+/// images.
+//  This shader comes from https://www.shadertoy.com/view/mtyGWy
+//  Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
 #include <banjo/error.h>
@@ -12,8 +15,6 @@
 #define CANVAS_W 512
 #define CANVAS_H 512
 
-// This shader comes from https://www.shadertoy.com/view/mtyGWy
-// Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
 void palette(bj_vec3 res, float t) {
     const float f = 6.28318f;
 

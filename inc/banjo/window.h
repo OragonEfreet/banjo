@@ -17,25 +17,37 @@
 /// Opaque typedef for the window type
 typedef struct bj_window_t bj_window;
 
-#define BJ_WINDOW_FLAG_CLOSE      0x01
-#define BJ_WINDOW_FLAG_KEY_REPEAT 0x02
+////////////////////////////////////////////////////////////////////////////////
+/// A set of flags describing some properties of a \ref bj_window.
+///
+/// These flags can be provided at window creation with \ref bj_window_new.
+/// The may also change during the window lifetime.
+/// You can use \ref bj_window_get_flags to query the status of any flag on an
+/// active window instance.
+////////////////////////////////////////////////////////////////////////////////
+typedef enum bj_window_flag_t {
+    BJ_WINDOW_FLAG_NONE       = 0x00, //!< No Flag.
+    BJ_WINDOW_FLAG_CLOSE      = 0x01, //!< Window should be closed by the application.
+    BJ_WINDOW_FLAG_KEY_REPEAT = 0x02, //!< Key repeat event is enabled (see \ref bj_window_set_key_event).
+    BJ_WINDOW_FLAG_ALL        = 0xFF, //!< All flags set.
+} bj_window_flag;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new bj_window with the specified attributes
 ///
 /// \param p_title  Title of the window
-/// \param x  Horizontal position of the window on-screen, expressed in pixels
-/// \param y  Vertical position of the window on-screen, expressed in pixels
-/// \param width  Width of the window.
-/// \param height Height of the window.
-/// \param flags  A set of options
+/// \param x        Horizontal position of the window on-screen, expressed in pixels
+/// \param y        Vertical position of the window on-screen, expressed in pixels
+/// \param width    Width of the window.
+/// \param height   Height of the window.
+/// \param flags    A set of options flags.
 ///
 /// \return A pointer to the newly created bj_window object.
 ///
-/// \par Option Flags
+/// \par Memory Management
 ///
-/// - *BJ_WINDOW_FLAG_KEY_REPEAT*: Enables trigerring key events with
-///   \ref BJ_REPEAT action.
+/// The caller is responsible for releasing the returned \ref bj_window object
+/// with \ref bj_window_del.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_window* bj_window_new(
@@ -65,6 +77,11 @@ BANJO_EXPORT void bj_window_del(
 /// Note that it is not possible to remove a closed flag once set.
 ///
 /// \param p_window Pointer to the window object to flag.
+///
+/// \remark
+///
+/// This function effectively returns 
+/// `bj_window_get_flags(p_window, BJ_WINDOW_FLAG_CLOSE) > 0`.
 ///
 /// \see bj_window_should_close
 ////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +148,7 @@ typedef void(* bj_window_button_event_t)(bj_window* p_window, int, bj_event_acti
 ///                 of the key that has been pressed or released.
 ///
 /// \see bj_window_set_key_event
+///
 ////////////////////////////////////////////////////////////////////////////////
 typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
 
@@ -187,6 +205,15 @@ BANJO_EXPORT bj_window_button_event_t bj_window_set_button_event(
 /// \param p_callback The callback function
 /// \return *0* or the previously set callback function if any.
 ///
+/// \par Behaviour
+///
+/// Pressing a key on the keyboard will generate a single call event with
+/// \ref BJ_PRESS action. Releasing the key generates a single call with 
+/// \ref BJ_RELEASE.
+/// If the \ref BJ_WINDOW_FLAG_KEY_REPEAT flag is set for a window, holding
+/// down the key will continuously call the event function with a 
+/// \ref BJ_REPEAT action.
+///
 /// \see bj_window_key_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,12 +222,19 @@ BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
     bj_window_key_event_t   p_callback
 );
 
-BANJO_EXPORT void bj_close_on_escape(
-    bj_window* p_window,
-    bj_event_action action,
-    bj_key key,
-    int scancode
-);
+////////////////////////////////////////////////////////////////////////////////
+/// An event call back for closing the window when escape key is pressed.
+///
+/// This utility function is a pre-made \ref bj_window_key_event_t you can
+/// directly use to provide a window the behaviour of closing when ESC key
+/// is pressed by the user (\ref BJ_KEY_ESCAPE).
+///
+/// Call it using `bj_window_set_key_event(p_window, bj_close_on_escape)`.
+///
+/// \see bj_window_key_event_t and bj_window_set_key_event
+///
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_close_on_escape(bj_window*, bj_event_action, bj_key, int);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for enter events.
@@ -222,6 +256,21 @@ BANJO_EXPORT bj_window_enter_event_t bj_window_set_enter_event(
     bj_window_enter_event_t   p_callback
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Get window flags.
+///
+/// This function returns all the flag sets for `p_window`.
+/// `flags` is a filter to only get the flag you are interested into.
+/// It can be a single flag, an OR'd combination of multiple flags or even
+/// \ref BJ_WINDOW_FLAG_ALL if you want to retrieve them all.
+///
+/// \param p_window   The window handler.
+/// \param flags      Filter flag set. 
+/// \return An OR'd combination of \ref bj_window_flag_t filtered by `flags`.
+///
+/// \see bj_window_enter_event_t
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT uint8_t bj_window_get_flags(
     bj_window* p_window,
     uint8_t    flags
@@ -238,17 +287,81 @@ BANJO_EXPORT void bj_poll_events(
     void
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Return the framebuffer attached to the window.
+///
+/// The framebuffer is an instance of \ref bj_bitmap attached (and owned) by
+/// the window.
+/// If necessary, \ref bj_window_get_flags will create (or recreate) the
+/// framebuffer object upon calling this function.
+/// This can happen when the window is resize, minimized or any even that
+/// invalidate the window drawing area.
+///
+/// TODO: The instance should stay the same and the framebuffer only change
+/// internally.
+///
+/// \param p_window The window handler
+/// \param p_error  Optional error location
+///
+/// \return A pointer to a \ref bj_bitmap attached to the window or _0_ in
+///         case of failure.
+///
+/// \par Behaviour
+///
+/// The function performs nothing if `p_window`  is _0_.
+///
+/// \par Memory Management
+///
+/// The library is responsible for the return \ref bj_bitmap object.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_window_get_framebuffer(
     bj_window* p_window,
     bj_error** p_error
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Retrieve the size of the window.
+///
+/// \param p_window   The window handler
+/// \param width      A location to the destination width
+/// \param height      A location to the destination height
+///
+/// \return _1_ on success, _0_ on error.
+///
+/// \par Behaviour
+///
+/// The function performs nothing if `p_window`  is _0_.
+///
+/// `width` and `height` can be _0_ if you are only interested in retrieving
+/// one of the values.
+///
+/// \par Memory Management
+///
+/// You are responsible for the memory of `width`  and `height`.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT int bj_window_get_size(
     const bj_window* p_window,
     int* width,
     int* height
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Copy window's framebuffer onto screen
+///
+/// \param p_window   The window handler
+///
+/// Use this function to apply any change made to the framebuffer on the window.
+/// 
+/// \par Behaviour
+///
+/// The function performs nothing if `p_window` is _0_ or does not contain any
+/// framebuffer.
+///
+/// \see bj_window_get_framebuffer
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_window_update_framebuffer(
     bj_window* p_window
 );

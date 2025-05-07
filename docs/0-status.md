@@ -25,20 +25,20 @@ Some features may exist in the API but not be listed here, and vice versa.
       - [ ] Cocoa
       - [X] X11
   - [ ] Mouse Button (\ref bj_window_button_event_t)
-    - [ ] Windows API
+    - [X] Windows API
     - [ ] Wayland
     - [ ] Cocoa
     - [X] X11
   - [ ] Mouse Events (\ref bj_window_cursor_event_t)
-    - [ ] Windows API
+    - [X] Windows API
     - [ ] Wayland
     - [ ] Cocoa
     - [X] X11
-  - [ ] Graphics Context
-    - [ ] Windows API
+  - [ ] Graphics Context (Software Framebuffer)
+    - [X] Windows API
     - [ ] Wayland
     - [ ] Cocoa
-    - [ ] X11
+    - [X] X11
 - [ ] Software Rendering
   - [ ] 3D Rendering
     - [ ] Simple Programmable Pipeline
@@ -58,6 +58,7 @@ Some features may exist in the API but not be listed here, and vice versa.
 - [X] Make CMake not mandatory.
 - [X] Custom Allocators (\ref memory_callbacks.c)
 - [X] Logging System (\ref logging.c)
+- [X] Time System 
 
 
 

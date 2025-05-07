@@ -132,6 +132,39 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
     bj_error**        p_error
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Creates a new bj_bitmap with the specified width and height.
+///
+/// Contrary to \ref bj_bitmap_new, the pixel data is explicitely provided
+/// by the caller through `p_pixels`.
+/// The caller is responsible for ensuring the allocated pixel data matches
+/// `width, `height`, `mode` and `stride`.
+///
+/// You can use \ref bj_compute_bitmap_stride with `width` and `mode` to
+/// retrieve the most suitable value for `stride`.
+/// It's also possible to set `stride` to _0_ and let Banjo compute it
+/// automatically.
+///
+/// \param p_pixels A pre-allocated array of pixels
+/// \param width  Width of the bitmap.
+/// \param height Height of the bitmap.
+/// \param mode   The pixel mode.
+/// \param stride The suggested bitmap stride.
+/// \return A new instance of \ref bj_bitmap.
+///
+/// \par Behaviour
+///
+/// Returns _0_ if `p_pixels` is _0_.
+///
+/// \par Memory Management
+///
+/// The caller is responsible for the memory management of `p_pixels`.
+/// \ref bj_bitmap will not modify it and it will not be released upon calling
+/// \ref bj_bitmap_del.
+///
+/// The caller is responsible for releasing the bitmap using \ref bj_bitmap_del.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_pixels(
     void*            p_pixels,
     size_t           width,
@@ -140,10 +173,57 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_pixels(
     size_t           stride
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Creates a new bj_bitmap by copying `p_bitmap`.
+///
+/// \param p_bitmap The source bitmap.
+///
+/// \return A pointer to the newly created bj_bitmap object.
+///
+/// The new bitmap will have exactly the same properties than the source bitmap.
+///
+/// \par Memory Management
+///
+/// The caller is responsible from releasing the bitmap using 
+/// \ref bj_bitmap_del.
+///
+/// If `p_source` was initially created using \ref bj_bitmap_new_from_pixels,
+/// the "weak" property of the bitmap is not maintained in the new bitmap and
+/// the caller is not responsible for manually releasing its pixel data.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_bitmap_copy(
     const bj_bitmap* p_bitmap
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Creates a new bj_bitmap by converting `p_bitmap`.
+///
+/// \param p_bitmap The source bitmap.
+/// \param mode     The new pixel mode.
+///
+/// \return A pointer to the newly created bj_bitmap object.
+///
+/// The new bitmap is provided by creating a new empty bitmap matching source's
+/// width and height, but using `mode` as pixel mode.
+/// The pixels are then converted to fill-in the new buffer.
+///
+/// \par Behaviour
+///
+/// Returns `bj_bitmap_copy(p_bitmap)` if `mode == bj_bitmap_mode(p_bitmap)`.
+///
+/// Returns _0_ if `mode` is \ref BJ_PIXEL_MODE_UNKNOWN or an unsupported value.
+///
+/// \par Memory Management
+///
+/// The caller is responsible from releasing the bitmap using 
+/// \ref bj_bitmap_del.
+///
+/// If `p_bitmap` was initially created using \ref bj_bitmap_new_from_pixels,
+/// the "weak" property of the bitmap is not maintained in the new bitmap and
+/// the caller is not responsible for manually releasing its pixel data.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_bitmap_convert(
     const bj_bitmap* p_bitmap,
     bj_pixel_mode    mode
@@ -412,6 +492,38 @@ BANJO_EXPORT bool bj_bitmap_blit(
     const bj_rect* p_destination_area
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Stretched bitmap blitting operation from a source to a destination bitmap.
+///
+/// \param p_source           The source bj_bitmap to copy from.
+/// \param p_source_area      The area to copy from in the source bitmap.
+/// \param p_destination      The destination bitmap.
+/// \param p_destination_area The area to copy to in the destination bitmap.
+/// \return                   true if a blit actually happened, false otherwise.
+///
+/// If `p_source_area` is _0_, the entire bitmap is copied.
+/// If `p_destination_area` is _0_, the source will fill in the entire
+/// destination bitmap.
+///
+/// Contrary to \ref bj_bitmap_blit, this function scales the source bitmap's
+/// area to fille the entire destination area.
+///
+/// \par Behaviour
+///
+/// The scale is done using nearest interpolation (the nearest real pixel in
+/// source area is used to color the destination pixel).
+/// This scale is suitable for pixel-art programs but will make the sprites
+/// appear jagged.
+///
+/// The blit is not performed if the source or destination area have `.w` or
+/// `.h`  set to _0_.
+///
+/// \par Clipping
+///
+/// The resulting blit can be clipped if it is performed partially or totally
+/// outside of the destination bitmap.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bool bj_bitmap_blit_stretched(
     const bj_bitmap* p_source,
     const bj_rect* p_source_area,

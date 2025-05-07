@@ -13,16 +13,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Representation of a pixel encoding.
 typedef enum {
-    BJ_PIXEL_MODE_UNKNOWN   = 0x00u,
-    BJ_PIXEL_MODE_INDEXED_1 = 0x00000101u,
-    BJ_PIXEL_MODE_INDEXED_4 = 0x00000104u,
-    BJ_PIXEL_MODE_INDEXED_8 = 0x00000108u,
+    BJ_PIXEL_MODE_UNKNOWN   = 0x00u,       //!< Unknown/Invalid pixel mode
+    BJ_PIXEL_MODE_INDEXED_1 = 0x00000101u, //!< 1bpp indexed
+    BJ_PIXEL_MODE_INDEXED_4 = 0x00000104u, //!< 4bpp indexed
+    BJ_PIXEL_MODE_INDEXED_8 = 0x00000108u, //!< 8bpp indexed
 
-    BJ_PIXEL_MODE_XRGB1555  = 0x01000210u,
-    BJ_PIXEL_MODE_RGB565    = 0x01020210u,
-    BJ_PIXEL_MODE_XRGB8888  = 0x01010220u,
+    BJ_PIXEL_MODE_XRGB1555  = 0x01000210u, //!< 16bpp 555-RGB
+    BJ_PIXEL_MODE_RGB565    = 0x01020210u, //!< 16bpp 565-RGB
+    BJ_PIXEL_MODE_XRGB8888  = 0x01010220u, //!< 32bpp RGB
 
-    BJ_PIXEL_MODE_BGR24     = 0x02000318u,
+    BJ_PIXEL_MODE_BGR24     = 0x02000318u, //!< 24bpp BGR
 } bj_pixel_mode;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,6 +60,21 @@ BANJO_EXPORT uint32_t bj_pixel_value(
     uint8_t blue
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Determine the most suitable \ref bj_pixel_mode from a set of masks.
+///
+/// This function can be used to retrieve what Banjo consider as the pixel
+/// mode corresponding to a given depth and masks.
+///
+/// If not suitable pixel mode is found, BJ_PIXEL_MODE_UNKNOWN is returned.
+///
+/// \param bpp        The number of bits used to encode a pixel.
+/// \param red_mask   A bitmask for the red channel information in the bits.
+/// \param green_mask A bitmask for the green channel information in the bits.
+/// \param blue_mask  A bitmask for the blue channel information in the bits.
+/// \return A \ref bj_pixel_mode value.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT int bj_compute_pixel_mode(
     uint8_t  bpp,
     uint32_t red_mask,
@@ -67,6 +82,22 @@ BANJO_EXPORT int bj_compute_pixel_mode(
     uint32_t blue_mask
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Returns the stride used for encoding a bitmaps in Banjo
+///
+/// In a bitmap, the stride is the actual number of bytes used to encode a 
+/// single row of pixels.
+/// Hence, the total size needed for a bitmap of `width` x `height` encoded with
+/// `mode` is equal to `bj_compute_bitmap_stride(width, mode) * height`.
+///
+/// Banjo uses the bits-per-pixel information from `mode` to compute the stride
+/// and aligns the byte count to 4.
+///
+/// \param width The width in pixel of a row
+/// \param mode  The pixel mode
+/// \return      The bitmap stride in bytes
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT size_t bj_compute_bitmap_stride(
     size_t width,
     bj_pixel_mode mode
