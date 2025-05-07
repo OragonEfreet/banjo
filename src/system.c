@@ -5,6 +5,9 @@
 #include "config.h"
 #include "system_t.h"
 
+// TODO Find a way that when a single backend is available, there is a 
+// compile-time way to bypassthis entire process.
+
 extern bj_system_backend_create_info fake_backend_create_info;
 #if BJ_HAS_FEATURE(X11)
 extern bj_system_backend_create_info x11_backend_create_info;

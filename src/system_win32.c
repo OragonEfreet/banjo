@@ -8,6 +8,8 @@
 #include <windows.h>
 #include <profileapi.h>
 
+#include "check.h"
+
 static uint64_t s_performance_frequency = 0;
 
 void* bj_load_library(
