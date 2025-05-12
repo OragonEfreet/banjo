@@ -18,7 +18,7 @@ double frequency = 0.0;
 static double w(double hz) {
 	return hz * 2.0 * M_PI;
 }
-
+typedef enum {
 typedef enum {
 	SINE,
 	SQUARE,
@@ -37,22 +37,21 @@ static double osc(double hz, double time, int type) {
 		double output = 0.0;
 		for (double n = 1.0; n < 100.0; ++n) {
 			output += (sin(n * w(hz) * time)) / n;
-		}
 		return output * 2.0 / M_PI;
-	}
+		return output * 2.0 / M_PI;
+	case SAW:
 	case SAW:
 		return (2.0 / M_PI) * (hz * M_PI * fmod(time, 1.0 / hz) - (M_PI / 2.0));
 	case RANDOM:
 		return 2.0 * ((double)rand() / (double)RAND_MAX) - 1.0;
-
+	default:return 0.0;
 	default:return 0.0;
 	}
-}
 
+double make_noise(double time) {
 double make_noise(double time) {
 	return osc(frequency, time, SAWSMOOTH);
 }
-
 typedef struct NoiseMakerT {
 	unsigned int sample_rate;
 	unsigned short n_channels;
