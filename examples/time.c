@@ -1,5 +1,6 @@
 #include <banjo/log.h>
 #include <banjo/system.h>
+#include <banjo/time.h>
 
 int main() {
 

@@ -8,9 +8,10 @@
 #include <banjo/bitmap.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
-#include <banjo/system.h>
-#include <banjo/window.h>
 #include <banjo/shader.h>
+#include <banjo/system.h>
+#include <banjo/time.h>
+#include <banjo/window.h>
 
 #define CANVAS_W 512
 #define CANVAS_H 512

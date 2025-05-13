@@ -9,6 +9,7 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 #include <banjo/system.h>
+#include <banjo/time.h>
 #include <banjo/window.h>
 
 #include <string.h>

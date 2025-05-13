@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/error.h>
 #include <banjo/system.h>
+#include <banjo/time.h>
 #include <banjo/window.h>
 
 #include <stdio.h>

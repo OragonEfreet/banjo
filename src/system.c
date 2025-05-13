@@ -1,6 +1,7 @@
 #include <banjo/error.h>
-#include <banjo/system.h>
 #include <banjo/log.h>
+#include <banjo/system.h>
+#include <banjo/time.h>
 
 #include "config.h"
 #include "system_t.h"
@@ -74,11 +75,4 @@ void bj_system_dispose(
     dispose(s_backend, p_error);
     bj_info("Disposed system backend");
 }
-
-double bj_get_time(
-    void
-) {
-    return (double)(bj_get_time_counter() - s_backend->timer_base) / bj_get_time_frequency();
-}
-
 
