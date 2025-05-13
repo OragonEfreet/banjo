@@ -65,7 +65,7 @@ int main(void) {
 
     bj_error* p_error = 0;
 
-    if(!bj_system_init(&p_error)) {
+    if(!bj_begin(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return 1;
     } 
@@ -86,6 +86,6 @@ int main(void) {
 
     bj_window_del(window);
 
-    bj_system_dispose(0);
+    bj_end(0);
     return 0;
 }

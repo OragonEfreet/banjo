@@ -23,7 +23,7 @@
 ///
 /// \return _true_ if the system is properly initialized, false otherswise.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bool bj_system_init(
+BANJO_EXPORT bool bj_begin(
     bj_error** p_error
 );
 
@@ -32,7 +32,7 @@ BANJO_EXPORT bool bj_system_init(
 ///
 /// \param p_error An optional location to an error object.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_system_dispose(
+BANJO_EXPORT void bj_end(
     bj_error** p_error
 );
 

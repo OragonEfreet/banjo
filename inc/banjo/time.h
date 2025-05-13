@@ -33,7 +33,7 @@ BANJO_EXPORT void bj_sleep(
 /// \brief Gets the current time in seconds.
 ///
 /// Returns the elapsed time in seconds since Banjo is initialized with
-/// \ref bj_system_init.
+/// \ref bj_begin.
 ///
 /// \return The current time in seconds as a double-precision value.
 ///

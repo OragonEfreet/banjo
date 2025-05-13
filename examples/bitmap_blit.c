@@ -37,7 +37,7 @@ int main() {
     bj_bitmap_del(bmp_blackbuck_512_512);
 
 
-    if (bj_system_init(0)) {
+    if (bj_begin(0)) {
 
         bj_window* window = bj_window_new("Blitmap Blit", 0, 0, WINDOW_W, WINDOW_H, 0);
         bj_window_set_key_event(window, bj_close_on_escape);
@@ -51,7 +51,7 @@ int main() {
         }
         
         bj_window_del(window);
-        bj_system_dispose(0);
+        bj_end(0);
     }
 
     bj_bitmap_del(bmp_rendering);

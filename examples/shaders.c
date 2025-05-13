@@ -64,7 +64,7 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
 
 int main(void) {
 
-   if (bj_system_init(0)) {    
+   if (bj_begin(0)) {    
 
         bj_window* window = bj_window_new("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
         bj_window_set_key_event(window, bj_close_on_escape);
@@ -80,7 +80,7 @@ int main(void) {
         }
 
         bj_window_del(window);
-        bj_system_dispose(0);
+        bj_end(0);
     }
 
     return 0;
