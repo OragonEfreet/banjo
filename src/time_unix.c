@@ -1,4 +1,4 @@
-#include <banjo/system.h>
+#include <banjo/time.h>
 
 #ifdef BJ_OS_UNIX
 
@@ -7,6 +7,7 @@
 
 static clockid_t   s_clock;
 static uint64_t    s_frequency;
+static uint64_t    s_timer_base;
 
 void bj_init_timer(
     void
@@ -20,6 +21,8 @@ void bj_init_timer(
         s_clock = CLOCK_MONOTONIC;
     }
 #endif
+
+    s_timer_base = bj_get_time_counter();
 }
 
 uint64_t bj_get_time_counter(
@@ -43,6 +46,12 @@ void bj_sleep(
     ts.tv_sec = milliseconds / 1000;
     ts.tv_nsec = (milliseconds % 1000) * 1000000;
     nanosleep(&ts, NULL);
+}
+
+double bj_get_time(
+    void
+) {
+    return (double)(bj_get_time_counter() - s_timer_base) / bj_get_time_frequency();
 }
 
 #endif

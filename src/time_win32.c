@@ -11,11 +11,13 @@
 #include "check.h"
 
 static uint64_t s_performance_frequency = 0;
+static uint64_t    s_timer_base;
 
 void bj_init_timer(
     void
 ) {
     QueryPerformanceFrequency((LARGE_INTEGER*)&s_performance_frequency);
+    s_timer_base = bj_get_time_counter();
 }
 
 uint64_t bj_get_time_counter(
@@ -36,6 +38,13 @@ void bj_sleep(
     int milliseconds
 ) {
     Sleep(milliseconds);
+}
+
+// TODO merge with unix one?
+double bj_get_time(
+    void
+) {
+    return (double)(bj_get_time_counter() - s_timer_base) / bj_get_time_frequency();
 }
 
 #endif
