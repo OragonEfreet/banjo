@@ -1,11 +1,11 @@
 #include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/video.h>
 
 #include "check.h"
-#include "system_t.h"
 #include "window_t.h"
 
-extern bj_system_backend* s_backend;
+extern bj_video_layer* s_video;
 
 bj_window* bj_window_new(
     const char* p_title,
@@ -15,7 +15,7 @@ bj_window* bj_window_new(
     uint16_t    height,
     uint8_t     window_flags
 ) {
-    return s_backend->create_window(s_backend, p_title, x, y, width, height, window_flags);
+    return s_video->create_window(s_video, p_title, x, y, width, height, window_flags);
 }
 
 void bj_window_del(
@@ -23,7 +23,7 @@ void bj_window_del(
 ) {
     bj_check(p_window);
     bj_bitmap_del(p_window->p_framebuffer);
-    s_backend->delete_window(s_backend, p_window);
+    s_video->delete_window(s_video, p_window);
 }
 
 bool bj_window_should_close(
@@ -66,7 +66,7 @@ void bj_window_set_should_close(
 BANJO_EXPORT void bj_poll_events(
     void
 ) {
-    s_backend->poll_events(s_backend);
+    s_video->poll_events(s_video);
 }
 
 bj_window_cursor_event_t bj_window_set_cursor_event(
@@ -191,7 +191,7 @@ bj_bitmap* bj_window_get_framebuffer(
             return 0;
         }
 
-        p_window->p_framebuffer = s_backend->create_window_framebuffer(s_backend, p_window, p_error);
+        p_window->p_framebuffer = s_video->create_window_framebuffer(s_video, p_window, p_error);
     }
 
     return p_window->p_framebuffer;
@@ -202,7 +202,7 @@ void bj_window_update_framebuffer(
 ) {
     bj_check(p_window);
     bj_check(p_window->p_framebuffer != 0);
-    s_backend->flush_window_framebuffer(s_backend, p_window);
+    s_video->flush_window_framebuffer(s_video, p_window);
 }
 
 int bj_window_get_size(
@@ -211,5 +211,5 @@ int bj_window_get_size(
     int* height
 ) {
     bj_check_or_0(p_window);
-    return s_backend->get_window_size(s_backend, p_window, width, height);
+    return s_video->get_window_size(s_video, p_window, width, height);
 }
