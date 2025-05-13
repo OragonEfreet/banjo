@@ -691,6 +691,7 @@ static void x11_dispose_video(
     pfn_XCloseDisplay XCloseDisplay = (pfn_XCloseDisplay)x11_get_symbol(p_x11, "XCloseDisplay");
     XCloseDisplay(p_x11->display);
     bj_free(p_x11->keymap);
+    bj_free(p_video->data);
     bj_free(p_video);
 }
 

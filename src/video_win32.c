@@ -20,11 +20,6 @@
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
 
 typedef struct {
-    bj_video_layer fns;
-    HINSTANCE         p_instance;
-} win32_video;
-
-typedef struct {
     struct bj_window_t common;
     HWND               handle;
     int                cursor_in_window;
@@ -42,7 +37,7 @@ static bj_window* win32_window_new(
     uint16_t height,
     uint8_t  flags
 ) {
-    win32_video* p_win32 = (win32_video*)p_video;
+    //win32* p_win32 = p_video->data;
 
     const uint32_t window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
                                  //| WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
@@ -59,7 +54,7 @@ static bj_window* win32_window_new(
     HWND hwnd = CreateWindowExA(
         window_ex_style, WIN32_WINDOWCLASS_NAME, p_title, window_style,
         window_x, window_y, window_width, window_height,
-        NULL, NULL, p_win32->p_instance, 0
+        NULL, NULL, (HINSTANCE)p_video->data, 0
     );
 
     if (!hwnd) {
@@ -217,13 +212,11 @@ static void win32_dispose_video(
 ) {
     (void)p_error;
 
-    if(!UnregisterClassA(
-        WIN32_WINDOWCLASS_NAME,
-        ((win32_video*)p_video)->p_instance)
-    ) {
+    if(!UnregisterClassA(WIN32_WINDOWCLASS_NAME, (HINSTANCE)(p_video->data))) {
         bj_set_error(p_error, BJ_ERROR_DISPOSE, "Failed to unregister window class");
     }
 
+    //bj_free(p_video->data);
     bj_free(p_video);
 }
 
@@ -393,19 +386,16 @@ static bj_video_layer* win32_init_video(
         return 0;
     }
 
-    win32_video win32 = {
-        .p_instance = hInstance,
-        .fns = {
-            .dispose                   = win32_dispose_video,
-            .create_window             = win32_window_new,
-            .delete_window             = win32_window_del,
-            .poll_events               = win32_window_poll,
-            .get_window_size           = win32_get_window_size,
-            .create_window_framebuffer = win32_create_window_framebuffer,
-            .flush_window_framebuffer  = win32_flush_window_framebuffer,
-        },
-    };
-    return bj_memcpy(bj_malloc(sizeof(win32_video)), &win32, sizeof(win32_video));
+    bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
+    p_layer->dispose = win32_dispose_video;
+    p_layer->create_window = win32_window_new;
+    p_layer->delete_window = win32_window_del;
+    p_layer->poll_events = win32_window_poll;
+    p_layer->get_window_size = win32_get_window_size;
+    p_layer->create_window_framebuffer = win32_create_window_framebuffer;
+    p_layer->flush_window_framebuffer = win32_flush_window_framebuffer;
+    p_layer->data = (void*)hInstance;
+    return p_layer;
 }
 
 bj_video_layer_create_info win32_layer_info = {
