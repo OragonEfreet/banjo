@@ -13,8 +13,44 @@
 
 #define sample_t short
 
+double frequency = 0.0;
+
+static double w(double hz) {
+	return hz * 2.0 * M_PI;
+}
+
+typedef enum {
+	SINE,
+	SQUARE,
+	TRIANGLE,
+	SAW,
+	SAWSMOOTH,
+	RANDOM,
+} oscillator;
+
+static double osc(double hz, double time, int type) {
+	switch (type) {
+	case SINE: return sin(w(hz) * time);
+	case SQUARE: return osc(hz, time, SINE) > 0.0 ? 1.0 : -1.0;
+	case TRIANGLE: return asin(osc(hz, time, SINE) * 2.0 / M_PI);
+	case SAWSMOOTH: {
+		double output = 0.0;
+		for (double n = 1.0; n < 100.0; ++n) {
+			output += (sin(n * w(hz) * time)) / n;
+		}
+		return output * 2.0 / M_PI;
+	}
+	case SAW:
+		return (2.0 / M_PI) * (hz * M_PI * fmod(time, 1.0 / hz) - (M_PI / 2.0));
+	case RANDOM:
+		return 2.0 * ((double)rand() / (double)RAND_MAX) - 1.0;
+
+	default:return 0.0;
+	}
+}
+
 double make_noise(double time) {
-	return 0.5 * sin(2.0 * M_PI * A4 * time);
+	return osc(frequency, time, SAWSMOOTH);
 }
 
 typedef struct NoiseMakerT {
@@ -210,7 +246,26 @@ int main() {
 
 	noise_maker.user_function = make_noise;
 	printf("Now playing...");
-	Sleep(10000);
+
+	double octave_base_frequency = A2;
+	double d12RootOf2 = pow(2.0, 1.0 / 12.0);
+
+	
+	while (1) {
+		int pressed = 0;
+
+		for (int k = 0; k < 15; ++k) {
+			if (GetAsyncKeyState((unsigned char)("A2Z3ER5T6Y7U"[k])) & 0x8000) {
+				frequency = octave_base_frequency * pow(d12RootOf2, k);
+				pressed = 1;
+			}
+		}
+
+		if (!pressed) {
+			frequency = REST;
+		}
+
+	}
 
 	// End
 	InterlockedExchange(&noise_maker.ready, 0);
