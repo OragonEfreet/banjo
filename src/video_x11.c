@@ -61,8 +61,7 @@ typedef XrmQuark            (* pfn_XrmUniqueQuark)(void);
 
 #define N_KEYCODES 256
 
-typedef struct {
-    bj_video_layer fns;
+typedef struct bj_video_layer_data_t {
     void*             p_handle;
     Display*          display;
     int               default_screen;
@@ -98,8 +97,7 @@ typedef struct {
     pfn_XStoreName           XStoreName;
     pfn_XSync                XSync;
     pfn_XUnmapWindow         XUnmapWindow;
-
-} x11_video;
+} x11;
 
 typedef struct {
     struct bj_window_t common;
@@ -108,15 +106,11 @@ typedef struct {
     void*              p_framebuffer_pixels;
 } x11_window;
 
-static void* x11_get_symbol(
-    x11_video*  p_x11,
-    const char* p_name
-) {
+static void* x11_get_symbol(x11* p_x11, const char* p_name) {
     return bj_get_symbol(p_x11->p_handle, p_name);
 }
 
-
-static void x11_wait_for_map_notify(x11_video* p_x11, Window window) {
+static void x11_wait_for_map_notify(x11* p_x11, Window window) {
     double start_time = bj_get_time();
 
     while ((bj_get_time() - start_time) < 1.f) {
@@ -142,7 +136,7 @@ static bj_window* x11_create_window(
     uint16_t height,
     uint8_t  flags
 ) {
-    x11_video* p_x11 = (x11_video*)p_video;
+    x11* p_x11 = p_video->data;
     Window root_window = RootWindow(p_x11->display, p_x11->default_screen);
 
     XSetWindowAttributes attributes = {
@@ -207,7 +201,7 @@ static bj_window* x11_create_window(
 }
 
 static void x11_delete_window_framebuffer(
-    x11_video* p_x11,
+    x11* p_x11,
     x11_window* p_window
 ) {
     bj_check(p_window);
@@ -224,7 +218,7 @@ static void x11_delete_window(
     bj_window* p_abstract_window
 ) {
     x11_window* p_window = (x11_window*)p_abstract_window;
-    x11_video* p_x11 = (x11_video*)p_video;
+    x11* p_x11 = p_video->data;
     x11_delete_window_framebuffer(p_x11, p_window);
     p_x11->XDeleteContext(p_x11->display, p_window->handle, p_x11->window_context);
     p_x11->XUnmapWindow(p_x11->display, p_window->handle);
@@ -234,19 +228,15 @@ static void x11_delete_window(
 }
 
 
-static int get_key(
-    x11_video* p_x11,
-    int          keycode
-) {
+static int get_key(x11* p_x11, int keycode) {
     if (keycode < 0 || keycode > 255) {
         return BJ_KEY_UNKNOWN;
     }
-
     return p_x11->keymap[keycode];
 }
 
 static void x11_dispatch_event(
-    x11_video*  p_x11,
+    x11*  p_x11,
     const XEvent* event
 ) {
     // Here switch events that do not need window
@@ -348,7 +338,7 @@ static void x11_poll_events(
     bj_video_layer* p_video
 ) {
     assert(p_video);
-    x11_video* p_x11 = (x11_video*)p_video;
+    x11* p_x11 = p_video->data;
 
     p_x11->XPending(p_x11->display);
 
@@ -519,7 +509,7 @@ static int translate_keysyms(const KeySym* keysyms, int width) {
 }
 
 static void x11_init_keycodes(
-    x11_video* p_x11
+    x11* p_x11
 ) {
     int min_keycode = 0;
     int max_keycode = 0;
@@ -557,7 +547,7 @@ static int x11_get_window_size(
     int* width,
     int* height
 ) {
-    x11_video* p_x11 = (x11_video*)p_video;
+    x11* p_x11 = p_video->data;
 
     XWindowAttributes attributes;
     p_x11->XGetWindowAttributes(
@@ -627,7 +617,7 @@ static bj_bitmap* x11_create_window_framebuffer(
     const bj_window* p_abstract_window,
     bj_error** p_error
 ) {
-    x11_video* p_x11 = (x11_video*)p_video;
+    x11* p_x11 = p_video->data;
     x11_window* p_window = (x11_window*)p_abstract_window;
 
     x11_delete_window_framebuffer(p_x11, p_window);
@@ -677,7 +667,7 @@ static void x11_flush_window_framebuffer(
     bj_video_layer* p_video,
     const bj_window*   p_abstract_window
 ) {
-    x11_video* p_x11 = (x11_video*)p_video;
+    x11* p_x11 = p_video->data;
     x11_window* p_window = (x11_window*)p_abstract_window;
 
     Display* display = p_x11->display;
@@ -697,7 +687,7 @@ static void x11_dispose_video(
     bj_error** p_error
 ) {
     (void)p_error;
-    x11_video* p_x11 = (x11_video*)p_video;
+    x11* p_x11 = p_video->data;
     pfn_XCloseDisplay XCloseDisplay = (pfn_XCloseDisplay)x11_get_symbol(p_x11, "XCloseDisplay");
     XCloseDisplay(p_x11->display);
     bj_free(p_x11->keymap);
@@ -714,7 +704,7 @@ static bj_video_layer* x11_init_video(
         return 0;
     }
 
-    x11_video* p_x11 = bj_malloc(sizeof(x11_video));
+    x11* p_x11 = bj_malloc(sizeof(x11));
     p_x11->p_handle            = p_handle;
 
     p_x11->XAllocSizeHints      = (pfn_XAllocSizeHints)x11_get_symbol(p_x11, "XAllocSizeHints");
@@ -769,15 +759,19 @@ static bj_video_layer* x11_init_video(
 
     x11_init_keycodes(p_x11);
 
-    p_x11->fns.dispose                   = x11_dispose_video;
-    p_x11->fns.create_window             = x11_create_window;
-    p_x11->fns.delete_window             = x11_delete_window;
-    p_x11->fns.poll_events               = x11_poll_events;
-    p_x11->fns.get_window_size           = x11_get_window_size;
-    p_x11->fns.create_window_framebuffer = x11_create_window_framebuffer;
-    p_x11->fns.flush_window_framebuffer  = x11_flush_window_framebuffer;
+    bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
 
-    return (bj_video_layer*)p_x11;
+    p_layer->data = p_x11;
+
+    p_layer->dispose                   = x11_dispose_video;
+    p_layer->create_window             = x11_create_window;
+    p_layer->delete_window             = x11_delete_window;
+    p_layer->poll_events               = x11_poll_events;
+    p_layer->get_window_size           = x11_get_window_size;
+    p_layer->create_window_framebuffer = x11_create_window_framebuffer;
+    p_layer->flush_window_framebuffer  = x11_flush_window_framebuffer;
+
+    return p_layer;
 }
 
 bj_video_layer_create_info x11_layer_info = {

@@ -13,6 +13,8 @@ typedef int (*bj_window_get_size_fn)(struct bj_video_layer_t*, const bj_window*,
 typedef bj_bitmap* (*bj_window_create_framebuffer_fn)(struct bj_video_layer_t*, const bj_window*, bj_error** p_error);
 typedef void (*bj_window_flush_framebuffer_fn)(struct bj_video_layer_t*, const bj_window*);
 
+struct bj_video_layer_data_t;
+
 typedef struct bj_video_layer_t {
     bj_window_dispose_fn                 dispose;
     bj_window_create_window_fn           create_window;
@@ -21,6 +23,8 @@ typedef struct bj_video_layer_t {
     bj_window_get_size_fn                get_window_size;
     bj_window_create_framebuffer_fn      create_window_framebuffer;
     bj_window_flush_framebuffer_fn       flush_window_framebuffer;
+
+    struct bj_video_layer_data_t*        data;
 } bj_video_layer;
 
 typedef struct {
