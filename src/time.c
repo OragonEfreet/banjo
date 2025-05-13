@@ -1,11 +1,10 @@
 #include <banjo/time.h>
+#include <banjo/video.h>
 
-#include "system_t.h"
-
-extern bj_system_backend* s_backend;
+extern bj_video_layer* s_video;
 
 double bj_get_time(
     void
 ) {
-    return (double)(bj_get_time_counter() - s_backend->timer_base) / bj_get_time_frequency();
+    return (double)(bj_get_time_counter() - s_video->timer_base) / bj_get_time_frequency();
 }

@@ -86,7 +86,7 @@ typedef enum {
     BJ_ERROR_INVALID_FORMAT      = 0x00000104, ///< Data format does not match expected format
     BJ_ERROR_INCORRECT_VALUE     = 0x00000204, ///< Mismatched expected value
 
-    BJ_ERROR_BACKEND             = 0x00000005, ///< Error while running backend
+    BJ_ERROR_VIDEO               = 0x00000005, ///< Error while running video layer
 } bj_error_code;
 
 ////////////////////////////////////////////////////////////////////////////////

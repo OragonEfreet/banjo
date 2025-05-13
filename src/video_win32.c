@@ -1,6 +1,7 @@
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
+#include <banjo/video.h>
 
 #include "config.h"
 
@@ -12,7 +13,6 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "system_t.h"
 #include "window_t.h"
 
 #include <assert.h>
@@ -20,9 +20,9 @@
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
 
 typedef struct {
-    bj_system_backend fns;
+    bj_video_layer fns;
     HINSTANCE         p_instance;
-} win32_backend;
+} win32_video;
 
 typedef struct {
     struct bj_window_t common;
@@ -34,7 +34,7 @@ typedef struct {
 } win32_window;
 
 static bj_window* win32_window_new(
-    bj_system_backend* p_backend,
+    bj_video_layer* p_video,
     const char* p_title,
     uint16_t x,
     uint16_t y,
@@ -42,7 +42,7 @@ static bj_window* win32_window_new(
     uint16_t height,
     uint8_t  flags
 ) {
-    win32_backend* p_win32 = (win32_backend*)p_backend;
+    win32_video* p_win32 = (win32_video*)p_video;
 
     const uint32_t window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
                                  //| WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
@@ -98,10 +98,10 @@ static void win32_delete_window_framebuffer(
 }
 
 static void win32_window_del(
-    bj_system_backend* p_backend,
+    bj_video_layer* p_video,
     bj_window* p_abstract_window
 ) {
-    (void)p_backend;
+    (void)p_video;
     win32_window* p_window = (win32_window*)p_abstract_window;
     win32_delete_window_framebuffer(p_window);
     ReleaseDC(p_window->handle, p_window->hdc);
@@ -110,7 +110,7 @@ static void win32_window_del(
 }
 
 static bj_bitmap* win32_create_window_framebuffer(
-    bj_system_backend* p_backend,
+    bj_video_layer* p_video,
     const bj_window* p_abstract_window,
     bj_error** p_error
 ) {
@@ -118,8 +118,8 @@ static bj_bitmap* win32_create_window_framebuffer(
 
     int width = 0;
     int height = 0;
-    if (!win32_get_window_size(p_backend, p_window, &width, &height)) {
-        bj_set_error(p_error, BJ_ERROR_BACKEND, "Cannot get window dimension");
+    if (!win32_get_window_size(p_video, p_window, &width, &height)) {
+        bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot get window dimension");
         return 0;
     }
 
@@ -153,7 +153,7 @@ static bj_bitmap* win32_create_window_framebuffer(
     const size_t stride = bj_compute_bitmap_stride(width, pixel_mode);
 
     if(stride == 0) {
-        bj_set_error(p_error, BJ_ERROR_BACKEND, "Invalid window pixel format");
+        bj_set_error(p_error, BJ_ERROR_VIDEO, "Invalid window pixel format");
         bj_free(p_bmp_info);
         return 0;
     }
@@ -169,7 +169,7 @@ static bj_bitmap* win32_create_window_framebuffer(
     bj_free(p_bmp_info);
 
     if (!p_window->fbmp) {
-        bj_set_error(p_error, BJ_ERROR_BACKEND, "Cannot create DIB section");
+        bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot create DIB section");
         return 0;
     }
     SelectObject(p_window->fbdc, p_window->fbmp);
@@ -178,12 +178,12 @@ static bj_bitmap* win32_create_window_framebuffer(
 }
 
 static int win32_get_window_size(
-    bj_system_backend* p_backend,
+    bj_video_layer* p_video,
     const bj_window* p_abstract_window,
     int* width,
     int* height
 ) {
-    (void)p_backend;
+    (void)p_video;
     win32_window* p_window = (win32_window*)p_abstract_window;
     HWND handle = p_window->handle;
     RECT rect;
@@ -198,7 +198,7 @@ static int win32_get_window_size(
 }
 
 static void win32_flush_window_framebuffer(
-    bj_system_backend* p_backend,
+    bj_video_layer* p_video,
     const bj_window*   p_abstract_window
 ) {
     win32_window* p_window = (win32_window*)p_abstract_window;
@@ -206,31 +206,31 @@ static void win32_flush_window_framebuffer(
 
     int width = 0;
     int height = 0;
-    if (win32_get_window_size(p_backend, p_window, &width, &height)) {
+    if (win32_get_window_size(p_video, p_window, &width, &height)) {
         BitBlt(p_window->hdc, 0, 0, width, height, p_window->fbdc, 0, 0, SRCCOPY);
     }
 }
 
-static void win32_dispose_backend(
-    bj_system_backend* p_backend,
+static void win32_dispose_video(
+    bj_video_layer* p_video,
     bj_error** p_error
 ) {
     (void)p_error;
 
     if(!UnregisterClassA(
         WIN32_WINDOWCLASS_NAME,
-        ((win32_backend*)p_backend)->p_instance)
+        ((win32_video*)p_video)->p_instance)
     ) {
         bj_set_error(p_error, BJ_ERROR_DISPOSE, "Failed to unregister window class");
     }
 
-    bj_free(p_backend);
+    bj_free(p_video);
 }
 
 static void win32_window_poll(
-    bj_system_backend* p_backend
+    bj_video_layer* p_video
 ) {
-    (void)p_backend;
+    (void)p_video;
     MSG message;
     while (PeekMessageA(&message, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage(&message);
@@ -377,7 +377,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     return 0;
 }
 
-static bj_system_backend* win32_init_backend(
+static bj_video_layer* win32_init_video(
     bj_error** p_error
 ) {
     HINSTANCE hInstance = GetModuleHandleA(0);
@@ -393,10 +393,10 @@ static bj_system_backend* win32_init_backend(
         return 0;
     }
 
-    win32_backend win32 = {
+    win32_video win32 = {
         .p_instance = hInstance,
         .fns = {
-            .dispose                   = win32_dispose_backend,
+            .dispose                   = win32_dispose_video,
             .create_window             = win32_window_new,
             .delete_window             = win32_window_del,
             .poll_events               = win32_window_poll,
@@ -405,12 +405,12 @@ static bj_system_backend* win32_init_backend(
             .flush_window_framebuffer  = win32_flush_window_framebuffer,
         },
     };
-    return bj_memcpy(bj_malloc(sizeof(win32_backend)), &win32, sizeof(win32_backend));
+    return bj_memcpy(bj_malloc(sizeof(win32_video)), &win32, sizeof(win32_video));
 }
 
-bj_system_backend_create_info win32_backend_create_info = {
+bj_video_layer_create_info win32_layer_info = {
     .name = "Win32",
-    .create = win32_init_backend,
+    .create = win32_init_video,
 };
 
 #endif
