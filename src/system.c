@@ -6,14 +6,21 @@
 
 #include "config.h"
 
-bool bj_init_video(bj_error**);
-void bj_dispose_video(bj_error**);
+#include <assert.h>
+
+bj_video_layer* s_video = 0;
+
+bj_video_layer* bj_init_video(bj_error**);
+void bj_dispose_video(bj_video_layer*, bj_error**);
 void bj_init_time(void);
 
 bool bj_begin(
     bj_error** p_error
 ) {
-    if(!bj_init_video(p_error)) {
+    assert(s_video == 0);
+
+    s_video = bj_init_video(p_error);
+    if(!s_video) {
         return false;
     }
 
@@ -25,7 +32,9 @@ bool bj_begin(
 void bj_end(
     bj_error** p_error
 ) {
-    bj_dispose_video(p_error);
+    assert(s_video != 0);
+
+    bj_dispose_video(s_video, p_error);
     bj_info("Disposed system");
 }
 

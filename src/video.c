@@ -24,9 +24,7 @@ static const bj_video_layer_create_info* layer_infos[] = {
     &fake_layer_info,
 };
 
-bj_video_layer* s_video = 0;
-
-bool bj_init_video(
+bj_video_layer* bj_init_video(
     bj_error** p_error
 ) {
     const size_t n_layers = sizeof(layer_infos) / sizeof(bj_video_layer_create_info*);
@@ -49,20 +47,20 @@ bool bj_init_video(
 
         if(p_layer != 0) {
             bj_info("Initialized %s system", p_create_info->name);
-            s_video = p_layer;
-            return true;
+            return p_layer;
         }
     }
 
     bj_set_error(p_error, BJ_ERROR_INITIALIZE, "No suitable layer found");
-    return false;
+    return 0;
 }
 
 void bj_dispose_video(
+    bj_video_layer* p_video,
     bj_error** p_error
 ) {
-    void (*dispose)(struct bj_video_layer_t*, bj_error** p_error) = s_video->dispose;
-    dispose(s_video, p_error);
+    void (*dispose)(struct bj_video_layer_t*, bj_error** p_error) = p_video->dispose;
+    dispose(p_video, p_error);
     bj_info("Disposed system");
 }
 
