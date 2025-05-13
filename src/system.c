@@ -17,7 +17,10 @@ void bj_init_time(void);
 bool bj_begin(
     bj_error** p_error
 ) {
-    assert(s_video == 0);
+    if(s_video != 0) {
+        bj_set_error(p_error, BJ_ERROR_INITIALIZE, "Video already initialized");
+        return false;
+    }
 
     s_video = bj_init_video(p_error);
     if(!s_video) {
@@ -32,7 +35,10 @@ bool bj_begin(
 void bj_end(
     bj_error** p_error
 ) {
-    assert(s_video != 0);
+    if(s_video == 0) {
+        bj_set_error(p_error, BJ_ERROR_DISPOSE, "Video already disposed");
+        return;
+    }
 
     bj_dispose_video(s_video, p_error);
     bj_info("Disposed system");
