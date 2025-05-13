@@ -9,7 +9,7 @@ static clockid_t   s_clock;
 static uint64_t    s_frequency;
 static uint64_t    s_timer_base;
 
-void bj_init_timer(
+void bj_init_time(
     void
 ) {
     s_clock = CLOCK_REALTIME;

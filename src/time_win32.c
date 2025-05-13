@@ -13,7 +13,7 @@
 static uint64_t s_performance_frequency = 0;
 static uint64_t    s_timer_base;
 
-void bj_init_timer(
+void bj_init_time(
     void
 ) {
     QueryPerformanceFrequency((LARGE_INTEGER*)&s_performance_frequency);

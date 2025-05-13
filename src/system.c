@@ -8,7 +8,7 @@
 
 bool bj_init_video(bj_error**);
 void bj_dispose_video(bj_error**);
-void bj_init_timer(void);
+void bj_init_time(void);
 
 bool bj_system_init(
     bj_error** p_error
@@ -17,7 +17,7 @@ bool bj_system_init(
         return false;
     }
 
-    bj_init_timer();
+    bj_init_time();
 
     return true;
 }
