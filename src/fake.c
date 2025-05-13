@@ -119,11 +119,12 @@ static bj_video_layer* fake_init_layer(
     p_layer->get_window_size           = fake_get_window_size;
     p_layer->create_window_framebuffer = fake_create_window_framebuffer;
     p_layer->flush_window_framebuffer  = fake_flush_window_framebuffer;
+    p_layer->data = 0;
     return p_layer;
 }
 
 bj_video_layer_create_info fake_layer_info = {
-    .name = "Fake",
+    .name = "fake",
     .create = fake_init_layer,
 };
 
