@@ -44,9 +44,9 @@ int bj_log_get_level(void) {
 #define BUFFER_SIZE (BJ_MAXIMUM_LOG_LEN + 1)
 
 #if BJ_HAS_CONFIG(LOG_COLOR)
-static const bool use_colors = true;
+static const bj_bool use_colors = BJ_TRUE;
 #else
-static const bool use_colors = false;
+static const bj_bool use_colors = BJ_FALSE;
 #endif
 
 #define BUFFER_WRAP 50
@@ -87,11 +87,11 @@ size_t bj_message(
             size_t level_payload = level_info[level].payload + 1;
             const size_t timestamp_payload = 9;
 
-            bool with_level = header_max_len >= level_payload;
-            bool with_source = with_level && ((source_payload + level_payload) <= header_max_len);
-            bool with_timestamp = with_source && ((level_payload + source_payload + timestamp_payload) <= header_max_len);
-            bool colored_level = use_colors && with_timestamp && ((level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD) <= header_max_len);
-            bool colored_source = use_colors && colored_level && ((level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD * 2) <= header_max_len);
+            bj_bool with_level = header_max_len >= level_payload;
+            bj_bool with_source = with_level && ((source_payload + level_payload) <= header_max_len);
+            bj_bool with_timestamp = with_source && ((level_payload + source_payload + timestamp_payload) <= header_max_len);
+            bj_bool colored_level = use_colors && with_timestamp && ((level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD) <= header_max_len);
+            bj_bool colored_source = use_colors && colored_level && ((level_payload + source_payload + timestamp_payload + COLORED_CHUNK_PAYLOAD * 2) <= header_max_len);
 
             if (with_source) {
                 size_t shift = header_max_len - source_payload;

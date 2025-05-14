@@ -9,6 +9,6 @@ struct bj_stream_t {
     union {
         const uint8_t* r;    //!< Read-only access
     } p_data;
-    bool    weak;       //!< True if memory buffer is not managed by the object
+    bj_bool    weak;       //!< True if memory buffer is not managed by the object
 };
 

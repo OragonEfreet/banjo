@@ -25,6 +25,12 @@
 #   define _BJ_HAS_FEATURE_X11 0
 #endif
 
+#ifdef BJ_FEATURE_MME
+#   define _BJ_HAS_FEATURE_MME 1
+#else
+#   define _BJ_HAS_FEATURE_MME 0
+#endif
+
 #ifdef BJ_CONFIG_ALL
 #   define _BJ_HAS_CONFIG_ALL 1
 #else

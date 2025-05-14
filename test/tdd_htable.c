@@ -18,7 +18,7 @@ TEST_CASE(empty_valid_initialization) {
     REQUIRE_EQ(htable->buckets.len, 10);
     REQUIRE(htable->buckets.capacity >= 10);
     REQUIRE_VALUE(htable->buckets.p_buffer);
-    REQUIRE_EQ(htable->weak_owning, false);
+    REQUIRE_EQ(htable->weak_owning, BJ_FALSE);
     REQUIRE_EQ(htable->bytes_key, sizeof(key_t));
     REQUIRE_EQ(htable->bytes_value, sizeof(value_t));
     REQUIRE_VALUE(htable->fn_hash);

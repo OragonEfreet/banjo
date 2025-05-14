@@ -119,7 +119,7 @@ int bj_compute_pixel_mode(
     uint32_t green_mask,
     uint32_t blue_mask
 ) {
-    const bool have_masks = (red_mask | green_mask | blue_mask) > 0;
+    const bj_bool have_masks = (red_mask | green_mask | blue_mask) > 0;
     switch (bpp) {
     case 1:
         assert(!have_masks);

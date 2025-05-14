@@ -1,3 +1,4 @@
+#include <banjo/audio.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
@@ -128,3 +129,4 @@ bj_video_layer_create_info fake_layer_info = {
     .create = fake_init_layer,
 };
 
+bj_audio_layer_create_info nosound_layer_info;

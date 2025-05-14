@@ -140,7 +140,7 @@ static void dib_read_uncompressed_raster(
     int32_t    height,
     uint16_t   dib_bit_count
 ) {
-    const bool is_top_down = height < 0;
+    const bj_bool is_top_down = height < 0;
 
     uint8_t* const dst_end = dst_pixels + dst_stride * _ABS(height);
     assert(dst_stride > 0);
@@ -169,7 +169,7 @@ static void dib_read_rle_raster(
     size_t      dst_stride,
     uint32_t        width,
     int32_t        i_height,
-    bool       use_rle_4,
+    bj_bool       use_rle_4,
     bj_error** p_error
 ) {
     #define rle_fsm_expect_any                0x01
@@ -184,13 +184,13 @@ static void dib_read_rle_raster(
     uint8_t last_read_byte = 0;
     uint8_t n_index = 0;
     uint8_t n_writes = 0;
-    bool padding_required = false;
+    bj_bool padding_required = BJ_FALSE;
 
     size_t x = 0;
     size_t y = 0;
     uint32_t height = _ABS(i_height);
 
-    while (true) {
+    while (BJ_TRUE) {
         if (state != rle_fsm_keep_and_write_index && bj_stream_read_t(p_stream, uint8_t, &last_read_byte) == 0) {
             return;
         }
@@ -198,7 +198,7 @@ static void dib_read_rle_raster(
         switch (state) {
             case rle_fsm_expect_any:
                 if (padding_required) {
-                    padding_required = false;
+                    padding_required = BJ_FALSE;
                 } else {
                     n_writes = 0;
                     if (last_read_byte == 0) {

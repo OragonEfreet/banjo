@@ -41,7 +41,7 @@ void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scan
     }
 }
 
-void enter_event(bj_window* p_window, bool enter, int x, int y) {
+void enter_event(bj_window* p_window, bj_bool enter, int x, int y) {
     printf("Enter event, window %p, %s, (%d,%d)\n",
         (void*)p_window, 
         enter ? "entered" : "left",

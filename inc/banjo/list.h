@@ -238,12 +238,12 @@ BANJO_EXPORT void bj_list_iterator_reset(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Returns true if the iterator has more elements.
+/// Returns BJ_TRUE if the iterator has more elements.
 ///
 /// \param iterator The iterator object.
-/// \return true if the iterator has more elements.
+/// \return BJ_TRUE if the iterator has more elements.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bool bj_list_iterator_has_next(
+BANJO_EXPORT bj_bool bj_list_iterator_has_next(
     bj_list_iterator* iterator
 );
 

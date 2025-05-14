@@ -1,11 +1,11 @@
+#include "config.h"
+
+#if BJ_HAS_FEATURE(WIN32)
+
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 #include <banjo/video.h>
-
-#include "config.h"
-
-#if BJ_HAS_FEATURE(WIN32)
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
@@ -67,7 +67,7 @@ static bj_window* win32_window_new(
         },
         .handle = hwnd,
         .hdc = GetDC(hwnd),
-        .cursor_in_window = false,
+        .cursor_in_window = BJ_FALSE,
     };
 
     ShowWindow(hwnd, SW_SHOW);

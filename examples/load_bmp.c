@@ -145,7 +145,7 @@ int main() {
 
     const size_t asset_dir_strlen = strlen(BANJO_ASSETS_DIR);
 
-    bool pause_on_display = true;
+    bj_bool pause_on_display = BJ_TRUE;
     for (size_t f = 0 ; f < n_files ; ++f) {
         total_tries +=1 ;
         const char* bmp_file = bmp_files[f];
@@ -176,7 +176,7 @@ int main() {
             bj_info("%s OK", bmp_file);
             total_ok +=1;
         }
-        pause_on_display = false;
+        pause_on_display = BJ_FALSE;
         bj_bitmap_del(p_bitmap);
     }
 

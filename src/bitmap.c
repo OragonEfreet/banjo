@@ -388,7 +388,7 @@ int bj_bitmap_clipped_blit_stretched(
     return 1;
 }
 
-bool bj_bitmap_blit(
+bj_bool bj_bitmap_blit(
     const bj_bitmap* p_src,
     const bj_rect* p_src_rect,
     bj_bitmap* p_dest,
@@ -441,13 +441,13 @@ bool bj_bitmap_blit(
 
 }
 
-bool bj_bitmap_blit_stretched(
+bj_bool bj_bitmap_blit_stretched(
     const bj_bitmap* p_src,
     const bj_rect* p_src_rect,
     bj_bitmap* p_dest,
     const bj_rect* p_dest_rect
 ) {
-    if (!p_src || !p_dest) return false;
+    if (!p_src || !p_dest) return BJ_FALSE;
 
     int src_w = p_src_rect ? p_src_rect->w : p_src->width;
     int src_h = p_src_rect ? p_src_rect->h : p_src->height;
@@ -455,7 +455,7 @@ bool bj_bitmap_blit_stretched(
     int dest_h = p_dest_rect ? p_dest_rect->h : p_dest->height;
 
     if (src_w <= 0 || src_h <= 0 || dest_w <= 0 || dest_h <= 0)
-        return false;
+        return BJ_FALSE;
 
     if (dest_w == src_w && dest_h == src_h) {
         return bj_bitmap_blit(p_src, p_src_rect, p_dest, p_dest_rect);
@@ -535,16 +535,16 @@ bool bj_bitmap_blit_stretched(
 
     if (clipped_src.w <= 0 || clipped_src.h <= 0 ||
         clipped_dest.w <= 0 || clipped_dest.h <= 0) {
-        return false;
+        return BJ_FALSE;
     }
 
     bj_rect src_bounds = { 0, 0, p_src->width, p_src->height };
     if (bj_rect_intersect(&src_bounds, &clipped_src, &clipped_src) == 0) {
-        return false;
+        return BJ_FALSE;
     }
 
     if (bj_rect_intersect(&clip_rect, &clipped_dest, &clipped_dest) == 0) {
-        return false;
+        return BJ_FALSE;
     }
 
     return bj_bitmap_clipped_blit_stretched(p_src, &clipped_src, p_dest, &clipped_dest);

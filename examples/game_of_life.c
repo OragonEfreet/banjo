@@ -26,7 +26,7 @@ bj_bitmap* presentation_fb = 0;
 uint32_t draw_color_1 = 0;
 uint32_t draw_color_2 = 0;
 uint32_t back_color = 0;
-bool painting = false;
+bj_bool painting = BJ_FALSE;
 
 void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
     (void)p_window;
@@ -35,7 +35,7 @@ void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scan
     (void)scancode;
 
     if (painting) {
-        painting = false;
+        painting = BJ_FALSE;
     }
     else {
         bj_window_set_should_close(p_window);
@@ -47,11 +47,11 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
     (void)x;
     (void)y;
     if (action == BJ_PRESS) {
-        painting = true;
+        painting = BJ_TRUE;
     }
     else {
         if (button == BJ_BUTTON_LEFT) {
-            painting = false;
+            painting = BJ_FALSE;
         }
     }
 }
@@ -92,7 +92,7 @@ void draw(size_t step) {
                 }
             }
 
-            bool is_alive = bj_bitmap_get(presentation_fb, x, y) != back_color;
+            bj_bool is_alive = bj_bitmap_get(presentation_fb, x, y) != back_color;
 
             if (is_alive) {
                 if (alive_neigh == 2 || alive_neigh == 3) {
@@ -152,10 +152,10 @@ int main() {
         double current_time = bj_get_time();
         double time_since_last = current_time - time;
 
-        bool need_update = false;
+        bj_bool need_update = BJ_FALSE;
         if (!painting && time_since_last >= 0.05) {
             draw(step++);
-            need_update = true;
+            need_update = BJ_TRUE;
         }
 
         if (need_update || painting) {

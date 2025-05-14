@@ -20,7 +20,7 @@ bj_stream* bj_stream_new_read(
     if(p_stream != 0) {
         bj_memset(p_stream, 0, sizeof(bj_stream));
         p_stream->p_data.r = p_data;
-        p_stream->weak   = true;
+        p_stream->weak   = BJ_TRUE;
         p_stream->len    = length;
     }
 
@@ -68,7 +68,7 @@ bj_stream* bj_stream_new_read_from_file(
         }
 
         bj_stream* p_stream = bj_stream_new_read(buffer, bytes_read);
-        p_stream->weak   = false;
+        p_stream->weak   = BJ_FALSE;
         return p_stream;
     }
 
