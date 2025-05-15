@@ -2,6 +2,7 @@
 #include <banjo/log.h>
 
 #include "config.h"
+#include "check.h"
 
 extern bj_audio_layer_create_info nosound_layer_info;
 #if BJ_HAS_FEATURE(MME)
@@ -14,6 +15,8 @@ static const bj_audio_layer_create_info* layer_infos[] = {
 #endif
 &nosound_layer_info,
 };
+
+extern bj_audio_layer* s_audio;
 
 bj_audio_layer* bj_init_audio(bj_error** p_error) {
     const size_t n_layers = sizeof(layer_infos) / sizeof(bj_audio_layer_create_info*);
@@ -48,4 +51,18 @@ void bj_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
     void (*dispose)(struct bj_video_layer_t*, bj_error * *p_error) = p_audio->dispose;
     dispose(p_audio, p_error);
     bj_info("disposed audio layer");
+}
+
+bj_audio_device* bj_open_audio_device(
+    bj_error** p_error
+) {
+    bj_check(s_audio);
+    return s_audio->open_device(s_audio, p_error);
+}
+
+void bj_close_audio_device(
+    bj_audio_device* p_device
+) {
+    bj_check(s_audio);
+    s_audio->close_device(s_audio, p_device);
 }
