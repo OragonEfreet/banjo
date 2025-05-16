@@ -19,7 +19,7 @@ int main(void) {
         }
 
         bj_close_audio_device(p_device);
-        bj_end(p_error);
+        bj_end(&p_error);
     } else {
         bj_err("while starting banjo: %s (%x)", p_error->message, p_error->code);
     }
