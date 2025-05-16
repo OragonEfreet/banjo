@@ -7,12 +7,8 @@
 #include "config.h"
 
 extern bj_video_layer_create_info novideo_layer_info;
-#if BJ_HAS_FEATURE(X11)
-extern bj_video_layer_create_info x11_layer_info;
-#endif
-#if BJ_HAS_FEATURE(WIN32)
 extern bj_video_layer_create_info win32_layer_info;
-#endif
+extern bj_video_layer_create_info x11_layer_info;
 
 static const bj_video_layer_create_info* layer_infos[] = {
 #if BJ_HAS_FEATURE(WIN32)

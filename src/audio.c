@@ -4,10 +4,8 @@
 #include "config.h"
 #include "check.h"
 
-extern bj_audio_layer_create_info noaudio_layer_info;
-#if BJ_HAS_FEATURE(MME)
 extern bj_audio_layer_create_info mme_layer_info;
-#endif
+extern bj_audio_layer_create_info noaudio_layer_info;
 
 static const bj_audio_layer_create_info* layer_infos[] = {
 #if BJ_HAS_FEATURE(MME)
