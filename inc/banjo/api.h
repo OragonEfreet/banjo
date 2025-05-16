@@ -139,6 +139,7 @@ typedef struct {
     bj_bool     feature_win32;       ///< Compiled with support for Win32 windows.
     bj_bool     feature_x11;         ///< Compiled with support for Win32 windows.
     bj_bool     feature_mme;         ///< Compiled with support for Windows Multimedia Extension (for audio).
+    bj_bool     feature_alsa;        ///< Compiled with support for ALSA (for audio).
     bj_bool     config_checks_abort; ///< When checks feature is on, a failed check will abort execution
     bj_bool     config_checks_log;   ///< If checks feature is on, failed check with log
     bj_bool     config_log_color;    ///< Banjo logs will have colored output
