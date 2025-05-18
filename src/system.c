@@ -44,7 +44,6 @@ bj_bool bj_begin(
         return BJ_FALSE;
     }
     
-    bj_info("banjo ready");
     return BJ_TRUE;
 }
 
@@ -62,7 +61,5 @@ void bj_end(
         bj_dispose_video(s_video, p_error);
         s_video = 0;
     }
-    
-    bj_info("banjo stopped");
 }
 

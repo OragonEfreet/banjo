@@ -746,8 +746,6 @@ static bj_video_layer* x11_init_video(
         return 0;
     }
 
-    bj_debug("X11 connected");
-
     p_x11->display          = display;
     p_x11->default_screen   = x11_XDefaultScreen(display);
     p_x11->default_depth    = x11_XDefaultDepth(display, p_x11->default_screen);
