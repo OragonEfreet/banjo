@@ -30,7 +30,6 @@ bj_video_layer* bj_init_video(
         bj_error* sub_err = 0;
 
         const bj_video_layer_create_info* p_create_info = layer_infos[b];
-        bj_trace("trying %s video layer", p_create_info->name);
         bj_video_layer* p_layer = p_create_info->create(&sub_err);
 
         if(sub_err) {
@@ -42,12 +41,12 @@ bj_video_layer* bj_init_video(
         }
 
         if(p_layer != 0) {
-            bj_info("%s video layer ready", p_create_info->name);
+            bj_info("video: %s", p_create_info->name);
             return p_layer;
         }
     }
 
-    bj_set_error(p_error, BJ_ERROR_INITIALIZE, "no video layer found");
+    bj_set_error(p_error, BJ_ERROR_INITIALIZE, "no suitable video");
     return 0;
 }
 
@@ -57,6 +56,5 @@ void bj_dispose_video(
 ) {
     void (*dispose)(struct bj_video_layer_t*, bj_error** p_error) = p_video->dispose;
     dispose(p_video, p_error);
-    bj_info("disposed video layer");
 }
 
