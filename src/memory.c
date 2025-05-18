@@ -34,6 +34,12 @@ void* bj_malloc(size_t size) {
     return s_default.fn_allocation(s_default.p_user_data, size);
 }
 
+void* bj_calloc(size_t size) {
+    void* ptr = bj_malloc(size);
+    bj_memzero(ptr, size);
+    return ptr;
+}
+
 void* bj_realloc(void* p_memory, size_t size) {
     return s_default.fn_reallocation(s_default.p_user_data, p_memory, size);
 }
@@ -81,4 +87,11 @@ void bj_memset(
     size_t num
 ) {
     memset(p_dest, value, num);
+}
+
+void bj_memzero(
+    void*  p_dest,
+    size_t mem_size
+) {
+    bj_memset(p_dest, 0, mem_size);
 }

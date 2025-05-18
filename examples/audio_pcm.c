@@ -19,6 +19,8 @@ int main(void) {
             return 0;
         }
 
+        bj_sleep(3000);
+
         bj_close_audio_device(p_device);
         bj_end(&p_error);
     } else {
