@@ -60,6 +60,18 @@ BANJO_EXPORT void* bj_malloc(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Allocate `size` bytes of memory and returns a pointer to it.
+///
+/// The returned memory is automatically filled with 0's using \ref bj_memzero.
+/// 
+/// \param[in] size        The number of bytes to allocate.
+///
+/// \return The memory address of the newly allocated block.
+BANJO_EXPORT void* bj_calloc(
+    size_t size
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Reallocate the given area of memory.
 /// 
 /// \param[in] p_memory    Pointer to the memory area to be reallocated.
@@ -127,7 +139,7 @@ BANJO_EXPORT void bj_memory_unset_defaults(void);
 BANJO_EXPORT void* bj_memcpy(
     void*       p_dest,
     const void* p_src,
-    size_t       mem_size
+    size_t      mem_size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,8 +150,20 @@ BANJO_EXPORT void* bj_memcpy(
 /// \param[in] value       fill byte.
 /// \param[in] mem_size    number of bytes to fill.
 BANJO_EXPORT void bj_memset(
-    void* p_dest,
-    uint8_t    value,
+    void*   p_dest,
+    uint8_t value,
+    size_t  mem_size
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Sets the `mem_size` bytes starting from `p_dest` to 0.
+///
+/// Effectively calls `bj_memset(p_dest, 0, mem_size)`
+///
+/// \param[in] p_dest      Pointer to the object to fill.
+/// \param[in] mem_size    number of bytes to fill.
+BANJO_EXPORT void bj_memzero(
+    void*  p_dest,
     size_t mem_size
 );
 
