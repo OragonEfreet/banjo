@@ -207,7 +207,7 @@ static bj_audio_device* alsa_open_device(bj_audio_layer* p_audio, bj_error** p_e
 
     snd_pcm_uframes_t total_frames = alsa_dev->frames_per_period * 4;
 
-    int alsa_err = ALSA.snd_pcm_open(&alsa_dev->p_handle, "plughw:0,0", SND_PCM_STREAM_PLAYBACK, 0);
+    int alsa_err = ALSA.snd_pcm_open(&alsa_dev->p_handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
     if(alsa_err < 0) {
         alsa_set_error(p_error, alsa_err);
         alsa_close_device(p_audio, p_device);
