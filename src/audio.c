@@ -1,6 +1,6 @@
-#include <banjo/audio.h>
 #include <banjo/log.h>
 
+#include "audio_t.h"
 #include "config.h"
 #include "check.h"
 
@@ -73,3 +73,11 @@ void bj_close_audio_device(
     bj_check(s_audio);
     s_audio->close_device(s_audio, p_device);
 }
+
+bj_audio_stream* bj_audio_get_device_stream(
+    const bj_audio_device* p_device
+) {
+    bj_check_or_0(p_device);
+    return &p_device->stream;
+}
+
