@@ -3,7 +3,6 @@
 #include <banjo/error.h>
 #include <banjo/api.h>
 
-#define BJ_AUDIO_SAMPLE_RATE 44100
 #define BJ_AUDIO_AMPLITUDE 16000
 
 typedef uint16_t bj_audio_format;

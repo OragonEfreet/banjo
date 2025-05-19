@@ -14,15 +14,14 @@
 #include <pthread.h>
 #include <math.h>
 
-#define BJ_AUDIO_PERIOD_FRAMES 512
-#define BJ_AUDIO_BUFFER_FRAMES (BJ_AUDIO_PERIOD_FRAMES * 4)
 #define BJ_AUDIO_FORMAT SND_PCM_FORMAT_S16_LE
-#define BJ_AUDIO_CHANNELS 1
 
 typedef struct bj_audio_device_data_t {
-    bj_bool    should_stop;
-    snd_pcm_t* p_handle;
-    pthread_t  playback_thread;
+    bj_bool           should_stop;
+    snd_pcm_t*        p_handle;
+    pthread_t         playback_thread;
+    int16_t           *p_buffer;
+    snd_pcm_uframes_t frames_per_period;
 } alsa_device;
 
 typedef int(*pfn_snd_pcm_hw_params_any)(snd_pcm_t*, snd_pcm_hw_params_t*);
@@ -30,7 +29,7 @@ typedef int(*pfn_snd_pcm_hw_params_malloc)(snd_pcm_hw_params_t**);
 typedef int(*pfn_snd_pcm_hw_params)(snd_pcm_t*, snd_pcm_hw_params_t*);
 typedef int(*pfn_snd_pcm_hw_params_set_access)(snd_pcm_t*, snd_pcm_hw_params_t*, snd_pcm_access_t);
 typedef int(*pfn_snd_pcm_hw_params_set_buffer_size_near)(snd_pcm_t*, snd_pcm_hw_params_t*, snd_pcm_uframes_t*);
-typedef int(*pfn_snd_pcm_hw_params_set_channels)(snd_pcm_t*, snd_pcm_hw_params_t*, unsigned int);
+typedef int(*pfn_snd_pcm_hw_params_set_channels_near)(snd_pcm_t*, snd_pcm_hw_params_t*, unsigned int*);
 typedef int(*pfn_snd_pcm_hw_params_set_format)(snd_pcm_t*, snd_pcm_hw_params_t*, snd_pcm_format_t);
 typedef int(*pfn_snd_pcm_hw_params_set_period_size_near)(snd_pcm_t*, snd_pcm_hw_params_t*, snd_pcm_uframes_t*, int*);
 typedef int(*pfn_snd_pcm_hw_params_set_rate_near)(snd_pcm_t*, snd_pcm_hw_params_t*, unsigned int*, int*);
@@ -41,8 +40,8 @@ typedef int(*pfn_snd_pcm_drain)(snd_pcm_t*);
 typedef snd_pcm_sframes_t(*pfn_snd_pcm_avail_update)(snd_pcm_t*);
 typedef int(*pfn_snd_pcm_prepare)(snd_pcm_t*);
 typedef snd_pcm_sframes_t(*pfn_snd_pcm_writei)(snd_pcm_t*, const void*, snd_pcm_uframes_t);
-typedef snd_pcm_sframes_t(*pfn_snd_pcm_writei)(snd_pcm_t*, const void*, snd_pcm_uframes_t);
 typedef const char*(*pfn_snd_strerror)(int);
+typedef uint16_t(*pfn_snd_pcm_format_silence_16)(snd_pcm_format_t);
 
 
 static struct alsa_lib_t {
@@ -53,7 +52,7 @@ static struct alsa_lib_t {
     pfn_snd_pcm_hw_params_malloc               snd_pcm_hw_params_malloc;
     pfn_snd_pcm_hw_params_set_access           snd_pcm_hw_params_set_access;
     pfn_snd_pcm_hw_params_set_buffer_size_near snd_pcm_hw_params_set_buffer_size_near;
-    pfn_snd_pcm_hw_params_set_channels         snd_pcm_hw_params_set_channels;
+    pfn_snd_pcm_hw_params_set_channels_near    snd_pcm_hw_params_set_channels_near;
     pfn_snd_pcm_hw_params_set_format           snd_pcm_hw_params_set_format;
     pfn_snd_pcm_hw_params_set_period_size_near snd_pcm_hw_params_set_period_size_near;
     pfn_snd_pcm_hw_params_set_rate_near        snd_pcm_hw_params_set_rate_near;
@@ -64,7 +63,12 @@ static struct alsa_lib_t {
     pfn_snd_pcm_avail_update                   snd_pcm_avail_update;
     pfn_snd_pcm_writei                         snd_pcm_writei;
     pfn_snd_strerror                           snd_strerror;
+    pfn_snd_pcm_format_silence_16              snd_pcm_format_silence_16;
 } ALSA = {0};
+
+static void alsa_set_error(bj_error** p_error, int alsa_err) {
+    bj_set_error(p_error, BJ_ERROR_AUDIO, ALSA.snd_strerror(alsa_err));
+}
 
 static void alsa_unload_library() {
     if(ALSA.p_handle != 0) {
@@ -86,13 +90,14 @@ static bj_bool alsa_load_library(bj_error** p_error) {
     ALSA_BIND(snd_pcm_avail_update)
     ALSA_BIND(snd_pcm_close)
     ALSA_BIND(snd_pcm_drain)
+    ALSA_BIND(snd_pcm_format_silence_16)
     ALSA_BIND(snd_pcm_hw_params)
     ALSA_BIND(snd_pcm_hw_params_any)
     ALSA_BIND(snd_pcm_hw_params_free)
     ALSA_BIND(snd_pcm_hw_params_malloc)
     ALSA_BIND(snd_pcm_hw_params_set_access)
     ALSA_BIND(snd_pcm_hw_params_set_buffer_size_near)
-    ALSA_BIND(snd_pcm_hw_params_set_channels)
+    ALSA_BIND(snd_pcm_hw_params_set_channels_near)
     ALSA_BIND(snd_pcm_hw_params_set_format)
     ALSA_BIND(snd_pcm_hw_params_set_period_size_near)
     ALSA_BIND(snd_pcm_hw_params_set_rate_near)
@@ -106,21 +111,22 @@ static bj_bool alsa_load_library(bj_error** p_error) {
 }
 
 
-// Notes in Hz: A4, C5, E5, G5, A5
-double notes[] = { 440.0, 523.25, 659.25, 783.99, 880.0 };
-const int note_count = sizeof(notes) / sizeof(notes[0]);
-
 static void* playback_thread(void* p_data) {
-    alsa_device* p_alsa_device = ((bj_audio_device*)p_data)->data;
-    snd_pcm_t* pcm_handle = p_alsa_device->p_handle;
 
-    int16_t buffer[BJ_AUDIO_PERIOD_FRAMES];
-    int sample_index = 0;
-    double current_freq = notes[0];
-    int last_second = -1;
+    bj_audio_device* p_device = (bj_audio_device*)p_data;
+
+    alsa_device* p_alsa_device          = (alsa_device*)p_device->data;
+    snd_pcm_t* pcm_handle               = p_alsa_device->p_handle;
+    int16_t* buffer                     = p_alsa_device->p_buffer;
+    snd_pcm_uframes_t frames_per_period = p_alsa_device->frames_per_period;
+    int sample_index                    = 0;
+
+    const double current_freq           = 440.0; // C4
+    const unsigned int sample_rate      = p_device->sample_rate;
 
     while (p_alsa_device->should_stop == BJ_FALSE) {
         snd_pcm_sframes_t avail = ALSA.snd_pcm_avail_update(pcm_handle);
+
         if (avail < 0) {
             if (avail == -EPIPE) {
                 bj_err("underrun!");
@@ -132,21 +138,13 @@ static void* playback_thread(void* p_data) {
             }
         }
 
-        // Change note every second
-        int now = time(NULL);
-        if (now != last_second) {
-            last_second = now;
-            current_freq = notes[now % note_count];
-            printf("Switching to frequency: %.2f Hz\n", current_freq);
-        }
-
-        if (avail >= BJ_AUDIO_PERIOD_FRAMES) {
-            for (int i = 0; i < BJ_AUDIO_PERIOD_FRAMES; ++i) {
-                double t = (double)(sample_index++) / BJ_AUDIO_SAMPLE_RATE;
+        if (avail >= frames_per_period) {
+            for (unsigned int i = 0; i < frames_per_period; ++i) {
+                double t = (double)(sample_index++) / sample_rate;
                 buffer[i] = (int16_t)(BJ_AUDIO_AMPLITUDE * sin(2 * M_PI * current_freq * t));
             }
 
-            int err = ALSA.snd_pcm_writei(pcm_handle, buffer, BJ_AUDIO_PERIOD_FRAMES);
+            int err = ALSA.snd_pcm_writei(pcm_handle, buffer, frames_per_period);
             if (err == -EPIPE) {
                 bj_err("write underrun!");
                 ALSA.snd_pcm_prepare(pcm_handle);
@@ -155,7 +153,7 @@ static void* playback_thread(void* p_data) {
                 break;
             }
         } else {
-            usleep(100); // Yield a bit if not enough space
+            usleep(100); // Yield a bit
         }
     }
 
@@ -179,6 +177,8 @@ static void alsa_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device
            ALSA.snd_pcm_drain(alsa_dev->p_handle);
            ALSA.snd_pcm_close(alsa_dev->p_handle);
         }
+
+        bj_free(alsa_dev->p_buffer);
     }
 
     bj_free(p_device->data);
@@ -192,47 +192,56 @@ static bj_audio_device* alsa_open_device(bj_audio_layer* p_audio, bj_error** p_e
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
         return 0;
     }
-    p_device->data = bj_calloc(sizeof(alsa_device));
-    if(p_device->data == 0) {
+    alsa_device* alsa_dev = bj_calloc(sizeof(alsa_device));
+    if(alsa_dev == 0) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device data");
         alsa_close_device(p_audio, p_device);
         return 0;
     }
+    p_device->data = alsa_dev;
 
-    snd_pcm_hw_params_t* params   = 0;
-    unsigned int sample_rate      = BJ_AUDIO_SAMPLE_RATE;
-    snd_pcm_uframes_t period      = BJ_AUDIO_PERIOD_FRAMES;
-    snd_pcm_uframes_t buffer_size = BJ_AUDIO_BUFFER_FRAMES;
+    snd_pcm_hw_params_t* params = 0;
+    p_device->channels          = 1;
+    p_device->sample_rate       = 44100;
+    alsa_dev->frames_per_period = 512;
 
-    if(ALSA.snd_pcm_open(&p_device->data->p_handle, "default", SND_PCM_STREAM_PLAYBACK, 0) < 0) {
-        bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot open 'default' device");
+    snd_pcm_uframes_t total_frames = alsa_dev->frames_per_period * 4;
+
+    int alsa_err = ALSA.snd_pcm_open(&alsa_dev->p_handle, "plughw:0,0", SND_PCM_STREAM_PLAYBACK, 0);
+    if(alsa_err < 0) {
+        alsa_set_error(p_error, alsa_err);
         alsa_close_device(p_audio, p_device);
         return 0;
     }
 
     ALSA.snd_pcm_hw_params_malloc(&params);
-    ALSA.snd_pcm_hw_params_any(p_device->data->p_handle, params);
-    ALSA.snd_pcm_hw_params_set_access(p_device->data->p_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
-    ALSA.snd_pcm_hw_params_set_format(p_device->data->p_handle, params, BJ_AUDIO_FORMAT);
-    ALSA.snd_pcm_hw_params_set_channels(p_device->data->p_handle, params, BJ_AUDIO_CHANNELS);
-    ALSA.snd_pcm_hw_params_set_rate_near(p_device->data->p_handle, params, &sample_rate, 0);
-    ALSA.snd_pcm_hw_params_set_period_size_near(p_device->data->p_handle, params, &period, 0);
-    ALSA.snd_pcm_hw_params_set_buffer_size_near(p_device->data->p_handle, params, &buffer_size);
+    ALSA.snd_pcm_hw_params_any(alsa_dev->p_handle, params);
+    ALSA.snd_pcm_hw_params_set_access(alsa_dev->p_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
+    ALSA.snd_pcm_hw_params_set_format(alsa_dev->p_handle, params, BJ_AUDIO_FORMAT);
+    ALSA.snd_pcm_hw_params_set_channels_near(alsa_dev->p_handle, params, &p_device->channels);
+    ALSA.snd_pcm_hw_params_set_rate_near(alsa_dev->p_handle, params, &p_device->sample_rate, 0);
+    ALSA.snd_pcm_hw_params_set_period_size_near(alsa_dev->p_handle, params, &alsa_dev->frames_per_period, 0);
+    ALSA.snd_pcm_hw_params_set_buffer_size_near(alsa_dev->p_handle, params, &total_frames);
 
-    if(ALSA.snd_pcm_hw_params(p_device->data->p_handle, params) < 0) {
-        bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot configure audio device");
+    alsa_err = ALSA.snd_pcm_hw_params(alsa_dev->p_handle, params);
+    if(alsa_err < 0) {
+        alsa_set_error(p_error, alsa_err);
         ALSA.snd_pcm_hw_params_free(params);
         alsa_close_device(p_audio, p_device);
         return 0;
     }
-    ALSA.snd_pcm_prepare(p_device->data->p_handle);
 
     ALSA.snd_pcm_hw_params_free(params);
 
-    pthread_t thread;
-    pthread_create(&thread, 0, playback_thread, (void*)p_device);
-
-    p_device->data->playback_thread = thread;
+    // Create buffer and fill with silence
+    alsa_dev->p_buffer = bj_malloc(sizeof(int16_t) * total_frames);
+    int16_t silence = ALSA.snd_pcm_format_silence_16(BJ_AUDIO_FORMAT);
+    for(size_t s = 0 ; s < total_frames ; ++s) {
+        alsa_dev->p_buffer[s] = silence;
+    }
+    
+    ALSA.snd_pcm_prepare(alsa_dev->p_handle);
+    pthread_create(&alsa_dev->playback_thread, 0, playback_thread, (void*)p_device);
 
 	return p_device;
 }
