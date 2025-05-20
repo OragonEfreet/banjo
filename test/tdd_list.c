@@ -1,7 +1,6 @@
 #include "test.h"
 
 #include "list_t.h"
-
 #include <string.h>
 
 typedef struct {

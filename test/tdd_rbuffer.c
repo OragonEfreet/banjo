@@ -10,245 +10,95 @@ typedef double payload;
 
 TEST_CASE(initialize_with_payload_gives_empty_rbuffer) {
     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
-
     REQUIRE_VALUE(p_rbuffer);
     REQUIRE_EQ(p_rbuffer->item_payload, sizeof(payload));
     REQUIRE_EQ(p_rbuffer->bucket_size, BUCKET_SIZE);
     REQUIRE_EQ(p_rbuffer->n_buckets, 0);
-    REQUIRE_EQ(p_rbuffer->p_buckets, 0);
-
-    /* bj_rbuffer_del(p_rbuffer); */
+    REQUIRE_EQ(p_rbuffer->buckets, 0);
+    bj_rbuffer_del(p_rbuffer);
 }
 
-/* TEST_CASE(clear_filled_reduces_size_to_zero) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-/*     bj_rbuffer_push(p_rbuffer, &(payload){.elem0 = 0}); */
-/*     bj_rbuffer_clear(p_rbuffer); */
-/*     REQUIRE_EQ(p_rbuffer->len, 0); */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
+TEST_CASE(reset_zero_entire_object) {
+    bj_rbuffer rbuffer = {
+        .item_payload = sizeof(payload),
+        .bucket_size  = BUCKET_SIZE,
+    };
+    rbuffer.n_buckets = 0;
+    bj_rbuffer_reset(&rbuffer);
+    REQUIRE_NIL(bj_rbuffer, &rbuffer);
+}
 
-/* TEST_CASE(clear_filled_does_not_change_capacity) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-/*     bj_rbuffer_push(p_rbuffer, &(payload){.elem0 = 0}); */
-/*     size_t capacity = bj_rbuffer_capacity(p_rbuffer); */
-/*     bj_rbuffer_clear(p_rbuffer); */
-/*     REQUIRE_EQ(capacity, bj_rbuffer_capacity(p_rbuffer)); */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
+TEST_CASE(initialize_with_0_payload_returns_0) {
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new(0, BUCKET_SIZE);
+    REQUIRE_NULL(p_rbuffer);
+}
 
-/* TEST_CASE(shrink_empty_does_nothing) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-/*     CHECK_EQ(p_rbuffer->capacity, 0); */
-/*     bj_rbuffer_clear(p_rbuffer); */
-/*     REQUIRE_EQ(p_rbuffer->capacity, 0); */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
+TEST_CASE(initialize_with_0_bucket_size_returns_0) {
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, 0);
+    REQUIRE_NULL(p_rbuffer);
+}
 
-/* TEST_CASE(shrink_sets_capacity_to_size) { */
-/*     payload p; */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
+TEST_CASE(capacity_null_returns_0) {
+    REQUIRE_EQ(bj_rbuffer_capacity(0), 0);
+}
 
-/*     for(size_t len = 1 ; len <= 10 ; ++len) { */
-/*         bj_rbuffer_push(p_rbuffer, &p); */
-/*         CHECK_EQ(p_rbuffer->len, len); */
-/*         CHECK(p_rbuffer->capacity >= len); */
+TEST_CASE(capacity_empty_returns_0) {
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
+    REQUIRE_EQ(bj_rbuffer_capacity(p_rbuffer), 0);
+    bj_rbuffer_del(p_rbuffer);
+}
 
-/*         bj_rbuffer_shrink(p_rbuffer); */
-/*         size_t got_len = bj_rbuffer_len(p_rbuffer); */
-/*         size_t got_capacity = bj_rbuffer_capacity(p_rbuffer); */
-/*         REQUIRE_EQ(got_len, got_capacity); */
-/*     } */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
+TEST_CASE(reserve_null_returns_0) {
+    REQUIRE_EQ(bj_rbuffer_reserve(0, 42), 0);
+}
 
-/* TEST_CASE(set_greater_len_changes_len_and_capacity) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
+TEST_CASE(reserve_larger_growths_capacity) {
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
+    for(size_t c = 1 ; c < (BUCKET_SIZE + 1) ; ++c) {
+        const size_t req_cap = c * (BUCKET_SIZE + 1); 
+        const size_t act_cap = bj_rbuffer_reserve(p_rbuffer, req_cap);
 
-/*     for(size_t len = 0 ; len < 10 ; ++len) { */
-/*         bj_rbuffer_set_len(p_rbuffer, len); */
-/*         REQUIRE_EQ(p_rbuffer->len, len); */
-/*         REQUIRE(p_rbuffer->capacity >= len); */
-/*     } */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
+        REQUIRE(act_cap >= req_cap); // At least required capacity
 
-/* TEST_CASE(set_lower_len_changes_len_but_not_capacity) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
+        REQUIRE_EQ(act_cap % BUCKET_SIZE, 0); // cap is multiple of bucket size
 
-/*     size_t len = 9; */
-/*     do { */
-/*         bj_rbuffer_set_len(p_rbuffer, len); */
-/*         REQUIRE_EQ(p_rbuffer->len, len); */
-/*         REQUIRE(p_rbuffer->capacity >= 9); */
-/*     } while(--len > 0); */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
+        const size_t got_cap = bj_rbuffer_capacity(p_rbuffer);
+        REQUIRE_EQ(got_cap, act_cap); // Consistent returned capacity
+    }
+    bj_rbuffer_del(p_rbuffer);
+}
 
-/* TEST_CASE(reserve_greater_capacity_growth_buffer) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-/*     bj_rbuffer_reserve(p_rbuffer, 10); */
-/*     REQUIRE(p_rbuffer->capacity >= 10); */
-/*     REQUIRE_VALUE(p_rbuffer->p_buffer); */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
+TEST_CASE(reserve_smaller_does_not_change_buffer) {
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
 
-/* TEST_CASE(reserve_smaller_or_equal_capacity_does_nothing) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
+    const size_t ini_cap = bj_rbuffer_reserve(p_rbuffer, 10);
+    REQUIRE(ini_cap >= 10);
 
-/*     bj_rbuffer_reserve(p_rbuffer, 0); */
-/*     REQUIRE_EQ(p_rbuffer->capacity, 0); */
-/*     REQUIRE_EQ(p_rbuffer->p_buffer, 0); */
+    const size_t expected_n_buckets = p_rbuffer->n_buckets;
+    const struct bj_rbucket_t* expected_p_buckets = p_rbuffer->buckets;
 
-/*     bj_rbuffer_reserve(p_rbuffer, 10); */
-/*     CHECK(p_rbuffer->capacity >= 10); */
-/*     CHECK_VALUE(p_rbuffer->p_buffer); */
+    const size_t new_cap = bj_rbuffer_reserve(p_rbuffer, 3);
 
-/*     bj_rbuffer_reserve(p_rbuffer, 5); */
-/*     REQUIRE(p_rbuffer->capacity >= 10); */
-/*     REQUIRE_VALUE(p_rbuffer->p_buffer); */
+    REQUIRE_EQ(new_cap, ini_cap);
+    REQUIRE_EQ(p_rbuffer->n_buckets, expected_n_buckets);
+    REQUIRE_EQ(p_rbuffer->buckets, expected_p_buckets);
 
-/*     bj_rbuffer_reserve(p_rbuffer, 0); */
-/*     REQUIRE(p_rbuffer->capacity >= 10); */
-/*     REQUIRE_VALUE(p_rbuffer->p_buffer); */
+    bj_rbuffer_del(p_rbuffer);
+}
 
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
-
-/* TEST_CASE(push_into_empty_rbuffer_creates_new_buffer) { */
-/*     payload p; */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-
-/*     CHECK(p_rbuffer->p_buffer == 0); */
-/*     CHECK_EQ(p_rbuffer->len, 0); */
-/*     CHECK_EQ(p_rbuffer->capacity, 0); */
-
-/*     bj_rbuffer_push(p_rbuffer, &p); */
-
-/*     REQUIRE(p_rbuffer->p_buffer != 0); */
-/*     REQUIRE_EQ(p_rbuffer->len, 1); */
-/*     REQUIRE(p_rbuffer->capacity >= 1); */
-    
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
-
-/* TEST_CASE(push_growth_len_by_1) { */
-/*     payload p; */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-
-/*     for(size_t i = 1 ; i < 9 ; ++i) { */
-/*         bj_rbuffer_push(p_rbuffer, &p); */
-/*         REQUIRE_EQ(p_rbuffer->len, i); */
-/*     } */
-
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
-
-/* TEST_CASE(push_growth_capacity_only_if_equals_to_len) { */
-/*     payload p; */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-
-/*     for(size_t i = 1 ; i < 90 ; ++i) { */
-/*         size_t before_capacity  = p_rbuffer->capacity; */
-/*         size_t capacity_resized = (before_capacity == p_rbuffer->len); */
-
-/*         bj_rbuffer_push(p_rbuffer, &p); */
-
-/*         if(capacity_resized) { */
-/*             REQUIRE(p_rbuffer->capacity >= before_capacity); */
-/*         } else { */
-/*             REQUIRE_EQ(p_rbuffer->capacity, before_capacity); */
-/*         } */
-/*     } */
-
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
-
-/* TEST_CASE(pop_empty_does_nothing) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-/*     bj_rbuffer_pop(p_rbuffer); */
-/*     REQUIRE_EQ(p_rbuffer->p_buffer, 0); */
-/*     REQUIRE_EQ(p_rbuffer->len, 0); */
-/*     REQUIRE_EQ(p_rbuffer->capacity, 0); */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
-
-/* TEST_CASE(pop_nonempty_reduces_len_but_not_capacity_nor_pointer) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-
-/*     size_t len = 10; */
-/*     bj_rbuffer_set_len(p_rbuffer, len); */
-/*     void* buffer  = p_rbuffer->p_buffer; */
-/*     size_t capacity = p_rbuffer->capacity; */
-
-/*     do { */
-/*         bj_rbuffer_pop(p_rbuffer); */
-/*         REQUIRE_EQ(p_rbuffer->len, --len); */
-/*         REQUIRE_EQ(p_rbuffer->capacity, capacity); */
-/*         REQUIRE_EQ(p_rbuffer->p_buffer, buffer); */
-/*     } while(len > 0); */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
-
-/* TEST_CASE(at_0_returns_0) { */
-/*     REQUIRE_EQ(bj_rbuffer_at(0, 0), 0); */
-/*     REQUIRE_EQ(bj_rbuffer_at(0, 1), 0); */
-/*     REQUIRE_EQ(bj_rbuffer_at(0, 2), 0); */
-/*     REQUIRE_EQ(bj_rbuffer_at(0, 3), 0); */
-/*     REQUIRE_EQ(bj_rbuffer_at(0, 4), 0); */
-/* } */
-
-/* TEST_CASE(at_empty_returns_0) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-/*     REQUIRE_EQ(bj_rbuffer_at(p_rbuffer, 0), 0); */
-/*     REQUIRE_EQ(bj_rbuffer_at(p_rbuffer, 1), 0); */
-/*     REQUIRE_EQ(bj_rbuffer_at(p_rbuffer, 2), 0); */
-/*     REQUIRE_EQ(bj_rbuffer_at(p_rbuffer, 3), 0); */
-/*     REQUIRE_EQ(bj_rbuffer_at(p_rbuffer, 4), 0); */
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
-
-/* TEST_CASE(at_nonempty_returns_indexed_value) { */
-/*     bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload); */
-
-/*     for(short i = 0 ; i < 10 ; ++i) { */
-
-/*         payload p = {.elem0 = i * 2, .elem1 = -((long)i)}; */
-/*         bj_rbuffer_push(p_rbuffer, &p); */
-
-/*         payload* got = bj_rbuffer_at(p_rbuffer, i); */
-
-/*         REQUIRE_EQ(p.elem0, got->elem0); */
-/*         REQUIRE_EQ(p.elem1, got->elem1); */
-
-/*         int diff = memcmp(&p, got, sizeof(payload)); */
-/*         REQUIRE_EQ(diff, 0); */
-/*     } */
-
-/*     bj_rbuffer_del(p_rbuffer); */
-/* } */
 
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
     RUN_TEST(initialize_with_payload_gives_empty_rbuffer);
-    /* RUN_TEST(clear_empty_does_nothing); */
-    /* RUN_TEST(clear_filled_reduces_size_to_zero); */
-    /* RUN_TEST(clear_filled_does_not_change_capacity); */
-    /* RUN_TEST(shrink_empty_does_nothing); */
-    /* RUN_TEST(shrink_sets_capacity_to_size); */
-    /* RUN_TEST(set_greater_len_changes_len_and_capacity); */
-    /* RUN_TEST(set_lower_len_changes_len_but_not_capacity); */
-    /* RUN_TEST(reserve_greater_capacity_growth_buffer); */
-    /* RUN_TEST(reserve_smaller_or_equal_capacity_does_nothing); */
-    /* RUN_TEST(push_into_empty_rbuffer_creates_new_buffer); */
-    /* RUN_TEST(push_growth_len_by_1); */
-    /* RUN_TEST(push_growth_capacity_only_if_equals_to_len); */
-    /* RUN_TEST(pop_empty_does_nothing); */
-    /* RUN_TEST(pop_nonempty_reduces_len_but_not_capacity_nor_pointer); */
-    /* RUN_TEST(at_0_returns_0); */
-    /* RUN_TEST(at_empty_returns_0); */
-    /* RUN_TEST(at_nonempty_returns_indexed_value); */
+    RUN_TEST(initialize_with_0_payload_returns_0);
+    RUN_TEST(initialize_with_0_bucket_size_returns_0);
+    RUN_TEST(reset_zero_entire_object);
+    RUN_TEST(capacity_null_returns_0);
+    RUN_TEST(capacity_empty_returns_0);
+    RUN_TEST(reserve_null_returns_0);
+    RUN_TEST(reserve_larger_growths_capacity);
+    RUN_TEST(reserve_smaller_does_not_change_buffer);
 
     END_TESTS();
 }

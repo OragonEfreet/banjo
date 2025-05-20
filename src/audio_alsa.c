@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if BJ_HAS_FEATURE(MME)
+#if BJ_HAS_FEATURE(ALSA)
 
 #include <banjo/audio.h>
 #include <banjo/error.h>

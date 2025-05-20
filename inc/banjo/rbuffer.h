@@ -69,4 +69,50 @@ BANJO_EXPORT void bj_rbuffer_reset(
     bj_rbuffer* p_rbuffer
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Retrieves the current capacity of the rbuffer.
+///
+/// \param rbuffer The rbuffer object to get the capacity from.
+/// \return Current capacity of the rbuffer.
+///
+/// The capacity of a ring buffer correspond to the number of items its internal
+/// memory has been allocated for.
+/// This is always a multiple of the bucket size set at initialization.
+///
+/// This capacity can be adjusted using \ref bj_rbuffer_reserve.
+/// The is also automatically called when the ring buffer is resized using
+/// \ref bj_rbuffer_set_len.
+///
+/// \retval 0 if `rbuffer` is null.
+///
+/// \see bj_rbuffer_reserve
+BANJO_EXPORT size_t bj_rbuffer_capacity(
+    const bj_rbuffer* p_rbuffer
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Reserves memory for at least `capacity` elements in the rbuffer.
+///
+/// \param rbuffer    The rbuffer object to reserve memory for.
+/// \param capacity Number of elements to reserve space for.
+///
+/// \return The actual capacity
+///
+/// \par Behaviour
+///
+/// If `capacity` is smaller than the current capacity, this function does nothing.
+/// Otherwise, it reallocates memory to fit the new capacity.
+///
+/// The actual amount of allocated memory may be greater than the required capacity
+/// because of the bucket architecture.
+///
+/// The returned value will always be a multiple of 
+/// `bj_rbuffer_bucket_size(p_rbuffer)`.
+///
+/// \note When called on a null object, this function does nothing.
+BANJO_EXPORT size_t bj_rbuffer_reserve(
+    bj_rbuffer* rbuffer,
+    size_t      capacity
+);
+
 /// \} // End of rbuffer group
