@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if BJ_HAS_FEATURE(MME)
+
 #include <banjo/audio.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
@@ -280,3 +284,4 @@ bj_audio_layer_create_info alsa_layer_info = {
     .create = alsa_init_audio,
 };
 
+#endif

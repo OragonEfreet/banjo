@@ -75,7 +75,7 @@ void bj_close_audio_device(
 }
 
 bj_audio_stream* bj_audio_get_device_stream(
-    const bj_audio_device* p_device
+    bj_audio_device* p_device
 ) {
     bj_check_or_0(p_device);
     return &p_device->stream;

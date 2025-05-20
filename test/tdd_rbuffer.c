@@ -6,14 +6,18 @@
 
 typedef double payload;
 
+#define BUCKET_SIZE 16
+
 TEST_CASE(initialize_with_payload_gives_empty_rbuffer) {
-    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload);
-    REQUIRE_EQ(p_rbuffer->bytes_payload, sizeof(payload));
-    REQUIRE_EQ(p_rbuffer->capacity, 0);
-    REQUIRE_EQ(p_rbuffer->len, 0);
-    REQUIRE_EQ(p_rbuffer->p_buffer, 0);
-    REQUIRE_EQ(p_rbuffer->head, 0);
-    bj_rbuffer_del(p_rbuffer);
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
+
+    REQUIRE_VALUE(p_rbuffer);
+    REQUIRE_EQ(p_rbuffer->item_payload, sizeof(payload));
+    REQUIRE_EQ(p_rbuffer->bucket_size, BUCKET_SIZE);
+    REQUIRE_EQ(p_rbuffer->n_buckets, 0);
+    REQUIRE_EQ(p_rbuffer->p_buckets, 0);
+
+    /* bj_rbuffer_del(p_rbuffer); */
 }
 
 /* TEST_CASE(clear_filled_reduces_size_to_zero) { */

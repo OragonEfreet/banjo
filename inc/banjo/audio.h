@@ -19,7 +19,7 @@ BANJO_EXPORT void bj_close_audio_device(
 );
 
 BANJO_EXPORT bj_audio_stream* bj_audio_get_device_stream(
-    const bj_audio_device* p_device
+    bj_audio_device* p_device
 );
 
 struct bj_audio_layer_data_t;

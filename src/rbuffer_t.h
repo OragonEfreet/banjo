@@ -2,12 +2,13 @@
 
 #include <banjo/rbuffer.h>
 
+struct bj_rbucket_t;
+
 struct bj_rbuffer_t {
-    size_t bytes_payload;
-    size_t capacity;
-    size_t head;
-    size_t len;
-    void*  p_buffer;
+    size_t               item_payload;
+    size_t               bucket_size;
+    size_t               n_buckets;
+    struct bj_rbucket_t* p_buckets;
 };
 
 
