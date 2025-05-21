@@ -12,11 +12,10 @@ typedef struct bj_rbucket_t {
 } bj_rbucket;
 
 bj_rbuffer* bj_rbuffer_new(
-    size_t bytes_payload,
     size_t bucket_size
 ) {
     bj_rbuffer rbuffer;
-    if(bj_rbuffer_init(&rbuffer, bytes_payload, bucket_size) == 0) {
+    if(bj_rbuffer_init(&rbuffer, bucket_size) == 0) {
         return 0;
     }
     return bj_memcpy(bj_malloc(sizeof(bj_rbuffer)), &rbuffer, sizeof(bj_rbuffer));
@@ -32,18 +31,12 @@ void bj_rbuffer_del(
 
 bj_rbuffer* bj_rbuffer_init(
     bj_rbuffer* p_instance, 
-    size_t      bytes_payload,
     size_t      bucket_size
 ) {
     bj_check_or_0(p_instance);
-    bj_check_or_0(bytes_payload);
     bj_check_or_0(bucket_size);
-
     bj_memzero(p_instance, sizeof(bj_rbuffer));
-
-    p_instance->item_payload = bytes_payload;
     p_instance->bucket_size  = bucket_size;
-
     return p_instance;
 }
 
@@ -102,7 +95,7 @@ size_t bj_rbuffer_reserve(
         }
 
         for(size_t b = p_rbuffer->n_buckets ; b < required_buckets ; ++b) {
-            p_rbuffer->buckets[b].data = bj_malloc(p_rbuffer->item_payload * p_rbuffer->bucket_size);
+            p_rbuffer->buckets[b].data = bj_malloc(p_rbuffer->bucket_size);
         }
         p_rbuffer->n_buckets = required_buckets;
     }

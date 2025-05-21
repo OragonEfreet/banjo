@@ -12,7 +12,7 @@
 
 int main(void) {
 
-    bj_rbuffer* rbuffer = bj_rbuffer_new_t(int, BUCKET_SIZE);
+    bj_rbuffer* rbuffer = bj_rbuffer_new(BUCKET_SIZE);
 
 
     for(size_t c = 1 ; c < (BUCKET_SIZE + 1) ; ++c) {

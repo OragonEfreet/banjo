@@ -4,14 +4,11 @@
 
 #include <string.h>
 
-typedef double payload;
-
 #define BUCKET_SIZE 16
 
-TEST_CASE(initialize_with_payload_gives_empty_rbuffer) {
-    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
+TEST_CASE(initialize_gives_empty_buffer) {
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new(BUCKET_SIZE);
     REQUIRE_VALUE(p_rbuffer);
-    REQUIRE_EQ(p_rbuffer->item_payload, sizeof(payload));
     REQUIRE_EQ(p_rbuffer->bucket_size, BUCKET_SIZE);
     REQUIRE_EQ(p_rbuffer->n_buckets, 0);
     REQUIRE_EQ(p_rbuffer->buckets, 0);
@@ -20,7 +17,6 @@ TEST_CASE(initialize_with_payload_gives_empty_rbuffer) {
 
 TEST_CASE(reset_zero_entire_object) {
     bj_rbuffer rbuffer = {
-        .item_payload = sizeof(payload),
         .bucket_size  = BUCKET_SIZE,
     };
     rbuffer.n_buckets = 0;
@@ -28,13 +24,8 @@ TEST_CASE(reset_zero_entire_object) {
     REQUIRE_NIL(bj_rbuffer, &rbuffer);
 }
 
-TEST_CASE(initialize_with_0_payload_returns_0) {
-    bj_rbuffer* p_rbuffer = bj_rbuffer_new(0, BUCKET_SIZE);
-    REQUIRE_NULL(p_rbuffer);
-}
-
 TEST_CASE(initialize_with_0_bucket_size_returns_0) {
-    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, 0);
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new(0);
     REQUIRE_NULL(p_rbuffer);
 }
 
@@ -43,7 +34,7 @@ TEST_CASE(capacity_null_returns_0) {
 }
 
 TEST_CASE(capacity_empty_returns_0) {
-    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new(BUCKET_SIZE);
     REQUIRE_EQ(bj_rbuffer_capacity(p_rbuffer), 0);
     bj_rbuffer_del(p_rbuffer);
 }
@@ -53,7 +44,7 @@ TEST_CASE(reserve_null_returns_0) {
 }
 
 TEST_CASE(reserve_larger_growths_capacity) {
-    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new(BUCKET_SIZE);
     for(size_t c = 1 ; c < (BUCKET_SIZE + 1) ; ++c) {
         const size_t req_cap = c * (BUCKET_SIZE + 1); 
         const size_t act_cap = bj_rbuffer_reserve(p_rbuffer, req_cap);
@@ -69,7 +60,7 @@ TEST_CASE(reserve_larger_growths_capacity) {
 }
 
 TEST_CASE(reserve_smaller_does_not_change_buffer) {
-    bj_rbuffer* p_rbuffer = bj_rbuffer_new_t(payload, BUCKET_SIZE);
+    bj_rbuffer* p_rbuffer = bj_rbuffer_new(BUCKET_SIZE);
 
     const size_t ini_cap = bj_rbuffer_reserve(p_rbuffer, 10);
     REQUIRE(ini_cap >= 10);
@@ -90,8 +81,7 @@ TEST_CASE(reserve_smaller_does_not_change_buffer) {
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(initialize_with_payload_gives_empty_rbuffer);
-    RUN_TEST(initialize_with_0_payload_returns_0);
+    RUN_TEST(initialize_gives_empty_buffer);
     RUN_TEST(initialize_with_0_bucket_size_returns_0);
     RUN_TEST(reset_zero_entire_object);
     RUN_TEST(capacity_null_returns_0);

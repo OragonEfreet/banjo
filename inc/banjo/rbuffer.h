@@ -16,26 +16,14 @@
 typedef struct bj_rbuffer_t bj_rbuffer;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Creates a new bj_rbuffer with a payload size inferred from the type T.
-///
-/// \param T Type of elements.
-/// \param bucket_size The size of each bucket in number of items.
-/// \return A pointer to the newly created bj_rbuffer object.
-///
-/// \see bj_rbuffer_new
-#define bj_rbuffer_new_t(T, bucket_size) bj_rbuffer_new(sizeof(T), bucket_size)
-
-////////////////////////////////////////////////////////////////////////////////
 /// Creates a new bj_rbuffer with a payload size specified in bytes.
 ///
 /// The function effectively uses \ref bj_rbuffer_alloc and \ref bj_rbuffer_init.
 ///
-/// \param bytes_payload Size of each element in bytes.
 /// \param bucket_size The size of each bucket in number of items.
 ///
 /// \return A pointer to the newly created bj_rbuffer object.
 BANJO_EXPORT bj_rbuffer* bj_rbuffer_new(
-    size_t bytes_payload,
     size_t bucket_size
 );
 
@@ -51,13 +39,11 @@ BANJO_EXPORT void bj_rbuffer_del(
 /// Initialize a new rbuffer with given size.
 ///
 /// \param p_instance A pointer to an rbuffer object.
-/// \param bytes_payload Size of each element in bytes.
 /// \param bucket_size The size of each bucket in number of items.
 ///
 /// \return A pointer to the newly created bj_rbuffer object.
 BANJO_EXPORT bj_rbuffer* bj_rbuffer_init(
     bj_rbuffer* p_instance, 
-    size_t      bytes_payload,
     size_t      bucket_size
 );
 
@@ -75,13 +61,9 @@ BANJO_EXPORT void bj_rbuffer_reset(
 /// \param rbuffer The rbuffer object to get the capacity from.
 /// \return Current capacity of the rbuffer.
 ///
-/// The capacity of a ring buffer correspond to the number of items its internal
+/// The capacity of a ring buffer correspond to the number of bytes its internal
 /// memory has been allocated for.
 /// This is always a multiple of the bucket size set at initialization.
-///
-/// The capacity of a ring buffer can be interpreted as the maximum number of
-/// items that can be pushed into the queue in total without reallocating
-/// memory.
 ///
 /// This capacity can be adjusted using \ref bj_rbuffer_reserve.
 ///
@@ -93,10 +75,10 @@ BANJO_EXPORT size_t bj_rbuffer_capacity(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Reserves memory for at least `capacity` elements in the rbuffer.
+/// Reserves memory for at least `capacity` bytes in the rbuffer.
 ///
 /// \param rbuffer    The rbuffer object to reserve memory for.
-/// \param capacity Number of elements to reserve space for.
+/// \param capacity   Number of bytes to reserve space for.
 ///
 /// \return The actual capacity
 ///
