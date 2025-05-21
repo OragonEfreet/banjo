@@ -142,7 +142,7 @@ static void* playback_thread(void* p_data) {
             }
         }
 
-        if (avail >= frames_per_period) {
+        if ((snd_pcm_uframes_t)avail >= frames_per_period) {
             for (unsigned int i = 0; i < frames_per_period; ++i) {
                 double t = (double)(sample_index++) / sample_rate;
                 buffer[i] = (int16_t)(BJ_AUDIO_AMPLITUDE * sin(2 * M_PI * current_freq * t));

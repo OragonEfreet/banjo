@@ -8,23 +8,67 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #define BUCKET_SIZE 16
+
+static int test_count = 0;
+
+#define REQUIRE(cond) do { \
+    ++test_count; \
+    if (!(cond)) { \
+        fprintf(stderr, "[FAIL] Test %d failed: %s\n", test_count, #cond); \
+        exit(1); \
+    } \
+} while (0)
+
+#define REQUIRE_EQ(a, b) REQUIRE(a == b)
+#define REQUIRE_FALSE(COND) REQUIRE(!(COND))
+
+
+void run_wrapping_tests() {
+    bj_rbuffer* buf = bj_rbuffer_new(40);
+    size_t cap = bj_rbuffer_capacity(buf);
+    REQUIRE(cap > 4);
+
+    // Push/pop alternation to force wrapping
+    for (unsigned int i = 0; i < cap * 3; ++i) {
+        REQUIRE(bj_rbuffer_push(buf, 0, 1) == BJ_TRUE);
+        REQUIRE(bj_rbuffer_ready(buf) == 1);
+        REQUIRE(bj_rbuffer_pop(buf, 0, 1) == BJ_TRUE);
+        REQUIRE(bj_rbuffer_ready(buf) == 0);
+    }
+
+    // Now fill and partially drain multiple times
+    for (int i = 0; i < 100; ++i) {
+        REQUIRE(bj_rbuffer_push(buf, 0, 3) == BJ_TRUE);
+        REQUIRE(bj_rbuffer_ready(buf) >= 3);
+        REQUIRE(bj_rbuffer_pop(buf, 0, 2) == BJ_TRUE);
+    }
+
+    bj_rbuffer_del(buf);
+}
 
 int main(void) {
 
-    bj_rbuffer* rbuffer = bj_rbuffer_new(BUCKET_SIZE);
+    run_wrapping_tests();
 
 
-    for(size_t c = 1 ; c < (BUCKET_SIZE + 1) ; ++c) {
-        const size_t req_cap = (c * (BUCKET_SIZE + 1)) - (BUCKET_SIZE / 2);
-
-        const size_t act_cap = bj_rbuffer_reserve(rbuffer, req_cap);
-
-        bj_info("Reserved for %d items, got %d", req_cap, act_cap);
-
-    }
-    
 
 
-    bj_rbuffer_del(rbuffer);
+    return 0;
 }
+
+
+
+
+/* void test_null_safety() { */
+/*     REQUIRE(bj_rbuffer_ready(NULL) == 0); */
+/*     REQUIRE(bj_rbuffer_available(NULL) == 0); */
+/*     REQUIRE(bj_rbuffer_push(NULL, 0, 5) == BJ_FALSE); */
+/*     REQUIRE(bj_rbuffer_pop(NULL, 0, 5) == BJ_FALSE); */
+/*     REQUIRE(bj_rbuffer_reserve(NULL, 1000) == 0); */
+/*     bj_rbuffer_reset(NULL); */
+/*     REQUIRE(bj_rbuffer_capacity(NULL) == 0); */
+/* } */
