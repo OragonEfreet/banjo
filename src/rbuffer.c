@@ -60,6 +60,13 @@ void bj_rbuffer_reset(
     bj_memzero(p_rbuffer, sizeof(bj_rbuffer));
 }
 
+size_t bj_rbuffer_bucket_size(
+    const bj_rbuffer* p_rbuffer
+) {
+    bj_check_or_0(p_rbuffer);
+    return p_rbuffer->bucket_size;
+}
+
 static size_t bj_rbuffer_required_buckets(
     const bj_rbuffer* p_rbuffer,
     size_t            capacity
@@ -103,4 +110,31 @@ size_t bj_rbuffer_reserve(
     return bj_rbuffer_capacity(p_rbuffer);
 }
 
+int bj_rbuffer_push(
+    bj_rbuffer* p_rbuffer,
+    void*       p_data,
+    size_t      n
+) {
+    bj_check_or_0(p_rbuffer);
+    bj_check_or_0(p_data);
+    bj_check_or_0(n);
+
+    p_rbuffer->tail += n;
+
+    return 0;
+}
+
+int bj_rbuffer_pop(
+    bj_rbuffer* p_rbuffer,
+    void**      p_data,
+    size_t      n
+) {
+    bj_check_or_0(p_rbuffer);
+    bj_check_or_0(p_data);
+    bj_check_or_0(n);
+
+    p_rbuffer->head += n;
+
+    return 0;
+}
 

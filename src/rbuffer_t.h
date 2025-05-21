@@ -9,6 +9,9 @@ struct bj_rbuffer_t {
     size_t               bucket_size;
     size_t               n_buckets;
     struct bj_rbucket_t* buckets;
+
+    size_t head;
+    size_t tail;
 };
 
 

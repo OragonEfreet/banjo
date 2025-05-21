@@ -79,9 +79,11 @@ BANJO_EXPORT void bj_rbuffer_reset(
 /// memory has been allocated for.
 /// This is always a multiple of the bucket size set at initialization.
 ///
+/// The capacity of a ring buffer can be interpreted as the maximum number of
+/// items that can be pushed into the queue in total without reallocating
+/// memory.
+///
 /// This capacity can be adjusted using \ref bj_rbuffer_reserve.
-/// The is also automatically called when the ring buffer is resized using
-/// \ref bj_rbuffer_set_len.
 ///
 /// \retval 0 if `rbuffer` is null.
 ///
@@ -111,8 +113,20 @@ BANJO_EXPORT size_t bj_rbuffer_capacity(
 ///
 /// \note When called on a null object, this function does nothing.
 BANJO_EXPORT size_t bj_rbuffer_reserve(
-    bj_rbuffer* rbuffer,
+    bj_rbuffer* r_buffer,
     size_t      capacity
+);
+
+BANJO_EXPORT int bj_rbuffer_push(
+    bj_rbuffer* p_rbuffer,
+    void*       p_data,
+    size_t      n
+);
+
+BANJO_EXPORT int bj_rbuffer_pop(
+    bj_rbuffer* p_rbuffer,
+    void**      p_data,
+    size_t      n
 );
 
 /// \} // End of rbuffer group
