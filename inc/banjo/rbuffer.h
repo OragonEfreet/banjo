@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file
-/// Header file for \ref rbuffer container type.
+/// Header file for the \ref rbuffer container type.
 ////////////////////////////////////////////////////////////////////////////////
-/// \defgroup rbuffer Array
+/// \defgroup rbuffer Ring Buffer
 /// \ingroup algo
 ///
 /// \{
@@ -12,186 +12,117 @@
 #include <banjo/api.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Typedef for the bj_rbuffer_t struct
+/// Forward declaration of the ring buffer structure.
 typedef struct bj_rbuffer_t bj_rbuffer;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Creates a new bj_rbuffer with a payload size specified in bytes.
+/// Creates a new \ref bj_rbuffer with a specified capacity in bytes.
 ///
-/// The function effectively uses \ref bj_rbuffer_alloc and \ref bj_rbuffer_init.
+/// Internally uses \ref bj_rbuffer_alloc and \ref bj_rbuffer_init.
 ///
-/// \param capacity The initial buffer capacity
+/// \param capacity Initial capacity of the buffer, in bytes.
 ///
-/// \par Behaviour
-///
-/// \return A pointer to the newly created bj_rbuffer object.
+/// \return A pointer to the newly allocated \ref bj_rbuffer object.
 BANJO_EXPORT bj_rbuffer* bj_rbuffer_new(
     size_t capacity
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Deletes a bj_rbuffer object and releases associated memory.
+/// Deletes a \ref bj_rbuffer object and frees its memory.
 ///
-/// \param p_rbuffer Pointer to the bj_rbuffer object to delete.
+/// \param p_rbuffer Pointer to the \ref bj_rbuffer object to delete.
 BANJO_EXPORT void bj_rbuffer_del(
     bj_rbuffer* p_rbuffer
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Initialize a new rbuffer with given size.
+/// Ensures the ring buffer has space for at least `capacity` bytes.
 ///
-/// \param p_instance A pointer to an rbuffer object.
-/// \param capacity   The initial capacity
+/// \param r_buffer Pointer to the buffer to reallocate.
+/// \param capacity Minimum number of bytes the buffer should be able to store.
 ///
-/// \return A pointer to the newly created bj_rbuffer object.
-BANJO_EXPORT bj_rbuffer* bj_rbuffer_init(
-    bj_rbuffer* p_instance, 
-    size_t      capacity
-);
-
-////////////////////////////////////////////////////////////////////////////////
-/// Resets the entire rbuffer object, making it suitable for free.
+/// \return The actual allocated capacity.
 ///
-/// \param p_rbuffer The rbuffer object to reset.
-BANJO_EXPORT void bj_rbuffer_reset(
-    bj_rbuffer* p_rbuffer
-);
-
-////////////////////////////////////////////////////////////////////////////////
-/// Retrieves the current capacity of the rbuffer.
+/// \details
+/// If `capacity` is less than or equal to the current capacity, the function 
+/// does nothing. Otherwise, it reallocates internal storage. The resulting 
+/// capacity may exceed `capacity` due to alignment or implementation details.
 ///
-/// \param rbuffer The rbuffer object to get the capacity from.
-/// \return Current capacity of the rbuffer.
-///
-/// The capacity of a ring buffer correspond to the number of bytes its internal
-/// memory has been allocated for.
-/// This is always a multiple of the bucket size set at initialization.
-///
-/// This capacity can be adjusted using \ref bj_rbuffer_reserve.
-///
-/// \retval 0 if `rbuffer` is null.
-///
-/// \see bj_rbuffer_reserve
-BANJO_EXPORT size_t bj_rbuffer_capacity(
-    const bj_rbuffer* p_rbuffer
-);
-
-////////////////////////////////////////////////////////////////////////////////
-/// Reserves memory for at least `capacity` bytes in the rbuffer.
-///
-/// \param rbuffer    The rbuffer object to reserve memory for.
-/// \param capacity   Number of bytes to reserve space for.
-///
-/// \return The actual capacity
-///
-/// \par Behaviour
-///
-/// If `capacity` is smaller than the current capacity, this function does nothing.
-/// Otherwise, it reallocates memory to fit the new capacity.
-///
-/// The actual amount of allocated memory may be greater than the required capacity
-/// because of the bucket architecture.
-///
-/// \note When called on a null object, this function does nothing.
+/// \note If `r_buffer` is NULL, the function does nothing.
 BANJO_EXPORT size_t bj_rbuffer_reserve(
     bj_rbuffer* r_buffer,
     size_t      capacity
 );
 
-
 ////////////////////////////////////////////////////////////////////////////////
-/// Get the number of bytes already pushed in to the buffer and ready for 
-/// pop()
+/// Checks if the buffer is full (i.e., no more bytes can be written).
 ///
-/// \param p_rbuffer    The rbuffer object to reserve memory for.
+/// \param p_rbuffer Pointer to the buffer.
 ///
-/// \return A number of bytes.
+/// \return \ref BJ_TRUE if the buffer is full, \ref BJ_FALSE otherwise.
 ///
-/// \par Behaviour
-///
-/// The returned value can be considered as the maximum number to use with
-/// \ref bj_buffer_available at the moment of calling this function.
-///
-/// \note When called on a null object, this function does nothing.
-BANJO_EXPORT size_t bj_rbuffer_ready(
+/// \note If `p_rbuffer` is NULL, returns \ref BJ_FALSE.
+BANJO_EXPORT bj_bool bj_rbuffer_full(
     const bj_rbuffer* p_rbuffer
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Get the maximum number of bytes that can be pushed into the buffer at the
-/// moment of calling this function.
+/// Checks if the buffer is empty (i.e., no data available to read).
 ///
-/// \param p_rbuffer    The rbuffer object to reserve memory for.
+/// \param p_rbuffer Pointer to the buffer.
 ///
-/// \return A number of bytes.
+/// \return \ref BJ_TRUE if the buffer is empty, \ref BJ_FALSE otherwise.
 ///
-/// \par Behaviour
+/// \note If `p_rbuffer` is NULL, returns \ref BJ_TRUE.
+BANJO_EXPORT bj_bool bj_rbuffer_empty(
+    const bj_rbuffer* p_rbuffer
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Returns the number of bytes currently stored (readable) in the buffer.
 ///
-/// Pushing more that the value returned would result in a buffer overrun.
+/// \param p_rbuffer Pointer to the buffer.
 ///
-/// \note When called on a null object, this function does nothing.
+/// \return The number of used bytes.
+///
+/// \note Returns 0 if `p_rbuffer` is NULL or has zero capacity.
+BANJO_EXPORT size_t bj_rbuffer_used(
+    const bj_rbuffer* p_rbuffer
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Returns the number of bytes available for writing.
+///
+/// \param p_rbuffer Pointer to the buffer.
+///
+/// \return The number of available bytes.
+///
+/// \note Returns 0 if `p_rbuffer` is NULL or has zero capacity.
 BANJO_EXPORT size_t bj_rbuffer_available(
     const bj_rbuffer* p_rbuffer
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Push `n` bytes into the buffer, copying the same amount of bytes from
-/// `p_data`.
+/// Writes `n` bytes to the buffer, potentially overwriting old data.
 ///
-/// \param p_rbuffer The rbuffer object to reserve memory for.
-/// \param p_data    A source buffer
-/// \param n         Number of bytes to push and copy from `p_data`.
+/// \param p_rbuffer Pointer to the buffer to write into.
+/// \param p_data    Source buffer to write from (can be NULL).
+/// \param n         Number of bytes to write.
 ///
-/// \return `BJ_FALSE` in case of overrun, `BJ_TRUE` otherwise.
+/// \details
+/// If `p_data` is NULL, memory is left uninitialized but the write index is 
+/// still advanced.
 ///
-/// \par Behaviour
+/// If `n` exceeds available space, the oldest data is discarded (overrun) and 
+/// the read index is advanced accordingly to maintain consistency.
 ///
-/// Pushing more that the available bytes will result in an overrun.
-/// In this case, the entire operation is dropped and the buffer is left unchanged.
+/// \note If `p_rbuffer` is NULL or `n` is zero, the function has no effect.
 ///
-/// `p_data` can be _0_.
-/// In this case, the ring buffer is updated correctly but the content is left
-/// uninitialized.
-///
-/// \note When called on a null object, this function does nothing.
-BANJO_EXPORT bj_bool bj_rbuffer_push(
+/// \see bj_rbuffer_available, bj_rbuffer_used, bj_rbuffer_empty
+BANJO_EXPORT void bj_rbuffer_write_overrun(
     bj_rbuffer* p_rbuffer,
     void*       p_data,
     size_t      n
 );
-
-////////////////////////////////////////////////////////////////////////////////
-/// Takes `n` bytes from the buffer, copying the same amount of bytes into
-/// `p_data`.
-///
-/// \param p_rbuffer The rbuffer object to reserve memory for.
-/// \param p_data    A destination buffer
-/// \param n         Number of bytes to pull and copy into `p_data`.
-///
-/// \return `BJ_FALSE` in case of overrun, `BJ_TRUE` otherwise.
-///
-/// \par Behaviour
-///
-/// Trying to get more that the available bytes will result in an underrun.
-/// In this case, the entire operation is dropped and the object is left unchanged.
-///
-/// `p_data` an be _0_.
-/// In this case, the ring buffer is updated correctly, but the content is not
-/// copied.
-///
-/// \note When called on a null object, this function does nothing.
-BANJO_EXPORT bj_bool bj_rbuffer_pop(
-    bj_rbuffer* p_rbuffer,
-    void*       p_data,
-    size_t      n
-);
-
-BANJO_EXPORT void bj_rbuffer_debug(
-    const bj_rbuffer* p_rbuffer,
-    const char* desc
-);
-
-
-
 
 /// \} // End of rbuffer group

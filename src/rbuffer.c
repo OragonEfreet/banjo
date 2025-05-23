@@ -8,6 +8,9 @@
 #include <assert.h>
 #include <stdio.h>
 
+#define WRAP(i, cap) ((i) % cap)
+#define INC(i, n, cap) WRAP((i + n), cap)
+
 bj_rbuffer* bj_rbuffer_new(
     size_t capacity
 ) {
@@ -28,12 +31,11 @@ void bj_rbuffer_del(
 
 bj_rbuffer* bj_rbuffer_init(
     bj_rbuffer* p_instance, 
-    size_t      bucket_size
+    size_t      capacity
 ) {
     bj_check_or_0(p_instance);
-    bj_check_or_0(bucket_size);
     bj_memzero(p_instance, sizeof(bj_rbuffer));
-    bj_rbuffer_reserve(p_instance, bucket_size);
+    bj_rbuffer_reserve(p_instance, capacity);
     return p_instance;
 }
 
@@ -41,28 +43,8 @@ void bj_rbuffer_reset(
     bj_rbuffer* p_rbuffer
 ) {
     bj_check(p_rbuffer);
-
     bj_memzero(p_rbuffer, sizeof(bj_rbuffer));
 }
-
-/* static size_t bj_rbuffer_required_buckets( */
-/*     const bj_rbuffer* p_rbuffer, */
-/*     size_t            capacity */
-/* ) { */
-/*     bj_check_or_0(p_rbuffer); */
-/*     bj_check_or_0(capacity); */
-
-/*     return (capacity + p_rbuffer->bucket_size - 1) / p_rbuffer->bucket_size; */
-/* } */
-
-size_t bj_rbuffer_capacity(
-    const bj_rbuffer* p_rbuffer
-) {
-    bj_check_or_0(p_rbuffer);
-    /* return p_rbuffer->bucket_size * p_rbuffer->n_buckets; */
-    return p_rbuffer->_capacity;
-}
-
 
 size_t bj_rbuffer_reserve(
     bj_rbuffer* p_rbuffer,
@@ -70,84 +52,71 @@ size_t bj_rbuffer_reserve(
 ) {
     bj_check_or_0(p_rbuffer);
 
-    if(capacity > p_rbuffer->_capacity) {
-        p_rbuffer->_capacity = capacity;
+    if(capacity > p_rbuffer->capacity) {
+        p_rbuffer->capacity = capacity;
     }
 
-    /* const size_t required_buckets = bj_rbuffer_required_buckets(p_rbuffer, capacity); */
+    // TODO we're just imagining capacity here
 
-    /* if(required_buckets > p_rbuffer->n_buckets) { */
-    /*     if(p_rbuffer->buckets == 0) { */
-    /*         assert(p_rbuffer->n_buckets == 0); */
-    /*         p_rbuffer->buckets = bj_malloc(sizeof(bj_rbucket) * required_buckets); */
-    /*     } else { */
-    /*         p_rbuffer->buckets = bj_realloc(p_rbuffer->buckets, sizeof(bj_rbucket) * required_buckets); */
-    /*     } */
-
-    /*     for(size_t b = p_rbuffer->n_buckets ; b < required_buckets ; ++b) { */
-    /*         p_rbuffer->buckets[b].data = bj_malloc(p_rbuffer->bucket_size); */
-    /*     } */
-    /*     p_rbuffer->n_buckets = required_buckets; */
-    /* } */
-
-    return bj_rbuffer_capacity(p_rbuffer);
+    return p_rbuffer->capacity;
 }
 
-BANJO_EXPORT size_t bj_rbuffer_ready(
+bj_bool bj_rbuffer_full(
+    const bj_rbuffer* p_rbuffer
+) {
+    bj_check_or_return(p_rbuffer, BJ_FALSE);
+    bj_check_or_return(p_rbuffer->capacity, BJ_FALSE);
+    return INC(p_rbuffer->write, 1, p_rbuffer->capacity) == p_rbuffer->read;
+}
+
+bj_bool bj_rbuffer_empty(
+    const bj_rbuffer* p_rbuffer
+) {
+    bj_check_or_return(p_rbuffer, BJ_TRUE);
+    return p_rbuffer->read == p_rbuffer->write;
+}
+
+size_t bj_rbuffer_used(
     const bj_rbuffer* p_rbuffer
 ) {
     bj_check_or_0(p_rbuffer);
-    return 0; // TODO
+    bj_check_or_0(p_rbuffer->capacity > 0);
+    size_t w = p_rbuffer->write;
+    size_t r = p_rbuffer->read;
+    size_t cap = p_rbuffer->capacity;
+
+    if (w >= r)
+        return w - r;
+    return cap - r + w;
 }
 
 size_t bj_rbuffer_available(
     const bj_rbuffer* p_rbuffer
 ) {
     bj_check_or_0(p_rbuffer);
-    return 0; // TODO
+    bj_check_or_0(p_rbuffer->capacity > 0);
+    return p_rbuffer->capacity - bj_rbuffer_used(p_rbuffer) - 1;
 }
 
-bj_bool bj_rbuffer_push(
+void bj_rbuffer_write_overrun(
     bj_rbuffer* p_rbuffer,
-    void*       p_data,
-    size_t      n
-) {
-    bj_check_or_0(p_rbuffer);
-    /* bj_check_or_0(p_data); */
-    bj_check_or_0(n);
-    (void)p_data;
-
-    return BJ_FALSE; // TODO
-}
-
-bj_bool bj_rbuffer_pop(
-    bj_rbuffer* p_rbuffer,
-    void*       p_data,
-    size_t      n
-) {
-    bj_check_or_0(p_rbuffer);
-    /* bj_check_or_0(p_data); */
-    bj_check_or_0(n);
-    (void)p_data;
-
-    bj_check_or_0(p_rbuffer);
-    /* bj_check_or_0(p_data); */
-    bj_check_or_0(n);
-    (void)p_data;
-
-    return BJ_FALSE; // TODO
-}
-
-BANJO_EXPORT void bj_rbuffer_debug(
-    const bj_rbuffer* p_rbuffer,
-    const char* desc
+    void* p_data,
+    size_t n
 ) {
     bj_check(p_rbuffer);
-    printf("%s: head(%ld) tail(%ld) avail(%ld) ready(%ld) cap(%ld)\n",
-        desc,
-        p_rbuffer->head, p_rbuffer->tail, 
-        bj_rbuffer_available(p_rbuffer),
-        bj_rbuffer_ready(p_rbuffer),
-        bj_rbuffer_capacity(p_rbuffer)
-    );
+    bj_check(n);
+    (void)p_data; // Ignored for now
+
+    const size_t cap = p_rbuffer->capacity;
+    const size_t available = bj_rbuffer_available(p_rbuffer);
+
+    // If we overrun, advance read pointer to discard oldest data
+    if (n > available) {
+        size_t overrun = n - available;
+        p_rbuffer->read = INC(p_rbuffer->read, overrun, cap);
+    }
+
+    p_rbuffer->write = INC(p_rbuffer->write, n, cap);
 }
+
+

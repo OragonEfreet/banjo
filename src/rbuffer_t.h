@@ -2,16 +2,14 @@
 
 #include <banjo/rbuffer.h>
 
-struct bj_rbucket_t;
-
 struct bj_rbuffer_t {
-    // size_t               bucket_size;
-    // size_t               n_buckets;
-    // struct bj_rbucket_t* buckets;
-
-    size_t head;
-    size_t tail;
-    size_t _capacity;
+    size_t write;
+    size_t read;
+    size_t capacity;
 };
+
+BANJO_EXPORT bj_rbuffer* bj_rbuffer_init( bj_rbuffer* p_instance, size_t capacity);
+BANJO_EXPORT void bj_rbuffer_reset(bj_rbuffer* p_rbuffer);
+
 
 
