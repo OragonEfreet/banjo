@@ -4,13 +4,29 @@
 #include <banjo/system.h>
 #include <banjo/time.h>
 
+#include <math.h>
+
+void my_audio_callback(int16_t* buffer, unsigned frames, void* user_data) {
+    (void)user_data;
+    static double phase = 0;
+    double freq = 440.0;
+    double sr = 44100.0;
+    for (unsigned int i = 0 ; i < frames; ++i) {
+        buffer[i] = (int16_t)(BJ_AUDIO_AMPLITUDE * sin(phase));
+        phase += 2.0 * M_PI * freq / sr;
+        if(phase > 2.0 * M_PI) {
+            phase -= 2.0 * M_PI;
+        }
+    }
+}
+
 int main(void) {
 
     bj_error* p_error = 0;
 
     if (bj_begin(&p_error)) {
 
-        bj_audio_device* p_device = bj_open_audio_device(&p_error);
+        bj_audio_device* p_device = bj_open_audio_device(&p_error, my_audio_callback, 0);
         
         if (p_device == 0) {
             if (p_error) {

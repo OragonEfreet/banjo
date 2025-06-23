@@ -61,10 +61,12 @@ void bj_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
 }
 
 bj_audio_device* bj_open_audio_device(
-    bj_error** p_error
+	bj_error** p_error,
+    bj_audio_callback_t p_callback,
+    void * p_callback_user_data
 ) {
     bj_check_or_0(s_audio);
-    return s_audio->open_device(s_audio, p_error);
+    return s_audio->open_device(s_audio, p_error, p_callback, p_callback_user_data);
 }
 
 void bj_close_audio_device(
@@ -72,12 +74,5 @@ void bj_close_audio_device(
 ) {
     bj_check(s_audio);
     s_audio->close_device(s_audio, p_device);
-}
-
-bj_audio_stream* bj_audio_get_device_stream(
-    const bj_audio_device* p_device
-) {
-    bj_check_or_0(p_device);
-    return &p_device->stream;
 }
 

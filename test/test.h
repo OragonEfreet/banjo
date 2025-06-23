@@ -89,7 +89,7 @@ int terminate_context(Context* SM_CTX()) {
     PRINT(SM_CTX(), fmt, SM_CTX()->n_run, SM_CTX()->n_asserts, SM_CTX()->n_fail);
 
     if(SM_CTX()->n_fail == 0) {
-            PRINT(SM_CTX(), "\nApplication allocated:\t %zu (max: %zu)\nTotal allocated:\t %zu (max %zu)\n%d allocs, %d reallocs, %d frees\n",
+            PRINT(SM_CTX(), "\nApplication allocated:\t %zu (max: %zu)\nTotal allocated:\t %zu (max: %zu)\n%d allocs, %d reallocs, %d frees\n",
             SM_CTX()->allocations.application_current_allocated, SM_CTX()->allocations.application_max_allocated,
             SM_CTX()->allocations.actual_current_allocated, SM_CTX()->allocations.actual_max_allocated,
             SM_CTX()->allocations.n_allocations, SM_CTX()->allocations.n_reallocations, SM_CTX()->allocations.n_free
@@ -151,6 +151,7 @@ bool all_zero(void* ptr, size_t byte_size) {
 
 // Weak assertions
 #define CHECK(COND) DO_CHECK(CHECK, COND, NOPE)
+#define CHECK_FALSE(COND) CHECK(!(COND))
 #define CHECK_EQ(EXPR, EXPECTED) DO_CHECK_EQ(CHECK_EQ, EXPR, EXPECTED, NOPE)
 #define CHECK_NEQ(EXPR, EXPECTED) DO_CHECK_NEQ(CHECK_NEQ, EXPR, EXPECTED, NOPE)
 #define CHECK_NULL(EXPR) DO_CHECK_NULL(CHECK_NULL, EXPR, NOPE)
@@ -159,6 +160,7 @@ bool all_zero(void* ptr, size_t byte_size) {
 
 // Strong assertions
 #define REQUIRE(COND) DO_CHECK(REQUIRED, COND, STOP)
+#define REQUIRE_FALSE(COND) REQUIRE(!(COND))
 #define REQUIRE_EQ(EXPR, EXPECTED) DO_CHECK_EQ(REQUIRE_EQ, EXPR, EXPECTED, STOP)
 #define REQUIRE_NEQ(EXPR, EXPECTED) DO_CHECK_NEQ(REQUIRE_NEQ, EXPR, EXPECTED, STOP)
 #define REQUIRE_NULL(EXPR) DO_CHECK_NULL(REQUIRE_NULL, EXPR, STOP)

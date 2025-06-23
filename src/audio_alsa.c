@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if BJ_HAS_FEATURE(ALSA)
+
 #include <banjo/audio.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
@@ -119,10 +123,10 @@ static void* playback_thread(void* p_data) {
     snd_pcm_t* pcm_handle               = p_alsa_device->p_handle;
     int16_t* buffer                     = p_alsa_device->p_buffer;
     snd_pcm_uframes_t frames_per_period = p_alsa_device->frames_per_period;
-    int sample_index                    = 0;
+    /* int sample_index                    = 0; */
 
-    const double current_freq           = 440.0; // C4
-    const unsigned int sample_rate      = p_device->sample_rate;
+    /* const double current_freq           = 440.0; // C4 */
+    /* const unsigned int sample_rate      = p_device->sample_rate; */
 
     while (p_alsa_device->should_stop == BJ_FALSE) {
         snd_pcm_sframes_t avail = ALSA.snd_pcm_avail_update(pcm_handle);
@@ -138,11 +142,14 @@ static void* playback_thread(void* p_data) {
             }
         }
 
-        if (avail >= frames_per_period) {
-            for (unsigned int i = 0; i < frames_per_period; ++i) {
-                double t = (double)(sample_index++) / sample_rate;
-                buffer[i] = (int16_t)(BJ_AUDIO_AMPLITUDE * sin(2 * M_PI * current_freq * t));
-            }
+        if ((snd_pcm_uframes_t)avail >= frames_per_period) {
+            // Call the user's callback to fill the buffer
+            p_device->p_callback(buffer, frames_per_period, p_device->p_callback_user_data);
+
+            /* for (unsigned int i = 0; i < frames_per_period; ++i) { */
+            /*     double t = (double)(sample_index++) / sample_rate; */
+            /*     buffer[i] = (int16_t)(BJ_AUDIO_AMPLITUDE * sin(2 * M_PI * current_freq * t)); */
+            /* } */
 
             int err = ALSA.snd_pcm_writei(pcm_handle, buffer, frames_per_period);
             if (err == -EPIPE) {
@@ -185,7 +192,12 @@ static void alsa_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device
     bj_free(p_device);
 }
 
-static bj_audio_device* alsa_open_device(bj_audio_layer* p_audio, bj_error** p_error) {
+static bj_audio_device* alsa_open_device(
+    bj_audio_layer*     p_audio,
+    bj_error**          p_error,
+    bj_audio_callback_t p_callback,
+    void*               p_callback_user_data
+) {
 
     bj_audio_device* p_device = bj_calloc(sizeof(bj_audio_device));
     if(p_device == 0) {
@@ -198,6 +210,8 @@ static bj_audio_device* alsa_open_device(bj_audio_layer* p_audio, bj_error** p_e
         alsa_close_device(p_audio, p_device);
         return 0;
     }
+    p_device->p_callback = p_callback;
+    p_device->p_callback_user_data = p_callback_user_data;
     p_device->data = alsa_dev;
 
     snd_pcm_hw_params_t* params = 0;
@@ -276,7 +290,8 @@ static bj_audio_layer* alsa_init_audio(bj_error** p_error) {
 }
 
 bj_audio_layer_create_info alsa_layer_info = {
-    .name = "alsa",
+    .name   = "alsa",
     .create = alsa_init_audio,
 };
 
+#endif
