@@ -89,7 +89,7 @@ int terminate_context(Context* SM_CTX()) {
     PRINT(SM_CTX(), fmt, SM_CTX()->n_run, SM_CTX()->n_asserts, SM_CTX()->n_fail);
 
     if(SM_CTX()->n_fail == 0) {
-            PRINT(SM_CTX(), "\nApplication allocated:\t %zu (max: %zu)\nTotal allocated:\t %zu (max %zu)\n%d allocs, %d reallocs, %d frees\n",
+            PRINT(SM_CTX(), "\nApplication allocated:\t %zu (max: %zu)\nTotal allocated:\t %zu (max: %zu)\n%d allocs, %d reallocs, %d frees\n",
             SM_CTX()->allocations.application_current_allocated, SM_CTX()->allocations.application_max_allocated,
             SM_CTX()->allocations.actual_current_allocated, SM_CTX()->allocations.actual_max_allocated,
             SM_CTX()->allocations.n_allocations, SM_CTX()->allocations.n_reallocations, SM_CTX()->allocations.n_free

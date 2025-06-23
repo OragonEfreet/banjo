@@ -41,8 +41,7 @@ TEST_CASE(new_large_capacity_initializes_correctly) {
     REQUIRE_EQ(buf->capacity, cap);
     REQUIRE_EQ(buf->write, 0);
     REQUIRE_EQ(buf->read, 0);
-    bj_rbuffer_del(buf);
-}
+    bj_rbuffer_del(buf); }
 
 TEST_CASE(new_multiple_instances_are_independent) {
     bj_rbuffer* a = bj_rbuffer_new(3);
@@ -117,6 +116,19 @@ TEST_CASE(reserve_capacity_with_max_value) {
     REQUIRE(ret >= SIZE_MAX || ret == SIZE_MAX); // depends on implementation, at least no crash
 }
 
+TEST_CASE(reserve_from_zero_capacity_grows) {
+    bj_rbuffer rbuf = {.capacity = 0};
+    size_t ret = bj_rbuffer_reserve(&rbuf, 16);
+    REQUIRE(ret >= 16);
+    REQUIRE(rbuf.capacity >= 16);
+}
+
+
+TEST_CASE(rbuffer_reserve_when_capacity_near_max_does_not_wrap) {
+    bj_rbuffer rbuf = {.capacity = SIZE_MAX - 10};
+    size_t ret = bj_rbuffer_reserve(&rbuf, SIZE_MAX - 5);
+    REQUIRE(ret <= SIZE_MAX); // Doesn't overflow
+}
 
 TEST_CASE(full_null_rbuffer_returns_false) {
     bj_bool result = bj_rbuffer_full(NULL);
@@ -163,7 +175,7 @@ TEST_CASE(full_buffer_write_far_from_read_returns_false) {
 TEST_CASE(full_buffer_capacity_zero_always_false) {
     bj_rbuffer rbuf = { .write = 0, .read = 0, .capacity = 0 };
     bj_bool result = bj_rbuffer_full(&rbuf);
-    REQUIRE(!result);
+    REQUIRE(result == BJ_FALSE);
 }
 
 
@@ -384,65 +396,76 @@ TEST_CASE(write_overrun_exact_available_advances_write_only) {
     REQUIRE_EQ(buffer.read, 0); // no overrun
 }
 
+TEST_CASE(rbuffer_full_capacity_one) {
+    bj_rbuffer rbuf = {.capacity = 1, .write = 0, .read = 0};
+    REQUIRE(bj_rbuffer_full(&rbuf));
+    bj_rbuffer_write_overrun(&rbuf, NULL, 1);
+    REQUIRE(bj_rbuffer_full(&rbuf));  // Still not full!
+    REQUIRE(bj_rbuffer_used(&rbuf) == 0); // because nothing actually fits
+}
+
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
-    RUN_TEST(new_returns_non_null);
+    RUN_TEST(available_and_used_basic);
+    RUN_TEST(available_and_used_empty_after_overrun);
+    RUN_TEST(available_and_used_full);
+    RUN_TEST(available_and_used_partial);
+    RUN_TEST(available_and_used_wraparound);
+    RUN_TEST(empty_new_buffer_is_true);
+    RUN_TEST(empty_null_returns_true);
+    RUN_TEST(empty_when_write_different_from_read);
+    RUN_TEST(empty_when_write_equals_read);
+    RUN_TEST(empty_when_write_wraps_around_and_equals_read);
+    RUN_TEST(empty_when_write_wraps_around_but_not_empty);
+    RUN_TEST(full_buffer_capacity_zero_always_false);
+    RUN_TEST(full_buffer_with_write_equal_to_read_minus_one_returns_true);
+    RUN_TEST(full_buffer_with_write_equal_to_read_returns_false);
+    RUN_TEST(full_buffer_with_write_less_than_read_returns_false);
+    RUN_TEST(full_buffer_write_far_from_read_returns_false);
+    RUN_TEST(full_buffer_write_just_before_read_returns_true);
+    RUN_TEST(full_empty_buffer_returns_false);
+    RUN_TEST(full_null_rbuffer_returns_false);
     RUN_TEST(new_initializes_capacity);
-    RUN_TEST(new_initializes_write_index_to_zero);
     RUN_TEST(new_initializes_read_index_to_zero);
-    RUN_TEST(new_zero_capacity_works);
+    RUN_TEST(new_initializes_write_index_to_zero);
     RUN_TEST(new_large_capacity_initializes_correctly);
     RUN_TEST(new_multiple_instances_are_independent);
-    RUN_TEST(reserve_null_rbuffer_returns_zero_and_does_nothing);
-    RUN_TEST(reserve_smaller_than_current_capacity_does_nothing);
+    RUN_TEST(new_returns_non_null);
+    RUN_TEST(new_zero_capacity_works);
+    RUN_TEST(rbuffer_reserve_when_capacity_near_max_does_not_wrap);
+    RUN_TEST(reserve_capacity_with_max_value);
     RUN_TEST(reserve_equal_to_current_capacity_does_nothing);
+    RUN_TEST(reserve_from_zero_capacity_grows);
     RUN_TEST(reserve_greater_capacity_increases_capacity);
     RUN_TEST(reserve_increases_capacity_but_preserves_read_write);
     RUN_TEST(reserve_multiple_growth_calls_grow_capacity);
-    RUN_TEST(reserve_capacity_with_max_value);
-    RUN_TEST(full_null_rbuffer_returns_false);
-    RUN_TEST(full_empty_buffer_returns_false);
-    RUN_TEST(full_buffer_with_write_less_than_read_returns_false);
-    RUN_TEST(full_buffer_with_write_equal_to_read_minus_one_returns_true);
-    RUN_TEST(full_buffer_with_write_equal_to_read_returns_false);
-    RUN_TEST(full_buffer_write_just_before_read_returns_true);
-    RUN_TEST(full_buffer_write_far_from_read_returns_false);
-    RUN_TEST(full_buffer_capacity_zero_always_false);
-    RUN_TEST(empty_null_returns_true);
-    RUN_TEST(empty_new_buffer_is_true);
-    RUN_TEST(empty_when_write_equals_read);
-    RUN_TEST(empty_when_write_different_from_read);
-    RUN_TEST(empty_when_write_wraps_around_and_equals_read);
-    RUN_TEST(empty_when_write_wraps_around_but_not_empty);
-    RUN_TEST(used_and_available_null_buffer);
+    RUN_TEST(reserve_null_rbuffer_returns_zero_and_does_nothing);
+    RUN_TEST(reserve_smaller_than_current_capacity_does_nothing);
     RUN_TEST(used_and_available_empty_buffer);
-    RUN_TEST(used_and_available_partially_filled);
     RUN_TEST(used_and_available_full_buffer_case1);
     RUN_TEST(used_and_available_full_buffer_case2_wraparound);
     RUN_TEST(used_and_available_half_full_no_wrap);
     RUN_TEST(used_and_available_half_full_wrap);
+    RUN_TEST(used_and_available_null_buffer);
+    RUN_TEST(used_and_available_partially_filled);
     RUN_TEST(used_and_available_read_equals_write_but_full);
     RUN_TEST(used_and_available_read_equals_write_empty);
-    RUN_TEST(write_overrun_zero_length_does_nothing);
-    RUN_TEST(write_overrun_null_data_advances_write_only);
-    RUN_TEST(write_overrun_fits_without_wrapping);
+    RUN_TEST(write_overrun_exact_available_advances_write_only);
     RUN_TEST(write_overrun_exact_capacity_wraps_and_resets);
-    RUN_TEST(write_overrun_overwrites_and_advances_read);
-    RUN_TEST(available_and_used_basic);
-    RUN_TEST(available_and_used_partial);
-    RUN_TEST(available_and_used_wraparound);
-    RUN_TEST(available_and_used_full);
-    RUN_TEST(available_and_used_empty_after_overrun);
-    RUN_TEST(write_overrun_zero_bytes_does_nothing);
-    RUN_TEST(write_overrun_without_overrun_advances_write_only);
-    RUN_TEST(write_overrun_with_exact_capacity_causes_full_overwrite);
-    RUN_TEST(write_overrun_partial_overrun_advances_both_indices);
-    RUN_TEST(write_overrun_full_buffer_wraps_and_overwrites_all);
+    RUN_TEST(write_overrun_fits_without_wrapping);
     RUN_TEST(write_overrun_full_buffer_single_byte);
+    RUN_TEST(write_overrun_full_buffer_wraps_and_overwrites_all);
     RUN_TEST(write_overrun_full_capacity_when_empty);
     RUN_TEST(write_overrun_no_available_but_not_full_advances_correctly);
-    RUN_TEST(write_overrun_exact_available_advances_write_only);
+    RUN_TEST(write_overrun_null_data_advances_write_only);
+    RUN_TEST(write_overrun_overwrites_and_advances_read);
+    RUN_TEST(write_overrun_partial_overrun_advances_both_indices);
+    RUN_TEST(write_overrun_with_exact_capacity_causes_full_overwrite);
+    RUN_TEST(write_overrun_without_overrun_advances_write_only);
+    RUN_TEST(write_overrun_zero_bytes_does_nothing);
+    RUN_TEST(write_overrun_zero_length_does_nothing);
+    RUN_TEST(rbuffer_full_capacity_one);
 
     END_TESTS();
 }

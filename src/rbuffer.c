@@ -64,25 +64,22 @@ size_t bj_rbuffer_reserve(
 bj_bool bj_rbuffer_full(
     const bj_rbuffer* p_rbuffer
 ) {
-    bj_check_or_return(p_rbuffer, BJ_FALSE);
-    bj_check_or_return(p_rbuffer->capacity, BJ_FALSE);
-    return INC(p_rbuffer->write, 1, p_rbuffer->capacity) == p_rbuffer->read;
+    return bj_rbuffer_available(p_rbuffer) == 0;
 }
 
 bj_bool bj_rbuffer_empty(
     const bj_rbuffer* p_rbuffer
 ) {
-    bj_check_or_return(p_rbuffer, BJ_TRUE);
-    return p_rbuffer->read == p_rbuffer->write;
+    return bj_rbuffer_used(p_rbuffer) == 0;
 }
 
 size_t bj_rbuffer_used(
     const bj_rbuffer* p_rbuffer
 ) {
     bj_check_or_0(p_rbuffer);
-    bj_check_or_0(p_rbuffer->capacity > 0);
-    size_t w = p_rbuffer->write;
-    size_t r = p_rbuffer->read;
+    bj_check_or_0(p_rbuffer->capacity > 1);
+    size_t w   = p_rbuffer->write;
+    size_t r   = p_rbuffer->read;
     size_t cap = p_rbuffer->capacity;
 
     if (w >= r)
@@ -94,7 +91,7 @@ size_t bj_rbuffer_available(
     const bj_rbuffer* p_rbuffer
 ) {
     bj_check_or_0(p_rbuffer);
-    bj_check_or_0(p_rbuffer->capacity > 0);
+    bj_check_or_0(p_rbuffer->capacity > 1);
     return p_rbuffer->capacity - bj_rbuffer_used(p_rbuffer) - 1;
 }
 
