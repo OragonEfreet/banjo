@@ -5,14 +5,15 @@
 #include <banjo/time.h>
 
 #include <math.h>
+#include <stdio.h>
 
-void my_audio_callback(int16_t* buffer, unsigned frames, void* user_data) {
+void my_audio_callback(int16_t* buffer, unsigned frames, const bj_audio_properties* audio, void* user_data) {
     (void)user_data;
     static double phase = 0;
     double freq = 440.0;
-    double sr = 44100.0;
+    double sr = audio->sample_rate;
     for (unsigned int i = 0 ; i < frames; ++i) {
-        buffer[i] = (int16_t)(BJ_AUDIO_AMPLITUDE * sin(phase));
+        buffer[i] = (int16_t)(audio->amplitude * sin(phase));
         phase += 2.0 * M_PI * freq / sr;
         if(phase > 2.0 * M_PI) {
             phase -= 2.0 * M_PI;

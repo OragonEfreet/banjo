@@ -144,12 +144,12 @@ static void* playback_thread(void* p_data) {
 
         if ((snd_pcm_uframes_t)avail >= frames_per_period) {
             // Call the user's callback to fill the buffer
-            p_device->p_callback(buffer, frames_per_period, p_device->p_callback_user_data);
-
-            /* for (unsigned int i = 0; i < frames_per_period; ++i) { */
-            /*     double t = (double)(sample_index++) / sample_rate; */
-            /*     buffer[i] = (int16_t)(BJ_AUDIO_AMPLITUDE * sin(2 * M_PI * current_freq * t)); */
-            /* } */
+            p_device->p_callback(
+                buffer,
+                frames_per_period,
+                &p_device->properties,
+                p_device->p_callback_user_data
+            );
 
             int err = ALSA.snd_pcm_writei(pcm_handle, buffer, frames_per_period);
             if (err == -EPIPE) {
@@ -214,10 +214,11 @@ static bj_audio_device* alsa_open_device(
     p_device->p_callback_user_data = p_callback_user_data;
     p_device->data = alsa_dev;
 
-    snd_pcm_hw_params_t* params = 0;
-    p_device->channels          = 1;
-    p_device->sample_rate       = 44100;
-    alsa_dev->frames_per_period = 512;
+    snd_pcm_hw_params_t* params      = 0;
+    p_device->properties.amplitude   = BJ_AUDIO_AMPLITUDE;
+    p_device->properties.channels    = 1;
+    p_device->properties.sample_rate = 44100;
+    alsa_dev->frames_per_period      = 512;
 
     snd_pcm_uframes_t total_frames = alsa_dev->frames_per_period * 4;
 
@@ -232,8 +233,8 @@ static bj_audio_device* alsa_open_device(
     ALSA.snd_pcm_hw_params_any(alsa_dev->p_handle, params);
     ALSA.snd_pcm_hw_params_set_access(alsa_dev->p_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
     ALSA.snd_pcm_hw_params_set_format(alsa_dev->p_handle, params, BJ_AUDIO_FORMAT);
-    ALSA.snd_pcm_hw_params_set_channels_near(alsa_dev->p_handle, params, &p_device->channels);
-    ALSA.snd_pcm_hw_params_set_rate_near(alsa_dev->p_handle, params, &p_device->sample_rate, 0);
+    ALSA.snd_pcm_hw_params_set_channels_near(alsa_dev->p_handle, params, &p_device->properties.channels);
+    ALSA.snd_pcm_hw_params_set_rate_near(alsa_dev->p_handle, params, &p_device->properties.sample_rate, 0);
     ALSA.snd_pcm_hw_params_set_period_size_near(alsa_dev->p_handle, params, &alsa_dev->frames_per_period, 0);
     ALSA.snd_pcm_hw_params_set_buffer_size_near(alsa_dev->p_handle, params, &total_frames);
 
@@ -248,7 +249,7 @@ static bj_audio_device* alsa_open_device(
     ALSA.snd_pcm_hw_params_free(params);
 
     // Create buffer and fill with silence
-    alsa_dev->p_buffer = bj_malloc(sizeof(int16_t) * total_frames);
+    alsa_dev->p_buffer = bj_malloc(sizeof(int16_t) * alsa_dev->frames_per_period);
     int16_t silence = ALSA.snd_pcm_format_silence_16(BJ_AUDIO_FORMAT);
     for(size_t s = 0 ; s < total_frames ; ++s) {
         alsa_dev->p_buffer[s] = silence;

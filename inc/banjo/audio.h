@@ -3,13 +3,15 @@
 #include <banjo/error.h>
 #include <banjo/api.h>
 
-#define BJ_AUDIO_AMPLITUDE 16000
-
-typedef uint16_t bj_audio_format;
-
 typedef struct bj_audio_device_t bj_audio_device;
 
-typedef void (*bj_audio_callback_t)(int16_t*, unsigned int, void*);
+typedef struct bj_audio_properties_t {
+    int16_t      amplitude;
+    unsigned int channels;
+    unsigned int sample_rate;
+} bj_audio_properties;
+
+typedef void (*bj_audio_callback_t)(int16_t*, unsigned int, const bj_audio_properties*, void*);
 
 BANJO_EXPORT bj_audio_device* bj_open_audio_device(
 	bj_error** p_error,
