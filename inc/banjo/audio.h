@@ -26,6 +26,13 @@ BANJO_EXPORT void bj_close_audio_device(
 );
 
 typedef struct bj_audio_play_note_data_t {
+    enum {
+        BJ_AUDIO_PLAY_SINE,
+        BJ_AUDIO_PLAY_SQUARE,
+        BJ_AUDIO_PLAY_TRIANGLE,
+        BJ_AUDIO_PLAY_SAWTOOTH,
+        BJ_AUDIO_PLAY_NOISE,
+    } function;
     double frequency;
     double phase;
 } bj_audio_play_note_data;

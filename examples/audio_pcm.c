@@ -12,7 +12,7 @@ int main(void) {
 
     if (bj_begin(&p_error)) {
 
-        bj_audio_play_note_data data = { .frequency = 440.0 };
+        bj_audio_play_note_data data = { .frequency = 220.0, .function = BJ_AUDIO_PLAY_SQUARE };
         bj_audio_device* p_device = bj_open_audio_device(&p_error, bj_audio_play_note, &data);
         
         if (p_device == 0) {
@@ -22,7 +22,7 @@ int main(void) {
             return 0;
         }
 
-        bj_sleep(500);
+        bj_sleep(1000);
 
 
         bj_close_audio_device(p_device);

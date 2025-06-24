@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdlib.h>
 
 extern bj_audio_layer_create_info alsa_layer_info;
 extern bj_audio_layer_create_info mme_layer_info;
@@ -87,10 +88,45 @@ void bj_audio_play_note(int16_t* buffer, unsigned frames, const bj_audio_propert
     double phase_increment = 2.0 * M_PI * freq / sample_rate;
 
     for (unsigned i = 0; i < frames; i++) {
-        buffer[i] = (int16_t)(amplitude * sin(phase));
-        phase += phase_increment;
+        double output = 0.0;
 
-        // Wrap the phase
+        switch(data->function) {
+            case BJ_AUDIO_PLAY_SINE:
+                output = sin(phase);
+                buffer[i] = (int16_t)(amplitude * output);
+                break;
+
+            case BJ_AUDIO_PLAY_SQUARE:
+                output = sin(phase);
+                buffer[i] = output > 0.0 ? (int16_t)(amplitude / 6.0) : (int16_t)(-amplitude / 6.0);
+                break;
+
+            case BJ_AUDIO_PLAY_TRIANGLE:
+                // Triangle wave ranges -1..1, phase 0..2pi
+                // Formula: (2 / pi) * asin(sin(phase))
+                output = asin(sin(phase)) * (2.0 / M_PI);
+                buffer[i] = (int16_t)(amplitude * output);
+                break;
+
+            case BJ_AUDIO_PLAY_SAWTOOTH:
+                // Sawtooth: map phase (0..2pi) to -1..1 linearly
+                output = (2.0 * (phase / (2.0 * M_PI))) - 1.0;
+                buffer[i] = (int16_t)(amplitude * output);
+                break;
+
+            case BJ_AUDIO_PLAY_NOISE:
+                // White noise between -1 and 1
+                output = ((double)rand() / (double)RAND_MAX) * 2.0 - 1.0;
+                buffer[i] = (int16_t)(amplitude * output);
+                break;
+
+            default:
+                output = sin(phase);
+                buffer[i] = (int16_t)(amplitude * output);
+                break;
+        }
+
+        phase += phase_increment;
         if (phase >= 2.0 * M_PI) {
             phase -= 2.0 * M_PI;
         }
