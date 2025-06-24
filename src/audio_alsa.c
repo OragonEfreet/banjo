@@ -160,7 +160,7 @@ static void* playback_thread(void* p_data) {
                 break;
             }
         } else {
-            usleep(100); // Yield a bit
+            usleep(100); // TODO
         }
     }
 
@@ -181,6 +181,7 @@ static void alsa_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device
         }
 
         if(alsa_dev->p_handle) {
+           ALSA.snd_pcm_drain(alsa_dev->p_handle);
            ALSA.snd_pcm_drain(alsa_dev->p_handle);
            ALSA.snd_pcm_close(alsa_dev->p_handle);
         }
@@ -252,7 +253,7 @@ static bj_audio_device* alsa_open_device(
 
     // Create buffer and fill with silence
     alsa_dev->p_buffer = bj_malloc(sizeof(int16_t) * alsa_dev->frames_per_period);
-    for(size_t s = 0 ; s < total_frames ; ++s) {
+    for(size_t s = 0 ; s < alsa_dev->frames_per_period ; ++s) {
         alsa_dev->p_buffer[s] = p_device->properties.silence;
     }
     

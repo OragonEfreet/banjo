@@ -4,18 +4,7 @@
 #include <banjo/system.h>
 #include <banjo/time.h>
 
-
-
-
-
-
-void my_audio_callback(int16_t* buffer, unsigned frames, const bj_audio_properties* audio, void* user_data) {
-    (void)user_data;
-
-    for (unsigned i = 0; i < frames; ++i) {
-        buffer[i] = audio->silence;
-    }
-}
+#include <math.h>
 
 int main(void) {
 
@@ -23,7 +12,8 @@ int main(void) {
 
     if (bj_begin(&p_error)) {
 
-        bj_audio_device* p_device = bj_open_audio_device(&p_error, my_audio_callback, 0);
+        bj_audio_play_note_data data = { .frequency = 440.0 };
+        bj_audio_device* p_device = bj_open_audio_device(&p_error, bj_audio_play_note, &data);
         
         if (p_device == 0) {
             if (p_error) {
@@ -32,7 +22,8 @@ int main(void) {
             return 0;
         }
 
-        bj_sleep(10000);
+        bj_sleep(500);
+
 
         bj_close_audio_device(p_device);
         bj_end(&p_error);

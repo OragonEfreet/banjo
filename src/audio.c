@@ -5,6 +5,7 @@
 #include "check.h"
 
 #include <assert.h>
+#include <math.h>
 
 extern bj_audio_layer_create_info alsa_layer_info;
 extern bj_audio_layer_create_info mme_layer_info;
@@ -74,5 +75,27 @@ void bj_close_audio_device(
 ) {
     bj_check(s_audio);
     s_audio->close_device(s_audio, p_device);
+}
+
+
+void bj_audio_play_note(int16_t* buffer, unsigned frames, const bj_audio_properties* audio, void* user_data) {
+    bj_audio_play_note_data* data = (bj_audio_play_note_data*)user_data;
+    double phase           = data->phase;
+    double freq            = data->frequency;
+    double amplitude       = (double)audio->amplitude;
+    double sample_rate     = (double)audio->sample_rate;
+    double phase_increment = 2.0 * M_PI * freq / sample_rate;
+
+    for (unsigned i = 0; i < frames; i++) {
+        buffer[i] = (int16_t)(amplitude * sin(phase));
+        phase += phase_increment;
+
+        // Wrap the phase
+        if (phase >= 2.0 * M_PI) {
+            phase -= 2.0 * M_PI;
+        }
+    }
+
+    data->phase = phase;
 }
 

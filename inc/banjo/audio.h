@@ -12,7 +12,8 @@ typedef struct bj_audio_properties_t {
     uint16_t     silence;
 } bj_audio_properties;
 
-typedef void (*bj_audio_callback_t)(int16_t*, unsigned int, const bj_audio_properties*, void*);
+typedef void (*bj_audio_callback_t)( int16_t*, unsigned, const bj_audio_properties*, void*);
+
 
 BANJO_EXPORT bj_audio_device* bj_open_audio_device(
 	bj_error** p_error,
@@ -22,6 +23,18 @@ BANJO_EXPORT bj_audio_device* bj_open_audio_device(
 
 BANJO_EXPORT void bj_close_audio_device(
 	bj_audio_device* p_device
+);
+
+typedef struct bj_audio_play_note_data_t {
+    double frequency;
+    double phase;
+} bj_audio_play_note_data;
+
+void bj_audio_play_note(
+    int16_t* buffer,
+    unsigned frames,
+    const bj_audio_properties* audio,
+    void* user_data
 );
 
 struct bj_audio_layer_data_t;
