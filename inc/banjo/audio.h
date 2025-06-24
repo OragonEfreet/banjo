@@ -39,6 +39,14 @@ BANJO_EXPORT void bj_audio_device_pause(
     bj_audio_device* p_device
 );
 
+BANJO_EXPORT void bj_audio_device_reset(
+    bj_audio_device* p_device
+);
+
+BANJO_EXPORT void bj_audio_device_stop(
+    bj_audio_device* p_device
+);
+
 BANJO_EXPORT bj_bool bj_audio_device_is_playing(
     const bj_audio_device* p_device
 );

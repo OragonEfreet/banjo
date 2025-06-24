@@ -76,6 +76,7 @@ void bj_close_audio_device(
     bj_audio_device* p_device
 ) {
     bj_check(s_audio);
+    p_device->should_close = BJ_TRUE;
     s_audio->close_device(s_audio, p_device);
 }
 
@@ -98,6 +99,21 @@ bj_bool bj_audio_device_is_playing(
     const bj_audio_device* p_device
 ) {
     return p_device ? p_device->playing : BJ_FALSE;
+}
+
+void bj_audio_device_reset(
+    bj_audio_device* p_device
+) {
+    bj_check(p_device);
+    p_device->should_reset = BJ_TRUE;
+}
+
+void bj_audio_device_stop(
+    bj_audio_device* p_device
+) {
+    bj_check(p_device);
+    bj_audio_device_pause(p_device);
+    bj_audio_device_reset(p_device);
 }
 
 void bj_audio_play_note(

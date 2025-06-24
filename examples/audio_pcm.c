@@ -22,6 +22,7 @@ int main(void) {
             return 0;
         }
 
+        bj_sleep(200);
         bj_audio_device_play(p_device);
         bj_sleep(200);
 

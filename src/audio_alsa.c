@@ -21,7 +21,6 @@
 #define BJ_AUDIO_FORMAT SND_PCM_FORMAT_S16_LE
 
 typedef struct bj_audio_device_data_t {
-    bj_bool           should_stop;
     snd_pcm_t*        p_handle;
     pthread_t         playback_thread;
     int16_t           *p_buffer;
@@ -124,7 +123,13 @@ static void* playback_thread(void* p_data) {
 
     uint64_t global_sample_index = 0;
 
-    while (p_alsa_device->should_stop == BJ_FALSE) {
+    while (p_device->should_close == BJ_FALSE) {
+
+        if(p_device->should_reset == BJ_TRUE) {
+            global_sample_index = 0;
+            p_device->should_reset = BJ_FALSE;
+        }
+
         snd_pcm_sframes_t avail = ALSA.snd_pcm_avail_update(pcm_handle);
 
         if (avail < 0) {
@@ -179,8 +184,6 @@ static void alsa_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device
     bj_check(p_device);
 
     alsa_device* alsa_dev = p_device->data;
-
-    alsa_dev->should_stop = BJ_TRUE;
 
     if(alsa_dev != 0) {
         if(alsa_dev->playback_thread) {
