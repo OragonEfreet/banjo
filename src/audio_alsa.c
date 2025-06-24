@@ -218,6 +218,8 @@ static bj_audio_device* alsa_open_device(
     p_device->properties.amplitude   = BJ_AUDIO_AMPLITUDE;
     p_device->properties.channels    = 1;
     p_device->properties.sample_rate = 44100;
+    p_device->properties.silence     = ALSA.snd_pcm_format_silence_16(BJ_AUDIO_FORMAT);
+
     alsa_dev->frames_per_period      = 512;
 
     snd_pcm_uframes_t total_frames = alsa_dev->frames_per_period * 4;
@@ -250,9 +252,8 @@ static bj_audio_device* alsa_open_device(
 
     // Create buffer and fill with silence
     alsa_dev->p_buffer = bj_malloc(sizeof(int16_t) * alsa_dev->frames_per_period);
-    int16_t silence = ALSA.snd_pcm_format_silence_16(BJ_AUDIO_FORMAT);
     for(size_t s = 0 ; s < total_frames ; ++s) {
-        alsa_dev->p_buffer[s] = silence;
+        alsa_dev->p_buffer[s] = p_device->properties.silence;
     }
     
     ALSA.snd_pcm_prepare(alsa_dev->p_handle);

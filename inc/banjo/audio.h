@@ -9,6 +9,7 @@ typedef struct bj_audio_properties_t {
     int16_t      amplitude;
     unsigned int channels;
     unsigned int sample_rate;
+    uint16_t     silence;
 } bj_audio_properties;
 
 typedef void (*bj_audio_callback_t)(int16_t*, unsigned int, const bj_audio_properties*, void*);
