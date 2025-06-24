@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 extern bj_audio_layer_create_info alsa_layer_info;
@@ -79,59 +80,76 @@ void bj_close_audio_device(
 }
 
 
-void bj_audio_play_note(int16_t* buffer, unsigned frames, const bj_audio_properties* audio, void* user_data) {
-    bj_audio_play_note_data* data = (bj_audio_play_note_data*)user_data;
-    double phase           = data->phase;
-    double freq            = data->frequency;
-    double amplitude       = (double)audio->amplitude;
-    double sample_rate     = (double)audio->sample_rate;
-    double phase_increment = 2.0 * M_PI * freq / sample_rate;
+void bj_audio_device_play(
+    bj_audio_device* p_device
+) {
+    bj_check(p_device);
+    p_device->playing = BJ_TRUE;
+}
+
+void bj_audio_device_pause(
+    bj_audio_device* p_device
+) {
+    bj_check(p_device);
+    p_device->playing = BJ_FALSE;
+}
+
+bj_bool bj_audio_device_is_playing(
+    const bj_audio_device* p_device
+) {
+    return p_device ? p_device->playing : BJ_FALSE;
+}
+
+void bj_audio_play_note(
+    int16_t*                    p_buffer,
+    unsigned                    frames,
+    const bj_audio_properties*  p_audio,
+    void*                       p_user_data,
+    uint64_t                    base_sample_index
+) {
+    bj_audio_play_note_data* data = (bj_audio_play_note_data*)p_user_data;
+
+    double freq         = data->frequency;
+    double amplitude    = (double)p_audio->amplitude;
+    double sample_rate  = (double)p_audio->sample_rate;
+    double phase_step   = 2.0 * M_PI * freq / sample_rate;
 
     for (unsigned i = 0; i < frames; i++) {
+        uint64_t sample_index = base_sample_index + i;
+        double phase = fmod(sample_index * phase_step, 2.0 * M_PI); // wrap phase
+
         double output = 0.0;
 
-        switch(data->function) {
+        switch (data->function) {
             case BJ_AUDIO_PLAY_SINE:
                 output = sin(phase);
-                buffer[i] = (int16_t)(amplitude * output);
                 break;
 
             case BJ_AUDIO_PLAY_SQUARE:
-                output = sin(phase);
-                buffer[i] = output > 0.0 ? (int16_t)(amplitude / 6.0) : (int16_t)(-amplitude / 6.0);
+                output = sin(phase) > 0.0 ? 0.2 : -0.2;
                 break;
 
-            case BJ_AUDIO_PLAY_TRIANGLE:
-                // Triangle wave ranges -1..1, phase 0..2pi
-                // Formula: (2 / pi) * asin(sin(phase))
-                output = asin(sin(phase)) * (2.0 / M_PI);
-                buffer[i] = (int16_t)(amplitude * output);
+            case BJ_AUDIO_PLAY_TRIANGLE: {
+                // Normalize phase to [0, 1]
+                double t = phase / (2.0 * M_PI);
+                output = 4.0 * fabs(t - floor(t + 0.5)) - 1.0;
                 break;
+            }
 
-            case BJ_AUDIO_PLAY_SAWTOOTH:
-                // Sawtooth: map phase (0..2pi) to -1..1 linearly
-                output = (2.0 * (phase / (2.0 * M_PI))) - 1.0;
-                buffer[i] = (int16_t)(amplitude * output);
+            case BJ_AUDIO_PLAY_SAWTOOTH: {
+                // Normalize phase to [0, 1]
+                double t = phase / (2.0 * M_PI);
+                output = 2.0 * (t - floor(t + 0.5));
                 break;
+            }
 
-            case BJ_AUDIO_PLAY_NOISE:
-                // White noise between -1 and 1
-                output = ((double)rand() / (double)RAND_MAX) * 2.0 - 1.0;
-                buffer[i] = (int16_t)(amplitude * output);
-                break;
 
             default:
-                output = sin(phase);
-                buffer[i] = (int16_t)(amplitude * output);
+                output = 0.0;
                 break;
         }
 
-        phase += phase_increment;
-        if (phase >= 2.0 * M_PI) {
-            phase -= 2.0 * M_PI;
-        }
+        p_buffer[i] = (int16_t)(output * amplitude);
     }
-
-    data->phase = phase;
 }
 

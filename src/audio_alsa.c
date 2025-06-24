@@ -116,17 +116,13 @@ static bj_bool alsa_load_library(bj_error** p_error) {
 
 
 static void* playback_thread(void* p_data) {
-
-    bj_audio_device* p_device = (bj_audio_device*)p_data;
-
+    bj_audio_device* p_device           = (bj_audio_device*)p_data;
     alsa_device* p_alsa_device          = (alsa_device*)p_device->data;
     snd_pcm_t* pcm_handle               = p_alsa_device->p_handle;
     int16_t* buffer                     = p_alsa_device->p_buffer;
     snd_pcm_uframes_t frames_per_period = p_alsa_device->frames_per_period;
-    /* int sample_index                    = 0; */
 
-    /* const double current_freq           = 440.0; // C4 */
-    /* const unsigned int sample_rate      = p_device->sample_rate; */
+    uint64_t global_sample_index = 0;
 
     while (p_alsa_device->should_stop == BJ_FALSE) {
         snd_pcm_sframes_t avail = ALSA.snd_pcm_avail_update(pcm_handle);
@@ -143,13 +139,20 @@ static void* playback_thread(void* p_data) {
         }
 
         if ((snd_pcm_uframes_t)avail >= frames_per_period) {
-            // Call the user's callback to fill the buffer
-            p_device->p_callback(
-                buffer,
-                frames_per_period,
-                &p_device->properties,
-                p_device->p_callback_user_data
-            );
+            if (p_device->playing == BJ_TRUE) {
+                // Generate audio normally
+                p_device->p_callback(
+                    buffer,
+                    frames_per_period,
+                    &p_device->properties,
+                    p_device->p_callback_user_data,
+                    global_sample_index
+                );
+            } else {
+                int16_t silence = p_device->properties.silence;
+                for (unsigned i = 0; i < frames_per_period; ++i)
+                    buffer[i] = silence;
+            }
 
             int err = ALSA.snd_pcm_writei(pcm_handle, buffer, frames_per_period);
             if (err == -EPIPE) {
@@ -159,8 +162,12 @@ static void* playback_thread(void* p_data) {
                 bj_err("write error: %s", ALSA.snd_strerror(err));
                 break;
             }
+
+            if (p_device->playing) {
+                global_sample_index += frames_per_period;
+            }
         } else {
-            usleep(100); // TODO
+            usleep(100); // Small sleep to avoid busy-looping
         }
     }
 
