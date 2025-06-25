@@ -4,6 +4,8 @@
 #include "config.h"
 #include "check.h"
 
+#define _USE_MATH_DEFINES
+
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>

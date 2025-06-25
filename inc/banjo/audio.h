@@ -62,7 +62,7 @@ typedef struct bj_audio_play_note_data_t {
     double phase;
 } bj_audio_play_note_data;
 
-void bj_audio_play_note(
+BANJO_EXPORT void bj_audio_play_note(
     int16_t* buffer,
     unsigned frames,
     const bj_audio_properties* audio,

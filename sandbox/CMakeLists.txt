@@ -2,11 +2,6 @@
 if(BJ_FEATURE_MME)
     enable_language(CXX)
 
-    add_executable(demo_mme demo_mme.c music.h)
-    target_link_libraries(demo_mme PRIVATE banjo)
-    target_compile_definitions(demo_mme PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
-
-    
     add_executable(olcNoiseMaker olcNoiseMaker.cpp olcNoiseMaker.h)
     target_link_libraries(olcNoiseMaker PRIVATE banjo)
     target_compile_definitions(olcNoiseMaker PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}" UNICODE _UNICODE)

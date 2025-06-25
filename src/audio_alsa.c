@@ -228,7 +228,7 @@ static bj_audio_device* alsa_open_device(
     snd_pcm_hw_params_t* params      = 0;
     p_device->properties.amplitude   = BJ_AUDIO_AMPLITUDE;
     p_device->properties.channels    = 1;
-    p_device->properties.sample_rate = 44100;
+    p_device->properties.sample_rate = BJ_AUDIO_SAMPLE_RATE;
     p_device->properties.silence     = ALSA.snd_pcm_format_silence_16(BJ_AUDIO_FORMAT);
 
     alsa_dev->frames_per_period      = 512;

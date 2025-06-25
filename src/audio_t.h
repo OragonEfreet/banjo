@@ -3,6 +3,8 @@
 #include <banjo/audio.h>
 
 #define BJ_AUDIO_AMPLITUDE 16000
+#define BJ_AUDIO_SAMPLE_RATE 44100
+#define BJ_AUDIO_CHANNELS 1
 
 typedef struct bj_audio_device_data_t bj_audio_device_data;
 
