@@ -1,12 +1,12 @@
 #include <banjo/rect.h>
 
-bool bj_rect_intersect(
+bj_bool bj_rect_intersect(
     const bj_rect* p_rect_a,
     const bj_rect* p_rect_b,
     bj_rect* result
 ) {
     if (!p_rect_a || !p_rect_b) {
-        return false;
+        return BJ_FALSE;
     }
 
     // Calculate the left, top, right, and bottom edges of the intersection rectangle
@@ -23,7 +23,7 @@ bool bj_rect_intersect(
 
     // Check if the intersection is valid
     if (x2 <= x1 || y2 <= y1) {
-        return false; // No intersection
+        return BJ_FALSE; // No intersection
     }
 
     // Populate the result rectangle with the intersection coordinates and size
@@ -34,6 +34,6 @@ bool bj_rect_intersect(
         result->h = (uint16_t)(y2 - y1);
     }
 
-    return true; // Intersection exists
+    return BJ_TRUE; // Intersection exists
 }
 

@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "algorithm": "c",
+        "iterator": "c",
+        "vector": "c",
+        "xutility": "c",
+        "format": "c",
+        "xhash": "c",
+        "xmemory": "c",
+        "xstring": "c",
+        "xtree": "c"
+    }
+}

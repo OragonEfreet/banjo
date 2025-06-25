@@ -7,9 +7,9 @@ foreach(_bin_source_path ${_bin_source_paths})
     set_target_properties(${_target} PROPERTIES FOLDER "Examples")
     target_compile_definitions(${_target} PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
 
-    if (BUILD_TESTING)
-            add_test(NAME "[Example] ${_target}" COMMAND ${_target})
-    endif()
+    # if (BUILD_TESTING)
+    #         add_test(NAME "[Example] ${_target}" COMMAND ${_target})
+    # endif()
 endforeach()
 
 

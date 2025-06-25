@@ -25,6 +25,8 @@ int main(void) {
 
     DESC(feature_win32);
     DESC(feature_x11);
+    DESC(feature_mme);
+    DESC(feature_alsa);
     DESC(config_checks_abort);
     DESC(config_checks_log);
     DESC(config_log_color);

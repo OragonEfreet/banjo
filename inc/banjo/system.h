@@ -21,9 +21,9 @@
 /// The initialization process will iteratively try to initialize a subsystem
 /// among the ones available and returns on the first that succeeded.
 ///
-/// \return _true_ if the system is properly initialized, false otherswise.
+/// \return _true_ if the system is properly initialized, BJ_FALSE otherswise.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bool bj_begin(
+BANJO_EXPORT bj_bool bj_begin(
     bj_error** p_error
 );
 

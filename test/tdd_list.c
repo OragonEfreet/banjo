@@ -1,7 +1,6 @@
 #include "test.h"
 
 #include "list_t.h"
-
 #include <string.h>
 
 typedef struct {
@@ -17,7 +16,7 @@ TEST_CASE(initialize_with_payload_gives_empty_list) {
     bj_list* p_list = bj_list_new_t(payload);
     REQUIRE_EQ(p_list->bytes_payload, sizeof(payload));
     REQUIRE(p_list->bytes_entry > sizeof(payload));
-    REQUIRE_EQ(p_list->weak_owning, false);
+    REQUIRE_EQ(p_list->weak_owning, BJ_FALSE);
     REQUIRE_EQ(p_list->p_head, 0);
     bj_list_del(p_list);
 }
@@ -27,7 +26,7 @@ TEST_CASE(clear_empty_does_nothing) {
     bj_list_clear(p_list); // Ensure cleared
     REQUIRE_EQ(p_list->bytes_payload, sizeof(payload));
     REQUIRE(p_list->bytes_entry > sizeof(payload));
-    REQUIRE_EQ(p_list->weak_owning, false);
+    REQUIRE_EQ(p_list->weak_owning, BJ_FALSE);
     REQUIRE_EQ(p_list->p_head, 0);
     bj_list_del(p_list);
 }

@@ -9,7 +9,6 @@
 /// \{
 #pragma once
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -125,19 +124,26 @@
 #    endif
 #endif
 
+typedef uint32_t bj_bool;
+
+#define BJ_FALSE ((bj_bool)0)
+#define BJ_TRUE ((bj_bool)1)
+
 /// Structure holding build information of the binary
 typedef struct {
     const char* p_name;              ///< API Name (\ref BJ_NAME)
     uint32_t    version;             ///< Built version (\ref BJ_VERSION)
     const char* compiler_name;       ///< Compiler C-String name
     int         compiler_version;    ///< Compiler version specifier
-    bool        debug;               ///< Built with debug information
-    bool        feature_win32;       ///< Compiled with support for Win32 windows.
-    bool        feature_x11;         ///< Compiled with support for Win32 windows.
-    bool        config_checks_abort; ///< When checks feature is on, a failed check will abort execution
-    bool        config_checks_log;   ///< If checks feature is on, failed check with log
-    bool        config_log_color;    ///< Banjo logs will have colored output
-    bool        config_pedantic;     ///< Banjo runtime will make costly extra checks
+    bj_bool     debug;               ///< Built with debug information
+    bj_bool     feature_win32;       ///< Compiled with support for Win32 windows.
+    bj_bool     feature_x11;         ///< Compiled with support for Win32 windows.
+    bj_bool     feature_mme;         ///< Compiled with support for Windows Multimedia Extension (for audio).
+    bj_bool     feature_alsa;        ///< Compiled with support for ALSA (for audio).
+    bj_bool     config_checks_abort; ///< When checks feature is on, a failed check will abort execution
+    bj_bool     config_checks_log;   ///< If checks feature is on, failed check with log
+    bj_bool     config_log_color;    ///< Banjo logs will have colored output
+    bj_bool     config_pedantic;     ///< Banjo runtime will make costly extra checks
 } bj_build_info;
 
 ////////////////////////////////////////////////////////////////////////////////

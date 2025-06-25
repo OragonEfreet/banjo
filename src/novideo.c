@@ -1,3 +1,4 @@
+#include <banjo/audio.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
@@ -10,9 +11,9 @@ typedef struct {
     struct bj_window_t common;
     int        width;
     int        height;
-} fake_window;
+} novideo_window;
 
-static bj_window* fake_window_new(
+static bj_window* novideo_window_new(
     bj_video_layer* p_layer,
     const char* p_title,
     uint16_t x,
@@ -28,7 +29,7 @@ static bj_window* fake_window_new(
 
     flags |= BJ_WINDOW_FLAG_CLOSE;
 
-    fake_window window = { 
+    novideo_window window = { 
         .common = {
             .flags = flags,
         },
@@ -36,21 +37,21 @@ static bj_window* fake_window_new(
         .height = height,
     };
 
-    fake_window* p_window = bj_malloc(sizeof(fake_window));
-    bj_memcpy(p_window, &window, sizeof(fake_window));
+    novideo_window* p_window = bj_malloc(sizeof(novideo_window));
+    bj_memcpy(p_window, &window, sizeof(novideo_window));
     return (bj_window*)p_window;
 }
 
-static void fake_window_del(
+static void novideo_window_del(
     bj_video_layer* p_layer,
     bj_window* p_abstract_window
 ) {
     (void)p_layer;
-    fake_window* p_window = (fake_window*)p_abstract_window;
+    novideo_window* p_window = (novideo_window*)p_abstract_window;
     bj_free(p_window);
 }
 
-static void fake_dispose_layer(
+static void novideo_dispose_layer(
     bj_video_layer* p_layer,
     bj_error** p_error
 ) {
@@ -59,13 +60,13 @@ static void fake_dispose_layer(
     bj_free(p_layer);
 }
 
-static void fake_window_poll(
+static void novideo_window_poll(
     bj_video_layer* p_layer
 ) {
     (void)p_layer;
 }
 
-static int fake_get_window_size(
+static int novideo_get_window_size(
     bj_video_layer* p_layer,
     const bj_window* p_abstract_window,
     int* width,
@@ -74,7 +75,7 @@ static int fake_get_window_size(
     (void)p_layer;
     bj_check_or_0(p_abstract_window);
     bj_check_or_0(width || height);
-    const fake_window* p_window = (const fake_window*)p_abstract_window;
+    const novideo_window* p_window = (const novideo_window*)p_abstract_window;
     if(width) {
         *width = p_window->width;
     }
@@ -84,21 +85,21 @@ static int fake_get_window_size(
     return 1;
 }
 
-static bj_bitmap* fake_create_window_framebuffer(
+static bj_bitmap* novideo_create_window_framebuffer(
     bj_video_layer* p_layer,
     const bj_window* p_abstract_window,
     bj_error** p_error
 ) {
     (void)p_layer;
     (void)p_error;
-    fake_window* p_window = (fake_window*)p_abstract_window;
+    novideo_window* p_window = (novideo_window*)p_abstract_window;
     return bj_bitmap_new(
         p_window->width, p_window->height,
         BJ_PIXEL_MODE_INDEXED_1, 0
     );
 }
 
-static void fake_flush_window_framebuffer(
+static void novideo_flush_window_framebuffer(
     bj_video_layer* p_layer,
     const bj_window*   p_abstract_window
 ) {
@@ -106,25 +107,25 @@ static void fake_flush_window_framebuffer(
     (void)p_abstract_window;
 }
 
-static bj_video_layer* fake_init_layer(
+static bj_video_layer* novideo_init_layer(
     bj_error** p_error
 ) {
     (void)p_error;
 
     bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
-    p_layer->dispose                   = fake_dispose_layer;
-    p_layer->create_window             = fake_window_new;
-    p_layer->delete_window             = fake_window_del;
-    p_layer->poll_events               = fake_window_poll;
-    p_layer->get_window_size           = fake_get_window_size;
-    p_layer->create_window_framebuffer = fake_create_window_framebuffer;
-    p_layer->flush_window_framebuffer  = fake_flush_window_framebuffer;
+    p_layer->dispose                   = novideo_dispose_layer;
+    p_layer->create_window             = novideo_window_new;
+    p_layer->delete_window             = novideo_window_del;
+    p_layer->poll_events               = novideo_window_poll;
+    p_layer->get_window_size           = novideo_get_window_size;
+    p_layer->create_window_framebuffer = novideo_create_window_framebuffer;
+    p_layer->flush_window_framebuffer  = novideo_flush_window_framebuffer;
     p_layer->data = 0;
     return p_layer;
 }
 
-bj_video_layer_create_info fake_layer_info = {
-    .name = "fake",
-    .create = fake_init_layer,
+bj_video_layer_create_info novideo_layer_info = {
+    .name = "novideo",
+    .create = novideo_init_layer,
 };
 

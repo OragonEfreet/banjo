@@ -70,12 +70,12 @@ BANJO_EXPORT void bj_htable_del(
 ///
 /// \par Weak / Strong ownership
 ///
-/// When `p_info->weak_owning` is set to true, the container does not allocate any
+/// When `p_info->weak_owning` is set to BJ_TRUE, the container does not allocate any
 /// new memory for storing the actual data.
 /// Memory allocation is still needed for the container structure itself.
 /// In this case, the caller is responsible for the lifetime of the inserted objects (key and value).
 ///
-/// When set to false, the inserted data is copied into the container's internal
+/// When set to BJ_FALSE, the inserted data is copied into the container's internal
 /// memory using \ref bj_memcpy.
 BANJO_EXPORT void* bj_htable_set(
     bj_htable* table,

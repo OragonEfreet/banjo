@@ -26,7 +26,7 @@ void bj_window_del(
     s_video->delete_window(s_video, p_window);
 }
 
-bool bj_window_should_close(
+bj_bool bj_window_should_close(
     bj_window* p_window
 ) {
     return bj_window_get_flags(p_window, BJ_WINDOW_FLAG_CLOSE) > 0;
@@ -158,7 +158,7 @@ bj_window_enter_event_t bj_window_set_enter_event(
 
 void bj_window_input_enter(
     bj_window* p_window,
-    bool enter,
+    bj_bool enter,
     int x,
     int y
 ) {

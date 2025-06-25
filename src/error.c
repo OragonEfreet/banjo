@@ -29,14 +29,14 @@ void bj_set_error(
     }
 }
 
-bool bj_error_check(
+bj_bool bj_error_check(
     const bj_error* p_error,
     uint32_t code
 ) {
     return p_error && code == p_error->code;
 }
 
-bool bj_forward_error(
+bj_bool bj_forward_error(
     bj_error*  p_source,
     bj_error** p_destination
 ) {
@@ -46,7 +46,7 @@ bool bj_forward_error(
         if (p_source) {
             bj_free (p_source);
         }
-        return false;
+        return BJ_FALSE;
     }
 
     if (*p_destination != 0) {
@@ -57,7 +57,7 @@ bool bj_forward_error(
     } else {
         *p_destination = p_source;
     }
-    return true;
+    return BJ_TRUE;
 }
 
 void bj_clear_error(

@@ -95,11 +95,11 @@ BANJO_EXPORT void bj_window_set_should_close(
 /// \param p_window Pointer to the window object to flag.
 /// \return _true_ if the close flag is set, _false_ otherwise.
 ///
-/// If `p_window` is *0*, the function returns *true*.
+/// If `p_window` is *0*, the function returns *BJ_TRUE*.
 ///
 /// \see bj_window_set_should_close
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bool bj_window_should_close(
+BANJO_EXPORT bj_bool bj_window_should_close(
     bj_window* p_window
 );
 
@@ -113,7 +113,7 @@ BANJO_EXPORT bool bj_window_should_close(
 ///
 /// \see bj_window_set_enter_event
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_window_enter_event_t)(bj_window* p_window, bool enter, int x, int y);
+typedef void(* bj_window_enter_event_t)(bj_window* p_window, bj_bool enter, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor position changes.

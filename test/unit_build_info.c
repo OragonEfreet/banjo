@@ -6,15 +6,15 @@
 #include <string.h>
 
 #ifdef BJ_BUILD_RELEASE
-#   define INFO_EXPECT_DEBUG false
+#   define INFO_EXPECT_DEBUG BJ_FALSE
 #else
-#   define INFO_EXPECT_DEBUG true
+#   define INFO_EXPECT_DEBUG BJ_TRUE
 #endif
 
 #if BJ_HAS_CONFIG(LOG_COLOR)
-#   define INFO_EXPECT_COLOR_LOG true
+#   define INFO_EXPECT_COLOR_LOG BJ_TRUE
 #else
-#   define INFO_EXPECT_COLOR_LOG false
+#   define INFO_EXPECT_COLOR_LOG BJ_FALSE
 #endif
 
 TEST_CASE(get_build_info) {

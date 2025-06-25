@@ -470,7 +470,7 @@ BANJO_EXPORT void bj_bitmap_set_clear_color(
 /// \param p_source_area      The area to copy from in the source bitmap.
 /// \param p_destination      The destination bitmap.
 /// \param p_destination_area The area to copy to in the destination bitmap.
-/// \return                   true if a blit actually happened, false otherwise.
+/// \return                   BJ_TRUE if a blit actually happened, BJ_FALSE otherwise.
 ///
 /// If p_source_area is NULL, the entire bitmap is copied.
 /// p_destination_area can also be NULL, which is equivalent to
@@ -485,7 +485,7 @@ BANJO_EXPORT void bj_bitmap_set_clear_color(
 /// but are set to the actual dimensions of the blit.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bool bj_bitmap_blit(
+BANJO_EXPORT bj_bool bj_bitmap_blit(
     const bj_bitmap* p_source,
     const bj_rect* p_source_area,
     bj_bitmap* p_destination,
@@ -499,7 +499,7 @@ BANJO_EXPORT bool bj_bitmap_blit(
 /// \param p_source_area      The area to copy from in the source bitmap.
 /// \param p_destination      The destination bitmap.
 /// \param p_destination_area The area to copy to in the destination bitmap.
-/// \return                   true if a blit actually happened, false otherwise.
+/// \return                   BJ_TRUE if a blit actually happened, BJ_FALSE otherwise.
 ///
 /// If `p_source_area` is _0_, the entire bitmap is copied.
 /// If `p_destination_area` is _0_, the source will fill in the entire
@@ -524,7 +524,7 @@ BANJO_EXPORT bool bj_bitmap_blit(
 /// outside of the destination bitmap.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bool bj_bitmap_blit_stretched(
+BANJO_EXPORT bj_bool bj_bitmap_blit_stretched(
     const bj_bitmap* p_source,
     const bj_rect* p_source_area,
     bj_bitmap* p_destination,

@@ -20,6 +20,18 @@
 #   define BJ_INFO_X11 0
 #endif
 
+#if BJ_HAS_FEATURE(ALSA)
+#   define BJ_INFO_ALSA 1
+#else
+#   define BJ_INFO_ALSA 0
+#endif
+
+#if BJ_HAS_FEATURE(MME)
+#   define BJ_INFO_MME 1
+#else
+#   define BJ_INFO_MME 0
+#endif
+
 #if BJ_HAS_CONFIG(CHECKS_ABORT)
 #   define BJ_INFO_CHECKS_ABORT 1
 #else
@@ -54,6 +66,8 @@ static const bj_build_info s_build_info = {
     // Features
     .feature_win32 = BJ_INFO_WIN32,
     .feature_x11   = BJ_INFO_X11,
+    .feature_mme   = BJ_INFO_MME,
+    .feature_alsa  = BJ_INFO_ALSA,
 
     // Options
     .config_checks_abort = BJ_INFO_CHECKS_ABORT,

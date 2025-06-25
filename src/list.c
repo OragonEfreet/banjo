@@ -36,7 +36,7 @@ bj_list* bj_list_init(
 
     bj_memset(p_instance, 0, sizeof(bj_list));
     p_instance->bytes_payload = bytes_payload;
-    p_instance->weak_owning   = false;
+    p_instance->weak_owning   = BJ_FALSE;
     p_instance->bytes_entry   = p_instance->weak_owning ? sizeof(void*) * 2 : bytes_payload + sizeof(void*);
     p_instance->p_head        = 0;
     return p_instance;
@@ -178,10 +178,10 @@ void bj_list_iterator_reset(bj_list_iterator* iterator) {
     iterator->p_current = 0;
 }
 
-bool bj_list_iterator_has_next(
+bj_bool bj_list_iterator_has_next(
     bj_list_iterator* iterator
 ) {
-    bj_check_or_return(iterator, false);
+    bj_check_or_return(iterator, BJ_FALSE);
     return *(iterator->p_current) != 0;
 }
 

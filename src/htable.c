@@ -37,7 +37,7 @@ BANJO_EXPORT bj_htable* bj_htable_new(
     bj_htable* p_table = bj_malloc(sizeof(bj_htable));
     bj_memset(p_table, 0, sizeof(bj_htable));
 
-    p_table->weak_owning = false;
+    p_table->weak_owning = BJ_FALSE;
     /* p_table->fn_hash     = p_info->fn_hash ? p_info->fn_hash : fnv1a_hash; */
     p_table->fn_hash     = fnv1a_hash;
     p_table->bytes_key   = bytes_key;

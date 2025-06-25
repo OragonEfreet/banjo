@@ -86,7 +86,9 @@ typedef enum {
     BJ_ERROR_INVALID_FORMAT      = 0x00000104, ///< Data format does not match expected format
     BJ_ERROR_INCORRECT_VALUE     = 0x00000204, ///< Mismatched expected value
 
-    BJ_ERROR_VIDEO               = 0x00000005, ///< Error while running video layer
+    BJ_ERROR_VIDEO = 0x00000005, ///< Error while running video layer
+    
+    BJ_ERROR_AUDIO = 0x00000006, ///< Error while running audio layer
 } bj_error_code;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +96,7 @@ typedef enum {
 ///
 /// All Banjo error codes are guaranted to have their most signigicant byte set
 /// to 0x00.
-/// This helper macro evaluates to `true` if the provided error is user-defined.
+/// This helper macro evaluates to `BJ_TRUE` if the provided error is user-defined.
 ///
 /// \param c The error code
 ///
@@ -164,7 +166,7 @@ BANJO_EXPORT void bj_set_error(
 ///
 /// \return _true_ if `p_error` matches `code`, _false_ otherwise.
 ///
-BANJO_EXPORT bool bj_error_check(
+BANJO_EXPORT bj_bool bj_error_check(
     const bj_error* p_error,
     uint32_t code
 );
@@ -182,11 +184,11 @@ BANJO_EXPORT bool bj_error_check(
 /// \param p_source The source error.
 /// \param p_destination The destination error pointer.
 ///
-/// \return `true` if both `p_source` and `p_destination` are non-zero.
+/// \return `BJ_TRUE` if both `p_source` and `p_destination` are non-zero.
 ///         When this happens, this means there was an error to propagate and
 ///         that the caller asked for it.
 ///
-BANJO_EXPORT bool bj_forward_error(
+BANJO_EXPORT bj_bool bj_forward_error(
     bj_error*  p_source,
     bj_error** p_destination
 );

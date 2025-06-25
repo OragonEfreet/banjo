@@ -48,6 +48,13 @@ Some features may exist in the API but not be listed here, and vice versa.
 - [ ] BMP File Support
   - [ ] Writing to disk
   - [X] Loading from disk (\ref load_bmp.c)
+- [ ] Sound support
+  - [X] Windows
+  - [X] GNU/Linux
+  - [X] Pull based PCM
+  - [ ] Push based PCM
+  - [ ] WAVE support
+  - [ ] MIDI support
 - [ ] Frameworks
   - [ ] Entity-Component System
 - [ ] Data Structures
