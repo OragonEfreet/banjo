@@ -12,6 +12,9 @@
 #include <windows.h>
 #include <mmeapi.h>
 
+#define MME_BLOCK_COUNT 8
+#define MME_SAMPLES_PER_BLOCK 256
+
 typedef struct bj_audio_device_data_t {
 	HWAVEOUT hwDevice;
 	WAVEHDR* p_wave_headers;
@@ -210,8 +213,8 @@ static bj_audio_device* mme_open_device(
 	p_device->data                   = mme_dev;
 
 	mme_dev->hwDevice          = hwDevice;
-	mme_dev->block_count       = 8;
-	mme_dev->samples_per_block = 512;
+	mme_dev->block_count       = MME_BLOCK_COUNT;
+	mme_dev->samples_per_block = MME_SAMPLES_PER_BLOCK;
 	mme_dev->sample_index      = 0;
 	mme_dev->event             = CreateEvent(NULL, FALSE, FALSE, NULL);
 	mme_dev->p_wave_headers    = bj_calloc(sizeof(WAVEHDR) * mme_dev->block_count);
