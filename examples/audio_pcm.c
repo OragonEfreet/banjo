@@ -23,8 +23,7 @@ int main(void) {
             {329.63, 300}, {293.66, 300}, {261.63, 600}
         };
 
-        bj_audio_play_note_data data = {
-        };
+        bj_audio_play_note_data data = {0};
 
         bj_audio_device* p_device = bj_open_audio_device(&p_error, bj_audio_play_note, &data);
         if (p_device == 0) {
