@@ -14,6 +14,7 @@ option(BJ_FEATURE_WIN32       "Add Win32 support"                               
 option(BJ_FEATURE_X11         "Add X11 support"                                                OFF)
 option(BJ_FEATURE_MME         "Add support for audio with Windows Multimedia Extensions"       OFF)
 option(BJ_FEATURE_ALSA        "Add support for audio with ALSA"                                OFF)
+option(BJ_FEATURE_EMSCRIPTEN  "Add support for Emscripten"                                     OFF)
 option(BJ_CONFIG_ALL          "Enable all CONFIG options at once"                              OFF)
 option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)
 option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 OFF)
