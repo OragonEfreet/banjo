@@ -144,6 +144,7 @@ typedef struct {
     int         compiler_version;    ///< Compiler version specifier
     bj_bool     debug;               ///< Built with debug information
     bj_bool     feature_win32;       ///< Compiled with support for Win32 windows.
+    bj_bool     feature_emscripten;  ///< Compiled with support for Emscripten.
     bj_bool     feature_x11;         ///< Compiled with support for Win32 windows.
     bj_bool     feature_mme;         ///< Compiled with support for Windows Multimedia Extension (for audio).
     bj_bool     feature_alsa;        ///< Compiled with support for ALSA (for audio).
