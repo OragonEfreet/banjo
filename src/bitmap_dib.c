@@ -1,11 +1,9 @@
+#include <banjo/assert.h>
 #include <banjo/bitmap.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/pixel.h>
 #include <banjo/stream.h>
-
-#include <assert.h>
-#include <stdio.h>
 
 #define ERR_MSG                         "unsupported"
 #define ERR_MSG_BAD_BIT_COUNT           "unsupported bit count"
@@ -90,7 +88,7 @@ static bj_bitmap* unpalletized(bj_bitmap* p_original, dib_table_rgb* p_color_tab
                             default:
                                 break;
                         }
-                        assert(index < color_table_size);
+                        bj_assert(index < color_table_size);
                         *p_dest_byte++ = p_color_table[index].blue;
                         *p_dest_byte++ = p_color_table[index].green;
                         *p_dest_byte++ = p_color_table[index].red;
@@ -143,7 +141,7 @@ static void dib_read_uncompressed_raster(
     const bj_bool is_top_down = height < 0;
 
     uint8_t* const dst_end = dst_pixels + dst_stride * _ABS(height);
-    assert(dst_stride > 0);
+    bj_assert(dst_stride > 0);
 
     uint8_t* p_dst_row         = is_top_down ? dst_pixels : dst_end - dst_stride;
     const size_t src_stride  = dib_uncompressed_row_size(width, dib_bit_count);

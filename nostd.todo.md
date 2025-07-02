@@ -1,0 +1,51 @@
+- [ ] Standard Library
+  - [ ] math.h                   -----------------------------------------------
+    - [ ] inc/banjo/math.h       temporary wrapper
+  - [ ] stdarg.h                 -----------------------------------------------
+    - [ ] src/log.c              variable arguments in bj_log
+    - [ ] test/test.h            variable arguments in printf-like function
+  - [ ] stddef.h                 -----------------------------------------------
+    - [ ] inc/banjo/api.h        size_t
+  - [ ] stdint.h                 -----------------------------------------------
+    - [ ] inc/banjo/api.h        All integer types
+  - [ ] stdio.h                  -----------------------------------------------
+    - [ ] src/log.c              printf
+    - [ ] src/stream.c           file manipulation
+    - [ ] test/test.h            IO
+  - [ ] stdlib.h                 -----------------------------------------------
+    - [ ] inc/banjo/assert.h     abort
+    - [ ] test/mock_memory.h     std malloc/realloc/etc
+  - [ ] string.h                 -----------------------------------------------
+    - [ ] inc/banjo/string.h     temporary wrapper
+    - [ ] src/memory.c           memcpy, memcmp, memmove
+  - [ ] time.h                   -----------------------------------------------
+    - [ ] src/log.c              strftime
+    - [ ] src/time_unix.c        time functions
+
+- [ ] OS Libraries
+  - [ ] dlfcn.h 
+    - [ ] src/system_unix.c
+  - [ ] mmeapi.h
+    - [ ] src/audio_mme.c
+  - [ ] profileapi.h
+    - [ ] src/time_win32.c
+  - [ ] pthread.h
+    - [ ] src/audio_alsa.c
+  - [ ] windows.h
+    - [ ] src/audio_mme.c
+    - [ ] src/system_win32.c
+    - [ ] src/time_win32.c
+    - [ ] src/video_win32.c
+  - [ ] windowsx.h
+    - [ ] src/video_win32.c
+
+- [ ] 3rd-Party Libraries
+  - [ ] X11/Xlib.h
+    - [ ] src/video_x11.c
+  - [ ] X11/Xresource.h
+    - [ ] src/video_x11.c
+  - [ ] X11/Xutil.h
+    - [ ] src/video_x11.c
+  - [ ] alsa/asoundlib.h
+    - [ ] src/audio_alsa.c
+

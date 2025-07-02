@@ -5,10 +5,11 @@
 #include <banjo/audio.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/math.h>
 #include <banjo/memory.h>
-#include <banjo/video.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
+#include <banjo/video.h>
 
 #include "audio_t.h"
 #include "check.h"
@@ -16,7 +17,6 @@
 
 #include <alsa/asoundlib.h>
 #include <pthread.h>
-#include <math.h>
 
 #define BJ_AUDIO_FORMAT SND_PCM_FORMAT_S16_LE
 

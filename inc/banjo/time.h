@@ -14,7 +14,6 @@
 #include <banjo/api.h>
 #include <banjo/error.h>
 
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Suspends the current thread for a specified duration.
 ///

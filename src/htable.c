@@ -2,8 +2,6 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
-#include <string.h>
-
 #include "check.h"
 #include "htable_t.h"
 #include "list_t.h"
@@ -83,7 +81,7 @@ void* bj_htable_set(
     while(bj_list_iterator_has_next(&it)) {
         char* key = bj_list_iterator_next(&it);
         if(key != 0) {
-            if(memcmp(key, p_key, table->bytes_key) == 0) {
+            if(bj_memcmp(key, p_key, table->bytes_key) == 0) {
                 char* value = key+table->bytes_key;
                 bj_memcpy(value, p_value, table->bytes_value);
                 return value;
@@ -122,7 +120,7 @@ void* bj_htable_get(
         while(bj_list_iterator_has_next(&it)) {
             char* key = bj_list_iterator_next(&it);
             if(key != 0) {
-                if(memcmp(key, p_key, table->bytes_key) == 0) {
+                if(bj_memcmp(key, p_key, table->bytes_key) == 0) {
                     return key+table->bytes_key;
                 }
             }

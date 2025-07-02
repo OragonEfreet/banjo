@@ -23,7 +23,7 @@ float bj_smoothstep(
     float edge1,
     float x
 ) {
-    float t = fminf(fmaxf((x - edge0) / (edge1 - edge0), 0.0f), 1.0f);
+    float t = bj_fminf(bj_fmaxf((x - edge0) / (edge1 - edge0), 0.0f), 1.0f);
     return t * t * (3.0f - 2.0f * t);
 }
 
@@ -31,13 +31,13 @@ int bj_mod(
     float x,
     float y
 ) {
-    return x - y * floorf(x / y);
+    return x - y * bj_floorf(x / y);
 }
 
 float bj_fract(
     float x
 ) {
-    return x - floorf(x);
+    return x - bj_floorf(x);
 }
 
 void bj_bitmap_apply_shader(

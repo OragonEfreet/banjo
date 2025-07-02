@@ -2,7 +2,6 @@
 
 #ifdef BJ_OS_UNIX
 
-#include <stdint.h>
 #include <time.h>
 
 static clockid_t   s_clock;

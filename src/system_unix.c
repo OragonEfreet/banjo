@@ -3,7 +3,6 @@
 #ifdef BJ_OS_UNIX
 
 #include <dlfcn.h> 
-#include <stdint.h>
 
 void* bj_load_library(
     const char* p_path

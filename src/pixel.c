@@ -1,9 +1,8 @@
+#include <banjo/assert.h>
 #include <banjo/log.h>
 #include <banjo/pixel.h>
 
 #include "check.h"
-
-#include <assert.h>
 
 struct bitmask {
     uint8_t shift;
@@ -122,15 +121,15 @@ int bj_compute_pixel_mode(
     const bj_bool have_masks = (red_mask | green_mask | blue_mask) > 0;
     switch (bpp) {
     case 1:
-        assert(!have_masks);
+        bj_assert(!have_masks);
         return BJ_PIXEL_MODE_INDEXED_1;
 
     case 4:
-        assert(!have_masks);
+        bj_assert(!have_masks);
         return BJ_PIXEL_MODE_INDEXED_4;
 
     case 8:
-        assert(!have_masks);
+        bj_assert(!have_masks);
         return BJ_PIXEL_MODE_INDEXED_8;
 
     case 16:
@@ -141,7 +140,7 @@ int bj_compute_pixel_mode(
         return have_masks ? BJ_PIXEL_MODE_UNKNOWN : BJ_PIXEL_MODE_XRGB1555;
 
     case 24:
-        assert(!have_masks);
+        bj_assert(!have_masks);
         return BJ_PIXEL_MODE_BGR24;
 
     case 32:

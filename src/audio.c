@@ -1,15 +1,11 @@
+#include <banjo/assert.h>
 #include <banjo/log.h>
+#include <banjo/math.h>
 
 #include "audio_t.h"
 #include "config.h"
 #include "check.h"
 
-#define _USE_MATH_DEFINES
-
-#include <assert.h>
-#include <math.h>
-#include <stdint.h>
-#include <stdlib.h>
 
 extern bj_audio_layer_create_info alsa_layer_info;
 extern bj_audio_layer_create_info mme_layer_info;
@@ -28,7 +24,7 @@ static const bj_audio_layer_create_info* layer_infos[] = {
 extern bj_audio_layer* s_audio;
 
 bj_audio_layer* bj_init_audio(bj_error** p_error) {
-    assert(s_audio == 0);
+    bj_assert(s_audio == 0);
 
     const size_t n_layers = sizeof(layer_infos) / sizeof(bj_audio_layer_create_info*);
 
@@ -130,34 +126,34 @@ void bj_audio_play_note(
     double freq         = data->frequency;
     double amplitude    = (double)p_audio->amplitude;
     double sample_rate  = (double)p_audio->sample_rate;
-    double phase_step   = 2.0 * M_PI * freq / sample_rate;
+    double phase_step   = 2.0 * BJ_PI * freq / sample_rate;
 
     for (unsigned i = 0; i < frames; i++) {
         uint64_t sample_index = base_sample_index + i;
-        double phase = fmod(sample_index * phase_step, 2.0 * M_PI); // wrap phase
+        double phase = bj_fmod(sample_index * phase_step, 2.0 * BJ_PI); // wrap phase
 
         double output = 0.0;
 
         switch (data->function) {
             case BJ_AUDIO_PLAY_SINE:
-                output = sin(phase);
+                output = bj_sin(phase);
                 break;
 
             case BJ_AUDIO_PLAY_SQUARE:
-                output = sin(phase) > 0.0 ? 0.2 : -0.2;
+                output = bj_sin(phase) > 0.0 ? 0.2 : -0.2;
                 break;
 
             case BJ_AUDIO_PLAY_TRIANGLE: {
                 // Normalize phase to [0, 1]
-                double t = phase / (2.0 * M_PI);
-                output = 4.0 * fabs(t - floor(t + 0.5)) - 1.0;
+                double t = phase / (2.0 * BJ_PI);
+                output = 4.0 * bj_fabs(t - bj_floor(t + 0.5)) - 1.0;
                 break;
             }
 
             case BJ_AUDIO_PLAY_SAWTOOTH: {
                 // Normalize phase to [0, 1]
-                double t = phase / (2.0 * M_PI);
-                output = 2.0 * (t - floor(t + 0.5));
+                double t = phase / (2.0 * BJ_PI);
+                output = 2.0 * (t - bj_floor(t + 0.5));
                 break;
             }
 

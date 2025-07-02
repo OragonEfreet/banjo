@@ -2,14 +2,14 @@
 /// \example list.c
 /// Single chained list example.
 ////////////////////////////////////////////////////////////////////////////////
-#include <assert.h>
+#include <banjo/assert.h>
 #include <banjo/list.h>
 
 int main(void) {
 
     // Create a new list
     bj_list* list = bj_list_new_t(int); // No custom allocator
-    assert(list); // Ensure list creation was successful
+    bj_assert(list); // Ensure list creation was successful
 
     // Insert elements into the list
     bj_list_insert(list, 0, &(int){10});
@@ -17,16 +17,16 @@ int main(void) {
     bj_list_insert(list, 2, &(int){30});
 
     // Get the number of elements in the list
-    assert(bj_list_len(list) == 3); // Ensure the count is correct
+    bj_assert(bj_list_len(list) == 3); // Ensure the count is correct
 
     // Accessing elements by index
-    assert(*(int*)bj_list_at(list, 0) == 10); // Ensure the value at index 0 is correct
-    assert(*(int*)bj_list_at(list, 1) == 20); // Ensure the value at index 1 is correct
-    assert(*(int*)bj_list_at(list, 2) == 30); // Ensure the value at index 2 is correct
+    bj_assert(*(int*)bj_list_at(list, 0) == 10); // Ensure the value at index 0 is correct
+    bj_assert(*(int*)bj_list_at(list, 1) == 20); // Ensure the value at index 1 is correct
+    bj_assert(*(int*)bj_list_at(list, 2) == 30); // Ensure the value at index 2 is correct
 
     // Iterating over the list using an iterator
     bj_list_iterator* iterator = bj_list_iterator_new(list);
-    assert(iterator); // Ensure iterator creation was successful
+    bj_assert(iterator); // Ensure iterator creation was successful
     while (bj_list_iterator_has_next(iterator)) {
         bj_list_iterator_next(iterator);
     }
@@ -34,7 +34,7 @@ int main(void) {
 
     // Clearing the list
     bj_list_clear(list);
-    assert(bj_list_len(list) == 0); // Ensure the list is cleared
+    bj_assert(bj_list_len(list) == 0); // Ensure the list is cleared
 
     // Deleting the list
     bj_list_del(list);

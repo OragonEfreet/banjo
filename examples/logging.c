@@ -2,9 +2,8 @@
 /// \example logging.c
 /// Demonstrate the use of log facilities
 ////////////////////////////////////////////////////////////////////////////////
+#include <banjo/assert.h>
 #include <banjo/log.h>
-
-#include <assert.h>
 
 int main(void) {
 
@@ -13,7 +12,7 @@ int main(void) {
     // BJ_LOG_WARN <  BJ_LOG_ERROR < BJ_LOG_FATAL.
     // The default log level on application start is 0 (TRACE)
     const int default_level = bj_log_get_level();
-    assert(default_level == 0);
+    bj_assert(default_level == 0);
     bj_info("Default log level: %d\n", default_level);
 
     // To set the current log level:

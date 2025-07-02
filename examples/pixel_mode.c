@@ -1,8 +1,6 @@
 #include <banjo/log.h>
 #include <banjo/pixel.h>
 
-#include <stdio.h>
-
 void display_value(bj_pixel_mode mode, uint8_t red, uint8_t green, uint8_t blue) {
     const uint32_t val = bj_pixel_value(mode, red, green, blue);
 

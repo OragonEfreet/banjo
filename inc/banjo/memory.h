@@ -142,6 +142,19 @@ BANJO_EXPORT void* bj_memcpy(
     size_t      mem_size
 );
 
+BANJO_EXPORT void* bj_memmove(
+    void*       p_dest,
+    const void* p_src,
+    size_t      mem_size
+);
+
+
+BANJO_EXPORT int bj_memcmp(
+    const void* p_block_a,
+    const void* p_block_b,
+    size_t size
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Copies the value `value` into each ot the first `num` bytes of the object
 /// pointed to by `p_dest`.

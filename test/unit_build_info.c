@@ -3,8 +3,6 @@
 
 #include "test.h"
 
-#include <string.h>
-
 #ifdef BJ_BUILD_RELEASE
 #   define INFO_EXPECT_DEBUG BJ_FALSE
 #else
@@ -19,7 +17,7 @@
 
 TEST_CASE(get_build_info) {
     const bj_build_info* info = bj_get_build_info();
-    int cmp = strcmp(info->p_name, BJ_NAME);
+    int cmp = bj_strcmp(info->p_name, BJ_NAME);
     REQUIRE_EQ(cmp, 0);
     REQUIRE_EQ(info->version, BJ_VERSION);
     REQUIRE_EQ(info->debug, INFO_EXPECT_DEBUG);

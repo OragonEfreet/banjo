@@ -3,12 +3,10 @@
 #include "mock_memory.h"
 
 #include <banjo/api.h>
+#include <banjo/string.h>
 
-#include <ctype.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
-#include <string.h>
 
 // Symbol overrides
 #define SM_NS(SM) test_ ## SM
@@ -106,14 +104,14 @@ int terminate_context(Context* SM_CTX()) {
     return SM_CTX()->n_fail;
 }
 
-bool all_zero(void* ptr, size_t byte_size) {
+bj_bool all_zero(void* ptr, size_t byte_size) {
     char* b = ptr;
     while(byte_size-- > 0) {
         if((*b++) != 0) {
-            return false;
+            return BJ_FALSE;
         }
     }
-    return true;
+    return BJ_TRUE;
 }
 
 

@@ -1,7 +1,5 @@
 #include "test.h"
-
 #include "list_t.h"
-#include <string.h>
 
 typedef struct {
     short elem0;
@@ -71,7 +69,7 @@ TEST_CASE_ARGS(insert_to_n_makes_item_available_at_index_n, {size_t n;}) {
 
     REQUIRE_EQ(got->elem0, data.elem0);
     REQUIRE_EQ(got->elem1, data.elem1);
-    int diff = memcmp(got, &data, sizeof(payload));
+    int diff = bj_memcmp(got, &data, sizeof(payload));
     REQUIRE_EQ(diff, 0);
 
     bj_list_del(p_list);
@@ -89,7 +87,7 @@ TEST_CASE(prepend_to_makes_item_available_at_index_0) {
 
         REQUIRE_EQ(got->elem0, p.elem0);
         REQUIRE_EQ(got->elem1, p.elem1);
-        int diff = memcmp(got, &p, sizeof(payload));
+        int diff = bj_memcmp(got, &p, sizeof(payload));
         REQUIRE_EQ(diff, 0);
     }
     bj_list_del(p_list);
@@ -125,7 +123,7 @@ TEST_CASE(head_is_at_0) {
 
         REQUIRE_EQ(got->elem0, p.elem0);
         REQUIRE_EQ(got->elem1, p.elem1);
-        int diff = memcmp(got, &p, sizeof(payload));
+        int diff = bj_memcmp(got, &p, sizeof(payload));
         REQUIRE_EQ(diff, 0);
     }
     bj_list_del(p_list);

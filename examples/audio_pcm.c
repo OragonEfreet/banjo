@@ -4,8 +4,6 @@
 #include <banjo/system.h>
 #include <banjo/time.h>
 
-#include <math.h>
-#include <stdio.h>
 
 typedef struct {
     double frequency;
@@ -33,7 +31,7 @@ int main(void) {
             return 0;
         }
 
-        for (int i = 0; i < sizeof(melody) / sizeof(melody[0]); ++i) {
+        for (size_t i = 0; i < sizeof(melody) / sizeof(melody[0]); ++i) {
             data.frequency = melody[i].frequency;
             bj_audio_device_play(p_device);
             bj_sleep(melody[i].duration_ms);

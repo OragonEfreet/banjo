@@ -3,20 +3,19 @@
 /// Basic event handling.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/error.h>
+#include <banjo/log.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
 
-#include <stdio.h>
-
 void cursor_event(bj_window* p_window, int x, int y) {
-    printf("Cursor event, window %p, (%d,%d)\n",
+    bj_info("Cursor event, window %p, (%d,%d)",
         (void*)p_window, x, y
     );
 }
 
 void button_event(bj_window* p_window, int button, bj_event_action action, int x, int y) {
-    printf("Button event, window %p, button %d, %s, (%d,%d)\n",
+    bj_info("Button event, window %p, button %d, %s, (%d,%d)",
         (void*)p_window, button, 
         action == BJ_PRESS ? "pressed" : "released",
         x, y
@@ -32,7 +31,7 @@ void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scan
     }
 
 
-    printf("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s\n", 
+    bj_info("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s", 
         key, bj_get_key_name(key), scancode, action_str
     );
 
@@ -42,7 +41,7 @@ void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scan
 }
 
 void enter_event(bj_window* p_window, bj_bool enter, int x, int y) {
-    printf("Enter event, window %p, %s, (%d,%d)\n",
+    bj_info("Enter event, window %p, %s, (%d,%d)",
         (void*)p_window, 
         enter ? "entered" : "left",
         x, y

@@ -27,7 +27,7 @@
 
 #include <banjo/api.h>
 #include <banjo/bitmap.h>
-#include <banjo/math.h>
+#include <banjo/linmath.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Function type for a bitmap shading operation.

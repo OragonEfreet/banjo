@@ -6,8 +6,8 @@
 
 TEST_CASE_ARGS(is_valid_bmp, {const char* name;}) {
     const char* folder = BANJO_ASSETS_DIR;
-    size_t folder_len = strlen(folder);
-    char* bmp_path = bj_malloc(sizeof(char) * (folder_len + strlen(test_data->name) + 2));
+    size_t folder_len = bj_strlen(folder);
+    char* bmp_path = bj_malloc(sizeof(char) * (folder_len + bj_strlen(test_data->name) + 2));
     sprintf(bmp_path, "%s/%s", folder, test_data->name);
 
     bj_error* p_error = 0;
@@ -19,8 +19,8 @@ TEST_CASE_ARGS(is_valid_bmp, {const char* name;}) {
 
 TEST_CASE_ARGS(is_corrupt_bmp, {const char* name;bj_error_code code;}) {
     const char* folder = BANJO_ASSETS_DIR;
-    size_t folder_len = strlen(folder);
-    char* bmp_path = bj_malloc(sizeof(char) * (folder_len + strlen(test_data->name) + 2));
+    size_t folder_len = bj_strlen(folder);
+    char* bmp_path = bj_malloc(sizeof(char) * (folder_len + bj_strlen(test_data->name) + 2));
     sprintf(bmp_path, "%s/%s", folder, test_data->name);
 
     bj_error* p_error = 0;

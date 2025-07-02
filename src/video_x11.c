@@ -2,6 +2,7 @@
 
 #if BJ_HAS_FEATURE(X11)
 
+#include <banjo/assert.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
@@ -17,9 +18,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
-
-#include <assert.h>
-#include <string.h>
 
 #define X11_CANNOT_OPEN_DISPLAY 0x00010000
 #define X11_CANNOT_CREATE_IMAGE 0x00020000
@@ -337,7 +335,7 @@ static void x11_dispatch_event(
 static void x11_poll_events(
     bj_video_layer* p_video
 ) {
-    assert(p_video);
+    bj_assert(p_video);
     x11* p_x11 = p_video->data;
 
     p_x11->XPending(p_x11->display);

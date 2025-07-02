@@ -2,6 +2,7 @@
 
 #if BJ_HAS_FEATURE(WIN32)
 
+#include <banjo/assert.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
@@ -15,7 +16,6 @@
 
 #include "window_t.h"
 
-#include <assert.h>
 
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
 
@@ -197,7 +197,7 @@ static void win32_flush_window_framebuffer(
     const bj_window*   p_abstract_window
 ) {
     win32_window* p_window = (win32_window*)p_abstract_window;
-    assert(p_window->common.p_framebuffer != 0);
+    bj_assert(p_window->common.p_framebuffer != 0);
 
     int width = 0;
     int height = 0;

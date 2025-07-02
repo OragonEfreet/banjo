@@ -3,8 +3,8 @@
 #include <banjo/error.h>
 
 #include "check.h"
-#include <stdlib.h>
-#include <string.h>
+
+#include <string.h> // memset, memcpy, memmove
 
 static void* fallback_malloc(void* user_data, size_t size) {
     (void)user_data;
@@ -79,6 +79,22 @@ void* bj_memcpy(
     size_t       mem_size
 ) {
     return memcpy(p_dest, p_src, mem_size);
+}
+
+void* bj_memmove(
+    void*       p_dest,
+    const void* p_src,
+    size_t       mem_size
+) {
+    return memmove(p_dest, p_src, mem_size);
+}
+
+int bj_memcmp(
+    const void* p_block_a,
+    const void* p_block_b,
+    size_t size
+) {
+    return memcmp(p_block_a, p_block_b, size);
 }
 
 void bj_memset(

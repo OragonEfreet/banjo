@@ -24,9 +24,9 @@ void palette(bj_vec3 res, float t) {
     const bj_vec3 c = {1.f, 1.f, 1.f};
     const bj_vec3 d = {.263f, .416f, .557f};
 
-    res[0] = a[0] + b[0] * cosf(f * (c[0] * t + d[0]));
-    res[1] = a[1] + b[1] * cosf(f * (c[1] * t + d[1]));
-    res[2] = a[2] + b[2] * cosf(f * (c[2] * t + d[2]));
+    res[0] = a[0] + b[0] * bj_cosf(f * (c[0] * t + d[0]));
+    res[1] = a[1] + b[1] * bj_cosf(f * (c[1] * t + d[1]));
+    res[2] = a[2] + b[2] * bj_cosf(f * (c[2] * t + d[2]));
 }
 
 int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
@@ -46,10 +46,10 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
         bj_vec2_apply(uv, uv, bj_fract);
         bj_vec2_sub(uv, uv, (bj_vec2) { .5f, .5f });
 
-        const float d = powf(0.01f / (
-            fabsf(
-                sinf(
-                    bj_vec2_len(uv) * expf(-uv0_len) * 8.f + time
+        const float d = bj_powf(0.01f / (
+            bj_fabsf(
+                bj_sinf(
+                    bj_vec2_len(uv) * bj_expf(-uv0_len) * 8.f + time
                 ) / 8.f
             )
          ), 1.2f);

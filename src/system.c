@@ -1,3 +1,4 @@
+#include <banjo/assert.h>
 #include <banjo/audio.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
@@ -7,7 +8,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 
 bj_video_layer* s_video = 0;
 bj_audio_layer* s_audio = 0;
@@ -23,8 +23,8 @@ bj_bool bj_begin(
 ) {
     bj_error* error = 0;
 
-    assert(s_video == 0);
-    assert(s_audio == 0);
+    bj_assert(s_video == 0);
+    bj_assert(s_audio == 0);
 
     bj_init_time();
 

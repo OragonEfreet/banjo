@@ -1,11 +1,10 @@
 #include <banjo/log.h>
+#include <banjo/math.h>
 #include <banjo/pixel.h>
 #include <banjo/stream.h>
 
 #include "bitmap_t.h"
 #include "check.h"
-
-#include <math.h>
 
 #define ABS_INT(x) ((x) < 0 ? -(x) : (x))
 
@@ -520,17 +519,17 @@ bj_bool bj_bitmap_blit_stretched(
     }
 
     bj_rect clipped_src = {
-        .x = (int)round(src_x0),
-        .y = (int)round(src_y0),
-        .w = (int)round(src_x1 - src_x0),
-        .h = (int)round(src_y1 - src_y0),
+        .x = (int)bj_round(src_x0),
+        .y = (int)bj_round(src_y0),
+        .w = (int)bj_round(src_x1 - src_x0),
+        .h = (int)bj_round(src_y1 - src_y0),
     };
 
     bj_rect clipped_dest = {
-        .x = (int)round(dst_x0),
-        .y = (int)round(dst_y0),
-        .w = (int)round(dst_x1 - dst_x0),
-        .h = (int)round(dst_y1 - dst_y0),
+        .x = (int)bj_round(dst_x0),
+        .y = (int)bj_round(dst_y0),
+        .w = (int)bj_round(dst_x1 - dst_x0),
+        .h = (int)bj_round(dst_y1 - dst_y0),
     };
 
     if (clipped_src.w <= 0 || clipped_src.h <= 0 ||

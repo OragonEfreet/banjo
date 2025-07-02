@@ -2,18 +2,17 @@
 /// \example build_info.c
 /// Query binary information about the Banjo API.
 ////////////////////////////////////////////////////////////////////////////////
+#include <banjo/log.h>
 #include <banjo/api.h>
 
-#include <stdio.h>
-
-#define DESC(mode) printf("%c %s\n", info->mode ? '+' : '-', #mode)
+#define DESC(mode) bj_info("%c %s", info->mode ? '+' : '-', #mode)
 
 int main(void) {
 
-    printf("%s\n", BANJO_ASSETS_DIR);
+    bj_info("%s", BANJO_ASSETS_DIR);
     const bj_build_info* info = bj_get_build_info();
 
-    printf("%s API Version %d.%d.%d (0x%08X), %s build\n",
+    bj_info("%s API Version %d.%d.%d (0x%08X), %s build",
         info->p_name,
         BJ_VERSION_MAJOR(info->version),
         BJ_VERSION_MINOR(info->version),
@@ -21,7 +20,7 @@ int main(void) {
         info->version,
         info->debug ? "Debug" : "Release"
     );
-    printf("Compiler: %s %d\n", info->compiler_name, info->compiler_version);
+    bj_info("Compiler: %s %d", info->compiler_name, info->compiler_version);
 
     DESC(feature_win32);
     DESC(feature_x11);

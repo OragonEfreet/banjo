@@ -1,8 +1,5 @@
 #include "test.h"
-
 #include "array_t.h"
-
-#include <string.h>
 
 typedef struct {
     short elem0;
@@ -228,7 +225,7 @@ TEST_CASE(at_nonempty_returns_indexed_value) {
         REQUIRE_EQ(p.elem0, got->elem0);
         REQUIRE_EQ(p.elem1, got->elem1);
 
-        int diff = memcmp(&p, got, sizeof(payload));
+        int diff = bj_memcmp(&p, got, sizeof(payload));
         REQUIRE_EQ(diff, 0);
     }
 

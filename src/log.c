@@ -3,7 +3,6 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <string.h>
 #include <time.h>
 
 #include "config.h"
@@ -75,7 +74,7 @@ size_t bj_message(
 
         size_t header_size = 0;
         if (header_max_len > 0) {
-            memmove(buf + header_max_len, buf, msg_payload);
+            bj_memmove(buf + header_max_len, buf, msg_payload);
 
             size_t source_payload = 0;
             if (p_file) {
@@ -96,28 +95,28 @@ size_t bj_message(
             if (with_source) {
                 size_t shift = header_max_len - source_payload;
                 if (colored_source) {
-                    memcpy(buf + header_max_len - COLOR_END_PAYLOAD, color_end, COLOR_END_PAYLOAD);
+                    bj_memcpy(buf + header_max_len - COLOR_END_PAYLOAD, color_end, COLOR_END_PAYLOAD);
                     shift -= COLOR_END_PAYLOAD;
                     header_size += COLOR_END_PAYLOAD;
                 }
-                memmove(buf + shift, buf, source_payload);
+                bj_memmove(buf + shift, buf, source_payload);
                 header_size += source_payload;
                 if (colored_source) {
-                    memcpy(buf + header_max_len - COLOR_END_PAYLOAD - COLOR_SET_PAYLOAD - source_payload, color_source, COLOR_SET_PAYLOAD);
+                    bj_memcpy(buf + header_max_len - COLOR_END_PAYLOAD - COLOR_SET_PAYLOAD - source_payload, color_source, COLOR_SET_PAYLOAD);
                     header_size += COLOR_SET_PAYLOAD;
                 }
             }
 
             if (with_level) {
                 if (colored_level) {
-                    memcpy(buf + header_max_len - header_size - COLOR_END_PAYLOAD, color_end, COLOR_END_PAYLOAD);
+                    bj_memcpy(buf + header_max_len - header_size - COLOR_END_PAYLOAD, color_end, COLOR_END_PAYLOAD);
                     header_size += COLOR_END_PAYLOAD;
                 }
                 snprintf(buf + header_max_len - header_size - level_payload, level_payload, "%s", level_info[level].name);
                 buf[header_max_len - header_size - 1] = ' ';
                 header_size += level_payload;
                 if (colored_level) {
-                    memcpy(buf + header_max_len - header_size - COLOR_SET_PAYLOAD, level_info[level].color, COLOR_SET_PAYLOAD);
+                    bj_memcpy(buf + header_max_len - header_size - COLOR_SET_PAYLOAD, level_info[level].color, COLOR_SET_PAYLOAD);
                     header_size += COLOR_SET_PAYLOAD;
                 }
             }

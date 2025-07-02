@@ -8,11 +8,10 @@
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
+#include <banjo/string.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
-
-#include <string.h>
 
 int display_bitmap(const bj_bitmap* p_bitmap, const char* title, int pause_on_display) {
 
@@ -143,19 +142,19 @@ int main() {
     };
     size_t n_files = sizeof(bmp_files) / sizeof(bmp_files[0]);
 
-    const size_t asset_dir_strlen = strlen(BANJO_ASSETS_DIR);
+    const size_t asset_dir_strlen = bj_strlen(BANJO_ASSETS_DIR);
 
     bj_bool pause_on_display = BJ_TRUE;
     for (size_t f = 0 ; f < n_files ; ++f) {
         total_tries +=1 ;
         const char* bmp_file = bmp_files[f];
-        const size_t bmp_file_strlen = strlen(bmp_file);
-        const size_t bufsize = asset_dir_strlen + bmp_file_strlen + 1;
+        const size_t bmp_file_bj_strlen = bj_strlen(bmp_file);
+        const size_t bufsize = asset_dir_strlen + bmp_file_bj_strlen + 1;
 
         char* bmp_path = bj_malloc(bufsize);
         bj_memset(bmp_path, 0, bufsize);
         bj_memcpy(bmp_path, BANJO_ASSETS_DIR, asset_dir_strlen);
-        bj_memcpy(bmp_path+asset_dir_strlen, bmp_file, bmp_file_strlen);
+        bj_memcpy(bmp_path+asset_dir_strlen, bmp_file, bmp_file_bj_strlen);
 
         bj_error* error = 0;
         bj_bitmap* p_bitmap = bj_bitmap_new_from_file(bmp_path, &error);

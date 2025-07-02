@@ -12,8 +12,6 @@
 #include <banjo/time.h>
 #include <banjo/window.h>
 
-#include <stdlib.h>
-
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
