@@ -14,6 +14,7 @@
     - [ ] test/test.h            IO
   - [ ] stdlib.h                 -----------------------------------------------
     - [ ] inc/banjo/assert.h     abort
+    - [ ] src/memory.c           std malloc/realloc/etc
     - [ ] test/mock_memory.h     std malloc/realloc/etc
   - [ ] string.h                 -----------------------------------------------
     - [ ] inc/banjo/string.h     temporary wrapper

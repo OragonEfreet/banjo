@@ -4,6 +4,7 @@
 
 #include "check.h"
 
+#include <stdlib.h> // malloc, realloc, ...
 #include <string.h> // memset, memcpy, memmove
 
 static void* fallback_malloc(void* user_data, size_t size) {
