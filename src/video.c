@@ -6,11 +6,15 @@
 
 #include "config.h"
 
+extern bj_video_layer_create_info emscripten_layer_info;
 extern bj_video_layer_create_info novideo_layer_info;
 extern bj_video_layer_create_info win32_layer_info;
 extern bj_video_layer_create_info x11_layer_info;
 
 static const bj_video_layer_create_info* layer_infos[] = {
+#if BJ_HAS_FEATURE(EMSCRIPTEN)
+    &emscripten_layer_info,
+#endif
 #if BJ_HAS_FEATURE(WIN32)
     &win32_layer_info,
 #endif
