@@ -1,13 +1,16 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example drawing_2d.c
-/// How to open and close windows.
+///  2D primitive drawing demo.
 ////////////////////////////////////////////////////////////////////////////////
+#define BJ_MAIN_USE_CALLBACKS
 #include <banjo/bitmap.h>
-#include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
+
+bj_window* window = 0;
 
 void draw(bj_bitmap* bmp) {
     bj_bitmap_clear(bmp);
@@ -60,32 +63,40 @@ void draw(bj_bitmap* bmp) {
     }
 }
 
-
-int main(void) {
+int bj_app_begin(void** user_data, int argc, char* argv[]) {
+    (void)user_data; (void)argc; (void)argv;
 
     bj_error* p_error = 0;
 
     if(!bj_begin(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
-        return 1;
+        return bj_callback_exit_error;
     } 
 
-    bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 500, 500, 0);
-
+    window = bj_window_new("Simple Banjo Window", 100, 100, 500, 500, 0);
     bj_window_set_key_event(window, bj_close_on_escape);
 
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
-
     draw(framebuffer);
     bj_window_update_framebuffer(window);
 
-    while (!bj_window_should_close(window)) {
-        bj_poll_events();
-        bj_sleep(300);
-    }
-
-    bj_window_del(window);
-
-    bj_end(0);
-    return 0;
+    return bj_callback_continue;
 }
+
+int bj_app_iterate(void* user_data) {
+    (void)user_data;
+    bj_poll_events();
+    bj_sleep(300);
+
+    return bj_window_should_close(window) 
+         ? bj_callback_exit_success 
+         : bj_callback_continue;
+}
+
+int bj_app_end(void* user_data, int status) {
+    (void)user_data;
+    bj_window_del(window);
+    bj_end(0);
+    return status;
+}
+

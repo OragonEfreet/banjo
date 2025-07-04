@@ -2,11 +2,15 @@
 /// \example events.c
 /// Basic event handling.
 ////////////////////////////////////////////////////////////////////////////////
+#define BJ_MAIN_USE_CALLBACKS
 #include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
+
+bj_window* window = 0;
 
 void cursor_event(bj_window* p_window, int x, int y) {
     bj_info("Cursor event, window %p, (%d,%d)",
@@ -48,28 +52,40 @@ void enter_event(bj_window* p_window, bj_bool enter, int x, int y) {
     );
 }
 
-int main(void) {
+int bj_app_begin(void** user_data, int argc, char* argv[]) {
+    (void)user_data; (void)argc; (void)argv;
 
     bj_error* p_error = 0;
 
     if(!bj_begin(&p_error)) {
-        return 1;
+        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
+        return bj_callback_exit_error;
     } 
 
-    bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
+    window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
 
     bj_window_set_key_event(window, key_event);
     bj_window_set_button_event(window, button_event);
     bj_window_set_cursor_event(window, cursor_event);
     bj_window_set_enter_event(window, enter_event);
 
-    while(!bj_window_should_close(window)) {
-        bj_poll_events();
-        bj_sleep(30); 
-    }
-
-    bj_window_del(window);
-
-    bj_end(0);
-    return 0;
+    return bj_callback_continue;
 }
+
+int bj_app_iterate(void* user_data) {
+    (void)user_data;
+    bj_poll_events();
+    bj_sleep(30);
+
+    return bj_window_should_close(window) 
+         ? bj_callback_exit_success 
+         : bj_callback_continue;
+}
+
+int bj_app_end(void* user_data, int status) {
+    (void)user_data;
+    bj_window_del(window);
+    bj_end(0);
+    return status;
+}
+

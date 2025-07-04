@@ -1,12 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \example time.c
-/// Code example displaing time for 3 seconds.
+/// \example template_callback.c
+/// Base code for using Banjo API with callback entry points
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_MAIN_USE_CALLBACKS
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/system.h>
-#include <banjo/time.h>
+
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
@@ -23,12 +23,8 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
 int bj_app_iterate(void* user_data) {
     (void)user_data;
-
-    double elapsed = bj_get_time();
-    bj_trace("- %lf", elapsed);
-
-    bj_sleep(300);
-    return elapsed >= 3.0 ? bj_callback_exit_success : bj_callback_continue;
+    bj_info("Hello Banjo!");
+    return bj_callback_exit_success;
 }
 
 int bj_app_end(void* user_data, int status) {

@@ -2,10 +2,13 @@
 /// \example window.c
 /// How to open and close windows.
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/error.h>
+#define BJ_MAIN_USE_CALLBACKS
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/window.h>
+
+bj_window* window = 0;
 
 void key_event(bj_window* p_window, bj_event_action mode, bj_key key, int scancode) {
     (void)key;
@@ -26,26 +29,36 @@ void key_event(bj_window* p_window, bj_event_action mode, bj_key key, int scanco
     }
 }
 
-int main(void) {
+int bj_app_begin(void** user_data, int argc, char* argv[]) {
+    (void)user_data; (void)argc; (void)argv;
 
     bj_error* p_error = 0;
 
-
     if(!bj_begin(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
-        return 1;
+        return bj_callback_exit_error;
     } 
 
-    bj_window* window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
-
+    window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
     bj_window_set_key_event(window, key_event);
 
-    while(!bj_window_should_close(window)) {
-        bj_poll_events();
-    }
-
-    bj_window_del(window);
-
-    bj_end(0);
-    return 0;
+    return bj_callback_continue;
 }
+
+int bj_app_iterate(void* user_data) {
+    (void)user_data;
+    bj_poll_events();
+
+    return bj_window_should_close(window) 
+         ? bj_callback_exit_success 
+         : bj_callback_continue;
+}
+
+int bj_app_end(void* user_data, int status) {
+    (void)user_data;
+    bj_window_del(window);
+    bj_end(0);
+    return status;
+}
+
+

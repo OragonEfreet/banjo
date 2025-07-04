@@ -3,6 +3,7 @@
 /// How to handle recoverable errors using \ref bj_error.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/error.h>
+#include <banjo/main.h>
 #include <banjo/log.h>
 
 #define CODE 101
@@ -27,7 +28,9 @@ void function_calling_failing_function(bj_error** error) {
 }
 
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     // If you are not interested by an error, pass 0 to the bj_error* pointer:
     function_returning_error(0);

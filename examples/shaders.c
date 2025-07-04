@@ -5,9 +5,10 @@
 //  This shader comes from https://www.shadertoy.com/view/mtyGWy
 //  Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
 ////////////////////////////////////////////////////////////////////////////////
+#define BJ_MAIN_USE_CALLBACKS
 #include <banjo/bitmap.h>
-#include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/shader.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
@@ -15,6 +16,9 @@
 
 #define CANVAS_W 512
 #define CANVAS_H 512
+
+bj_window* window      = 0;
+bj_bitmap* framebuffer = 0;
 
 void palette(bj_vec3 res, float t) {
     const float f = 6.28318f;
@@ -62,26 +66,41 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
     return 1;
 }
 
-int main(void) {
+int bj_app_begin(void** user_data, int argc, char* argv[]) {
+    (void)user_data; (void)argc; (void)argv;
 
-   if (bj_begin(0)) {    
+    bj_error* p_error = 0;
 
-        bj_window* window = bj_window_new("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
-        bj_window_set_key_event(window, bj_close_on_escape);
+    if(!bj_begin(&p_error)) {
+        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
+        return bj_callback_exit_error;
+    } 
 
-        bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
+    window = bj_window_new("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
+    bj_window_set_key_event(window, bj_close_on_escape);
 
-        while (!bj_window_should_close(window)) {
-            bj_poll_events();
-            float time = (float)bj_get_time();
-            bj_bitmap_apply_shader(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
-            bj_window_update_framebuffer(window);
-            bj_sleep(15);
-        }
+    framebuffer = bj_window_get_framebuffer(window, 0);
 
-        bj_window_del(window);
-        bj_end(0);
-    }
-
-    return 0;
+    return bj_callback_continue;
 }
+
+int bj_app_iterate(void* user_data) {
+    (void)user_data;
+    bj_poll_events();
+    float time = (float)bj_get_time();
+    bj_bitmap_apply_shader(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
+    bj_window_update_framebuffer(window);
+    bj_sleep(15);
+
+    return bj_window_should_close(window) 
+         ? bj_callback_exit_success 
+         : bj_callback_continue;
+}
+
+int bj_app_end(void* user_data, int status) {
+    (void)user_data;
+    bj_window_del(window);
+    bj_end(0);
+    return status;
+}
+

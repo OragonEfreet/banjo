@@ -2,11 +2,14 @@
 /// \example window.c
 /// How to open and close windows.
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/system.h>
 
-int main(void) {
+#include <banjo/main.h>
+
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_error* p_error = 0;
 
