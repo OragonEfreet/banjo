@@ -5,8 +5,8 @@
 /// \details Use \ref bj_bitmap_new_from_file to load bitmap data into a \ref bj_bitmap.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
-#include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/memory.h>
 #include <banjo/string.h>
 #include <banjo/system.h>
@@ -49,7 +49,9 @@ int display_bitmap(const bj_bitmap* p_bitmap, const char* title, int pause_on_di
     return 1;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_error* p_error = 0;
 

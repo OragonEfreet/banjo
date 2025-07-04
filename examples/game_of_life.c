@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
@@ -112,8 +113,9 @@ void draw(size_t step) {
     draw_fb = temp;
 }
 
-int main() {
-    
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;    
 
     bj_error* p_error = 0;
 

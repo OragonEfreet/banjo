@@ -3,9 +3,12 @@
 /// Single chained list example.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/assert.h>
+#include <banjo/main.h>
 #include <banjo/list.h>
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     // Create a new list
     bj_list* list = bj_list_new_t(int); // No custom allocator

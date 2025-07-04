@@ -1,8 +1,11 @@
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 
-int main() {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     if(bj_begin(0)) {
 

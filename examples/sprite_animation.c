@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
@@ -20,8 +21,9 @@
 #define WINDOW_W 240
 #define WINDOW_H 240
 
-int main() {
-
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_bitmap* bmp_rendering = bj_bitmap_new(SPRITE_W, SPRITE_H, BJ_PIXEL_MODE_BGR24, 0);
     bj_bitmap_set_clear_color(bmp_rendering, bj_bitmap_pixel_value(bmp_rendering, 0xFF, 0x00, 0x00));

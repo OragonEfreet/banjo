@@ -1,6 +1,7 @@
 #include <banjo/api.h>
 #include <banjo/audio.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 
@@ -10,7 +11,10 @@ typedef struct {
     int duration_ms;
 } note_t;
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+
     bj_error* p_error = 0;
 
     if (bj_begin(&p_error)) {

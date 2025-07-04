@@ -6,8 +6,8 @@
 //  Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
-#include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/shader.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
@@ -62,7 +62,9 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
     return 1;
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
    if (bj_begin(0)) {    
 

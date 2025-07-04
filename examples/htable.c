@@ -4,10 +4,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <banjo/htable.h>
+#include <banjo/main.h>
 #include <banjo/log.h>
 
-int main(void)
-{
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+
     // Create a new hash table
     bj_htable* table = bj_htable_new_t(int, int); // No custom allocator
 

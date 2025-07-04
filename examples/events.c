@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
@@ -48,7 +49,9 @@ void enter_event(bj_window* p_window, bj_bool enter, int x, int y) {
     );
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_error* p_error = 0;
 

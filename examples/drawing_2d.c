@@ -3,8 +3,8 @@
 /// How to open and close windows.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
-#include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
@@ -61,7 +61,9 @@ void draw(bj_bitmap* bmp) {
 }
 
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_error* p_error = 0;
 

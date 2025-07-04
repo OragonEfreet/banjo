@@ -7,7 +7,9 @@
 
 #include <banjo/main.h>
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_error* p_error = 0;
 

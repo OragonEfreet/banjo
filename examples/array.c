@@ -5,9 +5,12 @@
 #include <banjo/api.h>
 #include <banjo/array.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/memory.h>
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_array* array = bj_array_new_t(int);
 

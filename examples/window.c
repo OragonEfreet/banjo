@@ -2,8 +2,8 @@
 /// \example window.c
 /// How to open and close windows.
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/error.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/window.h>
 
@@ -26,7 +26,9 @@ void key_event(bj_window* p_window, bj_event_action mode, bj_key key, int scanco
     }
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_error* p_error = 0;
 

@@ -3,11 +3,14 @@
 /// Query binary information about the Banjo API.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/api.h>
 
 #define DESC(mode) bj_info("%c %s", info->mode ? '+' : '-', #mode)
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     bj_info("%s", BANJO_ASSETS_DIR);
     const bj_build_info* info = bj_get_build_info();

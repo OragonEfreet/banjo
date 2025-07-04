@@ -1,4 +1,5 @@
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/pixel.h>
 
 void display_value(bj_pixel_mode mode, uint8_t red, uint8_t green, uint8_t blue) {
@@ -14,7 +15,9 @@ void display_value(bj_pixel_mode mode, uint8_t red, uint8_t green, uint8_t blue)
     );
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     display_value(BJ_PIXEL_MODE_RGB565, 255, 0, 0);
     display_value(BJ_PIXEL_MODE_RGB565, 0, 255, 0);
@@ -25,9 +28,6 @@ int main(void) {
     display_value(BJ_PIXEL_MODE_XRGB8888, 255, 0, 0);
     display_value(BJ_PIXEL_MODE_XRGB8888, 0, 255, 0);
     display_value(BJ_PIXEL_MODE_XRGB8888, 0, 0, 255);
-
-
-
 
     return 0;
 }
