@@ -1,21 +1,39 @@
+////////////////////////////////////////////////////////////////////////////////
+/// \example time.c
+/// Code example displaing time for 3 seconds.
+////////////////////////////////////////////////////////////////////////////////
+#define BJ_MAIN_USE_CALLBACKS
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 
-int main(int argc, char* argv[]) {
-    (void)argc;
-    (void)argv;
+int bj_app_begin(void** user_data, int argc, char* argv[]) {
+    (void)user_data; (void)argc; (void)argv;
 
-    if(bj_begin(0)) {
+    bj_error* p_error = 0;
 
-        for(size_t i = 0 ; i < 10 ; ++i) {
-            bj_sleep(300);
-            bj_trace("- %lf", bj_get_time());
-        }
+    if(!bj_begin(&p_error)) {
+        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
+        return bj_callback_exit_error;
+    } 
 
-        bj_end(0);
-    }
-
-    return 0;
+    return bj_callback_continue;
 }
+
+int bj_app_iterate(void* user_data) {
+    (void)user_data;
+
+    double elapsed = bj_get_time();
+    bj_trace("- %lf", elapsed);
+
+    bj_sleep(300);
+    return elapsed >= 3.0 ? bj_callback_exit_success : bj_callback_continue;
+}
+
+int bj_app_end(void* user_data, int status) {
+    (void)user_data;
+    bj_end(0);
+    return status;
+}
+
