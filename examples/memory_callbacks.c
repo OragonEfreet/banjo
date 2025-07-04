@@ -4,7 +4,9 @@
 #include <banjo/main.h>
 #include <banjo/memory.h>
 
-int main(void) {
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
 
     // TODO
 
