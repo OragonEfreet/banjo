@@ -2,11 +2,10 @@
 /// \example template_callback.c
 /// Base code for using Banjo API with callback entry points
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/log.h>
-#include <banjo/system.h>
-
 #define BJ_MAIN_USE_CALLBACKS
+#include <banjo/log.h>
 #include <banjo/main.h>
+#include <banjo/system.h>
 
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
