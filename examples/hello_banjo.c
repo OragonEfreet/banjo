@@ -2,9 +2,10 @@
 /// \example window.c
 /// How to open and close windows.
 ////////////////////////////////////////////////////////////////////////////////
-#include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/system.h>
+
+#include <banjo/main.h>
 
 int main(void) {
 
