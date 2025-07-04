@@ -2,20 +2,30 @@
 
 #if BJ_HAS_FEATURE(EMSCRIPTEN)
 
-#include <banjo/audio.h>
-#include <banjo/error.h>
-#include <banjo/log.h>
-#include <banjo/memory.h>
 #include <banjo/video.h>
 
 #include "check.h"
 #include "window_t.h"
 
+#include <emscripten/html5.h>
+
+#define BJ_EM_CANVAS_SELECTOR "#canvas"
+
+struct {
+    bj_bool window_exist;
+} emscripten;
+
 typedef struct {
     struct bj_window_t common;
-    int        width;
-    int        height;
+    const char* selector;
+    int         width;
+    int         height;
 } emscripten_window;
+
+bool em_mousedown_callback(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData) {
+    bj_trace("pouet");
+    return 0;
+}
 
 static bj_window* emscripten_window_new(
     bj_video_layer* p_layer,
@@ -31,15 +41,28 @@ static bj_window* emscripten_window_new(
     (void)x;
     (void)y;
 
-    flags |= BJ_WINDOW_FLAG_CLOSE;
+    if(emscripten.window_exist == BJ_TRUE) {
+        return 0;
+    }
+
+    /* flags |= BJ_WINDOW_FLAG_CLOSE; */
 
     emscripten_window window = { 
         .common = {
             .flags = flags,
         },
-        .width = width,
-        .height = height,
+        .selector = BJ_EM_CANVAS_SELECTOR,
+        .width    = width,
+        .height   = height,
     };
+
+    EMSCRIPTEN_RESULT res = emscripten_set_canvas_element_size(window.selector, width, height);
+    if(res != EMSCRIPTEN_RESULT_SUCCESS) {
+        return 0;
+    }
+
+    emscripten_set_mousedown_callback(window.selector, 0, 0, em_mousedown_callback);
+
 
     emscripten_window* p_window = bj_malloc(sizeof(emscripten_window));
     bj_memcpy(p_window, &window, sizeof(emscripten_window));
@@ -52,6 +75,9 @@ static void emscripten_window_del(
 ) {
     (void)p_layer;
     emscripten_window* p_window = (emscripten_window*)p_abstract_window;
+    emscripten_set_canvas_element_size(p_window->selector, 0, 0);
+    emscripten.window_exist = BJ_FALSE;
+
     bj_free(p_window);
 }
 
@@ -60,7 +86,6 @@ static void emscripten_dispose_layer(
     bj_error** p_error
 ) {
     (void)p_error;
-
     bj_free(p_layer);
 }
 
