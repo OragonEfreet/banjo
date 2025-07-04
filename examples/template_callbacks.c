@@ -9,8 +9,8 @@
 #include <banjo/main.h>
 
 
-int bj_app_begin(int argc, char* argv[]) {
-    (void)argc; (void)argv;
+int bj_app_begin(void** user_data, int argc, char* argv[]) {
+    (void)user_data; (void)argc; (void)argv;
 
     bj_error* p_error = 0;
 
@@ -22,12 +22,14 @@ int bj_app_begin(int argc, char* argv[]) {
     return bj_callback_continue;
 }
 
-int bj_app_iterate() {
+int bj_app_iterate(void* user_data) {
+    (void)user_data;
     bj_info("Hello Banjo!");
     return bj_callback_exit_success;
 }
 
-int bj_app_end(int status) {
+int bj_app_end(void* user_data, int status) {
+    (void)user_data;
     bj_end(0);
     return status;
 }

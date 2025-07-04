@@ -44,11 +44,12 @@ typedef enum bj_callback_result_t
 ///   the initialization is interpreted as sucessful and the application 
 ///   hands over to bj_app_end.
 ///
+/// \param user_data Location to custom user data, passed to \ref bj_app_iterate.
 /// \param argc Number of arguments provided from command line (length of argv)
 /// \param argv Array of arguments in UTF8
 /// \return Any status code
 ///
-int bj_app_begin(int argc, char *argv[]);
+int bj_app_begin(void** user_data, int argc, char *argv[]);
 
 /// \brief Callback function for application main execution.
 ///
@@ -66,8 +67,9 @@ int bj_app_begin(int argc, char *argv[]);
 ///   the call is interpreted as terminating sucessfully and the application 
 ///   hands over to bj_app_end.
 ///
+///   \param user_data Custom user data pointer, set by \ref bj_app_begin
 ///   \return Any status code
-int bj_app_iterate();
+int bj_app_iterate(void* user_data);
 
 
 /// \brief Callback function for application termination
@@ -77,17 +79,19 @@ int bj_app_iterate();
 ///
 /// After the function returns, HOOPS Exchange is terminated and unloaded.
 ///
+/// \param user_data Custom user data pointer, set by \ref bj_app_begin
 /// \param status The last status returned by either `bj_app_begin` or `bj_app_iterate`.
 /// \return The value to return to operating system.
-int bj_app_end(int status);
+int bj_app_end(void* user_data, int status);
 
 
 int bj_main(int argc, char* argv[]) {
-    int status = bj_app_begin(argc, argv);
+    void* user_data = 0;
+    int status = bj_app_begin(&user_data, argc, argv);
     while (status > 0) {
-        status = bj_app_iterate();
+        status = bj_app_iterate(user_data);
     }
-    return bj_app_end(status);
+    return bj_app_end(user_data, status);
 }
 #endif // BJ_MAIN_USE_CALLBACKS
 
@@ -110,7 +114,7 @@ typedef int (*bj_main_fn_t)(int argc, char *argv[]);
 
 // Entry Point Implementation
 # ifdef BJ_OS_WINDOWS
-# define WIN32_LEAN_AND_MEAN 
+# define WIN32_LEAN_AND_MEAN
 // Includes are order-dependend (window.h must be before)
 # include <assert.h>
 # include <windows.h>
