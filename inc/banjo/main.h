@@ -22,9 +22,9 @@
 /// \brief Return codes determining how to handle callback returns
 typedef enum bj_callback_result_t
 {
-    bj_callback_exiterror   = -1, //!< Application must quit with `A3D_ERROR`
-    bj_callback_exitsuccess =  0, //!< Application must quit with `A3D_SUCCESS`
-    bj_callback_continue    =  1, //!< Application must continue
+    bj_callback_exit_error   = -1, //!< Application must quit with `A3D_ERROR`
+    bj_callback_exit_success =  0, //!< Application must quit with `A3D_SUCCESS`
+    bj_callback_continue     =  1, //!< Application must continue
 } bj_callback_result;
 
 /// \brief Callback function for application initialization.
