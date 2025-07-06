@@ -1,4 +1,4 @@
-#define HE_MAIN_NOIMPL
+#define BJ_MAIN_NOIMPL
 #include <banjo/main_new.h>
 
 #if !defined(BJ_MAIN_NEEDED) && !defined(BJ_MAIN_AVAILABLE)
