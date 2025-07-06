@@ -24,10 +24,22 @@
 #   endif
 #endif
 
-// Rename user's main function
-#if defined(BJ_AUTOMAIN) || defined(BJ_AUTOMAIN_CALLBACKS)
-#   define main bj_main
+// // Rename user's main function
+// #if defined(BJ_AUTOMAIN) || defined(BJ_AUTOMAIN_CALLBACKS)
+// #   define main bj_main
+// #endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+typedef int (*bj_main_fn_t)(int argc, char *argv[]);
+#if defined(BJ_AUTOMAIN) || defined(BJ_AUTOMAIN_CALLBACKS)
+extern int bj_main(int argc, char* argv[]);
+extern int bj_run_app(int argc, char* argv[], bj_main_fn_t function);
+#endif
+
+#ifdef BJ_AUTOMAIN_CALLBACKS
 
 typedef enum bj_callback_result_t
 {
@@ -40,23 +52,14 @@ typedef bj_callback_result (*bj_app_begin_fn_t)(void**, int, char*[]);
 typedef bj_callback_result (*bj_app_iterate_fn_t)(void*);
 typedef bj_callback_result (*bj_app_end_fn_t)(void*, int);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef BJ_AUTOMAIN_CALLBACKS
-
 extern bj_callback_result bj_app_begin(void** user_data, int argc, char *argv[]);
 extern bj_callback_result bj_app_iterate(void* user_data);
 extern bj_callback_result bj_app_end(void* user_data, int status);
 
+extern int bj_enter_app_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t, bj_app_iterate_fn_t, bj_app_end_fn_t);
+
 #endif
 
-typedef int (*bj_main_fn_t)(int argc, char *argv[]);
-
-extern int bj_main(int argc, char* argv[]);
-extern int bj_run_app(int argc, char* argv[], bj_main_fn_t function);
-extern int bj_enter_app_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t, bj_app_iterate_fn_t, bj_app_end_fn_t);
 
 #ifdef __cplusplus
 }

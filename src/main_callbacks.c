@@ -1,3 +1,4 @@
+#define BJ_AUTOMAIN_CALLBACKS
 #define BJ_MAIN_NOIMPL
 #include <banjo/main.h>
 
