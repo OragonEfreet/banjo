@@ -2,7 +2,7 @@
 #include <banjo/main.h>
 
 #if !defined(BJ_AUTOMAIN)
-int bj_run_app(int argc, char* argv[], bj_main_fn_t function) {
+int bj_call_main(int argc, char* argv[], int (*function)(int argc, char* argv[])) {
     return function(argc, argv);
 }
 #else
@@ -15,7 +15,8 @@ int bj_run_app(int argc, char* argv[], bj_main_fn_t function) {
 #include <wchar.h> // wchar_t
 #undef WIN32_LEAN_AND_MEAN 
 
-int bj_run_app(int ignore_argc, char* ignore_argv[], bj_main_fn_t function) {
+
+int bj_call_main(int argc, char* argv[], int (*function)(int argc, char* argv[])) {
     (void)ignore_argc;(void)ignore_argv;
     int argc = 0;
     LPWSTR* argvw = CommandLineToArgvW(GetCommandLineW(), &argc);

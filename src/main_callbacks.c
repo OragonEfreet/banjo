@@ -2,7 +2,7 @@
 #define BJ_MAIN_NOIMPL
 #include <banjo/main.h>
 
-int bj_enter_app_main_callbacks(
+int bj_call_main_callbacks(
     int argc, 
     char*               argv[],
     bj_app_begin_fn_t   app_begin,

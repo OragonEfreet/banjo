@@ -33,10 +33,9 @@
 extern "C" {
 #endif
 
-typedef int (*bj_main_fn_t)(int argc, char *argv[]);
 #if defined(BJ_AUTOMAIN) || defined(BJ_AUTOMAIN_CALLBACKS)
 extern int bj_main(int argc, char* argv[]);
-extern int bj_run_app(int argc, char* argv[], bj_main_fn_t function);
+extern int bj_call_main(int argc, char* argv[], int (*function)(int argc, char* argv[]));
 #endif
 
 #ifdef BJ_AUTOMAIN_CALLBACKS
@@ -56,7 +55,7 @@ extern bj_callback_result bj_app_begin(void** user_data, int argc, char *argv[])
 extern bj_callback_result bj_app_iterate(void* user_data);
 extern bj_callback_result bj_app_end(void* user_data, int status);
 
-extern int bj_enter_app_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t, bj_app_iterate_fn_t, bj_app_end_fn_t);
+extern int bj_call_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t, bj_app_iterate_fn_t, bj_app_end_fn_t);
 
 #endif
 
@@ -73,7 +72,7 @@ extern int bj_enter_app_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t
 #      ifdef BJ_AUTOMAIN_CALLBACKS
 #          define BJ_MAIN_CALLBACK_STANDARD 1
             int bj_main(int argc, char* argv[]) {
-                return bj_enter_app_main_callbacks(argc, argv, bj_app_begin, bj_app_iterate, bj_app_end);
+                return bj_call_main_callbacks(argc, argv, bj_app_begin, bj_app_iterate, bj_app_end);
             }
 #      endif
 #      if (!defined(BJ_AUTOMAIN_CALLBACKS) || defined(BJ_MAIN_CALLBACK_STANDARD))
@@ -88,12 +87,12 @@ extern int bj_enter_app_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t
 #                   if defined(UNICODE) && UNICODE
                         int wmain(int argc, wchar_t* wargv[], wchar_t* wenvp) {
                             (void)argc; (void)wargv; (void)wenvp;
-                            return bj_run_app(0, NULL, bj_main);
+                            return bj_call_main(0, NULL, bj_main);
                         }
 #                  else
                         int main(int argc, char* argv[]) {
                             (void)argc; (void)argv;
-                            return bj_run_app(0, NULL, bj_main);
+                            return bj_call_main(0, NULL, bj_main);
                         }
 #                  endif
 #               endif
@@ -106,14 +105,14 @@ extern int bj_enter_app_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t
                     int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {
 #               endif
                         (void)hInst; (void)hPrev; (void)szCmdLine; (void)sw;
-                        return bj_run_app(0, NULL, bj_main);
+                        return bj_call_main(0, NULL, bj_main);
                     }
 #               ifdef __cplusplus
                     }
 #               endif
 #           else
                 int main(int argc, char* argv[]) {
-                    return bj_run_app(argc, argv, bj_main);
+                    return bj_call_main(argc, argv, bj_main);
                 }
 #           endif
 #       endif
