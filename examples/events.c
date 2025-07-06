@@ -2,7 +2,7 @@
 /// \example events.c
 /// Basic event handling.
 ////////////////////////////////////////////////////////////////////////////////
-#define BJ_MAIN_USE_CALLBACKS
+#define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/main.h>

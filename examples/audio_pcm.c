@@ -2,7 +2,7 @@
 /// \example audio_pcm.c
 /// An example on how to use the callback-based audio API for raw PCM output.
 ////////////////////////////////////////////////////////////////////////////////
-#define BJ_MAIN_USE_CALLBACKS
+#define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/api.h>
 #include <banjo/audio.h>
 #include <banjo/log.h>

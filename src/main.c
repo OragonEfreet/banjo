@@ -1,14 +1,11 @@
 #define BJ_MAIN_NOIMPL
 #include <banjo/main.h>
 
-#if !defined(BJ_MAIN_NEEDED) && !defined(BJ_MAIN_AVAILABLE)
-
+#if !defined(BJ_AUTOMAIN)
 int bj_run_app(int argc, char* argv[], bj_main_fn_t function) {
     return function(argc, argv);
 }
-
 #endif
-
 
 // Todo remove later
 int bj_enter_app_main_callbacks(

@@ -1,35 +1,31 @@
-#ifndef BJ_MAIN_H
-#define BJ_MAIN_H
+#pragma once
 
 #include <banjo/api.h>
 
 // Provided by the user to say that the client application is
 // provided its own main implementation.
-// #define BJ_MAIN_HANDLED 1
+// #define BJ_NO_AUTOMAIN 1
 
 // Provided by the user to say that the client wants to use the
 // callback system.
-// #define BJ_MAIN_USE_CALLBACKS
+// #define BJ_AUTOMAIN_CALLBACKS
 
 // Defined internally to say that BJ will rename main() to bj_main
 // in order to provide a special main.
-// #define BJ_MAIN_AVAILABLE
+// #define BJ_AUTOMAIN
 
-// Defined internally to say that the platform we're compiling in
-// NEEDS a special main
-// #define BJ_MAIN_NEEDED
 
 // Determining if main function is provided, optionnaly or not
-#ifndef BJ_MAIN_HANDLED
+#ifndef BJ_NO_AUTOMAIN
 #   if defined(BJ_OS_WINDOWS)
-#       define BJ_MAIN_AVAILABLE
+#       define BJ_AUTOMAIN
 #   elif defined(BJ_OS_IOS)
-#       define BJ_MAIN_NEEDED
+#       define BJ_AUTOMAIN
 #   endif
 #endif
 
 // Rename user's main function
-#if defined(BJ_MAIN_NEEDED) || defined(BJ_MAIN_AVAILABLE) || defined(BJ_MAIN_USE_CALLBACKS)
+#if defined(BJ_AUTOMAIN) || defined(BJ_AUTOMAIN_CALLBACKS)
 #   define main bj_main
 #endif
 
@@ -48,7 +44,7 @@ typedef bj_callback_result (*bj_app_end_fn_t)(void*, int);
 extern "C" {
 #endif
 
-#ifdef BJ_MAIN_USE_CALLBACKS
+#ifdef BJ_AUTOMAIN_CALLBACKS
 
 extern bj_callback_result bj_app_begin(void** user_data, int argc, char *argv[]);
 extern bj_callback_result bj_app_iterate(void* user_data);
@@ -66,18 +62,18 @@ extern int bj_enter_app_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t
 }
 #endif
 
-#if !defined(BJ_MAIN_HANDLED) && !defined(BJ_MAIN_NOIMPL)
-    #if defined(BJ_MAIN_USE_CALLBACKS) || defined(BJ_MAIN_NEEDED) || defined(BJ_MAIN_AVAILABLE)
+#if !defined(BJ_NO_AUTOMAIN) && !defined(BJ_MAIN_NOIMPL)
+    #if defined(BJ_AUTOMAIN_CALLBACKS) || defined(BJ_AUTOMAIN)
 #      ifdef main
 #           undef main
 #      endif
-#      ifdef BJ_MAIN_USE_CALLBACKS
+#      ifdef BJ_AUTOMAIN_CALLBACKS
 #          define BJ_MAIN_CALLBACK_STANDARD 1
             int bj_main(int argc, char* argv[]) {
                 return bj_enter_app_main_callbacks(argc, argv, bj_app_begin, bj_app_iterate, bj_app_end);
             }
 #      endif
-#      if (!defined(BJ_MAIN_USE_CALLBACKS) || defined(BJ_MAIN_CALLBACK_STANDARD))
+#      if (!defined(BJ_AUTOMAIN_CALLBACKS) || defined(BJ_MAIN_CALLBACK_STANDARD))
 #           if defined(BJ_OS_WINDOWS)
 #               ifndef WINAPI
 #                  define WINAPI __stdcall
@@ -122,5 +118,4 @@ extern int bj_enter_app_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t
 #   endif
 #endif
 
-#endif
 
