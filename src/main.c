@@ -16,7 +16,7 @@ int bj_call_main(int argc, char* argv[], int (*function)(int argc, char* argv[])
 #undef WIN32_LEAN_AND_MEAN 
 
 
-int bj_call_main(int argc, char* argv[], int (*function)(int argc, char* argv[])) {
+int bj_call_main(int ignore_argc, char* ignore_argv[], int (*function)(int argc, char* argv[])) {
     (void)ignore_argc;(void)ignore_argv;
     int argc = 0;
     LPWSTR* argvw = CommandLineToArgvW(GetCommandLineW(), &argc);
