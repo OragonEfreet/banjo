@@ -5,7 +5,7 @@
 /// Blitting a \ref bj_bitmap into another is done by calling \ref bj_bitmap_blit.
 /// This example blits 3 bitmaps onto another and displays the result on screen.
 ////////////////////////////////////////////////////////////////////////////////
-#define BJ_MAIN_USE_CALLBACKS
+#define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
 #include <banjo/log.h>
 #include <banjo/main.h>

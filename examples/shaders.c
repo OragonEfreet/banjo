@@ -5,7 +5,7 @@
 //  This shader comes from https://www.shadertoy.com/view/mtyGWy
 //  Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
 ////////////////////////////////////////////////////////////////////////////////
-#define BJ_MAIN_USE_CALLBACKS
+#define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
 #include <banjo/log.h>
 #include <banjo/main.h>

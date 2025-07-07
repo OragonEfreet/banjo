@@ -3,9 +3,8 @@
 /// How to open and close windows.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/log.h>
-#include <banjo/system.h>
-
 #include <banjo/main.h>
+#include <banjo/system.h>
 
 int main(int argc, char* argv[]) {
     (void)argc;

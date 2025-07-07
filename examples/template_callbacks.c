@@ -2,7 +2,7 @@
 /// \example template_callback.c
 /// Base code for using Banjo API with callback entry points
 ////////////////////////////////////////////////////////////////////////////////
-#define BJ_MAIN_USE_CALLBACKS
+#define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/system.h>
