@@ -1,7 +1,7 @@
 #define BJ_MAIN_NOIMPL
 #include <banjo/main.h>
 
-#if !defined(BJ_AUTOMAIN)
+#if !defined(BJ_AUTOMAIN) | defined(BJ_OS_EMSCRIPTEN)
 int bj_call_main(int argc, char* argv[], int (*function)(int argc, char* argv[])) {
     return function(argc, argv);
 }
@@ -45,6 +45,7 @@ int bj_call_main(int ignore_argc, char* ignore_argv[], int (*function)(int argc,
     return main_res;
 
 }
+
 #endif // BJ_OS_WINDOWS
 
 #endif
