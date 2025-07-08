@@ -17,7 +17,9 @@
 
 // Determining if main function is provided, optionnaly or not
 #ifndef BJ_NO_AUTOMAIN
-#   if defined(BJ_OS_WINDOWS)
+#   if defined(BJ_OS_EMSCRIPTEN)
+#       define BJ_AUTOMAIN
+#   elif defined(BJ_OS_WINDOWS)
 #       define BJ_AUTOMAIN
 #   elif defined(BJ_OS_IOS)
 #       define BJ_AUTOMAIN
