@@ -352,7 +352,7 @@ typedef void(* bj_key_event_t)(bj_window* p_window, bj_event_action action, bj_k
 /// \see bj_cursor_event_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_cursor_event_t bj_set_cursor_event(
-    bj_window*                 p_window,
+    bj_window*          p_window,
     bj_cursor_event_t   p_callback
 );
 
@@ -373,7 +373,7 @@ BANJO_EXPORT bj_cursor_event_t bj_set_cursor_event(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_button_event_t bj_set_button_event(
-    bj_window*                 p_window,
+    bj_window*          p_window,
     bj_button_event_t   p_callback
 );
 
@@ -403,7 +403,7 @@ BANJO_EXPORT bj_button_event_t bj_set_button_event(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_key_event_t bj_set_key_event(
-    bj_window*              p_window,
+    bj_window*       p_window,
     bj_key_event_t   p_callback
 );
 
@@ -423,7 +423,7 @@ BANJO_EXPORT bj_key_event_t bj_set_key_event(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_enter_event_t bj_set_enter_event(
-    bj_window*                p_window,
+    bj_window*         p_window,
     bj_enter_event_t   p_callback
 );
 
@@ -440,6 +440,11 @@ BANJO_EXPORT bj_enter_event_t bj_set_enter_event(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_close_on_escape(bj_window*, bj_event_action, bj_key, int);
+
+void bj_window_input_key(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
+void bj_window_input_cursor(bj_window* p_window, int x, int y);
+void bj_window_input_button(bj_window* p_window, int button, bj_event_action action, int x, int y);
+void bj_window_input_enter(bj_window* p_window, bj_bool enter, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Polls all pending events and dispatch them to callbacks.

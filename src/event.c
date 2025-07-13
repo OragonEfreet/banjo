@@ -1,10 +1,6 @@
-#include <banjo/error.h>
-#include <banjo/log.h>
 #include <banjo/video.h>
-#include <banjo/window.h>
 
 #include "check.h"
-#include "event_t.h"
 #include "window_t.h"
 
 extern bj_video_layer* s_video;
