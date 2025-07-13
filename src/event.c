@@ -296,7 +296,7 @@ void bj_push_enter_event(
 ) {
     bj_check(p_window);
     if(!!p_window->p_enter_callback) {
-        p_window->p_enter_callback(p_window, enter, x, y);
+        p_window->p_enter_callback(p_window, &(bj_enter_event){x, y, enter});
     }
 }
 

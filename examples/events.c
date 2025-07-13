@@ -45,11 +45,11 @@ void key_callback(bj_window* p_window, bj_event_action action, bj_key key, int s
     }
 }
 
-void enter_callback(bj_window* p_window, bj_bool enter, int x, int y) {
+void enter_callback(bj_window* p_window, const bj_enter_event* e) {
     bj_info("Enter event, window %p, %s, (%d,%d)",
         (void*)p_window, 
-        enter ? "entered" : "left",
-        x, y
+        e->enter ? "entered" : "left",
+        e->x, e->y
     );
 }
 

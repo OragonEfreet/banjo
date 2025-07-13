@@ -289,6 +289,12 @@ typedef enum bj_event_action_t {
     BJ_REPEAT,  //!< The button/key is kept being pressed
 } bj_event_action;
 
+typedef struct bj_enter_event_t {
+    int x;
+    int y;
+    bj_bool enter;
+} bj_enter_event;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor enters a window.
 ///
@@ -299,7 +305,7 @@ typedef enum bj_event_action_t {
 ///
 /// \see bj_set_enter_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_enter_callback_fn_t)(bj_window* p_window, bj_bool enter, int x, int y);
+typedef void(* bj_enter_callback_fn_t)(bj_window*, const bj_enter_event*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor position changes.
