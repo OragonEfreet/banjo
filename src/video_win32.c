@@ -294,14 +294,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 }
             }
 
-            bj_window_input_key((bj_window*)p_window, action, keycode, scancode);
+            bj_push_key_event((bj_window*)p_window, action, keycode, scancode);
             
             break;
         }
 
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
-            bj_window_input_button((bj_window*)p_window, 
+            bj_push_button_event((bj_window*)p_window, 
                 BJ_BUTTON_LEFT,
                 uMsg == WM_LBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -311,7 +311,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
         case WM_MBUTTONDOWN:
         case WM_MBUTTONUP:
-            bj_window_input_button((bj_window*)p_window, 
+            bj_push_button_event((bj_window*)p_window, 
                 BJ_BUTTON_MIDDLE,
                 uMsg == WM_MBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -325,25 +325,25 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
             if(!p_window->cursor_in_window) {
                 p_window->cursor_in_window = 1;
-                bj_window_input_enter((bj_window*)p_window, 1, x, y);
+                bj_push_enter_event((bj_window*)p_window, 1, x, y);
             }
             TRACKMOUSEEVENT tme = {0};
             tme.cbSize = sizeof(TRACKMOUSEEVENT);
             tme.dwFlags = TME_LEAVE;
             tme.hwndTrack = hwnd;
             TrackMouseEvent(&tme);
-            bj_window_input_cursor((bj_window*)p_window, x, y);
+            bj_push_cursor_event((bj_window*)p_window, x, y);
             break;
         }
 
         case WM_MOUSELEAVE: {
             p_window->cursor_in_window = 0;
-            bj_window_input_enter((bj_window*)p_window, 0, 0, 0);
+            bj_push_enter_event((bj_window*)p_window, 0, 0, 0);
             break;
         }
 
         case WM_MOUSEWHEEL:
-            bj_window_input_button((bj_window*)p_window, 
+            bj_push_button_event((bj_window*)p_window, 
                 GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? BJ_BUTTON_UP : BJ_BUTTON_DOWN,
                 BJ_PRESS,
                 GET_X_LPARAM(lParam),
@@ -354,7 +354,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case WM_RBUTTONDOWN:
 
         case WM_RBUTTONUP:
-            bj_window_input_button((bj_window*)p_window, 
+            bj_push_button_event((bj_window*)p_window, 
                 BJ_BUTTON_RIGHT,
                 uMsg == WM_RBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),

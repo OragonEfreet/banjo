@@ -210,7 +210,7 @@ bj_cursor_event_t bj_set_cursor_event(
     return p_replaced;
 }
 
-void bj_window_input_cursor(
+void bj_push_cursor_event(
     bj_window* p_window,
     int x,
     int y
@@ -231,7 +231,7 @@ bj_button_event_t bj_set_button_event(
     return p_replaced;
 }
 
-void bj_window_input_key(
+void bj_push_key_event(
     bj_window*      p_window,
     bj_event_action action,
     bj_key          key,
@@ -264,7 +264,7 @@ void bj_window_input_key(
     }
 }
 
-void bj_window_input_button(
+void bj_push_button_event(
     bj_window* p_window,
     int button,
     bj_event_action action,
@@ -287,7 +287,7 @@ bj_enter_event_t bj_set_enter_event(
     return p_replaced;
 }
 
-void bj_window_input_enter(
+void bj_push_enter_event(
     bj_window* p_window,
     bj_bool enter,
     int x,

@@ -256,7 +256,7 @@ static void x11_dispatch_event(
         case Expose:
         case EnterNotify:
         case LeaveNotify:
-            bj_window_input_enter(
+            bj_push_enter_event(
                 (bj_window*)p_window,
                 event->type == EnterNotify,
                 event->xcrossing.x,
@@ -266,7 +266,7 @@ static void x11_dispatch_event(
 
         case ButtonRelease:
         case ButtonPress:
-            bj_window_input_button(
+            bj_push_button_event(
                 (bj_window*)p_window,
                 event->xbutton.button,
                 event->type == ButtonPress ? BJ_PRESS : BJ_RELEASE,
@@ -277,7 +277,7 @@ static void x11_dispatch_event(
             break;
 
         case MotionNotify:
-            bj_window_input_cursor(
+            bj_push_cursor_event(
                 (bj_window*)p_window,
                 event->xmotion.x,
                 event->xmotion.y
@@ -311,7 +311,7 @@ static void x11_dispatch_event(
                     }
                 }
             }
-            bj_window_input_key(
+            bj_push_key_event(
                 (bj_window*)p_window,
                 BJ_RELEASE,
                 get_key(p_x11, event->xkey.keycode),
@@ -321,7 +321,7 @@ static void x11_dispatch_event(
 
         case KeyPress:
 
-            bj_window_input_key(
+            bj_push_key_event(
                 (bj_window*)p_window,
                 BJ_PRESS,
                 get_key(p_x11, event->xkey.keycode),
