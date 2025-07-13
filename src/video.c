@@ -1,7 +1,4 @@
-#include <banjo/error.h>
 #include <banjo/log.h>
-#include <banjo/system.h>
-#include <banjo/time.h>
 #include <banjo/video.h>
 
 #include "config.h"

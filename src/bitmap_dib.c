@@ -1,9 +1,5 @@
 #include <banjo/assert.h>
 #include <banjo/bitmap.h>
-#include <banjo/error.h>
-#include <banjo/log.h>
-#include <banjo/pixel.h>
-#include <banjo/stream.h>
 
 #define ERR_MSG                         "unsupported"
 #define ERR_MSG_BAD_BIT_COUNT           "unsupported bit count"

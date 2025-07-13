@@ -1,5 +1,3 @@
-#include <banjo/error.h>
-#include <banjo/log.h>
 #include <banjo/video.h>
 
 #include "check.h"

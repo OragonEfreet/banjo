@@ -1,11 +1,6 @@
 #include <banjo/audio.h>
-#include <banjo/error.h>
-#include <banjo/log.h>
-#include <banjo/memory.h>
-#include <banjo/video.h>
 
 #include "check.h"
-#include "window_t.h"
 
 static void noaudio_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
     (void)p_error;

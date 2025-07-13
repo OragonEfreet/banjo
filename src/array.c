@@ -1,5 +1,3 @@
-#include <banjo/error.h>
-#include <banjo/log.h>
 #include <banjo/memory.h>
 
 #include "array_t.h"

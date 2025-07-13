@@ -1,3 +1,4 @@
+#include <banjo/event.h>
 #include <banjo/video.h>
 
 #include "check.h"

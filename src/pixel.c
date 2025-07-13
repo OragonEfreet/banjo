@@ -1,5 +1,4 @@
 #include <banjo/assert.h>
-#include <banjo/log.h>
 #include <banjo/pixel.h>
 
 #include "check.h"
