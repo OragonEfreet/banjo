@@ -3,6 +3,7 @@
 /// How to open and close windows.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
+#include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/system.h>

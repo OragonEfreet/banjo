@@ -3,6 +3,7 @@
 /// Basic event handling.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
+#include <banjo/event.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/main.h>

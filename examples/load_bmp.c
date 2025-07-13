@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
+#include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/memory.h>
