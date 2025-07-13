@@ -332,7 +332,7 @@ typedef void(* bj_button_event_t)(bj_window* p_window, int, bj_event_action acti
 /// \param scancode Implementation-dependent / Layout-independent representation 
 ///                 of the key that has been pressed or released.
 ///
-/// \see bj_window_set_key_event
+/// \see bj_set_key_event
 ///
 ////////////////////////////////////////////////////////////////////////////////
 typedef void(* bj_key_event_t)(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
@@ -402,7 +402,7 @@ BANJO_EXPORT bj_button_event_t bj_window_set_button_event(
 /// \see bj_key_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_key_event_t bj_window_set_key_event(
+BANJO_EXPORT bj_key_event_t bj_set_key_event(
     bj_window*              p_window,
     bj_key_event_t   p_callback
 );
@@ -434,9 +434,9 @@ BANJO_EXPORT bj_enter_event_t bj_set_enter_event(
 /// directly use to provide a window the behaviour of closing when ESC key
 /// is pressed by the user (\ref BJ_KEY_ESCAPE).
 ///
-/// Call it using `bj_window_set_key_event(p_window, bj_close_on_escape)`.
+/// Call it using `bj_set_key_event(p_window, bj_close_on_escape)`.
 ///
-/// \see bj_key_event_t and bj_window_set_key_event
+/// \see bj_key_event_t and bj_set_key_event
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_close_on_escape(bj_window*, bj_event_action, bj_key, int);

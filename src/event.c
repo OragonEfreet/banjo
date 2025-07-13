@@ -188,7 +188,7 @@ const char* bj_get_key_name(int key) {
     return "Unknown";
 }
 
-bj_key_event_t bj_window_set_key_event(
+bj_key_event_t bj_set_key_event(
     bj_window* p_window,
     bj_key_event_t   p_event
 ) {

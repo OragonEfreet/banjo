@@ -75,7 +75,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     } 
 
     window = bj_window_new("Simple Banjo Window", 100, 100, 500, 500, 0);
-    bj_window_set_key_event(window, bj_close_on_escape);
+    bj_set_key_event(window, bj_close_on_escape);
 
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
     draw(framebuffer);

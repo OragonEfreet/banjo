@@ -65,7 +65,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
 
-    bj_window_set_key_event(window, key_event);
+    bj_set_key_event(window, key_event);
     bj_window_set_button_event(window, button_event);
     bj_window_set_cursor_event(window, cursor_event);
     bj_set_enter_event(window, enter_event);
