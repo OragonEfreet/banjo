@@ -309,7 +309,7 @@ typedef void(* bj_window_enter_event_t)(bj_window* p_window, bj_bool enter, int 
 ///
 /// \see bj_window_set_cursor_event
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_window_cursor_event_t)(bj_window* p_window, int x, int y);
+typedef void(* bj_cursor_event_t)(bj_window* p_window, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when a mouse button is pressed or released.
@@ -349,11 +349,11 @@ typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action actio
 /// \param p_callback The callback function
 /// \return *0* or the previously set callback function if any.
 ///
-/// \see bj_window_cursor_event_t
+/// \see bj_cursor_event_t
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_window_cursor_event_t bj_window_set_cursor_event(
+BANJO_EXPORT bj_cursor_event_t bj_window_set_cursor_event(
     bj_window*                 p_window,
-    bj_window_cursor_event_t   p_callback
+    bj_cursor_event_t   p_callback
 );
 
 
