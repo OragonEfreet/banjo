@@ -11,7 +11,6 @@
 
 #include <banjo/api.h>
 #include <banjo/bitmap.h>
-#include <banjo/input.h>
 #include <banjo/memory.h>
 
 /// Opaque typedef for the window type
@@ -102,20 +101,6 @@ BANJO_EXPORT void bj_window_set_should_close(
 BANJO_EXPORT bj_bool bj_window_should_close(
     bj_window* p_window
 );
-
-////////////////////////////////////////////////////////////////////////////////
-/// An event call back for closing the window when escape key is pressed.
-///
-/// This utility function is a pre-made \ref bj_window_key_event_t you can
-/// directly use to provide a window the behaviour of closing when ESC key
-/// is pressed by the user (\ref BJ_KEY_ESCAPE).
-///
-/// Call it using `bj_window_set_key_event(p_window, bj_close_on_escape)`.
-///
-/// \see bj_window_key_event_t and bj_window_set_key_event
-///
-////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_close_on_escape(bj_window*, bj_event_action, bj_key, int);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Get window flags.

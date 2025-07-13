@@ -1,7 +1,6 @@
 #pragma once
 
 #include <banjo/event.h>
-#include <banjo/input.h>
 #include <banjo/window.h>
 
 struct bj_window_t {
