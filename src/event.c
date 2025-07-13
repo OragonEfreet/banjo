@@ -225,7 +225,7 @@ void bj_window_input_cursor(
     }
 }
 
-bj_button_event_t bj_window_set_button_event(
+bj_button_event_t bj_set_button_event(
     bj_window*                 p_window,
     bj_button_event_t   p_event
 ) {

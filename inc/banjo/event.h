@@ -319,7 +319,7 @@ typedef void(* bj_cursor_event_t)(bj_window* p_window, int x, int y);
 /// \param x        The horizontal position of the cursor
 /// \param y        The vertical position of the cursor
 ///
-/// \see bj_window_set_button_event
+/// \see bj_set_button_event
 ////////////////////////////////////////////////////////////////////////////////
 typedef void(* bj_button_event_t)(bj_window* p_window, int, bj_event_action action, int x, int y);
 
@@ -372,7 +372,7 @@ BANJO_EXPORT bj_cursor_event_t bj_set_cursor_event(
 /// \see bj_button_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_button_event_t bj_window_set_button_event(
+BANJO_EXPORT bj_button_event_t bj_set_button_event(
     bj_window*                 p_window,
     bj_button_event_t   p_callback
 );
