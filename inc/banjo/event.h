@@ -298,7 +298,7 @@ BANJO_EXPORT const char* bj_get_key_name(
 ///
 /// \see bj_window_set_enter_event
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_window_enter_event_t)(bj_window* p_window, bj_bool enter, int x, int y);
+typedef void(* bj_enter_event_t)(bj_window* p_window, bj_bool enter, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor position changes.
@@ -419,12 +419,12 @@ BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
 /// \param p_callback The callback function
 /// \return *0* or the previously set callback function if any.
 ///
-/// \see bj_window_enter_event_t
+/// \see bj_enter_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_window_enter_event_t bj_window_set_enter_event(
+BANJO_EXPORT bj_enter_event_t bj_window_set_enter_event(
     bj_window*                p_window,
-    bj_window_enter_event_t   p_callback
+    bj_enter_event_t   p_callback
 );
 
 ////////////////////////////////////////////////////////////////////////////////

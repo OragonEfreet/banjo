@@ -114,7 +114,7 @@ BANJO_EXPORT bj_bool bj_window_should_close(
 /// \param flags      Filter flag set. 
 /// \return An OR'd combination of \ref bj_window_flag_t filtered by `flags`.
 ///
-/// \see bj_window_enter_event_t
+/// \see bj_enter_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT uint8_t bj_window_get_flags(
