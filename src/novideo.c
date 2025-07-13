@@ -109,7 +109,7 @@ static bj_video_layer* novideo_init_layer(
     (void)p_error;
 
     bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
-    p_layer->dispose                   = novideo_dispose_layer;
+    p_layer->end                       = novideo_dispose_layer;
     p_layer->create_window             = novideo_window_new;
     p_layer->delete_window             = novideo_window_del;
     p_layer->poll_events               = novideo_window_poll;

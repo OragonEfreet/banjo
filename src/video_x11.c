@@ -760,7 +760,7 @@ static bj_video_layer* x11_init_video(
 
     p_layer->data = p_x11;
 
-    p_layer->dispose                   = x11_dispose_video;
+    p_layer->end                       = x11_end_video;
     p_layer->create_window             = x11_create_window;
     p_layer->delete_window             = x11_delete_window;
     p_layer->poll_events               = x11_poll_events;

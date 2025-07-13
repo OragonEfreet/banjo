@@ -74,7 +74,7 @@ struct bj_audio_layer_data_t;
 
 typedef struct bj_audio_layer_t {
 	bj_audio_device*(*detect_devices)(struct bj_audio_layer_t*);
-	void (*dispose)(struct bj_audio_layer_t*, bj_error** p_error);
+	void (*end)(struct bj_audio_layer_t*, bj_error** p_error);
 	void(*close_device)(struct bj_audio_layer_t*, bj_audio_device*);
 	bj_audio_device*(*open_device)(struct bj_audio_layer_t*, bj_error** p_error, bj_audio_callback_t, void*);
 	struct bj_audio_layer_data_t* data;

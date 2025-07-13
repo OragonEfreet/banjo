@@ -387,14 +387,14 @@ static bj_video_layer* win32_init_video(
     }
 
     bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
-    p_layer->dispose = win32_dispose_video;
-    p_layer->create_window = win32_window_new;
-    p_layer->delete_window = win32_window_del;
-    p_layer->poll_events = win32_window_poll;
-    p_layer->get_window_size = win32_get_window_size;
+    p_layer->end                       = win32_end_video;
+    p_layer->create_window             = win32_window_new;
+    p_layer->delete_window             = win32_window_del;
+    p_layer->poll_events               = win32_window_poll;
+    p_layer->get_window_size           = win32_get_window_size;
     p_layer->create_window_framebuffer = win32_create_window_framebuffer;
-    p_layer->flush_window_framebuffer = win32_flush_window_framebuffer;
-    p_layer->data = (void*)hInstance;
+    p_layer->flush_window_framebuffer  = win32_flush_window_framebuffer;
+    p_layer->data                      = (void*)hInstance;
     return p_layer;
 }
 

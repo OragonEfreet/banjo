@@ -294,7 +294,7 @@ static bj_audio_layer* alsa_init_audio(bj_error** p_error) {
 		return 0;
 	}
 
-	p_audio->dispose        = alsa_dispose_audio;
+	p_audio->end            = alsa_dispose_audio;
 	p_audio->open_device    = alsa_open_device;
 	p_audio->close_device   = alsa_close_device;
     p_audio->data = 0;
