@@ -281,7 +281,7 @@ void bj_window_input_button(
     }
 }
 
-bj_enter_event_t bj_window_set_enter_event(
+bj_enter_event_t bj_set_enter_event(
     bj_window*                 p_window,
     bj_enter_event_t    p_event
 ) {

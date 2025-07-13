@@ -296,7 +296,7 @@ BANJO_EXPORT const char* bj_get_key_name(
 /// \param x        The horizontal position of the cursor
 /// \param y        The vertical position of the cursor
 ///
-/// \see bj_window_set_enter_event
+/// \see bj_set_enter_event
 ////////////////////////////////////////////////////////////////////////////////
 typedef void(* bj_enter_event_t)(bj_window* p_window, bj_bool enter, int x, int y);
 
@@ -422,7 +422,7 @@ BANJO_EXPORT bj_key_event_t bj_window_set_key_event(
 /// \see bj_enter_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_enter_event_t bj_window_set_enter_event(
+BANJO_EXPORT bj_enter_event_t bj_set_enter_event(
     bj_window*                p_window,
     bj_enter_event_t   p_callback
 );
