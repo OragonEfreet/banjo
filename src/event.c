@@ -185,13 +185,13 @@ const char* bj_get_key_name(int key) {
     return "Unknown";
 }
 
-bj_key_event_t bj_set_key_event(
+bj_key_callback_fn_t bj_set_key_callback(
     bj_window* p_window,
-    bj_key_event_t   p_event
+    bj_key_callback_fn_t   p_callback
 ) {
     bj_check_or_0(p_window);
-    bj_key_event_t p_replaced = p_window->p_key_event;
-    p_window->p_key_event = p_event;
+    bj_key_callback_fn_t p_replaced = p_window->p_key_callback;
+    p_window->p_key_callback = p_callback;
     return p_replaced;
 }
 
@@ -201,38 +201,38 @@ BANJO_EXPORT void bj_poll_events(
     s_video->poll_events(s_video);
 }
 
-bj_cursor_event_t bj_set_cursor_event(
+bj_cursor_callback_fn_t bj_set_cursor_callback(
     bj_window*                 p_window,
-    bj_cursor_event_t   p_event
+    bj_cursor_callback_fn_t   p_callback
 ) {
     bj_check_or_0(p_window);
-    bj_cursor_event_t p_replaced = p_window->p_cursor_event;
-    p_window->p_cursor_event = p_event;
+    bj_cursor_callback_fn_t p_replaced = p_window->p_cursor_callback;
+    p_window->p_cursor_callback = p_callback;
     return p_replaced;
 }
 
-void bj_push_cursor_event(
+void bj_push_cursor_callback(
     bj_window* p_window,
     int x,
     int y
 ) {
     bj_check(p_window);
-    if(!!p_window->p_cursor_event) {
-        p_window->p_cursor_event(p_window, x, y);
+    if(!!p_window->p_cursor_callback) {
+        p_window->p_cursor_callback(p_window, x, y);
     }
 }
 
-bj_button_event_t bj_set_button_event(
+bj_button_callback_fn_t bj_set_button_callback(
     bj_window*                 p_window,
-    bj_button_event_t   p_event
+    bj_button_callback_fn_t   p_callback
 ) {
     bj_check_or_0(p_window);
-    bj_button_event_t p_replaced = p_window->p_button_event;
-    p_window->p_button_event = p_event;
+    bj_button_callback_fn_t p_replaced = p_window->p_button_callback;
+    p_window->p_button_callback = p_callback;
     return p_replaced;
 }
 
-void bj_push_key_event(
+void bj_push_key_callback(
     bj_window*      p_window,
     bj_event_action action,
     bj_key          key,
@@ -260,12 +260,12 @@ void bj_push_key_event(
         *keystate = BJ_RELEASE;
     }
 
-    if (p_window->p_key_event) {
-        p_window->p_key_event(p_window, action, key, scancode);
+    if (p_window->p_key_callback) {
+        p_window->p_key_callback(p_window, action, key, scancode);
     }
 }
 
-void bj_push_button_event(
+void bj_push_button_callback(
     bj_window* p_window,
     int button,
     bj_event_action action,
@@ -273,30 +273,30 @@ void bj_push_button_event(
     int y
 ) {
     bj_check(p_window);
-    if(!!p_window->p_button_event) {
-        p_window->p_button_event(p_window, button, action, x, y);
+    if(!!p_window->p_button_callback) {
+        p_window->p_button_callback(p_window, button, action, x, y);
     }
 }
 
-bj_enter_event_t bj_set_enter_event(
+bj_enter_callback_fn_t bj_set_enter_callback(
     bj_window*                 p_window,
-    bj_enter_event_t    p_event
+    bj_enter_callback_fn_t    p_callback
 ) {
     bj_check_or_0(p_window);
-    bj_enter_event_t p_replaced = p_window->p_enter_event;
-    p_window->p_enter_event = p_event;
+    bj_enter_callback_fn_t p_replaced = p_window->p_enter_callback;
+    p_window->p_enter_callback = p_callback;
     return p_replaced;
 }
 
-void bj_push_enter_event(
+void bj_push_enter_callback(
     bj_window* p_window,
     bj_bool enter,
     int x,
     int y
 ) {
     bj_check(p_window);
-    if(!!p_window->p_enter_event) {
-        p_window->p_enter_event(p_window, enter, x, y);
+    if(!!p_window->p_enter_callback) {
+        p_window->p_enter_callback(p_window, enter, x, y);
     }
 }
 

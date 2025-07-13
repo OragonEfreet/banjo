@@ -13,13 +13,13 @@
 
 bj_window* window = 0;
 
-void cursor_event(bj_window* p_window, int x, int y) {
+void cursor_callback(bj_window* p_window, int x, int y) {
     bj_info("Cursor event, window %p, (%d,%d)",
         (void*)p_window, x, y
     );
 }
 
-void button_event(bj_window* p_window, int button, bj_event_action action, int x, int y) {
+void button_callback(bj_window* p_window, int button, bj_event_action action, int x, int y) {
     bj_info("Button event, window %p, button %d, %s, (%d,%d)",
         (void*)p_window, button, 
         action == BJ_PRESS ? "pressed" : "released",
@@ -27,7 +27,7 @@ void button_event(bj_window* p_window, int button, bj_event_action action, int x
     );
 }
 
-void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
+void key_callback(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
     (void)p_window;
 
     const char* action_str = "pressed";
@@ -45,7 +45,7 @@ void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scan
     }
 }
 
-void enter_event(bj_window* p_window, bj_bool enter, int x, int y) {
+void enter_callback(bj_window* p_window, bj_bool enter, int x, int y) {
     bj_info("Enter event, window %p, %s, (%d,%d)",
         (void*)p_window, 
         enter ? "entered" : "left",
@@ -65,10 +65,10 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
 
-    bj_set_key_event(window, key_event);
-    bj_set_button_event(window, button_event);
-    bj_set_cursor_event(window, cursor_event);
-    bj_set_enter_event(window, enter_event);
+    bj_set_key_callback(window, key_callback);
+    bj_set_button_callback(window, button_callback);
+    bj_set_cursor_callback(window, cursor_callback);
+    bj_set_enter_callback(window, enter_callback);
 
     return bj_callback_continue;
 }

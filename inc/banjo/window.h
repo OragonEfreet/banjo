@@ -27,7 +27,7 @@ typedef struct bj_window_t bj_window;
 typedef enum bj_window_flag_t {
     BJ_WINDOW_FLAG_NONE       = 0x00, //!< No Flag.
     BJ_WINDOW_FLAG_CLOSE      = 0x01, //!< Window should be closed by the application.
-    BJ_WINDOW_FLAG_KEY_REPEAT = 0x02, //!< Key repeat event is enabled (see \ref bj_set_key_event).
+    BJ_WINDOW_FLAG_KEY_REPEAT = 0x02, //!< Key repeat event is enabled (see \ref bj_set_key_callback).
     BJ_WINDOW_FLAG_ALL        = 0xFF, //!< All flags set.
 } bj_window_flag;
 
@@ -113,8 +113,6 @@ BANJO_EXPORT bj_bool bj_window_should_close(
 /// \param p_window   The window handler.
 /// \param flags      Filter flag set. 
 /// \return An OR'd combination of \ref bj_window_flag_t filtered by `flags`.
-///
-/// \see bj_enter_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT uint8_t bj_window_get_flags(

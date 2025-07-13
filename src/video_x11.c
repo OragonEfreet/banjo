@@ -233,7 +233,7 @@ static int get_key(x11* p_x11, int keycode) {
     return p_x11->keymap[keycode];
 }
 
-static void x11_dispatch_event(
+static void x11_dispatch_callback(
     x11*  p_x11,
     const XEvent* event
 ) {
@@ -256,7 +256,7 @@ static void x11_dispatch_event(
         case Expose:
         case EnterNotify:
         case LeaveNotify:
-            bj_push_enter_event(
+            bj_push_enter_callback(
                 (bj_window*)p_window,
                 event->type == EnterNotify,
                 event->xcrossing.x,
@@ -266,7 +266,7 @@ static void x11_dispatch_event(
 
         case ButtonRelease:
         case ButtonPress:
-            bj_push_button_event(
+            bj_push_button_callback(
                 (bj_window*)p_window,
                 event->xbutton.button,
                 event->type == ButtonPress ? BJ_PRESS : BJ_RELEASE,
@@ -277,7 +277,7 @@ static void x11_dispatch_event(
             break;
 
         case MotionNotify:
-            bj_push_cursor_event(
+            bj_push_cursor_callback(
                 (bj_window*)p_window,
                 event->xmotion.x,
                 event->xmotion.y
@@ -311,7 +311,7 @@ static void x11_dispatch_event(
                     }
                 }
             }
-            bj_push_key_event(
+            bj_push_key_callback(
                 (bj_window*)p_window,
                 BJ_RELEASE,
                 get_key(p_x11, event->xkey.keycode),
@@ -321,7 +321,7 @@ static void x11_dispatch_event(
 
         case KeyPress:
 
-            bj_push_key_event(
+            bj_push_key_callback(
                 (bj_window*)p_window,
                 BJ_PRESS,
                 get_key(p_x11, event->xkey.keycode),
@@ -343,7 +343,7 @@ static void x11_poll_events(
     while(p_x11->XQLength(p_x11->display)) {
         XEvent event;
         p_x11->XNextEvent(p_x11->display, &event);
-        x11_dispatch_event(p_x11, &event);
+        x11_dispatch_callback(p_x11, &event);
     }
     p_x11->XFlush(p_x11->display);
 }

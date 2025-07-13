@@ -2,16 +2,6 @@
 
 #include <banjo/window.h>
 
-////////////////////////////////////////////////////////////////////////////////
-/// Event action type enumeration.
-///
-/// Used in key and button events to identify the action type.
-////////////////////////////////////////////////////////////////////////////////
-typedef enum bj_event_action_t {
-    BJ_RELEASE, //!< The button/key is released
-    BJ_PRESS,   //!< The button/key is pressed
-    BJ_REPEAT,  //!< The button/key is kept being pressed
-} bj_event_action;
 
 // TODO Align buttons and keys
 /// First button
@@ -289,6 +279,17 @@ BANJO_EXPORT const char* bj_get_key_name(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Event action type enumeration.
+///
+/// Used in key and button events to identify the action type.
+////////////////////////////////////////////////////////////////////////////////
+typedef enum bj_event_action_t {
+    BJ_RELEASE, //!< The button/key is released
+    BJ_PRESS,   //!< The button/key is pressed
+    BJ_REPEAT,  //!< The button/key is kept being pressed
+} bj_event_action;
+
+////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor enters a window.
 ///
 /// \param p_window Window handle
@@ -296,9 +297,9 @@ BANJO_EXPORT const char* bj_get_key_name(
 /// \param x        The horizontal position of the cursor
 /// \param y        The vertical position of the cursor
 ///
-/// \see bj_set_enter_event
+/// \see bj_set_enter_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_enter_event_t)(bj_window* p_window, bj_bool enter, int x, int y);
+typedef void(* bj_enter_callback_fn_t)(bj_window* p_window, bj_bool enter, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor position changes.
@@ -307,9 +308,9 @@ typedef void(* bj_enter_event_t)(bj_window* p_window, bj_bool enter, int x, int 
 /// \param x        The horizontal position of the cursor
 /// \param y        The vertical position of the cursor
 ///
-/// \see bj_set_cursor_event
+/// \see bj_set_cursor_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_cursor_event_t)(bj_window* p_window, int x, int y);
+typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when a mouse button is pressed or released.
@@ -319,9 +320,9 @@ typedef void(* bj_cursor_event_t)(bj_window* p_window, int x, int y);
 /// \param x        The horizontal position of the cursor
 /// \param y        The vertical position of the cursor
 ///
-/// \see bj_set_button_event
+/// \see bj_set_button_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_button_event_t)(bj_window* p_window, int, bj_event_action action, int x, int y);
+typedef void(* bj_button_callback_fn_t)(bj_window* p_window, int, bj_event_action action, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when a keyboard key is pressed or released.
@@ -332,10 +333,10 @@ typedef void(* bj_button_event_t)(bj_window* p_window, int, bj_event_action acti
 /// \param scancode Implementation-dependent / Layout-independent representation 
 ///                 of the key that has been pressed or released.
 ///
-/// \see bj_set_key_event
+/// \see bj_set_key_callback
 ///
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_key_event_t)(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
+typedef void(* bj_key_callback_fn_t)(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for cursor events.
@@ -349,11 +350,11 @@ typedef void(* bj_key_event_t)(bj_window* p_window, bj_event_action action, bj_k
 /// \param p_callback The callback function
 /// \return *0* or the previously set callback function if any.
 ///
-/// \see bj_cursor_event_t
+/// \see bj_cursor_callback_fn_t
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_cursor_event_t bj_set_cursor_event(
+BANJO_EXPORT bj_cursor_callback_fn_t bj_set_cursor_callback(
     bj_window*          p_window,
-    bj_cursor_event_t   p_callback
+    bj_cursor_callback_fn_t   p_callback
 );
 
 
@@ -369,12 +370,12 @@ BANJO_EXPORT bj_cursor_event_t bj_set_cursor_event(
 /// \param p_callback The callback function
 /// \return *0* or the previously set callback function if any.
 ///
-/// \see bj_button_event_t
+/// \see bj_button_callback_fn_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_button_event_t bj_set_button_event(
+BANJO_EXPORT bj_button_callback_fn_t bj_set_button_callback(
     bj_window*          p_window,
-    bj_button_event_t   p_callback
+    bj_button_callback_fn_t   p_callback
 );
 
 
@@ -399,12 +400,12 @@ BANJO_EXPORT bj_button_event_t bj_set_button_event(
 /// down the key will continuously call the event function with a 
 /// \ref BJ_REPEAT action.
 ///
-/// \see bj_key_event_t
+/// \see bj_key_callback_fn_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_key_event_t bj_set_key_event(
+BANJO_EXPORT bj_key_callback_fn_t bj_set_key_callback(
     bj_window*       p_window,
-    bj_key_event_t   p_callback
+    bj_key_callback_fn_t   p_callback
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -419,32 +420,32 @@ BANJO_EXPORT bj_key_event_t bj_set_key_event(
 /// \param p_callback The callback function
 /// \return *0* or the previously set callback function if any.
 ///
-/// \see bj_enter_event_t
+/// \see bj_enter_callback_fn_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_enter_event_t bj_set_enter_event(
+BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
     bj_window*         p_window,
-    bj_enter_event_t   p_callback
+    bj_enter_callback_fn_t   p_callback
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// An event callback for closing the window when escape key is pressed.
 ///
-/// This utility function is a pre-made \ref bj_key_event_t you can
+/// This utility function is a pre-made \ref bj_key_callback_fn_t you can
 /// directly use to provide a window the behaviour of closing when ESC key
 /// is pressed by the user (\ref BJ_KEY_ESCAPE).
 ///
-/// Call it using `bj_set_key_event(p_window, bj_close_on_escape)`.
+/// Call it using `bj_set_key_callback(p_window, bj_close_on_escape)`.
 ///
-/// \see bj_key_event_t and bj_set_key_event
+/// \see bj_key_callback_fn_t and bj_set_key_callback
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_close_on_escape(bj_window*, bj_event_action, bj_key, int);
 
-void bj_push_key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
-void bj_push_cursor_event(bj_window* p_window, int x, int y);
-void bj_push_button_event(bj_window* p_window, int button, bj_event_action action, int x, int y);
-void bj_push_enter_event(bj_window* p_window, bj_bool enter, int x, int y);
+void bj_push_key_callback(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
+void bj_push_cursor_callback(bj_window* p_window, int x, int y);
+void bj_push_button_callback(bj_window* p_window, int button, bj_event_action action, int x, int y);
+void bj_push_enter_callback(bj_window* p_window, bj_bool enter, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Polls all pending events and dispatch them to callbacks.
