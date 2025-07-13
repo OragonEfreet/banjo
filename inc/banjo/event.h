@@ -321,7 +321,7 @@ typedef void(* bj_cursor_event_t)(bj_window* p_window, int x, int y);
 ///
 /// \see bj_window_set_button_event
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_window_button_event_t)(bj_window* p_window, int, bj_event_action action, int x, int y);
+typedef void(* bj_button_event_t)(bj_window* p_window, int, bj_event_action action, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when a keyboard key is pressed or released.
@@ -369,12 +369,12 @@ BANJO_EXPORT bj_cursor_event_t bj_window_set_cursor_event(
 /// \param p_callback The callback function
 /// \return *0* or the previously set callback function if any.
 ///
-/// \see bj_window_button_event_t
+/// \see bj_button_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_window_button_event_t bj_window_set_button_event(
+BANJO_EXPORT bj_button_event_t bj_window_set_button_event(
     bj_window*                 p_window,
-    bj_window_button_event_t   p_callback
+    bj_button_event_t   p_callback
 );
 
 

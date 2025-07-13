@@ -225,12 +225,12 @@ void bj_window_input_cursor(
     }
 }
 
-bj_window_button_event_t bj_window_set_button_event(
+bj_button_event_t bj_window_set_button_event(
     bj_window*                 p_window,
-    bj_window_button_event_t   p_event
+    bj_button_event_t   p_event
 ) {
     bj_check_or_0(p_window);
-    bj_window_button_event_t p_replaced = p_window->p_button_event;
+    bj_button_event_t p_replaced = p_window->p_button_event;
     p_window->p_button_event = p_event;
     return p_replaced;
 }
