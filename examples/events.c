@@ -13,9 +13,9 @@
 
 bj_window* window = 0;
 
-void cursor_callback(bj_window* p_window, int x, int y) {
+void cursor_callback(bj_window* p_window, const bj_cursor_event* e) {
     bj_info("Cursor event, window %p, (%d,%d)",
-        (void*)p_window, x, y
+        (void*)p_window, e->x, e->y
     );
 }
 

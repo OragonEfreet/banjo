@@ -295,6 +295,11 @@ typedef struct bj_enter_event_t {
     bj_bool enter;
 } bj_enter_event;
 
+typedef struct bj_cursor_event_t {
+    int x;
+    int y;
+} bj_cursor_event;
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor enters a window.
 ///
@@ -316,7 +321,7 @@ typedef void(* bj_enter_callback_fn_t)(bj_window*, const bj_enter_event*);
 ///
 /// \see bj_set_cursor_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, int x, int y);
+typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, const bj_cursor_event*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when a mouse button is pressed or released.
