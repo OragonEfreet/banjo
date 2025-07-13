@@ -303,9 +303,15 @@ typedef struct bj_cursor_event_t {
 typedef struct bj_button_event_t {
     int             x;
     int             y;
-    int             button;
     bj_event_action action;
+    int             button;
 } bj_button_event;
+
+typedef struct bj_key_event_t {
+    bj_key          key;
+    int             scancode;
+    bj_event_action action;
+} bj_key_event;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor enters a window.
@@ -354,7 +360,7 @@ typedef void(* bj_button_callback_fn_t)(bj_window* p_window, const bj_button_eve
 /// \see bj_set_key_callback
 ///
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_key_callback_fn_t)(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
+typedef void(* bj_key_callback_fn_t)(bj_window* p_window, const bj_key_event*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for cursor events.
@@ -458,7 +464,7 @@ BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
 /// \see bj_key_callback_fn_t and bj_set_key_callback
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_close_on_escape(bj_window*, bj_event_action, bj_key, int);
+BANJO_EXPORT void bj_close_on_escape(bj_window*, const bj_key_event*);
 
 void bj_push_key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
 void bj_push_cursor_event(bj_window* p_window, int x, int y);

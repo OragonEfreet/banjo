@@ -11,12 +11,10 @@
 
 bj_window* window = 0;
 
-void key_callback(bj_window* p_window, bj_event_action mode, bj_key key, int scancode) {
-    (void)key;
+void key_callback(bj_window* p_window, const bj_key_event* e) {
     (void)p_window;
-    (void)scancode;
 
-    switch(mode) {
+    switch(e->action) {
         case BJ_PRESS:
             bj_info("Pressed");
             break;

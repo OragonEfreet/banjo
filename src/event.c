@@ -261,7 +261,9 @@ void bj_push_key_event(
     }
 
     if (p_window->p_key_callback) {
-        p_window->p_key_callback(p_window, action, key, scancode);
+        p_window->p_key_callback(p_window, &(bj_key_event){
+            .action=action, .key=key, .scancode=scancode
+        });
     }
 }
 
@@ -304,14 +306,11 @@ void bj_push_enter_event(
 
 void bj_close_on_escape(
     bj_window* p_window,
-    bj_event_action action,
-    bj_key key,
-    int scancode
+    const bj_key_event* p_event
 ) {
     (void)p_window;
-    (void)scancode;
 
-    if (key == BJ_KEY_ESCAPE && action == BJ_RELEASE) {
+    if (p_event->key == BJ_KEY_ESCAPE && p_event->action == BJ_RELEASE) {
         bj_window_set_should_close(p_window);
     }
 }

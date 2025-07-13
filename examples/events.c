@@ -27,20 +27,20 @@ void button_callback(bj_window* p_window, const bj_button_event* e) {
     );
 }
 
-void key_callback(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
+void key_callback(bj_window* p_window, const bj_key_event* e) {
     (void)p_window;
 
     const char* action_str = "pressed";
-    if(action != BJ_PRESS) {
-        action_str = action == BJ_RELEASE ? "released" : "repeated";
+    if(e->action != BJ_PRESS) {
+        action_str = e->action == BJ_RELEASE ? "released" : "repeated";
     }
 
 
     bj_info("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s", 
-        key, bj_get_key_name(key), scancode, action_str
+        e->key, bj_get_key_name(e->key), e->scancode, action_str
     );
 
-    if(key == BJ_KEY_ESCAPE) {
+    if(e->key == BJ_KEY_ESCAPE) {
         bj_window_set_should_close(p_window);
     }
 }
