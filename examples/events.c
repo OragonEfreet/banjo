@@ -67,7 +67,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_set_key_event(window, key_event);
     bj_window_set_button_event(window, button_event);
-    bj_window_set_cursor_event(window, cursor_event);
+    bj_set_cursor_event(window, cursor_event);
     bj_set_enter_event(window, enter_event);
 
     return bj_callback_continue;

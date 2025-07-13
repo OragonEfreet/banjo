@@ -204,7 +204,7 @@ BANJO_EXPORT void bj_poll_events(
     s_video->poll_events(s_video);
 }
 
-bj_cursor_event_t bj_window_set_cursor_event(
+bj_cursor_event_t bj_set_cursor_event(
     bj_window*                 p_window,
     bj_cursor_event_t   p_event
 ) {
