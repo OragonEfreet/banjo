@@ -19,11 +19,11 @@ void cursor_callback(bj_window* p_window, const bj_cursor_event* e) {
     );
 }
 
-void button_callback(bj_window* p_window, int button, bj_event_action action, int x, int y) {
+void button_callback(bj_window* p_window, const bj_button_event* e) {
     bj_info("Button event, window %p, button %d, %s, (%d,%d)",
-        (void*)p_window, button, 
-        action == BJ_PRESS ? "pressed" : "released",
-        x, y
+        (void*)p_window, e->button, 
+        e->action == BJ_PRESS ? "pressed" : "released",
+        e->x, e->y
     );
 }
 

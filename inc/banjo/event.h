@@ -290,8 +290,8 @@ typedef enum bj_event_action_t {
 } bj_event_action;
 
 typedef struct bj_enter_event_t {
-    int x;
-    int y;
+    int     x;
+    int     y;
     bj_bool enter;
 } bj_enter_event;
 
@@ -299,6 +299,13 @@ typedef struct bj_cursor_event_t {
     int x;
     int y;
 } bj_cursor_event;
+
+typedef struct bj_button_event_t {
+    int             x;
+    int             y;
+    int             button;
+    bj_event_action action;
+} bj_button_event;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor enters a window.
@@ -333,7 +340,7 @@ typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, const bj_cursor_eve
 ///
 /// \see bj_set_button_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_button_callback_fn_t)(bj_window* p_window, int, bj_event_action action, int x, int y);
+typedef void(* bj_button_callback_fn_t)(bj_window* p_window, const bj_button_event*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when a keyboard key is pressed or released.

@@ -274,7 +274,9 @@ void bj_push_button_event(
 ) {
     bj_check(p_window);
     if(!!p_window->p_button_callback) {
-        p_window->p_button_callback(p_window, button, action, x, y);
+        p_window->p_button_callback(p_window, &(bj_button_event) {
+            .x=x, .y=y, .button=button, .action=action
+        });
     }
 }
 
