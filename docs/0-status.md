@@ -7,7 +7,7 @@ This list primarily serves as a **development status tracker**, helping to keep 
 It provides a rough vision of the project's direction but is **not exhaustive**.  
 Features are added over time and are **not listed in priority order**.  
 Some features may exist in the API but not be listed here, and vice versa.  
-- [ ] Basic System Layer
+- [ ] Basic System Layers
   - [ ] Window management (\ref window.c)
     - [X] Windows API
     - [ ] Wayland
@@ -39,6 +39,11 @@ Some features may exist in the API but not be listed here, and vice versa.
     - [ ] Wayland
     - [ ] Cocoa
     - [X] X11
+  - [ ] Event Polling API
+    - [ ] Generic "bj_event" struct
+    - [ ] Event buffering structure (linked-list or ring buffer)
+    - [ ] Poll event fillfunction
+    - [ ] Dispatch-to-callback function
 - [ ] Software Rendering
   - [ ] 3D Rendering
     - [ ] Simple Programmable Pipeline
