@@ -335,7 +335,7 @@ typedef void(* bj_button_event_t)(bj_window* p_window, int, bj_event_action acti
 /// \see bj_window_set_key_event
 ///
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_window_key_event_t)(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
+typedef void(* bj_key_event_t)(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set the callback for cursor events.
@@ -399,12 +399,12 @@ BANJO_EXPORT bj_button_event_t bj_window_set_button_event(
 /// down the key will continuously call the event function with a 
 /// \ref BJ_REPEAT action.
 ///
-/// \see bj_window_key_event_t
+/// \see bj_key_event_t
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_window_key_event_t bj_window_set_key_event(
+BANJO_EXPORT bj_key_event_t bj_window_set_key_event(
     bj_window*              p_window,
-    bj_window_key_event_t   p_callback
+    bj_key_event_t   p_callback
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -430,13 +430,13 @@ BANJO_EXPORT bj_enter_event_t bj_window_set_enter_event(
 ////////////////////////////////////////////////////////////////////////////////
 /// An event callback for closing the window when escape key is pressed.
 ///
-/// This utility function is a pre-made \ref bj_window_key_event_t you can
+/// This utility function is a pre-made \ref bj_key_event_t you can
 /// directly use to provide a window the behaviour of closing when ESC key
 /// is pressed by the user (\ref BJ_KEY_ESCAPE).
 ///
 /// Call it using `bj_window_set_key_event(p_window, bj_close_on_escape)`.
 ///
-/// \see bj_window_key_event_t and bj_window_set_key_event
+/// \see bj_key_event_t and bj_window_set_key_event
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_close_on_escape(bj_window*, bj_event_action, bj_key, int);

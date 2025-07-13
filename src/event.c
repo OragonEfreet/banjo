@@ -188,12 +188,12 @@ const char* bj_get_key_name(int key) {
     return "Unknown";
 }
 
-bj_window_key_event_t bj_window_set_key_event(
+bj_key_event_t bj_window_set_key_event(
     bj_window* p_window,
-    bj_window_key_event_t   p_event
+    bj_key_event_t   p_event
 ) {
     bj_check_or_0(p_window);
-    bj_window_key_event_t p_replaced = p_window->p_key_event;
+    bj_key_event_t p_replaced = p_window->p_key_event;
     p_window->p_key_event = p_event;
     return p_replaced;
 }
