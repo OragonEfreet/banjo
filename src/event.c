@@ -211,7 +211,7 @@ bj_cursor_callback_fn_t bj_set_cursor_callback(
     return p_replaced;
 }
 
-void bj_push_cursor_callback(
+void bj_push_cursor_event(
     bj_window* p_window,
     int x,
     int y
@@ -232,7 +232,7 @@ bj_button_callback_fn_t bj_set_button_callback(
     return p_replaced;
 }
 
-void bj_push_key_callback(
+void bj_push_key_event(
     bj_window*      p_window,
     bj_event_action action,
     bj_key          key,
@@ -265,7 +265,7 @@ void bj_push_key_callback(
     }
 }
 
-void bj_push_button_callback(
+void bj_push_button_event(
     bj_window* p_window,
     int button,
     bj_event_action action,
@@ -288,7 +288,7 @@ bj_enter_callback_fn_t bj_set_enter_callback(
     return p_replaced;
 }
 
-void bj_push_enter_callback(
+void bj_push_enter_event(
     bj_window* p_window,
     bj_bool enter,
     int x,

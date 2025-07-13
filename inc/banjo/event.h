@@ -442,10 +442,10 @@ BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_close_on_escape(bj_window*, bj_event_action, bj_key, int);
 
-void bj_push_key_callback(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
-void bj_push_cursor_callback(bj_window* p_window, int x, int y);
-void bj_push_button_callback(bj_window* p_window, int button, bj_event_action action, int x, int y);
-void bj_push_enter_callback(bj_window* p_window, bj_bool enter, int x, int y);
+void bj_push_key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
+void bj_push_cursor_event(bj_window* p_window, int x, int y);
+void bj_push_button_event(bj_window* p_window, int button, bj_event_action action, int x, int y);
+void bj_push_enter_event(bj_window* p_window, bj_bool enter, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Polls all pending events and dispatch them to callbacks.
