@@ -1,3 +1,4 @@
+#include <banjo/assert.h>
 #include <banjo/event.h>
 #include <banjo/video.h>
 
@@ -5,6 +6,177 @@
 #include "window_t.h"
 
 extern bj_video_layer* s_video;
+
+// Event queue implemented as a ring buffer
+#define BJ_EVQ_CAP ((size_t)64)
+
+static struct evq_t {
+    bj_event* array[BJ_EVQ_CAP];
+    size_t read;
+    size_t write;
+} evq = { {0}, 0, 0 };
+
+#define evq_write(at, val) bj_memcpy(evq.array + at, val, sizeof(bj_event))
+#define evq_read(at, out) bj_memcpy(out, evq.array + at, sizeof(bj_event))
+
+// Both solution are presented by Juho Snellman.
+// See https://www.snellman.net/blog/archive/2016-12-13-ring-buffers/
+#define evq_mask(val) (val & (BJ_EVQ_CAP - 1))
+#define evq_reset(val) evq.read = evq.write = 0
+#define EVQ_UNMASKED_INDICES
+#ifdef EVQ_UNMASKED_INDICES
+#   define evq_push(val) bj_assert(!evq_full()); evq_write(evq_mask(evq.write++), val)
+#   define evq_shift(out) bj_assert(!evq_empty()); evq_read(evq_mask(evq.read++), out)
+#   define evq_empty() (evq.read == evq.write)
+#   define evq_full() (evq_size() == BJ_EVQ_CAP)
+#   define evq_size() (evq.write - evq.read)
+#else
+#   define evq_inc(index) evq_mask(index + 1)
+#   define evq_push(val) bj_assert(!evq_full()); evq_write(evq.write, val); evq.write = evq_inc(evq.write)
+#   define evq_shift(out) bj_assert(!evq_empty()); evq_read(evq.read, out); evq.read = evq_inc(evq.read)
+#   define evq_empty() (evq.read == evq.write)
+#   define evq_full() (evq_inc(evq.write) == evq.read)
+#   define evq_size() (evq_mask(evq.write - evq.read))
+#endif
+
+void bj_begin_event(void) {
+    evq_reset();
+    bj_trace("bj_begin_event");
+}
+
+void bj_end_event(void) {
+    bj_trace("bj_end_event");
+}
+
+bj_key_callback_fn_t bj_set_key_callback(
+    bj_window* p_window,
+    bj_key_callback_fn_t   p_callback
+) {
+    bj_check_or_0(p_window);
+    bj_key_callback_fn_t p_replaced = p_window->p_key_callback;
+    p_window->p_key_callback = p_callback;
+    return p_replaced;
+}
+
+BANJO_EXPORT void bj_poll_events(
+    void
+) {
+    s_video->poll_events(s_video);
+}
+
+bj_cursor_callback_fn_t bj_set_cursor_callback(
+    bj_window*                 p_window,
+    bj_cursor_callback_fn_t   p_callback
+) {
+    bj_check_or_0(p_window);
+    bj_cursor_callback_fn_t p_replaced = p_window->p_cursor_callback;
+    p_window->p_cursor_callback = p_callback;
+    return p_replaced;
+}
+
+bj_button_callback_fn_t bj_set_button_callback(
+    bj_window*                 p_window,
+    bj_button_callback_fn_t   p_callback
+) {
+    bj_check_or_0(p_window);
+    bj_button_callback_fn_t p_replaced = p_window->p_button_callback;
+    p_window->p_button_callback = p_callback;
+    return p_replaced;
+}
+
+bj_enter_callback_fn_t bj_set_enter_callback(
+    bj_window*                 p_window,
+    bj_enter_callback_fn_t    p_callback
+) {
+    bj_check_or_0(p_window);
+    bj_enter_callback_fn_t p_replaced = p_window->p_enter_callback;
+    p_window->p_enter_callback = p_callback;
+    return p_replaced;
+}
+
+void bj_close_on_escape(
+    bj_window* p_window,
+    const bj_key_event* p_event
+) {
+    (void)p_window;
+
+    if (p_event->key == BJ_KEY_ESCAPE && p_event->action == BJ_RELEASE) {
+        bj_window_set_should_close(p_window);
+    }
+}
+
+void bj_push_cursor_event(
+    bj_window* p_window,
+    int x,
+    int y
+) {
+    bj_check(p_window);
+    if(!!p_window->p_cursor_callback) {
+        p_window->p_cursor_callback(p_window, &(bj_cursor_event){x, y});
+    }
+}
+
+void bj_push_key_event(
+    bj_window*      p_window,
+    bj_event_action action,
+    bj_key          key,
+    int             scancode
+) {
+    bj_check(p_window);
+    bj_check(key >= 0x00 && key < 0xFF);
+    bj_check(action == BJ_PRESS || action == BJ_RELEASE);
+
+    char* keystate = &p_window->keystates[key];
+    
+    if (action == BJ_PRESS) {
+        if (*keystate == BJ_PRESS) {
+            if(!bj_window_get_flags(p_window, BJ_WINDOW_FLAG_KEY_REPEAT)) {
+                return;
+            }
+            action = BJ_REPEAT;
+        } else {
+            *keystate = BJ_PRESS;
+        }
+    } else {
+        if (*keystate == BJ_RELEASE) {
+            return;
+        }
+        *keystate = BJ_RELEASE;
+    }
+
+    if (p_window->p_key_callback) {
+        p_window->p_key_callback(p_window, &(bj_key_event){
+            .action=action, .key=key, .scancode=scancode
+        });
+    }
+}
+
+void bj_push_button_event(
+    bj_window* p_window,
+    int button,
+    bj_event_action action,
+    int x,
+    int y
+) {
+    bj_check(p_window);
+    if(!!p_window->p_button_callback) {
+        p_window->p_button_callback(p_window, &(bj_button_event) {
+            .x=x, .y=y, .button=button, .action=action
+        });
+    }
+}
+
+void bj_push_enter_event(
+    bj_window* p_window,
+    bj_bool enter,
+    int x,
+    int y
+) {
+    bj_check(p_window);
+    if(!!p_window->p_enter_callback) {
+        p_window->p_enter_callback(p_window, &(bj_enter_event){x, y, enter});
+    }
+}
 
 const char* bj_get_key_name(int key) {
     switch(key) {
@@ -184,135 +356,3 @@ const char* bj_get_key_name(int key) {
     }
     return "Unknown";
 }
-
-bj_key_callback_fn_t bj_set_key_callback(
-    bj_window* p_window,
-    bj_key_callback_fn_t   p_callback
-) {
-    bj_check_or_0(p_window);
-    bj_key_callback_fn_t p_replaced = p_window->p_key_callback;
-    p_window->p_key_callback = p_callback;
-    return p_replaced;
-}
-
-BANJO_EXPORT void bj_poll_events(
-    void
-) {
-    s_video->poll_events(s_video);
-}
-
-bj_cursor_callback_fn_t bj_set_cursor_callback(
-    bj_window*                 p_window,
-    bj_cursor_callback_fn_t   p_callback
-) {
-    bj_check_or_0(p_window);
-    bj_cursor_callback_fn_t p_replaced = p_window->p_cursor_callback;
-    p_window->p_cursor_callback = p_callback;
-    return p_replaced;
-}
-
-void bj_push_cursor_event(
-    bj_window* p_window,
-    int x,
-    int y
-) {
-    bj_check(p_window);
-    if(!!p_window->p_cursor_callback) {
-        p_window->p_cursor_callback(p_window, &(bj_cursor_event){x, y});
-    }
-}
-
-bj_button_callback_fn_t bj_set_button_callback(
-    bj_window*                 p_window,
-    bj_button_callback_fn_t   p_callback
-) {
-    bj_check_or_0(p_window);
-    bj_button_callback_fn_t p_replaced = p_window->p_button_callback;
-    p_window->p_button_callback = p_callback;
-    return p_replaced;
-}
-
-void bj_push_key_event(
-    bj_window*      p_window,
-    bj_event_action action,
-    bj_key          key,
-    int             scancode
-) {
-    bj_check(p_window);
-    bj_check(key >= 0x00 && key < 0xFF);
-    bj_check(action == BJ_PRESS || action == BJ_RELEASE);
-
-    char* keystate = &p_window->keystates[key];
-    
-    if (action == BJ_PRESS) {
-        if (*keystate == BJ_PRESS) {
-            if(!bj_window_get_flags(p_window, BJ_WINDOW_FLAG_KEY_REPEAT)) {
-                return;
-            }
-            action = BJ_REPEAT;
-        } else {
-            *keystate = BJ_PRESS;
-        }
-    } else {
-        if (*keystate == BJ_RELEASE) {
-            return;
-        }
-        *keystate = BJ_RELEASE;
-    }
-
-    if (p_window->p_key_callback) {
-        p_window->p_key_callback(p_window, &(bj_key_event){
-            .action=action, .key=key, .scancode=scancode
-        });
-    }
-}
-
-void bj_push_button_event(
-    bj_window* p_window,
-    int button,
-    bj_event_action action,
-    int x,
-    int y
-) {
-    bj_check(p_window);
-    if(!!p_window->p_button_callback) {
-        p_window->p_button_callback(p_window, &(bj_button_event) {
-            .x=x, .y=y, .button=button, .action=action
-        });
-    }
-}
-
-bj_enter_callback_fn_t bj_set_enter_callback(
-    bj_window*                 p_window,
-    bj_enter_callback_fn_t    p_callback
-) {
-    bj_check_or_0(p_window);
-    bj_enter_callback_fn_t p_replaced = p_window->p_enter_callback;
-    p_window->p_enter_callback = p_callback;
-    return p_replaced;
-}
-
-void bj_push_enter_event(
-    bj_window* p_window,
-    bj_bool enter,
-    int x,
-    int y
-) {
-    bj_check(p_window);
-    if(!!p_window->p_enter_callback) {
-        p_window->p_enter_callback(p_window, &(bj_enter_event){x, y, enter});
-    }
-}
-
-void bj_close_on_escape(
-    bj_window* p_window,
-    const bj_key_event* p_event
-) {
-    (void)p_window;
-
-    if (p_event->key == BJ_KEY_ESCAPE && p_event->action == BJ_RELEASE) {
-        bj_window_set_should_close(p_window);
-    }
-}
-
-

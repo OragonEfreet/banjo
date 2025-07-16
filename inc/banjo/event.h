@@ -2,7 +2,6 @@
 
 #include <banjo/window.h>
 
-
 // TODO Align buttons and keys
 /// First button
 #define BJ_BUTTON_1      1
@@ -278,6 +277,7 @@ BANJO_EXPORT const char* bj_get_key_name(
     int key
 );
 
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Event action type enumeration.
 ///
@@ -312,6 +312,23 @@ typedef struct bj_key_event_t {
     int             scancode;
     bj_event_action action;
 } bj_key_event;
+
+typedef enum bj_event_type_t {
+    BJ_EVENT_ENTER,
+    BJ_EVENT_CURSOR,
+    BJ_EVENT_KEY,
+    BJ_EVENT_BUTTON,
+} bj_event_type;
+
+typedef struct bj_event_t {
+    bj_event_type type;
+    union {
+        bj_key_event    key;
+        bj_button_event button;
+        bj_cursor_event cursor;
+        bj_enter_event  enter;
+    };
+} bj_event;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Callback type for functions called when the mouse cursor enters a window.
@@ -377,8 +394,8 @@ typedef void(* bj_key_callback_fn_t)(bj_window* p_window, const bj_key_event*);
 /// \see bj_cursor_callback_fn_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_cursor_callback_fn_t bj_set_cursor_callback(
-    bj_window*          p_window,
-    bj_cursor_callback_fn_t   p_callback
+    bj_window*              p_window,
+    bj_cursor_callback_fn_t p_callback
 );
 
 
