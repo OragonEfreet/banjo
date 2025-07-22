@@ -77,9 +77,8 @@ BANJO_EXPORT void bj_dispatch_events(
     s_video->poll_events(s_video);
 
     bj_event e;
-    bj_debug("[polling] queue size: %d", evq_size());
+    
     while(get_next_event(&e)) {
-        //print_event("[polling] got ", &e);
         bj_window* p_window = e.window;
         switch(e.type) {
             case BJ_EVENT_CURSOR:
