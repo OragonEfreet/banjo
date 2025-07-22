@@ -16,6 +16,13 @@ static struct evq_t {
     size_t write;
 } evq = { {0}, 0, 0 };
 
+static struct event_callbacks_t {
+    bj_button_callback_fn_t p_button;
+    bj_cursor_callback_fn_t p_cursor;
+    bj_enter_callback_fn_t  p_enter;
+    bj_key_callback_fn_t    p_key;
+} event_callbacks;
+
 #define evq_write(at, val) bj_memcpy(evq.array + at, val, sizeof(bj_event))
 #define evq_read(at, out) bj_memcpy(out, evq.array + at, sizeof(bj_event))
 
@@ -57,12 +64,10 @@ static inline bj_bool get_next_event(bj_event* e) {
 }
 
 bj_key_callback_fn_t bj_set_key_callback(
-    bj_window* p_window,
     bj_key_callback_fn_t   p_callback
 ) {
-    bj_check_or_0(p_window);
-    bj_key_callback_fn_t p_replaced = p_window->p_key_callback;
-    p_window->p_key_callback = p_callback;
+    bj_key_callback_fn_t p_replaced = event_callbacks.p_key;
+    event_callbacks.p_key = p_callback;
     return p_replaced;
 }
 
@@ -71,18 +76,20 @@ BANJO_EXPORT void bj_dispatch_events(
 ) {
     s_video->poll_events(s_video);
 
+    bj_debug("Event size: %d", evq_size());
+
     bj_event e;
     while(get_next_event(&e)) {
         bj_window* p_window = e.window;
         switch(e.type) {
             case BJ_EVENT_CURSOR:
                 if(!!p_window->p_cursor_callback) {
-                    p_window->p_cursor_callback( p_window, &e.cursor);
+                    p_window->p_cursor_callback(p_window, &e.cursor);
                 }
                 break;
             case BJ_EVENT_KEY:
-                if (p_window->p_key_callback) {
-                    p_window->p_key_callback(p_window, &e.key);
+                if(event_callbacks.p_key) {
+                    event_callbacks.p_key(p_window, &e.key);
                 }
                 break;
             case BJ_EVENT_BUTTON:
@@ -169,26 +176,27 @@ void bj_push_key_event(
     bj_key          key,
     int             scancode
 ) {
-    bj_check(p_window);
     bj_check(key >= 0x00 && key < 0xFF);
     bj_check(action == BJ_PRESS || action == BJ_RELEASE);
 
-    char* keystate = &p_window->keystates[key];
-    
-    if (action == BJ_PRESS) {
-        if (*keystate == BJ_PRESS) {
-            if(!bj_window_get_flags(p_window, BJ_WINDOW_FLAG_KEY_REPEAT)) {
+    if(p_window != 0) {
+        char* keystate = &p_window->keystates[key];
+        
+        if (action == BJ_PRESS) {
+            if (*keystate == BJ_PRESS) {
+                if(!bj_window_get_flags(p_window, BJ_WINDOW_FLAG_KEY_REPEAT)) {
+                    return;
+                }
+                action = BJ_REPEAT;
+            } else {
+                *keystate = BJ_PRESS;
+            }
+        } else {
+            if (*keystate == BJ_RELEASE) {
                 return;
             }
-            action = BJ_REPEAT;
-        } else {
-            *keystate = BJ_PRESS;
+            *keystate = BJ_RELEASE;
         }
-    } else {
-        if (*keystate == BJ_RELEASE) {
-            return;
-        }
-        *keystate = BJ_RELEASE;
     }
 
     bj_push_event(
