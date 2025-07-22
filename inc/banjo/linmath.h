@@ -1429,4 +1429,5 @@ BJ_INLINE void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     q[k] = (M[k][i] + M[i][k]) * inv;
     q[3] = (M[k][j] - M[j][k]) * inv;
 }
+/// \}
 
