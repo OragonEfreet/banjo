@@ -37,9 +37,9 @@ static void print_event(const char* prefix, const bj_event* e) {
 #define BJ_EVQ_CAP ((size_t)64)
 
 static struct evq_t {
-    bj_event* array[BJ_EVQ_CAP];
-    size_t read;
-    size_t write;
+    bj_event array[BJ_EVQ_CAP];
+    size_t   read;
+    size_t   write;
 } evq = { {0}, 0, 0 };
 
 static struct event_callbacks_t {
@@ -82,17 +82,17 @@ void bj_end_event(void) {
 }
 
 static inline bj_bool get_next_event(bj_event* e) {
-    bj_trace("=== GET ===");
-    bj_trace("Before get: read=%ld, write=%ld", evq.read, evq.write);
+    //bj_trace("=== GET ===");
+    //bj_trace("Before get: read=%ld, write=%ld", evq.read, evq.write);
     if(evq_empty()) {
-        bj_trace("Empty, return FALSE");
-        bj_trace("===========");
+        //bj_trace("Empty, return FALSE");
+        //bj_trace("===========");
         return BJ_FALSE;
     }
     evq_shift(e);
-    print_event("pulled ", e);
-    bj_trace("After get: read=%ld, write=%ld", evq.read, evq.write);
-    bj_trace("===========");
+    //print_event("pulled ", e);
+    //bj_trace("After get: read=%ld, write=%ld", evq.read, evq.write);
+    //bj_trace("===========");
     return BJ_TRUE;
 }
 
@@ -109,11 +109,10 @@ BANJO_EXPORT void bj_dispatch_events(
 ) {
     s_video->poll_events(s_video);
 
-
     bj_event e;
     bj_debug("[polling] queue size: %d", evq_size());
     while(get_next_event(&e)) {
-        print_event("[polling] got ", &e);
+        //print_event("[polling] got ", &e);
         bj_window* p_window = e.window;
         switch(e.type) {
             case BJ_EVENT_CURSOR:
@@ -183,16 +182,16 @@ void bj_close_on_escape(
 void bj_push_event(
     const bj_event* e
 ) {
-    bj_trace("=== PUSH ===");
-    print_event("pushing ", e);
-    bj_trace("Before get: read=%ld, write=%ld", evq.read, evq.write);
+    //bj_trace("=== PUSH ===");
+    //print_event("pushing ", e);
+    //bj_trace("Before get: read=%ld, write=%ld", evq.read, evq.write);
     if(!evq_full()) {
         evq_push(e);
-        bj_trace("After get: read=%ld, write=%ld", evq.read, evq.write);
+        //bj_trace("After get: read=%ld, write=%ld", evq.read, evq.write);
     } else {
-        bj_trace("Full");
+        //bj_trace("Full");
     }
-    bj_trace("============");
+    //bj_trace("============");
 }
 
 void bj_push_cursor_event(
