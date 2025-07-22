@@ -38,6 +38,10 @@ void key_callback(bj_window* p_window, const bj_key_event* e) {
     bj_info("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s", 
         e->key, bj_get_key_name(e->key), e->scancode, action_str
     );
+
+    if(e->key == BJ_KEY_ESCAPE) {
+        bj_window_set_should_close(p_window);
+    }
 }
 
 void enter_callback(bj_window* p_window, const bj_enter_event* e) {
