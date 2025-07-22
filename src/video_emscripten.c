@@ -2,6 +2,7 @@
 
 #if BJ_HAS_FEATURE(EMSCRIPTEN)
 
+#include <banjo/event.h>
 #include <banjo/video.h>
 
 #include "check.h"
@@ -22,8 +23,32 @@ typedef struct {
     int         height;
 } emscripten_window;
 
-bool em_mousedown_callback(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData) {
-    bj_trace("pouet");
+bool em_mouse_callback(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData) {
+    const int x = mouseEvent->targetX;
+    const int y = mouseEvent->targetY;
+
+    switch (eventType) {
+        case EMSCRIPTEN_EVENT_MOUSEDOWN:
+        case EMSCRIPTEN_EVENT_MOUSEUP: {
+            const int action = (eventType == EMSCRIPTEN_EVENT_MOUSEDOWN) ? BJ_PRESS : BJ_RELEASE;
+            // +1 because EMSCRITEN buttons are the same as ours -1
+            bj_push_button_event(userData, mouseEvent->button + 1, action, x, y);
+            break;
+        }
+        case EMSCRIPTEN_EVENT_MOUSEMOVE:
+            bj_push_cursor_event(userData, x, y);
+            break;
+        case EMSCRIPTEN_EVENT_MOUSEENTER:
+        case EMSCRIPTEN_EVENT_MOUSELEAVE: {
+            bj_push_enter_event(userData, eventType == EMSCRIPTEN_EVENT_MOUSEENTER, x, y);
+            break;
+        }
+        case EMSCRIPTEN_EVENT_CLICK:
+        case EMSCRIPTEN_EVENT_DBLCLICK:
+        default:
+            break;
+    }
+
     return 0;
 }
 
@@ -45,8 +70,6 @@ static bj_window* emscripten_window_new(
         return 0;
     }
 
-    /* flags |= BJ_WINDOW_FLAG_CLOSE; */
-
     emscripten_window window = { 
         .common = {
             .flags = flags,
@@ -61,10 +84,14 @@ static bj_window* emscripten_window_new(
         return 0;
     }
 
-    emscripten_set_mousedown_callback(window.selector, 0, 0, em_mousedown_callback);
-
-
     emscripten_window* p_window = bj_malloc(sizeof(emscripten_window));
+
+    emscripten_set_mousedown_callback(window.selector, p_window, 0, em_mouse_callback);
+    emscripten_set_mouseup_callback(window.selector, p_window, 0, em_mouse_callback);
+    emscripten_set_mousemove_callback(window.selector, p_window, 0, em_mouse_callback);
+    emscripten_set_mouseenter_callback(window.selector, p_window, 0, em_mouse_callback);
+    emscripten_set_mouseleave_callback(window.selector, p_window, 0, em_mouse_callback);
+
     bj_memcpy(p_window, &window, sizeof(emscripten_window));
     return (bj_window*)p_window;
 }
@@ -81,7 +108,7 @@ static void emscripten_window_del(
     bj_free(p_window);
 }
 
-static void emscripten_dispose_layer(
+static void emscripten_end_layer(
     bj_video_layer* p_layer,
     bj_error** p_error
 ) {
@@ -142,7 +169,7 @@ static bj_video_layer* emscripten_init_layer(
     (void)p_error;
 
     bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
-    p_layer->dispose                   = emscripten_dispose_layer;
+    p_layer->end                       = emscripten_end_layer;
     p_layer->create_window             = emscripten_window_new;
     p_layer->delete_window             = emscripten_window_del;
     p_layer->poll_events               = emscripten_window_poll;
