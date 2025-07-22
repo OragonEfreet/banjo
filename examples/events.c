@@ -17,13 +17,13 @@ void cursor_callback(bj_window* p_window, const bj_cursor_event* e) {
     );
 }
 
-/* void button_callback(bj_window* p_window, const bj_button_event* e) { */
-/*     bj_info("Button event, window %p, button %d, %s, (%d,%d)", */
-/*         (void*)p_window, e->button, */ 
-/*         e->action == BJ_PRESS ? "pressed" : "released", */
-/*         e->x, e->y */
-/*     ); */
-/* } */
+void button_callback(bj_window* p_window, const bj_button_event* e) {
+    bj_info("Button event, window %p, button %d, %s, (%d,%d)",
+        (void*)p_window, e->button, 
+        e->action == BJ_PRESS ? "pressed" : "released",
+        e->x, e->y
+    );
+}
 
 void key_callback(bj_window* p_window, const bj_key_event* e) {
     (void)p_window;
@@ -57,7 +57,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     } 
 
     bj_set_key_callback(key_callback);
-    /* bj_set_button_callback(window, button_callback); */
+    bj_set_button_callback(button_callback);
     bj_set_cursor_callback(cursor_callback);
     bj_set_enter_callback(enter_callback);
 
@@ -65,7 +65,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     bj_push_key_event(0, BJ_PRESS, BJ_KEY_J, 42);
     bj_push_enter_event(0, BJ_FALSE, 34, 43);
     bj_push_cursor_event(0, 12, 13);
-    /* bj_push_button_event(0, BJ_BUTTON_LEFT, BJ_PRESS, 12, 13); */
+    bj_push_button_event(0, BJ_BUTTON_LEFT, BJ_PRESS, 12, 13);
 
     return bj_callback_continue;
 }

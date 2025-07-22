@@ -56,17 +56,10 @@ void bj_end_event(void) {
 }
 
 static inline bj_bool get_next_event(bj_event* e) {
-    //bj_trace("=== GET ===");
-    //bj_trace("Before get: read=%ld, write=%ld", evq.read, evq.write);
     if(evq_empty()) {
-        //bj_trace("Empty, return FALSE");
-        //bj_trace("===========");
         return BJ_FALSE;
     }
     evq_shift(e);
-    //print_event("pulled ", e);
-    //bj_trace("After get: read=%ld, write=%ld", evq.read, evq.write);
-    //bj_trace("===========");
     return BJ_TRUE;
 }
 
@@ -100,8 +93,8 @@ BANJO_EXPORT void bj_dispatch_events(
                 }
                 break;
             case BJ_EVENT_BUTTON:
-                if (p_window->p_button_callback) {
-                    p_window->p_button_callback(p_window, &e.button);
+                if(event_callbacks.p_button) {
+                    event_callbacks.p_button(p_window, &e.button);
                 }
                 break;
             case BJ_EVENT_ENTER:
@@ -122,12 +115,10 @@ bj_cursor_callback_fn_t bj_set_cursor_callback(
 }
 
 bj_button_callback_fn_t bj_set_button_callback(
-    bj_window*                 p_window,
     bj_button_callback_fn_t   p_callback
 ) {
-    bj_check_or_0(p_window);
-    bj_button_callback_fn_t p_replaced = p_window->p_button_callback;
-    p_window->p_button_callback = p_callback;
+    bj_button_callback_fn_t p_replaced = event_callbacks.p_button;
+    event_callbacks.p_button = p_callback;
     return p_replaced;
 }
 
@@ -154,16 +145,9 @@ void bj_close_on_escape(
 void bj_push_event(
     const bj_event* e
 ) {
-    //bj_trace("=== PUSH ===");
-    //print_event("pushing ", e);
-    //bj_trace("Before get: read=%ld, write=%ld", evq.read, evq.write);
     if(!evq_full()) {
         evq_push(e);
-        //bj_trace("After get: read=%ld, write=%ld", evq.read, evq.write);
-    } else {
-        //bj_trace("Full");
     }
-    //bj_trace("============");
 }
 
 void bj_push_cursor_event(
@@ -229,7 +213,6 @@ void bj_push_button_event(
     int x,
     int y
 ) {
-    bj_check(p_window);
     bj_push_event(
         &(bj_event) {
             .window = p_window,
