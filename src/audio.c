@@ -1,5 +1,4 @@
 #include <banjo/assert.h>
-#include <banjo/log.h>
 #include <banjo/math.h>
 
 #include "audio_t.h"
@@ -23,7 +22,7 @@ static const bj_audio_layer_create_info* layer_infos[] = {
 
 extern bj_audio_layer* s_audio;
 
-bj_audio_layer* bj_init_audio(bj_error** p_error) {
+bj_audio_layer* bj_begin_audio(bj_error** p_error) {
     bj_assert(s_audio == 0);
 
     const size_t n_layers = sizeof(layer_infos) / sizeof(bj_audio_layer_create_info*);
@@ -57,8 +56,9 @@ bj_audio_layer* bj_init_audio(bj_error** p_error) {
     return s_audio;
 }
 
-void bj_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
-    p_audio->dispose(p_audio, p_error);
+void bj_end_audio(bj_audio_layer* p_audio, bj_error** p_error) {
+    // TODO?
+    p_audio->end(p_audio, p_error);
 }
 
 bj_audio_device* bj_open_audio_device(

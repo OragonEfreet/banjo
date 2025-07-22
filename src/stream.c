@@ -1,8 +1,5 @@
 #include "stream_t.h"
 
-#include <banjo/log.h>
-#include <banjo/memory.h>
-
 #include "check.h"
 #include <stdio.h>
 

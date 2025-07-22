@@ -7,7 +7,7 @@ This list primarily serves as a **development status tracker**, helping to keep 
 It provides a rough vision of the project's direction but is **not exhaustive**.  
 Features are added over time and are **not listed in priority order**.  
 Some features may exist in the API but not be listed here, and vice versa.  
-- [ ] Basic System Layer
+- [ ] Basic System Layers
   - [ ] Window management (\ref window.c)
     - [X] Windows API
     - [ ] Wayland
@@ -19,31 +19,37 @@ Some features may exist in the API but not be listed here, and vice versa.
       - [ ] Wayland
       - [ ] X11
       - [ ] Cocoa
-    - [ ] Keycode (\ref bj_window_key_event_t)
+    - [ ] Keycode 
       - [X] Windows API
       - [ ] Wayland
       - [ ] Cocoa
       - [X] X11
-  - [ ] Mouse Button (\ref bj_window_button_event_t)
+  - [ ] Mouse Button 
     - [X] Windows API
     - [ ] Wayland
     - [ ] Cocoa
     - [X] X11
-  - [ ] Mouse Events (\ref bj_window_cursor_event_t)
+  - [ ] Mouse Events 
     - [X] Windows API
     - [ ] Wayland
     - [ ] Cocoa
     - [X] X11
-  - [ ] Graphics Context (Software Framebuffer)
+  - [ ] Graphics Context 
     - [X] Windows API
     - [ ] Wayland
     - [ ] Cocoa
     - [X] X11
+  - [ ] Event Polling API
+    - [X] Generic "bj_event" struct
+    - [X] Event buffering structure (linked-list or ring buffer)
+    - [X] Poll event fillfunction
+    - [X] Dispatch-to-callback function
+    - [ ] Polling API
 - [ ] Software Rendering
   - [ ] 3D Rendering
     - [ ] Simple Programmable Pipeline
   - [X] Bitmap Structure (\ref bj_bitmap)
-  - [X] 2D pixel drawing (\ref game_of_life.c)
+  - [X] 2D pixel drawing 
   - [X] 2D primitives drawing (\ref drawing_2d.c)
 - [ ] BMP File Support
   - [ ] Writing to disk

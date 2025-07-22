@@ -1,7 +1,4 @@
-#include <banjo/error.h>
 #include <banjo/log.h>
-#include <banjo/system.h>
-#include <banjo/time.h>
 #include <banjo/video.h>
 
 #include "config.h"
@@ -20,7 +17,7 @@ static const bj_video_layer_create_info* layer_infos[] = {
     &novideo_layer_info,
 };
 
-bj_video_layer* bj_init_video(
+bj_video_layer* bj_begin_video(
     bj_error** p_error
 ) {
     const size_t n_layers = sizeof(layer_infos) / sizeof(bj_video_layer_create_info*);
@@ -50,11 +47,11 @@ bj_video_layer* bj_init_video(
     return 0;
 }
 
-void bj_dispose_video(
+void bj_end_video(
     bj_video_layer* p_video,
     bj_error** p_error
 ) {
-    void (*dispose)(struct bj_video_layer_t*, bj_error** p_error) = p_video->dispose;
-    dispose(p_video, p_error);
+    void (*end)(struct bj_video_layer_t*, bj_error** p_error) = p_video->end;
+    end(p_video, p_error);
 }
 

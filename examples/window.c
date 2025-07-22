@@ -3,6 +3,7 @@
 /// How to open and close windows.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
+#include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/system.h>
@@ -10,12 +11,10 @@
 
 bj_window* window = 0;
 
-void key_event(bj_window* p_window, bj_event_action mode, bj_key key, int scancode) {
-    (void)key;
+void key_callback(bj_window* p_window, const bj_key_event* e) {
     (void)p_window;
-    (void)scancode;
 
-    switch(mode) {
+    switch(e->action) {
         case BJ_PRESS:
             bj_info("Pressed");
             break;
@@ -40,14 +39,14 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     } 
 
     window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
-    bj_window_set_key_event(window, key_event);
+    bj_set_key_callback(key_callback);
 
     return bj_callback_continue;
 }
 
 int bj_app_iterate(void* user_data) {
     (void)user_data;
-    bj_poll_events();
+    bj_dispatch_events();
 
     return bj_window_should_close(window) 
          ? bj_callback_exit_success 

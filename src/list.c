@@ -1,7 +1,3 @@
-#include <banjo/error.h>
-#include <banjo/log.h>
-#include <banjo/memory.h>
-
 #include "check.h"
 #include "list_t.h"
 

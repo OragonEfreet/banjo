@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
+#include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/shader.h>
@@ -77,7 +78,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     } 
 
     window = bj_window_new("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
-    bj_window_set_key_event(window, bj_close_on_escape);
+    bj_set_key_callback(bj_close_on_escape);
 
     framebuffer = bj_window_get_framebuffer(window, 0);
 
@@ -86,7 +87,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
 int bj_app_iterate(void* user_data) {
     (void)user_data;
-    bj_poll_events();
+    bj_dispatch_events();
     float time = (float)bj_get_time();
     bj_bitmap_apply_shader(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
     bj_window_update_framebuffer(window);

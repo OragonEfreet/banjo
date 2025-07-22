@@ -206,7 +206,7 @@ static void win32_flush_window_framebuffer(
     }
 }
 
-static void win32_dispose_video(
+static void win32_end_video(
     bj_video_layer* p_video,
     bj_error** p_error
 ) {
@@ -294,14 +294,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 }
             }
 
-            bj_window_input_key((bj_window*)p_window, action, keycode, scancode);
+            bj_push_key_event((bj_window*)p_window, action, keycode, scancode);
             
             break;
         }
 
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
-            bj_window_input_button((bj_window*)p_window, 
+            bj_push_button_event((bj_window*)p_window, 
                 BJ_BUTTON_LEFT,
                 uMsg == WM_LBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -311,7 +311,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
         case WM_MBUTTONDOWN:
         case WM_MBUTTONUP:
-            bj_window_input_button((bj_window*)p_window, 
+            bj_push_button_event((bj_window*)p_window, 
                 BJ_BUTTON_MIDDLE,
                 uMsg == WM_MBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -325,25 +325,25 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
             if(!p_window->cursor_in_window) {
                 p_window->cursor_in_window = 1;
-                bj_window_input_enter((bj_window*)p_window, 1, x, y);
+                bj_push_enter_event((bj_window*)p_window, 1, x, y);
             }
             TRACKMOUSEEVENT tme = {0};
             tme.cbSize = sizeof(TRACKMOUSEEVENT);
             tme.dwFlags = TME_LEAVE;
             tme.hwndTrack = hwnd;
             TrackMouseEvent(&tme);
-            bj_window_input_cursor((bj_window*)p_window, x, y);
+            bj_push_cursor_event((bj_window*)p_window, x, y);
             break;
         }
 
         case WM_MOUSELEAVE: {
             p_window->cursor_in_window = 0;
-            bj_window_input_enter((bj_window*)p_window, 0, 0, 0);
+            bj_push_enter_event((bj_window*)p_window, 0, 0, 0);
             break;
         }
 
         case WM_MOUSEWHEEL:
-            bj_window_input_button((bj_window*)p_window, 
+            bj_push_button_event((bj_window*)p_window, 
                 GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? BJ_BUTTON_UP : BJ_BUTTON_DOWN,
                 BJ_PRESS,
                 GET_X_LPARAM(lParam),
@@ -354,7 +354,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case WM_RBUTTONDOWN:
 
         case WM_RBUTTONUP:
-            bj_window_input_button((bj_window*)p_window, 
+            bj_push_button_event((bj_window*)p_window, 
                 BJ_BUTTON_RIGHT,
                 uMsg == WM_RBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -387,14 +387,14 @@ static bj_video_layer* win32_init_video(
     }
 
     bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
-    p_layer->dispose = win32_dispose_video;
-    p_layer->create_window = win32_window_new;
-    p_layer->delete_window = win32_window_del;
-    p_layer->poll_events = win32_window_poll;
-    p_layer->get_window_size = win32_get_window_size;
+    p_layer->end                       = win32_end_video;
+    p_layer->create_window             = win32_window_new;
+    p_layer->delete_window             = win32_window_del;
+    p_layer->poll_events               = win32_window_poll;
+    p_layer->get_window_size           = win32_get_window_size;
     p_layer->create_window_framebuffer = win32_create_window_framebuffer;
-    p_layer->flush_window_framebuffer = win32_flush_window_framebuffer;
-    p_layer->data = (void*)hInstance;
+    p_layer->flush_window_framebuffer  = win32_flush_window_framebuffer;
+    p_layer->data                      = (void*)hInstance;
     return p_layer;
 }
 

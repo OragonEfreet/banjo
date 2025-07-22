@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
+#include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/system.h>
@@ -74,7 +75,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     } 
 
     window = bj_window_new("Simple Banjo Window", 100, 100, 500, 500, 0);
-    bj_window_set_key_event(window, bj_close_on_escape);
+    bj_set_key_callback(bj_close_on_escape);
 
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
     draw(framebuffer);
@@ -85,7 +86,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
 int bj_app_iterate(void* user_data) {
     (void)user_data;
-    bj_poll_events();
+    bj_dispatch_events();
     bj_sleep(300);
 
     return bj_window_should_close(window) 

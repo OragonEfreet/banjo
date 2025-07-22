@@ -1,7 +1,4 @@
-#include <banjo/log.h>
 #include <banjo/math.h>
-#include <banjo/pixel.h>
-#include <banjo/stream.h>
 
 #include "bitmap_t.h"
 #include "check.h"

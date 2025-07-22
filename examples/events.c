@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/error.h>
+#include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/system.h>
@@ -12,43 +13,42 @@
 
 bj_window* window = 0;
 
-void cursor_event(bj_window* p_window, int x, int y) {
+void cursor_callback(bj_window* p_window, const bj_cursor_event* e) {
     bj_info("Cursor event, window %p, (%d,%d)",
-        (void*)p_window, x, y
+        (void*)p_window, e->x, e->y
     );
 }
 
-void button_event(bj_window* p_window, int button, bj_event_action action, int x, int y) {
+void button_callback(bj_window* p_window, const bj_button_event* e) {
     bj_info("Button event, window %p, button %d, %s, (%d,%d)",
-        (void*)p_window, button, 
-        action == BJ_PRESS ? "pressed" : "released",
-        x, y
+        (void*)p_window, e->button, 
+        e->action == BJ_PRESS ? "pressed" : "released",
+        e->x, e->y
     );
 }
 
-void key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode) {
+void key_callback(bj_window* p_window, const bj_key_event* e) {
     (void)p_window;
 
     const char* action_str = "pressed";
-    if(action != BJ_PRESS) {
-        action_str = action == BJ_RELEASE ? "released" : "repeated";
+    if(e->action != BJ_PRESS) {
+        action_str = e->action == BJ_RELEASE ? "released" : "repeated";
     }
 
-
     bj_info("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s", 
-        key, bj_get_key_name(key), scancode, action_str
+        e->key, bj_get_key_name(e->key), e->scancode, action_str
     );
 
-    if(key == BJ_KEY_ESCAPE) {
+    if(e->key == BJ_KEY_ESCAPE) {
         bj_window_set_should_close(p_window);
     }
 }
 
-void enter_event(bj_window* p_window, bj_bool enter, int x, int y) {
+void enter_callback(bj_window* p_window, const bj_enter_event* e) {
     bj_info("Enter event, window %p, %s, (%d,%d)",
         (void*)p_window, 
-        enter ? "entered" : "left",
-        x, y
+        e->enter ? "entered" : "left",
+        e->x, e->y
     );
 }
 
@@ -64,17 +64,17 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
 
-    bj_window_set_key_event(window, key_event);
-    bj_window_set_button_event(window, button_event);
-    bj_window_set_cursor_event(window, cursor_event);
-    bj_window_set_enter_event(window, enter_event);
+    bj_set_key_callback(key_callback);
+    bj_set_button_callback(button_callback);
+    bj_set_cursor_callback(cursor_callback);
+    bj_set_enter_callback(enter_callback);
 
     return bj_callback_continue;
 }
 
 int bj_app_iterate(void* user_data) {
     (void)user_data;
-    bj_poll_events();
+    bj_dispatch_events();
     bj_sleep(30);
 
     return bj_window_should_close(window) 

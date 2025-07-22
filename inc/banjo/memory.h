@@ -1,154 +1,189 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file
 /// All memory-related functions, including custom allocators.
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup memory Memory Management
 /// \ingroup core
 ///
 /// \{
+////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <banjo/api.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Memory allocation callback.
+/// \typedef bj_malloc_fn
+/// \brief Memory allocation callback.
+///
 /// Used in \ref bj_memory_callbacks to set the function used for custom allocations.
+///
+/// \param p_user_data General purpose context data.
+/// \param size Allocation size in bytes requested by the caller.
+///
+/// \return Pointer to allocated memory block.
+////////////////////////////////////////////////////////////////////////////////
 typedef void* (*bj_malloc_fn)(
-    void* p_user_data, //< General purpose context data.
-    size_t size         //< Allocation size in bytes requested by the caller.
+    void* p_user_data,
+    size_t size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Memory allocation callback.
+/// \typedef bj_realloc_fn
+/// \brief Memory reallocation callback.
+///
 /// Used in \ref bj_memory_callbacks to set the function used for custom reallocations.
+///
+/// \param p_user_data General purpose context data.
+/// \param p_original Initial object to reallocate.
+/// \param size Allocation size in bytes requested by the caller.
+///
+/// \return Pointer to reallocated memory block.
+////////////////////////////////////////////////////////////////////////////////
 typedef void* (*bj_realloc_fn)(
-    void* p_user_data, //< General purpose context data.
-    void* p_original,  //< Initial object to reallocate.
-    size_t size         //< Allocation size in bytes requested by the caller.
+    void* p_user_data,
+    void* p_original,
+    size_t size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Memory allocation callback.
+/// \typedef bj_free_fn
+/// \brief Memory free callback.
 ///
 /// Used in \ref bj_memory_callbacks to set the function used for custom deallocations.
+///
+/// \param p_user_data General purpose context data.
+/// \param p_memory Object memory to dispose.
+////////////////////////////////////////////////////////////////////////////////
 typedef void (*bj_free_fn)(
-    void* p_user_data, //< General purpose context data.
-    void* p_memory     //< Object memory to dispose.
+    void* p_user_data,
+    void* p_memory
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Custom allocation callbacks.
-/// This structure is used to set the function used by the API upon managing memory.
-/// Each object created by the API can be set a specific set of callbacks.
-/// Also, the custom allocators can be set globally with \ref bj_memory_set_defaults.
+/// \brief Custom allocation callbacks.
+///
+/// This structure holds function pointers for allocation,
+/// reallocation, and deallocation callbacks along with user data.
+///
+/// These callbacks can be assigned per-object or set globally
+/// with \ref bj_memory_set_defaults.
+////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_memory_callbacks {
-    void*                      p_user_data;     ///< General purpose context data.
-    bj_malloc_fn    fn_allocation;   ///< The allocation function.
-    bj_realloc_fn  fn_reallocation; ///< The reallocation function.
-    bj_free_fn          fn_free;         ///< The deallocation function.
+    void*         p_user_data;       ///< General purpose context data.
+    bj_malloc_fn  fn_allocation;     ///< Allocation function pointer.
+    bj_realloc_fn fn_reallocation;   ///< Reallocation function pointer.
+    bj_free_fn    fn_free;           ///< Deallocation function pointer.
 } bj_memory_callbacks;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Allocate `size` bytes of memory and returns a pointer to it.
-/// 
-/// \param[in] size        The number of bytes to allocate.
+/// \brief Allocate `size` bytes of memory.
 ///
-/// \return The memory address of the newly allocated block.
+/// \param[in] size Number of bytes to allocate.
+///
+/// \return Pointer to newly allocated memory block.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_malloc(
     size_t size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Allocate `size` bytes of memory and returns a pointer to it.
+/// \brief Allocate `size` bytes of zero-initialized memory.
 ///
-/// The returned memory is automatically filled with 0's using \ref bj_memzero.
-/// 
-/// \param[in] size        The number of bytes to allocate.
+/// The returned memory is set to zero bytes.
 ///
-/// \return The memory address of the newly allocated block.
+/// \param[in] size Number of bytes to allocate.
+///
+/// \return Pointer to newly allocated zeroed memory block.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_calloc(
     size_t size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Reallocate the given area of memory.
-/// 
-/// \param[in] p_memory    Pointer to the memory area to be reallocated.
-/// \param[in] size        The number of bytes to allocate.
+/// \brief Reallocate a memory block to a new size.
 ///
-/// `p_memory` must be previously allocated by \ref bj_malloc or \ref bj_realloc.
+/// \param[in] p_memory Pointer to previously allocated memory.
+/// \param[in] size Number of bytes to allocate.
 ///
-/// \return The memory address of the newly allocated block.
+/// \return Pointer to newly reallocated memory block.
+///
+/// \note `p_memory` must have been allocated by \ref bj_malloc or \ref bj_realloc.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_realloc(
-    void*                        p_memory,
-    size_t                        size
+    void* p_memory,
+    size_t size
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Deallocate the given area of memory.
-/// 
-/// \param[in] p_memory    Pointer to the memory area to be reallocated.
+/// \brief Free a previously allocated memory block.
 ///
-/// `p_memory` must be previously allocated by \ref bj_malloc or \ref bj_realloc.
+/// \param[in] p_memory Pointer to memory to free.
 ///
-/// The latter can have been overriden by \ref bj_memory_set_defaults.
+/// \note `p_memory` must have been allocated by \ref bj_malloc or \ref bj_realloc.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_free(
-    void*                         p_memory
+    void* p_memory
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Set the default allocators.
+/// \brief Set the global default memory allocators.
 ///
-/// When a function requires memory changes,
-/// the caller can send callback memory functions.
-/// If the given allocator is _0_, Banjo uses global defaults
-/// (`malloc`/`realloc`/`free`).
+/// If `p_allocator` is `NULL`, resets to system defaults (`malloc`, `realloc`, `free`).
 ///
-/// This function can override the default allocator globally.
-/// After calling this function, default allocators (_0_) will be using the
-/// callbacks set in parameter.
-///
-/// If _0_ is passed to this function, Banjo sets back the systems allocators.
-///
-/// \param[in] p_allocator The new default allocators.
-///
-/// \see bj_memory_unset_defaults
+/// \param[in] p_allocator Pointer to custom allocator callbacks.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_memory_set_defaults(
     const bj_memory_callbacks* p_allocator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Reset the default allocators.
-/// Sets back the global allocators to standard defaults (`malloc`/`realloc`/`free`).
+/// \brief Reset the global default allocators to system defaults.
 ///
-/// \see bj_memory_set_defaults
+/// Sets allocators back to standard system functions (`malloc`, `realloc`, `free`).
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_memory_unset_defaults(void);
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Copies `mem_size` bytes from the object pointed to by `p_src` to to object
-/// pointed to by `p_dest`.
+/// \brief Copy `mem_size` bytes from `p_src` to `p_dest`.
 ///
-/// \param[in] p_dest   Pointer to the object to copy to.
-/// \param[in] p_src    Pointer to the object to copy from.
+/// \param[in] p_dest Destination pointer.
+/// \param[in] p_src Source pointer.
 /// \param[in] mem_size Number of bytes to copy.
 ///
-/// \return `p_dest` pointer.
-///
-/// The function effectively calls the standard `memcpy` function.
+/// \return Pointer to `p_dest`.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_memcpy(
-    void*       p_dest,
+    void* p_dest,
     const void* p_src,
-    size_t      mem_size
+    size_t mem_size
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Move `mem_size` bytes from `p_src` to `p_dest`.
+///
+/// Similar to \ref bj_memcpy but handles overlapping memory regions safely.
+///
+/// \param[in] p_dest Destination pointer.
+/// \param[in] p_src Source pointer.
+/// \param[in] mem_size Number of bytes to move.
+///
+/// \return Pointer to `p_dest`.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_memmove(
-    void*       p_dest,
+    void* p_dest,
     const void* p_src,
-    size_t      mem_size
+    size_t mem_size
 );
 
-
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Compare two memory blocks.
+///
+/// \param[in] p_block_a Pointer to first memory block.
+/// \param[in] p_block_b Pointer to second memory block.
+/// \param[in] size Number of bytes to compare.
+///
+/// \return Zero if equal, negative if a < b, positive if a > b.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT int bj_memcmp(
     const void* p_block_a,
     const void* p_block_b,
@@ -156,28 +191,29 @@ BANJO_EXPORT int bj_memcmp(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Copies the value `value` into each ot the first `num` bytes of the object
-/// pointed to by `p_dest`.
+/// \brief Fill `mem_size` bytes at `p_dest` with `value`.
 ///
-/// \param[in] p_dest      Pointer to the object to fill.
-/// \param[in] value       fill byte.
-/// \param[in] mem_size    number of bytes to fill.
-BANJO_EXPORT void bj_memset(
-    void*   p_dest,
-    uint8_t value,
-    size_t  mem_size
-);
-
+/// \param[in] p_dest Destination pointer.
+/// \param[in] value Byte value to fill.
+/// \param[in] mem_size Number of bytes to fill.
 ////////////////////////////////////////////////////////////////////////////////
-/// Sets the `mem_size` bytes starting from `p_dest` to 0.
-///
-/// Effectively calls `bj_memset(p_dest, 0, mem_size)`
-///
-/// \param[in] p_dest      Pointer to the object to fill.
-/// \param[in] mem_size    number of bytes to fill.
-BANJO_EXPORT void bj_memzero(
-    void*  p_dest,
+BANJO_EXPORT void bj_memset(
+    void* p_dest,
+    uint8_t value,
     size_t mem_size
 );
 
-/// \} // End of array memory
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Zero out `mem_size` bytes at `p_dest`.
+///
+/// Effectively calls \ref bj_memset with zero.
+///
+/// \param[in] p_dest Destination pointer.
+/// \param[in] mem_size Number of bytes to zero.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_memzero(
+    void* p_dest,
+    size_t mem_size
+);
+
+/// \} // End of memory group
