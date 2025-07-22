@@ -465,7 +465,6 @@ BANJO_EXPORT bj_key_callback_fn_t bj_set_key_callback(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
-    bj_window*         p_window,
     bj_enter_callback_fn_t   p_callback
 );
 

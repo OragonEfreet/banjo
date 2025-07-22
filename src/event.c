@@ -7,6 +7,32 @@
 
 extern bj_video_layer* s_video;
 
+static void print_event(const char* prefix, const bj_event* e) {
+    if(e == 0) {
+        bj_trace("void event");
+        return;
+    }
+
+    switch(e->type) {
+        case BJ_EVENT_CURSOR:
+            bj_trace("%sBJ_EVENT_CURSOR", prefix ? prefix: "");
+            break;
+        case BJ_EVENT_KEY:
+            bj_trace("%sBJ_EVENT_KEY", prefix ? prefix: "");
+            break;
+        case BJ_EVENT_BUTTON:
+            bj_trace("%sJ_EVENT_BUTTON", prefix ? prefix: "");
+            break;
+        case BJ_EVENT_ENTER:
+            bj_trace("%sBJ_EVENT_ENTER", prefix ? prefix: "");
+            break;
+        default:
+            bj_trace("%sunknown event", prefix ? prefix: "");
+            break;
+    }
+
+}
+
 // Event queue implemented as a ring buffer
 #define BJ_EVQ_CAP ((size_t)64)
 
@@ -56,10 +82,17 @@ void bj_end_event(void) {
 }
 
 static inline bj_bool get_next_event(bj_event* e) {
+    bj_trace("=== GET ===");
+    bj_trace("Before get: read=%ld, write=%ld", evq.read, evq.write);
     if(evq_empty()) {
+        bj_trace("Empty, return FALSE");
+        bj_trace("===========");
         return BJ_FALSE;
     }
     evq_shift(e);
+    print_event("pulled ", e);
+    bj_trace("After get: read=%ld, write=%ld", evq.read, evq.write);
+    bj_trace("===========");
     return BJ_TRUE;
 }
 
@@ -76,10 +109,11 @@ BANJO_EXPORT void bj_dispatch_events(
 ) {
     s_video->poll_events(s_video);
 
-    bj_debug("Event size: %d", evq_size());
 
     bj_event e;
+    bj_debug("[polling] queue size: %d", evq_size());
     while(get_next_event(&e)) {
+        print_event("[polling] got ", &e);
         bj_window* p_window = e.window;
         switch(e.type) {
             case BJ_EVENT_CURSOR:
@@ -98,8 +132,8 @@ BANJO_EXPORT void bj_dispatch_events(
                 }
                 break;
             case BJ_EVENT_ENTER:
-                if (p_window->p_enter_callback) {
-                    p_window->p_enter_callback(p_window, &e.enter);
+                if(event_callbacks.p_enter) {
+                    event_callbacks.p_enter(p_window, &e.enter);
                 }
                 break;
         }
@@ -127,12 +161,10 @@ bj_button_callback_fn_t bj_set_button_callback(
 }
 
 bj_enter_callback_fn_t bj_set_enter_callback(
-    bj_window*                 p_window,
     bj_enter_callback_fn_t    p_callback
 ) {
-    bj_check_or_0(p_window);
-    bj_enter_callback_fn_t p_replaced = p_window->p_enter_callback;
-    p_window->p_enter_callback = p_callback;
+    bj_enter_callback_fn_t p_replaced = event_callbacks.p_enter;
+    event_callbacks.p_enter = p_callback;
     return p_replaced;
 }
 
@@ -147,12 +179,20 @@ void bj_close_on_escape(
     }
 }
 
+
 void bj_push_event(
     const bj_event* e
 ) {
+    bj_trace("=== PUSH ===");
+    print_event("pushing ", e);
+    bj_trace("Before get: read=%ld, write=%ld", evq.read, evq.write);
     if(!evq_full()) {
         evq_push(e);
+        bj_trace("After get: read=%ld, write=%ld", evq.read, evq.write);
+    } else {
+        bj_trace("Full");
     }
+    bj_trace("============");
 }
 
 void bj_push_cursor_event(
@@ -240,7 +280,6 @@ void bj_push_enter_event(
     int x,
     int y
 ) {
-    bj_check(p_window);
     bj_push_event(
         &(bj_event) {
             .window = p_window,
@@ -432,3 +471,4 @@ const char* bj_get_key_name(int key) {
     }
     return "Unknown";
 }
+
