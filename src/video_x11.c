@@ -680,7 +680,7 @@ static void x11_flush_window_framebuffer(
     p_x11->XSync(display, False);
 }
 
-static void x11_dispose_video(
+static void x11_end_video(
     bj_video_layer* p_video,
     bj_error** p_error
 ) {

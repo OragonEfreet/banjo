@@ -14,7 +14,7 @@ static struct evq_t {
     bj_event array[BJ_EVQ_CAP];
     size_t   read;
     size_t   write;
-} evq = { {0}, 0, 0 };
+} evq = { { {0} }, 0, 0 };
 
 static struct event_callbacks_t {
     bj_button_callback_fn_t p_button;
