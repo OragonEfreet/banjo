@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \example events.c
+/// \example events_callbacks.c
 /// Basic event handling.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
@@ -10,8 +10,6 @@
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
-
-bj_window* window = 0;
 
 void cursor_callback(bj_window* p_window, const bj_cursor_event* e) {
     bj_info("Cursor event, window %p, (%d,%d)",

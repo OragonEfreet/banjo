@@ -57,7 +57,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 int bj_app_iterate(void* user_data) {
     (void)user_data;
 
-    bj_poll_events();
+    bj_dispatch_events();
 
     bj_bitmap_blit(bmp_sprite_sheet, &(bj_rect){
         .x = frame_count * SPRITE_W,

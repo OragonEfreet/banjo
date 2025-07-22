@@ -321,6 +321,7 @@ typedef enum bj_event_type_t {
 } bj_event_type;
 
 typedef struct bj_event_t {
+    bj_window* window;
     bj_event_type type;
     union {
         bj_key_event    key;
@@ -483,6 +484,7 @@ BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_close_on_escape(bj_window*, const bj_key_event*);
 
+void bj_push_event(const bj_event* e);
 void bj_push_key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
 void bj_push_cursor_event(bj_window* p_window, int x, int y);
 void bj_push_button_event(bj_window* p_window, int button, bj_event_action action, int x, int y);
@@ -494,7 +496,7 @@ void bj_push_enter_event(bj_window* p_window, bj_bool enter, int x, int y);
 /// All events received by the system will be processed and sent to the event
 /// callbacks.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_poll_events(
+BANJO_EXPORT void bj_dispatch_events(
     void
 );
 
