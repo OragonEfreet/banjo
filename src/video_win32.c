@@ -206,7 +206,7 @@ static void win32_flush_window_framebuffer(
     }
 }
 
-static void win32_dispose_video(
+static void win32_end_video(
     bj_video_layer* p_video,
     bj_error** p_error
 ) {
