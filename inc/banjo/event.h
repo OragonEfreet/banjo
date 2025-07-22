@@ -388,14 +388,12 @@ typedef void(* bj_key_callback_fn_t)(bj_window* p_window, const bj_key_event*);
 /// If an event was already set previously, it is returned to the caller.
 /// The event set is used until a new callback function is set.
 ///
-/// \param p_window   The window handler
 /// \param p_callback The callback function
 /// \return *0* or the previously set callback function if any.
 ///
 /// \see bj_cursor_callback_fn_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_cursor_callback_fn_t bj_set_cursor_callback(
-    bj_window*              p_window,
     bj_cursor_callback_fn_t p_callback
 );
 

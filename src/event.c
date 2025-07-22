@@ -7,32 +7,6 @@
 
 extern bj_video_layer* s_video;
 
-static void print_event(const char* prefix, const bj_event* e) {
-    if(e == 0) {
-        bj_trace("void event");
-        return;
-    }
-
-    switch(e->type) {
-        case BJ_EVENT_CURSOR:
-            bj_trace("%sBJ_EVENT_CURSOR", prefix ? prefix: "");
-            break;
-        case BJ_EVENT_KEY:
-            bj_trace("%sBJ_EVENT_KEY", prefix ? prefix: "");
-            break;
-        case BJ_EVENT_BUTTON:
-            bj_trace("%sJ_EVENT_BUTTON", prefix ? prefix: "");
-            break;
-        case BJ_EVENT_ENTER:
-            bj_trace("%sBJ_EVENT_ENTER", prefix ? prefix: "");
-            break;
-        default:
-            bj_trace("%sunknown event", prefix ? prefix: "");
-            break;
-    }
-
-}
-
 // Event queue implemented as a ring buffer
 #define BJ_EVQ_CAP ((size_t)64)
 
@@ -116,8 +90,8 @@ BANJO_EXPORT void bj_dispatch_events(
         bj_window* p_window = e.window;
         switch(e.type) {
             case BJ_EVENT_CURSOR:
-                if(!!p_window->p_cursor_callback) {
-                    p_window->p_cursor_callback(p_window, &e.cursor);
+                if(event_callbacks.p_cursor) {
+                    event_callbacks.p_cursor(p_window, &e.cursor);
                 }
                 break;
             case BJ_EVENT_KEY:
@@ -140,12 +114,10 @@ BANJO_EXPORT void bj_dispatch_events(
 }
 
 bj_cursor_callback_fn_t bj_set_cursor_callback(
-    bj_window*                 p_window,
     bj_cursor_callback_fn_t   p_callback
 ) {
-    bj_check_or_0(p_window);
-    bj_cursor_callback_fn_t p_replaced = p_window->p_cursor_callback;
-    p_window->p_cursor_callback = p_callback;
+    bj_cursor_callback_fn_t p_replaced = event_callbacks.p_cursor;
+    event_callbacks.p_cursor = p_callback;
     return p_replaced;
 }
 
@@ -199,7 +171,6 @@ void bj_push_cursor_event(
     int x,
     int y
 ) {
-    bj_check(p_window);
     bj_push_event(
         &(bj_event) {
             .window = p_window,

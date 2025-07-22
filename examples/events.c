@@ -11,11 +11,11 @@
 #include <banjo/time.h>
 #include <banjo/window.h>
 
-/* void cursor_callback(bj_window* p_window, const bj_cursor_event* e) { */
-/*     bj_info("Cursor event, window %p, (%d,%d)", */
-/*         (void*)p_window, e->x, e->y */
-/*     ); */
-/* } */
+void cursor_callback(bj_window* p_window, const bj_cursor_event* e) {
+    bj_info("Cursor event, window %p, (%d,%d)",
+        (void*)p_window, e->x, e->y
+    );
+}
 
 /* void button_callback(bj_window* p_window, const bj_button_event* e) { */
 /*     bj_info("Button event, window %p, button %d, %s, (%d,%d)", */
@@ -58,12 +58,14 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_set_key_callback(key_callback);
     /* bj_set_button_callback(window, button_callback); */
-    /* bj_set_cursor_callback(window, cursor_callback); */
+    bj_set_cursor_callback(cursor_callback);
     bj_set_enter_callback(enter_callback);
 
-    bj_push_key_event(0, BJ_PRESS, BJ_KEY_J, 42);
     bj_push_enter_event(0, BJ_TRUE, 10, 100);
-    /* bj_push_enter_event(0, BJ_FALSE, 34, 43); */
+    bj_push_key_event(0, BJ_PRESS, BJ_KEY_J, 42);
+    bj_push_enter_event(0, BJ_FALSE, 34, 43);
+    bj_push_cursor_event(0, 12, 13);
+    /* bj_push_button_event(0, BJ_BUTTON_LEFT, BJ_PRESS, 12, 13); */
 
     return bj_callback_continue;
 }
