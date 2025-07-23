@@ -230,7 +230,7 @@ static bj_bitmap* emscripten_create_window_framebuffer(
     emscripten_window* p_window = (emscripten_window*)p_abstract_window;
     return bj_bitmap_new(
         p_window->width, p_window->height,
-        BJ_PIXEL_MODE_INDEXED_1, 0
+        BJ_PIXEL_MODE_XRGB8888, 0
     );
 }
 
@@ -238,8 +238,34 @@ static void emscripten_flush_window_framebuffer(
     bj_video_layer* p_layer,
     const bj_window*   p_abstract_window
 ) {
+    const emscripten_window* p_window = (emscripten_window*)p_abstract_window;
     (void)p_layer;
     (void)p_abstract_window;
+
+    MAIN_THREAD_EM_ASM({
+        var w = $0;
+        var h = $1;
+        var pixels = $2;
+        var canvasId = UTF8ToString($3);
+        var canvas = document.querySelector(canvasId);
+        var ctx = canvas.getContext('2d');
+
+        var imageData = ctx.createImageData(w, h);
+        var data = imageData.data;
+
+        var src32 = HEAP32.subarray(pixels >> 2, (pixels >> 2) + w * h);
+        var dst32 = new Uint32Array(data.buffer);
+
+        for (var i = 0; i < src32.length; ++i) {
+            var xrgb = src32[i];
+            var r = (xrgb >> 16) & 0xFF;
+            var g = (xrgb >> 8) & 0xFF;
+            var b = xrgb & 0xFF;
+            dst32[i] = (0xFF << 24) | (b << 16) | (g << 8) | r; // RGBA
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    }, p_window->width, p_window->height, bj_bitmap_pixels(p_abstract_window->p_framebuffer), p_window->selector);
 }
 
 static bj_video_layer* emscripten_init_layer(
