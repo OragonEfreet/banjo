@@ -285,7 +285,7 @@ static bj_video_layer* emscripten_init_layer(
     return p_layer;
 }
 
-bj_video_layer_create_info emscripten_layer_info = {
+bj_video_layer_create_info emscripten_video_layer_info = {
     .name   = "emscripten",
     .create = emscripten_init_layer,
 };

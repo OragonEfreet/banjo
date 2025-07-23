@@ -45,7 +45,7 @@ static bj_audio_layer* noaudio_init_audio(bj_error** p_error) {
 	return p_audio;
 }
 
-bj_audio_layer_create_info noaudio_layer_info = {
+bj_audio_layer_create_info noaudio_audio_layer_info = {
     .name = "noaudio",
     .create = noaudio_init_audio,
 };
