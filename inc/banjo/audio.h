@@ -77,11 +77,17 @@ typedef void (*bj_audio_callback_t)(
 /// This initializes the audio backend and starts playback immediately
 /// using the provided callback.
 ///
-/// \param p_error               Pointer to receive error information.
+/// \param p_properties          An optional pointer to required properties, can be _0_.
 /// \param p_callback            Function pointer to the user-provided audio callback.
 /// \param p_callback_user_data  User-defined pointer passed to the callback.
+/// \param p_error               Pointer to receive error information.
 ///
 /// \return A handle to the opened audio device, or NULL on failure.
+///
+/// \par Behavior
+///
+/// If `p_properties` is set, the driver will attempt to open a device with the
+/// provided properties and fail if it's not able to.
 ///
 /// \see bj_audio_callback_t
 /// \see bj_close_audio_device
@@ -89,9 +95,10 @@ typedef void (*bj_audio_callback_t)(
 /// \see bj_audio_device_pause
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_audio_device* bj_open_audio_device(
-    bj_audio_callback_t p_callback,
-    void* p_callback_user_data,
-    bj_error** p_error
+    const bj_audio_properties* p_properties,
+    bj_audio_callback_t        p_callback,
+    void*                      p_callback_user_data,
+    bj_error**                 p_error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,9 +268,10 @@ typedef struct bj_audio_layer_t {
     ////////////////////////////////////////////////////////////////////////////
     bj_audio_device* (*open_device)(
         struct bj_audio_layer_t* self,
-        bj_error** p_error,
+        const bj_audio_properties* p_properties,
         bj_audio_callback_t callback,
-        void* user_data
+        void* user_data,
+        bj_error** p_error
     );
 
     ////////////////////////////////////////////////////////////////////////////

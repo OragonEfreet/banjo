@@ -9,15 +9,17 @@ static void noaudio_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
 }
 
 static bj_audio_device* noaudio_open_device(
-    bj_audio_layer*     p_audio,
-    bj_error**          p_error,
-    bj_audio_callback_t p_callback,
-    void*               p_callback_user_data
+    bj_audio_layer*            p_audio,
+    const bj_audio_properties* p_properties,
+    bj_audio_callback_t        p_callback,
+    void*                      p_callback_user_data,
+    bj_error**                 p_error
 ) {
     (void)p_audio;
-    (void)p_error;
     (void)p_callback;
     (void)p_callback_user_data;
+    (void)p_error;
+    (void)p_properties;
 	return 0;
 }
 

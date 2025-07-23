@@ -62,12 +62,13 @@ void bj_end_audio(bj_audio_layer* p_audio, bj_error** p_error) {
 }
 
 bj_audio_device* bj_open_audio_device(
-    bj_audio_callback_t p_callback,
-    void * p_callback_user_data,
-	bj_error** p_error
+    const bj_audio_properties* p_properties,
+    bj_audio_callback_t        p_callback,
+    void*                      p_callback_user_data,
+    bj_error**                 p_error
 ) {
     bj_check_or_0(s_audio);
-    return s_audio->open_device(s_audio, p_error, p_callback, p_callback_user_data);
+    return s_audio->open_device(s_audio, p_properties, p_callback, p_callback_user_data, p_error);
 }
 
 void bj_close_audio_device(
