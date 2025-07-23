@@ -89,9 +89,9 @@ typedef void (*bj_audio_callback_t)(
 /// \see bj_audio_device_pause
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_audio_device* bj_open_audio_device(
-    bj_error** p_error,
     bj_audio_callback_t p_callback,
-    void* p_callback_user_data
+    void* p_callback_user_data,
+    bj_error** p_error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
