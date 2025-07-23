@@ -3,12 +3,16 @@
 #if BJ_HAS_FEATURE(EMSCRIPTEN)
 
 #include <banjo/event.h>
+#include <banjo/string.h>
 #include <banjo/video.h>
 
 #include "check.h"
 #include "window_t.h"
 
+#include <emscripten/dom_pk_codes.h> 
 #include <emscripten/html5.h>
+
+#include <ctype.h>
 
 #define BJ_EM_CANVAS_SELECTOR "#canvas"
 
@@ -23,7 +27,80 @@ typedef struct {
     int         height;
 } emscripten_window;
 
-bool em_mouse_callback(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData) {
+
+static bj_key em_translate_keycode(const EM_UTF8 key[32], unsigned int location) {
+    // Common named keys
+    if (bj_strcmp(key, "Enter") == 0) return BJ_KEY_RETURN;
+    if (bj_strcmp(key, "Tab") == 0) return BJ_KEY_TAB;
+    if (bj_strcmp(key, "Escape") == 0) return BJ_KEY_ESCAPE;
+    if (bj_strcmp(key, "Backspace") == 0) return BJ_KEY_BACK;
+    if (bj_strcmp(key, " ") == 0 || bj_strcmp(key, "Spacebar") == 0) return BJ_KEY_SPACE;
+    if (bj_strcmp(key, "ArrowLeft") == 0) return BJ_KEY_LEFT;
+    if (bj_strcmp(key, "ArrowRight") == 0) return BJ_KEY_RIGHT;
+    if (bj_strcmp(key, "ArrowUp") == 0) return BJ_KEY_UP;
+    if (bj_strcmp(key, "ArrowDown") == 0) return BJ_KEY_DOWN;
+    if (bj_strcmp(key, "Home") == 0) return BJ_KEY_HOME;
+    if (bj_strcmp(key, "End") == 0) return BJ_KEY_END;
+    if (bj_strcmp(key, "PageUp") == 0) return BJ_KEY_PRIOR;
+    if (bj_strcmp(key, "PageDown") == 0) return BJ_KEY_NEXT;
+    if (bj_strcmp(key, "Insert") == 0) return BJ_KEY_INSERT;
+    if (bj_strcmp(key, "Delete") == 0) return BJ_KEY_DELETE;
+    if (bj_strcmp(key, "Pause") == 0) return BJ_KEY_PAUSE;
+    if (bj_strcmp(key, "CapsLock") == 0) return BJ_KEY_CAPITAL;
+
+    // Function keys F1-F24
+    if (key[0] == 'F' && isdigit((unsigned char)key[1])) {
+        int fnum = 0;
+        for (int i = 1; key[i] && isdigit((unsigned char)key[i]); ++i) {
+            fnum = fnum * 10 + (key[i] - '0');
+        }
+        if (fnum >= 1 && fnum <= 24) {
+            return (bj_key)(BJ_KEY_F1 + (fnum - 1));
+        }
+    }
+
+    // Modifier keys
+    if (bj_strcmp(key, "Shift") == 0) return location == 1 ? BJ_KEY_LSHIFT : BJ_KEY_RSHIFT;
+    if (bj_strcmp(key, "Control") == 0) return location == 1 ? BJ_KEY_LCONTROL : BJ_KEY_RCONTROL;
+    if (bj_strcmp(key, "Alt") == 0) return location == 1 ? BJ_KEY_LMENU : BJ_KEY_RMENU;
+    if (bj_strcmp(key, "Meta") == 0) return location == 1 ? BJ_KEY_LWIN : BJ_KEY_RWIN;
+
+    // Single-character keys
+    if (strlen(key) == 1) {
+        char c = key[0];
+        if (c >= '0' && c <= '9') return (bj_key)(BJ_KEY_0 + (c - '0'));
+        if (c >= 'A' && c <= 'Z') return (bj_key)(BJ_KEY_A + (c - 'A'));
+        if (c >= 'a' && c <= 'z') return (bj_key)(BJ_KEY_A + (c - 'a'));
+        // Handle symbols (US layout)
+        switch (c) {
+            case ';': return BJ_KEY_OEM_1;
+            case '+': return BJ_KEY_OEM_PLUS;
+            case ',': return BJ_KEY_OEM_COMMA;
+            case '-': return BJ_KEY_OEM_MINUS;
+            case '.': return BJ_KEY_OEM_PERIOD;
+            case '/': return BJ_KEY_OEM_2;
+            case '`': return BJ_KEY_OEM_3;
+            case '[': return BJ_KEY_OEM_4;
+            case '\\': return BJ_KEY_OEM_5;
+            case ']': return BJ_KEY_OEM_6;
+            case '\'': return BJ_KEY_OEM_7;
+        }
+    }
+
+    return BJ_KEY_UNKNOWN;
+}
+
+static bool em_key_callback(int eventType, const EmscriptenKeyboardEvent *keyEvent, void *userData) {
+    bj_push_key_event(
+        userData, 
+        eventType == EMSCRIPTEN_EVENT_KEYDOWN ? BJ_PRESS : BJ_RELEASE, 
+        em_translate_keycode(keyEvent->key, keyEvent->location), 
+        emscripten_compute_dom_pk_code(keyEvent->code)
+    );
+    return 1;
+}
+
+static bool em_mouse_callback(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData) {
     const int x = mouseEvent->targetX;
     const int y = mouseEvent->targetY;
 
@@ -46,10 +123,10 @@ bool em_mouse_callback(int eventType, const EmscriptenMouseEvent *mouseEvent, vo
         case EMSCRIPTEN_EVENT_CLICK:
         case EMSCRIPTEN_EVENT_DBLCLICK:
         default:
-            break;
+            return 0;
     }
 
-    return 0;
+    return 1;
 }
 
 static bj_window* emscripten_window_new(
@@ -91,6 +168,8 @@ static bj_window* emscripten_window_new(
     emscripten_set_mousemove_callback(window.selector, p_window, 0, em_mouse_callback);
     emscripten_set_mouseenter_callback(window.selector, p_window, 0, em_mouse_callback);
     emscripten_set_mouseleave_callback(window.selector, p_window, 0, em_mouse_callback);
+    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, p_window, 0, em_key_callback);
+    emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, p_window, 0, em_key_callback);
 
     bj_memcpy(p_window, &window, sizeof(emscripten_window));
     return (bj_window*)p_window;
