@@ -23,15 +23,24 @@
 /// \see bj_close_audio_device
 typedef struct bj_audio_device_t bj_audio_device;
 
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Describes how and audio device encodes sound samples.
 ///
 /// \see bj_audio_properties
 ////////////////////////////////////////////////////////////////////////////////
 typedef enum bj_audio_format_t {
-    BJ_AUDIO_INT16, ///!< 16-bit signed integer
-    BJ_AUDIO_F32,   ///!< 32-bit float
+    BJ_AUDIO_FORMAT_UNKNOWN = 0x0000,  ///!< Unknown
+    BJ_AUDIO_FORMAT_INT16   = 0x8010,  ///!< 16-bit signed integer
+    BJ_AUDIO_FORMAT_F32     = 0x8120, ///!< 32-bit float
 } bj_audio_format;
+
+
+#define BJ_AUDIO_FORMAT_WIDTH(x)         ((x) & (0xFFu))
+#define BJ_AUDIO_FORMAT_FLOAT(x)         ((x) & (1u<<8))
+#define BJ_AUDIO_FORMAT_INT(x)           (!((x) & (1u<<8))))
+#define BJ_AUDIO_FORMAT_BIG_ENDIAN(x)    ((x) & (1u<<12))
+#define BJ_AUDIO_FORMAT_SIGNED(x)        ((x) & (1u<<15))
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Describe properties of an audio device.
@@ -87,7 +96,8 @@ typedef void (*bj_audio_callback_t)(
 /// \par Behavior
 ///
 /// If `p_properties` is set, the driver will attempt to open a device with the
-/// provided properties and fail if it's not able to.
+/// provided properties.
+/// The opened device may not have the requested requirements.
 ///
 /// \see bj_audio_callback_t
 /// \see bj_close_audio_device
