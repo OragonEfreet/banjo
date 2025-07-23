@@ -24,6 +24,16 @@
 typedef struct bj_audio_device_t bj_audio_device;
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Describes how and audio device encodes sound samples.
+///
+/// \see bj_audio_properties
+////////////////////////////////////////////////////////////////////////////////
+typedef enum bj_audio_format_t {
+    BJ_AUDIO_INT16, ///!< 16-bit signed integer
+    BJ_AUDIO_F32,   ///!< 32-bit float
+} bj_audio_format;
+
+////////////////////////////////////////////////////////////////////////////////
 /// \brief Describe properties of an audio device.
 ///
 /// This structure is passed to audio callbacks to inform them about
@@ -32,10 +42,10 @@ typedef struct bj_audio_device_t bj_audio_device;
 /// \see bj_audio_callback_t
 ////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_audio_properties_t {
-    int16_t      amplitude;   ///< Maximum amplitude of the output samples.
-    unsigned int channels;    ///< Number of channels (currently always 1).
-    unsigned int sample_rate; ///< Number of samples per second (Hz).
-    uint16_t     silence;     ///< Sample value that represents silence.
+    bj_audio_format format;      ///< Sampling format.
+    int16_t         amplitude;   ///< Maximum amplitude of the output samples.
+    unsigned int    channels;    ///< Number of channels (currently always 1).
+    unsigned int    sample_rate; ///< Number of samples per second (Hz).
 } bj_audio_properties;
 
 ////////////////////////////////////////////////////////////////////////////////

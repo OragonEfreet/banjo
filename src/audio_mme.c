@@ -147,7 +147,7 @@ static DWORD WINAPI mme_playback_thread(LPVOID param) {
 				dev->p_callback_user_data, mme_dev->sample_index
 			);
 		} else {
-			const int16_t val = dev->properties.silence;
+			const int16_t val = dev->silence;
 			for (unsigned i = 0; i < mme_dev->samples_per_block; ++i) {
 				((int16_t*)hdr->lpData)[i] = val;
 			}
@@ -209,7 +209,7 @@ static bj_audio_device* mme_open_device(
 	p_device->properties.amplitude   = BJ_AUDIO_AMPLITUDE;
 	p_device->properties.channels    = BJ_AUDIO_CHANNELS;
 	p_device->properties.sample_rate = BJ_AUDIO_SAMPLE_RATE;
-	p_device->properties.silence     = 0;
+	p_device->silence                = 0;
 	p_device->data                   = mme_dev;
 
 	mme_dev->hwDevice          = hwDevice;

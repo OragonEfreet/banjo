@@ -154,7 +154,7 @@ static void* playback_thread(void* p_data) {
                     global_sample_index
                 );
             } else {
-                int16_t silence = p_device->properties.silence;
+                int16_t silence = p_device->silence;
                 for (unsigned i = 0; i < frames_per_period; ++i)
                     buffer[i] = silence;
             }
@@ -209,7 +209,6 @@ static bj_audio_device* alsa_open_device(
     bj_audio_callback_t p_callback,
     void*               p_callback_user_data
 ) {
-
     bj_audio_device* p_device = bj_calloc(sizeof(bj_audio_device));
     if(p_device == 0) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
@@ -226,10 +225,12 @@ static bj_audio_device* alsa_open_device(
     p_device->data = alsa_dev;
 
     snd_pcm_hw_params_t* params      = 0;
+    p_device->properties.format      = BJ_AUDIO_INT16;
     p_device->properties.amplitude   = BJ_AUDIO_AMPLITUDE;
     p_device->properties.channels    = 1;
     p_device->properties.sample_rate = BJ_AUDIO_SAMPLE_RATE;
-    p_device->properties.silence     = ALSA.snd_pcm_format_silence_16(BJ_AUDIO_FORMAT);
+    
+    p_device->silence                = ALSA.snd_pcm_format_silence_16(BJ_AUDIO_FORMAT);
 
     alsa_dev->frames_per_period      = 512;
 
@@ -264,7 +265,7 @@ static bj_audio_device* alsa_open_device(
     // Create buffer and fill with silence
     alsa_dev->p_buffer = bj_malloc(sizeof(int16_t) * alsa_dev->frames_per_period);
     for(size_t s = 0 ; s < alsa_dev->frames_per_period ; ++s) {
-        alsa_dev->p_buffer[s] = p_device->properties.silence;
+        alsa_dev->p_buffer[s] = p_device->silence;
     }
     
     ALSA.snd_pcm_prepare(alsa_dev->p_handle);
