@@ -38,7 +38,7 @@ typedef enum bj_audio_format_t {
 
 #define BJ_AUDIO_FORMAT_WIDTH(x)         ((x) & (0xFFu))
 #define BJ_AUDIO_FORMAT_FLOAT(x)         ((x) & (1u<<8))
-#define BJ_AUDIO_FORMAT_INT(x)           (!((x) & (1u<<8))))
+#define BJ_AUDIO_FORMAT_INT(x)           (!((x) & (1u<<8)))
 #define BJ_AUDIO_FORMAT_BIG_ENDIAN(x)    ((x) & (1u<<12))
 #define BJ_AUDIO_FORMAT_SIGNED(x)        ((x) & (1u<<15))
 
@@ -73,7 +73,7 @@ typedef struct bj_audio_properties_t {
 /// \see bj_audio_properties
 ////////////////////////////////////////////////////////////////////////////////
 typedef void (*bj_audio_callback_t)(
-    int16_t*                   buffer,
+    char*                      buffer,
     unsigned                   frames,
     const bj_audio_properties* audio,
     void*                      user_data,
@@ -230,7 +230,7 @@ typedef struct bj_audio_play_note_data_t {
 /// \see bj_audio_callback_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_audio_play_note(
-    int16_t* buffer,
+    char*    buffer,
     unsigned frames,
     const bj_audio_properties* audio,
     void* user_data,

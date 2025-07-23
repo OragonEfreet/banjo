@@ -22,7 +22,7 @@
 typedef struct bj_audio_device_data_t {
     snd_pcm_t*        p_handle;
     pthread_t         playback_thread;
-    int16_t           *p_buffer;
+    char*             p_buffer;
     snd_pcm_uframes_t frames_per_period;
 } alsa_device;
 
@@ -140,7 +140,7 @@ static void* playback_thread(void* p_data) {
     bj_audio_device* p_device           = (bj_audio_device*)p_data;
     alsa_device* p_alsa_device          = (alsa_device*)p_device->data;
     snd_pcm_t* pcm_handle               = p_alsa_device->p_handle;
-    int16_t* buffer                     = p_alsa_device->p_buffer;
+    char* buffer                        = p_alsa_device->p_buffer;
     snd_pcm_uframes_t frames_per_period = p_alsa_device->frames_per_period;
 
     uint64_t global_sample_index = 0;
@@ -176,9 +176,10 @@ static void* playback_thread(void* p_data) {
                     global_sample_index
                 );
             } else {
-                int16_t silence = p_device->silence;
-                for (unsigned i = 0; i < frames_per_period; ++i)
-                    buffer[i] = silence;
+                const size_t format_byte_size = BJ_AUDIO_FORMAT_WIDTH(p_device->properties.format);
+                for(size_t s = 0 ; s < frames_per_period * p_device->properties.channels ; ++s) {
+                    bj_memcpy(buffer + s * format_byte_size, &p_device->silence, format_byte_size);
+                }
             }
 
             int err = ALSA.snd_pcm_writei(pcm_handle, buffer, frames_per_period);
@@ -293,22 +294,22 @@ static bj_audio_device* alsa_open_device(
     ssize_t format_byte_size = ALSA.snd_pcm_format_size(alsa_format, 1);
     bj_assert(format_byte_size == BJ_AUDIO_FORMAT_WIDTH(p_device->properties.format) / 8);
 
-    switch(format_byte_size) {
-        case 2:
-            p_device->silence = ALSA.snd_pcm_format_silence_16(alsa_format);
-            break;
-        case 4:
-            p_device->silence = ALSA.snd_pcm_format_silence_32(alsa_format);
-            break;
-        default:
-            p_device->silence = 0;
-            break;
-    }
+    /* switch(format_byte_size) { */
+    /*     case 2: */
+    /*         p_device->silence = ALSA.snd_pcm_format_silence_16(alsa_format); */
+    /*         break; */
+    /*     case 4: */
+    /*         p_device->silence = ALSA.snd_pcm_format_silence_32(alsa_format); */
+    /*         break; */
+    /*     default: */
+    /*         p_device->silence = 0; */
+    /*         break; */
+    /* } */
 
     // Create buffer and fill with silence
     alsa_dev->p_buffer = bj_malloc(format_byte_size * alsa_dev->frames_per_period * p_device->properties.channels);
-    for(size_t s = 0 ; s < alsa_dev->frames_per_period ; ++s) {
-        alsa_dev->p_buffer[s] = p_device->silence;
+    for(size_t s = 0 ; s < alsa_dev->frames_per_period * p_device->properties.channels ; ++s) {
+        bj_memcpy(alsa_dev->p_buffer + s * format_byte_size, &p_device->silence, format_byte_size);
     }
     
     ALSA.snd_pcm_prepare(alsa_dev->p_handle);
