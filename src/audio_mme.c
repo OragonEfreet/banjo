@@ -266,7 +266,7 @@ static bj_audio_layer* mme_init_audio(bj_error** p_error) {
 	return p_audio;
 }
 
-bj_audio_layer_create_info mme_layer_info = {
+bj_audio_layer_create_info mme_audio_layer_info = {
 	.name = "mme",
 	.create = mme_init_audio,
 };
