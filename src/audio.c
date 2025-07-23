@@ -9,8 +9,12 @@
 extern bj_audio_layer_create_info alsa_audio_layer_info;
 extern bj_audio_layer_create_info mme_audio_layer_info;
 extern bj_audio_layer_create_info noaudio_audio_layer_info;
+extern bj_audio_layer_create_info emscripten_audio_layer_info;
 
 static const bj_audio_layer_create_info* layer_infos[] = {
+#if BJ_HAS_FEATURE(EMSCRIPTEN)
+    &emscripten_audio_layer_info,
+#endif
 #if BJ_HAS_FEATURE(MME)
     &mme_audio_layer_info,
 #endif
