@@ -146,42 +146,42 @@ inline static double make_note_value(
 }
 
 void bj_audio_play_note(
-    char*                       p_buffer,
-    unsigned                    frames,
-    const bj_audio_properties*  p_audio,
-    void*                       p_user_data,
-    uint64_t                    base_sample_index
+    void* buffer,
+    unsigned                   frames,
+    const bj_audio_properties* p_audio,
+    void* p_user_data,
+    uint64_t                   base_sample_index
 ) {
     bj_audio_play_note_data* data = (bj_audio_play_note_data*)p_user_data;
-
-    double freq         = data->frequency;
-    double amplitude    = (double)p_audio->amplitude;
-    double sample_rate  = (double)p_audio->sample_rate;
-    double phase_step   = 2.0 * BJ_PI * freq / sample_rate;
-    int    channels     = p_audio->channels;
+    double                   freq = data->frequency;
+    double                   amplitude = (double)p_audio->amplitude;
+    double                   sample_rate = (double)p_audio->sample_rate;
+    double                   phase_step = 2.0 * BJ_PI * freq / sample_rate;
+    int                      channels = p_audio->channels;
 
     for (unsigned i = 0; i < frames; i++) {
-
-        const double output = make_note_value(i, data->function, base_sample_index, phase_step);
+        double output = make_note_value(i, data->function, base_sample_index, phase_step);
 
         for (int ch = 0; ch < channels; ++ch) {
-            unsigned frame_index = (i * channels) + ch;
+            unsigned idx = (i * channels) + ch;
 
-            switch(p_audio->format) {
-                case BJ_AUDIO_FORMAT_INT16: {
-                    int16_t* buffer = (int16_t*)p_buffer;
-                    buffer[frame_index] = (int16_t)(output * amplitude);
-                    break;
-                }
-                case BJ_AUDIO_FORMAT_F32: {
-                    float* buffer = (float*)p_buffer;
-                    buffer[frame_index] = (float)(output);
-                    break;
-                }
-                default:
-                    break;
+            switch (p_audio->format) {
+            case BJ_AUDIO_FORMAT_INT16: {
+                int16_t* buf = (int16_t*)buffer;
+                buf[idx] = (int16_t)(output * amplitude);
+                break;
+            }
+            case BJ_AUDIO_FORMAT_F32: {
+                float* buf = (float*)buffer;
+                buf[idx] = (float)output;
+                break;
+            }
+            default:
+                // unsupported format—silence
+                break;
             }
         }
     }
 }
+
 

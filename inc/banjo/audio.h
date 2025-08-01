@@ -73,10 +73,10 @@ typedef struct bj_audio_properties_t {
 /// \see bj_audio_properties
 ////////////////////////////////////////////////////////////////////////////////
 typedef void (*bj_audio_callback_t)(
-    char*                      buffer,
+    void* buffer,
     unsigned                   frames,
     const bj_audio_properties* audio,
-    void*                      user_data,
+    void* user_data,
     uint64_t                   base_sample_index
 );
 
@@ -230,7 +230,7 @@ typedef struct bj_audio_play_note_data_t {
 /// \see bj_audio_callback_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_audio_play_note(
-    char*    buffer,
+    void* buffer,
     unsigned frames,
     const bj_audio_properties* audio,
     void* user_data,
