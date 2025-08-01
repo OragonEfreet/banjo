@@ -18,8 +18,8 @@
 
 typedef struct bj_audio_device_data_t {
     HWAVEOUT  hwDevice;
-    WAVEHDR* p_wave_headers;
-    void* p_buffer;           // raw sample buffer (all channels)
+    WAVEHDR*  p_wave_headers;
+    void*     p_buffer;
     uint64_t  sample_index;
     unsigned  block_count;
     unsigned  frames_per_block;
