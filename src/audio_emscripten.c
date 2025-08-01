@@ -2,100 +2,169 @@
 
 #if BJ_HAS_FEATURE(EMSCRIPTEN)
 
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <emscripten.h>
 #include <banjo/audio.h>
-
+#include <banjo/error.h>
+#include <banjo/log.h>
+#include <banjo/memory.h>
+#include "audio_t.h"
 #include "check.h"
 
-#include <emscripten/emscripten.h>
+// Maximum number of concurrent Emscripten audio devices
+#define EMSCRIPTEN_MAX_DEVICES 8
 
+// Per-device data
+typedef struct {
+    int      id;
+    unsigned frames_per_period;
+    uint64_t sample_index;
+} emscripten_device;
+
+static bj_audio_device* g_emscripten_devices[EMSCRIPTEN_MAX_DEVICES] = {0};
+
+// JavaScript glue to create a ScriptProcessorNode and hook into bj_emscripten_audio_process
+EM_JS(void, emscripten_setup_audio, (int id, int frames, int chans), {
+    Module.bjAudioNodes = Module.bjAudioNodes || {};
+    var ctx = Module.audioContext || (Module.audioContext = new (window.AudioContext || window.webkitAudioContext)());
+    // On browsers that block auto-play, resume AudioContext after user gesture
+    if (ctx.state === 'suspended') {
+        var resumeFunc = function() {
+            ctx.resume();
+            document.removeEventListener('mousedown', resumeFunc);
+            document.removeEventListener('touchstart', resumeFunc);
+        };
+        document.addEventListener('mousedown', resumeFunc);
+        document.addEventListener('touchstart', resumeFunc);
+    }
+    var node = ctx.createScriptProcessor(frames, 0, chans);
+    Module.bjAudioNodes[id] = node;
+    node.onaudioprocess = function(ev) {
+        var out = ev.outputBuffer;
+        var len = out.getChannelData(0).length;
+        var ptr = _malloc(len * chans * 4);
+        // Call the compiled function directly
+        Module._bj_emscripten_audio_process(id, ptr, len);
+        for (var c = 0; c < chans; ++c) {
+            var data = out.getChannelData(c);
+            for (var i = 0; i < len; ++i) {
+                data[i] = HEAPF32[(ptr >> 2) + i * chans + c];
+            }
+        }
+        _free(ptr);
+    };
+    node.connect(ctx.destination);
+});
+
+// Close and disconnect the ScriptProcessorNode
+static void emscripten_close_device(bj_audio_layer* p_audio, bj_audio_device* dev) {
+    (void)p_audio;
+    emscripten_device* data = (emscripten_device*)dev->data;
+    if (data->id >= 0 && data->id < EMSCRIPTEN_MAX_DEVICES) {
+        EM_ASM({
+            var id = $0;
+            if (Module.bjAudioNodes && Module.bjAudioNodes[id]) {
+                Module.bjAudioNodes[id].disconnect();
+                delete Module.bjAudioNodes[id];
+            }
+        }, data->id);
+        g_emscripten_devices[data->id] = NULL;
+    }
+    bj_free(dev->data);
+    bj_free(dev);
+}
+
+// Open an Emscripten audio device via Web Audio ScriptProcessor
+static bj_audio_device* emscripten_open_device(
+    bj_audio_layer*            p_audio,
+    const bj_audio_properties* p_properties,
+    bj_audio_callback_t        p_callback,
+    void*                      p_callback_user_data,
+    bj_error**                 p_error
+) {
+    // Allocate device
+    bj_audio_device* dev = bj_calloc(sizeof(bj_audio_device));
+    if (!dev) {
+        bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate audio device");
+        return NULL;
+    }
+    emscripten_device* data = bj_calloc(sizeof(emscripten_device));
+    if (!data) {
+        bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate device data");
+        bj_free(dev);
+        return NULL;
+    }
+
+    // Initialize bj_audio_device
+    dev->p_callback            = p_callback;
+    dev->p_callback_user_data  = p_callback_user_data;
+    dev->properties            = *p_properties;
+    dev->should_reset          = BJ_FALSE;
+    dev->playing               = BJ_TRUE; // start playing immediately
+    dev->data                  = data;
+
+    // Find a free slot
+    int id = -1;
+    for (int i = 0; i < EMSCRIPTEN_MAX_DEVICES; ++i) {
+        if (!g_emscripten_devices[i]) { id = i; break; }
+    }
+    if (id < 0) {
+        bj_set_error(p_error, BJ_ERROR_INITIALIZE, "no free emscripten device slots");
+        bj_free(data);
+        bj_free(dev);
+        return NULL;
+    }
+    data->id = id;
+    data->frames_per_period = 1024;
+    data->sample_index = 0;
+    g_emscripten_devices[id] = dev;
+
+    // Setup JS ScriptProcessor
+    emscripten_setup_audio(id,
+                            data->frames_per_period,
+                            dev->properties.channels);
+
+    return dev;
+}
+
+// Dispose of the audio layer
 static void emscripten_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
     (void)p_error;
     bj_check(p_audio);
     bj_free(p_audio);
 }
 
-static bj_audio_device* emscripten_open_device(
-    bj_audio_layer*             p_audio,
-    const bj_audio_properties*  p_properties,
-    bj_audio_callback_t         p_callback,
-    void*                       p_callback_user_data,
-    bj_error**                  p_error
-) {
-    (void)p_audio;
-    (void)p_properties;
-    (void)p_callback;
-    (void)p_callback_user_data;
-    (void)p_error;
-    
-    const bj_bool result = MAIN_THREAD_EM_ASM_INT({
-        if (typeof(Module['banjo']) === 'undefined') {
-            Module['banjo'] = {};
-        }
-        var banjo = Module['banjo'];
-        banjo.audio_playback = {};
-
-        if (!banjo.audioContext) {
-            if (typeof(AudioContext) !== 'undefined') {
-                banjo.audioContext = new AudioContext();
-            } else if (typeof(webkitAudioContext) !== 'undefined') {
-                banjo.audioContext = new webkitAudioContext();
-            }
-            if (banjo.audioContext) {
-                if ((typeof navigator.userActivation) === 'undefined') {
-                    autoResumeAudioContext(banjo.audioContext);
-                }
-            }
-        }
-        return (banjo.audioContext !== undefined);
-    });
-
-	if (!result) {
-		bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot open audio device");
-		return 0;
-	}
-
-	return 0;
+// C callback invoked from JS to fill float PCM data
+EMSCRIPTEN_KEEPALIVE
+void bj_emscripten_audio_process(int id, float* buffer, unsigned frames) {
+    if (id < 0 || id >= EMSCRIPTEN_MAX_DEVICES) return;
+    bj_audio_device* dev = g_emscripten_devices[id];
+    if (!dev) return;
+    emscripten_device* data = (emscripten_device*)dev->data;
+    // Call user-provided callback
+    dev->p_callback(buffer, frames, &dev->properties, dev->p_callback_user_data, data->sample_index);
+    data->sample_index += frames;
 }
 
-static void emscripten_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device) {
-	(void)p_audio;
-	(void)p_device;
-}
-
-
+// Initialize the Emscripten audio layer
 static bj_audio_layer* emscripten_init_audio(bj_error** p_error) {
-	bj_audio_layer* p_audio = bj_malloc(sizeof(bj_audio_layer));
-
-    const bj_bool available = MAIN_THREAD_EM_ASM_INT({
-        if (typeof(AudioContext) !== 'undefined') {
-            return true;
-        } 
-        if (typeof(webkitAudioContext) !== 'undefined') {
-            return true;
-        }
-        return false;
-    });
-    if(available == BJ_FALSE) {
-		bj_set_error(p_error, BJ_ERROR_INITIALIZE, "No available audio device");
-		return 0;
+    bj_audio_layer* layer = bj_malloc(sizeof(bj_audio_layer));
+    if (!layer) {
+        bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate emscripten layer");
+        return NULL;
     }
-
-	if (!p_audio) {
-		bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate memory for emscripten");
-		return 0;
-	}
-
-	p_audio->end          = emscripten_dispose_audio;
-	p_audio->open_device  = emscripten_open_device;
-	p_audio->close_device = emscripten_close_device;
-    p_audio->data         = 0;
-
-	return p_audio;
+    layer->end         = emscripten_dispose_audio;
+    layer->open_device = emscripten_open_device;
+    layer->close_device= emscripten_close_device;
+    layer->data        = NULL;
+    return layer;
 }
 
 bj_audio_layer_create_info emscripten_audio_layer_info = {
-    .name = "emscripten",
-    .create = emscripten_init_audio,
+    .name   = "emscripten",
+    .create = emscripten_init_audio
 };
 
-#endif
+#endif // BJ_HAS_FEATURE(EMSCRIPTEN)
