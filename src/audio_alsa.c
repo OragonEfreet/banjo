@@ -3,6 +3,7 @@
 #if BJ_HAS_FEATURE(ALSA)
 
 #include <banjo/audio.h>
+#include <banjo/assert.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/math.h>
@@ -18,12 +19,10 @@
 #include <alsa/asoundlib.h>
 #include <pthread.h>
 
-#define BJ_AUDIO_FORMAT SND_PCM_FORMAT_S16_LE
-
 typedef struct bj_audio_device_data_t {
     snd_pcm_t*        p_handle;
     pthread_t         playback_thread;
-    int16_t           *p_buffer;
+    char*             p_buffer;
     snd_pcm_uframes_t frames_per_period;
 } alsa_device;
 
@@ -45,7 +44,8 @@ typedef int(*pfn_snd_pcm_prepare)(snd_pcm_t*);
 typedef snd_pcm_sframes_t(*pfn_snd_pcm_writei)(snd_pcm_t*, const void*, snd_pcm_uframes_t);
 typedef const char*(*pfn_snd_strerror)(int);
 typedef uint16_t(*pfn_snd_pcm_format_silence_16)(snd_pcm_format_t);
-
+typedef uint32_t(*pfn_snd_pcm_format_silence_32)(snd_pcm_format_t);
+typedef ssize_t(*pfn_snd_pcm_format_size)(snd_pcm_format_t, size_t);
 
 static struct alsa_lib_t {
     void*                                      p_handle;
@@ -67,7 +67,27 @@ static struct alsa_lib_t {
     pfn_snd_pcm_writei                         snd_pcm_writei;
     pfn_snd_strerror                           snd_strerror;
     pfn_snd_pcm_format_silence_16              snd_pcm_format_silence_16;
+    pfn_snd_pcm_format_silence_32              snd_pcm_format_silence_32;
+    pfn_snd_pcm_format_size                    snd_pcm_format_size;
 } ALSA = {0};
+
+/* static bj_audio_format alsa_format_bj(snd_pcm_format_t alsa_format) { */
+/*     switch(alsa_format) { */
+/*         case SND_PCM_FORMAT_S16_LE:   return BJ_AUDIO_FORMAT_INT16; */
+/*         case SND_PCM_FORMAT_FLOAT_LE: return BJ_AUDIO_FORMAT_F32; */
+/*         default: break; */
+/*     } */
+/*     return BJ_AUDIO_FORMAT_UNKNOWN; */
+/* } */
+
+static snd_pcm_format_t bj_format_alsa(bj_audio_format format) {
+    switch(format) {
+        case BJ_AUDIO_FORMAT_INT16:   return SND_PCM_FORMAT_S16_LE;
+        case BJ_AUDIO_FORMAT_F32:     return SND_PCM_FORMAT_FLOAT_LE;
+        default: break;
+    }
+    return SND_PCM_FORMAT_UNKNOWN;
+}
 
 static void alsa_set_error(bj_error** p_error, int alsa_err) {
     bj_set_error(p_error, BJ_ERROR_AUDIO, ALSA.snd_strerror(alsa_err));
@@ -94,6 +114,8 @@ static bj_bool alsa_load_library(bj_error** p_error) {
     ALSA_BIND(snd_pcm_close)
     ALSA_BIND(snd_pcm_drain)
     ALSA_BIND(snd_pcm_format_silence_16)
+    ALSA_BIND(snd_pcm_format_silence_32)
+    ALSA_BIND(snd_pcm_format_size)
     ALSA_BIND(snd_pcm_hw_params)
     ALSA_BIND(snd_pcm_hw_params_any)
     ALSA_BIND(snd_pcm_hw_params_free)
@@ -118,7 +140,7 @@ static void* playback_thread(void* p_data) {
     bj_audio_device* p_device           = (bj_audio_device*)p_data;
     alsa_device* p_alsa_device          = (alsa_device*)p_device->data;
     snd_pcm_t* pcm_handle               = p_alsa_device->p_handle;
-    int16_t* buffer                     = p_alsa_device->p_buffer;
+    char* buffer                        = p_alsa_device->p_buffer;
     snd_pcm_uframes_t frames_per_period = p_alsa_device->frames_per_period;
 
     uint64_t global_sample_index = 0;
@@ -154,9 +176,10 @@ static void* playback_thread(void* p_data) {
                     global_sample_index
                 );
             } else {
-                int16_t silence = p_device->properties.silence;
-                for (unsigned i = 0; i < frames_per_period; ++i)
-                    buffer[i] = silence;
+                const size_t format_byte_size = BJ_AUDIO_FORMAT_WIDTH(p_device->properties.format);
+                for(size_t s = 0 ; s < frames_per_period * p_device->properties.channels ; ++s) {
+                    bj_memcpy(buffer + s * format_byte_size, &p_device->silence, format_byte_size);
+                }
             }
 
             int err = ALSA.snd_pcm_writei(pcm_handle, buffer, frames_per_period);
@@ -204,12 +227,12 @@ static void alsa_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device
 }
 
 static bj_audio_device* alsa_open_device(
-    bj_audio_layer*     p_audio,
-    bj_error**          p_error,
-    bj_audio_callback_t p_callback,
-    void*               p_callback_user_data
+    bj_audio_layer*            p_audio,
+    const bj_audio_properties* p_properties,
+    bj_audio_callback_t        p_callback,
+    void*                      p_callback_user_data,
+    bj_error**                 p_error
 ) {
-
     bj_audio_device* p_device = bj_calloc(sizeof(bj_audio_device));
     if(p_device == 0) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
@@ -221,15 +244,15 @@ static bj_audio_device* alsa_open_device(
         alsa_close_device(p_audio, p_device);
         return 0;
     }
-    p_device->p_callback = p_callback;
+    p_device->p_callback           = p_callback;
     p_device->p_callback_user_data = p_callback_user_data;
-    p_device->data = alsa_dev;
+    p_device->data                 = alsa_dev;
 
-    snd_pcm_hw_params_t* params      = 0;
-    p_device->properties.amplitude   = BJ_AUDIO_AMPLITUDE;
-    p_device->properties.channels    = 1;
-    p_device->properties.sample_rate = BJ_AUDIO_SAMPLE_RATE;
-    p_device->properties.silence     = ALSA.snd_pcm_format_silence_16(BJ_AUDIO_FORMAT);
+    p_device->properties.format      = p_properties ? p_properties->format : BJ_AUDIO_FORMAT_INT16;
+    p_device->properties.amplitude   = p_properties ? p_properties->amplitude : BJ_AUDIO_AMPLITUDE;
+    p_device->properties.channels    = p_properties ? p_properties->channels : 1;
+    p_device->properties.sample_rate = p_properties ? p_properties->sample_rate : BJ_AUDIO_SAMPLE_RATE;
+    
 
     alsa_dev->frames_per_period      = 512;
 
@@ -242,10 +265,13 @@ static bj_audio_device* alsa_open_device(
         return 0;
     }
 
+    const snd_pcm_format_t alsa_format = bj_format_alsa(p_device->properties.format);
+
+    snd_pcm_hw_params_t* params      = 0;
     ALSA.snd_pcm_hw_params_malloc(&params);
     ALSA.snd_pcm_hw_params_any(alsa_dev->p_handle, params);
     ALSA.snd_pcm_hw_params_set_access(alsa_dev->p_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
-    ALSA.snd_pcm_hw_params_set_format(alsa_dev->p_handle, params, BJ_AUDIO_FORMAT);
+    ALSA.snd_pcm_hw_params_set_format(alsa_dev->p_handle, params, alsa_format);
     ALSA.snd_pcm_hw_params_set_channels_near(alsa_dev->p_handle, params, &p_device->properties.channels);
     ALSA.snd_pcm_hw_params_set_rate_near(alsa_dev->p_handle, params, &p_device->properties.sample_rate, 0);
     ALSA.snd_pcm_hw_params_set_period_size_near(alsa_dev->p_handle, params, &alsa_dev->frames_per_period, 0);
@@ -258,13 +284,32 @@ static bj_audio_device* alsa_open_device(
         alsa_close_device(p_audio, p_device);
         return 0;
     }
-
     ALSA.snd_pcm_hw_params_free(params);
 
+    bj_info("format: %d", p_device->properties.format);
+    bj_info("amplitude: %d", p_device->properties.amplitude);
+    bj_info("channels: %d", p_device->properties.channels);
+    bj_info("sample_rate: %d", p_device->properties.sample_rate);
+
+    ssize_t format_byte_size = ALSA.snd_pcm_format_size(alsa_format, 1);
+    bj_assert(format_byte_size == BJ_AUDIO_FORMAT_WIDTH(p_device->properties.format) / 8);
+
+    /* switch(format_byte_size) { */
+    /*     case 2: */
+    /*         p_device->silence = ALSA.snd_pcm_format_silence_16(alsa_format); */
+    /*         break; */
+    /*     case 4: */
+    /*         p_device->silence = ALSA.snd_pcm_format_silence_32(alsa_format); */
+    /*         break; */
+    /*     default: */
+    /*         p_device->silence = 0; */
+    /*         break; */
+    /* } */
+
     // Create buffer and fill with silence
-    alsa_dev->p_buffer = bj_malloc(sizeof(int16_t) * alsa_dev->frames_per_period);
-    for(size_t s = 0 ; s < alsa_dev->frames_per_period ; ++s) {
-        alsa_dev->p_buffer[s] = p_device->properties.silence;
+    alsa_dev->p_buffer = bj_malloc(format_byte_size * alsa_dev->frames_per_period * p_device->properties.channels);
+    for(size_t s = 0 ; s < alsa_dev->frames_per_period * p_device->properties.channels ; ++s) {
+        bj_memcpy(alsa_dev->p_buffer + s * format_byte_size, &p_device->silence, format_byte_size);
     }
     
     ALSA.snd_pcm_prepare(alsa_dev->p_handle);

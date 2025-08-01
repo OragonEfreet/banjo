@@ -62,12 +62,13 @@ void bj_end_audio(bj_audio_layer* p_audio, bj_error** p_error) {
 }
 
 bj_audio_device* bj_open_audio_device(
-	bj_error** p_error,
-    bj_audio_callback_t p_callback,
-    void * p_callback_user_data
+    const bj_audio_properties* p_properties,
+    bj_audio_callback_t        p_callback,
+    void*                      p_callback_user_data,
+    bj_error**                 p_error
 ) {
     bj_check_or_0(s_audio);
-    return s_audio->open_device(s_audio, p_error, p_callback, p_callback_user_data);
+    return s_audio->open_device(s_audio, p_properties, p_callback, p_callback_user_data, p_error);
 }
 
 void bj_close_audio_device(
@@ -114,56 +115,73 @@ void bj_audio_device_stop(
     bj_audio_device_reset(p_device);
 }
 
-void bj_audio_play_note(
-    int16_t*                    p_buffer,
-    unsigned                    frames,
-    const bj_audio_properties*  p_audio,
-    void*                       p_user_data,
-    uint64_t                    base_sample_index
+inline static double make_note_value(
+    unsigned i,
+    int      function,
+    uint64_t base_sample_index, 
+    double   phase_step
 ) {
-    bj_audio_play_note_data* data = (bj_audio_play_note_data*)p_user_data;
+    uint64_t sample_index = base_sample_index + i;
+    double phase = bj_fmod(sample_index * phase_step, 2.0 * BJ_PI); // wrap phase
 
-    double freq         = data->frequency;
-    double amplitude    = (double)p_audio->amplitude;
-    double sample_rate  = (double)p_audio->sample_rate;
-    double phase_step   = 2.0 * BJ_PI * freq / sample_rate;
+    switch (function) {
+        case BJ_AUDIO_PLAY_SINE:
+            return bj_sin(phase);
 
-    for (unsigned i = 0; i < frames; i++) {
-        uint64_t sample_index = base_sample_index + i;
-        double phase = bj_fmod(sample_index * phase_step, 2.0 * BJ_PI); // wrap phase
+        case BJ_AUDIO_PLAY_SQUARE:
+            return bj_sin(phase) > 0.0 ? 0.2 : -0.2;
 
-        double output = 0.0;
-
-        switch (data->function) {
-            case BJ_AUDIO_PLAY_SINE:
-                output = bj_sin(phase);
-                break;
-
-            case BJ_AUDIO_PLAY_SQUARE:
-                output = bj_sin(phase) > 0.0 ? 0.2 : -0.2;
-                break;
-
-            case BJ_AUDIO_PLAY_TRIANGLE: {
-                // Normalize phase to [0, 1]
-                double t = phase / (2.0 * BJ_PI);
-                output = 4.0 * bj_fabs(t - bj_floor(t + 0.5)) - 1.0;
-                break;
-            }
-
-            case BJ_AUDIO_PLAY_SAWTOOTH: {
-                // Normalize phase to [0, 1]
-                double t = phase / (2.0 * BJ_PI);
-                output = 2.0 * (t - bj_floor(t + 0.5));
-                break;
-            }
-
-
-            default:
-                output = 0.0;
-                break;
+        case BJ_AUDIO_PLAY_TRIANGLE: {
+            double t = phase / (2.0 * BJ_PI);
+            return 4.0 * bj_fabs(t - bj_floor(t + 0.5)) - 1.0;
         }
 
-        p_buffer[i] = (int16_t)(output * amplitude);
+        case BJ_AUDIO_PLAY_SAWTOOTH: {
+            double t = phase / (2.0 * BJ_PI);
+            return 2.0 * (t - bj_floor(t + 0.5));
+        }
+
+        default: return 0;
     }
 }
+
+void bj_audio_play_note(
+    void* buffer,
+    unsigned                   frames,
+    const bj_audio_properties* p_audio,
+    void* p_user_data,
+    uint64_t                   base_sample_index
+) {
+    bj_audio_play_note_data* data = (bj_audio_play_note_data*)p_user_data;
+    double                   freq = data->frequency;
+    double                   amplitude = (double)p_audio->amplitude;
+    double                   sample_rate = (double)p_audio->sample_rate;
+    double                   phase_step = 2.0 * BJ_PI * freq / sample_rate;
+    int                      channels = p_audio->channels;
+
+    for (unsigned i = 0; i < frames; i++) {
+        double output = make_note_value(i, data->function, base_sample_index, phase_step);
+
+        for (int ch = 0; ch < channels; ++ch) {
+            unsigned idx = (i * channels) + ch;
+
+            switch (p_audio->format) {
+            case BJ_AUDIO_FORMAT_INT16: {
+                int16_t* buf = (int16_t*)buffer;
+                buf[idx] = (int16_t)(output * amplitude);
+                break;
+            }
+            case BJ_AUDIO_FORMAT_F32: {
+                float* buf = (float*)buffer;
+                buf[idx] = (float)output;
+                break;
+            }
+            default:
+                // unsupported format—silence
+                break;
+            }
+        }
+    }
+}
+
 

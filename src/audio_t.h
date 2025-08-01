@@ -10,6 +10,7 @@ typedef struct bj_audio_device_data_t bj_audio_device_data;
 
 struct bj_audio_device_t {
     bj_audio_properties   properties;
+    uint32_t              silence;
     bj_bool               playing;
     volatile bj_bool      should_reset;
     bj_bool               should_close;
