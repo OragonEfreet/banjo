@@ -28,7 +28,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         .format      = BJ_AUDIO_FORMAT_F32,
         .amplitude   = 16000,
         .sample_rate = 44100,
-        .channels    = 1,
+        .channels    = 2,
     }, bj_audio_play_note, &data, &p_error);
 
     if (p_device == 0) {

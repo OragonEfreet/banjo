@@ -68,3 +68,13 @@ if (BUILD_TESTING)
     add_subdirectory(test)
 endif()
 
+
+if (BJ_FEATURE_EMSCRIPTEN)
+  # make sure we’re compiling with emscripten
+  # (if you’re building an executable, apply this to your exe target instead of the library)
+  target_link_options(banjo PRIVATE
+    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','_malloc','_free']"
+    "-sEXPORTED_FUNCTIONS=['_bj_emscripten_audio_process']"
+    "-sALLOW_MEMORY_GROWTH"                     # optional, but often handy
+  )
+endif()
