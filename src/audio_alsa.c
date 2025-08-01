@@ -347,7 +347,7 @@ static bj_audio_layer* alsa_init_audio(bj_error** p_error) {
 	return p_audio;
 }
 
-bj_audio_layer_create_info alsa_layer_info = {
+bj_audio_layer_create_info alsa_audio_layer_info = {
     .name   = "alsa",
     .create = alsa_init_audio,
 };

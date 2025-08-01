@@ -25,13 +25,14 @@ int main(int argc, char* argv[]) {
     );
     bj_info("Compiler: %s %d", info->compiler_name, info->compiler_version);
 
-    DESC(feature_win32);
-    DESC(feature_x11);
-    DESC(feature_mme);
-    DESC(feature_alsa);
     DESC(config_checks_abort);
     DESC(config_checks_log);
     DESC(config_log_color);
     DESC(config_pedantic);
+    DESC(feature_alsa);
+    DESC(feature_emscripten);
+    DESC(feature_mme);
+    DESC(feature_win32);
+    DESC(feature_x11);
 
 }

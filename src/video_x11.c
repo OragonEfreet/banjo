@@ -771,7 +771,7 @@ static bj_video_layer* x11_init_video(
     return p_layer;
 }
 
-bj_video_layer_create_info x11_layer_info = {
+bj_video_layer_create_info x11_video_layer_info = {
     .name = "x11",
     .create = x11_init_video,
 };

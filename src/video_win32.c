@@ -398,7 +398,7 @@ static bj_video_layer* win32_init_video(
     return p_layer;
 }
 
-bj_video_layer_create_info win32_layer_info = {
+bj_video_layer_create_info win32_video_layer_info = {
     .name = "Win32",
     .create = win32_init_video,
 };

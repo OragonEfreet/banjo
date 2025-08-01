@@ -176,8 +176,8 @@ BANJO_EXPORT bj_bitmap* bj_window_get_framebuffer(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT int bj_window_get_size(
     const bj_window* p_window,
-    int* width,
-    int* height
+    int*             width,
+    int*             height
 );
 
 ////////////////////////////////////////////////////////////////////////////////

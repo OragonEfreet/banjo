@@ -40,7 +40,9 @@
 #define BJ_NAME "Banjo"
 
 /// Platform detection
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+#if defined(__EMSCRIPTEN__)
+#   define BJ_OS_EMSCRIPTEN
+#elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #   define BJ_OS_WINDOWS
 #elif defined(__linux__) || defined(__gnu_linux__)
 #   define BJ_OS_LINUX
@@ -67,7 +69,12 @@
 #endif
 
 // Compiler Detection
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__EMSCRIPTEN__)
+    #include <emscripten/version.h>
+    #define BJ_COMPILER_EMSCRIPTEN
+    #define BJ_COMPILER_NAME "Emscripten"
+    #define BJ_COMPILER_VERSION __EMSCRIPTEN_major__
+#elif defined(__GNUC__) && !defined(__clang__)
     #define BJ_COMPILER_GCC
     #define BJ_COMPILER_NAME "GCC"
     #define BJ_COMPILER_VERSION __GNUC__
@@ -165,6 +172,7 @@ typedef struct {
     int         compiler_version;    ///< Compiler version specifier
     bj_bool     debug;               ///< Built with debug information
     bj_bool     feature_win32;       ///< Compiled with support for Win32 windows.
+    bj_bool     feature_emscripten;  ///< Compiled with support for Emscripten.
     bj_bool     feature_x11;         ///< Compiled with support for Win32 windows.
     bj_bool     feature_mme;         ///< Compiled with support for Windows Multimedia Extension (for audio).
     bj_bool     feature_alsa;        ///< Compiled with support for ALSA (for audio).

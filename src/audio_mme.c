@@ -183,11 +183,11 @@ static DWORD WINAPI mme_playback_thread(LPVOID param) {
 }
 
 static bj_audio_device* mme_open_device(
-    bj_audio_layer* p_audio,
-    const bj_audio_properties* p_properties,
-    bj_audio_callback_t        p_callback,
-    void* p_callback_user_data,
-    bj_error** p_error
+    bj_audio_layer*             p_audio,
+    const bj_audio_properties*  p_properties,
+    bj_audio_callback_t         p_callback,
+    void*                       p_callback_user_data,
+    bj_error**                  p_error
 ) {
     bj_audio_device* p_device = bj_calloc(sizeof(bj_audio_device));
     mme_device* mme = bj_calloc(sizeof(mme_device));
@@ -296,9 +296,9 @@ static bj_audio_layer* mme_init_audio(bj_error** p_error) {
     return layer;
 }
 
-bj_audio_layer_create_info mme_layer_info = {
-    .name = "mme",
-    .create = mme_init_audio,
+bj_audio_layer_create_info mme_audio_layer_info = {
+	.name = "mme",
+	.create = mme_init_audio,
 };
 
 #endif // BJ_HAS_FEATURE(MME)

@@ -120,7 +120,7 @@ static bj_video_layer* novideo_init_layer(
     return p_layer;
 }
 
-bj_video_layer_create_info novideo_layer_info = {
+bj_video_layer_create_info novideo_video_layer_info = {
     .name = "novideo",
     .create = novideo_init_layer,
 };

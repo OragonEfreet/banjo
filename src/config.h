@@ -1,17 +1,12 @@
 #pragma once
 
-/// Features
-// #define BJ_FEATURE_WIN32
-// #define BJ_FEATURE_X11
-
-/// Configuration option
-// #define BJ_CONFIG_ALL
-// #define BJ_CONFIG_CHECKS_ABORT
-// #define BJ_CONFIG_CHECKS_LOG
-// #define BJ_CONFIG_LOG_COLOR
-// #define BJ_CONFIG_PEDANTIC
-
 ////////////////////////////////////////////////////////////////////////////////
+
+#ifdef BJ_FEATURE_EMSCRIPTEN
+#   define _BJ_HAS_FEATURE_EMSCRIPTEN 1
+#else
+#   define _BJ_HAS_FEATURE_EMSCRIPTEN 0
+#endif
 
 #ifdef BJ_FEATURE_WIN32
 #   define _BJ_HAS_FEATURE_WIN32 1
