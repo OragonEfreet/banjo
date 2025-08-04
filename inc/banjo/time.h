@@ -94,12 +94,12 @@ typedef struct bj_stopwatch
 /// Initializes internal counters and sets the stopwatch as running.
 /// Elapsed and delay tick counts are reset to zero.
 ///
-/// \param sw Pointer to the stopwatch.
+/// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \see bj_stopwatch_tick, bj_stopwatch_pause, bj_stopwatch_reset, bj_stopwatch_stop
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_stopwatch_start(
-    bj_stopwatch* sw
+    bj_stopwatch* p_stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,12 +108,12 @@ BANJO_EXPORT void bj_stopwatch_start(
 /// Updates the internal tick counters used to compute elapsed and delay times.
 /// Has no effect if the stopwatch is not running.
 ///
-/// \param sw Pointer to the stopwatch.
+/// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \see bj_stopwatch_elapsed, bj_stopwatch_delay
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_stopwatch_tick(
-    bj_stopwatch* sw
+    bj_stopwatch* p_stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -121,12 +121,12 @@ BANJO_EXPORT void bj_stopwatch_tick(
 ///
 /// Marks the stopwatch as not running. Tick counters and timing state are preserved.
 ///
-/// \param sw Pointer to the stopwatch.
+/// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \see bj_stopwatch_start, bj_stopwatch_stop
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_stopwatch_pause(
-    bj_stopwatch* sw
+    bj_stopwatch* p_stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -134,12 +134,12 @@ BANJO_EXPORT void bj_stopwatch_pause(
 ///
 /// Sets elapsed and delay tick values to zero. The stopwatch's running state is unchanged.
 ///
-/// \param sw Pointer to the stopwatch.
+/// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \see bj_stopwatch_start, bj_stopwatch_tick
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_stopwatch_reset(
-    bj_stopwatch* sw
+    bj_stopwatch* p_stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -147,25 +147,25 @@ BANJO_EXPORT void bj_stopwatch_reset(
 ///
 /// Resets all internal timing state and marks the stopwatch as not running.
 ///
-/// \param sw Pointer to the stopwatch.
+/// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \see bj_stopwatch_start, bj_stopwatch_pause, bj_stopwatch_reset
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_stopwatch_stop(
-    bj_stopwatch* sw
+    bj_stopwatch* p_stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Checks whether the stopwatch is currently running.
 ///
-/// \param sw Pointer to the stopwatch.
+/// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \return BJ_TRUE if the stopwatch is running, BJ_FALSE otherwise.
 ///
 /// \see bj_stopwatch_start, bj_stopwatch_pause
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_stopwatch_running(
-    const bj_stopwatch* sw
+    const bj_stopwatch* p_stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,14 +174,14 @@ BANJO_EXPORT bj_bool bj_stopwatch_running(
 /// This function converts the stored tick count to seconds. It does not update
 /// the stopwatch; call \ref bj_stopwatch_tick beforehand to refresh values.
 ///
-/// \param sw Pointer to the stopwatch.
+/// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \return Elapsed time in seconds.
 ///
 /// \see bj_stopwatch_tick
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT double bj_stopwatch_elapsed(
-    const bj_stopwatch* sw
+    const bj_stopwatch* p_stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -190,14 +190,35 @@ BANJO_EXPORT double bj_stopwatch_elapsed(
 /// This function converts the stored delay tick count to seconds. It does not
 /// update the stopwatch; call \ref bj_stopwatch_tick beforehand to refresh values.
 ///
-/// \param sw Pointer to the stopwatch.
+/// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \return Time in seconds since the last tick.
 ///
 /// \see bj_stopwatch_tick
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT double bj_stopwatch_delay(
-    const bj_stopwatch* sw
+    const bj_stopwatch* p_stopwatch
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Updates the stopwatch tick value and returns the time in seconds 
+/// since the last tick.
+///
+/// Updates the internal tick counters used to compute elapsed and delay times.
+/// Has no effect if the stopwatch is not running.
+/// This function converts the stored delay tick count to seconds.
+///
+/// This is the equivalent of calling \ref bj_stopwatch_tick followed by 
+/// \ref bj_stopwatch_delay.
+///
+/// \param p_stopwatch Pointer to the stopwatch.
+///
+/// \return Time in seconds since the last tick.
+///
+/// \see bj_stopwatch_tick, bj_stopwatch_delay
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT double bj_stopwatch_tick_delay(
+    bj_stopwatch* p_stopwatch
 );
 
 /// \} // End of time group

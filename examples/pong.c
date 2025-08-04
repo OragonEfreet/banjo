@@ -12,23 +12,26 @@
 #include <banjo/time.h>
 #include <banjo/window.h>
 
-bj_window* window = 0;
-bj_bitmap* framebuffer = 0;
 
+////////////////////////////////////////////////////////////////////////////////
+// Compile time, customize before building.
 #define SCREEN_W 800
 #define SCREEN_H 600
 #define BALL_SIZE 16
 
-// Initially place ball at center
-bj_vec2 ball_position = { 
-    (float)(SCREEN_W / 2), 
-    (float)(SCREEN_H / 2)
-};
+////////////////////////////////////////////////////////////////////////////////
+// Game data
 
-bj_vec2 ball_velocity = {
-    1.0f, 1.0f,
-};
+// Ball data
+bj_vec2 ball_position = { SCREEN_W / 2, SCREEN_H / 2 };
+bj_vec2 ball_velocity = { 200.0f, 200.0f, };
 
+bj_stopwatch stopwatch = {0};
+bj_window* window      = 0;
+bj_bitmap* framebuffer = 0;
+
+////////////////////////////////////////////////////////////////////////////////
+// Draw the scene
 void draw(bj_bitmap* bmp) {
     bj_bitmap_clear(bmp);
 
@@ -45,10 +48,26 @@ void draw(bj_bitmap* bmp) {
     );
 }
 
-void move_ball() {
-    bj_vec2_add(ball_position, ball_position, ball_velocity);
+////////////////////////////////////////////////////////////////////////////////
+// Game update
+void update(double delta_time) {
+
+    bj_vec2 target_position;
+    bj_vec2_add_scaled(target_position, ball_position, ball_velocity, delta_time);
+
+    if(target_position[1] >= SCREEN_H || target_position[1] < 0) {
+        ball_velocity[1] = -ball_velocity[1];
+    }
+
+    if(target_position[0] >= SCREEN_W || target_position[0] < 0) {
+        ball_velocity[0] = -ball_velocity[0];
+    }
+    bj_vec2_add_scaled(ball_position, ball_position, ball_velocity, delta_time);
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+// Initialization
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
 
@@ -59,26 +78,37 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     }
 
-    window = bj_window_new("Pong", 100, 100, SCREEN_W, SCREEN_H, 0);
+    window      = bj_window_new("Pong", 100, 100, SCREEN_W, SCREEN_H, 0);
     framebuffer = bj_window_get_framebuffer(window, 0);
 
     bj_set_key_callback(bj_close_on_escape);
+
+    bj_stopwatch_start(&stopwatch);
     return bj_callback_continue;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Game loop iteration
+// - Handle events
+// - Update game
+// - Draw
 int bj_app_iterate(void* user_data) {
     (void)user_data;
-    bj_dispatch_events();
 
+    bj_dispatch_events();
+    update(bj_stopwatch_tick_delay(&stopwatch));
     draw(framebuffer);
+
     bj_window_update_framebuffer(window);
-    bj_sleep(30);
+    bj_sleep(15);
 
     return bj_window_should_close(window)
         ? bj_callback_exit_success
         : bj_callback_continue;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Game termination
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
     bj_window_del(window);

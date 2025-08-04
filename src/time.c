@@ -92,3 +92,10 @@ double bj_stopwatch_delay(const bj_stopwatch* sw)
     bj_check_or_return(bj_time_frequency, 0.0);
     return (double)(sw->delay_ticks) / (double)bj_time_frequency;
 }
+
+double bj_stopwatch_tick_delay(
+    bj_stopwatch* p_stopwatch
+) {
+    bj_stopwatch_tick(p_stopwatch);
+    return bj_stopwatch_delay(p_stopwatch);
+}
