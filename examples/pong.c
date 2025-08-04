@@ -13,16 +13,20 @@
 #include <banjo/time.h>
 #include <banjo/window.h>
 
+#include <stdlib.h>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Compile time, customize before building.
 #define SCREEN_W 800
 #define SCREEN_H 600
 #define BALL_SIZE 16
-#define RACKET_MARGIN 100
-#define RACKET_LENGTH 120
-#define RACKET_WIDTH 24
-#define RACKET_VELOCITY (250.f)
+#define PADDLE_MARGIN 50
+#define PADDLE_LENGTH 120
+#define PADDLE_WIDTH 24
+#define PADDLE_VELOCITY (250.f)
 #define GAME_START_DELAY (1.f)
+#define LEFT_PADDLE_POSX (PADDLE_MARGIN)
+#define RIGHT_PADDLE_POSX (SCREEN_W - PADDLE_MARGIN - PADDLE_WIDTH)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Game data
@@ -36,14 +40,14 @@ static struct {
         float   position_y;
         bj_bool up;
         bj_bool down;
-    } racket[2];
+    } paddle[2];
     bj_bool running;
 } game = {
     .ball = {
         .position = { SCREEN_W / 2, SCREEN_H / 2 },
         .velocity = { 200.0f, 200.0f, },
     },
-    .racket = { 
+    .paddle = { 
         {.position_y = SCREEN_H / 2, .up = BJ_FALSE, .down = BJ_FALSE},
         {.position_y = SCREEN_H / 2, .up = BJ_FALSE, .down = BJ_FALSE}
     },
@@ -57,7 +61,7 @@ bj_stopwatch stopwatch = {0};
 ////////////////////////////////////////////////////////////////////////////////
 // Draw the scene
 // Important: bj_bitmap_draw_rect draws from the top-left corner of the rect
-// while the game's entities (rackets, ball) have coordinates on their centers.
+// while the game's entities (paddles, ball) have coordinates on their centers.
 void draw(bj_bitmap* framebuffer) {
     bj_bitmap_clear(framebuffer);
 
@@ -69,14 +73,14 @@ void draw(bj_bitmap* framebuffer) {
     ball_rect.y = game.ball.position[1] - BALL_SIZE / 2;
     bj_bitmap_draw_rectangle(framebuffer, &ball_rect, color);
 
-    static bj_rect racket_rect[2] = {
-        {.x = RACKET_MARGIN, .w = RACKET_WIDTH, .h = RACKET_LENGTH,},
-        {.x = SCREEN_W - RACKET_MARGIN - RACKET_WIDTH, .w = RACKET_WIDTH, .h = RACKET_LENGTH,},
+    static bj_rect paddle_rect[2] = {
+        {.x = LEFT_PADDLE_POSX, .w = PADDLE_WIDTH, .h = PADDLE_LENGTH,},
+        {.x = RIGHT_PADDLE_POSX, .w = PADDLE_WIDTH, .h = PADDLE_LENGTH,},
     };
 
     for(size_t r = 0 ; r < 2 ; ++r) {
-        racket_rect[r].y = game.racket[r].position_y - RACKET_LENGTH / 2;
-        bj_bitmap_draw_rectangle(framebuffer, &racket_rect[r], color);
+        paddle_rect[r].y = game.paddle[r].position_y - PADDLE_LENGTH / 2;
+        bj_bitmap_draw_rectangle(framebuffer, &paddle_rect[r], color);
     }
 
 }
@@ -93,8 +97,12 @@ void key_callback(bj_window* p_window, const bj_key_event* e) {
     };
 
     for(size_t r = 0 ; r < 2 ; ++r) {
-        game.racket[r].up = e->key == keymap[r].up && e->action == BJ_PRESS;
-        game.racket[r].down = e->key == keymap[r].down && e->action == BJ_PRESS;
+        if(e->key == keymap[r].up) {
+            game.paddle[r].up = e->action == BJ_PRESS;
+        }
+        if(e->key == keymap[r].down) {
+            game.paddle[r].down = e->action == BJ_PRESS;
+        }
     }
 
     if(e->key == BJ_KEY_ESCAPE && e->action == BJ_RELEASE) {
@@ -104,35 +112,48 @@ void key_callback(bj_window* p_window, const bj_key_event* e) {
     }
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // Game update
-void update(double delta_time) {
+static inline float clampf(float x, float lo, float hi) {
+    return x < lo ? lo : x > hi ? hi : x;
+}
 
-    // Ball
-    if(game.running) {
-        static const float ball_half_size = BALL_SIZE / 2;
-        bj_vec2 target_position;
-        bj_vec2_add_scaled(target_position, game.ball.position, game.ball.velocity, delta_time);
+void update(double dt) {
+    const float halfB = BALL_SIZE * 0.5f;
+    bj_vec2 tp;
+    bj_vec2_add_scaled(tp, game.ball.position, game.ball.velocity, dt);
 
-        if(target_position[1] >= SCREEN_H - ball_half_size || target_position[1] < ball_half_size) {
-            game.ball.velocity[1] = -(game.ball.velocity[1]);
-        }
-
-        if(target_position[0] >= SCREEN_W - ball_half_size || target_position[0] < ball_half_size) {
-            game.ball.velocity[0] = -(game.ball.velocity[0]);
-        }
-        bj_vec2_add_scaled(game.ball.position, game.ball.position, game.ball.velocity, delta_time);
+    // wall bounce (top/bottom)
+    if (tp[1] < halfB || tp[1] > SCREEN_H - halfB) {
+        tp[1] = clampf(tp[1], halfB, SCREEN_H - halfB);
+        game.ball.velocity[1] = -game.ball.velocity[1];
     }
 
-    // Paddle
-    for(size_t r = 0 ; r < 2 ; ++r) {
-        const float new_y = game.racket[r].position_y + 
-            (1.f * game.racket[r].down - 1.f * game.racket[r].up) 
-            * delta_time * RACKET_VELOCITY;
-
-        if(new_y > RACKET_LENGTH / 2 && new_y < SCREEN_H - RACKET_LENGTH / 2) {
-            game.racket[r].position_y = new_y;
+    // paddle bounce with random angle
+    float speed = bj_vec2_len(game.ball.velocity);
+    for (int p = 0; p < 2; p++) {
+        float cx = (p == 0 ? LEFT_PADDLE_POSX : RIGHT_PADDLE_POSX) + PADDLE_WIDTH * 0.5f;
+        if (fabsf(tp[0] - cx) <= halfB + PADDLE_WIDTH * 0.5f &&
+            fabsf(tp[1] - game.paddle[p].position_y) <= halfB + PADDLE_LENGTH * 0.5f) 
+        {
+            // random angle away from paddle: base 0 (left) or π (right) ±45°
+            float base = p == 0 ? 0.0f : BJ_PI;
+            float randn = (rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+            float angle = base + randn * (BJ_PI / 4.0f);
+            game.ball.velocity[0] = cosf(angle) * speed;
+            game.ball.velocity[1] = sinf(angle) * speed;
+            break;
         }
+    }
+
+    bj_vec2_copy(game.ball.position, tp);
+
+    // paddle movement
+    for (int p = 0; p < 2; p++) {
+        float dir = (float)game.paddle[p].down - (float)game.paddle[p].up;
+        float y  = game.paddle[p].position_y + dir * dt * PADDLE_VELOCITY;
+        game.paddle[p].position_y = clampf(y, PADDLE_LENGTH * 0.5f, SCREEN_H - PADDLE_LENGTH * 0.5f);
     }
 }
 
