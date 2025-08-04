@@ -5,6 +5,7 @@
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
 #include <banjo/event.h>
+#include <banjo/linmath.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/system.h>
@@ -14,25 +15,38 @@
 bj_window* window = 0;
 bj_bitmap* framebuffer = 0;
 
-#define SCREEN_W 500
-#define SCREEN_H 500
-#define BALL_SIZE 25
+#define SCREEN_W 800
+#define SCREEN_H 600
+#define BALL_SIZE 16
 
-bj_pixel ball_position = { SCREEN_W / 2, SCREEN_H / 2 };
+// Initially place ball at center
+bj_vec2 ball_position = { 
+    (float)(SCREEN_W / 2), 
+    (float)(SCREEN_H / 2)
+};
+
+bj_vec2 ball_velocity = {
+    1.0f, 1.0f,
+};
 
 void draw(bj_bitmap* bmp) {
-    (void)draw;
     bj_bitmap_clear(bmp);
 
     const uint32_t color_ball = bj_bitmap_pixel_value(bmp, 0xFF, 0xFF, 0xFF);
 
     bj_bitmap_draw_rectangle(framebuffer,
         &(bj_rect){
-            .x = ball_position[0], .y = ball_position[1],
-            BALL_SIZE, BALL_SIZE
+            .x = ball_position[0] - BALL_SIZE / 2, 
+            .y = ball_position[1] - BALL_SIZE / 2,
+            .w = BALL_SIZE, 
+            .h = BALL_SIZE,
         },
         color_ball
     );
+}
+
+void move_ball() {
+    bj_vec2_add(ball_position, ball_position, ball_velocity);
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
@@ -48,9 +62,6 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     window = bj_window_new("Pong", 100, 100, SCREEN_W, SCREEN_H, 0);
     framebuffer = bj_window_get_framebuffer(window, 0);
 
-    
-    
-   
     bj_set_key_callback(bj_close_on_escape);
     return bj_callback_continue;
 }
@@ -58,7 +69,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 int bj_app_iterate(void* user_data) {
     (void)user_data;
     bj_dispatch_events();
-    
+
     draw(framebuffer);
     bj_window_update_framebuffer(window);
     bj_sleep(30);
