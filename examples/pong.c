@@ -1,6 +1,6 @@
 ﻿////////////////////////////////////////////////////////////////////////////////
-/// \example drawing_2d.c
-///  2D primitive drawing demo.
+/// \example pong.c
+/// A clone of Pong.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/bitmap.h>
 #include <banjo/event.h>
@@ -31,17 +31,13 @@ typedef struct {
 void draw(const pong_game* game, bj_bitmap* framebuffer) {
     bj_bitmap_clear(framebuffer);
 
+    // Ball
     const uint32_t color_ball = bj_bitmap_pixel_value(framebuffer, 0xFF, 0xFF, 0xFF);
 
-    bj_bitmap_draw_rectangle(framebuffer,
-        &(bj_rect){
-            .x = game->ball.position[0] - BALL_SIZE / 2, 
-            .y = game->ball.position[1] - BALL_SIZE / 2,
-            .w = BALL_SIZE, 
-            .h = BALL_SIZE,
-        },
-        color_ball
-    );
+    static bj_rect ball_rect = { .w = BALL_SIZE, .h = BALL_SIZE,};
+    ball_rect.x = game->ball.position[0] - BALL_SIZE / 2;
+    ball_rect.y = game->ball.position[1] - BALL_SIZE / 2;
+    bj_bitmap_draw_rectangle(framebuffer, &ball_rect, color_ball);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
