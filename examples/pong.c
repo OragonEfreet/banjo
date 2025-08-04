@@ -16,6 +16,9 @@
 #define SCREEN_W 800
 #define SCREEN_H 600
 #define BALL_SIZE 16
+#define RACKET_MARGIN 10
+#define RACKET_LENGTH 120
+#define RACKET_WIDTH 24
 
 ////////////////////////////////////////////////////////////////////////////////
 // Game data
@@ -24,20 +27,40 @@ typedef struct {
         bj_vec2 position;
         bj_vec2 velocity;
     } ball;
+
+    struct {
+        float position;
+    } racket[2];
+        
 } pong_game;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Draw the scene
+// Important: bj_bitmap_draw_rect draws from the top-left corner of the rect
+// while the game's entities (rackets, ball) have coordinates on their centers.
 void draw(const pong_game* game, bj_bitmap* framebuffer) {
     bj_bitmap_clear(framebuffer);
 
-    // Ball
-    const uint32_t color_ball = bj_bitmap_pixel_value(framebuffer, 0xFF, 0xFF, 0xFF);
+    const uint32_t color = bj_bitmap_pixel_value(framebuffer, 0xFF, 0xFF, 0xFF);
 
+    // Ball
     static bj_rect ball_rect = { .w = BALL_SIZE, .h = BALL_SIZE,};
     ball_rect.x = game->ball.position[0] - BALL_SIZE / 2;
     ball_rect.y = game->ball.position[1] - BALL_SIZE / 2;
-    bj_bitmap_draw_rectangle(framebuffer, &ball_rect, color_ball);
+    bj_bitmap_draw_rectangle(framebuffer, &ball_rect, color);
+
+    static bj_rect racket_rect[2] = {
+        {.x = RACKET_MARGIN, .w = RACKET_WIDTH, .h = RACKET_LENGTH,},
+        {.x = SCREEN_W - RACKET_MARGIN - RACKET_WIDTH, .w = RACKET_WIDTH, .h = RACKET_LENGTH,},
+    };
+
+    bj_info("%d", racket_rect[0].x);
+
+    for(size_t r = 0 ; r < 2 ; ++r) {
+        racket_rect[r].y = game->racket[r].position - RACKET_LENGTH / 2;
+        bj_bitmap_draw_rectangle(framebuffer, &racket_rect[r], color);
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +100,10 @@ int main(int argc, char* argv[]) {
         .ball = {
             .position = { SCREEN_W / 2, SCREEN_H / 2 },
             .velocity = { 200.0f, 200.0f, },
+        },
+        .racket = { 
+            {.position = SCREEN_H / 2,},
+            {.position = SCREEN_H / 2,}
         },
     };
 
