@@ -20,12 +20,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Game data
 typedef struct {
-    bj_vec2 position;
-    bj_vec2 velocity;
-} pong_ball;
-
-typedef struct {
-    pong_ball ball;
+    struct {
+        bj_vec2 position;
+        bj_vec2 velocity;
+    } ball;
 } pong_game;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,5 +109,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
 
