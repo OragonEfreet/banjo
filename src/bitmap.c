@@ -298,8 +298,8 @@ BANJO_EXPORT void bj_bitmap_draw_rectangle(
 ) {
     bj_check(p_bitmap);
     bj_check(p_area);
-    for (size_t x = p_area->x; x < p_area->x + p_area->w; ++x) {
-        for (size_t y = p_area->y; y < p_area->y + p_area->h; ++y) {
+    for (int x = p_area->x; x < p_area->x + p_area->w; ++x) {
+        for (int y = p_area->y; y < p_area->y + p_area->h; ++y) {
             bj_bitmap_put_pixel(p_bitmap, x, y, pixel);
         }
     }
