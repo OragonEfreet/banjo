@@ -1,101 +1,70 @@
 #include <banjo/time.h>
-
 #include "check.h"
 
 uint64_t bj_time_frequency = 0;
 
-static void stopwatch_clear(bj_stopwatch* sw, uint64_t now)
+static void bj__stopwatch_autoreset(bj_stopwatch* p_stopwatch)
 {
-    sw->start_counter = now;
-    sw->last_tick     = now;
-    sw->elapsed_ticks = 0;
-    sw->delay_ticks   = 0;
-}
-
-static void stopwatch_zero(bj_stopwatch* sw)
-{
-    sw->start_counter = 0;
-    sw->last_tick     = 0;
-    sw->elapsed_ticks = 0;
-    sw->delay_ticks   = 0;
-    sw->running       = BJ_FALSE;
-}
-
-void bj_stopwatch_start(bj_stopwatch* sw)
-{
-    bj_check(sw);
-    bj_check(sw->running == BJ_FALSE);
-
-    const uint64_t now = bj_get_time_counter();
-
-    if (sw->start_counter == 0 && sw->last_tick == 0) {
-        stopwatch_clear(sw, now);
-    } else {
-        sw->start_counter += (now - sw->last_tick);
-        sw->last_tick = now;
-    }
-
-    sw->running = BJ_TRUE;
-}
-
-void bj_stopwatch_tick(bj_stopwatch* sw)
-{
-    bj_check(sw);
-    bj_check(sw->running);
-
-    const uint64_t now = bj_get_time_counter();
-    sw->delay_ticks    = now - sw->last_tick;
-    sw->elapsed_ticks  = now - sw->start_counter;
-    sw->last_tick      = now;
-}
-
-void bj_stopwatch_pause(bj_stopwatch* sw) {
-    bj_check(sw);
-    if (sw->running) {
+    if (p_stopwatch->start_counter == 0) {
         const uint64_t now = bj_get_time_counter();
-        sw->delay_ticks   = now - sw->last_tick;
-        sw->elapsed_ticks = now - sw->start_counter;
-        sw->last_tick     = now;
+        p_stopwatch->start_counter = now;
+        p_stopwatch->last_tick     = now;
     }
-    sw->running = BJ_FALSE;
 }
 
-void bj_stopwatch_reset(bj_stopwatch* sw)
+void bj_stopwatch_reset(bj_stopwatch* p_stopwatch)
 {
-    bj_check(sw);
+    bj_check(p_stopwatch);
     const uint64_t now = bj_get_time_counter();
-    stopwatch_clear(sw, now);
+    p_stopwatch->start_counter = now;
+    p_stopwatch->last_tick     = now;
 }
 
-void bj_stopwatch_stop(bj_stopwatch* sw)
+void bj_stopwatch_step(bj_stopwatch* p_stopwatch)
 {
-    bj_check(sw);
-    stopwatch_zero(sw);
+    bj_check(p_stopwatch);
+    bj__stopwatch_autoreset(p_stopwatch);
+    p_stopwatch->last_tick = bj_get_time_counter();
 }
 
-bj_bool bj_stopwatch_running(const bj_stopwatch* sw)
+double bj_stopwatch_elapsed(const bj_stopwatch* p_stopwatch)
 {
-    bj_check_or_return(sw, BJ_FALSE);
-    return sw->running;
+    bj_check_or_return(p_stopwatch, 0.0);
+
+    if (p_stopwatch->start_counter == 0) {
+        // auto-reset for read-only
+        bj_stopwatch* writable = (bj_stopwatch*)p_stopwatch;
+        bj_stopwatch_reset(writable);
+        return 0.0;
+    }
+
+    const uint64_t now = bj_get_time_counter();
+    return (double)(now - p_stopwatch->start_counter) / (double)bj_get_time_frequency();
 }
 
-double bj_stopwatch_elapsed(const bj_stopwatch* sw)
+double bj_stopwatch_delay(const bj_stopwatch* p_stopwatch)
 {
-    bj_check_or_return(sw, 0.0);
-    bj_check_or_return(bj_time_frequency, 0.0);
-    return (double)(sw->elapsed_ticks) / (double)bj_time_frequency;
+    bj_check_or_return(p_stopwatch, 0.0);
+
+    if (p_stopwatch->last_tick == 0) {
+        // auto-reset for read-only
+        bj_stopwatch* writable = (bj_stopwatch*)p_stopwatch;
+        bj_stopwatch_reset(writable);
+        return 0.0;
+    }
+
+    const uint64_t now = bj_get_time_counter();
+    return (double)(now - p_stopwatch->last_tick) / (double)bj_get_time_frequency();
 }
 
-double bj_stopwatch_delay(const bj_stopwatch* sw)
+double bj_stopwatch_step_delay(bj_stopwatch* p_stopwatch)
 {
-    bj_check_or_return(sw, 0.0);
-    bj_check_or_return(bj_time_frequency, 0.0);
-    return (double)(sw->delay_ticks) / (double)bj_time_frequency;
-}
+    bj_check_or_return(p_stopwatch, 0.0);
+    bj__stopwatch_autoreset(p_stopwatch);
 
-double bj_stopwatch_tick_delay(
-    bj_stopwatch* p_stopwatch
-) {
-    bj_stopwatch_tick(p_stopwatch);
-    return bj_stopwatch_delay(p_stopwatch);
+    const uint64_t now = bj_get_time_counter();
+    const uint64_t delta = now - p_stopwatch->last_tick;
+    p_stopwatch->last_tick = now;
+
+    return (double)delta / (double)bj_get_time_frequency();
 }

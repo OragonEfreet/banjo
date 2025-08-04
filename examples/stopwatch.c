@@ -20,14 +20,13 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     }
 
-    bj_stopwatch_start(&p_stopwatch);
     return bj_callback_continue;
 }
 
 int bj_app_iterate(void* user_data) {
     (void)user_data;
 
-    bj_stopwatch_tick(&p_stopwatch);
+    bj_stopwatch_step(&p_stopwatch);
 
     double elapsed = bj_stopwatch_elapsed(&p_stopwatch);
     double delay   = bj_stopwatch_delay(&p_stopwatch);

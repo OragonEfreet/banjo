@@ -7,6 +7,7 @@
 #include <banjo/linmath.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
+#include <banjo/shader.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
@@ -16,7 +17,7 @@
 #define SCREEN_W 800
 #define SCREEN_H 600
 #define BALL_SIZE 16
-#define RACKET_MARGIN 10
+#define RACKET_MARGIN 100
 #define RACKET_LENGTH 120
 #define RACKET_WIDTH 24
 #define RACKET_VELOCITY (250.f)
@@ -31,11 +32,11 @@ static struct {
     } ball;
 
     struct {
-        float position_y;
+        float   position_y;
         bj_bool up;
         bj_bool down;
     } racket[2];
-    bj_stopwatch start;
+    bj_bool running;
 } game = {
     .ball = {
         .position = { SCREEN_W / 2, SCREEN_H / 2 },
@@ -45,7 +46,7 @@ static struct {
         {.position_y = SCREEN_H / 2, .up = BJ_FALSE, .down = BJ_FALSE},
         {.position_y = SCREEN_H / 2, .up = BJ_FALSE, .down = BJ_FALSE}
     },
-    .start = 0,
+    .running = BJ_FALSE,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,32 +79,24 @@ void draw(bj_bitmap* framebuffer) {
 void key_callback(bj_window* p_window, const bj_key_event* e) {
     (void)p_window;
 
-    switch(e->key) {
-        case BJ_KEY_F:
-            game.racket[0].down = (e->action == BJ_PRESS);
-            break;
-        case BJ_KEY_D:
-            game.racket[0].up = (e->action == BJ_PRESS);
-            break;
-        case BJ_KEY_J:
-            game.racket[1].down = (e->action == BJ_PRESS);
-            break;
-        case BJ_KEY_K:
-            game.racket[1].up = (e->action == BJ_PRESS);
-            break;
-        case BJ_KEY_ESCAPE:
-            if(e->action == BJ_RELEASE) {
-                bj_window_set_should_close(p_window);
-            }
-            break;
-        default:
-            break;
+    static const struct {
+        bj_key up;
+        bj_key down;
+    } keymap[2] = {
+        {.up = BJ_KEY_D, .down = BJ_KEY_F},
+        {.up = BJ_KEY_K, .down = BJ_KEY_J},
+    };
 
-        
+    for(size_t r = 0 ; r < 2 ; ++r) {
+        game.racket[r].up = e->key == keymap[r].up && e->action == BJ_PRESS;
+        game.racket[r].down = e->key == keymap[r].down && e->action == BJ_PRESS;
     }
 
-
-
+    if(e->key == BJ_KEY_ESCAPE && e->action == BJ_RELEASE) {
+        bj_window_set_should_close(p_window);
+    } else {
+        game.running = BJ_TRUE;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,16 +104,16 @@ void key_callback(bj_window* p_window, const bj_key_event* e) {
 void update(double delta_time) {
 
     // Ball
-    bj_stopwatch_tick(&game.start);
-    if(bj_stopwatch_elapsed(&game.start) > GAME_START_DELAY) {
+    if(game.running) {
+        static const float ball_half_size = BALL_SIZE / 2;
         bj_vec2 target_position;
         bj_vec2_add_scaled(target_position, game.ball.position, game.ball.velocity, delta_time);
 
-        if(target_position[1] >= SCREEN_H || target_position[1] < 0) {
+        if(target_position[1] >= SCREEN_H - ball_half_size || target_position[1] < ball_half_size) {
             game.ball.velocity[1] = -(game.ball.velocity[1]);
         }
 
-        if(target_position[0] >= SCREEN_W || target_position[0] < 0) {
+        if(target_position[0] >= SCREEN_W - ball_half_size || target_position[0] < ball_half_size) {
             game.ball.velocity[0] = -(game.ball.velocity[0]);
         }
         bj_vec2_add_scaled(game.ball.position, game.ball.position, game.ball.velocity, delta_time);
@@ -142,41 +135,25 @@ void update(double delta_time) {
 int main(int argc, char* argv[]) {
     (void)argc; (void)argv;
 
-    bj_error* p_error = 0;
+    bj_begin(NULL);
 
-    if (!bj_begin(&p_error)) {
-        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
-        return -1;
-    }
-
-    bj_window* window      = bj_window_new("Pong", 0, 0, SCREEN_W, SCREEN_H, 0);
+    bj_window* window = bj_window_new("Pong", 0,0, SCREEN_W, SCREEN_H, 0);
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
 
     bj_set_key_callback(key_callback);
     bj_stopwatch stopwatch = {0};
-    bj_stopwatch_start(&stopwatch);
 
-    bj_stopwatch_start(&game.start);
-
-    // Game loop:
-    // - Handle events
-    // - Run game loop iteration
-    // - Draw scene
-    // - Draw scene
-    while(bj_window_should_close(window) == BJ_FALSE) {
-
+    while (!bj_window_should_close(window)) {
         bj_dispatch_events();
-        update(bj_stopwatch_tick_delay(&stopwatch));
-        draw(framebuffer);
+        update(bj_stopwatch_step_delay(&stopwatch));
 
-        // Flush and wait
+        draw(framebuffer);
         bj_window_update_framebuffer(window);
         bj_sleep(15);
     }
 
     bj_window_del(window);
     bj_end(0);
-
     return 0;
 }
 
