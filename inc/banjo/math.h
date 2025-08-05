@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include <banjo/api.h>
+
 #define _USE_MATH_DEFINES 
 #include <math.h>
 
@@ -149,4 +151,69 @@
 /// Computes the tangent of a single precision floating-point value.
 ////////////////////////////////////////////////////////////////////////////////
 #define bj_tanf tanf
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Clamps a float between a minimum and a maximum value.
+///
+/// \param  x The input value.
+/// \param  min The minimum value allowed.
+/// \param  max The maximum value allowed.
+/// \return The clamped value.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT float bj_clamp(
+    float x,
+    float min,
+    float max
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Returns _0.0_ if `x < edge`, else _1.0_.
+///
+/// Often used for binary thresholding in shaders.
+///
+/// \param edge The threshold edge.
+/// \param x The input value.
+/// \return _0.0_ or _1.0_ depending on x's relationship to edge.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT float bj_step(
+    float edge,
+    float x
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Performs smooth Hermite interpolation between 0 and 1 over a range.
+///
+/// \param edge0 The lower bound of the transition.
+/// \param edge1 The upper bound of the transition.
+/// \param x The input value.
+/// \return The smoothed value in [0, 1].
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT float bj_smoothstep(
+    float edge0,
+    float edge1,
+    float x
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Returns the fractional part of a float.
+///
+/// \param x The input value.
+/// \return The fractional part (x - floor(x)).
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT float bj_fract(
+    float x
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Computes a floor-style modulus between two floats.
+///
+/// \param x The dividend.
+/// \param y The divisor.
+/// \return The result of x mod y, using floor-based logic.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT int bj_mod(
+    float x,
+    float y
+);
+
 /// \}
