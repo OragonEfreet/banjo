@@ -405,6 +405,12 @@ BANJO_EXPORT void bj_bitmap_draw_line(
     uint32_t       pixel
 );
 
+BANJO_EXPORT void bj_bitmap_draw_rectangle(
+    bj_bitmap*     p_bitmap,
+    const bj_rect* p_area,
+    uint32_t       pixel
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws the edges of a triangle given its 3 corners.
 ///

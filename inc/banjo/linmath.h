@@ -124,6 +124,22 @@ BJ_INLINE void bj_vec2_add(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// \brief Computes `res = a + b * s` for 2D vectors.
+///
+/// This is the fused “add then scale” operation.
+///
+/// \param res The resulting vec2.
+/// \param a   The base vec2.
+/// \param b   The vec2 to be scaled.
+/// \param s   The scalar factor.
+////////////////////////////////////////////////////////////////////////////////
+BJ_INLINE void bj_vec2_add_scaled(bj_vec2 res, const bj_vec2 a, const bj_vec2 b, bj_real_t s)
+{
+    res[0] = a[0] + b[0] * s;
+    res[1] = a[1] + b[1] * s;
+}
+
+////////////////////////////////////////////////////////////////////////////////
 /// Set `res` to the result of `lhs`-`rhs`.
 ///
 /// \param res The destination vec2
@@ -236,7 +252,7 @@ BJ_INLINE void bj_vec2_copy(bj_vec2 res, const bj_vec2 src) {
 /// \param c   The third scalar value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_set(bj_vec2 res, bj_real_t a, bj_real_t b, bj_real_t c) {
+BJ_INLINE void bj_vec3_set(bj_vec3 res, bj_real_t a, bj_real_t b, bj_real_t c) {
     res[0] = a; res[1] = b; res[2] = c;
 }
 
@@ -267,6 +283,23 @@ BJ_INLINE void bj_vec3_add(bj_vec3 res, const bj_vec3 lhs, const bj_vec3 rhs) {
     res[1] = lhs[1] + rhs[1];
     res[2] = lhs[2] + rhs[2];
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Computes `res = a + b * s` for 3D vectors.
+///
+/// This is the fused “add then scale” operation.
+///
+/// \param res The resulting vec3.
+/// \param a   The base vec3.
+/// \param b   The vec3 to be scaled.
+/// \param s   The scalar factor.
+////////////////////////////////////////////////////////////////////////////////
+BJ_INLINE void bj_vec3_add_scaled(bj_vec3 res, const bj_vec3 a, const bj_vec3 b, bj_real_t s) {
+    res[0] = a[0] + b[0] * s;
+    res[1] = a[1] + b[1] * s;
+    res[2] = a[2] + b[2] * s;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set `res` to the result of `lhs`-`rhs`.
@@ -425,7 +458,7 @@ BJ_INLINE void bj_vec4_apply(bj_vec4 res, const bj_vec4 a, bj_real_t(*f)(bj_real
     res[0] = f(a[0]);
     res[1] = f(a[1]);
     res[2] = f(a[2]);
-    res[3] = f(a[4]);
+    res[3] = f(a[3]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -440,6 +473,23 @@ BJ_INLINE void bj_vec4_add(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
     res[1] = lhs[1] + rhs[1];
     res[2] = lhs[2] + rhs[2];
     res[3] = lhs[3] + rhs[3];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Computes `res = a + b * s` for 4D vectors.
+///
+/// This is the fused “add then scale” operation.
+///
+/// \param res The resulting vec4.
+/// \param a   The base vec4.
+/// \param b   The vec4 to be scaled.
+/// \param s   The scalar factor.
+////////////////////////////////////////////////////////////////////////////////
+BJ_INLINE void bj_vec4_add_scaled(bj_vec4 res, const bj_vec4 a, const bj_vec4 b, bj_real_t s) {
+    res[0] = a[0] + b[0] * s;
+    res[1] = a[1] + b[1] * s;
+    res[2] = a[2] + b[2] * s;
+    res[3] = a[3] + b[3] * s;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

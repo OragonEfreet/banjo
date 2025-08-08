@@ -291,6 +291,20 @@ BANJO_EXPORT void bj_bitmap_draw_line(
     }
 }
 
+BANJO_EXPORT void bj_bitmap_draw_rectangle(
+    bj_bitmap*     p_bitmap,
+    const bj_rect* p_area,
+    uint32_t       pixel
+) {
+    bj_check(p_bitmap);
+    bj_check(p_area);
+    for (int x = p_area->x; x < p_area->x + p_area->w; ++x) {
+        for (int y = p_area->y; y < p_area->y + p_area->h; ++y) {
+            bj_bitmap_put_pixel(p_bitmap, x, y, pixel);
+        }
+    }
+}
+
 void bj_bitmap_draw_triangle(
     bj_bitmap* bmp,
     bj_pixel p0,

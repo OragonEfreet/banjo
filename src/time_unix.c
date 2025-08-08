@@ -4,8 +4,8 @@
 
 #include <time.h>
 
+extern uint64_t bj_time_frequency;
 static clockid_t   s_clock;
-static uint64_t    s_frequency;
 static uint64_t    s_timer_base;
 
 void bj_end_time() {
@@ -16,7 +16,7 @@ void bj_begin_time(
     void
 ) {
     s_clock = CLOCK_REALTIME;
-    s_frequency = 1000000000;
+    bj_time_frequency = 1000000000;
 
 #if defined(_POSIX_MONOTONIC_CLOCK)
     struct timespec spec;
@@ -33,13 +33,13 @@ uint64_t bj_get_time_counter(
 ) {
     struct timespec spec;
     clock_gettime(s_clock, &spec);
-    return (uint64_t) spec.tv_sec * s_frequency + (uint64_t) spec.tv_nsec;
+    return (uint64_t) spec.tv_sec * bj_time_frequency + (uint64_t) spec.tv_nsec;
 }
 
 uint64_t bj_get_time_frequency(
     void
 ) {
-    return s_frequency;
+    return bj_time_frequency;
 }
 
 void bj_sleep(

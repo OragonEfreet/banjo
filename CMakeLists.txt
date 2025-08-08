@@ -22,9 +22,9 @@ option(BJ_CONFIG_LOG_COLOR    "Banjo logs will have colored output"             
 option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    OFF)
 
 file(GLOB SOURCES
-    "${CMAKE_SOURCE_DIR}/src/*.c"
-    "${CMAKE_SOURCE_DIR}/src/*.h"
-    "${CMAKE_SOURCE_DIR}/inc/banjo/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/inc/banjo/*.h"
 )
 add_library(banjo ${SOURCES})
 target_include_directories(banjo PUBLIC inc)
