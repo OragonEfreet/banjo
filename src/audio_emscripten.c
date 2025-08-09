@@ -145,14 +145,16 @@ static bj_audio_layer* emscripten_init_audio(bj_error** p_error) {
 EMSCRIPTEN_KEEPALIVE void audio_emscripten_process(uintptr_t device_ptr) {
     bj_audio_device*   p_device = (bj_audio_device*)device_ptr;
     emscripten_device* dev      = (emscripten_device*)p_device->data;
-    p_device->p_callback(
-        dev->p_buffer,
-        dev->frames_per_block,
-        &p_device->properties,
-        p_device->p_callback_user_data,
-        dev->sample_index
-    );
-    dev->sample_index += dev->frames_per_block;
+    if(p_device->playing) {
+        p_device->p_callback(
+            dev->p_buffer,
+            dev->frames_per_block,
+            &p_device->properties,
+            p_device->p_callback_user_data,
+            dev->sample_index
+        );
+        dev->sample_index += dev->frames_per_block;
+    }
 }
 
 bj_audio_layer_create_info emscripten_audio_layer_info = {
