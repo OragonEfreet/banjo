@@ -145,7 +145,12 @@ static bj_audio_layer* emscripten_init_audio(bj_error** p_error) {
 EMSCRIPTEN_KEEPALIVE void audio_emscripten_process(uintptr_t device_ptr) {
     bj_audio_device*   p_device = (bj_audio_device*)device_ptr;
     emscripten_device* dev      = (emscripten_device*)p_device->data;
-    if(p_device->playing) {
+
+    size_t samples = (size_t)dev->frames_per_block * (size_t)dev->channels;
+    // Always start with silence so JS never repeats old audio.
+    memset(dev->p_buffer, 0, samples * sizeof(float));
+
+    if (p_device->playing && p_device->p_callback) {
         p_device->p_callback(
             dev->p_buffer,
             dev->frames_per_block,
