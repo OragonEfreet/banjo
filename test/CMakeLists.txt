@@ -10,7 +10,10 @@ macro(gen_test category pattern)
         target_link_libraries(${_target} PRIVATE banjo)
         set_target_properties(${_target} PROPERTIES OUTPUT_NAME ${_test_name})
         add_test(NAME "[${category}] ${_test_name}" COMMAND ${_target})
-        set_target_properties(${_target} PROPERTIES FOLDER "Tests")
+        set_target_properties(${_target} PROPERTIES 
+            FOLDER "Tests"
+            SUFFIX ".html"
+        )
         target_compile_definitions(${_target} PRIVATE -DBANJO_ASSETS_DIR="${BANJO_ASSETS_DIR}")
     endforeach()
 endmacro()

@@ -59,6 +59,7 @@ void bj_bitmap_reset(
     if(p_bitmap->weak == 0) {
         bj_free(p_bitmap->buffer);
     }
+    bj_bitmap_del(p_bitmap->charset);
 }
 
 bj_bitmap* bj_bitmap_new(

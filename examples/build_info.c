@@ -35,4 +35,5 @@ int main(int argc, char* argv[]) {
     DESC(feature_win32);
     DESC(feature_x11);
 
+    return 0;
 }

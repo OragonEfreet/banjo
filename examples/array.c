@@ -57,4 +57,5 @@ int main(int argc, char* argv[]) {
     bj_info("data = [%d, %d, %d]", data[0], data[1], data[2]);
 
     bj_array_del(array);
+    return 0;
 }

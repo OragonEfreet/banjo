@@ -537,6 +537,14 @@ BANJO_EXPORT bj_bool bj_bitmap_blit_stretched(
     const bj_rect* p_destination_area
 );
 
+BANJO_EXPORT void bj_bitmap_blit_text(
+    bj_bitmap* p_bitmap,
+    int x,
+    int y,
+    unsigned int pixel_height,
+    const char* text
+);
+
 
 
 
