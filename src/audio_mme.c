@@ -26,6 +26,7 @@ typedef struct bj_audio_device_data_t {
     HANDLE    thread;
     HANDLE    event;
     unsigned  next_block;
+    size_t    bytes_per_sample; // Added: bytes per sample
 } mme_device;
 
 typedef UINT(WINAPI* pfn_waveOutGetNumDevs)(void);
@@ -39,16 +40,16 @@ typedef MMRESULT(WINAPI* pfn_waveOutReset)(HWAVEOUT);
 typedef MMRESULT(WINAPI* pfn_waveOutUnprepareHeader)(HWAVEOUT, LPWAVEHDR, UINT);
 
 static struct mme_lib_t {
-	void* dll;
-	pfn_waveOutGetDevCapsW waveOutGetDevCapsW;
-	pfn_waveOutGetNumDevs waveOutGetNumDevs;
-	pfn_waveOutOpen waveOutOpen;
-	pfn_waveOutClose waveOutClose;
-	pfn_waveOutWrite waveOutWrite;
-	pfn_waveOutReset waveOutReset;
-	pfn_waveOutGetErrorTextA waveOutGetErrorTextA;
-	pfn_waveOutPrepareHeader waveOutPrepareHeader;
-	pfn_waveOutUnprepareHeader waveOutUnprepareHeader;
+    void* dll;
+    pfn_waveOutGetDevCapsW waveOutGetDevCapsW;
+    pfn_waveOutGetNumDevs waveOutGetNumDevs;
+    pfn_waveOutOpen waveOutOpen;
+    pfn_waveOutClose waveOutClose;
+    pfn_waveOutWrite waveOutWrite;
+    pfn_waveOutReset waveOutReset;
+    pfn_waveOutGetErrorTextA waveOutGetErrorTextA;
+    pfn_waveOutPrepareHeader waveOutPrepareHeader;
+    pfn_waveOutUnprepareHeader waveOutUnprepareHeader;
 } MME = { 0 };
 
 static void mme_set_error(bj_error** p_error, MMRESULT result) {
@@ -78,23 +79,23 @@ static bj_bool mme_load_library(bj_error** p_error) {
     }
 
 #define MME_BIND(fn) \
-        if (!(MME.fn = (pfn_##fn)bj_get_symbol(MME.dll, #fn))) { \
-            bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot load MME function " #fn); \
-            mme_unload_library(); \
-            return BJ_FALSE; \
-        }
+    if (!(MME.fn = (pfn_##fn)bj_get_symbol(MME.dll, #fn))) { \
+        bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot load MME function " #fn); \
+        mme_unload_library(); \
+        return BJ_FALSE; \
+    }
 
     MME_BIND(waveOutGetNumDevs)
-        MME_BIND(waveOutGetDevCapsW)
-        MME_BIND(waveOutOpen)
-        MME_BIND(waveOutGetErrorTextA)
-        MME_BIND(waveOutPrepareHeader)
-        MME_BIND(waveOutWrite)
-        MME_BIND(waveOutReset)
-        MME_BIND(waveOutUnprepareHeader)
+    MME_BIND(waveOutGetDevCapsW)
+    MME_BIND(waveOutOpen)
+    MME_BIND(waveOutGetErrorTextA)
+    MME_BIND(waveOutPrepareHeader)
+    MME_BIND(waveOutWrite)
+    MME_BIND(waveOutReset)
+    MME_BIND(waveOutUnprepareHeader)
 
 #undef MME_BIND
-        return BJ_TRUE;
+    return BJ_TRUE;
 }
 
 static void CALLBACK waveOutProcWrap(
@@ -115,14 +116,12 @@ static void mme_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device)
     (void)p_audio;
     mme_device* mme = (mme_device*)p_device->data;
 
-    // Signal thread to exit
     p_device->should_close = BJ_TRUE;
     if (mme->thread) {
         WaitForSingleObject(mme->thread, INFINITE);
         CloseHandle(mme->thread);
     }
 
-    // Stop and clean up waveOut
     if (mme->hwDevice) {
         MME.waveOutReset(mme->hwDevice);
         for (unsigned i = 0; i < mme->block_count; ++i) {
@@ -131,7 +130,6 @@ static void mme_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device)
         MME.waveOutClose(mme->hwDevice);
     }
 
-    // Free resources
     bj_free(mme->p_wave_headers);
     bj_free(mme->p_buffer);
     CloseHandle(mme->event);
@@ -166,11 +164,18 @@ static DWORD WINAPI mme_playback_thread(LPVOID param) {
             );
         }
         else {
-            // Fill silence
-            size_t samples = mme->frames_per_block * dev->properties.channels;
-            int16_t* buf = (int16_t*)hdr->lpData;
-            for (size_t i = 0; i < samples; ++i) {
-                buf[i] = dev->silence;
+            size_t total_frames = mme->frames_per_block;
+            size_t channels = dev->properties.channels;
+            size_t bps = mme->bytes_per_sample;
+            size_t block_bytes = total_frames * channels * bps;
+
+            if (dev->silence == 0) {
+                memset(hdr->lpData, 0, block_bytes);
+            } else {
+                uint8_t* dst = (uint8_t*)hdr->lpData;
+                for (size_t i = 0; i < total_frames * channels; ++i) {
+                    memcpy(dst + i * bps, &dev->silence, bps);
+                }
             }
         }
 
@@ -196,14 +201,12 @@ static bj_audio_device* mme_open_device(
         return NULL;
     }
 
-    // Load WinMM functions
     if (!mme_load_library(p_error)) {
         bj_free(mme);
         bj_free(p_device);
         return NULL;
     }
 
-    // Prepare wave format
     WAVEFORMATEX wf = { 0 };
     wf.wFormatTag = BJ_AUDIO_FORMAT_FLOAT(p_properties->format)
         ? WAVE_FORMAT_IEEE_FLOAT
@@ -215,7 +218,6 @@ static bj_audio_device* mme_open_device(
     wf.nAvgBytesPerSec = wf.nSamplesPerSec * wf.nBlockAlign;
     wf.cbSize = 0;
 
-    // Open device
     HWAVEOUT hwDevice = 0;
     UINT n_devs = MME.waveOutGetNumDevs();
     for (UINT d = 0; d < n_devs; ++d) {
@@ -233,28 +235,31 @@ static bj_audio_device* mme_open_device(
         return NULL;
     }
 
-    // Initialize device fields
     p_device->p_callback = p_callback;
     p_device->p_callback_user_data = p_callback_user_data;
     p_device->properties = *p_properties;
-    p_device->silence = 0;
+
+    // Compute proper silence value
+    if (wf.wFormatTag == WAVE_FORMAT_PCM && wf.wBitsPerSample == 8) {
+        p_device->silence = 0x80; // unsigned 8-bit silence
+    } else {
+        p_device->silence = 0; // signed PCM and float32 silence
+    }
+
     p_device->data = mme;
 
-    // Setup mme device struct
     mme->hwDevice = hwDevice;
     mme->block_count = MME_BLOCK_COUNT;
     mme->frames_per_block = MME_SAMPLES_PER_BLOCK;
     mme->sample_index = 0;
     mme->next_block = 0;
     mme->event = CreateEvent(NULL, FALSE, FALSE, NULL);
+    mme->bytes_per_sample = wf.wBitsPerSample / 8;
 
-    // Compute sizes
-    WORD bytes_per_sample = wf.wBitsPerSample / 8;
     WORD channels = wf.nChannels;
     size_t samples_per_block_allchan = mme->frames_per_block * channels;
-    size_t bytes_per_block = samples_per_block_allchan * bytes_per_sample;
+    size_t bytes_per_block = samples_per_block_allchan * mme->bytes_per_sample;
 
-    // Allocate buffers
     mme->p_wave_headers = bj_calloc(sizeof(WAVEHDR) * mme->block_count);
     mme->p_buffer = bj_calloc(bytes_per_block * mme->block_count);
     if (!mme->p_wave_headers || !mme->p_buffer) {
@@ -263,7 +268,6 @@ static bj_audio_device* mme_open_device(
         return NULL;
     }
 
-    // Prepare headers
     for (unsigned i = 0; i < mme->block_count; ++i) {
         WAVEHDR* hdr = &mme->p_wave_headers[i];
         hdr->lpData = (LPSTR)((uint8_t*)mme->p_buffer + i * bytes_per_block);
@@ -271,7 +275,6 @@ static bj_audio_device* mme_open_device(
         MME.waveOutPrepareHeader(hwDevice, hdr, sizeof(WAVEHDR));
     }
 
-    // Start playback thread
     mme->thread = CreateThread(NULL, 0, mme_playback_thread, p_device, 0, NULL);
     return p_device;
 }
@@ -297,8 +300,8 @@ static bj_audio_layer* mme_init_audio(bj_error** p_error) {
 }
 
 bj_audio_layer_create_info mme_audio_layer_info = {
-	.name = "mme",
-	.create = mme_init_audio,
+    .name = "mme",
+    .create = mme_init_audio,
 };
 
 #endif // BJ_HAS_FEATURE(MME)
