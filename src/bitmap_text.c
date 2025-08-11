@@ -54,23 +54,31 @@ static const bj_bitmap* get_charset(
 
 void bj_bitmap_blit_text(
     bj_bitmap* p_bitmap,
-    int x,
-    int y,
+    int _x,
+    int _y,
     unsigned int height,
     const char* text
 ) {
     bj_check(p_bitmap);
     bj_check(height > 0);
     bj_check(text);
-    bj_debug("blit text \"%s\" at {%d, %d}, size %ud", text, x, y, height);
+    /* bj_debug("blit text \"%s\" at {%d, %d}, size %ud", text, x, y, height); */
 
     const bj_bitmap* charset = get_charset(p_bitmap);
 
-    bj_bitmap_blit( charset, 0, p_bitmap, 0);
-    /* bj_bitmap_blit_stretched( charset, 0, p_bitmap, 0); */
-    /* bj_bitmap_blit_stretched(charset, 0, p_bitmap, &(bj_rect) { */
-    /*     0, 0, 800, 600 */
-    /* }); */
+    const char c = 'T';
+
+    const bj_rect char_area = {
+        .x = CHAR_PIXEL_X(c), .y = CHAR_PIXEL_Y(c),
+        .w = CHAR_PIXEL_W,    .h = CHAR_PIXEL_H,
+    };
+
+    const bj_rect dest_area = {
+        .x = 100, .y = 100,
+        .w = 48,  .h = 48,
+    };
+
+    bj_bitmap_blit_stretched(charset, &char_area, p_bitmap, &dest_area);
     
 
 
