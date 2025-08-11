@@ -526,8 +526,8 @@ static void x11_init_keycodes(
         &keysym_per_keycode
     );
 
-    p_x11->keymap = bj_malloc(sizeof(bj_key) * max_keycode);
-    bj_memset(p_x11->keymap, 0, sizeof(bj_key) * max_keycode);
+    p_x11->keymap = bj_malloc(sizeof(bj_key) * (max_keycode+1));
+    bj_memset(p_x11->keymap, 0, sizeof(bj_key) * (max_keycode+1));
 
     for (int keycode = min_keycode;  keycode <= max_keycode;  ++keycode) {
         if (p_x11->keymap[keycode] == BJ_KEY_UNKNOWN) {

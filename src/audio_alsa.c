@@ -176,9 +176,11 @@ static void* playback_thread(void* p_data) {
                     global_sample_index
                 );
             } else {
-                const size_t format_byte_size = BJ_AUDIO_FORMAT_WIDTH(p_device->properties.format);
-                for(size_t s = 0 ; s < frames_per_period * p_device->properties.channels ; ++s) {
-                    bj_memcpy(buffer + s * format_byte_size, &p_device->silence, format_byte_size);
+                const size_t bytes_per_sample =
+                    BJ_AUDIO_FORMAT_WIDTH(p_device->properties.format) / 8; // <-- divide by 8
+
+                for (size_t s = 0; s < frames_per_period * p_device->properties.channels; ++s) {
+                    bj_memcpy(buffer + s * bytes_per_sample, &p_device->silence, bytes_per_sample);
                 }
             }
 
