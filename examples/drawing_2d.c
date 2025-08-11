@@ -43,7 +43,7 @@ void draw(bj_bitmap* bmp) {
     /* } */
 
     // Draw simple text
-    bj_bitmap_blit_text(bmp, 10, 100, 16, "Hello World");
+    bj_bitmap_blit_text(bmp, 10, 100, 24, "Hello, World!");
 
 }
 
@@ -57,7 +57,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     } 
 
-    window = bj_window_new("latin-1 character set", 100, 100, 500, 500, 0);
+    window = bj_window_new("Simple Text", 100, 100, 500, 500, 0);
     bj_set_key_callback(bj_close_on_escape);
 
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);

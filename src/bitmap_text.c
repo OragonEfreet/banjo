@@ -1,4 +1,6 @@
 #include <banjo/log.h>
+#include <banjo/math.h>
+#include <banjo/string.h>
 
 #include "bitmap_charsets.h"
 #include "bitmap_t.h"
@@ -54,8 +56,8 @@ static const bj_bitmap* get_charset(
 
 void bj_bitmap_blit_text(
     bj_bitmap* p_bitmap,
-    int _x,
-    int _y,
+    int x,
+    int y,
     unsigned int height,
     const char* text
 ) {
@@ -66,20 +68,29 @@ void bj_bitmap_blit_text(
 
     const bj_bitmap* charset = get_charset(p_bitmap);
 
-    const char c = 'T';
+    int spacing = bj_round(0.1 * (double)CHAR_PIXEL_W);
+    if(spacing < 1) {
+        spacing = 1;
+    }
 
-    const bj_rect char_area = {
-        .x = CHAR_PIXEL_X(c), .y = CHAR_PIXEL_Y(c),
-        .w = CHAR_PIXEL_W,    .h = CHAR_PIXEL_H,
+    bj_rect dest_area = {
+        .x = 10,
+        .y = 100,
+        .w = (float)height / (float)CHAR_PIXEL_H * (float)CHAR_PIXEL_W,
+        .h = height,
     };
 
-    const bj_rect dest_area = {
-        .x = 100, .y = 100,
-        .w = 48,  .h = 48,
-    };
+    const size_t len = bj_strlen(text);
 
-    bj_bitmap_blit_stretched(charset, &char_area, p_bitmap, &dest_area);
-    
+    for(size_t c = 0 ; c < len ; ++c) {
+        const char code = text[c];
 
+        const bj_rect char_area = {
+            .x = CHAR_PIXEL_X(code), .y = CHAR_PIXEL_Y(code),
+            .w = CHAR_PIXEL_W,       .h = CHAR_PIXEL_H,
+        };
 
+        bj_bitmap_blit_stretched(charset, &char_area, p_bitmap, &dest_area);
+        dest_area.x += dest_area.w + spacing;
+    }
 }
