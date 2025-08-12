@@ -10,10 +10,10 @@ I owe the progress of this project some acknowledgements.
 
 ## Videos
 
-- [Sos Sosowsky]() presented [Writing an ultra-portable game without using an engine](https://www.youtube.com/watch?v=2cOqAHzIfQE) at _Game Industry Conference 2023_.
-- [One Lone Coder / javidx9 channel](https://www.youtube.com/@javidx9), immensely useful, especially for learning the bases of audio programming.
-- [Travis Vroman channel](https://www.youtube.com/@TravisVroman), maker of the [Kohi Engine](https://kohiengine.com/).
 - [Game Maker's Toolkit](https://www.youtube.com/@GMTK) obviously, the famous channel by Mark Brown.
+- [One Lone Coder / javidx9 channel](https://www.youtube.com/@javidx9), immensely useful, especially for learning the bases of audio programming.
+- Sos Sosowsky presented [Writing an ultra-portable game without using an engine](https://www.youtube.com/watch?v=2cOqAHzIfQE) at _Game Industry Conference 2023_.
+- [Travis Vroman channel](https://www.youtube.com/@TravisVroman), maker of the [Kohi Engine](https://kohiengine.com/).
 
 ## Books
 
@@ -22,6 +22,6 @@ I owe the progress of this project some acknowledgements.
 
 ## Projects
 
-- [Simple DirectMedia Layer](https://www.libsdl.org/) ([zlib](https://www.libsdl.org/license.php)), for the quality of the code that made me understand so many things.
 - [Kohi Engine](https://kohiengine.com/) ([Apache](https://github.com/travisvroman/kohi/blob/main/LICENSE)), by Travis Vroman.
+- [Simple DirectMedia Layer](https://www.libsdl.org/) ([zlib](https://www.libsdl.org/license.php)), for the quality of the code that made me understand so many things.
 
