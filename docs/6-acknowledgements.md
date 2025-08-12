@@ -8,6 +8,13 @@ I owe the progress of this project some acknowledgements.
 - [Juho Snellman](https://www.snellman.net/blog/archive/about/), who provided a [simple yet efficient implementation for ring buffers](https://www.snellman.net/blog/archive/2016-12-13-ring-buffers/), which I use for event queues.
 - [Wolfgang Drawinger](https://datenwolf.net/), author of [linmath.h](https://github.com/datenwolf/linmath.h) that I directly took and adapted for Banjo.
 
+## Videos
+
+- [Sos Sosowsky]() presented [Writing an ultra-portable game without using an engine](https://www.youtube.com/watch?v=2cOqAHzIfQE) at _Game Industry Conference 2023_.
+- [One Lone Coder / javidx9 channel](https://www.youtube.com/@javidx9), immensely useful, especially for learning the bases of audio programming.
+- [Travis Vroman channel](https://www.youtube.com/@TravisVroman), maker of the [Kohi Engine](https://kohiengine.com/).
+- [Game Maker's Toolkit](https://www.youtube.com/@GMTK) obviously, the famous channel by Mark Brown.
+
 ## Books
 
 - [Computer Graphics from Scratch](https://gabrielgambetta.com/computer-graphics-from-scratch/index.html), by [Gabriel Gambetta](https://gabrielgambetta.com/index.html). This book became the starting motivation for making my own 2D renderer.
@@ -16,4 +23,5 @@ I owe the progress of this project some acknowledgements.
 ## Projects
 
 - [Simple DirectMedia Layer](https://www.libsdl.org/) ([zlib](https://www.libsdl.org/license.php)), for the quality of the code that made me understand so many things.
+- [Kohi Engine](https://kohiengine.com/) ([Apache](https://github.com/travisvroman/kohi/blob/main/LICENSE)), by Travis Vroman.
 
