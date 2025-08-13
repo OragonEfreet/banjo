@@ -1,3 +1,6 @@
+// Note: This file is AI-generated.
+// TODO: I'll remake it myself later on.
+
 #include <banjo/api.h>
 #include <banjo/pixel.h>
 #include <banjo/rect.h>

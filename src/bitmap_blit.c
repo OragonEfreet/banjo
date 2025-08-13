@@ -1,6 +1,9 @@
 #include "bitmap_t.h"
 #include "check.h"
 
+// Note: This file is AI-generated.
+// TODO: I'll remake it myself later on.
+
 /* ---------- Public: color key ---------- */
 void bj_bitmap_set_colorkey(bj_bitmap* bmp, bj_bool enabled, uint32_t key_value) {
     bj_check(bmp);

@@ -3,7 +3,7 @@
 #if BJ_HAS_FEATURE(EMSCRIPTEN)
 
 // Note: This file is AI-generated.
-// I'll remake it myself later on.
+// TODO: I'll remake it myself later on.
 
 #include <emscripten.h>
 #include <banjo/audio.h>
