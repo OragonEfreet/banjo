@@ -16,14 +16,14 @@ bj_window* window = 0;
 void draw(bj_bitmap* bmp) {
     bj_bitmap_clear(bmp);
 
-    const uint32_t color_aquamarine = bj_bitmap_pixel_value(bmp, 0xFF, 0x00, 0xFF);
+    const uint32_t color_red = bj_bitmap_pixel_value(bmp, 0xFF, 0x00, 0x00);
     const uint32_t color_cyan = bj_bitmap_pixel_value(bmp, 0x7F, 0xFF, 0xD4);
     const uint32_t color_white = bj_bitmap_pixel_value(bmp, 0xFF, 0xFF, 0xFF);
 
     // Draw pixels individually
     for (size_t x = 10; x < 490; ++x) {
         if (x % 7 == 0) {
-            bj_bitmap_put_pixel(bmp, x, 10, color_aquamarine);
+            bj_bitmap_put_pixel(bmp, x, 10, color_red);
         }
     }
 
@@ -42,26 +42,8 @@ void draw(bj_bitmap* bmp) {
         );
     }
 
-    // Draw triangles (shapes a fox)
-    bj_pixel verts[] = {
-        {330, 270}, {270, 210}, {210, 270}, {210, 150}, {390, 210}, {450, 270},
-        {450, 150}, {180, 330}, {270, 390}, {390, 390}, {480, 330}, {330, 450},
-        {300, 480}, {360, 480},
-    };
+    bj_bitmap_blit_text(bmp, 150, 250, 24, bj_bitmap_pixel_value(bmp, 255, 0, 0), "Hello Banjo!");
 
-    size_t tris[13][3] = {
-        {0, 1, 2},   {0, 2, 3},   {0, 4, 5},  {0, 1, 4},  {4, 6, 5}, {2, 8, 7},
-        {0, 8, 2},   {0, 5, 9},   {9, 5, 10}, {8, 9, 11}, {8, 11, 12},
-        {9, 13, 11}, {11, 12, 13},
-    };
-
-
-    for (size_t t = 0; t < 13; ++t) {
-        bj_bitmap_draw_triangle(bmp,
-            verts[tris[t][0]], verts[tris[t][1]], verts[tris[t][2]],
-            color_white
-        );
-    }
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
@@ -74,7 +56,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     } 
 
-    window = bj_window_new("Simple Banjo Window", 100, 100, 500, 500, 0);
+    window = bj_window_new("Simple Text", 100, 100, 500, 500, 0);
     bj_set_key_callback(bj_close_on_escape);
 
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);

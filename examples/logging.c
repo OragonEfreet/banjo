@@ -37,4 +37,5 @@ int main(int argc, char* argv[]) {
 
     // Written contains the number of characters actually written:
     bj_info("Previous log message was written in %ld characters (excluding '\\0')", written);
+    return 0;
 }

@@ -34,9 +34,9 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     bj_bitmap* bmp_lena_512_512 = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/lena.bmp", 0);
     bj_bitmap* bmp_snail_256_256 = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/snail.bmp", 0);
     
-    bj_bitmap_blit(bmp_greenland_grid_velo_762_1309, &(bj_rect){.x = 0, .y = 0, .w = 762, .h = 1309}, bmp_rendering, & (bj_rect){.x = 20, .y = 0});
-    bj_bitmap_blit(bmp_blackbuck_512_512, &(bj_rect){.x = 100, .y = 100, .w = 512, .h = 512}, bmp_rendering, & (bj_rect){.x = 100, .y = 200});
-    bj_bitmap_blit(bmp_snail_256_256, &(bj_rect){.x = 0, .y = 0, .w = 256, .h = 256}, bmp_rendering, & (bj_rect){.x = 500, .y = 130});
+    bj_bitmap_blit(bmp_greenland_grid_velo_762_1309, &(bj_rect){.x = 0, .y = 0, .w = 762, .h = 1309}, bmp_rendering, & (bj_rect){.x = 20, .y = 0}, BJ_BLIT_OP_COPY);
+    bj_bitmap_blit(bmp_blackbuck_512_512, &(bj_rect){.x = 100, .y = 100, .w = 512, .h = 512}, bmp_rendering, & (bj_rect){.x = 100, .y = 200}, BJ_BLIT_OP_COPY);
+    bj_bitmap_blit(bmp_snail_256_256, &(bj_rect){.x = 0, .y = 0, .w = 256, .h = 256}, bmp_rendering, & (bj_rect){.x = 500, .y = 130}, BJ_BLIT_OP_COPY);
 
     bj_bitmap_del(bmp_snail_256_256);
     bj_bitmap_del(bmp_lena_512_512);
@@ -51,7 +51,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     window = bj_window_new("Blitmap Blit", 0, 0, WINDOW_W, WINDOW_H, 0);
     bj_set_key_callback(bj_close_on_escape);
 
-    bj_bitmap_blit(bmp_rendering, 0, bj_window_get_framebuffer(window, 0), 0);
+    bj_bitmap_blit(bmp_rendering, 0, bj_window_get_framebuffer(window, 0), 0, BJ_BLIT_OP_COPY);
     bj_bitmap_del(bmp_rendering);
 
     bj_window_update_framebuffer(window);

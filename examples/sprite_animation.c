@@ -60,11 +60,13 @@ int bj_app_iterate(void* user_data) {
     bj_dispatch_events();
 
     bj_bitmap_blit(bmp_sprite_sheet, &(bj_rect){
-        .x = frame_count * SPRITE_W,
-        .w = 24, .h = 24
-    }, bmp_rendering, & (bj_rect){.x = 0, .y = 0});
+            .x = frame_count * SPRITE_W,
+            .w = 24, .h = 24
+        }, bmp_rendering, & (bj_rect){.x = 0, .y = 0},
+        BJ_BLIT_OP_COPY
+    );
 
-    bj_bitmap_blit_stretched(bmp_rendering, 0, p_window_framebuffer, 0);
+    bj_bitmap_blit_stretched(bmp_rendering, 0, p_window_framebuffer, 0, BJ_BLIT_OP_COPY);
     bj_window_update_framebuffer(window);
 
     bj_sleep(120);

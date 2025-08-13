@@ -68,7 +68,6 @@ if (BUILD_TESTING)
     add_subdirectory(test)
 endif()
 
-
 if (BJ_FEATURE_EMSCRIPTEN)
   # make sure we’re compiling with emscripten
   # (if you’re building an executable, apply this to your exe target instead of the library)
