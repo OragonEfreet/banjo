@@ -495,44 +495,52 @@ BANJO_EXPORT bj_bool bj_bitmap_blit_stretched(
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op);
 
-/* Blit an 8-bit coverage mask into dst, tinting with a solid color (native to dst). */
+
+typedef enum {
+    BJ_MASK_BG_TRANSPARENT = 0,
+    BJ_MASK_BG_OPAQUE,
+    BJ_MASK_BG_REV_TRANSPARENT
+} bj_mask_bg_mode;
+
+
+/* Non-stretched: mask must be 8 bpp (coverage 0..255) */
 BANJO_EXPORT bj_bool bj_bitmap_blit_mask(
-    const bj_bitmap* mask,          /* must be 8 bpp (one byte per pixel) */
+    const bj_bitmap* mask,
     const bj_rect*   mask_area,     /* NULL = full mask */
     bj_bitmap*       dst,
-    const bj_rect*   dst_area,      /* NULL = place at {0,0} with mask's size */
-    uint32_t         color_native   /* packed in dst's native pixel format */
+    const bj_rect*   dst_area,      /* NULL = place at {0,0} w/ mask_area size */
+    uint32_t         fg_native,     /* dst-native packed color */
+    uint32_t         bg_native,     /* dst-native packed color */
+    bj_mask_bg_mode  mode
 );
 
-/* Same, but stretched to dst_area.w × dst_area.h (nearest neighbor). */
+/* Stretched (nearest) */
 BANJO_EXPORT bj_bool bj_bitmap_blit_mask_stretched(
-    const bj_bitmap* mask,          /* must be 8 bpp */
+    const bj_bitmap* mask,
     const bj_rect*   mask_area,     /* NULL = full mask */
     bj_bitmap*       dst,
     const bj_rect*   dst_area,      /* NULL = fill entire dst */
-    uint32_t         color_native
+    uint32_t         fg_native,
+    uint32_t         bg_native,
+    bj_mask_bg_mode  mode
 );
+
+// typedef struct bj_text_properties_t {
+//     uint32_t     foreground_color;
+//     uint32_t     background_color;
+//     unsigned int font_height;
+// } bj_text_properties;
+
 
 BANJO_EXPORT void bj_bitmap_blit_text(
-    bj_bitmap*   dst,
-    int          x,
-    int          y,
-    unsigned     height,
-    uint32_t     color_native,   /* packed in dst’s native pixel format */
-    const char*  text
-);
-
-typedef struct bj_text_properties_t {
-    uint32_t     foreground_color;
-    uint32_t     background_color;
-    unsigned int font_height;
-} bj_text_properties;
-
-BANJO_EXPORT void bj_bitmap_blit_text_ex(
-    bj_bitmap*                dst,
-    const char*               text,
-    const bj_rect*            area,
-    const bj_text_properties* properties
+    bj_bitmap*      dst,
+    int             x,
+    int             y,
+    unsigned        height,
+    uint32_t        fg_native,
+    uint32_t        bg_native,
+    bj_mask_bg_mode mode,            /* TRANSPARENT / OPAQUE / REV_TRANSPARENT */
+    const char*     text
 );
 
 /// \} // End of bitmap group

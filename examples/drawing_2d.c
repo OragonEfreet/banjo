@@ -42,7 +42,13 @@ void draw(bj_bitmap* bmp) {
         );
     }
 
-    bj_bitmap_blit_text(bmp, 150, 250, 24, bj_bitmap_pixel_value(bmp, 255, 0, 0), "Hello Banjo!");
+    bj_bitmap_blit_text(
+        bmp, 150, 250, 24, 
+        bj_bitmap_pixel_value(bmp, 255, 0, 0), 
+        bj_bitmap_pixel_value(bmp, 0, 255, 0), 
+        BJ_MASK_BG_REV_TRANSPARENT,
+        "Hello Banjo!"
+    );
 
 }
 
