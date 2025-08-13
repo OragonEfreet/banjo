@@ -47,7 +47,7 @@ void draw(bj_bitmap* bmp) {
         bj_bitmap_pixel_value(bmp, 255, 0, 0), 
         bj_bitmap_pixel_value(bmp, 0, 255, 0), 
         BJ_MASK_BG_REV_TRANSPARENT,
-        "Hello Banjo!"
+        "A\033[39mA"
     );
 
 }

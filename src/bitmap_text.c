@@ -152,6 +152,8 @@ static void render_text_masked(
 
     bj_rect dest_area = { (int16_t)x, (int16_t)y, glyph_w, glyph_h };
 
+    uint32_t fg = fg_native;
+    uint32_t bg = bg_native;
     for (size_t i = 0; i < len; ++i) {
         uint8_t code = (uint8_t)text[i];
         if (code >= table_len) code = (uint8_t)'?';
@@ -167,7 +169,7 @@ static void render_text_masked(
         bj_bitmap_blit_mask_stretched(
             mask, &src_glyph,
             dst, &dest_area,
-            fg_native, bg_native, mode
+            fg, bg, mode
         );
 
         /* Bridge the spacing gap with BG when carving so backgrounds touch */
@@ -182,6 +184,8 @@ static void render_text_masked(
         }
 
         dest_area.x = (int16_t)(dest_area.x + (int)dest_area.w + spacing);
+
+
     }
 }
 
