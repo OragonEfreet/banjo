@@ -42,12 +42,14 @@ void draw(bj_bitmap* bmp) {
         );
     }
 
+
+
     bj_bitmap_blit_text(
         bmp, 150, 250, 24, 
-        bj_bitmap_pixel_value(bmp, 255, 0, 0), 
-        bj_bitmap_pixel_value(bmp, 0, 255, 0), 
-        BJ_MASK_BG_REV_TRANSPARENT,
-        "A\033[39mA"
+        bj_bitmap_pixel_value(bmp, 0xFF, 0xFF, 0xFF), 
+        bj_bitmap_pixel_value(bmp, 0, 0, 0), 
+        BJ_MASK_BG_OPAQUE,
+"\033[31mRed\033[0mDefault"
     );
 
 }
