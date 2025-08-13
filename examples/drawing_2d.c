@@ -20,34 +20,29 @@ void draw(bj_bitmap* bmp) {
     const uint32_t color_cyan = bj_bitmap_pixel_value(bmp, 0x7F, 0xFF, 0xD4);
     const uint32_t color_white = bj_bitmap_pixel_value(bmp, 0xFF, 0xFF, 0xFF);
 
-    /* // Draw pixels individually */
-    /* for (size_t x = 10; x < 490; ++x) { */
-    /*     if (x % 7 == 0) { */
-    /*         bj_bitmap_put_pixel(bmp, x, 10, color_red); */
-    /*     } */
-    /* } */
-
-    /* // Draw lines (shapes a banjo) */
-    /* bj_pixel points[18] = { */
-    /*     {100, 20},  {95,  25},  {95,  50},  {100, 55},  {100, 100}, {95,  100}, */
-    /*     {75,  120}, {75,  145}, {95,  165}, {120, 165}, {140, 145}, {140, 120}, */
-    /*     {120, 100}, {115, 100}, {115, 55},  {120, 50},  {120, 25},  {115, 20}, */
-    /* }; */
-
-    /* for (size_t p = 0; p < 18; ++p) { */
-    /*     bj_bitmap_draw_line(bmp, */
-    /*         points[p], */
-    /*         points[(p + 1) % 18], */
-    /*         color_cyan */
-    /*     ); */
-    /* } */
-
-    // Draw simple text
-    for(size_t y = 0 ; y < 24 ; ++y) {
-        bj_bitmap_blit_text(bmp, 10, y * 25, y, "Hello, World!");
+    // Draw pixels individually
+    for (size_t x = 10; x < 490; ++x) {
+        if (x % 7 == 0) {
+            bj_bitmap_put_pixel(bmp, x, 10, color_red);
+        }
     }
-    uint32_t red = bj_bitmap_pixel_value(bmp, 255, 0, 0);
-    bj_bitmap_blit_text_masked_color(bmp, 10, 50, 24, red, "Colored text!");
+
+    // Draw lines (shapes a banjo)
+    bj_pixel points[18] = {
+        {100, 20},  {95,  25},  {95,  50},  {100, 55},  {100, 100}, {95,  100},
+        {75,  120}, {75,  145}, {95,  165}, {120, 165}, {140, 145}, {140, 120},
+        {120, 100}, {115, 100}, {115, 55},  {120, 50},  {120, 25},  {115, 20},
+    };
+
+    for (size_t p = 0; p < 18; ++p) {
+        bj_bitmap_draw_line(bmp,
+            points[p],
+            points[(p + 1) % 18],
+            color_cyan
+        );
+    }
+
+    bj_bitmap_blit_text(bmp, 150, 250, 24, bj_bitmap_pixel_value(bmp, 255, 0, 0), "Hello Banjo!");
 
 }
 
