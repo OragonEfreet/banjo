@@ -187,15 +187,12 @@ bj_bool bj_bitmap_blit_mask_stretched(
     bj_rect ms, ds;
     if (!bj__setup_mask_rects(mask, mask_area_in, dst, dst_area_in, &ms, &ds))
         return BJ_FALSE;
-
-    if (!dst_area_in) {
-        ds.x = 0; ds.y = 0;
-        ds.w = (uint16_t)bj__min_size_t(dst->width,  UINT16_MAX);
-        ds.h = (uint16_t)bj__min_size_t(dst->height, UINT16_MAX);
-    }
     if (ds.w == 0 || ds.h == 0) return BJ_FALSE;
 
-    /* Clip destination */
+    /* Save the *requested* (pre-clip) destination box for proportional mapping */
+    const bj_rect ds_req = ds;
+
+    /* Clip destination to surface */
     bj_rect dst_bounds = (bj_rect){
         .x = 0, .y = 0,
         .w = (uint16_t)bj__min_size_t(dst->width,  UINT16_MAX),
@@ -205,7 +202,56 @@ bj_bool bj_bitmap_blit_mask_stretched(
     if (bj_rect_intersect(&ds, &dst_bounds, &inter) == 0) return BJ_FALSE;
     ds = inter;
 
-    /* Unpack FG and BG once */
+    /* If the whole requested box is off-screen, nothing to do */
+    if (ds.w == 0 || ds.h == 0) return BJ_FALSE;
+
+    /* Proportional source adjustment for any clipping that happened.
+       We want the visible part of the *scaled* glyph to correspond to the same
+       portion of the *source* glyph, not to squeeze the whole source into the
+       shrunken visible rectangle.
+    */
+    if (ds.x != ds_req.x || ds.y != ds_req.y || ds.w != ds_req.w || ds.h != ds_req.h) {
+        /* Horizontal: compute source subrange [sx0, sx1) kept by the visible dst range */
+        uint32_t sx0 = 0, sx1 = ms.w; /* relative to ms.x */
+        if (ds_req.w > 0) {
+            const int left_clip  = ds.x - ds_req.x;                 /* >=0 if clipped on the left */
+            const int right_clip = (ds_req.x + ds_req.w) - (ds.x + ds.w); /* >=0 if clipped on the right */
+            if (left_clip > 0) {
+                sx0 = (uint32_t)bj__map_nn((size_t)left_clip, (size_t)ms.w, (size_t)ds_req.w);
+            }
+            if (right_clip > 0) {
+                /* number of dst pixels *kept* */
+                const uint32_t keep = (uint32_t)ds.w;
+                sx1 = (uint32_t)bj__map_nn((size_t)keep, (size_t)ms.w, (size_t)ds_req.w);
+                if (sx1 <= sx0) sx1 = sx0 + 1; /* keep at least 1 */
+                if (sx1 > ms.w) sx1 = ms.w;
+            }
+        }
+        ms.x = (int16_t)(ms.x + (int)sx0);
+        ms.w = (uint16_t)(sx1 - sx0);
+
+        /* Vertical: same idea */
+        uint32_t sy0 = 0, sy1 = ms.h;
+        if (ds_req.h > 0) {
+            const int top_clip    = ds.y - ds_req.y;
+            const int bottom_clip = (ds_req.y + ds_req.h) - (ds.y + ds.h);
+            if (top_clip > 0) {
+                sy0 = (uint32_t)bj__map_nn((size_t)top_clip, (size_t)ms.h, (size_t)ds_req.h);
+            }
+            if (bottom_clip > 0) {
+                const uint32_t keep = (uint32_t)ds.h;
+                sy1 = (uint32_t)bj__map_nn((size_t)keep, (size_t)ms.h, (size_t)ds_req.h);
+                if (sy1 <= sy0) sy1 = sy0 + 1;
+                if (sy1 > ms.h) sy1 = ms.h;
+            }
+        }
+        ms.y = (int16_t)(ms.y + (int)sy0);
+        ms.h = (uint16_t)(sy1 - sy0);
+
+        if (ms.w == 0 || ms.h == 0) return BJ_FALSE;
+    }
+
+    /* Unpack FG and BG once (dst-native) */
     uint8_t fr, fg, fb;
     uint8_t br, bg, bb;
     bj_pixel_rgb(dst->mode, fg_native, &fr, &fg, &fb);
@@ -252,12 +298,9 @@ bj_bool bj_bitmap_blit_mask_stretched(
                 break;
 
             case BJ_MASK_BG_REV_TRANSPARENT: {
-                /* CARVED OUT: BG over dst with alpha (1-a) */
                 const uint8_t a_bg = (uint8_t)(255u - a);
-                if (a_bg == 0) {
-                    /* inside glyph: keep dst */
-                } else if (a_bg == 255) {
-                    /* outside glyph: paint BG */
+                if (a_bg == 0) { /* inside glyph → keep dst */ }
+                else if (a_bg == 255) {
                     bj_bitmap_put_pixel(dst, out_x, out_y, bg_native);
                 } else {
                     const uint32_t dval = bj_bitmap_get(dst, out_x, out_y);

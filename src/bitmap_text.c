@@ -216,9 +216,12 @@ static size_t parse_ansi_sgr(
             /* Expect ;2;r;g;b */
             if (p + 4 < nparams && params[p+1] == 2) {
                 int r = params[p+2], g = params[p+3], b = params[p+4];
-                if (r < 0) r = 0; if (r > 255) r = 255;
-                if (g < 0) g = 0; if (g > 255) g = 255;
-                if (b < 0) b = 0; if (b > 255) b = 255;
+                if (r < 0)   r = 0;
+                if (r > 255) r = 255;
+                if (g < 0)   g = 0;
+                if (g > 255) g = 255;
+                if (b < 0)   b = 0;
+                if (b > 255) b = 255;
                 uint32_t v = pack_native_rgb(dst, (uint8_t)r, (uint8_t)g, (uint8_t)b);
                 if (code == 38) tmp_fg = v; else tmp_bg = v;
                 p += 4;
@@ -248,6 +251,7 @@ static size_t parse_ansi_sgr(
     return i;
 }
 
+
 /* =========================
    Text renderer
    ========================= */
@@ -265,23 +269,31 @@ static void render_text_masked(
     bj_check(text);
     bj_check(height > 0);
 
+    /* Atlas (8bpp, 0/255) */
     const bj_bitmap* mask = get_charset_mask(dst);
     bj_check(mask);
 
-    /* Scale glyph box from CHAR_PIXEL_W×CHAR_PIXEL_H to requested pixel height (keep aspect) */
+    /* Target glyph box (keeps aspect from CHAR_PIXEL_W×CHAR_PIXEL_H) */
     const uint16_t glyph_w = (uint16_t)((height * CHAR_PIXEL_W + CHAR_PIXEL_H/2) / CHAR_PIXEL_H);
     const uint16_t glyph_h = (uint16_t)height;
 
+    /* Spacing between glyph boxes in pixels */
     int spacing = (int)bj_round(0.1 * (double)CHAR_PIXEL_W);
     if (spacing < 1) spacing = 1;
 
     const size_t table_len = sizeof charset_latin1 / sizeof charset_latin1[0];
     const size_t len = bj_strlen(text);
 
-    bj_rect dest_area = { (int16_t)x, (int16_t)y, glyph_w, glyph_h };
+    const int dst_w = (int)dst->width;
+    const int dst_h = (int)dst->height;
 
+    /* Current colors (can be changed by ANSI sequences) */
     uint32_t fg = fg_native;
     uint32_t bg = bg_native;
+
+    /* Track pen x in int to avoid int16_t overflow */
+    int pen_x = x;
+    const int pen_y = y;
 
     size_t i = 0;
     while (i < len) {
@@ -293,42 +305,146 @@ static void render_text_masked(
             bj_bool changed = BJ_FALSE;
             uint32_t new_fg = fg, new_bg = bg;
             i = parse_ansi_sgr(text, i, len, dst, fg_native, bg_native, &changed, &new_fg, &new_bg);
+            if (i < len && text[i] == 'm') ++i; /* consume trailing 'm' if present */
             if (changed) { fg = new_fg; bg = new_bg; }
-            /* If not at 'm' due to malformed seq, we already advanced safely. */
-            if (i < len && text[i] == 'm') i++; /* consume 'm' if still there */
             continue;
         }
 
-        /* Regular printable (we’ll map via 8x8 mask) */
-        uint8_t code = ch;
-        if (code >= table_len) code = (uint8_t)'?';
+        /* Stop if we are completely to the right of the surface */
+        if (pen_x >= dst_w) break;
 
-        const bj_rect src_glyph = {
+        /* Map to charset index (fallback to '?') */
+        uint8_t code = (uint8_t)((ch < table_len) ? ch : (unsigned char)'?');
+
+        /* Full source glyph (in atlas space) */
+        bj_rect src_full = {
             .x = (int16_t)CHAR_PIXEL_X((int)code),
             .y = (int16_t)CHAR_PIXEL_Y((int)code),
             .w = (uint16_t)CHAR_PIXEL_W,
             .h = (uint16_t)CHAR_PIXEL_H
         };
 
-        bj_bitmap_blit_mask_stretched(
-            mask, &src_glyph,
-            dst, &dest_area,
-            fg, bg, mode
-        );
+        /* Desired destination box before clipping */
+        bj_rect dst_box = {
+            .x = (int16_t)pen_x,
+            .y = (int16_t)pen_y,
+            .w = glyph_w,
+            .h = glyph_h
+        };
 
-        /* Bridge the spacing gap with BG when carving so backgrounds touch */
-        if (mode == BJ_MASK_BG_REV_TRANSPARENT && spacing > 0) {
-            bj_rect gap = {
-                .x = (int16_t)(dest_area.x + (int)dest_area.w),
-                .y = dest_area.y,
-                .w = (uint16_t)spacing,
-                .h = dest_area.h
-            };
-            fast_fill_rect(dst, &gap, bg);
+        /* Early out if the entire glyph box starts below or to the right */
+        if (dst_box.x >= dst_w || dst_box.y >= dst_h) break;
+        if ((int)dst_box.x + (int)dst_box.w <= 0 || (int)dst_box.y + (int)dst_box.h <= 0) {
+            /* Entirely left or above; just advance pen */
+            pen_x += (int)glyph_w + spacing;
+            ++i;
+            continue;
         }
 
-        dest_area.x = (int16_t)(dest_area.x + (int)dest_area.w + spacing);
-        i++;
+        /* Clip dst_box against surface, and proportionally adjust src_full.
+           We do left/top/right/bottom separately. */
+
+        bj_rect src_adj = src_full;
+
+        /* --- Horizontal clip --- */
+        /* Left clip */
+        if (dst_box.x < 0) {
+            int clip = -dst_box.x;
+            if (clip >= (int)dst_box.w) { /* fully clipped horizontally */
+                pen_x += (int)glyph_w + spacing;
+                ++i;
+                continue;
+            }
+            /* Proportional shift in source */
+            uint16_t src_shift = (uint16_t)(((uint32_t)clip * CHAR_PIXEL_W) / glyph_w);
+            if (src_shift >= src_adj.w) src_shift = src_adj.w - 1;
+            src_adj.x = (int16_t)(src_adj.x + (int)src_shift);
+            src_adj.w = (uint16_t)(src_adj.w - src_shift);
+
+            dst_box.x = 0;
+            dst_box.w = (uint16_t)((int)dst_box.w - clip);
+        }
+
+        /* Right clip */
+        {
+            int over = (int)dst_box.x + (int)dst_box.w - dst_w;
+            if (over > 0) {
+                if (over >= (int)dst_box.w) { /* fully clipped horizontally */
+                    pen_x += (int)glyph_w + spacing;
+                    ++i;
+                    continue;
+                }
+                uint16_t keep = (uint16_t)((int)dst_box.w - over);
+                /* Proportional shrink of source width */
+                uint16_t src_keep = (uint16_t)(((uint32_t)keep * CHAR_PIXEL_W) / glyph_w);
+                if (src_keep == 0) src_keep = 1;
+                if (src_keep > src_adj.w) src_keep = src_adj.w;
+                src_adj.w = src_keep;
+                dst_box.w = keep;
+            }
+        }
+
+        /* --- Vertical clip --- */
+        /* Top clip */
+        if (dst_box.y < 0) {
+            int clip = -dst_box.y;
+            if (clip >= (int)dst_box.h) { /* fully clipped vertically */
+                pen_x += (int)glyph_w + spacing;
+                ++i;
+                continue;
+            }
+            uint16_t src_shift = (uint16_t)(((uint32_t)clip * CHAR_PIXEL_H) / glyph_h);
+            if (src_shift >= src_adj.h) src_shift = src_adj.h - 1;
+            src_adj.y = (int16_t)(src_adj.y + (int)src_shift);
+            src_adj.h = (uint16_t)(src_adj.h - src_shift);
+
+            dst_box.y = 0;
+            dst_box.h = (uint16_t)((int)dst_box.h - clip);
+        }
+
+        /* Bottom clip */
+        {
+            int over = (int)dst_box.y + (int)dst_box.h - dst_h;
+            if (over > 0) {
+                if (over >= (int)dst_box.h) { /* fully clipped vertically */
+                    pen_x += (int)glyph_w + spacing;
+                    ++i;
+                    continue;
+                }
+                uint16_t keep = (uint16_t)((int)dst_box.h - over);
+                uint16_t src_keep = (uint16_t)(((uint32_t)keep * CHAR_PIXEL_H) / glyph_h);
+                if (src_keep == 0) src_keep = 1;
+                if (src_keep > src_adj.h) src_keep = src_adj.h;
+                src_adj.h = src_keep;
+                dst_box.h = keep;
+            }
+        }
+
+        /* If anything remains, blit the (possibly clipped) glyph */
+        if (dst_box.w > 0 && dst_box.h > 0 && src_adj.w > 0 && src_adj.h > 0) {
+            bj_bitmap_blit_mask_stretched(
+                mask, &src_adj,
+                dst, &dst_box,
+                fg, bg, mode
+            );
+
+            /* Fill spacing gap (carved mode), clipped to right edge */
+            if (mode == BJ_MASK_BG_REV_TRANSPARENT && spacing > 0) {
+                int gap_x = (int)dst_box.x + (int)dst_box.w;
+                if (gap_x < dst_w) {
+                    uint16_t gap_w = (uint16_t)((gap_x + spacing <= dst_w) ? spacing : (dst_w - gap_x));
+                    if (gap_w) {
+                        bj_rect gap = { (int16_t)gap_x, (int16_t)dst_box.y, gap_w, dst_box.h };
+                        fast_fill_rect(dst, &gap, bg);
+                    }
+                }
+            }
+        }
+
+        /* Advance pen by the *intended* glyph width (not the clipped width) plus spacing.
+           This preserves fixed advance even when the last glyph is partially clipped. */
+        pen_x += (int)glyph_w + spacing;
+        ++i;
     }
 }
 
@@ -344,4 +460,15 @@ void bj_bitmap_blit_text(
     const char*     text
 ) {
     render_text_masked(dst, x, y, height, fg_native, bg_native, mode, text);
+}
+
+void bj_bitmap_print(
+    bj_bitmap*      dst,
+    int             x,
+    int             y,
+    unsigned        height,
+    uint32_t        fg_native,
+    const char*     text
+) {
+    render_text_masked(dst, x, y, height, fg_native, 0, BJ_MASK_BG_TRANSPARENT, text);
 }

@@ -14,33 +14,23 @@
 bj_window* window = 0;
 
 void draw(bj_bitmap* bmp) {
-    bj_bitmap_clear(bmp);
 
-    const uint32_t color_red = bj_bitmap_pixel_value(bmp, 0xFF, 0x00, 0x00);
-    const uint32_t color_cyan = bj_bitmap_pixel_value(bmp, 0x7F, 0xFF, 0xD4);
+    uint32_t white      = bj_bitmap_pixel_value(bmp,255,255,255);
+    uint32_t black      = bj_bitmap_pixel_value(bmp,0,0,0);
+    uint32_t light_grey = bj_bitmap_pixel_value(bmp,220,220,220);
+    uint32_t cyan       = bj_bitmap_pixel_value(bmp,0,200,200);
 
-    // Draw pixels individually
-    for (size_t x = 10; x < 490; ++x) {
-        if (x % 7 == 0) {
-            bj_bitmap_put_pixel(bmp, x, 10, color_red);
-        }
-    }
+    bj_bitmap_print(bmp, 20, 20,  18, white, "\x1B[31mRED\x1B[0m normal");
+    bj_bitmap_print(bmp, 20, 52,  18, white, "\x1B[94mBrightBlue\x1B[0m + default");
+    bj_bitmap_print(bmp, 20, 84,  18, white, "\x1B[38;2;255;128;0mTruecolor Orange\x1B[0m");
+    bj_bitmap_print(bmp, 20, 200, 28, white, "Normal Text");
 
-    // Draw lines (shapes a banjo)
-    bj_pixel points[18] = {
-        {100, 20},  {95,  25},  {95,  50},  {100, 55},  {100, 100}, {95,  100},
-        {75,  120}, {75,  145}, {95,  165}, {120, 165}, {140, 145}, {140, 120},
-        {120, 100}, {115, 100}, {115, 55},  {120, 50},  {120, 25},  {115, 20},
-    };
+    // More control:
+    bj_bitmap_blit_text(bmp, 20, 116, 14, black, light_grey, BJ_MASK_BG_OPAQUE, "OPAQUE band (FG black)");
+    bj_bitmap_blit_text(bmp, 20, 150, 32, black, cyan, BJ_MASK_BG_REV_TRANSPARENT, "CARVED cyan");
 
-    for (size_t p = 0; p < 18; ++p) {
-        bj_bitmap_draw_line(bmp,
-            points[p],
-            points[(p + 1) % 18],
-            color_cyan
-        );
-    }
 }
+
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
