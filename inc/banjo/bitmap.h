@@ -15,14 +15,25 @@
 #include <banjo/rect.h>
 #include <banjo/stream.h>
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Raster operation (ROP) to apply during blitting.
+///
+/// These operations define how source pixels combine with destination pixels
+/// during \ref bj_bitmap_blit and \ref bj_bitmap_blit_stretched.
+/// Some operations are optimized on specific formats (e.g., 32bpp).
+///
+/// \note For mismatched pixel formats, colors are combined in linear integer
+/// RGB (8-bit per channel) after conversion from/to native formats.
+///
 typedef enum {
-    BJ_BLIT_OP_COPY = 0,
-    BJ_BLIT_OP_XOR,
-    BJ_BLIT_OP_OR,
-    BJ_BLIT_OP_AND,
-    BJ_BLIT_OP_ADD_SAT,
-    BJ_BLIT_OP_SUB_SAT,
+    BJ_BLIT_OP_COPY = 0,  //!< Copy source to destination (fast path when formats match)
+    BJ_BLIT_OP_XOR,       //!< Bitwise XOR (channel-wise for >8bpp)
+    BJ_BLIT_OP_OR,        //!< Bitwise OR
+    BJ_BLIT_OP_AND,       //!< Bitwise AND
+    BJ_BLIT_OP_ADD_SAT,   //!< Per-channel saturated add (clamped to 255)
+    BJ_BLIT_OP_SUB_SAT,   //!< Per-channel saturated subtract (clamped to 0)
 } bj_blit_op;
+
 
 /// Represents a pixel position in a bitmap.
 typedef int bj_pixel[2];
@@ -389,6 +400,16 @@ BANJO_EXPORT void bj_bitmap_clear(
     bj_bitmap* p_bitmap
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// Enables or disables color key transparency for blitting.
+///
+/// \param p_bitmap   The target bitmap.
+/// \param enabled    Whether the color key should be enabled.
+/// \param key_value  The pixel value (in bitmap's native format) considered transparent.
+///
+/// When color keying is enabled on the **source** bitmap, blitters skip any
+/// source pixel equal to `key_value`.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_bitmap_set_colorkey(
     bj_bitmap*  p_bitmap,
     bj_bool     enabled,
@@ -484,42 +505,277 @@ BANJO_EXPORT void bj_bitmap_set_clear_color(
     uint32_t clear_color
 );
 
-
+////////////////////////////////////////////////////////////////////////////////
+/// Bitmap blitting operation from a source to a destination bitmap.
+///
+/// \param src        The source bitmap.
+/// \param src_area   Optional area to copy from in the source bitmap (0 = full source).
+/// \param dst        The destination bitmap.
+/// \param dst_area   Optional area to copy to in the destination bitmap (0 = same size at {0,0}).
+/// \param op         The raster operation to apply (see \ref bj_blit_op).
+/// \return           *BJ_TRUE* if a blit actually happened, *BJ_FALSE* otherwise.
+///
+/// If `src_area` is 0, the entire source is copied.
+/// If `dst_area` is 0, the destination area defaults to `{.x=0,.y=0,.w=src_area.w,.h=src_area.h}`.
+///
+/// \par Clipping
+///
+/// The blit is automatically clipped to the destination bounds. If clipping
+/// occurs, the source area is adjusted accordingly to preserve pixel mapping.
+///
+/// \par Color Key
+///
+/// If the *source* bitmap has color keying enabled via \ref bj_bitmap_set_colorkey,
+/// any source pixel equal to the key value is skipped.
+///
+/// \par Pixel Formats
+///
+/// - If `src->mode == dst->mode` and `op == BJ_BLIT_OP_COPY`, a fast path is used.
+/// - Otherwise, pixels are converted via RGB and the ROP is applied per channel.
+///
+/// \par Limitations
+///
+/// Sub-byte formats (1/4/8bpp) are supported but may be slower due to bit packing.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_bitmap_blit(
     const bj_bitmap* src, const bj_rect* src_area,
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op);
 
+////////////////////////////////////////////////////////////////////////////////
+/// Stretched bitmap blitting (nearest neighbor).
+///
+/// \param src        The source bitmap.
+/// \param src_area   Optional area to copy from in the source bitmap (0 = full source).
+/// \param dst        The destination bitmap.
+/// \param dst_area   Optional area to copy to in the destination bitmap (0 = full destination).
+/// \param op         The raster operation to apply (see \ref bj_blit_op).
+/// \return           *BJ_TRUE* if a blit actually happened, *BJ_FALSE* otherwise.
+///
+/// If source and destination rectangles have the same size, this function
+/// delegates to \ref bj_bitmap_blit and uses the same fast paths.
+///
+/// \par Clipping
+///
+/// The destination rectangle is clipped to the destination bounds, and the
+/// source rectangle is proportionally adjusted to ensure visual consistency.
+///
+/// \par Color Key
+///
+/// Color keying on the *source* bitmap is honored (see \ref bj_bitmap_set_colorkey).
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_bitmap_blit_stretched(
     const bj_bitmap* src, const bj_rect* src_area,
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op);
 
-BANJO_EXPORT void bj_bitmap_blit_text(
-    bj_bitmap*   dst,
-    int          x,
-    int          y,
-    unsigned     height,
-    uint32_t     color_native,   /* packed in dst’s native pixel format */
-    const char*  text
-);
+////////////////////////////////////////////////////////////////////////////////
+/// Mask background mode for masked blits (glyph/text rendering).
+///
+/// \par Modes
+/// - `BJ_MASK_BG_TRANSPARENT`:
+///     Only the foreground is drawn where the mask coverage > 0. Destination
+///     pixels outside the mask are preserved (no background fill).
+/// - `BJ_MASK_BG_OPAQUE`:
+///     The entire destination rectangle is written as a blend between the
+///     background color (where mask coverage is 0) and the foreground color
+///     (where mask coverage is 255), with linear interpolation for values in
+///     between.
+/// - `BJ_MASK_BG_REV_TRANSPARENT`:
+///     Carved mode. The background color is composited where the mask coverage
+///     is **outside** the glyph (i.e., with alpha = 1 - coverage). Pixels inside
+///     the glyph (coverage=255) keep the destination value, effectively cutting
+///     the text out of the background.
+///
+typedef enum {
+    BJ_MASK_BG_TRANSPARENT = 0,   //!< Foreground over destination where mask>0
+    BJ_MASK_BG_OPAQUE,            //!< Opaque band: mix(background, foreground, mask)
+    BJ_MASK_BG_REV_TRANSPARENT    //!< Carved: mix(destination, background, 1-mask)
+} bj_mask_bg_mode;
 
-/* Blit an 8-bit coverage mask into dst, tinting with a solid color (native to dst). */
+////////////////////////////////////////////////////////////////////////////////
+/// Masked blit (non-stretched). The mask must be 8bpp (coverage 0..255).
+///
+/// \param mask        The 8bpp mask bitmap (0 = fully transparent, 255 = fully opaque).
+/// \param mask_area   Optional area in the mask to use (0 = full mask).
+/// \param dst         The destination bitmap.
+/// \param dst_area    Optional destination area (0 = place at {0,0} with mask_area size).
+/// \param fg_native   Foreground color packed in the destination's native format.
+/// \param bg_native   Background color packed in the destination's native format.
+/// \param mode        The background mode (see \ref bj_mask_bg_mode).
+/// \return            *BJ_TRUE* if any pixel was written, *BJ_FALSE* otherwise.
+///
+/// \par Behavior
+///
+/// - For `BJ_MASK_BG_TRANSPARENT`, foreground is **source-over** composited
+///   onto destination wherever the mask is non-zero.
+/// - For `BJ_MASK_BG_OPAQUE`, each pixel in the dest area is `mix(bg, fg, mask)`.
+/// - For `BJ_MASK_BG_REV_TRANSPARENT`, the background is composited with
+///   alpha `(1 - mask)` and glyph interiors are left untouched.
+///
+/// \par Pixel Formats
+///
+/// The mask must be 8 bits per pixel. Destination can be any supported pixel
+/// mode; colors must be provided in destination-native format (see
+/// \ref bj_bitmap_pixel_value).
+///
+/// \par Clipping
+///
+/// The destination area is clipped to the destination bounds. The mask area
+/// is clipped to the mask bounds. Both rectangles must have identical sizes.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_bitmap_blit_mask(
-    const bj_bitmap* mask,          /* must be 8 bpp (one byte per pixel) */
+    const bj_bitmap* mask,
     const bj_rect*   mask_area,     /* NULL = full mask */
     bj_bitmap*       dst,
-    const bj_rect*   dst_area,      /* NULL = place at {0,0} with mask's size */
-    uint32_t         color_native   /* packed in dst's native pixel format */
+    const bj_rect*   dst_area,      /* NULL = place at {0,0} w/ mask_area size */
+    uint32_t         fg_native,     /* dst-native packed color */
+    uint32_t         bg_native,     /* dst-native packed color */
+    bj_mask_bg_mode  mode
 );
 
-/* Same, but stretched to dst_area.w × dst_area.h (nearest neighbor). */
+////////////////////////////////////////////////////////////////////////////////
+/// Masked blit with stretching (nearest neighbor). The mask must be 8bpp.
+///
+/// \param mask        The 8bpp mask bitmap (0..255 coverage).
+/// \param mask_area   Optional area in the mask (0 = full mask).
+/// \param dst         The destination bitmap.
+/// \param dst_area    Optional destination area (0 = full destination).
+/// \param fg_native   Foreground color packed for destination.
+/// \param bg_native   Background color packed for destination.
+/// \param mode        The background mode (see \ref bj_mask_bg_mode).
+/// \return            *BJ_TRUE* if any pixel was written, *BJ_FALSE* otherwise.
+///
+/// \par Clipping & Mapping
+///
+/// The destination area is clipped to the destination bounds. The source mask
+/// area is **proportionally adjusted** so that the visible sub-rectangle of
+/// the stretched glyph corresponds to the same sub-rectangle of the source.
+/// This avoids visual “wrap-around” artifacts when partially off-screen.
+///
+/// \par Coverage
+///
+/// Mask values are interpreted as linear coverage (0..255). Alpha blending uses
+/// integer arithmetic: `mix(dst, src, a)` → `(dst*(255-a) + src*a)/255`.
+///
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_bitmap_blit_mask_stretched(
-    const bj_bitmap* mask,          /* must be 8 bpp */
+    const bj_bitmap* mask,
     const bj_rect*   mask_area,     /* NULL = full mask */
     bj_bitmap*       dst,
     const bj_rect*   dst_area,      /* NULL = fill entire dst */
-    uint32_t         color_native
+    uint32_t         fg_native,
+    uint32_t         bg_native,
+    bj_mask_bg_mode  mode
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Prints text using the default foreground color and transparent background.
+///
+/// \param dst        The destination bitmap.
+/// \param x          X coordinate of the baseline origin.
+/// \param y          Y coordinate of the baseline origin.
+/// \param height     Target font height in pixels (glyphs are scaled from the
+///                   internal font cell size to this height).
+/// \param fg_native  Foreground color in destination-native format.
+/// \param text       UTF-8/ASCII string with optional ANSI SGR sequences (see below).
+///
+/// \par ANSI Color Formatting
+///
+/// The text supports a subset of ANSI SGR sequences introduced by ESC (`\x1B`):
+/// - `\x1B[0m`      Reset colors to defaults.
+/// - `\x1B[30..37m` Set foreground to basic colors (black, red, green, yellow,
+///                  blue, magenta, cyan, white).
+/// - `\x1B[90..97m` Set foreground to bright basic colors.
+/// - `\x1B[39m`     Reset foreground to the default provided in the call.
+/// - `\x1B[38;2;R;G;Bm` Set truecolor foreground.
+/// - Background-related codes are ignored by this function (use
+///   \ref bj_bitmap_blit_text for background control).
+///
+/// \par Behavior
+///
+/// The function uses the internal monochrome font mask and performs a masked
+/// blit in transparent background mode (foreground over destination).
+///
+/// \par Clipping
+///
+/// Text is clipped to the destination bounds. Out-of-range glyphs are skipped.
+///
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_bitmap_print(
+    bj_bitmap*      dst,
+    int             x,
+    int             y,
+    unsigned        height,
+    uint32_t        fg_native,
+    const char*     text
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Prints text with explicit foreground/background and background mode.
+///
+/// \param dst        The destination bitmap.
+/// \param x          X coordinate of the baseline origin.
+/// \param y          Y coordinate of the baseline origin.
+/// \param height     Target font height in pixels.
+/// \param fg_native  Foreground color in destination-native format.
+/// \param bg_native  Background color in destination-native format.
+/// \param mode       Background mode (see \ref bj_mask_bg_mode).
+/// \param text       UTF-8/ASCII string with optional ANSI SGR sequences.
+///
+/// \par ANSI Color Formatting
+///
+/// The string may embed standard SGR sequences following `ESC '['`:
+///
+/// - **Reset**
+///   - `\x1B[0m`        Reset both foreground and background to the defaults
+///                      passed as `fg_native`/`bg_native`.
+///
+/// - **Basic / Bright colors**
+///   - Foreground: `\x1B[30..37m` (basic), `\x1B[90..97m` (bright)
+///   - Background: `\x1B[40..47m` (basic), `\x1B[100..107m` (bright)
+///
+/// - **Defaults**
+///   - `\x1B[39m`       Reset foreground to the call’s `fg_native`.
+///   - `\x1B[49m`       Reset background to the call’s `bg_native`.
+///
+/// - **Truecolor**
+///   - Foreground: `\x1B[38;2;R;G;Bm`
+///   - Background: `\x1B[48;2;R;G;Bm`
+///
+/// Unsupported or malformed sequences are ignored gracefully.
+///
+/// \par Background Modes
+///
+/// - `BJ_MASK_BG_TRANSPARENT`: foreground is composited where glyph coverage > 0.
+/// - `BJ_MASK_BG_OPAQUE`: the glyph box is a band: mix(bg, fg, coverage).
+/// - `BJ_MASK_BG_REV_TRANSPARENT`: carved-out mode where background is painted
+///   with alpha = (1 - coverage) and glyph interiors remain untouched.
+///
+/// \par Clipping
+///
+/// Each glyph is pre-clipped to the destination bounds. The source mask
+/// sub-rectangle is adjusted proportionally so edge glyphs render correctly
+/// without wrap-around artifacts.
+///
+/// \par Performance
+///
+/// The glyph mask atlas is cached per destination bitmap. Rendering uses
+/// nearest-neighbor scaling and an inner loop with integer blending.
+///
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_bitmap_blit_text(
+    bj_bitmap*      dst,
+    int             x,
+    int             y,
+    unsigned        height,
+    uint32_t        fg_native,
+    uint32_t        bg_native,
+    bj_mask_bg_mode mode,            /* TRANSPARENT / OPAQUE / REV_TRANSPARENT */
+    const char*     text
 );
 
 /// \} // End of bitmap group
