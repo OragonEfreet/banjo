@@ -495,15 +495,6 @@ BANJO_EXPORT bj_bool bj_bitmap_blit_stretched(
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op);
 
-BANJO_EXPORT void bj_bitmap_blit_text(
-    bj_bitmap*   dst,
-    int          x,
-    int          y,
-    unsigned     height,
-    uint32_t     color_native,   /* packed in dst’s native pixel format */
-    const char*  text
-);
-
 /* Blit an 8-bit coverage mask into dst, tinting with a solid color (native to dst). */
 BANJO_EXPORT bj_bool bj_bitmap_blit_mask(
     const bj_bitmap* mask,          /* must be 8 bpp (one byte per pixel) */
@@ -520,6 +511,28 @@ BANJO_EXPORT bj_bool bj_bitmap_blit_mask_stretched(
     bj_bitmap*       dst,
     const bj_rect*   dst_area,      /* NULL = fill entire dst */
     uint32_t         color_native
+);
+
+BANJO_EXPORT void bj_bitmap_blit_text(
+    bj_bitmap*   dst,
+    int          x,
+    int          y,
+    unsigned     height,
+    uint32_t     color_native,   /* packed in dst’s native pixel format */
+    const char*  text
+);
+
+typedef struct bj_text_properties_t {
+    uint32_t     foreground_color;
+    uint32_t     background_color;
+    unsigned int font_height;
+} bj_text_properties;
+
+BANJO_EXPORT void bj_bitmap_blit_text_ex(
+    bj_bitmap*                dst,
+    const char*               text,
+    const bj_rect*            area,
+    const bj_text_properties* properties
 );
 
 /// \} // End of bitmap group
