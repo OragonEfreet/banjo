@@ -74,8 +74,8 @@ void bj_bitmap_blit_text(
     }
 
     bj_rect dest_area = {
-        .x = 10,
-        .y = 100,
+        .x = x,
+        .y = y,
         .w = (float)height / (float)CHAR_PIXEL_H * (float)CHAR_PIXEL_W,
         .h = height,
     };

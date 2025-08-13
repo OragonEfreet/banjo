@@ -43,7 +43,9 @@ void draw(bj_bitmap* bmp) {
     /* } */
 
     // Draw simple text
-    bj_bitmap_blit_text(bmp, 10, 100, 24, "Hello, World!");
+    for(size_t y = 0 ; y < 24 ; ++y) {
+        bj_bitmap_blit_text(bmp, 10, y * 25, y, "Hello, World!");
+    }
 
 }
 
