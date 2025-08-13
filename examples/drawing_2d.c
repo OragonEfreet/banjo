@@ -46,6 +46,8 @@ void draw(bj_bitmap* bmp) {
     for(size_t y = 0 ; y < 24 ; ++y) {
         bj_bitmap_blit_text(bmp, 10, y * 25, y, "Hello, World!");
     }
+    uint32_t red = bj_bitmap_pixel_value(bmp, 255, 0, 0);
+    bj_bitmap_blit_text_masked_color(bmp, 10, 50, 24, red, "Colored text!");
 
 }
 

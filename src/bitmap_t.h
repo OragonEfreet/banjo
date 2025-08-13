@@ -10,6 +10,8 @@ struct bj_bitmap_t {
     uint32_t               clear_color;
     void*                  buffer;
     int                    weak;
+    bj_bool                colorkey_enabled;
+    uint32_t               colorkey;
     struct bj_bitmap_t*    charset;
 };
 

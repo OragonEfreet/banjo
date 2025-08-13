@@ -570,14 +570,7 @@ BANJO_EXPORT void bj_bitmap_blit_text(
     const char* text
 );
 
-BANJO_EXPORT void bj_bitmap_blit_text_masked_color(
-    bj_bitmap*   dst,
-    int          x,
-    int          y,
-    unsigned     height,
-    uint32_t     color_native,   /* packed in dst’s native pixel format */
-    const char*  text
-);
+
 
 
 /// \} // End of bitmap group
