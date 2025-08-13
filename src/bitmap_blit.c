@@ -352,7 +352,7 @@ static bj_bool do_blit_dispatch(
 
 /* ---------- Public: clipped blit (no scaling) using your existing clipper ---------- */
 
-bj_bool bj_bitmap_blit_ex(
+bj_bool bj_bitmap_blit(
     const bj_bitmap* p_src, const bj_rect* p_src_area,
     bj_bitmap* p_dst, const bj_rect* p_dst_area,
     bj_blit_op op)
@@ -389,14 +389,6 @@ bj_bool bj_bitmap_blit_ex(
     return do_blit_dispatch(p_src, &src_rect, p_dst, &dst_rect, op);
 }
 
-/* Keep legacy API as thin wrapper */
-bj_bool bj_bitmap_blit(
-    const bj_bitmap* p_src, const bj_rect* p_src_rect,
-    bj_bitmap* p_dst, const bj_rect* p_dst_rect)
-{
-    return bj_bitmap_blit_ex(p_src, p_src_rect, p_dst, p_dst_rect, BJ_BLIT_OP_COPY);
-}
-
 /* ---------- Stretched blit (nearest) with same fast paths ---------- */
 
 static inline size_t map_nn(size_t i, size_t src_len, size_t dst_len) {
@@ -404,7 +396,7 @@ static inline size_t map_nn(size_t i, size_t src_len, size_t dst_len) {
     return (size_t)((uint64_t)i * (uint64_t)src_len / (uint64_t)dst_len);
 }
 
-bj_bool bj_bitmap_blit_stretched_ex(
+bj_bool bj_bitmap_blit_stretched(
     const bj_bitmap* src, const bj_rect* src_area,
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op)
@@ -488,9 +480,3 @@ bj_bool bj_bitmap_blit_stretched_ex(
     return BJ_TRUE;
 }
 
-bj_bool bj_bitmap_blit_stretched(
-    const bj_bitmap* s, const bj_rect* sa,
-    bj_bitmap* d, const bj_rect* da)
-{
-    return bj_bitmap_blit_stretched_ex(s, sa, d, da, BJ_BLIT_OP_COPY);
-}

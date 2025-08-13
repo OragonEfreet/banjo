@@ -484,80 +484,13 @@ BANJO_EXPORT void bj_bitmap_set_clear_color(
     uint32_t clear_color
 );
 
-////////////////////////////////////////////////////////////////////////////////
-/// Bitmap blitting operation from a source to a destination bitmap.
-///
-/// \param p_source           The source bj_bitmap to copy from.
-/// \param p_source_area      The area to copy from in the source bitmap.
-/// \param p_destination      The destination bitmap.
-/// \param p_destination_area The area to copy to in the destination bitmap.
-/// \return                   BJ_TRUE if a blit actually happened, BJ_FALSE otherwise.
-///
-/// If p_source_area is NULL, the entire bitmap is copied.
-/// p_destination_area can also be NULL, which is equivalent to
-/// using an area at {.x = 0, .y = 0}.
-///
-/// \par Clipping
-///
-/// The resulting blit can be clipped if it is performed partially or totally
-/// outside of the destination bitmap.
-///
-/// p_destination_area.w and p_destination_area.h are ignored for reading
-/// but are set to the actual dimensions of the blit.
-///
-////////////////////////////////////////////////////////////////////////////////
+
 BANJO_EXPORT bj_bool bj_bitmap_blit(
-    const bj_bitmap* p_source,
-    const bj_rect* p_source_area,
-    bj_bitmap* p_destination,
-    const bj_rect* p_destination_area
-);
-
-////////////////////////////////////////////////////////////////////////////////
-/// Stretched bitmap blitting operation from a source to a destination bitmap.
-///
-/// \param p_source           The source bj_bitmap to copy from.
-/// \param p_source_area      The area to copy from in the source bitmap.
-/// \param p_destination      The destination bitmap.
-/// \param p_destination_area The area to copy to in the destination bitmap.
-/// \return                   BJ_TRUE if a blit actually happened, BJ_FALSE otherwise.
-///
-/// If `p_source_area` is _0_, the entire bitmap is copied.
-/// If `p_destination_area` is _0_, the source will fill in the entire
-/// destination bitmap.
-///
-/// Contrary to \ref bj_bitmap_blit, this function scales the source bitmap's
-/// area to fille the entire destination area.
-///
-/// \par Behaviour
-///
-/// The scale is done using nearest interpolation (the nearest real pixel in
-/// source area is used to color the destination pixel).
-/// This scale is suitable for pixel-art programs but will make the sprites
-/// appear jagged.
-///
-/// The blit is not performed if the source or destination area have `.w` or
-/// `.h`  set to _0_.
-///
-/// \par Clipping
-///
-/// The resulting blit can be clipped if it is performed partially or totally
-/// outside of the destination bitmap.
-///
-////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_bitmap_blit_stretched(
-    const bj_bitmap* p_source,
-    const bj_rect* p_source_area,
-    bj_bitmap* p_destination,
-    const bj_rect* p_destination_area
-);
-
-BANJO_EXPORT bj_bool bj_bitmap_blit_ex(
     const bj_bitmap* src, const bj_rect* src_area,
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op);
 
-BANJO_EXPORT bj_bool bj_bitmap_blit_stretched_ex(
+BANJO_EXPORT bj_bool bj_bitmap_blit_stretched(
     const bj_bitmap* src, const bj_rect* src_area,
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op);

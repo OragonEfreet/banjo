@@ -37,7 +37,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     bj_set_key_callback(bj_close_on_escape);
 
     p_window_framebuffer = bj_window_get_framebuffer(window, 0);
-    bj_bitmap_blit_stretched(bmp_sprite_sheet, 0, p_window_framebuffer, 0);
+    bj_bitmap_blit_stretched(bmp_sprite_sheet, 0, p_window_framebuffer, 0, BJ_BLIT_OP_COPY);
     bj_window_update_framebuffer(window);
 
     return bj_callback_continue;
