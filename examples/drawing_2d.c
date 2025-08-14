@@ -28,7 +28,7 @@ void draw(bj_bitmap* bmp) {
     }
 
     // Draw lines (shapes a banjo)
-    bj_pixel points[18] = {
+    int points[18][2] = {
         {100, 20},  {95,  25},  {95,  50},  {100, 55},  {100, 100}, {95,  100},
         {75,  120}, {75,  145}, {95,  165}, {120, 165}, {140, 145}, {140, 120},
         {120, 100}, {115, 100}, {115, 55},  {120, 50},  {120, 25},  {115, 20},
@@ -36,8 +36,10 @@ void draw(bj_bitmap* bmp) {
 
     for (size_t p = 0; p < 18; ++p) {
         bj_bitmap_draw_line(bmp,
-            points[p],
-            points[(p + 1) % 18],
+            points[p][0],
+            points[p][1],
+            points[(p + 1) % 18][0],
+            points[(p + 1) % 18][1],
             color_cyan
         );
     }

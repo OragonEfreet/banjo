@@ -246,7 +246,7 @@ bj_bitmap* bj_bitmap_new_from_file(
 void bj_bitmap_clear(bj_bitmap* p_bitmap) {
     bj_check(p_bitmap);
 
-    bj_bitmap_draw_line(p_bitmap, (bj_pixel){0, 0}, (bj_pixel){p_bitmap->width - 1, 0}, p_bitmap->clear_color);
+    bj_bitmap_draw_line(p_bitmap, 0, 0, p_bitmap->width - 1, 0, p_bitmap->clear_color);
     if (p_bitmap->height > 1) {
         void* first_row = p_bitmap->buffer;
         for (size_t y = 1; y < p_bitmap->height; ++y) {

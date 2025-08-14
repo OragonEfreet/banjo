@@ -10,15 +10,13 @@
 
 BANJO_EXPORT void bj_bitmap_draw_line(
     bj_bitmap*     bmp,
-    bj_pixel       p0,
-    bj_pixel       p1,
-    uint32_t       c
+    int            x0,
+    int            y0,
+    int            x1,
+    int            y1,
+    uint32_t       pixel
 ) {
     /// Bresenham's line algorithm
-    int x0 = p0[X];
-    int y0 = p0[Y];
-    const int x1 = p1[X]; const int y1 = p1[Y];
-
     const int dx = ABS_INT(x1 - x0);
     const int dy = ABS_INT(y1 - y0);
     const int sx = (x0 < x1) ? 1 : -1;
@@ -26,7 +24,7 @@ BANJO_EXPORT void bj_bitmap_draw_line(
     int err = dx - dy;
 
     while (1) {
-        bj_bitmap_put_pixel(bmp, x0, y0, c);
+        bj_bitmap_put_pixel(bmp, x0, y0, pixel);
         if (x0 == x1 && y0 == y1) break;
         const int e2 = 2 * err;
         if (e2 > -dy) {
@@ -61,52 +59,19 @@ BANJO_EXPORT void bj_bitmap_draw_rectangle(
     }
 
     if(horizontal) {
-        bj_bitmap_draw_line(
-            p_bitmap,
-            (bj_pixel){x0, y0}, 
-            (bj_pixel){x1, y0}, 
-            pixel
-        );
+        bj_bitmap_draw_line(p_bitmap, x0, y0, x1, y0, pixel);
         return;
     }
 
     if(vertical) {
-        bj_bitmap_draw_line(
-            p_bitmap,
-            (bj_pixel){x0, y0}, 
-            (bj_pixel){x0, y1}, 
-            pixel
-        );
+        bj_bitmap_draw_line(p_bitmap, x0, y0, x0, y1, pixel);
         return;
     }
 
-    bj_bitmap_draw_line(
-        p_bitmap,
-        (bj_pixel){x0, y0}, 
-        (bj_pixel){x1, y0}, 
-        pixel
-    );
-
-    bj_bitmap_draw_line(
-        p_bitmap,
-        (bj_pixel){x0, y1}, 
-        (bj_pixel){x1, y1}, 
-        pixel
-    );
-
-    bj_bitmap_draw_line(
-        p_bitmap,
-        (bj_pixel){x0, y0+1}, 
-        (bj_pixel){x0, y1-1}, 
-        pixel
-    );
-
-    bj_bitmap_draw_line(
-        p_bitmap,
-        (bj_pixel){x1, y0+1}, 
-        (bj_pixel){x1, y1-1}, 
-        pixel
-    );
+    bj_bitmap_draw_line(p_bitmap, x0, y0, x1, y0, pixel);
+    bj_bitmap_draw_line(p_bitmap, x0, y1, x1, y1, pixel);
+    bj_bitmap_draw_line(p_bitmap, x0, y0+1, x0, y1-1, pixel);
+    bj_bitmap_draw_line(p_bitmap, x1, y0+1, x1, y1-1, pixel);
 }
 
 BANJO_EXPORT void bj_bitmap_draw_filled_rectangle(
@@ -130,7 +95,7 @@ void bj_bitmap_draw_triangle(
     bj_pixel p2,
     uint32_t c
 ) {
-    bj_bitmap_draw_line(bmp, p0, p1, c);
-    bj_bitmap_draw_line(bmp, p1, p2, c);
-    bj_bitmap_draw_line(bmp, p2, p0, c);
+    bj_bitmap_draw_line(bmp, p0[0], p0[1], p1[0], p1[1], c);
+    bj_bitmap_draw_line(bmp, p1[0], p1[1], p2[0], p2[1], c);
+    bj_bitmap_draw_line(bmp, p2[0], p2[1], p0[0], p0[1], c);
 }

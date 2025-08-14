@@ -38,8 +38,10 @@ typedef int bj_pixel[2];
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_bitmap_draw_line(
     bj_bitmap*     p_bitmap,
-    bj_pixel       p0,
-    bj_pixel       p1,
+    int            x0,
+    int            y0,
+    int            x1,
+    int            y1,
     uint32_t       pixel
 );
 
