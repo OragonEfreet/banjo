@@ -2,6 +2,7 @@
 #include <banjo/assert.h>
 #include <banjo/audio.h>
 #include <banjo/bitmap.h>
+#include <banjo/draw.h>
 #include <banjo/event.h>
 #include <banjo/linmath.h>
 #include <banjo/log.h>

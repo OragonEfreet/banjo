@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
+#include <banjo/draw.h>
 #include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
@@ -40,6 +41,13 @@ void draw(bj_bitmap* bmp) {
             color_cyan
         );
     }
+
+    //Draw a checker board
+    bj_rect board = {.x = 100, .y = 100, .w = 80, .h = 80,};
+    bj_bitmap_draw_rectangle(bmp,
+        &board,
+        color_red
+    );
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
