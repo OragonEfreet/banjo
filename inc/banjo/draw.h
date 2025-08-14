@@ -15,17 +15,16 @@
 #include <banjo/pixel.h>
 #include <banjo/rect.h>
 
-/// Represents a pixel position in a bitmap.
-typedef int bj_pixel[2];
-
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws a line of pixels in the given bitmap.
 ///
 /// The line is drawn for each pixel between p0 and p1.
 ///
 /// \param p_bitmap The bitmap object.
-/// \param p0       The first point in the line.
-/// \param p1       The second point in the line.
+/// \param x0       The X coordinate of the first point in the line.
+/// \param y0       The Y coordinate of the first point in the line.
+/// \param x1       The X coordinate of the second point in the line.
+/// \param y1       The Y coordinate of the second point in the line.
 /// \param pixel    The line pixel value.
 ///
 /// \par Memory Safety
@@ -97,9 +96,12 @@ BANJO_EXPORT void bj_bitmap_draw_filled_rectangle(
 /// Draws the edges of a triangle given its 3 corners.
 ///
 /// \param p_bitmap The bitmap object.
-/// \param p0       The first point of the triangle.
-/// \param p1       The second point of the triangle.
-/// \param p2       The third point of the triangle.
+/// \param x0       The X coordinate of the first triangle vertex.
+/// \param y0       The Y coordinate of the first triangle vertex.
+/// \param x1       The X coordinate of the second triangle vertex.
+/// \param y1       The Y coordinate of the second triangle vertex.
+/// \param x2       The X coordinate of the third triangle vertex.
+/// \param y2       The Y coordinate of the third triangle vertex.
 /// \param color    The line color.
 ///
 /// \par Memory Safety
@@ -112,9 +114,12 @@ BANJO_EXPORT void bj_bitmap_draw_filled_rectangle(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_bitmap_draw_triangle(
     bj_bitmap* p_bitmap,
-    bj_pixel   p0,
-    bj_pixel   p1,
-    bj_pixel   p2,
+    int        x0,
+    int        y0,
+    int        x1,
+    int        y1,
+    int        x2,
+    int        y2,
     uint32_t   color
 );
 

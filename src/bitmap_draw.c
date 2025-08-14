@@ -90,12 +90,15 @@ BANJO_EXPORT void bj_bitmap_draw_filled_rectangle(
 
 void bj_bitmap_draw_triangle(
     bj_bitmap* bmp,
-    bj_pixel p0,
-    bj_pixel p1,
-    bj_pixel p2,
-    uint32_t c
+    int        x0,
+    int        y0,
+    int        x1,
+    int        y1,
+    int        x2,
+    int        y2,
+    uint32_t   c
 ) {
-    bj_bitmap_draw_line(bmp, p0[0], p0[1], p1[0], p1[1], c);
-    bj_bitmap_draw_line(bmp, p1[0], p1[1], p2[0], p2[1], c);
-    bj_bitmap_draw_line(bmp, p2[0], p2[1], p0[0], p0[1], c);
+    bj_bitmap_draw_line(bmp, x0, y0, x1, y1, c);
+    bj_bitmap_draw_line(bmp, x1, y1, x2, y2, c);
+    bj_bitmap_draw_line(bmp, x2, y2, x0, y0, c);
 }
