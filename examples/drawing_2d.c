@@ -86,7 +86,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     } 
 
     window = bj_window_new("Simple Text", 100, 100, 500, 500, 0);
-    bj_set_key_callback(bj_close_on_escape);
+    bj_set_key_callback(bj_close_on_escape, 0);
 
     bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
     draw(framebuffer);

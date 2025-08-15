@@ -363,7 +363,7 @@ typedef struct bj_event_t {
 /// Called when the cursor enters or exits a window.
 /// \see bj_set_enter_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_enter_callback_fn_t)(bj_window*, const bj_enter_event*);
+typedef void(* bj_enter_callback_fn_t)(bj_window*, const bj_enter_event*, void*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define the callback type for cursor movement events.
@@ -371,7 +371,7 @@ typedef void(* bj_enter_callback_fn_t)(bj_window*, const bj_enter_event*);
 /// Called when the cursor moves inside a window.
 /// \see bj_set_cursor_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, const bj_cursor_event*);
+typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, const bj_cursor_event*, void*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define the callback type for mouse button events.
@@ -379,7 +379,7 @@ typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, const bj_cursor_eve
 /// Called when a mouse button is pressed or released.
 /// \see bj_set_button_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_button_callback_fn_t)(bj_window* p_window, const bj_button_event*);
+typedef void(* bj_button_callback_fn_t)(bj_window* p_window, const bj_button_event*, void*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define the callback type for keyboard key events.
@@ -387,36 +387,41 @@ typedef void(* bj_button_callback_fn_t)(bj_window* p_window, const bj_button_eve
 /// Called when a key is pressed, released, or repeated.
 /// \see bj_set_key_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_key_callback_fn_t)(bj_window* p_window, const bj_key_event*);
+typedef void(* bj_key_callback_fn_t)(bj_window* p_window, const bj_key_event*, void*);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the global callback for cursor events.
 ///
 /// \param p_callback The new callback function
+/// \param p_user_data Location to user-provided data.
 /// \return The previously set callback, or NULL if none
 ///
 /// \see bj_cursor_callback_fn_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_cursor_callback_fn_t bj_set_cursor_callback(
-    bj_cursor_callback_fn_t p_callback
+    bj_cursor_callback_fn_t p_callback,
+    void*                   p_user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the global callback for mouse button events.
 ///
 /// \param p_callback The new callback function
+/// \param p_user_data Location to user-provided data.
 /// \return The previously set callback, or NULL if none
 ///
 /// \see bj_button_callback_fn_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_button_callback_fn_t bj_set_button_callback(
-    bj_button_callback_fn_t p_callback
+    bj_button_callback_fn_t p_callback,
+    void*                   p_user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the global callback for keyboard key events.
 ///
 /// \param p_callback The new callback function
+/// \param p_user_data Location to user-provided data.
 /// \return The previously set callback, or NULL if none
 ///
 /// \par Key Repeat
@@ -426,19 +431,22 @@ BANJO_EXPORT bj_button_callback_fn_t bj_set_button_callback(
 /// \see bj_key_callback_fn_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_key_callback_fn_t bj_set_key_callback(
-    bj_key_callback_fn_t p_callback
+    bj_key_callback_fn_t p_callback,
+    void*                p_user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the global callback for mouse enter/leave events.
 ///
 /// \param p_callback The new callback function
+/// \param p_user_data Location to user-provided data.
 /// \return The previously set callback, or NULL if none
 ///
 /// \see bj_enter_callback_fn_t
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
-    bj_enter_callback_fn_t p_callback
+    bj_enter_callback_fn_t p_callback,
+    void*                  p_user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -450,7 +458,7 @@ BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
 /// \see bj_key_callback_fn_t
 /// \see bj_set_key_callback
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_close_on_escape(bj_window*, const bj_key_event*);
+BANJO_EXPORT void bj_close_on_escape(bj_window*, const bj_key_event*, void* p_user_data);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Push a custom event to the internal event queue.

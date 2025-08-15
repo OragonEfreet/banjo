@@ -13,13 +13,24 @@
 
 bj_window* window = 0;
 
-void cursor_callback(bj_window* p_window, const bj_cursor_event* e) {
+typedef struct {
+    size_t cursor;
+    size_t button;
+    size_t key;
+    size_t enter;
+} event_counter;
+
+void cursor_callback(bj_window* p_window, const bj_cursor_event* e, void* data) {
+    event_counter* counter = (event_counter*)data;
+    ++counter->cursor;
     bj_info("Cursor event, window %p, (%d,%d)",
         (void*)p_window, e->x, e->y
     );
 }
 
-void button_callback(bj_window* p_window, const bj_button_event* e) {
+void button_callback(bj_window* p_window, const bj_button_event* e, void* data) {
+    event_counter* counter = (event_counter*)data;
+    ++counter->button;
     bj_info("Button event, window %p, button %d, %s, (%d,%d)",
         (void*)p_window, e->button, 
         e->action == BJ_PRESS ? "pressed" : "released",
@@ -27,7 +38,9 @@ void button_callback(bj_window* p_window, const bj_button_event* e) {
     );
 }
 
-void key_callback(bj_window* p_window, const bj_key_event* e) {
+void key_callback(bj_window* p_window, const bj_key_event* e, void* data) {
+    event_counter* counter = (event_counter*)data;
+    ++counter->key;
     (void)p_window;
 
     const char* action_str = "pressed";
@@ -44,7 +57,9 @@ void key_callback(bj_window* p_window, const bj_key_event* e) {
     }
 }
 
-void enter_callback(bj_window* p_window, const bj_enter_event* e) {
+void enter_callback(bj_window* p_window, const bj_enter_event* e, void* data) {
+    event_counter* counter = (event_counter*)data;
+    ++counter->enter;
     bj_info("Enter event, window %p, %s, (%d,%d)",
         (void*)p_window, 
         e->enter ? "entered" : "left",
@@ -53,7 +68,7 @@ void enter_callback(bj_window* p_window, const bj_enter_event* e) {
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
-    (void)user_data; (void)argc; (void)argv;
+    (void)argc; (void)argv;
 
     bj_error* p_error = 0;
 
@@ -64,10 +79,14 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
 
-    bj_set_key_callback(key_callback);
-    bj_set_button_callback(button_callback);
-    bj_set_cursor_callback(cursor_callback);
-    bj_set_enter_callback(enter_callback);
+    event_counter* counter = bj_calloc(sizeof(event_counter));
+
+    bj_set_key_callback(key_callback, counter);
+    bj_set_button_callback(button_callback, counter);
+    bj_set_cursor_callback(cursor_callback, counter);
+    bj_set_enter_callback(enter_callback, counter);
+
+    *user_data = counter;
 
     return bj_callback_continue;
 }
@@ -83,7 +102,12 @@ int bj_app_iterate(void* user_data) {
 }
 
 int bj_app_end(void* user_data, int status) {
-    (void)user_data;
+
+    event_counter* counter = (event_counter*)user_data;
+    bj_info("Total events: %ld cursor, %ld button, %ld key, %ld enter",
+        counter->cursor, counter->button, counter->key, counter->enter
+    );
+
     bj_window_del(window);
     bj_end(0);
     return status;

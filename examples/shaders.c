@@ -78,7 +78,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     } 
 
     window = bj_window_new("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
-    bj_set_key_callback(bj_close_on_escape);
+    bj_set_key_callback(bj_close_on_escape, 0);
 
     framebuffer = bj_window_get_framebuffer(window, 0);
 

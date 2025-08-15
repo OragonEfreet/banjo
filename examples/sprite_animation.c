@@ -46,7 +46,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     } 
 
     window = bj_window_new("sprite sheet - Banjo", 0, 0, WINDOW_W, WINDOW_H, 0);
-    bj_set_key_callback(bj_close_on_escape);
+    bj_set_key_callback(bj_close_on_escape, 0);
 
     p_window_framebuffer = bj_window_get_framebuffer(window, 0);
 

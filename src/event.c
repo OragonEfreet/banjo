@@ -17,10 +17,26 @@ static struct evq_t {
 } evq = { { {0} }, 0, 0 };
 
 static struct event_callbacks_t {
-    bj_button_callback_fn_t p_button;
-    bj_cursor_callback_fn_t p_cursor;
-    bj_enter_callback_fn_t  p_enter;
-    bj_key_callback_fn_t    p_key;
+    struct {
+        bj_button_callback_fn_t p_call;
+        void*                   p_data;
+    } button;
+
+    struct {
+        bj_cursor_callback_fn_t p_call;
+        void*                   p_data;
+    } cursor;
+
+    struct {
+        bj_enter_callback_fn_t p_call;
+        void*                  p_data;
+    } enter;
+
+    struct {
+        bj_key_callback_fn_t p_call;
+        void*                p_data;
+    } key;
+
 } event_callbacks;
 
 #define evq_write(at, val) bj_memcpy(evq.array + at, val, sizeof(bj_event))
@@ -64,10 +80,12 @@ static inline bj_bool get_next_event(bj_event* e) {
 }
 
 bj_key_callback_fn_t bj_set_key_callback(
-    bj_key_callback_fn_t   p_callback
+    bj_key_callback_fn_t   p_callback,
+    void* p_user_data
 ) {
-    bj_key_callback_fn_t p_replaced = event_callbacks.p_key;
-    event_callbacks.p_key = p_callback;
+    bj_key_callback_fn_t p_replaced = event_callbacks.key.p_call;
+    event_callbacks.key.p_call = p_callback;
+    event_callbacks.key.p_data = p_user_data;
     return p_replaced;
 }
 
@@ -82,23 +100,23 @@ BANJO_EXPORT void bj_dispatch_events(
         bj_window* p_window = e.window;
         switch(e.type) {
             case BJ_EVENT_CURSOR:
-                if(event_callbacks.p_cursor) {
-                    event_callbacks.p_cursor(p_window, &e.cursor);
+                if(event_callbacks.cursor.p_call) {
+                    event_callbacks.cursor.p_call(p_window, &e.cursor, event_callbacks.cursor.p_data);
                 }
                 break;
             case BJ_EVENT_KEY:
-                if(event_callbacks.p_key) {
-                    event_callbacks.p_key(p_window, &e.key);
+                if(event_callbacks.key.p_call) {
+                    event_callbacks.key.p_call(p_window, &e.key, event_callbacks.key.p_data);
                 }
                 break;
             case BJ_EVENT_BUTTON:
-                if(event_callbacks.p_button) {
-                    event_callbacks.p_button(p_window, &e.button);
+                if(event_callbacks.button.p_call) {
+                    event_callbacks.button.p_call(p_window, &e.button, event_callbacks.button.p_data);
                 }
                 break;
             case BJ_EVENT_ENTER:
-                if(event_callbacks.p_enter) {
-                    event_callbacks.p_enter(p_window, &e.enter);
+                if(event_callbacks.enter.p_call) {
+                    event_callbacks.enter.p_call(p_window, &e.enter, event_callbacks.enter.p_data);
                 }
                 break;
         }
@@ -106,33 +124,41 @@ BANJO_EXPORT void bj_dispatch_events(
 }
 
 bj_cursor_callback_fn_t bj_set_cursor_callback(
-    bj_cursor_callback_fn_t   p_callback
+    bj_cursor_callback_fn_t   p_callback,
+    void* p_user_data
 ) {
-    bj_cursor_callback_fn_t p_replaced = event_callbacks.p_cursor;
-    event_callbacks.p_cursor = p_callback;
+    bj_cursor_callback_fn_t p_replaced = event_callbacks.cursor.p_call;
+    event_callbacks.cursor.p_call = p_callback;
+    event_callbacks.cursor.p_data = p_user_data;
     return p_replaced;
 }
 
 bj_button_callback_fn_t bj_set_button_callback(
-    bj_button_callback_fn_t   p_callback
+    bj_button_callback_fn_t   p_callback,
+    void* p_user_data
 ) {
-    bj_button_callback_fn_t p_replaced = event_callbacks.p_button;
-    event_callbacks.p_button = p_callback;
+    bj_button_callback_fn_t p_replaced = event_callbacks.button.p_call;
+    event_callbacks.button.p_call = p_callback;
+    event_callbacks.button.p_data = p_user_data;
     return p_replaced;
 }
 
 bj_enter_callback_fn_t bj_set_enter_callback(
-    bj_enter_callback_fn_t    p_callback
+    bj_enter_callback_fn_t    p_callback,
+    void* p_user_data
 ) {
-    bj_enter_callback_fn_t p_replaced = event_callbacks.p_enter;
-    event_callbacks.p_enter = p_callback;
+    bj_enter_callback_fn_t p_replaced = event_callbacks.enter.p_call;
+    event_callbacks.enter.p_call = p_callback;
+    event_callbacks.enter.p_data = p_user_data;
     return p_replaced;
 }
 
 void bj_close_on_escape(
     bj_window* p_window,
-    const bj_key_event* p_event
+    const bj_key_event* p_event,
+    void* p_user_data
 ) {
+    (void)p_user_data;
     (void)p_window;
 
     if (p_event->key == BJ_KEY_ESCAPE && p_event->action == BJ_RELEASE) {

@@ -14,7 +14,6 @@
 
 #include "audio_t.h"
 #include "check.h"
-#include "window_t.h"
 
 #include <alsa/asoundlib.h>
 #include <pthread.h>
