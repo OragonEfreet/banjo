@@ -1,9 +1,8 @@
 #include <banjo/math.h>
+#include <banjo/draw.h>
 
 #include "bitmap_t.h"
 #include "check.h"
-
-#define ABS_INT(x) ((x) < 0 ? -(x) : (x))
 
 bj_bitmap* dib_create_bitmap_from_stream(bj_stream*, bj_error**);
 
@@ -247,7 +246,7 @@ bj_bitmap* bj_bitmap_new_from_file(
 void bj_bitmap_clear(bj_bitmap* p_bitmap) {
     bj_check(p_bitmap);
 
-    bj_bitmap_draw_line(p_bitmap, (bj_pixel){0, 0}, (bj_pixel){p_bitmap->width - 1, 0}, p_bitmap->clear_color);
+    bj_bitmap_draw_line(p_bitmap, 0, 0, p_bitmap->width - 1, 0, p_bitmap->clear_color);
     if (p_bitmap->height > 1) {
         void* first_row = p_bitmap->buffer;
         for (size_t y = 1; y < p_bitmap->height; ++y) {
@@ -257,66 +256,6 @@ void bj_bitmap_clear(bj_bitmap* p_bitmap) {
     }
 }
 
-#define X 0
-#define Y 1
-
-BANJO_EXPORT void bj_bitmap_draw_line(
-    bj_bitmap*     bmp,
-    bj_pixel       p0,
-    bj_pixel       p1,
-    uint32_t       c
-) {
-    /// Bresenham's line algorithm
-    int x0 = p0[X];
-    int y0 = p0[Y];
-    const int x1 = p1[X]; const int y1 = p1[Y];
-
-    const int dx = ABS_INT(x1 - x0);
-    const int dy = ABS_INT(y1 - y0);
-    const int sx = (x0 < x1) ? 1 : -1;
-    const int sy = (y0 < y1) ? 1 : -1;
-    int err = dx - dy;
-
-    while (1) {
-        bj_bitmap_put_pixel(bmp, x0, y0, c);
-        if (x0 == x1 && y0 == y1) break;
-        const int e2 = 2 * err;
-        if (e2 > -dy) {
-            err -= dy;
-            x0 += sx;
-        }
-        if (e2 < dx) {
-            err += dx;
-            y0 += sy;
-        }
-    }
-}
-
-BANJO_EXPORT void bj_bitmap_draw_rectangle(
-    bj_bitmap*     p_bitmap,
-    const bj_rect* p_area,
-    uint32_t       pixel
-) {
-    bj_check(p_bitmap);
-    bj_check(p_area);
-    for (int x = p_area->x; x < p_area->x + p_area->w; ++x) {
-        for (int y = p_area->y; y < p_area->y + p_area->h; ++y) {
-            bj_bitmap_put_pixel(p_bitmap, x, y, pixel);
-        }
-    }
-}
-
-void bj_bitmap_draw_triangle(
-    bj_bitmap* bmp,
-    bj_pixel p0,
-    bj_pixel p1,
-    bj_pixel p2,
-    uint32_t c
-) {
-    bj_bitmap_draw_line(bmp, p0, p1, c);
-    bj_bitmap_draw_line(bmp, p1, p2, c);
-    bj_bitmap_draw_line(bmp, p2, p0, c);
-}
 
 void bj_bitmap_set_clear_color(
     bj_bitmap* p_bitmap,
