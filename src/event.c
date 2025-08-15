@@ -89,37 +89,43 @@ bj_key_callback_fn_t bj_set_key_callback(
     return p_replaced;
 }
 
-BANJO_EXPORT void bj_dispatch_events(
+void bj_dispatch_event(const bj_event* p_event) {
+    bj_window* p_window = p_event->window;
+    switch(p_event->type) {
+        case BJ_EVENT_CURSOR:
+            if(event_callbacks.cursor.p_call) {
+                event_callbacks.cursor.p_call(p_window, &p_event->cursor, event_callbacks.cursor.p_data);
+            }
+            break;
+        case BJ_EVENT_KEY:
+            if(event_callbacks.key.p_call) {
+                event_callbacks.key.p_call(p_window, &p_event->key, event_callbacks.key.p_data);
+            }
+            break;
+        case BJ_EVENT_BUTTON:
+            if(event_callbacks.button.p_call) {
+                event_callbacks.button.p_call(p_window, &p_event->button, event_callbacks.button.p_data);
+            }
+            break;
+        case BJ_EVENT_ENTER:
+            if(event_callbacks.enter.p_call) {
+                event_callbacks.enter.p_call(p_window, &p_event->enter, event_callbacks.enter.p_data);
+            }
+            break;
+    }
+}
+
+bj_bool bj_poll_events(bj_event* p_event) {
+    s_video->poll_events(s_video);
+    return get_next_event(p_event);
+}
+
+void bj_dispatch_events(
     void
 ) {
-    s_video->poll_events(s_video);
-
     bj_event e;
-    
-    while(get_next_event(&e)) {
-        bj_window* p_window = e.window;
-        switch(e.type) {
-            case BJ_EVENT_CURSOR:
-                if(event_callbacks.cursor.p_call) {
-                    event_callbacks.cursor.p_call(p_window, &e.cursor, event_callbacks.cursor.p_data);
-                }
-                break;
-            case BJ_EVENT_KEY:
-                if(event_callbacks.key.p_call) {
-                    event_callbacks.key.p_call(p_window, &e.key, event_callbacks.key.p_data);
-                }
-                break;
-            case BJ_EVENT_BUTTON:
-                if(event_callbacks.button.p_call) {
-                    event_callbacks.button.p_call(p_window, &e.button, event_callbacks.button.p_data);
-                }
-                break;
-            case BJ_EVENT_ENTER:
-                if(event_callbacks.enter.p_call) {
-                    event_callbacks.enter.p_call(p_window, &e.enter, event_callbacks.enter.p_data);
-                }
-                break;
-        }
+    while(bj_poll_events(&e)) {
+        bj_dispatch_event(&e);
     }
 }
 

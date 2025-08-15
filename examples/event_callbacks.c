@@ -77,7 +77,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     } 
 
-    window = bj_window_new("Simple Banjo Window", 100, 100, 800, 600, 0);
+    window = bj_window_new("Event Callbacks", 100, 100, 800, 600, 0);
 
     event_counter* counter = bj_calloc(sizeof(event_counter));
 
@@ -107,6 +107,7 @@ int bj_app_end(void* user_data, int status) {
     bj_info("Total events: %ld cursor, %ld button, %ld key, %ld enter",
         counter->cursor, counter->button, counter->key, counter->enter
     );
+    bj_free(counter);
 
     bj_window_del(window);
     bj_end(0);

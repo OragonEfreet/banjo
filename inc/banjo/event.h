@@ -530,4 +530,9 @@ void bj_push_enter_event(bj_window* p_window, bj_bool enter, int x, int y);
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_dispatch_events(void);
 
+BANJO_EXPORT bj_bool bj_poll_events(bj_event* p_event);
+
+BANJO_EXPORT void bj_dispatch_event(const bj_event* p_event);
+
+
 /// \} // end of event group
