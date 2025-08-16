@@ -16,6 +16,9 @@
 #include "bitmap_t.h"
 #include "check.h"
 
+#include <stdio.h>
+#include <stdarg.h>
+
 #define CHARSET_CHAR_PER_ROW 16
 #define CHAR_PIXEL_X(c) ((int)((c) % CHARSET_CHAR_PER_ROW) * CHAR_PIXEL_W)
 #define CHAR_PIXEL_Y(c) ((int)((c) / CHARSET_CHAR_PER_ROW) * CHAR_PIXEL_H)
@@ -471,4 +474,64 @@ void bj_bitmap_print(
     const char*     text
 ) {
     render_text_masked(dst, x, y, height, fg_native, 0, BJ_MASK_BG_TRANSPARENT, text);
+}
+
+void bj_bitmap_vprintf(
+    bj_bitmap*     p_bitmap,
+    int            x,
+    int            y,
+    unsigned       height,
+    uint32_t       fg_native,
+    const char*    fmt,
+    va_list        args
+) {
+    bj_check(p_bitmap);
+    bj_check(fmt);
+    bj_check(height > 0);
+
+    /* First pass: measure required length (excluding NUL) */
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int needed = vsnprintf(NULL, 0, fmt, args_copy);
+    va_end(args_copy);
+    if (needed < 0) {
+        /* Formatting failed; nothing to draw */
+        return;
+    }
+
+    /* Allocate exact buffer (+1 for NUL). Fallback to small stack if alloc fails. */
+    char* dyn = (char*)bj_malloc((size_t)needed + 1u);
+    if (dyn) {
+        int written = vsnprintf(dyn, (size_t)needed + 1u, fmt, args);
+        if (written >= 0) {
+            bj_bitmap_print(p_bitmap, x, y, height, fg_native, dyn);
+        }
+        bj_free(dyn);
+        return;
+    }
+
+    /* Fallback: truncated stack buffer (no heap). */
+    {
+        char small[1024];
+        int written = vsnprintf(small, sizeof small, fmt, args);
+        if (written >= 0) {
+            small[sizeof small - 1] = '\0';
+            bj_bitmap_print(p_bitmap, x, y, height, fg_native, small);
+        }
+    }
+}
+
+void bj_bitmap_printf(
+    bj_bitmap*     p_bitmap,
+    int            x,
+    int            y,
+    unsigned       height,
+    uint32_t       fg_native,
+    const char*    fmt,
+    ...
+) {
+    va_list args;
+    va_start(args, fmt);
+    bj_bitmap_vprintf(p_bitmap, x, y, height, fg_native, fmt, args);
+    va_end(args);
 }

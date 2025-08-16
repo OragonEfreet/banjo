@@ -657,6 +657,37 @@ BANJO_EXPORT void bj_bitmap_print(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Prints formatted text into a bitmap, similar to `printf`.
+///
+/// This function formats the full string using `vsnprintf` into a temporary
+/// buffer (heap-allocated), then renders it with \ref bj_bitmap_print.
+///
+/// \param p_bitmap   The destination bitmap.
+/// \param x          The X coordinate (top-left) where the text begins.
+/// \param y          The Y coordinate (top-left) where the text begins.
+/// \param height     The pixel height of the rendered font.
+/// \param fg_native  Foreground color in destination-native format.
+/// \param fmt        The `printf`-style format string.
+/// \param ...        Additional arguments corresponding to the format string.
+///
+/// \par Supported formatting
+/// Exactly the same as the C library `printf` (C99). All flags, width,
+/// precision (including `*`), length modifiers, and conversions are supported.
+///
+/// \note This routine renders **foreground only**. For background or mask modes,
+///       use \ref bj_bitmap_blit_text (or provide a printf variant of it).
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_bitmap_printf(
+    bj_bitmap*     p_bitmap,
+    int            x,
+    int            y,
+    unsigned       height,
+    uint32_t       fg_native,
+    const char*    fmt,
+    ...
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Prints text with explicit foreground/background and background mode.
 ///
 /// \param dst        The destination bitmap.
