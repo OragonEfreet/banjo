@@ -131,8 +131,6 @@
 #    endif
 #endif
 
-typedef float bj_real;
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \typedef bj_bool
 /// \brief Boolean type used throughout the BJ codebase.

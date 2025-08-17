@@ -7,13 +7,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
-#include <banjo/event.h>
-#include <banjo/log.h>
-#include <banjo/main.h>
 #include <banjo/shader.h>
-#include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
+#include <banjo/event.h>
+#include <banjo/main.h>
+#include <banjo/log.h>
+#include <banjo/system.h>
 
 #define CANVAS_W 512
 #define CANVAS_H 512
@@ -21,43 +21,46 @@
 bj_window* window      = 0;
 bj_bitmap* framebuffer = 0;
 
-void palette(bj_vec3 res, float t) {
-    const float f = 6.28318f;
+void palette(bj_vec3 res, bj_real t) {
+    const bj_real f = BJ_F(6.28318);
 
-    const bj_vec3 a = {.5f, .5f, .5f};
-    const bj_vec3 b = {.5f, .5f, .5f};
-    const bj_vec3 c = {1.f, 1.f, 1.f};
-    const bj_vec3 d = {.263f, .416f, .557f};
+    const bj_vec3 a = { BJ_F(0.5), BJ_F(0.5), BJ_F(0.5) };
+    const bj_vec3 b = { BJ_F(0.5), BJ_F(0.5), BJ_F(0.5) };
+    const bj_vec3 c = { BJ_F(1.0), BJ_F(1.0), BJ_F(1.0) };
+    const bj_vec3 d = { BJ_F(0.263), BJ_F(0.416), BJ_F(0.557) };
 
-    res[0] = a[0] + b[0] * bj_cosf(f * (c[0] * t + d[0]));
-    res[1] = a[1] + b[1] * bj_cosf(f * (c[1] * t + d[1]));
-    res[2] = a[2] + b[2] * bj_cosf(f * (c[2] * t + d[2]));
+    res[0] = a[0] + b[0] * bj_cos(f * (c[0] * t + d[0]));
+    res[1] = a[1] + b[1] * bj_cos(f * (c[1] * t + d[1]));
+    res[2] = a[2] + b[2] * bj_cos(f * (c[2] * t + d[2]));
 }
 
 int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
-    float time = *(float*)data;
+    bj_real time = *(bj_real*)data;
 
     bj_vec2 uv;
-    bj_vec3 final_color = { 0 };
+    bj_vec3 final_color = { BJ_F(0.0), BJ_F(0.0), BJ_F(0.0) };
 
     bj_vec2_copy(uv, frag_coords);
-    const float uv0_len = bj_vec2_len(uv);
+    const bj_real uv0_len = bj_vec2_len(uv);
     
-    for(float i = 0.f ; i < 4.f ; ++i) {
+    for (bj_real i = BJ_F(0.0); i < BJ_F(4.0); i += BJ_F(1.0)) {
         bj_vec3 col;
-        palette(col, uv0_len + i * .4f + time * .4f);
+        palette(col, uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
         
-        bj_vec2_scale(uv, uv, 1.5f);
+        bj_vec2_scale(uv, uv, BJ_F(1.5));
         bj_vec2_apply(uv, uv, bj_fract);
-        bj_vec2_sub(uv, uv, (bj_vec2) { .5f, .5f });
+        bj_vec2_sub(uv, uv, (bj_vec2){ BJ_F(0.5), BJ_F(0.5) });
 
-        const float d = bj_powf(0.01f / (
-            bj_fabsf(
-                bj_sinf(
-                    bj_vec2_len(uv) * bj_expf(-uv0_len) * 8.f + time
-                ) / 8.f
-            )
-         ), 1.2f);
+        const bj_real d = bj_pow(
+            BJ_F(0.01) / (
+                bj_abs(
+                    bj_sin(
+                        bj_vec2_len(uv) * bj_exp(-uv0_len) * BJ_F(8.0) + time
+                    ) / BJ_F(8.0)
+                )
+            ),
+            BJ_F(1.2)
+        );
 
         bj_vec3_scale(col, col, d);
         bj_vec3_add(final_color, final_color, col);
@@ -72,7 +75,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
-    if(!bj_begin(&p_error)) {
+    if (!bj_begin(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     } 
@@ -88,7 +91,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 int bj_app_iterate(void* user_data) {
     (void)user_data;
     bj_dispatch_events();
-    float time = (float)bj_get_time();
+    bj_real time = (bj_real)bj_get_time();
     bj_bitmap_apply_shader(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
     bj_window_update_framebuffer(window);
     bj_sleep(15);
@@ -104,4 +107,3 @@ int bj_app_end(void* user_data, int status) {
     bj_end(0);
     return status;
 }
-

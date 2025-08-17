@@ -12,8 +12,6 @@
 /// - 4x4 matrix with \ref bj_mat4
 /// - Quaternion with \ref bj_quat
 ///
-/// The scalar type is `float` by is aliased as `bj_real` using a typedef.
-///
 /// This library is a _direct_ conversion of 
 /// [linmath.h](https://github.com/datenwolf/linmath.h) by Wolfgang Draxinger.
 ///
@@ -23,12 +21,6 @@
 
 #include <banjo/api.h>
 #include <banjo/math.h>
-
-#ifndef BJ_COMPILER_DOXYGEN
-#   define real_sqrt bj_sqrtf
-#   define real_acos bj_acosf
-#   define BJ_INLINE static inline
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Defines a 2D vector type.
@@ -93,7 +85,7 @@ typedef bj_real bj_quat[4];
 /// \param b   The second scalar value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_set(bj_vec2 res, bj_real a, bj_real b) {
+static inline void bj_vec2_set(bj_vec2 res, bj_real a, bj_real b) {
     res[0] = a; res[1] = b;
 }
 
@@ -105,7 +97,7 @@ BJ_INLINE void bj_vec2_set(bj_vec2 res, bj_real a, bj_real b) {
 /// \param f   The map function
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_apply(bj_vec2 res, const bj_vec2 a, bj_real(*f)(bj_real)) {
+static inline void bj_vec2_apply(bj_vec2 res, const bj_vec2 a, bj_real(*f)(bj_real)) {
     res[0] = f(a[0]);
     res[1] = f(a[1]);
 }
@@ -117,7 +109,7 @@ BJ_INLINE void bj_vec2_apply(bj_vec2 res, const bj_vec2 a, bj_real(*f)(bj_real))
 /// \param lhs The first source vec2
 /// \param rhs The second source vec2
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_add(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
+static inline void bj_vec2_add(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
     res[0] = lhs[0] + rhs[0];
     res[1] = lhs[1] + rhs[1];
 }
@@ -132,7 +124,7 @@ BJ_INLINE void bj_vec2_add(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
 /// \param b   The vec2 to be scaled.
 /// \param s   The scalar factor.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_add_scaled(bj_vec2 res, const bj_vec2 a, const bj_vec2 b, bj_real s)
+static inline void bj_vec2_add_scaled(bj_vec2 res, const bj_vec2 a, const bj_vec2 b, bj_real s)
 {
     res[0] = a[0] + b[0] * s;
     res[1] = a[1] + b[1] * s;
@@ -145,7 +137,7 @@ BJ_INLINE void bj_vec2_add_scaled(bj_vec2 res, const bj_vec2 a, const bj_vec2 b,
 /// \param lhs The first source vec2
 /// \param rhs The second source vec2
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_sub(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
+static inline void bj_vec2_sub(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
     res[0] = lhs[0] - rhs[0];
     res[1] = lhs[1] - rhs[1];
 }
@@ -157,7 +149,7 @@ BJ_INLINE void bj_vec2_sub(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
 /// \param v   The source vec2
 /// \param s   The factor value
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_scale(bj_vec2 res, const bj_vec2 v, bj_real s) {
+static inline void bj_vec2_scale(bj_vec2 res, const bj_vec2 v, bj_real s) {
     res[0] = v[0] * s;
     res[1] = v[1] * s;
 }
@@ -169,7 +161,7 @@ BJ_INLINE void bj_vec2_scale(bj_vec2 res, const bj_vec2 v, bj_real s) {
 /// \param v   The source vec2
 /// \param s   The scalar vec2
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_scale_each(bj_vec2 res, const bj_vec2 v, const bj_vec2 s) {
+static inline void bj_vec2_scale_each(bj_vec2 res, const bj_vec2 v, const bj_vec2 s) {
     res[0] = v[0] * s[0];
     res[1] = v[1] * s[1];
 }
@@ -181,7 +173,7 @@ BJ_INLINE void bj_vec2_scale_each(bj_vec2 res, const bj_vec2 v, const bj_vec2 s)
 /// \param b   The second vec2
 /// \return    The resulting dot product
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE bj_real bj_vec2_dot(const bj_vec2 a, const bj_vec2 b) {
+static inline bj_real bj_vec2_dot(const bj_vec2 a, const bj_vec2 b) {
     return a[0] * b[0] + a[1] * b[1];
 }
 
@@ -191,8 +183,8 @@ BJ_INLINE bj_real bj_vec2_dot(const bj_vec2 a, const bj_vec2 b) {
 /// \param v   The vec2
 /// \return    The length
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE bj_real bj_vec2_len(const bj_vec2 v) {
-    return real_sqrt(v[0] * v[0] + v[1] * v[1]);
+static inline bj_real bj_vec2_len(const bj_vec2 v) {
+    return bj_sqrt(v[0] * v[0] + v[1] * v[1]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,8 +193,8 @@ BJ_INLINE bj_real bj_vec2_len(const bj_vec2 v) {
 /// \param res   The resulting vec2
 /// \param v     The vec2
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_normalize(bj_vec2 res, const bj_vec2 v) {
-    bj_real inv_len = 1.0f / real_sqrt(v[0] * v[0] + v[1] * v[1]);
+static inline void bj_vec2_normalize(bj_vec2 res, const bj_vec2 v) {
+    bj_real inv_len = 1.0f / bj_sqrt(v[0] * v[0] + v[1] * v[1]);
     res[0] = v[0] * inv_len;
     res[1] = v[1] * inv_len;
 }
@@ -214,7 +206,7 @@ BJ_INLINE void bj_vec2_normalize(bj_vec2 res, const bj_vec2 v) {
 /// \param a The first input vector.
 /// \param b The second input vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_min(bj_vec2 res, const bj_vec2 a, const bj_vec2 b) {
+static inline void bj_vec2_min(bj_vec2 res, const bj_vec2 a, const bj_vec2 b) {
     res[0] = a[0] < b[0] ? a[0] : b[0];
     res[1] = a[1] < b[1] ? a[1] : b[1];
 }
@@ -226,7 +218,7 @@ BJ_INLINE void bj_vec2_min(bj_vec2 res, const bj_vec2 a, const bj_vec2 b) {
 /// \param a The first input vector.
 /// \param b The second input vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_max(bj_vec2 res, const bj_vec2 a, const bj_vec2 b) {
+static inline void bj_vec2_max(bj_vec2 res, const bj_vec2 a, const bj_vec2 b) {
     res[0] = a[0] > b[0] ? a[0] : b[0];
     res[1] = a[1] > b[1] ? a[1] : b[1];
 }
@@ -237,7 +229,7 @@ BJ_INLINE void bj_vec2_max(bj_vec2 res, const bj_vec2 a, const bj_vec2 b) {
 /// \param res The destination vector.
 /// \param src The source vector to copy.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec2_copy(bj_vec2 res, const bj_vec2 src) {
+static inline void bj_vec2_copy(bj_vec2 res, const bj_vec2 src) {
     res[0] = src[0];
     res[1] = src[1];
 }
@@ -251,7 +243,7 @@ BJ_INLINE void bj_vec2_copy(bj_vec2 res, const bj_vec2 src) {
 /// \param c   The third scalar value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_set(bj_vec3 res, bj_real a, bj_real b, bj_real c) {
+static inline void bj_vec3_set(bj_vec3 res, bj_real a, bj_real b, bj_real c) {
     res[0] = a; res[1] = b; res[2] = c;
 }
 
@@ -263,7 +255,7 @@ BJ_INLINE void bj_vec3_set(bj_vec3 res, bj_real a, bj_real b, bj_real c) {
 /// \param f   The map function
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_apply(bj_vec3 res, const bj_vec3 a, bj_real(*f)(bj_real)) {
+static inline void bj_vec3_apply(bj_vec3 res, const bj_vec3 a, bj_real(*f)(bj_real)) {
     res[0] = f(a[0]);
     res[1] = f(a[1]);
     res[2] = f(a[2]);
@@ -277,7 +269,7 @@ BJ_INLINE void bj_vec3_apply(bj_vec3 res, const bj_vec3 a, bj_real(*f)(bj_real))
 /// \param lhs The first source vec3
 /// \param rhs The second source vec3
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_add(bj_vec3 res, const bj_vec3 lhs, const bj_vec3 rhs) {
+static inline void bj_vec3_add(bj_vec3 res, const bj_vec3 lhs, const bj_vec3 rhs) {
     res[0] = lhs[0] + rhs[0];
     res[1] = lhs[1] + rhs[1];
     res[2] = lhs[2] + rhs[2];
@@ -293,7 +285,7 @@ BJ_INLINE void bj_vec3_add(bj_vec3 res, const bj_vec3 lhs, const bj_vec3 rhs) {
 /// \param b   The vec3 to be scaled.
 /// \param s   The scalar factor.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_add_scaled(bj_vec3 res, const bj_vec3 a, const bj_vec3 b, bj_real s) {
+static inline void bj_vec3_add_scaled(bj_vec3 res, const bj_vec3 a, const bj_vec3 b, bj_real s) {
     res[0] = a[0] + b[0] * s;
     res[1] = a[1] + b[1] * s;
     res[2] = a[2] + b[2] * s;
@@ -307,7 +299,7 @@ BJ_INLINE void bj_vec3_add_scaled(bj_vec3 res, const bj_vec3 a, const bj_vec3 b,
 /// \param lhs The first source vec3
 /// \param rhs The second source vec3
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_sub(bj_vec3 res, const bj_vec3 lhs, const bj_vec3 rhs) {
+static inline void bj_vec3_sub(bj_vec3 res, const bj_vec3 lhs, const bj_vec3 rhs) {
     res[0] = lhs[0] - rhs[0];
     res[1] = lhs[1] - rhs[1];
     res[2] = lhs[2] - rhs[2];
@@ -320,7 +312,7 @@ BJ_INLINE void bj_vec3_sub(bj_vec3 res, const bj_vec3 lhs, const bj_vec3 rhs) {
 /// \param v   The source vec3
 /// \param s   The factor value
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_scale(bj_vec3 res, const bj_vec3 v, bj_real s) {
+static inline void bj_vec3_scale(bj_vec3 res, const bj_vec3 v, bj_real s) {
     res[0] = v[0] * s;
     res[1] = v[1] * s;
     res[2] = v[2] * s;
@@ -333,7 +325,7 @@ BJ_INLINE void bj_vec3_scale(bj_vec3 res, const bj_vec3 v, bj_real s) {
 /// \param b   The second vec3
 /// \return    The resulting dot product
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE bj_real bj_vec3_dot(const bj_vec3 a, const bj_vec3 b) {
+static inline bj_real bj_vec3_dot(const bj_vec3 a, const bj_vec3 b) {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
@@ -343,8 +335,8 @@ BJ_INLINE bj_real bj_vec3_dot(const bj_vec3 a, const bj_vec3 b) {
 /// \param v   The vec3
 /// \return    The length
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE bj_real bj_vec3_len(const bj_vec3 v) {
-    return real_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+static inline bj_real bj_vec3_len(const bj_vec3 v) {
+    return bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -353,8 +345,8 @@ BJ_INLINE bj_real bj_vec3_len(const bj_vec3 v) {
 /// \param res   The resulting vec3
 /// \param v     The vec3
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_normalize(bj_vec3 res, const bj_vec3 v) {
-    bj_real inv_len = 1.0f / real_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+static inline void bj_vec3_normalize(bj_vec3 res, const bj_vec3 v) {
+    bj_real inv_len = 1.0f / bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     res[0] = v[0] * inv_len;
     res[1] = v[1] * inv_len;
     res[2] = v[2] * inv_len;
@@ -367,7 +359,7 @@ BJ_INLINE void bj_vec3_normalize(bj_vec3 res, const bj_vec3 v) {
 /// \param a The first input vector.
 /// \param b The second input vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_min(bj_vec3 res, const bj_vec3 a, const bj_vec3 b) {
+static inline void bj_vec3_min(bj_vec3 res, const bj_vec3 a, const bj_vec3 b) {
     res[0] = a[0] < b[0] ? a[0] : b[0];
     res[1] = a[1] < b[1] ? a[1] : b[1];
     res[2] = a[2] < b[2] ? a[2] : b[2];
@@ -380,7 +372,7 @@ BJ_INLINE void bj_vec3_min(bj_vec3 res, const bj_vec3 a, const bj_vec3 b) {
 /// \param a The first input vector.
 /// \param b The second input vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_max(bj_vec3 res, const bj_vec3 a, const bj_vec3 b) {
+static inline void bj_vec3_max(bj_vec3 res, const bj_vec3 a, const bj_vec3 b) {
     res[0] = a[0] > b[0] ? a[0] : b[0];
     res[1] = a[1] > b[1] ? a[1] : b[1];
     res[2] = a[2] > b[2] ? a[2] : b[2];
@@ -392,7 +384,7 @@ BJ_INLINE void bj_vec3_max(bj_vec3 res, const bj_vec3 a, const bj_vec3 b) {
 /// \param res The destination vector.
 /// \param src The source vector to copy.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_copy(bj_vec3 res, const bj_vec3 src) {
+static inline void bj_vec3_copy(bj_vec3 res, const bj_vec3 src) {
     res[0] = src[0];
     res[1] = src[1];
     res[2] = src[2];
@@ -405,7 +397,7 @@ BJ_INLINE void bj_vec3_copy(bj_vec3 res, const bj_vec3 src) {
 /// \param l The left-hand input vector.
 /// \param r The right-hand input vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_cross(bj_vec3 res, const bj_vec3 l, const bj_vec3 r)
+static inline void bj_vec3_cross(bj_vec3 res, const bj_vec3 l, const bj_vec3 r)
 {
     res[0] = l[1] * r[2] - l[2] * r[1];
     res[1] = l[2] * r[0] - l[0] * r[2];
@@ -422,7 +414,7 @@ BJ_INLINE void bj_vec3_cross(bj_vec3 res, const bj_vec3 l, const bj_vec3 r)
 /// \param v The incident vector.
 /// \param n The normal vector (should be normalized).
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec3_reflect(bj_vec3 res, const bj_vec3 v, const bj_vec3 n)
+static inline void bj_vec3_reflect(bj_vec3 res, const bj_vec3 v, const bj_vec3 n)
 {
     const bj_real p = 2.f * bj_vec3_dot(v, n);
     for (int i = 0; i < 3; ++i) {
@@ -441,7 +433,7 @@ BJ_INLINE void bj_vec3_reflect(bj_vec3 res, const bj_vec3 v, const bj_vec3 n)
 /// \param d   The fourth scalar value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_set(bj_vec2 res, bj_real a, bj_real b, bj_real c, bj_real d) {
+static inline void bj_vec4_set(bj_vec2 res, bj_real a, bj_real b, bj_real c, bj_real d) {
     res[0] = a; res[1] = b; res[2] = c; res[3] = d;
 }
 
@@ -453,7 +445,7 @@ BJ_INLINE void bj_vec4_set(bj_vec2 res, bj_real a, bj_real b, bj_real c, bj_real
 /// \param f   The map function
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_apply(bj_vec4 res, const bj_vec4 a, bj_real(*f)(bj_real)) {
+static inline void bj_vec4_apply(bj_vec4 res, const bj_vec4 a, bj_real(*f)(bj_real)) {
     res[0] = f(a[0]);
     res[1] = f(a[1]);
     res[2] = f(a[2]);
@@ -467,7 +459,7 @@ BJ_INLINE void bj_vec4_apply(bj_vec4 res, const bj_vec4 a, bj_real(*f)(bj_real))
 /// \param lhs The first source vec4
 /// \param rhs The second source vec4
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_add(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
+static inline void bj_vec4_add(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
     res[0] = lhs[0] + rhs[0];
     res[1] = lhs[1] + rhs[1];
     res[2] = lhs[2] + rhs[2];
@@ -484,7 +476,7 @@ BJ_INLINE void bj_vec4_add(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
 /// \param b   The vec4 to be scaled.
 /// \param s   The scalar factor.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_add_scaled(bj_vec4 res, const bj_vec4 a, const bj_vec4 b, bj_real s) {
+static inline void bj_vec4_add_scaled(bj_vec4 res, const bj_vec4 a, const bj_vec4 b, bj_real s) {
     res[0] = a[0] + b[0] * s;
     res[1] = a[1] + b[1] * s;
     res[2] = a[2] + b[2] * s;
@@ -498,7 +490,7 @@ BJ_INLINE void bj_vec4_add_scaled(bj_vec4 res, const bj_vec4 a, const bj_vec4 b,
 /// \param lhs The first source vec4
 /// \param rhs The second source vec4
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_sub(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
+static inline void bj_vec4_sub(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
     res[0] = lhs[0] - rhs[0];
     res[1] = lhs[1] - rhs[1];
     res[2] = lhs[2] - rhs[2];
@@ -512,7 +504,7 @@ BJ_INLINE void bj_vec4_sub(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
 /// \param v   The source vec2
 /// \param s   The factor value
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_scale(bj_vec4 res, const bj_vec4 v, bj_real s) {
+static inline void bj_vec4_scale(bj_vec4 res, const bj_vec4 v, bj_real s) {
     res[0] = v[0] * s;
     res[1] = v[1] * s;
     res[2] = v[2] * s;
@@ -526,7 +518,7 @@ BJ_INLINE void bj_vec4_scale(bj_vec4 res, const bj_vec4 v, bj_real s) {
 /// \param b   The second vec4
 /// \return    The resulting dot product
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE bj_real bj_vec4_dot(const bj_vec4 a, const bj_vec4 b) {
+static inline bj_real bj_vec4_dot(const bj_vec4 a, const bj_vec4 b) {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
 }
 
@@ -536,8 +528,8 @@ BJ_INLINE bj_real bj_vec4_dot(const bj_vec4 a, const bj_vec4 b) {
 /// \param v   The vec4
 /// \return    The length
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE bj_real bj_vec4_len(const bj_vec4 v) {
-    return real_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
+static inline bj_real bj_vec4_len(const bj_vec4 v) {
+    return bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -546,8 +538,8 @@ BJ_INLINE bj_real bj_vec4_len(const bj_vec4 v) {
 /// \param res   The resulting vec4
 /// \param v     The vec4
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_normalize(bj_vec4 res, const bj_vec4 v) {
-    bj_real inv_len = 1.0f / real_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
+static inline void bj_vec4_normalize(bj_vec4 res, const bj_vec4 v) {
+    bj_real inv_len = 1.0f / bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
     res[0] = v[0] * inv_len;
     res[1] = v[1] * inv_len;
     res[2] = v[2] * inv_len;
@@ -561,7 +553,7 @@ BJ_INLINE void bj_vec4_normalize(bj_vec4 res, const bj_vec4 v) {
 /// \param a The first input vector.
 /// \param b The second input vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_min(bj_vec4 res, const bj_vec4 a, const bj_vec4 b) {
+static inline void bj_vec4_min(bj_vec4 res, const bj_vec4 a, const bj_vec4 b) {
     res[0] = a[0] < b[0] ? a[0] : b[0];
     res[1] = a[1] < b[1] ? a[1] : b[1];
     res[2] = a[2] < b[2] ? a[2] : b[2];
@@ -575,7 +567,7 @@ BJ_INLINE void bj_vec4_min(bj_vec4 res, const bj_vec4 a, const bj_vec4 b) {
 /// \param a The first input vector.
 /// \param b The second input vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_max(bj_vec4 res, const bj_vec4 a, const bj_vec4 b) {
+static inline void bj_vec4_max(bj_vec4 res, const bj_vec4 a, const bj_vec4 b) {
     res[0] = a[0] > b[0] ? a[0] : b[0];
     res[1] = a[1] > b[1] ? a[1] : b[1];
     res[2] = a[2] > b[2] ? a[2] : b[2];
@@ -588,7 +580,7 @@ BJ_INLINE void bj_vec4_max(bj_vec4 res, const bj_vec4 a, const bj_vec4 b) {
 /// \param res The destination vector.
 /// \param src The source vector to copy.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_copy(bj_vec4 res, const bj_vec4 src) {
+static inline void bj_vec4_copy(bj_vec4 res, const bj_vec4 src) {
     res[0] = src[0];
     res[1] = src[1];
     res[2] = src[2];
@@ -605,7 +597,7 @@ BJ_INLINE void bj_vec4_copy(bj_vec4 res, const bj_vec4 src) {
 /// \param l The left-hand input vector.
 /// \param r The right-hand input vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_cross(bj_vec4 res, const bj_vec4 l, const bj_vec4 r)
+static inline void bj_vec4_cross(bj_vec4 res, const bj_vec4 l, const bj_vec4 r)
 {
     res[0] = l[1] * r[2] - l[2] * r[1];
     res[1] = l[2] * r[0] - l[0] * r[2];
@@ -623,7 +615,7 @@ BJ_INLINE void bj_vec4_cross(bj_vec4 res, const bj_vec4 l, const bj_vec4 r)
 /// \param v The incident vector.
 /// \param n The normal vector (should be normalized).
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_vec4_reflect(bj_vec4 res, const bj_vec4 v, const bj_vec4 n)
+static inline void bj_vec4_reflect(bj_vec4 res, const bj_vec4 v, const bj_vec4 n)
 {
     bj_real p = 2.f * bj_vec4_dot(v, n);
     for (int i = 0; i < 4; ++i) {
@@ -638,7 +630,7 @@ BJ_INLINE void bj_vec4_reflect(bj_vec4 res, const bj_vec4 v, const bj_vec4 n)
 ///
 /// \param mat The matrix to be initialized as the identity matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_identity(bj_mat4 mat)
+static inline void bj_mat4_identity(bj_mat4 mat)
 {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
@@ -655,7 +647,7 @@ BJ_INLINE void bj_mat4_identity(bj_mat4 mat)
 /// \param to The destination matrix.
 /// \param from The source matrix to copy from.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_copy(bj_mat4 to, const bj_mat4 from)
+static inline void bj_mat4_copy(bj_mat4 to, const bj_mat4 from)
 {
     for (int i = 0; i < 4; ++i) {
         bj_vec4_copy(to[i], from[i]);
@@ -671,7 +663,7 @@ BJ_INLINE void bj_mat4_copy(bj_mat4 to, const bj_mat4 from)
 /// \param mat The matrix from which to extract the row.
 /// \param r The row index (0-based) to extract.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_row(bj_vec4 res, const bj_mat4 mat, int r)
+static inline void bj_mat4_row(bj_vec4 res, const bj_mat4 mat, int r)
 {
     for (int k = 0; k < 4; ++k) {
         res[k] = mat[k][r];
@@ -687,7 +679,7 @@ BJ_INLINE void bj_mat4_row(bj_vec4 res, const bj_mat4 mat, int r)
 /// \param mat The matrix from which to extract the column.
 /// \param c The column index (0-based) to extract.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_col(bj_vec4 res, const bj_mat4 mat, int c)
+static inline void bj_mat4_col(bj_vec4 res, const bj_mat4 mat, int c)
 {
     for (int k = 0; k < 4; ++k) {
         res[k] = mat[c][k];
@@ -703,7 +695,7 @@ BJ_INLINE void bj_mat4_col(bj_vec4 res, const bj_mat4 mat, int c)
 /// \param res The transposed matrix.
 /// \param mat The matrix to transpose.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_transpose(bj_mat4 res, const bj_mat4 mat)
+static inline void bj_mat4_transpose(bj_mat4 res, const bj_mat4 mat)
 {
     for (int j = 0; j < 4; ++j) {
         for (int i = 0; i < 4; ++i) {
@@ -721,7 +713,7 @@ BJ_INLINE void bj_mat4_transpose(bj_mat4 res, const bj_mat4 mat)
 /// \param lhs The left-hand matrix to add.
 /// \param rhs The right-hand matrix to add.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_add(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
+static inline void bj_mat4_add(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
 {
     for (int i = 0; i < 4; ++i) {
         bj_vec4_add(res[i], lhs[i], rhs[i]);
@@ -737,7 +729,7 @@ BJ_INLINE void bj_mat4_add(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
 /// \param lhs The matrix to subtract from.
 /// \param rhs The matrix to subtract.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_sub(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
+static inline void bj_mat4_sub(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
 {
     for (int i = 0; i < 4; ++i) {
         bj_vec4_sub(res[i], lhs[i], rhs[i]);
@@ -753,7 +745,7 @@ BJ_INLINE void bj_mat4_sub(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
 /// \param lhs The matrix to scale.
 /// \param k The scalar by which to scale the matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_scale(bj_mat4 res, const bj_mat4 lhs, bj_real k)
+static inline void bj_mat4_scale(bj_mat4 res, const bj_mat4 lhs, bj_real k)
 {
     for (int i = 0; i < 4; ++i) {
         bj_vec4_scale(res[i], lhs[i], k);
@@ -772,7 +764,7 @@ BJ_INLINE void bj_mat4_scale(bj_mat4 res, const bj_mat4 lhs, bj_real k)
 /// \param y The scaling factor for the Y component.
 /// \param z The scaling factor for the Z component.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_scale_xyz(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_real y, bj_real z)
+static inline void bj_mat4_scale_xyz(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_real y, bj_real z)
 {
     bj_vec4_scale(res[0], mat[0], x);
     bj_vec4_scale(res[1], mat[1], y);
@@ -789,7 +781,7 @@ BJ_INLINE void bj_mat4_scale_xyz(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_r
 /// \param lhs The left-hand matrix.
 /// \param rhs The right-hand matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_mul(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
+static inline void bj_mat4_mul(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
 {
     bj_mat4 temp;
     for (int c = 0; c < 4; ++c) {
@@ -811,7 +803,7 @@ BJ_INLINE void bj_mat4_mul(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
 /// \param mat The matrix to multiply.
 /// \param v The vector to multiply.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_mul_vec4(bj_vec4 res, const bj_mat4 mat, const bj_vec4 v)
+static inline void bj_mat4_mul_vec4(bj_vec4 res, const bj_mat4 mat, const bj_vec4 v)
 {
     for (int j = 0; j < 4; ++j) {
         res[j] = 0.f;
@@ -831,7 +823,7 @@ BJ_INLINE void bj_mat4_mul_vec4(bj_vec4 res, const bj_mat4 mat, const bj_vec4 v)
 /// \param y The translation distance along the Y axis.
 /// \param z The translation distance along the Z axis.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_translation(bj_mat4 res, bj_real x, bj_real y, bj_real z)
+static inline void bj_mat4_translation(bj_mat4 res, bj_real x, bj_real y, bj_real z)
 {
     bj_mat4_identity(res);
     res[3][0] = x;
@@ -850,7 +842,7 @@ BJ_INLINE void bj_mat4_translation(bj_mat4 res, bj_real x, bj_real y, bj_real z)
 /// \param y The translation distance along the Y axis.
 /// \param z The translation distance along the Z axis.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_translation_inplace(bj_mat4 M, bj_real x, bj_real y, bj_real z)
+static inline void bj_mat4_translation_inplace(bj_mat4 M, bj_real x, bj_real y, bj_real z)
 {
     bj_vec4 t = { x, y, z, 0 };
     bj_vec4 r;
@@ -870,7 +862,7 @@ BJ_INLINE void bj_mat4_translation_inplace(bj_mat4 M, bj_real x, bj_real y, bj_r
 /// \param a The first 3D vector.
 /// \param b The second 3D vector.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_mul_outer(bj_mat4 res, const bj_vec3 a, const bj_vec3 b)
+static inline void bj_mat4_mul_outer(bj_mat4 res, const bj_vec3 a, const bj_vec3 b)
 {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
@@ -892,10 +884,10 @@ BJ_INLINE void bj_mat4_mul_outer(bj_mat4 res, const bj_vec3 a, const bj_vec3 b)
 /// \param z The Z component of the axis of rotation.
 /// \param angle The angle to rotate by (in radians).
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_rotate(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_real y, bj_real z, bj_real angle)
+static inline void bj_mat4_rotate(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_real y, bj_real z, bj_real angle)
 {
-    bj_real s = bj_sinf(angle);
-    bj_real c = bj_cosf(angle);
+    bj_real s = bj_sin(angle);
+    bj_real c = bj_cos(angle);
     bj_vec3 u = { x, y, z };
 
     if (bj_vec3_len(u) > 1e-4) {
@@ -937,10 +929,10 @@ BJ_INLINE void bj_mat4_rotate(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_real
 /// \param mat The matrix to rotate.
 /// \param angle The angle to rotate by (in radians).
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_ma4_rotate_x(bj_mat4 res, const bj_mat4 mat, bj_real angle)
+static inline void bj_ma4_rotate_x(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
-    bj_real s = bj_sinf(angle);
-    bj_real c = bj_cosf(angle);
+    bj_real s = bj_sin(angle);
+    bj_real c = bj_cos(angle);
     bj_mat4 R = {
         {1.f, 0.f, 0.f, 0.f},
         {0.f,   c,   s, 0.f},
@@ -960,10 +952,10 @@ BJ_INLINE void bj_ma4_rotate_x(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 /// \param mat The matrix to rotate.
 /// \param angle The angle to rotate by (in radians).
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_ma4_rotate_y(bj_mat4 res, const bj_mat4 mat, bj_real angle)
+static inline void bj_ma4_rotate_y(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
-    bj_real s = bj_sinf(angle);
-    bj_real c = bj_cosf(angle);
+    bj_real s = bj_sin(angle);
+    bj_real c = bj_cos(angle);
     bj_mat4 R = {
         {   c, 0.f,  -s, 0.f},
         { 0.f, 1.f, 0.f, 0.f},
@@ -983,10 +975,10 @@ BJ_INLINE void bj_ma4_rotate_y(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 /// \param angle The angle (in radians) to rotate the matrix around the Z-axis.
 /// \param res The resulting rotated matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_ma4_rotate_z(bj_mat4 res, const bj_mat4 mat, bj_real angle)
+static inline void bj_ma4_rotate_z(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
-    bj_real s = bj_sinf(angle);
-    bj_real c = bj_cosf(angle);
+    bj_real s = bj_sin(angle);
+    bj_real c = bj_cos(angle);
     bj_mat4 R = {
         {   c,   s, 0.f, 0.f},
         {  -s,   c, 0.f, 0.f},
@@ -1011,7 +1003,7 @@ BJ_INLINE void bj_ma4_rotate_z(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 /// \param s A scaling factor for the rotation angle.
 /// \param R The resulting rotation matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4 R, const bj_mat4 M, bj_vec2 const _a, bj_vec2 const _b, bj_real s)
+static inline void bj_mat4_rotate_arcball(bj_mat4 R, const bj_mat4 M, bj_vec2 const _a, bj_vec2 const _b, bj_real s)
 {
     bj_vec2 a = { _a[0], _a[1] };
     bj_vec2 b = { _b[0], _b[1] };;
@@ -1020,14 +1012,14 @@ BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4 R, const bj_mat4 M, bj_vec2 const 
     bj_real z_b = 0.;
 
     if (bj_vec2_len(a) < 1.) {
-        z_a = real_sqrt(1.f - bj_vec2_dot(a, a));
+        z_a = bj_sqrt(1.f - bj_vec2_dot(a, a));
     }
     else {
         bj_vec2_normalize(a, a);
     }
 
     if (bj_vec2_len(b) < 1.) {
-        z_b = real_sqrt(1.f - bj_vec2_dot(b, b));
+        z_b = bj_sqrt(1.f - bj_vec2_dot(b, b));
     }
     else {
         bj_vec2_normalize(b, b);
@@ -1039,7 +1031,7 @@ BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4 R, const bj_mat4 M, bj_vec2 const 
     bj_vec3 c_;
     bj_vec3_cross(c_, a_, b_);
 
-    bj_real const angle = real_acos(bj_vec3_dot(a_, b_)) * s;
+    bj_real const angle = bj_acos(bj_vec3_dot(a_, b_)) * s;
     bj_mat4_rotate(R, M, c_[0], c_[1], c_[2], angle);
 }
 
@@ -1052,7 +1044,7 @@ BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4 R, const bj_mat4 M, bj_vec2 const 
 /// \param mat The matrix to invert.
 /// \param res The resulting inverted matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_inverse(bj_mat4 res, const bj_mat4 mat) {
+static inline void bj_mat4_inverse(bj_mat4 res, const bj_mat4 mat) {
     bj_real s[6];
     bj_real c[6];
     s[0] = mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1];
@@ -1101,7 +1093,7 @@ BJ_INLINE void bj_mat4_inverse(bj_mat4 res, const bj_mat4 mat) {
 /// \param mat The 4x4 matrix to orthonormalize.
 /// \param res The resulting orthonormalized 4x4 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_orthonormalize(bj_mat4 res, const bj_mat4 mat) {
+static inline void bj_mat4_orthonormalize(bj_mat4 res, const bj_mat4 mat) {
     bj_mat4_copy(res, mat);
     bj_real s = 1.f;
     bj_vec3 h;
@@ -1137,7 +1129,7 @@ BJ_INLINE void bj_mat4_orthonormalize(bj_mat4 res, const bj_mat4 mat) {
 /// \param f The far plane of the frustum.
 /// \param fmat The resulting perspective projection matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_frustum(bj_mat4 fmat, bj_real l, bj_real r, bj_real b, bj_real t, bj_real n, bj_real f) {
+static inline void bj_mat4_frustum(bj_mat4 fmat, bj_real l, bj_real r, bj_real b, bj_real t, bj_real n, bj_real f) {
     fmat[0][0] = 2.f * n / (r - l);
     fmat[0][1] = fmat[0][2] = fmat[0][3] = 0.f;
     fmat[1][1] = 2.f * n / (t - b);
@@ -1164,7 +1156,7 @@ BJ_INLINE void bj_mat4_frustum(bj_mat4 fmat, bj_real l, bj_real r, bj_real b, bj
 /// \param f The far plane of the orthographic projection.
 /// \param omat The resulting orthographic projection matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_ortho(bj_mat4 omat, bj_real l, bj_real r, bj_real b, bj_real t, bj_real n, bj_real f) {
+static inline void bj_mat4_ortho(bj_mat4 omat, bj_real l, bj_real r, bj_real b, bj_real t, bj_real n, bj_real f) {
     omat[0][0] = 2.f / (r - l);
     omat[0][1] = omat[0][2] = omat[0][3] = 0.f;
     omat[1][1] = 2.f / (t - b);
@@ -1189,8 +1181,8 @@ BJ_INLINE void bj_mat4_ortho(bj_mat4 omat, bj_real l, bj_real r, bj_real b, bj_r
 /// \param f The far clipping plane.
 /// \param pmat The resulting perspective projection matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_perspective(bj_mat4 pmat, bj_real y_fov, bj_real aspect, bj_real n, bj_real f) {
-    const bj_real a = 1.f / bj_tanf(y_fov / 2.f);
+static inline void bj_mat4_perspective(bj_mat4 pmat, bj_real y_fov, bj_real aspect, bj_real n, bj_real f) {
+    const bj_real a = 1.f / bj_tan(y_fov / 2.f);
     pmat[0][0] = a / aspect;
     pmat[0][1] = 0.f;
     pmat[0][2] = 0.f;
@@ -1221,7 +1213,7 @@ BJ_INLINE void bj_mat4_perspective(bj_mat4 pmat, bj_real y_fov, bj_real aspect, 
 /// \param up The up vector of the camera.
 /// \param m The resulting look-at matrix.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_lookat(bj_mat4 m, const bj_vec3 eye, const bj_vec3 center, const bj_vec3 up) {
+static inline void bj_mat4_lookat(bj_mat4 m, const bj_vec3 eye, const bj_vec3 center, const bj_vec3 up) {
     bj_vec3 f;
     bj_vec3_sub(f, center, eye);
     bj_vec3_normalize(f, f);
@@ -1283,7 +1275,7 @@ BJ_INLINE void bj_mat4_lookat(bj_mat4 m, const bj_vec3 eye, const bj_vec3 center
 ///
 /// \param q The quaternion to set as the identity.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_quat_identity(bj_quat q)
+static inline void bj_quat_identity(bj_quat q)
 {
     q[0] = q[1] = q[2] = 0.f;
     q[3] = 1.f;
@@ -1299,7 +1291,7 @@ BJ_INLINE void bj_quat_identity(bj_quat q)
 /// \param p The first quaternion.
 /// \param q The second quaternion.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q)
+static inline void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q)
 {
     bj_vec3 w, tmp;
 
@@ -1323,7 +1315,7 @@ BJ_INLINE void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q)
 /// \param res The resulting conjugated quaternion.
 /// \param q The quaternion to conjugate.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_quat_conjugate(bj_quat res, const bj_quat q)
+static inline void bj_quat_conjugate(bj_quat res, const bj_quat q)
 {
     for (int i = 0; i < 3; ++i) {
         res[i] = -q[i];
@@ -1341,11 +1333,11 @@ BJ_INLINE void bj_quat_conjugate(bj_quat res, const bj_quat q)
 /// \param angle The angle (in radians) of rotation.
 /// \param axis The axis around which the rotation occurs.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 axis) {
+static inline void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 axis) {
     bj_vec3 axis_norm;
     bj_vec3_normalize(axis_norm, axis);
-    const bj_real s = bj_sinf(angle / 2);
-    const bj_real c = bj_cosf(angle / 2);
+    const bj_real s = bj_sin(angle / 2);
+    const bj_real c = bj_cos(angle / 2);
     bj_vec3_scale(res, axis_norm, s);
     res[3] = c;
 }
@@ -1360,7 +1352,7 @@ BJ_INLINE void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 axis) 
 /// \param q The quaternion representing the rotation.
 /// \param v The 3D vector to rotate.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 v) {
+static inline void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 v) {
     bj_vec3 t;
     bj_vec3 q_xyz = { q[0], q[1], q[2] };
     bj_vec3 u = { q[0], q[1], q[2] };
@@ -1383,7 +1375,7 @@ BJ_INLINE void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 v) {
 /// \param res The resulting 4x4 rotation matrix.
 /// \param q The quaternion to convert.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
+static inline void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
     bj_real a = q[3];
     bj_real b = q[0];
     bj_real c = q[1];
@@ -1422,7 +1414,7 @@ BJ_INLINE void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
 /// \param M The matrix to rotate.
 /// \param q The quaternion representing the rotation.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj_quat q) {
+static inline void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj_quat q) {
     bj_quat_mul_vec3(R[0], q, M[0]);
     bj_quat_mul_vec3(R[1], q, M[1]);
     bj_quat_mul_vec3(R[2], q, M[2]);
@@ -1442,7 +1434,7 @@ BJ_INLINE void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj_qua
 /// \param q The resulting quaternion.
 /// \param M The 4x4 rotation matrix to convert.
 ////////////////////////////////////////////////////////////////////////////////
-BJ_INLINE void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
+static inline void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     bj_real r = 0.f;
     int i, j, k;
 
@@ -1461,7 +1453,7 @@ BJ_INLINE void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     j = p[1];
     k = p[2];
 
-    r = real_sqrt(1.f + M[i][i] - M[j][j] - M[k][k]);
+    r = bj_sqrt(1.f + M[i][i] - M[j][j] - M[k][k]);
 
     if (r < 1e-6f) {
         q[0] = 0.f;
