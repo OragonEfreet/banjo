@@ -8,7 +8,8 @@
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_SYSTEM_H
+#define BJ_SYSTEM_H
 
 #include <banjo/api.h>
 #include <banjo/error.h>
@@ -128,4 +129,5 @@ BANJO_EXPORT void* bj_get_symbol(
     const char* p_name
 );
 
+#endif
 /// \} // End of system group

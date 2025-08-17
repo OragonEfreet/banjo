@@ -23,7 +23,8 @@
 /// \snippet handling_errors.c Return Errors
 ///
 /// \{
-#pragma once
+#ifndef BJ_ERROR_H
+#define BJ_ERROR_H
 
 #include <banjo/api.h>
 #include <banjo/memory.h>
@@ -201,4 +202,5 @@ BANJO_EXPORT void bj_clear_error(
     bj_error** p_error
 );
 
+#endif
 /// \} // End of error Error Management

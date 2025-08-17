@@ -11,7 +11,12 @@
 /// Utilities (clamp/step/smoothstep/fract/mod) exist **only** as bj_real.
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#ifndef BJ_MATH_H
+#define BJ_MATH_H
+
+#include <banjo/api.h>
+
+#define _USE_MATH_DEFINES 
 #include <math.h>
 
 /*-------------------------- Precision & literals ---------------------------*/
@@ -128,3 +133,5 @@ static inline bj_real bj_fract(bj_real x) {
 static inline bj_real bj_mod(bj_real x, bj_real y) {
     return x - y * bj_floor(x / y);
 }
+
+#endif

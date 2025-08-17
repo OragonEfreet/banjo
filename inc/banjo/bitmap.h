@@ -8,7 +8,8 @@
 /// \brief Matrix of pixels
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_BITMAP_H
+#define BJ_BITMAP_H
 #include <banjo/api.h>
 #include <banjo/error.h>
 #include <banjo/pixel.h>
@@ -751,4 +752,5 @@ BANJO_EXPORT void bj_bitmap_blit_text(
     const char*     text
 );
 
+#endif
 /// \} // End of bitmap group

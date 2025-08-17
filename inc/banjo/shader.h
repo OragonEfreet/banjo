@@ -23,7 +23,8 @@
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#ifndef BJ_SHADER_H
+#define BJ_SHADER_H
 
 #include <banjo/api.h>
 #include <banjo/bitmap.h>
@@ -164,4 +165,5 @@ BANJO_EXPORT void bj_bitmap_apply_shader(
     uint8_t                flags
 );
 
+#endif
 /// \} // End of bitmap group

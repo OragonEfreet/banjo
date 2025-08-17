@@ -13,7 +13,8 @@
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_AUDIO_H
+#define BJ_AUDIO_H
 
 #include <banjo/error.h>
 #include <banjo/api.h>
@@ -305,4 +306,5 @@ typedef struct {
     bj_audio_layer* (*create)(bj_error**);     ///< Factory function to instantiate the backend.
 } bj_audio_layer_create_info;
 
+#endif
 /// \} // end of audio group

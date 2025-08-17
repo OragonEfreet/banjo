@@ -12,7 +12,8 @@
 ///        The storage of the array is expanded as needed.
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_ARRAY_H
+#define BJ_ARRAY_H
 
 #include <banjo/api.h>
 
@@ -213,4 +214,5 @@ BANJO_EXPORT size_t bj_array_capacity(
     const bj_array* array
 );
 
+#endif
 /// \} // End of array group

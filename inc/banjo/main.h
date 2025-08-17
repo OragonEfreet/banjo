@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BJ_MAIN_H
+#define BJ_MAIN_H
 
 #include <banjo/api.h>
 
@@ -122,4 +123,5 @@ extern int bj_call_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t, bj_
 #   endif
 #endif
 
+#endif
 

@@ -17,7 +17,8 @@
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_LINMATH_H
+#define BJ_LINMATH_H
 
 #include <banjo/api.h>
 #include <banjo/math.h>
@@ -1470,5 +1471,7 @@ static inline void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     q[k] = (M[k][i] + M[i][k]) * inv;
     q[3] = (M[k][j] - M[j][k]) * inv;
 }
+#endif
+
 /// \}
 

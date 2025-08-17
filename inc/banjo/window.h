@@ -7,7 +7,8 @@
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#ifndef BJ_WINDOW_H
+#define BJ_WINDOW_H
 
 #include <banjo/api.h>
 #include <banjo/bitmap.h>
@@ -199,4 +200,5 @@ BANJO_EXPORT void bj_window_update_framebuffer(
     bj_window* p_window
 );
 
+#endif
 /// \} // End of window group

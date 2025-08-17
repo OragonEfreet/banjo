@@ -7,7 +7,8 @@
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_MEMORY_H
+#define BJ_MEMORY_H
 
 #include <banjo/api.h>
 
@@ -216,4 +217,5 @@ BANJO_EXPORT void bj_memzero(
     size_t mem_size
 );
 
+#endif
 /// \} // End of memory group
