@@ -22,7 +22,6 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     }
 
-    /* choose a waveform your DSP supports */
     data.function = BJ_AUDIO_PLAY_SINE;
 
     p_device = bj_open_audio_device(&(bj_audio_properties){

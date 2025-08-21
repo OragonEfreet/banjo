@@ -46,7 +46,7 @@ static inline void buffer_set_pixel_bits(
     bj_memcpy((uint8_t*)buffer + byte_offset, &window, span_bytes);
 }
 
-/* ---------- Canonical RGB (8:8:8) converters via your bj_pixel_* ---------- */
+/* ---------- Canonical RGB (8:8:8) converters via bj_pixel_* ---------- */
 
 static inline void unpack_rgb_from_native(bj_pixel_mode mode, uint32_t native, uint8_t* r, uint8_t* g, uint8_t* b) {
     bj_pixel_rgb(mode, native, r, g, b);
@@ -353,7 +353,7 @@ static bj_bool do_blit_dispatch(
     return BJ_TRUE;
 }
 
-/* ---------- Public: clipped blit (no scaling) using your existing clipper ---------- */
+/* ---------- Public: clipped blit (no scaling) using existing clipper ---------- */
 
 bj_bool bj_bitmap_blit(
     const bj_bitmap* p_src, const bj_rect* p_src_area,
@@ -362,7 +362,7 @@ bj_bool bj_bitmap_blit(
 {
     bj_check_or_0(p_src && p_dst);
 
-    /* Build default rects & clip like your current bj_bitmap_blit */
+    /* Build default rects & clip like current bj_bitmap_blit */
     bj_rect src_rect = {0,0,(uint16_t)p_src->width,(uint16_t)p_src->height};
     bj_rect dst_rect = {0,0,0,0};
 
@@ -413,7 +413,6 @@ bj_bool bj_bitmap_blit_stretched(
     if (dst_area) d.x = dst_area->x, d.y = dst_area->y, d.w = dst_area->w, d.h = dst_area->h;
     if (!s.w || !s.h || !d.w || !d.h) return BJ_FALSE;
 
-    /* Clip to bounds, like your existing function */
     bj_rect sbounds = (bj_rect){0,0,(uint16_t)src->width,(uint16_t)src->height};
     bj_rect dbounds = (bj_rect){0,0,(uint16_t)dst->width,(uint16_t)dst->height};
     if (bj_rect_intersect(&s, &sbounds, &s) == 0) return BJ_FALSE;

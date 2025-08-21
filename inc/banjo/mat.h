@@ -1,21 +1,14 @@
 ////////////////////////////////////////////////////////////////////////////////
+/// Matrix utilities for 2D and 3D transforms using \c bj_real and \c bj_vec*.
+///
 /// \file mat.h
-/// Linear matrix library.
-////////////////////////////////////////////////////////////////////////////////
-/// \addtogroup math Math
+/// Column-major storage: elements are addressed as \c m[col][row].
+/// Vectors are treated as column vectors and are multiplied on the right: \c res = M * v.
 ///
-/// \brief Linear math function
+/// Provides creation, copy, transpose, arithmetic, products, inversion,
+/// orthonormalization, and common projection/viewport helpers for 3×3, 3×2, 4×4, 4×3.
 ///
-/// The Math group provides usual facilities for linear math, including
-/// - 3x3 matrix with \ref bj_mat3
-/// - 3x2 matrix with \ref bj_mat3x2
-/// - 4x4 matrix with \ref bj_mat4
-/// - 4x3 matrix with \ref bj_mat4x3
-///
-/// This library is initially a direct adaptation of 
-/// [linmath.h](https://github.com/datenwolf/linmath.h) 
-/// by Wolfgang Draxinger, but since I added some new types.
-///
+/// \addtogroup math
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_MAT_H
@@ -26,55 +19,32 @@
 #include <banjo/vec.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Defines a 3x3 matrix type.
-///
-/// This type represents a 3x3 matrix, where each column is a `bj_vec3` vector.
-/// It is commonly used for transformations such as rotations, scaling, and translations.
-///
-/// \note The matrix is represented as an array of four `bj_vec3` values.
-/// \see bj_vec3
+/// bj_mat3: 3×3 column-major matrix backed by bj_vec3.
+/// Columns are arrays of 3 components.
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_vec3 bj_mat3[3];
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Defines a 3x2 matrix type.
-///
-/// This type represents a 3x2 matrix, where each column is a `bj_vec2` vector.
-/// It is commonly used for transformations such as rotations, scaling, and translations.
-///
-/// \note The matrix is represented as an array of 3 `bj_vec2` values.
-/// \see bj_vec2
+/// bj_mat3x2: 3×2 column-major matrix backed by bj_vec2. (2D affine: 2×2 linear block plus translation column).
+/// Columns are arrays of 2 components.
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_vec2 bj_mat3x2[3];
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Defines a 4x4 matrix type.
-///
-/// This type represents a 4x4 matrix, where each column is a `bj_vec4` vector.
-/// It is commonly used for transformations such as rotations, scaling, and translations.
-///
-/// \note The matrix is represented as an array of four `bj_vec4` values.
-/// \see bj_vec4
+/// bj_mat4: 4×4 column-major matrix backed by bj_vec4.
+/// Columns are arrays of 4 components.
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_vec4 bj_mat4[4];
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Defines a 4x3 matrix type.
-///
-/// This type represents a 4x3 matrix, where each column is a `bj_vec3` vector.
-/// It is commonly used for transformations such as rotations, scaling, and translations.
-///
-/// \note The matrix is represented as an array of 4 `bj_vec3` values.
-/// \see bj_vec3
+/// bj_mat4x3: 4×3 column-major matrix backed by bj_vec3. (3D affine: 3×3 linear block plus translation row).
+/// Columns are arrays of 3 components.
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_vec3 bj_mat4x3[4];
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Initializes a 3x3 matrix to the identity matrix.
-///
-/// Sets all diagonal elements to 1 and off-diagonal to 0.
-///
-/// \param m The matrix to initialize.
+/// Set to identity matrix.
+/// \param m Output buffer.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_identity(bj_mat3 m) {
     for (int i = 0; i < 3; ++i)
@@ -83,10 +53,9 @@ static inline void bj_mat3_identity(bj_mat3 m) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Copies a 3x3 matrix.
-///
-/// \param to   Destination matrix.
-/// \param from Source matrix.
+/// Copy matrix contents.
+/// \param to Output matrix.
+/// \param from Input matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_copy(bj_mat3 to, const bj_mat3 from) {
     for (int i = 0; i < 3; ++i) {
@@ -97,34 +66,29 @@ static inline void bj_mat3_copy(bj_mat3 to, const bj_mat3 from) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Extracts a row from a 3x3 matrix.
-///
-/// Column-major convention: row r contains elements m[0..2][r].
-///
-/// \param res Output row (vec3).
-/// \param m   Source matrix.
-/// \param r   Row index in [0,2].
+/// Extract a row as a vector (row index into second subscript).
+/// \param res Output matrix.
+/// \param m Output buffer.
+/// \param r Right plane.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_row(bj_vec3 res, const bj_mat3 m, int r) {
     for (int k = 0; k < 3; ++k) res[k] = m[k][r];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Extracts a column from a 3x3 matrix.
-///
-/// \param res Output column (vec3).
-/// \param m   Source matrix.
-/// \param c   Column index in [0,2].
+/// Extract a column as a vector (column index into first subscript).
+/// \param res Output matrix.
+/// \param m Output buffer.
+/// \param c Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_col(bj_vec3 res, const bj_mat3 m, int c) {
     for (int k = 0; k < 3; ++k) res[k] = m[c][k];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Transposes a 3x3 matrix.
-///
-/// \param res Output transposed matrix.
-/// \param m   Input matrix.
+/// Transpose the matrix.
+/// \param res Output matrix.
+/// \param m Output buffer.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_transpose(bj_mat3 res, const bj_mat3 m) {
     for (int j = 0; j < 3; ++j)
@@ -133,11 +97,10 @@ static inline void bj_mat3_transpose(bj_mat3 res, const bj_mat3 m) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Element-wise addition of two 3x3 matrices.
-///
-/// \param res Output matrix (a + b).
-/// \param a   Left operand.
-/// \param b   Right operand.
+/// Component-wise addition: res = a + b.
+/// \param res Output matrix.
+/// \param a Parameter.
+/// \param b Bottom plane.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_add(bj_mat3 res, const bj_mat3 a, const bj_mat3 b) {
     for (int i = 0; i < 3; ++i) {
@@ -148,11 +111,10 @@ static inline void bj_mat3_add(bj_mat3 res, const bj_mat3 a, const bj_mat3 b) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Element-wise subtraction of two 3x3 matrices.
-///
-/// \param res Output matrix (a - b).
-/// \param a   Left operand.
-/// \param b   Right operand.
+/// Component-wise subtraction: res = a - b.
+/// \param res Output matrix.
+/// \param a Parameter.
+/// \param b Bottom plane.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_sub(bj_mat3 res, const bj_mat3 a, const bj_mat3 b) {
     for (int i = 0; i < 3; ++i) {
@@ -163,11 +125,10 @@ static inline void bj_mat3_sub(bj_mat3 res, const bj_mat3 a, const bj_mat3 b) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Scales a 3x3 matrix by a scalar (element-wise).
-///
+/// Uniformly scale all elements by scalar k.
 /// \param res Output matrix.
-/// \param m   Input matrix.
-/// \param k   Scalar multiplier.
+/// \param m Output buffer.
+/// \param k Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_scale(bj_mat3 res, const bj_mat3 m, bj_real k) {
     for (int i = 0; i < 3; ++i) {
@@ -178,13 +139,11 @@ static inline void bj_mat3_scale(bj_mat3 res, const bj_mat3 m, bj_real k) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Multiplies two 3x3 matrices (res = lhs * rhs).
-///
-/// Column-major, column-vector convention (matches bj_mat4_mul).
-///
-/// \param res Output product.
-/// \param lhs Left operand.
-/// \param rhs Right operand.
+/// Matrix multiplication: res = lhs * rhs (column-major).
+/// \param 3][3] Parameter.
+/// \param 3][3] Parameter.
+/// \param 3][3] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_mul(
     bj_real       res[restrict 3][3],
@@ -232,11 +191,11 @@ static inline void bj_mat3_mul(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Multiplies a 3x3 matrix by a 3D vector.
-///
-/// \param res Output vector (m * v).
-/// \param m   Matrix.
-/// \param v   Vector.
+/// Multiply 3×3 matrix by a 3D column vector: res = M * v.
+/// \param 3] Parameter.
+/// \param 3][3] Parameter.
+/// \param 3] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_mul_vec3(
     bj_real       res[restrict 3],
@@ -258,14 +217,12 @@ static inline void bj_mat3_mul_vec3(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Transforms a 2D point by a 3x3 homogeneous matrix.
-///
-/// Uses (x,y,1) and performs homogeneous divide. If w==0, returns the
-/// un-divided x,y.
-///
-/// \param res Output point (2D).
-/// \param m   Matrix.
-/// \param p   Input point (2D).
+/// Transform a point (homogeneous w=1 for 2D/3D variants).
+/// \param res Output matrix.
+/// \param m Output buffer.
+/// \param p Input vector.
+/// \note Column-major convention: \c res = lhs * rhs.
+/// \note Uses homogeneous coordinates with w=1.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_mul_point(bj_vec2 res, const bj_mat3 m, const bj_vec2 p) {
     bj_vec3 v = { p[0], p[1], BJ_F(1.0) };
@@ -277,13 +234,11 @@ static inline void bj_mat3_mul_point(bj_vec2 res, const bj_mat3 m, const bj_vec2
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Transforms a 2D direction by a 3x3 homogeneous matrix.
-///
-/// Uses (x,y,0), which ignores translation.
-///
-/// \param res Output direction (2D).
-/// \param m   Matrix.
-/// \param v2  Input direction (2D).
+/// Matrix operation.
+/// \param res Output matrix.
+/// \param m Output buffer.
+/// \param v2 Input vector.
+/// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_mul_vector2(bj_vec2 res, const bj_mat3 m, const bj_vec2 v2) {
     bj_vec3 v = { v2[0], v2[1], BJ_F(0.0) };
@@ -292,11 +247,10 @@ static inline void bj_mat3_mul_vector2(bj_vec2 res, const bj_mat3 m, const bj_ve
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a 2D translation matrix.
-///
+/// Create a translation matrix.
 /// \param res Output matrix.
-/// \param tx  Translation along X.
-/// \param ty  Translation along Y.
+/// \param tx Translation along X.
+/// \param ty Translation along Y.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_translation(bj_mat3 res, bj_real tx, bj_real ty) {
     bj_mat3_identity(res);
@@ -305,11 +259,8 @@ static inline void bj_mat3_translation(bj_mat3 res, bj_real tx, bj_real ty) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Applies a 2D translation in-place (M ← M * T(tx,ty)).
-///
-/// Column-major: updates the last column using current rows of M.
-///
-/// \param M  Matrix to modify.
+/// Apply a translation to an existing matrix in-place.
+/// \param M Output buffer.
 /// \param tx Translation along X.
 /// \param ty Translation along Y.
 ////////////////////////////////////////////////////////////////////////////////
@@ -323,11 +274,10 @@ static inline void bj_mat3_translation_inplace(bj_mat3 M, bj_real tx, bj_real ty
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a 2D scaling matrix.
-///
+/// Create 2D scaling matrix with independent X/Y scales.
 /// \param res Output matrix.
-/// \param sx  Scale along X.
-/// \param sy  Scale along Y.
+/// \param sx Scale along X.
+/// \param sy Scale along Y.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_scale_xy(bj_mat3 res, bj_real sx, bj_real sy) {
     bj_mat3_identity(res);
@@ -336,13 +286,10 @@ static inline void bj_mat3_scale_xy(bj_mat3 res, bj_real sx, bj_real sy) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a 2D shear matrix.
-///
-/// shy applies y += shy * x, shx applies x += shx * y.
-///
+/// Create 2D shear matrix.
 /// \param res Output matrix.
-/// \param shx Shear factor in X (by Y).
-/// \param shy Shear factor in Y (by X).
+/// \param shx Shear along X (xy).
+/// \param shy Shear along Y (yx).
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_shear(bj_mat3 res, bj_real shx, bj_real shy) {
     bj_mat3_identity(res);
@@ -351,10 +298,10 @@ static inline void bj_mat3_shear(bj_mat3 res, bj_real shx, bj_real shy) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a 2D rotation matrix around the origin (CCW, radians).
-///
-/// \param res   Output matrix.
-/// \param angle Angle in radians (counterclockwise).
+/// Rotate about arbitrary axis (Rodrigues), post-multiplied.
+/// \param res Output matrix.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_rotate(bj_mat3 res, bj_real angle) {
     bj_real s = bj_sin(angle), c = bj_cos(angle);
@@ -367,12 +314,10 @@ static inline void bj_mat3_rotate(bj_mat3 res, bj_real angle) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Inverts a 3x3 matrix.
-///
-/// \warning The matrix must be invertible (determinant != 0).
-///
-/// \param res Output inverse matrix.
-/// \param m   Input matrix.
+/// Invert the matrix.
+/// \param res Output matrix.
+/// \param m Output buffer.
+/// \warning Undefined if the matrix is singular (determinant is zero).
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_inverse(bj_mat3 res, const bj_mat3 m) {
     bj_real a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
@@ -400,22 +345,13 @@ static inline void bj_mat3_inverse(bj_mat3 res, const bj_mat3 m) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Generates a 2D orthographic transform to NDC [-1,1]^2 with Y down
-///
-/// Maps world box [l..r]×[b..t] to NDC such that:
-///   x_ndc =  (2x - r - l) / (r - l)
-///   y_ndc = -(2y - t - b) / (t - b)    // Y down: top -> -1, bottom -> +1
-///
-/// Column-major 3×3:
-/// [  2/(r-l)        0              0 ]
-/// [     0       -2/(t-b)           0 ]
-/// [ -(r+l)/(r-l)  (t+b)/(t-b)      1 ]
-///
-/// \param omat Output 3x3 matrix
-/// \param l    Left   world bound
-/// \param r    Right  world bound
-/// \param b    Bottom world bound
-/// \param t    Top    world bound
+/// Orthographic projection matrix.
+/// \param 3][3] Parameter.
+/// \param l Left plane.
+/// \param r Right plane.
+/// \param b Bottom plane.
+/// \param t Top plane.
+/// \note NDC convention: +Z forward, depth in [0,1], Y-down as implemented.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_ortho(bj_real omat[restrict 3][3],
                                  bj_real l, bj_real r,
@@ -435,22 +371,13 @@ static inline void bj_mat3_ortho(bj_real omat[restrict 3][3],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Builds a 2D viewport transform (NDC -> window pixels; top-left origin)
-///
-/// Vulkan-like mapping with **no Y flip** here:
-///   x_win = x + (x_ndc + 1) * (w/2)
-///   y_win = y + (y_ndc + 1) * (h/2)
-///
-/// Column-major 3×3:
-/// [  w/2    0     0 ]
-/// [   0    h/2    0 ]
-/// [ x+w/2  y+h/2  1 ]
-///
-/// \param vpmat Output 3x3 viewport matrix
-/// \param x     Viewport origin X in pixels
-/// \param y     Viewport origin Y in pixels
-/// \param w     Viewport width  in pixels
-/// \param h     Viewport height in pixels
+/// Viewport transform matrix.
+/// \param 3][3] Parameter.
+/// \param x X value.
+/// \param y Y value.
+/// \param w Parameter.
+/// \param h Parameter.
+/// \note NDC convention: +Z forward, depth in [0,1], Y-down as implemented.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_viewport(bj_real vpmat[restrict 3][3],
                                     bj_real x, bj_real y,
@@ -464,7 +391,8 @@ static inline void bj_mat3_viewport(bj_real vpmat[restrict 3][3],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Sets \p m to the identity 2D affine transform.
+/// Set to identity matrix.
+/// \param 3] Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_identity(bj_vec2 m[restrict 3]) {
     m[0][0]=BJ_F(1.0); m[0][1]=BJ_F(0.0); // col 0: [1,0]
@@ -473,7 +401,10 @@ static inline void bj_mat3x2_identity(bj_vec2 m[restrict 3]) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Sets \p m to a pure 2D translation by (tx, ty).
+/// Matrix operation.
+/// \param 3] Parameter.
+/// \param tx Translation along X.
+/// \param ty Translation along Y.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_translate(bj_vec2 m[restrict 3], bj_real tx, bj_real ty) {
     m[0][0]=BJ_F(1.0); m[0][1]=BJ_F(0.0);
@@ -482,7 +413,10 @@ static inline void bj_mat3x2_translate(bj_vec2 m[restrict 3], bj_real tx, bj_rea
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Sets \p m to a 2D non-uniform scale by (sx, sy).
+/// Uniformly scale all elements by scalar k.
+/// \param 3] Parameter.
+/// \param sx Scale along X.
+/// \param sy Scale along Y.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_scale(bj_vec2 m[restrict 3], bj_real sx, bj_real sy) {
     m[0][0]=sx;        m[0][1]=BJ_F(0.0);
@@ -491,9 +425,10 @@ static inline void bj_mat3x2_scale(bj_vec2 m[restrict 3], bj_real sx, bj_real sy
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Sets \p m to a 2D rotation by \p angle radians (CCW in math coords;
-///        with your Y-down screen it appears clockwise unless combined with an
-///        appropriate projection/viewport).
+/// Rotate about arbitrary axis (Rodrigues), post-multiplied.
+/// \param 3] Parameter.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_rotate(bj_vec2 m[restrict 3], bj_real angle) {
     const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
@@ -503,9 +438,11 @@ static inline void bj_mat3x2_rotate(bj_vec2 m[restrict 3], bj_real angle) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Multiplies two 2D affine transforms (column-major): \p res = \p A * \p B.
-/// \details Column-vector convention: when applied to a point v, B is applied
-///          first, then A (v' = A * (B * v)).
+/// Matrix multiplication: res = lhs * rhs (column-major).
+/// \param 3] Parameter.
+/// \param 3] Parameter.
+/// \param 3] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_mul(bj_vec2 res[restrict 3],
                                  const bj_vec2 A  [restrict 3],
@@ -542,7 +479,12 @@ static inline void bj_mat3x2_mul(bj_vec2 res[restrict 3],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Transforms a 2D point (x,y,1) by an affine 3×2 matrix.
+/// Transform a point (homogeneous w=1 for 2D/3D variants).
+/// \param 2] Parameter.
+/// \param 3] Parameter.
+/// \param 2] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
+/// \note Uses homogeneous coordinates with w=1.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_mul_point(bj_real r[restrict 2],
                                        const bj_vec2 m[restrict 3],
@@ -559,8 +501,12 @@ static inline void bj_mat3x2_mul_point(bj_real r[restrict 2],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Transforms a 2D direction (x,y,0) by an affine 3×2 matrix
-///        (translation ignored).
+/// Transform a direction (homogeneous w=0; ignores translation).
+/// \param 2] Parameter.
+/// \param 3] Parameter.
+/// \param 2] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
+/// \note Uses homogeneous coordinates with w=0 (no translation).
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_mul_dir(bj_real r[restrict 2],
                                      const bj_vec2 m[restrict 3],
@@ -577,8 +523,9 @@ static inline void bj_mat3x2_mul_dir(bj_real r[restrict 2],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Builds a 3×3 homogeneous matrix from a 3×2 affine matrix.
-/// \details Fills the last column with (0,0,1)^T.
+/// Promote 2D affine (3×2) to 3×3 homogeneous.
+/// \param 3][3] Parameter.
+/// \param 3] Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3_from_mat3x2(bj_real out3x3[restrict 3][3],
                                        const bj_vec2 a[restrict 3]) {
@@ -588,8 +535,9 @@ static inline void bj_mat3_from_mat3x2(bj_real out3x3[restrict 3][3],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Extracts a 3×2 affine matrix from a 3×3 homogeneous matrix.
-/// \details Assumes last row is (0,0,1); ignores the last column.
+/// Extract 3×2 affine block from 3×3.
+/// \param 3] Parameter.
+/// \param 3][3] Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_from_mat3(bj_vec2 out3x2[restrict 3],
                                        const bj_real m[restrict 3][3]) {
@@ -599,10 +547,13 @@ static inline void bj_mat3x2_from_mat3(bj_vec2 out3x2[restrict 3],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief 2D orthographic to NDC ([-1,1]×[-1,1]), Y-down.
-/// res = ortho(l,r,b,t). Column-major 3×2:
-///   x' =  2/(r-l) * x  + 0          + -(r+l)/(r-l)
-///   y' =  0          + -2/(t-b) * y +  (t+b)/(t-b)
+/// Orthographic projection matrix.
+/// \param 3] Parameter.
+/// \param l Left plane.
+/// \param r Right plane.
+/// \param b Bottom plane.
+/// \param t Top plane.
+/// \note NDC convention: +Z forward, depth in [0,1], Y-down as implemented.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_ortho(bj_vec2 omat[restrict 3],
                                    bj_real l, bj_real r,
@@ -619,10 +570,13 @@ static inline void bj_mat3x2_ortho(bj_vec2 omat[restrict 3],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief NDC → screen viewport mapping (top-left origin).
-/// res = viewport(x,y,w,h):
-///   x_s = (x_ndc+1)*w/2 + x
-///   y_s = (y_ndc+1)*h/2 + y
+/// Viewport transform matrix.
+/// \param 3] Parameter.
+/// \param x X value.
+/// \param y Y value.
+/// \param w Parameter.
+/// \param h Parameter.
+/// \note NDC convention: +Z forward, depth in [0,1], Y-down as implemented.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat3x2_viewport(bj_vec2 vpmat[restrict 3],
                                       bj_real x, bj_real y,
@@ -640,11 +594,8 @@ static inline void bj_mat3x2_viewport(bj_vec2 vpmat[restrict 3],
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Initializes a 4x4 matrix to the identity matrix.
-///
-/// Sets all diagonal elements of the matrix to 1.0 and all off-diagonal elements to 0.0.
-///
-/// \param mat The matrix to be initialized as the identity matrix.
+/// Set to identity matrix.
+/// \param mat Input matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_identity(bj_mat4 mat)
 {
@@ -656,12 +607,9 @@ static inline void bj_mat4_identity(bj_mat4 mat)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Copies a 4x4 matrix from one to another.
-///
-/// Copies the entire contents of the matrix \a from to the matrix \a to.
-///
-/// \param to The destination matrix.
-/// \param from The source matrix to copy from.
+/// Copy matrix contents.
+/// \param to Output matrix.
+/// \param from Input matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_copy(bj_mat4 to, const bj_mat4 from)
 {
@@ -671,13 +619,10 @@ static inline void bj_mat4_copy(bj_mat4 to, const bj_mat4 from)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Retrieves a specific row from a 4x4 matrix.
-///
-/// Extracts the row at index \a r from matrix \a mat and stores it in \a res.
-///
-/// \param res The resulting row vector.
-/// \param mat The matrix from which to extract the row.
-/// \param r The row index (0-based) to extract.
+/// Extract a row as a vector (row index into second subscript).
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \param r Right plane.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_row(bj_vec4 res, const bj_mat4 mat, int r)
 {
@@ -687,13 +632,10 @@ static inline void bj_mat4_row(bj_vec4 res, const bj_mat4 mat, int r)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Retrieves a specific column from a 4x4 matrix.
-///
-/// Extracts the column at index \a c from matrix \a mat and stores it in \a res.
-///
-/// \param res The resulting column vector.
-/// \param mat The matrix from which to extract the column.
-/// \param c The column index (0-based) to extract.
+/// Extract a column as a vector (column index into first subscript).
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \param c Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_col(bj_vec4 res, const bj_mat4 mat, int c)
 {
@@ -703,13 +645,9 @@ static inline void bj_mat4_col(bj_vec4 res, const bj_mat4 mat, int c)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Transposes a 4x4 matrix.
-///
-/// Computes the transpose of matrix \a mat and stores it in \a res.
-/// The rows of \a mat become the columns of \a res.
-///
-/// \param res The transposed matrix.
-/// \param mat The matrix to transpose.
+/// Transpose the matrix.
+/// \param res Output matrix.
+/// \param mat Input matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_transpose(bj_mat4 res, const bj_mat4 mat)
 {
@@ -721,13 +659,10 @@ static inline void bj_mat4_transpose(bj_mat4 res, const bj_mat4 mat)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Adds two 4x4 matrices.
-///
-/// Computes the element-wise addition of two matrices \a lhs and \a rhs and stores the result in \a res.
-///
-/// \param res The resulting matrix after addition.
-/// \param lhs The left-hand matrix to add.
-/// \param rhs The right-hand matrix to add.
+/// Component-wise addition: res = a + b.
+/// \param res Output matrix.
+/// \param lhs Input matrix.
+/// \param rhs Input matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_add(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
 {
@@ -737,13 +672,10 @@ static inline void bj_mat4_add(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Subtracts one 4x4 matrix from another.
-///
-/// Computes the element-wise subtraction of two matrices \a lhs and \a rhs and stores the result in \a res.
-///
-/// \param res The resulting matrix after subtraction.
-/// \param lhs The matrix to subtract from.
-/// \param rhs The matrix to subtract.
+/// Component-wise subtraction: res = a - b.
+/// \param res Output matrix.
+/// \param lhs Input matrix.
+/// \param rhs Input matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_sub(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
 {
@@ -753,13 +685,10 @@ static inline void bj_mat4_sub(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Scales a 4x4 matrix by a scalar.
-///
-/// Multiplies each element of the matrix \a lhs by the scalar \a k and stores the result in \a res.
-///
-/// \param res The resulting scaled matrix.
-/// \param lhs The matrix to scale.
-/// \param k The scalar by which to scale the matrix.
+/// Uniformly scale all elements by scalar k.
+/// \param res Output matrix.
+/// \param lhs Input matrix.
+/// \param k Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_scale(bj_mat4 res, const bj_mat4 lhs, bj_real k)
 {
@@ -769,16 +698,12 @@ static inline void bj_mat4_scale(bj_mat4 res, const bj_mat4 lhs, bj_real k)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Scales the X, Y, and Z components of a 4x4 matrix.
-///
-/// Scales the X, Y, and Z components of the matrix \a mat by \a x, \a y, and \a z respectively.
-/// The W component is left unchanged and copied directly from \a mat.
-///
-/// \param res The resulting scaled matrix.
-/// \param mat The matrix to scale.
-/// \param x The scaling factor for the X component.
-/// \param y The scaling factor for the Y component.
-/// \param z The scaling factor for the Z component.
+/// Scale each basis vector by given X/Y/Z factors.
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \param x X value.
+/// \param y Y value.
+/// \param z Z value.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_scale_xyz(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_real y, bj_real z)
 {
@@ -789,13 +714,11 @@ static inline void bj_mat4_scale_xyz(bj_mat4 res, const bj_mat4 mat, bj_real x, 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Multiplies two 4x4 matrices.
-///
-/// Computes the matrix product of \a lhs and \a rhs and stores the result in \a res.
-///
-/// \param res The resulting matrix after multiplication.
-/// \param lhs The left-hand matrix.
-/// \param rhs The right-hand matrix.
+/// Matrix multiplication: res = lhs * rhs (column-major).
+/// \param 4][4] Parameter.
+/// \param 4][4] Parameter.
+/// \param 4][4] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_mul(
     bj_real       res[restrict 4][4],
@@ -855,13 +778,11 @@ static inline void bj_mat4_mul(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Multiplies a 4x4 matrix by a 4D vector.
-///
-/// Computes the matrix-vector product of matrix \a mat and vector \a v and stores the result in \a res.
-///
-/// \param res The resulting vector after multiplication.
-/// \param mat The matrix to multiply.
-/// \param v The vector to multiply.
+/// Multiply matrix by a 4D column vector: res = M * v.
+/// \param 4] Parameter.
+/// \param 4][4] Parameter.
+/// \param 4] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_mul_vec4(
     bj_real       res[restrict 4],
@@ -885,14 +806,11 @@ static inline void bj_mat4_mul_vec4(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a 4x4 translation matrix.
-///
-/// Creates a translation matrix that translates a point by \a x, \a y, and \a z in 3D space.
-///
-/// \param res The resulting translation matrix.
-/// \param x The translation distance along the X axis.
-/// \param y The translation distance along the Y axis.
-/// \param z The translation distance along the Z axis.
+/// Create a translation matrix.
+/// \param res Output matrix.
+/// \param x X value.
+/// \param y Y value.
+/// \param z Z value.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_translation(bj_mat4 res, bj_real x, bj_real y, bj_real z)
 {
@@ -903,15 +821,11 @@ static inline void bj_mat4_translation(bj_mat4 res, bj_real x, bj_real y, bj_rea
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Applies a translation transformation to a 4x4 matrix in-place.
-///
-/// This function adds a translation by \a x, \a y, and \a z to the matrix \a M in-place.
-/// The translation vector is applied by modifying the last column of the matrix.
-///
-/// \param[in,out] M The matrix to apply the translation to (modified in-place).
-/// \param x The translation distance along the X axis.
-/// \param y The translation distance along the Y axis.
-/// \param z The translation distance along the Z axis.
+/// Apply a translation to an existing matrix in-place.
+/// \param M Output buffer.
+/// \param x X value.
+/// \param y Y value.
+/// \param z Z value.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_translation_inplace(bj_mat4 M, bj_real x, bj_real y, bj_real z)
 {
@@ -924,14 +838,11 @@ static inline void bj_mat4_translation_inplace(bj_mat4 M, bj_real x, bj_real y, 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Computes the outer product of two 3D vectors and stores the result in a 4x4 matrix.
-///
-/// Computes the outer product of vectors \a a and \a b and stores the result in matrix \a res.
-/// The result is a matrix where elements are the products of corresponding components of the vectors.
-///
-/// \param res The resulting 4x4 matrix from the outer product.
-/// \param a The first 3D vector.
-/// \param b The second 3D vector.
+/// Outer product of two 3D vectors placed in the upper-left 3×3 block.
+/// \param res Output matrix.
+/// \param a Parameter.
+/// \param b Bottom plane.
+/// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_mul_outer(bj_mat4 res, const bj_vec3 a, const bj_vec3 b)
 {
@@ -943,17 +854,14 @@ static inline void bj_mat4_mul_outer(bj_mat4 res, const bj_vec3 a, const bj_vec3
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Rotates a 4x4 matrix by a given axis and angle.
-///
-/// This function performs a 3D rotation on matrix \a mat around an arbitrary axis \a (x, y, z) by \a angle (in radians),
-/// and stores the resulting matrix in \a res. The axis vector is normalized before the rotation.
-///
-/// \param res The resulting rotated matrix.
-/// \param mat The matrix to rotate.
-/// \param x The X component of the axis of rotation.
-/// \param y The Y component of the axis of rotation.
-/// \param z The Z component of the axis of rotation.
-/// \param angle The angle to rotate by (in radians).
+/// Rotate about arbitrary axis (Rodrigues), post-multiplied.
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \param x X value.
+/// \param y Y value.
+/// \param z Z value.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_rotate(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_real y, bj_real z, bj_real angle)
 {
@@ -991,14 +899,11 @@ static inline void bj_mat4_rotate(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Rotates a 4x4 matrix around the X axis by a given angle.
-///
-/// This function performs a rotation of matrix \a mat around the X axis by \a angle (in radians),
-/// and stores the resulting matrix in \a res.
-///
-/// \param res The resulting rotated matrix.
-/// \param mat The matrix to rotate.
-/// \param angle The angle to rotate by (in radians).
+/// Rotate about X axis and post-multiply: res = mat * R_x.
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_rotate_x(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
@@ -1014,14 +919,11 @@ static inline void bj_mat4_rotate_x(bj_mat4 res, const bj_mat4 mat, bj_real angl
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Rotates a 4x4 matrix around the Y axis by a given angle.
-///
-/// This function performs a rotation of matrix \a mat around the Y axis by \a angle (in radians),
-/// and stores the resulting matrix in \a res.
-///
-/// \param res The resulting rotated matrix.
-/// \param mat The matrix to rotate.
-/// \param angle The angle to rotate by (in radians).
+/// Rotate about Y axis and post-multiply: res = mat * R_y.
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_rotate_y(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
@@ -1037,14 +939,11 @@ static inline void bj_mat4_rotate_y(bj_mat4 res, const bj_mat4 mat, bj_real angl
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Rotates a 4x4 matrix around the Z-axis by a given angle.
-///
-/// This function applies a rotation to the input matrix around the Z-axis by
-/// a specified angle and stores the result in the output matrix.
-///
-/// \param mat The 4x4 matrix to rotate.
-/// \param angle The angle (in radians) to rotate the matrix around the Z-axis.
-/// \param res The resulting rotated matrix.
+/// Rotate about Z axis and post-multiply: res = mat * R_z.
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_rotate_z(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
@@ -1061,18 +960,13 @@ static inline void bj_mat4_rotate_z(bj_mat4 res, const bj_mat4 mat, bj_real angl
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Rotates a matrix based on arcball-style rotation from two 2D vectors.
-///
-/// This function computes the rotation matrix that represents the arcball
-/// rotation based on two 2D input vectors (a, b), the input matrix, and a scaling factor.
-/// It normalizes the vectors and calculates the rotation axis and angle,
-/// applying the rotation to the matrix.
-///
-/// \param M The input matrix to rotate.
-/// \param _a The first 2D vector for the arcball rotation.
-/// \param _b The second 2D vector for the arcball rotation.
-/// \param s A scaling factor for the rotation angle.
-/// \param R The resulting rotation matrix.
+/// Trackball (arcball) rotation from two 2D positions.
+/// \param R Output matrix.
+/// \param M Output buffer.
+/// \param _a Parameter.
+/// \param _b Parameter.
+/// \param s Scale or sensitivity.
+/// \note Inputs are normalized to the unit sphere if inside the unit disk.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_rotate_arcball(bj_mat4 R, const bj_mat4 M, bj_vec2 const _a, bj_vec2 const _b, bj_real s)
 {
@@ -1107,13 +1001,10 @@ static inline void bj_mat4_rotate_arcball(bj_mat4 R, const bj_mat4 M, bj_vec2 co
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Inverts a 4x4 matrix.
-///
-/// This function calculates the inverse of the given 4x4 matrix and stores it
-/// in the result matrix. It uses a standard matrix inversion method for 4x4 matrices.
-///
-/// \param mat The matrix to invert.
-/// \param res The resulting inverted matrix.
+/// Invert the matrix.
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \warning Undefined if the matrix is singular (determinant is zero).
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_inverse(bj_mat4 res, const bj_mat4 mat) {
     bj_real s[6];
@@ -1156,13 +1047,10 @@ static inline void bj_mat4_inverse(bj_mat4 res, const bj_mat4 mat) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Orthonormalizes the rows of a 4x4 matrix.
-///
-/// This function orthonormalizes the rows of the matrix, ensuring that the 
-/// matrix rows are orthogonal and normalized.
-///
-/// \param mat The 4x4 matrix to orthonormalize.
-/// \param res The resulting orthonormalized 4x4 matrix.
+/// Orthonormalize the upper-left 3×3 (Gram–Schmidt).
+/// \param res Output matrix.
+/// \param mat Input matrix.
+/// \note Operates on the upper-left 3×3; translation (last row/column) is preserved.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_orthonormalize(bj_mat4 res, const bj_mat4 mat) {
     bj_mat4_copy(res, mat);
@@ -1187,18 +1075,15 @@ static inline void bj_mat4_orthonormalize(bj_mat4 res, const bj_mat4 mat) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Generates a perspective projection matrix for a frustum.
-///
-/// This function generates a perspective projection matrix based on a frustum
-/// defined by the left, right, bottom, top, near, and far clipping planes.
-///
-/// \param l The left plane of the frustum.
-/// \param r The right plane of the frustum.
-/// \param b The bottom plane of the frustum.
-/// \param t The top plane of the frustum.
-/// \param n The near plane of the frustum.
-/// \param f The far plane of the frustum.
-/// \param fmat The resulting perspective projection matrix.
+/// Off-center perspective frustum matrix.
+/// \param 4][4] Parameter.
+/// \param l Left plane.
+/// \param r Right plane.
+/// \param b Bottom plane.
+/// \param t Top plane.
+/// \param n Near plane (> 0).
+/// \param f Far plane (> near).
+/// \note NDC convention: +Z forward, depth in [0,1], Y-down as implemented.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_frustum(bj_real fmat[restrict 4][4],
                                    bj_real l, bj_real r,
@@ -1229,22 +1114,15 @@ static inline void bj_mat4_frustum(bj_real fmat[restrict 4][4],
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Generates a Vulkan-style orthographic projection (Y down, Z in [0,1])
-///
-/// Maps world box [l..r]×[b..t]×[n..f] to NDC:
-///   x_ndc =  (2x - r - l) / (r - l)
-///   y_ndc = -(2y - t - b) / (t - b)
-///   z_ndc =        (z - n) / (f - n)      // [0,1]
-///
-/// Column-major 4×4:
-/// [ 2/(r-l)      0          0        0 ]
-/// [   0       -2/(t-b)      0        0 ]
-/// [   0          0        1/(f-n)    0 ]
-/// [-(r+l)/(r-l) (t+b)/(t-b) -n/(f-n)  1 ]
-///
-/// \param omat Output 4x4 matrix
-/// \param l,r,b,t World bounds
-/// \param n,f     Near/Far plane distances
+/// Orthographic projection matrix.
+/// \param 4][4] Parameter.
+/// \param l Left plane.
+/// \param r Right plane.
+/// \param b Bottom plane.
+/// \param t Top plane.
+/// \param n Near plane (> 0).
+/// \param f Far plane (> near).
+/// \note NDC convention: +Z forward, depth in [0,1], Y-down as implemented.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_ortho(
     bj_real omat[restrict 4][4],
@@ -1271,20 +1149,13 @@ static inline void bj_mat4_ortho(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Generates a Vulkan-style perspective projection matrix.
-///
-/// Vulkan clip/NDC conventions:
-/// - Y points **down** in NDC (so the Y scale term is negated),
-/// - Z maps to **[0,1]** (near -> 0, far -> 1),
-/// - Right-handed clip with **+Z forward** (w = +z_eye).
-///
-/// Column-major, column-vector convention.
-///
-/// \param pmat   Output 4x4 matrix
-/// \param y_fov  Vertical field of view in radians
-/// \param aspect Aspect ratio (width / height)
-/// \param n      Near plane distance  (> 0)
-/// \param f      Far  plane distance  (> n)
+/// Symmetric perspective projection matrix from FOV and aspect.
+/// \param 4][4] Parameter.
+/// \param y_fov Vertical field of view in radians.
+/// \param aspect Aspect ratio width/height.
+/// \param n Near plane (> 0).
+/// \param f Far plane (> near).
+/// \note NDC convention: +Z forward, depth in [0,1], Y-down as implemented.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_perspective(bj_real pmat[restrict 4][4],
                                        bj_real y_fov, bj_real aspect,
@@ -1314,22 +1185,13 @@ static inline void bj_mat4_perspective(bj_real pmat[restrict 4][4],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Builds a Vulkan-style viewport (NDC -> window pixels; no Y flip)
-///
-/// For Z in [0,1]:
-///   x_win = x + (x_ndc + 1) * (w/2)
-///   y_win = y + (y_ndc + 1) * (h/2)
-///   z_win = z_min + z_ndc * (z_max - z_min)
-///
-/// Column-major 4×4:
-/// [  w/2    0      0      0 ]
-/// [   0    h/2     0      0 ]
-/// [   0     0   z_max-z_min 0 ]
-/// [ x+w/2 y+h/2   z_min   1 ]
-///
-/// \param vpmat Output 4x4 viewport matrix
-/// \param x,y   Viewport origin in pixels
-/// \param w,h   Viewport size in pixels
+/// Viewport transform matrix.
+/// \param 4][4] Parameter.
+/// \param x X value.
+/// \param y Y value.
+/// \param w Parameter.
+/// \param h Parameter.
+/// \note NDC convention: +Z forward, depth in [0,1], Y-down as implemented.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_viewport(bj_real vpmat[restrict 4][4],
                                     bj_real x, bj_real y,
@@ -1353,14 +1215,11 @@ static inline void bj_mat4_viewport(bj_real vpmat[restrict 4][4],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Generates a right-handed view matrix with **+Z forward** (Vulkan-style).
-///
-/// Column-major, column-vector convention.
-///
-/// \param m      Output 4x4 view matrix
-/// \param eye    Camera position
-/// \param center Target point the camera looks at
-/// \param up     World up
+/// Look-at view matrix builder.
+/// \param 4][4] Parameter.
+/// \param eye Input vector.
+/// \param center Input vector.
+/// \param up Input vector.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_lookat(bj_real m[restrict 4][4],
                                   const bj_vec3 eye,
@@ -1380,8 +1239,8 @@ static inline void bj_mat4_lookat(bj_real m[restrict 4][4],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Set \p m to the identity affine transform (R=I, T=0).
-/// \param[out] m  Affine matrix to fill (4×3).
+/// Set to identity matrix.
+/// \param 4] Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_identity(bj_vec3 m[restrict 4]) {
     m[0][0]=BJ_F(1.0); m[0][1]=BJ_F(0.0); m[0][2]=BJ_F(0.0);
@@ -1391,9 +1250,11 @@ static inline void bj_mat4x3_identity(bj_vec3 m[restrict 4]) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Set \p m to a pure translation by (\p tx,\p ty,\p tz).
-/// \param[out] m  Affine matrix (4×3).
-/// \param tx,ty,tz Translation components.
+/// Matrix operation.
+/// \param 4] Parameter.
+/// \param tx Translation along X.
+/// \param ty Translation along Y.
+/// \param tz Translation along Z.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_translate(bj_vec3 m[restrict 4],
                                        bj_real tx, bj_real ty, bj_real tz) {
@@ -1404,9 +1265,11 @@ static inline void bj_mat4x3_translate(bj_vec3 m[restrict 4],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Set \p m to a non-uniform scale by (\p sx,\p sy,\p sz).
-/// \param[out] m  Affine matrix (4×3).
-/// \param sx,sy,sz Scale factors.
+/// Uniformly scale all elements by scalar k.
+/// \param 4] Parameter.
+/// \param sx Scale along X.
+/// \param sy Scale along Y.
+/// \param sz Scale along Z.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_scale(bj_vec3 m[restrict 4],
                                    bj_real sx, bj_real sy, bj_real sz) {
@@ -1417,9 +1280,10 @@ static inline void bj_mat4x3_scale(bj_vec3 m[restrict 4],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Set \p m to a rotation about the X axis by \p angle (radians).
-/// \param[out] m    Affine matrix (4×3).
-/// \param angle     Angle in radians.
+/// Rotate about X axis and post-multiply: res = mat * R_x.
+/// \param 4] Parameter.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_rotate_x(bj_vec3 m[restrict 4], bj_real angle) {
     const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
@@ -1430,9 +1294,10 @@ static inline void bj_mat4x3_rotate_x(bj_vec3 m[restrict 4], bj_real angle) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Set \p m to a rotation about the Y axis by \p angle (radians).
-/// \param[out] m    Affine matrix (4×3).
-/// \param angle     Angle in radians.
+/// Rotate about Y axis and post-multiply: res = mat * R_y.
+/// \param 4] Parameter.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_rotate_y(bj_vec3 m[restrict 4], bj_real angle) {
     const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
@@ -1443,9 +1308,10 @@ static inline void bj_mat4x3_rotate_y(bj_vec3 m[restrict 4], bj_real angle) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Set \p m to a rotation about the Z axis by \p angle (radians).
-/// \param[out] m    Affine matrix (4×3).
-/// \param angle     Angle in radians.
+/// Rotate about Z axis and post-multiply: res = mat * R_z.
+/// \param 4] Parameter.
+/// \param angle Rotation angle in radians.
+/// \param angle Angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_rotate_z(bj_vec3 m[restrict 4], bj_real angle) {
     const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
@@ -1456,12 +1322,11 @@ static inline void bj_mat4x3_rotate_z(bj_vec3 m[restrict 4], bj_real angle) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Multiply two affine transforms (column-major): \p res = \p A * \p B.
-/// \details Column-vector convention: when applied to a point v,
-///          B is applied first, then A (v' = A * (B * v)).
-/// \param[out] res  Product (4×3).
-/// \param[in]  A    Left operand (4×3).
-/// \param[in]  B    Right operand (4×3).
+/// Matrix multiplication: res = lhs * rhs (column-major).
+/// \param 4] Parameter.
+/// \param 4] Parameter.
+/// \param 4] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_mul(bj_vec3 res[restrict 4],
                                  const bj_vec3 A  [restrict 4],
@@ -1505,10 +1370,12 @@ static inline void bj_mat4x3_mul(bj_vec3 res[restrict 4],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Transform a 3D \em point (x,y,z,1) by an affine 4×3 matrix.
-/// \param[out] r  Resulting point (3).
-/// \param[in]  m  Affine matrix (4×3).
-/// \param[in]  p  Input point (3).
+/// Transform a point (homogeneous w=1 for 2D/3D variants).
+/// \param 3] Parameter.
+/// \param 4] Parameter.
+/// \param 3] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
+/// \note Uses homogeneous coordinates with w=1.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_mul_point(bj_real r[restrict 3],
                                        const bj_vec3 m[restrict 4],
@@ -1527,10 +1394,12 @@ static inline void bj_mat4x3_mul_point(bj_real r[restrict 3],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Transform a 3D \em direction (x,y,z,0); translation is ignored.
-/// \param[out] r  Resulting direction (3).
-/// \param[in]  m  Affine matrix (4×3).
-/// \param[in]  v  Input direction (3).
+/// Transform a direction (homogeneous w=0; ignores translation).
+/// \param 3] Parameter.
+/// \param 4] Parameter.
+/// \param 3] Parameter.
+/// \note Column-major convention: \c res = lhs * rhs.
+/// \note Uses homogeneous coordinates with w=0 (no translation).
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_mul_dir(bj_real r[restrict 3],
                                      const bj_vec3 m[restrict 4],
@@ -1549,10 +1418,9 @@ static inline void bj_mat4x3_mul_dir(bj_real r[restrict 3],
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Convert a 4×3 affine matrix to a 4×4 homogeneous matrix.
-/// \param[out] out  4×4 matrix.
-/// \param[in]  a    4×3 affine matrix.
-/// \note Fills the last column with (0,0,0,1)^T.
+/// Promote 3D affine (4×3) to 4×4 homogeneous.
+/// \param out Output matrix.
+/// \param 4] Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_from_mat4x3(bj_mat4 out, const bj_vec3 a[restrict 4]) {
     out[0][0]=a[0][0]; out[0][1]=a[0][1]; out[0][2]=a[0][2]; out[0][3]=BJ_F(0.0);
@@ -1562,10 +1430,9 @@ static inline void bj_mat4_from_mat4x3(bj_mat4 out, const bj_vec3 a[restrict 4])
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Extract a 4×3 affine matrix from a 4×4 homogeneous matrix.
-/// \param[out] out43  4×3 affine matrix.
-/// \param[in]  m      4×4 matrix (assumes bottom row is (0,0,0,1)).
-/// \warning If \p m 's bottom row is not (0,0,0,1), the result is not affine.
+/// Extract upper 4×3 affine block from 4×4.
+/// \param 4] Parameter.
+/// \param m Output buffer.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_from_mat4(bj_vec3 out43[restrict 4], const bj_mat4 m) {
     out43[0][0]=m[0][0]; out43[0][1]=m[0][1]; out43[0][2]=m[0][2];
@@ -1575,20 +1442,11 @@ static inline void bj_mat4x3_from_mat4(bj_vec3 out43[restrict 4], const bj_mat4 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Build a right-handed "look-at" view matrix (affine 4×3).
-///
-/// \details Constructs a view transform that takes world-space points into
-///          camera (view) space, using the common D3D/Vulkan-style basis:
-///          \c f = normalize(center - eye), \c s = normalize(cross(up, f)),
-///          \c t = cross(f, s). The linear columns are \c {s, t, f}.
-///
-/// \param[out] m      Result view matrix (4×3, affine).
-/// \param[in]  eye    Camera position in world space (3).
-/// \param[in]  center Target point the camera looks at (3).
-/// \param[in]  up     Approximate world up (3).
-///
-/// \note Column-major output with columns {s, t, f}. Translation is set to
-///       (-dot(s,eye), -dot(t,eye), -dot(f,eye)).
+/// Look-at view matrix builder.
+/// \param 4] Parameter.
+/// \param 3] Parameter.
+/// \param 3] Parameter.
+/// \param 3] Parameter.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4x3_lookat(bj_vec3 m[restrict 4],
                                     const bj_real eye[restrict 3],
@@ -1631,7 +1489,8 @@ static inline void bj_mat4x3_lookat(bj_vec3 m[restrict 4],
     m[3][2]=-(f[0]*eye[0] + f[1]*eye[1] + f[2]*eye[2]);
 }
 
-/// \}
 
 #endif
+
+/// \}
 

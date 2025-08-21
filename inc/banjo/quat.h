@@ -1,9 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file quat.h
-/// Math quaternion library.
-////////////////////////////////////////////////////////////////////////////////
-/// \addtogroup math
+/// Quaternion utilities using \c bj_real with \c {x,y,z,w} layout.
 ///
+/// \file quat.h
+/// Quaternions are stored as a 4-tuple where the vector part is (x,y,z) and scalar part is w.
+/// The functions here support identity, multiplication, conjugation, axis-angle creation,
+/// rotating vectors, and conversions to/from 4×4 rotation matrices.
+///
+/// \addtogroup math
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_QUAT_H
@@ -15,42 +18,44 @@
 #include <banjo/vec.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Defines a quaternion type.
-///
-/// This type represents a quaternion with four components, each of type `bj_real`.
-/// Quaternions are used for representing rotations in 3D space.
-///
-/// \note The quaternion is represented as an array of four `bj_real` values.
-/// \see bj_real
+/// bj_quat: Quaternion stored as {x, y, z, w} with \c bj_real components.
+/// Multiplication composes rotations; unit quaternions represent pure rotations.
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_real bj_quat[4];
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Alias for \ref bj_vec4_add, adds two quaternions.
+/// Alias to vector add (component-wise).
+/// \see bj_vec4_add
+////////////////////////////////////////////////////////////////////////////////
 #define bj_quat_add bj_vec4_add
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Alias for \ref bj_vec4_sub, subtracts two quaternions.
+/// Alias to vector subtract (component-wise).
+/// \see bj_vec4_sub
+////////////////////////////////////////////////////////////////////////////////
 #define bj_quat_sub bj_vec4_sub
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Alias for \ref bj_vec4_normalize, normalizes a quaternion.
+/// Alias to normalize quaternion (scales to unit length).
+/// \see bj_vec4_normalize
+////////////////////////////////////////////////////////////////////////////////
 #define bj_quat_norm bj_vec4_normalize
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Alias for \ref bj_vec4_scale, scales a quaternion by a scalar.
+/// Alias to uniform scale all four components.
+/// \see bj_vec4_scale
+////////////////////////////////////////////////////////////////////////////////
 #define bj_quat_scale bj_vec4_scale
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Alias for \ref bj_vec4_dot, computes the dot product of two quaternions.
+/// Alias to 4D dot product.
+/// \see bj_vec4_dot
+////////////////////////////////////////////////////////////////////////////////
 #define bj_quat_dot bj_vec4_dot
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Sets a quaternion to the identity quaternion.
-///
-/// This function sets the given quaternion to the identity quaternion (0, 0, 0, 1).
-///
-/// \param q The quaternion to set as the identity.
+/// Set quaternion to identity (no rotation).
+/// \param q Input quaternion.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_quat_identity(bj_quat q)
 {
@@ -59,14 +64,11 @@ static inline void bj_quat_identity(bj_quat q)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Multiplies two quaternions.
-///
-/// This function computes the product of two quaternions, following the quaternion
-/// multiplication rules, and stores the result in the output quaternion.
-///
-/// \param res The resulting quaternion after multiplication.
-/// \param p The first quaternion.
-/// \param q The second quaternion.
+/// Hamilton product: res = p * q.
+/// \param res Output quaternion.
+/// \param p Input quaternion.
+/// \param q Input quaternion.
+/// \note Assumes unit-length quaternions for pure rotations.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q)
 {
@@ -83,14 +85,9 @@ static inline void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Computes the conjugate of a quaternion.
-///
-/// This function computes the conjugate of the given quaternion, which involves
-/// negating the vector part (x, y, z) of the quaternion while keeping the scalar
-/// part unchanged.
-///
-/// \param res The resulting conjugated quaternion.
-/// \param q The quaternion to conjugate.
+/// Conjugate quaternion: (x,y,z,w) -> (-x,-y,-z,w).
+/// \param res Output quaternion.
+/// \param q Input quaternion.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_quat_conjugate(bj_quat res, const bj_quat q)
 {
@@ -101,14 +98,12 @@ static inline void bj_quat_conjugate(bj_quat res, const bj_quat q)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a rotation quaternion based on an angle and axis.
-///
-/// This function generates a quaternion representing a rotation of the specified
-/// angle (in radians) around the given axis.
-///
-/// \param res The resulting rotation quaternion.
-/// \param angle The angle (in radians) of rotation.
-/// \param axis The axis around which the rotation occurs.
+/// Build a unit quaternion from axis-angle.
+/// \param res Output quaternion.
+/// \param angle Rotation angle in radians.
+/// \param axis 3D vector.
+/// \note Assumes unit-length quaternions for pure rotations.
+/// \warning If \p axis is near zero length, the result is implementation-defined.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 axis) {
     bj_vec3 axis_norm;
@@ -120,14 +115,12 @@ static inline void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 ax
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Applies a quaternion rotation to a 3D vector.
-///
-/// This function rotates a 3D vector using the given quaternion, which represents
-/// the rotation.
-///
-/// \param res The resulting rotated vector.
-/// \param q The quaternion representing the rotation.
-/// \param v The 3D vector to rotate.
+/// Rotate a 3D vector by a unit quaternion.
+/// \param res Output quaternion.
+/// \param q Input quaternion.
+/// \param v 3D vector.
+/// \note Assumes unit-length quaternions for pure rotations.
+/// \returns The rotated vector in \p res.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 v) {
     bj_vec3 t;
@@ -145,12 +138,10 @@ static inline void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Converts a quaternion to a 4x4 rotation matrix.
-///
-/// This function converts the given quaternion into a 4x4 rotation matrix.
-///
-/// \param res The resulting 4x4 rotation matrix.
-/// \param q The quaternion to convert.
+/// Convert unit quaternion to a 4×4 rotation matrix.
+/// \param res Output quaternion.
+/// \param q Input quaternion.
+/// \note Assumes unit-length quaternions for pure rotations.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
     bj_real a = q[3];
@@ -182,14 +173,11 @@ static inline void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Applies a quaternion rotation to each column of a matrix.
-///
-/// This function applies the rotation represented by the given quaternion to each
-/// column of the given matrix, transforming it into the rotated matrix.
-///
-/// \param R The resulting rotated matrix.
-/// \param M The matrix to rotate.
-/// \param q The quaternion representing the rotation.
+/// Post-multiply matrix by rotation from quaternion: R = M * rot(q).
+/// \param R Output matrix.
+/// \param M Input 4×4 matrix.
+/// \param q Input quaternion.
+/// \note Assumes unit-length quaternions for pure rotations.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj_quat q) {
     bj_quat_mul_vec3(R[0], q, M[0]);
@@ -204,12 +192,11 @@ static inline void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Converts a 4x4 rotation matrix to a quaternion.
-///
-/// This function converts the given 4x4 rotation matrix into a quaternion.
-///
-/// \param q The resulting quaternion.
-/// \param M The 4x4 rotation matrix to convert.
+/// Extract a unit quaternion from a 4×4 rotation matrix.
+/// \param q Input quaternion.
+/// \param M Input 4×4 matrix.
+/// \note Assumes unit-length quaternions for pure rotations.
+/// \note Uses a numerically stable branch based on the dominant diagonal term.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     bj_real r = BJ_F(0.0);
@@ -249,7 +236,9 @@ static inline void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
 }
 
 
-/// \}
 
 #endif
+
+/// \}
+
 
