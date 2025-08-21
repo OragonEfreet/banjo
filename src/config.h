@@ -62,6 +62,12 @@
 #   define _BJ_HAS_CONFIG_PEDANTIC 0
 #endif
 
+#ifdef BJ_CONFIG_FASTMATH
+#   define _BJ_HAS_CONFIG_FASTMATH 1
+#else
+#   define _BJ_HAS_CONFIG_FASTMATH 0
+#endif
+
 #define BJ_HAS_CONFIG(NAME) _BJ_HAS_CONFIG_ALL || _BJ_HAS_CONFIG_ ## NAME
 #define BJ_HAS_FEATURE(NAME) _BJ_HAS_FEATURE_ ## NAME
 

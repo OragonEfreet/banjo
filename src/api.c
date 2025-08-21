@@ -50,6 +50,12 @@
 #   define BJ_INFO_CHECKS_LOG 0
 #endif
 
+#if BJ_HAS_CONFIG(FASTMATH)
+#   define BJ_INFO_FASTMATH 1
+#else
+#   define BJ_INFO_FASTMATH 0
+#endif
+
 #if BJ_HAS_CONFIG(LOG_COLOR)
 #   define BJ_INFO_LOG_COLOR 1
 #else
@@ -76,11 +82,12 @@ static const bj_build_info s_build_info = {
     .feature_mme        = BJ_INFO_MME,
     .feature_alsa       = BJ_INFO_ALSA,
 
-    // Options
+    // Configs
     .config_checks_abort = BJ_INFO_CHECKS_ABORT,
     .config_checks_log   = BJ_INFO_CHECKS_LOG,
     .config_log_color    = BJ_INFO_LOG_COLOR,
     .config_pedantic     = BJ_INFO_PEDANTIC,
+    .config_fastmath     = BJ_INFO_FASTMATH,
 
 };
 

@@ -132,12 +132,6 @@
 #    endif
 #endif
 
-#if defined(_MSC_VER)
-#  define BJ_ALWAYS_INLINE __forceinline
-#else
-#  define BJ_ALWAYS_INLINE __attribute__((always_inline)) inline
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \typedef bj_bool
 /// \brief Boolean type used throughout the BJ codebase.
@@ -187,6 +181,7 @@ typedef struct {
     bj_bool     config_checks_log;   ///< If checks feature is on, failed check with log
     bj_bool     config_log_color;    ///< Banjo logs will have colored output
     bj_bool     config_pedantic;     ///< Banjo runtime will make costly extra checks
+    bj_bool     config_fastmath;     ///< Banjo compiled with floating point math optimizations
 } bj_build_info;
 
 ////////////////////////////////////////////////////////////////////////////////

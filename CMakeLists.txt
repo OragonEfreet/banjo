@@ -20,6 +20,7 @@ option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will ab
 option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 OFF)
 option(BJ_CONFIG_LOG_COLOR    "Banjo logs will have colored output"                            OFF)
 option(BJ_CONFIG_PEDANTIC     "Banjo runtime will make costly extra checks"                    OFF)
+option(BJ_CONFIG_FASTMATH     "Enable fast math (FMA, reassociation, etc.) "                   OFF)
 
 file(GLOB SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
@@ -30,6 +31,20 @@ add_library(banjo ${SOURCES})
 target_include_directories(banjo PUBLIC inc)
 
 set_target_properties(banjo PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED TRUE)
+
+# ---- Fast-math toggle (default ON) ----
+if (BJ_CONFIG_FASTMATH)
+    if (MSVC)
+        target_compile_options(banjo PRIVATE /fp:fast)
+    else()
+        target_compile_options(banjo PRIVATE
+            -ffast-math
+            -ffp-contract=fast
+            -fno-math-errno
+            -fno-trapping-math
+        )
+    endif()
+endif()
 
 if(NOT MSVC)
     target_link_libraries(banjo PRIVATE m)
@@ -48,6 +63,7 @@ if(BJ_FEATURE_X11)
     endif()
 endif()
 
+# Export all enabled BJ_* BOOL options as preprocessor defines
 get_cmake_property(ALL_CACHE_VARS CACHE_VARIABLES)
 foreach(VAR ${ALL_CACHE_VARS})
     get_property(VAR_TYPE CACHE ${VAR} PROPERTY TYPE)
@@ -74,6 +90,6 @@ if (BJ_FEATURE_EMSCRIPTEN)
   target_link_options(banjo PRIVATE
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','_malloc','_free']"
     "-sEXPORTED_FUNCTIONS=['_bj_emscripten_audio_process']"
-    "-sALLOW_MEMORY_GROWTH"                     # optional, but often handy
+    "-sALLOW_MEMORY_GROWTH"
   )
 endif()
