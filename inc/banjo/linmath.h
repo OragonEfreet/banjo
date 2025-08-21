@@ -9,6 +9,7 @@
 ///
 /// The Math group provides usual facilities for linear math, including
 /// - vector types: \ref bj_vec2, \ref bj_vec3 and \ref bj_vec4
+/// - 3x3 matrix with \ref bj_mat3
 /// - 4x4 matrix with \ref bj_mat4
 /// - Quaternion with \ref bj_quat
 ///
@@ -55,6 +56,17 @@ typedef bj_real bj_vec3[3];
 /// \see bj_real
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_real bj_vec4[4];
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Defines a 3x3 matrix type.
+///
+/// This type represents a 3x3 matrix, where each row is a `bj_vec3` vector.
+/// It is commonly used for transformations such as rotations, scaling, and translations.
+///
+/// \note The matrix is represented as an array of four `bj_vec3` values.
+/// \see bj_vec3
+////////////////////////////////////////////////////////////////////////////////
+typedef bj_vec3 bj_mat3[4];
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Defines a 4x4 matrix type.
@@ -625,6 +637,356 @@ static inline void bj_vec4_reflect(bj_vec4 res, const bj_vec4 v, const bj_vec4 n
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// \brief Initializes a 3x3 matrix to the identity matrix.
+///
+/// Sets all diagonal elements to 1 and off-diagonal to 0.
+///
+/// \param m The matrix to initialize.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_identity(bj_mat3 m) {
+    for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+            m[i][j] = (i == j) ? BJ_F(1.0) : BJ_F(0.0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Copies a 3x3 matrix.
+///
+/// \param to   Destination matrix.
+/// \param from Source matrix.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_copy(bj_mat3 to, const bj_mat3 from) {
+    for (int i = 0; i < 3; ++i) {
+        to[i][0] = from[i][0];
+        to[i][1] = from[i][1];
+        to[i][2] = from[i][2];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Extracts a row from a 3x3 matrix.
+///
+/// Column-major convention: row r contains elements m[0..2][r].
+///
+/// \param res Output row (vec3).
+/// \param m   Source matrix.
+/// \param r   Row index in [0,2].
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_row(bj_vec3 res, const bj_mat3 m, int r) {
+    for (int k = 0; k < 3; ++k) res[k] = m[k][r];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Extracts a column from a 3x3 matrix.
+///
+/// \param res Output column (vec3).
+/// \param m   Source matrix.
+/// \param c   Column index in [0,2].
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_col(bj_vec3 res, const bj_mat3 m, int c) {
+    for (int k = 0; k < 3; ++k) res[k] = m[c][k];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Transposes a 3x3 matrix.
+///
+/// \param res Output transposed matrix.
+/// \param m   Input matrix.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_transpose(bj_mat3 res, const bj_mat3 m) {
+    for (int j = 0; j < 3; ++j)
+        for (int i = 0; i < 3; ++i)
+            res[i][j] = m[j][i];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Element-wise addition of two 3x3 matrices.
+///
+/// \param res Output matrix (a + b).
+/// \param a   Left operand.
+/// \param b   Right operand.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_add(bj_mat3 res, const bj_mat3 a, const bj_mat3 b) {
+    for (int i = 0; i < 3; ++i) {
+        res[i][0] = a[i][0] + b[i][0];
+        res[i][1] = a[i][1] + b[i][1];
+        res[i][2] = a[i][2] + b[i][2];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Element-wise subtraction of two 3x3 matrices.
+///
+/// \param res Output matrix (a - b).
+/// \param a   Left operand.
+/// \param b   Right operand.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_sub(bj_mat3 res, const bj_mat3 a, const bj_mat3 b) {
+    for (int i = 0; i < 3; ++i) {
+        res[i][0] = a[i][0] - b[i][0];
+        res[i][1] = a[i][1] - b[i][1];
+        res[i][2] = a[i][2] - b[i][2];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Scales a 3x3 matrix by a scalar (element-wise).
+///
+/// \param res Output matrix.
+/// \param m   Input matrix.
+/// \param k   Scalar multiplier.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_scale(bj_mat3 res, const bj_mat3 m, bj_real k) {
+    for (int i = 0; i < 3; ++i) {
+        res[i][0] = m[i][0] * k;
+        res[i][1] = m[i][1] * k;
+        res[i][2] = m[i][2] * k;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Multiplies two 3x3 matrices (res = lhs * rhs).
+///
+/// Column-major, column-vector convention (matches bj_mat4_mul).
+///
+/// \param res Output product.
+/// \param lhs Left operand.
+/// \param rhs Right operand.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_mul(bj_mat3 res, const bj_mat3 lhs, const bj_mat3 rhs) {
+    bj_mat3 tmp;
+    for (int c = 0; c < 3; ++c) {
+        for (int r = 0; r < 3; ++r) {
+            tmp[c][r] = BJ_F(0.0);
+            for (int k = 0; k < 3; ++k)
+                tmp[c][r] += lhs[k][r] * rhs[c][k];
+        }
+    }
+    bj_mat3_copy(res, tmp);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Multiplies a 3x3 matrix by a 3D vector.
+///
+/// \param res Output vector (m * v).
+/// \param m   Matrix.
+/// \param v   Vector.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_mul_vec3(bj_vec3 res, const bj_mat3 m, const bj_vec3 v) {
+    for (int j = 0; j < 3; ++j) {
+        res[j] = BJ_F(0.0);
+        for (int i = 0; i < 3; ++i)
+            res[j] += m[i][j] * v[i];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Transforms a 2D point by a 3x3 homogeneous matrix.
+///
+/// Uses (x,y,1) and performs homogeneous divide. If w==0, returns the
+/// un-divided x,y.
+///
+/// \param res Output point (2D).
+/// \param m   Matrix.
+/// \param p   Input point (2D).
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_mul_point(bj_vec2 res, const bj_mat3 m, const bj_vec2 p) {
+    bj_vec3 v = { p[0], p[1], BJ_F(1.0) };
+    bj_vec3 o;
+    bj_mat3_mul_vec3(o, m, v);
+    bj_real w = o[2];
+    if (w != BJ_F(0.0)) { res[0] = o[0] / w; res[1] = o[1] / w; }
+    else                { res[0] = o[0];     res[1] = o[1];     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Transforms a 2D direction by a 3x3 homogeneous matrix.
+///
+/// Uses (x,y,0), which ignores translation.
+///
+/// \param res Output direction (2D).
+/// \param m   Matrix.
+/// \param v2  Input direction (2D).
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_mul_vector2(bj_vec2 res, const bj_mat3 m, const bj_vec2 v2) {
+    bj_vec3 v = { v2[0], v2[1], BJ_F(0.0) };
+    bj_vec3 o; bj_mat3_mul_vec3(o, m, v);
+    res[0] = o[0]; res[1] = o[1];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Creates a 2D translation matrix.
+///
+/// \param res Output matrix.
+/// \param tx  Translation along X.
+/// \param ty  Translation along Y.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_translation(bj_mat3 res, bj_real tx, bj_real ty) {
+    bj_mat3_identity(res);
+    res[2][0] = tx;
+    res[2][1] = ty;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Applies a 2D translation in-place (M ← M * T(tx,ty)).
+///
+/// Column-major: updates the last column using current rows of M.
+///
+/// \param M  Matrix to modify.
+/// \param tx Translation along X.
+/// \param ty Translation along Y.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_translation_inplace(bj_mat3 M, bj_real tx, bj_real ty) {
+    bj_vec3 t = { tx, ty, BJ_F(0.0) };
+    bj_vec3 r;
+    for (int i = 0; i < 3; ++i) {
+        bj_mat3_row(r, M, i);
+        M[2][i] += r[0]*t[0] + r[1]*t[1] + r[2]*t[2];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Creates a 2D scaling matrix.
+///
+/// \param res Output matrix.
+/// \param sx  Scale along X.
+/// \param sy  Scale along Y.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_scale_xy(bj_mat3 res, bj_real sx, bj_real sy) {
+    bj_mat3_identity(res);
+    res[0][0] = sx;
+    res[1][1] = sy;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Creates a 2D shear matrix.
+///
+/// shy applies y += shy * x, shx applies x += shx * y.
+///
+/// \param res Output matrix.
+/// \param shx Shear factor in X (by Y).
+/// \param shy Shear factor in Y (by X).
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_shear(bj_mat3 res, bj_real shx, bj_real shy) {
+    bj_mat3_identity(res);
+    res[1][0] = shy;
+    res[0][1] = shx;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Creates a 2D rotation matrix around the origin (CCW, radians).
+///
+/// \param res   Output matrix.
+/// \param angle Angle in radians (counterclockwise).
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_rotate(bj_mat3 res, bj_real angle) {
+    bj_real s = bj_sin(angle), c = bj_cos(angle);
+    /* [ c  s  0 ]
+       [-s  c  0 ]
+       [ 0  0  1 ] */
+    res[0][0] =  c;  res[0][1] =  s;  res[0][2] = BJ_F(0.0);
+    res[1][0] = -s;  res[1][1] =  c;  res[1][2] = BJ_F(0.0);
+    res[2][0] = BJ_F(0.0); res[2][1] = BJ_F(0.0); res[2][2] = BJ_F(1.0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Inverts a 3x3 matrix.
+///
+/// \warning The matrix must be invertible (determinant != 0).
+///
+/// \param res Output inverse matrix.
+/// \param m   Input matrix.
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_inverse(bj_mat3 res, const bj_mat3 m) {
+    bj_real a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
+    bj_real a10 = m[1][0], a11 = m[1][1], a12 = m[1][2];
+    bj_real a20 = m[2][0], a21 = m[2][1], a22 = m[2][2];
+
+    bj_real b01 =  a22*a11 - a12*a21;
+    bj_real b11 = -a22*a10 + a12*a20;
+    bj_real b21 =  a21*a10 - a11*a20;
+
+    bj_real det = a00*b01 + a01*b11 + a02*b21;
+    bj_real inv_det = BJ_F(1.0) / det;
+
+    res[0][0] = b01 * inv_det;
+    res[0][1] = (-a22*a01 + a02*a21) * inv_det;
+    res[0][2] = ( a12*a01 - a02*a11) * inv_det;
+
+    res[1][0] = b11 * inv_det;
+    res[1][1] = ( a22*a00 - a02*a20) * inv_det;
+    res[1][2] = (-a12*a00 + a02*a10) * inv_det;
+
+    res[2][0] = b21 * inv_det;
+    res[2][1] = (-a21*a00 + a01*a20) * inv_det;
+    res[2][2] = ( a11*a00 - a01*a10) * inv_det;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Generates a 2D orthographic transform to NDC [-1,1]^2 with Y down
+///
+/// Maps world box [l..r]×[b..t] to NDC such that:
+///   x_ndc =  (2x - r - l) / (r - l)
+///   y_ndc = -(2y - t - b) / (t - b)    // Y down: top -> -1, bottom -> +1
+///
+/// Column-major 3×3:
+/// [  2/(r-l)        0              0 ]
+/// [     0       -2/(t-b)           0 ]
+/// [ -(r+l)/(r-l)  (t+b)/(t-b)      1 ]
+///
+/// \param omat Output 3x3 matrix
+/// \param l    Left   world bound
+/// \param r    Right  world bound
+/// \param b    Bottom world bound
+/// \param t    Top    world bound
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_ortho(bj_mat3 omat,
+                                 bj_real l, bj_real r,
+                                 bj_real b, bj_real t)
+{
+    omat[0][0] = BJ_F(2.0) / (r - l);
+    omat[0][1] = BJ_F(0.0);
+    omat[0][2] = BJ_F(0.0);
+
+    omat[1][0] = BJ_F(0.0);
+    omat[1][1] = BJ_F(-2.0) / (t - b);
+    omat[1][2] = BJ_F(0.0);
+
+    omat[2][0] = -(r + l) / (r - l);
+    omat[2][1] =  (t + b) / (t - b);
+    omat[2][2] = BJ_F(1.0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Builds a 2D viewport transform (NDC -> window pixels; top-left origin)
+///
+/// Vulkan-like mapping with **no Y flip** here:
+///   x_win = x + (x_ndc + 1) * (w/2)
+///   y_win = y + (y_ndc + 1) * (h/2)
+///
+/// Column-major 3×3:
+/// [  w/2    0     0 ]
+/// [   0    h/2    0 ]
+/// [ x+w/2  y+h/2  1 ]
+///
+/// \param vpmat Output 3x3 viewport matrix
+/// \param x     Viewport origin X in pixels
+/// \param y     Viewport origin Y in pixels
+/// \param w     Viewport width  in pixels
+/// \param h     Viewport height in pixels
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat3_viewport(bj_mat3 vpmat,
+                                    bj_real x, bj_real y,
+                                    bj_real w, bj_real h)
+{
+    vpmat[0][0] = BJ_F(0.5) * w;  vpmat[0][1] = BJ_F(0.0);       vpmat[0][2] = BJ_F(0.0);
+    vpmat[1][0] = BJ_F(0.0);      vpmat[1][1] = BJ_F(0.5) * h;   vpmat[1][2] = BJ_F(0.0);
+    vpmat[2][0] = x + BJ_F(0.5) * w;
+    vpmat[2][1] = y + BJ_F(0.5) * h;
+    vpmat[2][2] = BJ_F(1.0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 /// \brief Initializes a 4x4 matrix to the identity matrix.
 ///
 /// Sets all diagonal elements of the matrix to 1.0 and all off-diagonal elements to 0.0.
@@ -1143,112 +1505,153 @@ static inline void bj_mat4_frustum(bj_mat4 fmat, bj_real l, bj_real r, bj_real b
     fmat[3][0] = fmat[3][1] = fmat[3][3] = BJ_F(0.0);
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Generates an orthographic projection matrix.
+/// \brief Generates a Vulkan-style orthographic projection (Y down, Z in [0,1])
 ///
-/// This function generates an orthographic projection matrix for the specified
-/// left, right, bottom, top, near, and far clipping planes.
+/// Maps world box [l..r]×[b..t]×[n..f] to NDC:
+///   x_ndc =  (2x - r - l) / (r - l)
+///   y_ndc = -(2y - t - b) / (t - b)
+///   z_ndc =        (z - n) / (f - n)      // [0,1]
 ///
-/// \param l The left plane of the orthographic projection.
-/// \param r The right plane of the orthographic projection.
-/// \param b The bottom plane of the orthographic projection.
-/// \param t The top plane of the orthographic projection.
-/// \param n The near plane of the orthographic projection.
-/// \param f The far plane of the orthographic projection.
-/// \param omat The resulting orthographic projection matrix.
+/// Column-major 4×4:
+/// [ 2/(r-l)      0          0        0 ]
+/// [   0       -2/(t-b)      0        0 ]
+/// [   0          0        1/(f-n)    0 ]
+/// [-(r+l)/(r-l) (t+b)/(t-b) -n/(f-n)  1 ]
+///
+/// \param omat Output 4x4 matrix
+/// \param l,r,b,t World bounds
+/// \param n,f     Near/Far plane distances
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_ortho(bj_mat4 omat, bj_real l, bj_real r, bj_real b, bj_real t, bj_real n, bj_real f) {
+static inline void bj_mat4_ortho(bj_mat4 omat,
+                                 bj_real l, bj_real r,
+                                 bj_real b, bj_real t,
+                                 bj_real n, bj_real f)
+{
     omat[0][0] = BJ_F(2.0) / (r - l);
     omat[0][1] = omat[0][2] = omat[0][3] = BJ_F(0.0);
-    omat[1][1] = BJ_F(2.0) / (t - b);
+
     omat[1][0] = omat[1][2] = omat[1][3] = BJ_F(0.0);
-    omat[2][2] = BJ_F(-2.0) / (f - n);
+    omat[1][1] = BJ_F(-2.0) / (t - b);
+
     omat[2][0] = omat[2][1] = omat[2][3] = BJ_F(0.0);
+    omat[2][2] = BJ_F(1.0) / (f - n);
+
     omat[3][0] = -(r + l) / (r - l);
-    omat[3][1] = -(t + b) / (t - b);
-    omat[3][2] = -(f + n) / (f - n);
+    omat[3][1] =  (t + b) / (t - b);
+    omat[3][2] = -n / (f - n);
     omat[3][3] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Generates a perspective projection matrix based on field of view.
+/// \brief Generates a Vulkan-style perspective projection matrix.
 ///
-/// This function generates a perspective projection matrix based on the field
-/// of view (y_fov), aspect ratio, and near and far clipping planes.
+/// Vulkan clip/NDC conventions:
+/// - Y points **down** in NDC (so the Y scale term is negated),
+/// - Z maps to **[0,1]** (near -> 0, far -> 1),
+/// - Right-handed clip with **+Z forward** (w = +z_eye).
 ///
-/// \param y_fov The vertical field of view in radians.
-/// \param aspect The aspect ratio (width / height).
-/// \param n The near clipping plane.
-/// \param f The far clipping plane.
-/// \param pmat The resulting perspective projection matrix.
+/// Column-major, column-vector convention.
+///
+/// \param pmat   Output 4x4 matrix
+/// \param y_fov  Vertical field of view in radians
+/// \param aspect Aspect ratio (width / height)
+/// \param n      Near plane distance  (> 0)
+/// \param f      Far  plane distance  (> n)
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_perspective(bj_mat4 pmat, bj_real y_fov, bj_real aspect, bj_real n, bj_real f) {
+static inline void bj_mat4_perspective(bj_mat4 pmat,
+                                       bj_real y_fov, bj_real aspect,
+                                       bj_real n, bj_real f)
+{
     const bj_real a = BJ_F(1.0) / bj_tan(y_fov / BJ_F(2.0));
+
+    // X scale
     pmat[0][0] = a / aspect;
-    pmat[0][1] = BJ_F(0.0);
-    pmat[0][2] = BJ_F(0.0);
-    pmat[0][3] = BJ_F(0.0);
+    pmat[0][1] = pmat[0][2] = pmat[0][3] = BJ_F(0.0);
+
+    // Y scale (negated: Y-down NDC)
     pmat[1][0] = BJ_F(0.0);
-    pmat[1][1] = a;
-    pmat[1][2] = BJ_F(0.0);
-    pmat[1][3] = BJ_F(0.0);
+    pmat[1][1] = -a;
+    pmat[1][2] = pmat[1][3] = BJ_F(0.0);
+
+    // Z in [0,1], +Z forward, w = +z_eye
     pmat[2][0] = BJ_F(0.0);
     pmat[2][1] = BJ_F(0.0);
-    pmat[2][2] = -((f + n) / (f - n));
-    pmat[2][3] = BJ_F(-1.0);
+    pmat[2][2] = f / (f - n);
+    pmat[2][3] = BJ_F(1.0);
+
     pmat[3][0] = BJ_F(0.0);
     pmat[3][1] = BJ_F(0.0);
-    pmat[3][2] = -((BJ_F(2.0) * f * n) / (f - n));
+    pmat[3][2] = -(f * n) / (f - n);
     pmat[3][3] = BJ_F(0.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Generates a look-at matrix.
+/// \brief Builds a Vulkan-style viewport (NDC -> window pixels; no Y flip)
 ///
-/// This function generates a view matrix that transforms coordinates from world
-/// space to camera space based on the eye position, center (target) position, and
-/// up vector.
+/// For Z in [0,1]:
+///   x_win = x + (x_ndc + 1) * (w/2)
+///   y_win = y + (y_ndc + 1) * (h/2)
+///   z_win = z_min + z_ndc * (z_max - z_min)
 ///
-/// \param eye The position of the camera.
-/// \param center The target position the camera is looking at.
-/// \param up The up vector of the camera.
-/// \param m The resulting look-at matrix.
+/// Column-major 4×4:
+/// [  w/2    0      0      0 ]
+/// [   0    h/2     0      0 ]
+/// [   0     0   z_max-z_min 0 ]
+/// [ x+w/2 y+h/2   z_min   1 ]
+///
+/// \param vpmat Output 4x4 viewport matrix
+/// \param x,y   Viewport origin in pixels
+/// \param w,h   Viewport size in pixels
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_lookat(bj_mat4 m, const bj_vec3 eye, const bj_vec3 center, const bj_vec3 up) {
-    bj_vec3 f;
-    bj_vec3_sub(f, center, eye);
-    bj_vec3_normalize(f, f);
+static inline void bj_mat4_viewport(bj_mat4 vpmat,
+                                    bj_real x, bj_real y,
+                                    bj_real w, bj_real h)
+{
+    const bj_real z_min = BJ_F(0.0);
+    const bj_real z_max = BJ_F(1.0);
 
-    bj_vec3 s;
-    bj_vec3_cross(s, f, up);
-    bj_vec3_normalize(s, s);
+    const bj_real sx = BJ_F(0.50) * w;
+    const bj_real sy = BJ_F(0.50) * h;
+    const bj_real sz = (z_max - z_min);
 
-    bj_vec3 t;
-    bj_vec3_cross(t, s, f);
+    const bj_real tx = x + BJ_F(0.50) * w;
+    const bj_real ty = y + BJ_F(0.50) * h;
+    const bj_real tz = z_min;
 
-    m[0][0] = s[0];
-    m[0][1] = t[0];
-    m[0][2] = -f[0];
-    m[0][3] = BJ_F(0.0);
+    vpmat[0][0] = sx;   vpmat[0][1] = BJ_F(0.0);  vpmat[0][2] = BJ_F(0.0);  vpmat[0][3] = BJ_F(0.0);
+    vpmat[1][0] = BJ_F(0.0);  vpmat[1][1] = sy;   vpmat[1][2] = BJ_F(0.0);  vpmat[1][3] = BJ_F(0.0);
+    vpmat[2][0] = BJ_F(0.0);  vpmat[2][1] = BJ_F(0.0);  vpmat[2][2] = sz;   vpmat[2][3] = BJ_F(0.0);
+    vpmat[3][0] = tx;   vpmat[3][1] = ty;   vpmat[3][2] = tz;               vpmat[3][3] = BJ_F(1.0);
+}
 
-    m[1][0] = s[1];
-    m[1][1] = t[1];
-    m[1][2] = -f[1];
-    m[1][3] = BJ_F(0.0);
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Generates a right-handed view matrix with **+Z forward** (Vulkan-style).
+///
+/// Column-major, column-vector convention.
+///
+/// \param m      Output 4x4 view matrix
+/// \param eye    Camera position
+/// \param center Target point the camera looks at
+/// \param up     World up
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat4_lookat(bj_mat4 m,
+                                  const bj_vec3 eye,
+                                  const bj_vec3 center,
+                                  const bj_vec3 up)
+{
+    bj_vec3 f;  bj_vec3_sub(f, center, eye);  bj_vec3_normalize(f, f);      // forward (+Z)
+    bj_vec3 s;  bj_vec3_cross(s, up, f);      bj_vec3_normalize(s, s);      // right = up × f
+    bj_vec3 t;  bj_vec3_cross(t, f, s);                                      // up'
 
-    m[2][0] = s[2];
-    m[2][1] = t[2];
-    m[2][2] = -f[2];
-    m[2][3] = BJ_F(0.0);
-
-    m[3][0] = BJ_F(0.0);
-    m[3][1] = BJ_F(0.0);
-    m[3][2] = BJ_F(0.0);
-    m[3][3] = BJ_F(1.0);
+    m[0][0]=s[0]; m[0][1]=t[0]; m[0][2]=f[0]; m[0][3]=BJ_F(0.0);
+    m[1][0]=s[1]; m[1][1]=t[1]; m[1][2]=f[1]; m[1][3]=BJ_F(0.0);
+    m[2][0]=s[2]; m[2][1]=t[2]; m[2][2]=f[2]; m[2][3]=BJ_F(0.0);
+    m[3][0]=BJ_F(0.0); m[3][1]=BJ_F(0.0); m[3][2]=BJ_F(0.0); m[3][3]=BJ_F(1.0);
 
     bj_mat4_translation_inplace(m, -eye[0], -eye[1], -eye[2]);
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 /// Alias for \ref bj_vec4_add, adds two quaternions.
 #define bj_quat_add bj_vec4_add
@@ -1472,47 +1875,6 @@ static inline void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     q[3] = (M[k][j] - M[j][k]) * inv;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Builds a viewport transform (NDC -> window pixels).
-///
-/// Maps Normalized Device Coordinates (x_ndc, y_ndc, z_ndc) in [-1,1]
-/// to window coordinates:
-///   x_win = x + (x_ndc + 1) * (w/2)
-///   y_win = y + (1 - y_ndc) * (h/2)
-///   z_win = z_min + (z_ndc + 1) * ((z_max - z_min)/2)
-///
-/// Column-major, column-vector convention (like the rest of this file).
-///
-/// \param vpmat Output 4x4 viewport matrix
-/// \param x     Viewport origin X in pixels
-/// \param y     Viewport origin Y in pixels
-/// \param w     Viewport width  in pixels
-/// \param h     Viewport height in pixels
-////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_viewport(
-    bj_mat4 vpmat,
-    bj_real x,
-    bj_real y,
-    bj_real w,
-    bj_real h
-) {
-    const bj_real z_min = BJ_F(0.0);
-    const bj_real z_max = BJ_F(1.0);
-
-    const bj_real sx =  BJ_F(0.50) * w;
-    const bj_real sy = BJ_F(-0.50) * h;
-    const bj_real sz =  BJ_F(0.50) * (z_max - z_min);
-
-    const bj_real tx = x + BJ_F(0.50) * w;
-    const bj_real ty = y + BJ_F(0.50) * h;
-    const bj_real tz = BJ_F(0.50) * (z_max + z_min);
-
-    // Zero-initialize
-    vpmat[0][0] = sx;   vpmat[0][1] = BJ_F(0.0);  vpmat[0][2] = BJ_F(0.0);  vpmat[0][3] = BJ_F(0.0);
-    vpmat[1][0] = BJ_F(0.0);  vpmat[1][1] = sy;   vpmat[1][2] = BJ_F(0.0);  vpmat[1][3] = BJ_F(0.0);
-    vpmat[2][0] = BJ_F(0.0);  vpmat[2][1] = BJ_F(0.0);  vpmat[2][2] = sz;   vpmat[2][3] = BJ_F(0.0);
-    vpmat[3][0] = tx;   vpmat[3][1] = ty;   vpmat[3][2] = tz;   vpmat[3][3] = BJ_F(1.0);
-}
 
 /// \}
 
