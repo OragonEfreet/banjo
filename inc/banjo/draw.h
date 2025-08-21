@@ -8,7 +8,8 @@
 /// \brief 2D drawing facilities
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_DRAW_H
+#define BJ_DRAW_H
 #include <banjo/api.h>
 #include <banjo/bitmap.h>
 #include <banjo/error.h>
@@ -123,4 +124,5 @@ BANJO_EXPORT void bj_bitmap_draw_triangle(
     uint32_t   color
 );
 
+#endif
 /// \} // End of drawing group

@@ -12,7 +12,8 @@
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#ifndef BJ_EVENT_H
+#define BJ_EVENT_H
 
 #include <banjo/window.h>
 
@@ -535,4 +536,5 @@ BANJO_EXPORT bj_bool bj_poll_events(bj_event* p_event);
 BANJO_EXPORT void bj_dispatch_event(const bj_event* p_event);
 
 
+#endif
 /// \} // end of event group

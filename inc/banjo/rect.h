@@ -6,7 +6,8 @@
 /// \ingroup graphics
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_RECT_H
+#define BJ_RECT_H
 
 #include <banjo/api.h>
 
@@ -53,6 +54,8 @@ BANJO_EXPORT bj_bool bj_rect_intersect(
     const bj_rect* p_rect_b,
     bj_rect*       p_result
 );
+
+#endif
 
 /// \} // End of rect group
 

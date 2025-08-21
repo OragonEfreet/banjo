@@ -12,7 +12,8 @@
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_VIDEO_H
+#define BJ_VIDEO_H
 
 #include <banjo/error.h>
 #include <banjo/window.h>
@@ -157,4 +158,5 @@ typedef struct {
     bj_video_layer* (*create)(bj_error** p_error);   ///< Function to create the backend
 } bj_video_layer_create_info;
 
+#endif
 /// \} // End of video group

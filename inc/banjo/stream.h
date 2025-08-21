@@ -6,7 +6,8 @@
 /// \ingroup io
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_STREAM_H
+#define BJ_STREAM_H
 
 #include <banjo/api.h>
 #include <banjo/error.h>
@@ -151,4 +152,5 @@ BANJO_EXPORT size_t bj_stream_tell(
 ///
 #define bj_stream_skip_t(stream, type) bj_stream_read(stream, 0, sizeof(type))
 
+#endif
 /// \} // End of stream group

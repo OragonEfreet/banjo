@@ -9,7 +9,8 @@
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_TIME_H
+#define BJ_TIME_H
 
 #include <banjo/api.h>
 #include <banjo/error.h>
@@ -162,4 +163,5 @@ double bj_stopwatch_step_delay(
     bj_stopwatch* p_stopwatch
 );
 
+#endif
 /// \} // End of time group

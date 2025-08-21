@@ -13,7 +13,8 @@
 ///        It is implemented as a singly linked list.
 ///
 /// \{
-#pragma once
+#ifndef BJ_LIST_H
+#define BJ_LIST_H
 
 #include <banjo/api.h>
 #include <banjo/memory.h>
@@ -257,4 +258,5 @@ BANJO_EXPORT void* bj_list_iterator_next(
     bj_list_iterator* iterator
 );
 
+#endif
 /// \} End of list group

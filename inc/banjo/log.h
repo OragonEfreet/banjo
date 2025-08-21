@@ -9,7 +9,8 @@
 ///
 /// \brief Logging utility functions
 /// \{
-#pragma once
+#ifndef BJ_LOG_H
+#define BJ_LOG_H
 
 #include <banjo/api.h>
 
@@ -230,4 +231,5 @@ BANJO_EXPORT int bj_log_get_level(void);
 /// \see bj_log, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal
 BANJO_EXPORT size_t bj_message(int level, const char* p_file, int line, const char* p_format, ...);
 
+#endif
 /// \} // End of array log

@@ -6,7 +6,8 @@
 /// \ingroup graphics
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-#pragma once
+#ifndef BJ_PIXEL_H
+#define BJ_PIXEL_H
 
 #include <banjo/api.h>
 
@@ -198,4 +199,5 @@ BANJO_EXPORT size_t bj_compute_bitmap_stride(
 /// \param fmt Pixel format value.
 #define BJ_PIXEL_GET_ORDER(fmt)  (((fmt) >> 24) & 0xFF)
 
+#endif
 /// \} 

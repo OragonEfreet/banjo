@@ -7,7 +7,8 @@
 /// General-purpose API
 ///
 /// \{
-#pragma once
+#ifndef BJ_API_H
+#define BJ_API_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -192,4 +193,5 @@ typedef struct {
 ///
 BANJO_EXPORT const bj_build_info* bj_get_build_info(void);
 
+#endif
 /// \} End of core

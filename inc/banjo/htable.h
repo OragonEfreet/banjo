@@ -12,7 +12,8 @@
 ///        The elements are stored in an array of linked lists called buckets.
 ///
 /// \{
-#pragma once
+#ifndef BJ_HTABLE_H
+#define BJ_HTABLE_H
 
 #include <banjo/api.h>
 #include <banjo/array.h>
@@ -109,4 +110,5 @@ BANJO_EXPORT size_t bj_htable_len(
     const bj_htable* table
 );
 
+#endif
 /// \} End of htable group

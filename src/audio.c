@@ -5,7 +5,6 @@
 #include "config.h"
 #include "check.h"
 
-
 extern bj_audio_layer_create_info alsa_audio_layer_info;
 extern bj_audio_layer_create_info mme_audio_layer_info;
 extern bj_audio_layer_create_info noaudio_audio_layer_info;
@@ -125,63 +124,74 @@ inline static double make_note_value(
     uint64_t base_sample_index, 
     double   phase_step
 ) {
-    uint64_t sample_index = base_sample_index + i;
-    double phase = bj_fmod(sample_index * phase_step, 2.0 * BJ_PI); // wrap phase
+    const uint64_t sample_index = base_sample_index + i;
+    const double two_pi = BJ_TAU_D; /* 2PI exactly in double */
+
+    /* Use the double variant explicitly to avoid accidental float truncation
+       when BJ_USE_DOUBLE is off. */
+    const double phase = bj_fmodd(sample_index * phase_step, two_pi);
 
     switch (function) {
         case BJ_AUDIO_PLAY_SINE:
-            return bj_sin(phase);
+            return bj_sind(phase);
 
         case BJ_AUDIO_PLAY_SQUARE:
-            return bj_sin(phase) > 0.0 ? 0.2 : -0.2;
+            /* Cheap sign of sine; or compare phase against PI for duty=50%. */
+            return (bj_sind(phase) > 0.0) ? 0.2 : -0.2;
 
         case BJ_AUDIO_PLAY_TRIANGLE: {
-            double t = phase / (2.0 * BJ_PI);
-            return 4.0 * bj_fabs(t - bj_floor(t + 0.5)) - 1.0;
+            const double t = phase / two_pi;               /* 0..1 ramp */
+            return 4.0 * bj_absd(t - bj_floord(t + 0.5)) - 1.0;
         }
 
         case BJ_AUDIO_PLAY_SAWTOOTH: {
-            double t = phase / (2.0 * BJ_PI);
-            return 2.0 * (t - bj_floor(t + 0.5));
+            const double t = phase / two_pi;               /* 0..1 ramp */
+            return 2.0 * (t - bj_floord(t + 0.5));
         }
 
-        default: return 0;
+        default:
+            return 0.0;
     }
 }
 
 void bj_audio_play_note(
-    void* buffer,
-    unsigned                   frames,
-    const bj_audio_properties* p_audio,
-    void* p_user_data,
-    uint64_t                   base_sample_index
+    void*                        buffer,
+    unsigned                     frames,
+    const bj_audio_properties*   p_audio,
+    void*                        p_user_data,
+    uint64_t                     base_sample_index
 ) {
     bj_audio_play_note_data* data = (bj_audio_play_note_data*)p_user_data;
-    double                   freq = data->frequency;
-    double                   amplitude = (double)p_audio->amplitude;
-    double                   sample_rate = (double)p_audio->sample_rate;
-    double                   phase_step = 2.0 * BJ_PI * freq / sample_rate;
-    int                      channels = p_audio->channels;
 
-    for (unsigned i = 0; i < frames; i++) {
-        double output = make_note_value(i, data->function, base_sample_index, phase_step);
+    const double freq        = (double)data->frequency;
+    const double amplitude   = (double)p_audio->amplitude;   /* scale for int16 path */
+    const double sample_rate = (double)p_audio->sample_rate;
+    const double phase_step  = BJ_TAU_D * freq / sample_rate;
+    const int    channels    = p_audio->channels;
+
+    for (unsigned i = 0; i < frames; ++i) {
+        const double output = make_note_value(i, data->function, base_sample_index, phase_step);
 
         for (int ch = 0; ch < channels; ++ch) {
-            unsigned idx = (i * channels) + ch;
+            const unsigned idx = i * (unsigned)channels + (unsigned)ch;
 
             switch (p_audio->format) {
             case BJ_AUDIO_FORMAT_INT16: {
                 int16_t* buf = (int16_t*)buffer;
-                buf[idx] = (int16_t)(output * amplitude);
+                /* clamp to avoid wrap if amplitude drives beyond range */
+                double s = output * amplitude;
+                if (s >  32767.0) s =  32767.0;
+                if (s < -32768.0) s = -32768.0;
+                buf[idx] = (int16_t)s;
                 break;
             }
             case BJ_AUDIO_FORMAT_F32: {
                 float* buf = (float*)buffer;
-                buf[idx] = (float)output;
+                buf[idx] = (float)output;  /* amplitude can be baked into output if desired */
                 break;
             }
             default:
-                // unsupported format—silence
+                /* unsupported -> silence */
                 break;
             }
         }
