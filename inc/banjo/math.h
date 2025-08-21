@@ -1,5 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file bj_math.h
+/// \defgroup math Math
+/// \ingroup core
+///
 /// \brief C99 math shim with macro forwarding and bj_real-only utilities.
 ///
 /// Define BJ_USE_DOUBLE to make bj_real = double (else float).
@@ -7,6 +10,19 @@
 ///   - bj_*   → operates on bj_real (auto-switch with BJ_USE_DOUBLE)
 ///   - bj_*f  → explicit float forwards (1:1 to <math.h>)
 ///   - bj_*d  → explicit double forwards (1:1 to <math.h>)
+///
+/// The Math group also provides usual facilities for linear math, including
+/// - vector types: \ref bj_vec2, \ref bj_vec3 and \ref bj_vec4
+/// - 3x3 matrix with \ref bj_mat3
+/// - 3x2 matrix with \ref bj_mat3x2
+/// - 4x4 matrix with \ref bj_mat4
+/// - 4x3 matrix with \ref bj_mat4x3
+/// - Quaternion with \ref bj_quat
+///
+/// This library is initially a direct adaptation of 
+/// [linmath.h](https://github.com/datenwolf/linmath.h) 
+/// by Wolfgang Draxinger, but since I added some new types.
+///
 ///
 /// Utilities (clamp/step/smoothstep/fract/mod) exist **only** as bj_real.
 ////////////////////////////////////////////////////////////////////////////////
