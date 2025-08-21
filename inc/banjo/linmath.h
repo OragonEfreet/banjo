@@ -195,7 +195,7 @@ static inline bj_real bj_vec2_len(const bj_vec2 v) {
 /// \param v     The vec2
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_vec2_normalize(bj_vec2 res, const bj_vec2 v) {
-    bj_real inv_len = 1.0f / bj_sqrt(v[0] * v[0] + v[1] * v[1]);
+    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v[0] * v[0] + v[1] * v[1]);
     res[0] = v[0] * inv_len;
     res[1] = v[1] * inv_len;
 }
@@ -347,7 +347,7 @@ static inline bj_real bj_vec3_len(const bj_vec3 v) {
 /// \param v     The vec3
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_vec3_normalize(bj_vec3 res, const bj_vec3 v) {
-    bj_real inv_len = 1.0f / bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     res[0] = v[0] * inv_len;
     res[1] = v[1] * inv_len;
     res[2] = v[2] * inv_len;
@@ -417,7 +417,7 @@ static inline void bj_vec3_cross(bj_vec3 res, const bj_vec3 l, const bj_vec3 r)
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_vec3_reflect(bj_vec3 res, const bj_vec3 v, const bj_vec3 n)
 {
-    const bj_real p = 2.f * bj_vec3_dot(v, n);
+    const bj_real p = BJ_F(2.) * bj_vec3_dot(v, n);
     for (int i = 0; i < 3; ++i) {
         res[i] = v[i] - p * n[i];
     }
@@ -434,7 +434,7 @@ static inline void bj_vec3_reflect(bj_vec3 res, const bj_vec3 v, const bj_vec3 n
 /// \param d   The fourth scalar value
 ///
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_vec4_set(bj_vec2 res, bj_real a, bj_real b, bj_real c, bj_real d) {
+static inline void bj_vec4_set(bj_vec4 res, bj_real a, bj_real b, bj_real c, bj_real d) {
     res[0] = a; res[1] = b; res[2] = c; res[3] = d;
 }
 
@@ -540,7 +540,7 @@ static inline bj_real bj_vec4_len(const bj_vec4 v) {
 /// \param v     The vec4
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_vec4_normalize(bj_vec4 res, const bj_vec4 v) {
-    bj_real inv_len = 1.0f / bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
+    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
     res[0] = v[0] * inv_len;
     res[1] = v[1] * inv_len;
     res[2] = v[2] * inv_len;
@@ -603,7 +603,7 @@ static inline void bj_vec4_cross(bj_vec4 res, const bj_vec4 l, const bj_vec4 r)
     res[0] = l[1] * r[2] - l[2] * r[1];
     res[1] = l[2] * r[0] - l[0] * r[2];
     res[2] = l[0] * r[1] - l[1] * r[0];
-    res[3] = 1.f;
+    res[3] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -618,7 +618,7 @@ static inline void bj_vec4_cross(bj_vec4 res, const bj_vec4 l, const bj_vec4 r)
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_vec4_reflect(bj_vec4 res, const bj_vec4 v, const bj_vec4 n)
 {
-    bj_real p = 2.f * bj_vec4_dot(v, n);
+    bj_real p = BJ_F(2.0) * bj_vec4_dot(v, n);
     for (int i = 0; i < 4; ++i) {
         res[i] = v[i] - p * n[i];
     }
@@ -635,7 +635,7 @@ static inline void bj_mat4_identity(bj_mat4 mat)
 {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            mat[i][j] = i == j ? 1.f : 0.f;
+            mat[i][j] = i == j ? BJ_F(1.0) : BJ_F(0.0);
         }
     }
 }
@@ -787,7 +787,7 @@ static inline void bj_mat4_mul(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs
     bj_mat4 temp;
     for (int c = 0; c < 4; ++c) {
         for (int r = 0; r < 4; ++r) {
-            temp[c][r] = 0.f;
+            temp[c][r] = BJ_F(0.0);
             for (int k = 0; k < 4; ++k)
                 temp[c][r] += lhs[k][r] * rhs[c][k];
         }
@@ -807,7 +807,7 @@ static inline void bj_mat4_mul(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs
 static inline void bj_mat4_mul_vec4(bj_vec4 res, const bj_mat4 mat, const bj_vec4 v)
 {
     for (int j = 0; j < 4; ++j) {
-        res[j] = 0.f;
+        res[j] = BJ_F(0.0);
         for (int i = 0; i < 4; ++i) {
             res[j] += mat[i][j] * v[i];
         }
@@ -845,7 +845,7 @@ static inline void bj_mat4_translation(bj_mat4 res, bj_real x, bj_real y, bj_rea
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_translation_inplace(bj_mat4 M, bj_real x, bj_real y, bj_real z)
 {
-    bj_vec4 t = { x, y, z, 0 };
+    bj_vec4 t = { x, y, z, BJ_F(0.0) };
     bj_vec4 r;
     for (int i = 0; i < 4; ++i) {
         bj_mat4_row(r, M, i);
@@ -867,7 +867,7 @@ static inline void bj_mat4_mul_outer(bj_mat4 res, const bj_vec3 a, const bj_vec3
 {
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            res[i][j] = i < 3 && j < 3 ? a[i] * b[j] : 0.f;
+            res[i][j] = i < 3 && j < 3 ? a[i] * b[j] : BJ_F(0.0);
         }
     }
 }
@@ -891,16 +891,16 @@ static inline void bj_mat4_rotate(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_
     bj_real c = bj_cos(angle);
     bj_vec3 u = { x, y, z };
 
-    if (bj_vec3_len(u) > 1e-4) {
+    if (bj_vec3_len(u) > BJ_F(1e-4)) {
         bj_vec3_normalize(u, u);
         bj_mat4 T;
         bj_mat4_mul_outer(T, u, u);
 
         bj_mat4 S = {
-            {    0,  u[2], -u[1], 0},
-            {-u[2],     0,  u[0], 0},
-            { u[1], -u[0],     0, 0},
-            {    0,     0,     0, 0}
+            {    BJ_F(0),  u[2], -u[1], BJ_F(0)},
+            {-u[2],     BJ_F(0),  u[0], BJ_F(0)},
+            { u[1], -u[0],     BJ_F(0), BJ_F(0)},
+            {    BJ_F(0),     BJ_F(0),     BJ_F(0), BJ_F(0)}
         };
         bj_mat4_scale(S, S, s);
 
@@ -913,7 +913,7 @@ static inline void bj_mat4_rotate(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_
         bj_mat4_add(T, T, C);
         bj_mat4_add(T, T, S);
 
-        T[3][3] = 1.f;
+        T[3][3] = BJ_F(1.0);
         bj_mat4_mul(res, mat, T);
     } else {
         bj_mat4_copy(res, mat);
@@ -930,15 +930,15 @@ static inline void bj_mat4_rotate(bj_mat4 res, const bj_mat4 mat, bj_real x, bj_
 /// \param mat The matrix to rotate.
 /// \param angle The angle to rotate by (in radians).
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_ma4_rotate_x(bj_mat4 res, const bj_mat4 mat, bj_real angle)
+static inline void bj_mat4_rotate_x(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
     bj_real s = bj_sin(angle);
     bj_real c = bj_cos(angle);
     bj_mat4 R = {
-        {1.f, 0.f, 0.f, 0.f},
-        {0.f,   c,   s, 0.f},
-        {0.f,  -s,   c, 0.f},
-        {0.f, 0.f, 0.f, 1.f}
+        {BJ_F(1.0), BJ_F(0.0), BJ_F(0.0), BJ_F(0.0)},
+        {BJ_F(0.0),   c,   s, BJ_F(0.0)},
+        {BJ_F(0.0),  -s,   c, BJ_F(0.0)},
+        {BJ_F(0.0), BJ_F(0.0), BJ_F(0.0), BJ_F(1.0)}
     };
     bj_mat4_mul(res, mat, R);
 }
@@ -953,15 +953,15 @@ static inline void bj_ma4_rotate_x(bj_mat4 res, const bj_mat4 mat, bj_real angle
 /// \param mat The matrix to rotate.
 /// \param angle The angle to rotate by (in radians).
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_ma4_rotate_y(bj_mat4 res, const bj_mat4 mat, bj_real angle)
+static inline void bj_mat4_rotate_y(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
     bj_real s = bj_sin(angle);
     bj_real c = bj_cos(angle);
     bj_mat4 R = {
-        {   c, 0.f,  -s, 0.f},
-        { 0.f, 1.f, 0.f, 0.f},
-        {   s, 0.f,   c, 0.f},
-        { 0.f, 0.f, 0.f, 1.f}
+        {   c, BJ_F(0.0),  -s, BJ_F(0.0)},
+        { BJ_F(0.0), BJ_F(1.0), BJ_F(0.0), BJ_F(0.0)},
+        {   s, BJ_F(0.0),   c, BJ_F(0.0)},
+        { BJ_F(0.0), BJ_F(0.0), BJ_F(0.0), BJ_F(1.0)}
     };
     bj_mat4_mul(res, mat, R);
 }
@@ -976,15 +976,15 @@ static inline void bj_ma4_rotate_y(bj_mat4 res, const bj_mat4 mat, bj_real angle
 /// \param angle The angle (in radians) to rotate the matrix around the Z-axis.
 /// \param res The resulting rotated matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_ma4_rotate_z(bj_mat4 res, const bj_mat4 mat, bj_real angle)
+static inline void bj_mat4_rotate_z(bj_mat4 res, const bj_mat4 mat, bj_real angle)
 {
     bj_real s = bj_sin(angle);
     bj_real c = bj_cos(angle);
     bj_mat4 R = {
-        {   c,   s, 0.f, 0.f},
-        {  -s,   c, 0.f, 0.f},
-        { 0.f, 0.f, 1.f, 0.f},
-        { 0.f, 0.f, 0.f, 1.f}
+        {   c,   s, BJ_F(0.0), BJ_F(0.0)},
+        {  -s,   c, BJ_F(0.0), BJ_F(0.0)},
+        { BJ_F(0.0), BJ_F(0.0), BJ_F(1.0), BJ_F(0.0)},
+        { BJ_F(0.0), BJ_F(0.0), BJ_F(0.0), BJ_F(1.0)}
     };
     bj_mat4_mul(res, mat, R);
 }
@@ -1009,18 +1009,18 @@ static inline void bj_mat4_rotate_arcball(bj_mat4 R, const bj_mat4 M, bj_vec2 co
     bj_vec2 a = { _a[0], _a[1] };
     bj_vec2 b = { _b[0], _b[1] };;
 
-    bj_real z_a = 0.;
-    bj_real z_b = 0.;
+    bj_real z_a = BJ_F(0.0);
+    bj_real z_b = BJ_F(0.0);
 
-    if (bj_vec2_len(a) < 1.) {
-        z_a = bj_sqrt(1.f - bj_vec2_dot(a, a));
+    if (bj_vec2_len(a) < BJ_F(1.0)) {
+        z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a, a));
     }
     else {
         bj_vec2_normalize(a, a);
     }
 
-    if (bj_vec2_len(b) < 1.) {
-        z_b = bj_sqrt(1.f - bj_vec2_dot(b, b));
+    if (bj_vec2_len(b) < BJ_F(1.0)) {
+        z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b, b));
     }
     else {
         bj_vec2_normalize(b, b);
@@ -1062,7 +1062,7 @@ static inline void bj_mat4_inverse(bj_mat4 res, const bj_mat4 mat) {
     c[4] = mat[2][1] * mat[3][3] - mat[3][1] * mat[2][3];
     c[5] = mat[2][2] * mat[3][3] - mat[3][2] * mat[2][3];
 
-    bj_real idet = 1.0f / (s[0] * c[5] - s[1] * c[4] + s[2] * c[3] + s[3] * c[2] - s[4] * c[1] + s[5] * c[0]);
+    bj_real idet = BJ_F(1.0) / (s[0] * c[5] - s[1] * c[4] + s[2] * c[3] + s[3] * c[2] - s[4] * c[1] + s[5] * c[0]);
 
     res[0][0] = (mat[1][1] * c[5] - mat[1][2] * c[4] + mat[1][3] * c[3]) * idet;
     res[0][1] = (-mat[0][1] * c[5] + mat[0][2] * c[4] - mat[0][3] * c[3]) * idet;
@@ -1096,7 +1096,7 @@ static inline void bj_mat4_inverse(bj_mat4 res, const bj_mat4 mat) {
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_orthonormalize(bj_mat4 res, const bj_mat4 mat) {
     bj_mat4_copy(res, mat);
-    bj_real s = 1.f;
+    bj_real s = BJ_F(1.0);
     bj_vec3 h;
 
     bj_vec3_normalize(res[2], res[2]);
@@ -1131,16 +1131,16 @@ static inline void bj_mat4_orthonormalize(bj_mat4 res, const bj_mat4 mat) {
 /// \param fmat The resulting perspective projection matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_frustum(bj_mat4 fmat, bj_real l, bj_real r, bj_real b, bj_real t, bj_real n, bj_real f) {
-    fmat[0][0] = 2.f * n / (r - l);
-    fmat[0][1] = fmat[0][2] = fmat[0][3] = 0.f;
-    fmat[1][1] = 2.f * n / (t - b);
-    fmat[1][0] = fmat[1][2] = fmat[1][3] = 0.f;
+    fmat[0][0] = BJ_F(2.0) * n / (r - l);
+    fmat[0][1] = fmat[0][2] = fmat[0][3] = BJ_F(0.0);
+    fmat[1][1] = BJ_F(2.0) * n / (t - b);
+    fmat[1][0] = fmat[1][2] = fmat[1][3] = BJ_F(0.0);
     fmat[2][0] = (r + l) / (r - l);
     fmat[2][1] = (t + b) / (t - b);
     fmat[2][2] = -(f + n) / (f - n);
-    fmat[2][3] = -1.f;
-    fmat[3][2] = -2.f * (f * n) / (f - n);
-    fmat[3][0] = fmat[3][1] = fmat[3][3] = 0.f;
+    fmat[2][3] = BJ_F(-1.0);
+    fmat[3][2] = BJ_F(-2.0) * (f * n) / (f - n);
+    fmat[3][0] = fmat[3][1] = fmat[3][3] = BJ_F(0.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1158,16 +1158,16 @@ static inline void bj_mat4_frustum(bj_mat4 fmat, bj_real l, bj_real r, bj_real b
 /// \param omat The resulting orthographic projection matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_ortho(bj_mat4 omat, bj_real l, bj_real r, bj_real b, bj_real t, bj_real n, bj_real f) {
-    omat[0][0] = 2.f / (r - l);
-    omat[0][1] = omat[0][2] = omat[0][3] = 0.f;
-    omat[1][1] = 2.f / (t - b);
-    omat[1][0] = omat[1][2] = omat[1][3] = 0.f;
-    omat[2][2] = -2.f / (f - n);
-    omat[2][0] = omat[2][1] = omat[2][3] = 0.f;
+    omat[0][0] = BJ_F(2.0) / (r - l);
+    omat[0][1] = omat[0][2] = omat[0][3] = BJ_F(0.0);
+    omat[1][1] = BJ_F(2.0) / (t - b);
+    omat[1][0] = omat[1][2] = omat[1][3] = BJ_F(0.0);
+    omat[2][2] = BJ_F(-2.0) / (f - n);
+    omat[2][0] = omat[2][1] = omat[2][3] = BJ_F(0.0);
     omat[3][0] = -(r + l) / (r - l);
     omat[3][1] = -(t + b) / (t - b);
     omat[3][2] = -(f + n) / (f - n);
-    omat[3][3] = 1.f;
+    omat[3][3] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1183,23 +1183,23 @@ static inline void bj_mat4_ortho(bj_mat4 omat, bj_real l, bj_real r, bj_real b, 
 /// \param pmat The resulting perspective projection matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_mat4_perspective(bj_mat4 pmat, bj_real y_fov, bj_real aspect, bj_real n, bj_real f) {
-    const bj_real a = 1.f / bj_tan(y_fov / 2.f);
+    const bj_real a = BJ_F(1.0) / bj_tan(y_fov / BJ_F(2.0));
     pmat[0][0] = a / aspect;
-    pmat[0][1] = 0.f;
-    pmat[0][2] = 0.f;
-    pmat[0][3] = 0.f;
-    pmat[1][0] = 0.f;
+    pmat[0][1] = BJ_F(0.0);
+    pmat[0][2] = BJ_F(0.0);
+    pmat[0][3] = BJ_F(0.0);
+    pmat[1][0] = BJ_F(0.0);
     pmat[1][1] = a;
-    pmat[1][2] = 0.f;
-    pmat[1][3] = 0.f;
-    pmat[2][0] = 0.f;
-    pmat[2][1] = 0.f;
+    pmat[1][2] = BJ_F(0.0);
+    pmat[1][3] = BJ_F(0.0);
+    pmat[2][0] = BJ_F(0.0);
+    pmat[2][1] = BJ_F(0.0);
     pmat[2][2] = -((f + n) / (f - n));
-    pmat[2][3] = -1.f;
-    pmat[3][0] = 0.f;
-    pmat[3][1] = 0.f;
-    pmat[3][2] = -((2.f * f * n) / (f - n));
-    pmat[3][3] = 0.f;
+    pmat[2][3] = BJ_F(-1.0);
+    pmat[3][0] = BJ_F(0.0);
+    pmat[3][1] = BJ_F(0.0);
+    pmat[3][2] = -((BJ_F(2.0) * f * n) / (f - n));
+    pmat[3][3] = BJ_F(0.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1229,22 +1229,22 @@ static inline void bj_mat4_lookat(bj_mat4 m, const bj_vec3 eye, const bj_vec3 ce
     m[0][0] = s[0];
     m[0][1] = t[0];
     m[0][2] = -f[0];
-    m[0][3] = 0.f;
+    m[0][3] = BJ_F(0.0);
 
     m[1][0] = s[1];
     m[1][1] = t[1];
     m[1][2] = -f[1];
-    m[1][3] = 0.f;
+    m[1][3] = BJ_F(0.0);
 
     m[2][0] = s[2];
     m[2][1] = t[2];
     m[2][2] = -f[2];
-    m[2][3] = 0.f;
+    m[2][3] = BJ_F(0.0);
 
-    m[3][0] = 0.f;
-    m[3][1] = 0.f;
-    m[3][2] = 0.f;
-    m[3][3] = 1.f;
+    m[3][0] = BJ_F(0.0);
+    m[3][1] = BJ_F(0.0);
+    m[3][2] = BJ_F(0.0);
+    m[3][3] = BJ_F(1.0);
 
     bj_mat4_translation_inplace(m, -eye[0], -eye[1], -eye[2]);
 }
@@ -1278,8 +1278,8 @@ static inline void bj_mat4_lookat(bj_mat4 m, const bj_vec3 eye, const bj_vec3 ce
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_quat_identity(bj_quat q)
 {
-    q[0] = q[1] = q[2] = 0.f;
-    q[3] = 1.f;
+    q[0] = q[1] = q[2] = BJ_F(0.0);
+    q[3] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1337,8 +1337,8 @@ static inline void bj_quat_conjugate(bj_quat res, const bj_quat q)
 static inline void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 axis) {
     bj_vec3 axis_norm;
     bj_vec3_normalize(axis_norm, axis);
-    const bj_real s = bj_sin(angle / 2);
-    const bj_real c = bj_cos(angle / 2);
+    const bj_real s = bj_sin(angle / BJ_F(2.0));
+    const bj_real c = bj_cos(angle / BJ_F(2.0));
     bj_vec3_scale(res, axis_norm, s);
     res[3] = c;
 }
@@ -1359,7 +1359,7 @@ static inline void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 
     bj_vec3 u = { q[0], q[1], q[2] };
 
     bj_vec3_cross(t, q_xyz, v);
-    bj_vec3_scale(t, t, 2);
+    bj_vec3_scale(t, t, BJ_F(2));
 
     bj_vec3_cross(u, q_xyz, t);
     bj_vec3_scale(t, t, q[3]);
@@ -1387,22 +1387,22 @@ static inline void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
     bj_real d2 = d * d;
 
     res[0][0] = a2 + b2 - c2 - d2;
-    res[0][1] = 2.f * (b * c + a * d);
-    res[0][2] = 2.f * (b * d - a * c);
-    res[0][3] = 0.f;
+    res[0][1] = BJ_F(2.0) * (b * c + a * d);
+    res[0][2] = BJ_F(2.0) * (b * d - a * c);
+    res[0][3] = BJ_F(0.0);
 
-    res[1][0] = 2 * (b * c - a * d);
+    res[1][0] = BJ_F(2) * (b * c - a * d);
     res[1][1] = a2 - b2 + c2 - d2;
-    res[1][2] = 2.f * (c * d + a * b);
-    res[1][3] = 0.f;
+    res[1][2] = BJ_F(2.0) * (c * d + a * b);
+    res[1][3] = BJ_F(0.0);
 
-    res[2][0] = 2.f * (b * d + a * c);
-    res[2][1] = 2.f * (c * d - a * b);
+    res[2][0] = BJ_F(2.0) * (b * d + a * c);
+    res[2][1] = BJ_F(2.0) * (c * d - a * b);
     res[2][2] = a2 - b2 - c2 + d2;
-    res[2][3] = 0.f;
+    res[2][3] = BJ_F(0.0);
 
-    res[3][0] = res[3][1] = res[3][2] = 0.f;
-    res[3][3] = 1.f;
+    res[3][0] = res[3][1] = res[3][2] = BJ_F(0.0);
+    res[3][3] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1420,7 +1420,7 @@ static inline void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj
     bj_quat_mul_vec3(R[1], q, M[1]);
     bj_quat_mul_vec3(R[2], q, M[2]);
 
-    R[3][0] = R[3][1] = R[3][2] = 0.f;
+    R[3][0] = R[3][1] = R[3][2] = BJ_F(0.0);
     R[0][3] = M[0][3];
     R[1][3] = M[1][3];
     R[2][3] = M[2][3];
@@ -1436,7 +1436,7 @@ static inline void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj
 /// \param M The 4x4 rotation matrix to convert.
 ////////////////////////////////////////////////////////////////////////////////
 static inline void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
-    bj_real r = 0.f;
+    bj_real r = BJ_F(0.0);
     int i, j, k;
 
     int perm[] = { 0, 1, 2, 0, 1 };
@@ -1454,24 +1454,67 @@ static inline void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     j = p[1];
     k = p[2];
 
-    r = bj_sqrt(1.f + M[i][i] - M[j][j] - M[k][k]);
+    r = bj_sqrt(BJ_F(1.0) + M[i][i] - M[j][j] - M[k][k]);
 
-    if (r < 1e-6f) {
-        q[0] = 0.f;
-        q[1] = 0.f;
-        q[2] = 0.f;
-        q[3] = 1.f;
+    if (r < BJ_F(1e-6)) {
+        q[0] = BJ_F(0.0);
+        q[1] = BJ_F(0.0);
+        q[2] = BJ_F(0.0);
+        q[3] = BJ_F(1.0);
         return;
     }
 
-    bj_real inv = 0.5f / r;
+    bj_real inv = BJ_F(0.5) / r;
 
-    q[i] = 0.5f * r;
+    q[i] = BJ_F(0.5) * r;
     q[j] = (M[i][j] + M[j][i]) * inv;
     q[k] = (M[k][i] + M[i][k]) * inv;
     q[3] = (M[k][j] - M[j][k]) * inv;
 }
-#endif
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Builds a viewport transform (NDC -> window pixels).
+///
+/// Maps Normalized Device Coordinates (x_ndc, y_ndc, z_ndc) in [-1,1]
+/// to window coordinates:
+///   x_win = x + (x_ndc + 1) * (w/2)
+///   y_win = y + (1 - y_ndc) * (h/2)
+///   z_win = z_min + (z_ndc + 1) * ((z_max - z_min)/2)
+///
+/// Column-major, column-vector convention (like the rest of this file).
+///
+/// \param vpmat Output 4x4 viewport matrix
+/// \param x     Viewport origin X in pixels
+/// \param y     Viewport origin Y in pixels
+/// \param w     Viewport width  in pixels
+/// \param h     Viewport height in pixels
+////////////////////////////////////////////////////////////////////////////////
+static inline void bj_mat4_viewport(
+    bj_mat4 vpmat,
+    bj_real x,
+    bj_real y,
+    bj_real w,
+    bj_real h
+) {
+    const bj_real z_min = BJ_F(0.0);
+    const bj_real z_max = BJ_F(1.0);
+
+    const bj_real sx =  BJ_F(0.50) * w;
+    const bj_real sy = BJ_F(-0.50) * h;
+    const bj_real sz =  BJ_F(0.50) * (z_max - z_min);
+
+    const bj_real tx = x + BJ_F(0.50) * w;
+    const bj_real ty = y + BJ_F(0.50) * h;
+    const bj_real tz = BJ_F(0.50) * (z_max + z_min);
+
+    // Zero-initialize
+    vpmat[0][0] = sx;   vpmat[0][1] = BJ_F(0.0);  vpmat[0][2] = BJ_F(0.0);  vpmat[0][3] = BJ_F(0.0);
+    vpmat[1][0] = BJ_F(0.0);  vpmat[1][1] = sy;   vpmat[1][2] = BJ_F(0.0);  vpmat[1][3] = BJ_F(0.0);
+    vpmat[2][0] = BJ_F(0.0);  vpmat[2][1] = BJ_F(0.0);  vpmat[2][2] = sz;   vpmat[2][3] = BJ_F(0.0);
+    vpmat[3][0] = tx;   vpmat[3][1] = ty;   vpmat[3][2] = tz;   vpmat[3][3] = BJ_F(1.0);
+}
 
 /// \}
+
+#endif
 

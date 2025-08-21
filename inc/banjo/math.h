@@ -25,11 +25,11 @@
 #ifdef BJ_USE_DOUBLE
     typedef double bj_real;
     #define BJ_F(x) x
-    #define BJ_EPS  BJ_F(1e-12)
+    #define BJ_EPSILON  BJ_F(1e-12)
 #else
     typedef float  bj_real;
     #define BJ_F(x) x##f
-    #define BJ_EPS  BJ_F(1e-6)
+    #define BJ_EPSILON  BJ_F(1e-6)
 #endif
 
 /*-------------------------------- Constants --------------------------------*/
