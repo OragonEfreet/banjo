@@ -132,6 +132,12 @@
 #    endif
 #endif
 
+#if defined(_MSC_VER)
+#  define BJ_ALWAYS_INLINE __forceinline
+#else
+#  define BJ_ALWAYS_INLINE __attribute__((always_inline)) inline
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \typedef bj_bool
 /// \brief Boolean type used throughout the BJ codebase.

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file math.h
+/// \file linmath.h
 /// Linear math library.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup math Math
@@ -60,18 +60,18 @@ typedef bj_real bj_vec4[4];
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Defines a 3x3 matrix type.
 ///
-/// This type represents a 3x3 matrix, where each row is a `bj_vec3` vector.
+/// This type represents a 3x3 matrix, where each column is a `bj_vec3` vector.
 /// It is commonly used for transformations such as rotations, scaling, and translations.
 ///
 /// \note The matrix is represented as an array of four `bj_vec3` values.
 /// \see bj_vec3
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_vec3 bj_mat3[4];
+typedef bj_vec3 bj_mat3[3];
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Defines a 4x4 matrix type.
 ///
-/// This type represents a 4x4 matrix, where each row is a `bj_vec4` vector.
+/// This type represents a 4x4 matrix, where each column is a `bj_vec4` vector.
 /// It is commonly used for transformations such as rotations, scaling, and translations.
 ///
 /// \note The matrix is represented as an array of four `bj_vec4` values.
@@ -753,7 +753,11 @@ static inline void bj_mat3_scale(bj_mat3 res, const bj_mat3 m, bj_real k) {
 /// \param lhs Left operand.
 /// \param rhs Right operand.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat3_mul(bj_mat3 res, const bj_mat3 lhs, const bj_mat3 rhs) {
+static inline void bj_mat3_mul(
+    bj_real       res[restrict 3][3],
+    const bj_real lhs[restrict 3][3],
+    const bj_real rhs[restrict 3][3]
+) {
     bj_mat3 tmp;
     for (int c = 0; c < 3; ++c) {
         for (int r = 0; r < 3; ++r) {
@@ -772,7 +776,11 @@ static inline void bj_mat3_mul(bj_mat3 res, const bj_mat3 lhs, const bj_mat3 rhs
 /// \param m   Matrix.
 /// \param v   Vector.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat3_mul_vec3(bj_vec3 res, const bj_mat3 m, const bj_vec3 v) {
+static inline void bj_mat3_mul_vec3(
+    bj_real       res[restrict 3],
+    const bj_real m[restrict 3][3],
+    const bj_real v[restrict 3]
+) {
     for (int j = 0; j < 3; ++j) {
         res[j] = BJ_F(0.0);
         for (int i = 0; i < 3; ++i)
@@ -940,7 +948,7 @@ static inline void bj_mat3_inverse(bj_mat3 res, const bj_mat3 m) {
 /// \param b    Bottom world bound
 /// \param t    Top    world bound
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat3_ortho(bj_mat3 omat,
+static inline void bj_mat3_ortho(bj_real omat[restrict 3][3],
                                  bj_real l, bj_real r,
                                  bj_real b, bj_real t)
 {
@@ -975,7 +983,7 @@ static inline void bj_mat3_ortho(bj_mat3 omat,
 /// \param w     Viewport width  in pixels
 /// \param h     Viewport height in pixels
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat3_viewport(bj_mat3 vpmat,
+static inline void bj_mat3_viewport(bj_real vpmat[restrict 3][3],
                                     bj_real x, bj_real y,
                                     bj_real w, bj_real h)
 {
@@ -1144,8 +1152,11 @@ static inline void bj_mat4_scale_xyz(bj_mat4 res, const bj_mat4 mat, bj_real x, 
 /// \param lhs The left-hand matrix.
 /// \param rhs The right-hand matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_mul(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs)
-{
+static inline void bj_mat4_mul(
+    bj_real       res[restrict 4][4],
+    const bj_real lhs[restrict 4][4],
+    const bj_real rhs[restrict 4][4]
+) {
     bj_mat4 temp;
     for (int c = 0; c < 4; ++c) {
         for (int r = 0; r < 4; ++r) {
@@ -1166,8 +1177,11 @@ static inline void bj_mat4_mul(bj_mat4 res, const bj_mat4 lhs, const bj_mat4 rhs
 /// \param mat The matrix to multiply.
 /// \param v The vector to multiply.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_mul_vec4(bj_vec4 res, const bj_mat4 mat, const bj_vec4 v)
-{
+static inline void bj_mat4_mul_vec4(
+    bj_real       res[restrict 4],
+    const bj_real mat[restrict 4][4],
+    const bj_real v[restrict 4]
+) {
     for (int j = 0; j < 4; ++j) {
         res[j] = BJ_F(0.0);
         for (int i = 0; i < 4; ++i) {
@@ -1492,17 +1506,31 @@ static inline void bj_mat4_orthonormalize(bj_mat4 res, const bj_mat4 mat) {
 /// \param f The far plane of the frustum.
 /// \param fmat The resulting perspective projection matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_frustum(bj_mat4 fmat, bj_real l, bj_real r, bj_real b, bj_real t, bj_real n, bj_real f) {
+static inline void bj_mat4_frustum(bj_real fmat[restrict 4][4],
+                                   bj_real l, bj_real r,
+                                   bj_real b, bj_real t,
+                                   bj_real n, bj_real f)
+{
+    // X, Y scales (note Y negative for Y-down)
     fmat[0][0] = BJ_F(2.0) * n / (r - l);
     fmat[0][1] = fmat[0][2] = fmat[0][3] = BJ_F(0.0);
-    fmat[1][1] = BJ_F(2.0) * n / (t - b);
-    fmat[1][0] = fmat[1][2] = fmat[1][3] = BJ_F(0.0);
+
+    fmat[1][0] = BJ_F(0.0);
+    fmat[1][1] = BJ_F(-2.0) * n / (t - b);
+    fmat[1][2] = fmat[1][3] = BJ_F(0.0);
+
+    // Off-center terms
     fmat[2][0] = (r + l) / (r - l);
     fmat[2][1] = (t + b) / (t - b);
-    fmat[2][2] = -(f + n) / (f - n);
-    fmat[2][3] = BJ_F(-1.0);
-    fmat[3][2] = BJ_F(-2.0) * (f * n) / (f - n);
-    fmat[3][0] = fmat[3][1] = fmat[3][3] = BJ_F(0.0);
+
+    // Depth in [0,1] with w=+z_eye
+    fmat[2][2] =  f / (f - n);
+    fmat[2][3] =  BJ_F(1.0);
+
+    fmat[3][0] = BJ_F(0.0);
+    fmat[3][1] = BJ_F(0.0);
+    fmat[3][2] = -(f * n) / (f - n);
+    fmat[3][3] = BJ_F(0.0);
 }
 
 
@@ -1524,11 +1552,15 @@ static inline void bj_mat4_frustum(bj_mat4 fmat, bj_real l, bj_real r, bj_real b
 /// \param l,r,b,t World bounds
 /// \param n,f     Near/Far plane distances
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_ortho(bj_mat4 omat,
-                                 bj_real l, bj_real r,
-                                 bj_real b, bj_real t,
-                                 bj_real n, bj_real f)
-{
+static inline void bj_mat4_ortho(
+    bj_real omat[restrict 4][4],
+    bj_real l, 
+    bj_real r,
+    bj_real b, 
+    bj_real t,
+    bj_real n, 
+    bj_real f
+) {
     omat[0][0] = BJ_F(2.0) / (r - l);
     omat[0][1] = omat[0][2] = omat[0][3] = BJ_F(0.0);
 
@@ -1560,7 +1592,7 @@ static inline void bj_mat4_ortho(bj_mat4 omat,
 /// \param n      Near plane distance  (> 0)
 /// \param f      Far  plane distance  (> n)
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_perspective(bj_mat4 pmat,
+static inline void bj_mat4_perspective(bj_real pmat[restrict 4][4],
                                        bj_real y_fov, bj_real aspect,
                                        bj_real n, bj_real f)
 {
@@ -1605,7 +1637,7 @@ static inline void bj_mat4_perspective(bj_mat4 pmat,
 /// \param x,y   Viewport origin in pixels
 /// \param w,h   Viewport size in pixels
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_viewport(bj_mat4 vpmat,
+static inline void bj_mat4_viewport(bj_real vpmat[restrict 4][4],
                                     bj_real x, bj_real y,
                                     bj_real w, bj_real h)
 {
@@ -1636,7 +1668,7 @@ static inline void bj_mat4_viewport(bj_mat4 vpmat,
 /// \param center Target point the camera looks at
 /// \param up     World up
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_lookat(bj_mat4 m,
+static inline void bj_mat4_lookat(bj_real m[restrict 4][4],
                                   const bj_vec3 eye,
                                   const bj_vec3 center,
                                   const bj_vec3 up)
