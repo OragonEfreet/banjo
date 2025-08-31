@@ -3,7 +3,6 @@
 /// Colored balls thrown at random angles
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
-#include <banjo/bitmap.h>
 #include <banjo/draw.h>
 #include <banjo/event.h>
 #include <banjo/log.h>
