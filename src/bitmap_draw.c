@@ -107,10 +107,10 @@ void bj_bitmap_draw_circle(
     bj_bitmap* p_bitmap,
     int        cx,
     int        cy,
-    bj_real    radius,
+    int        radius,
     uint32_t   color)
 {
-    int r = (int)(radius + BJ_F(0.5));
+    int r = (int)((bj_real)radius + BJ_F(0.5));
     if (r <= 0) {
         bj_bitmap_draw_line(p_bitmap, cx, cy, cx, cy, color);
         return;
@@ -145,10 +145,10 @@ void bj_bitmap_draw_filled_circle(
     bj_bitmap* p_bitmap,
     int        cx,
     int        cy,
-    bj_real    radius,
+    int        radius,
     uint32_t   color)
 {
-    int r = (int)(radius + BJ_F(0.5));
+    int r = (int)((bj_real)radius + BJ_F(0.5));
     if (r <= 0) {
         bj_bitmap_draw_line(p_bitmap, cx, cy, cx, cy, color);
         return;

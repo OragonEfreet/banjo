@@ -128,7 +128,7 @@ inline static double make_note_value(
     const double two_pi = BJ_TAU_D; /* 2PI exactly in double */
 
     /* Use the double variant explicitly to avoid accidental float truncation
-       when BJ_USE_DOUBLE is off. */
+       when BJ_API_FLOAT64 is off. */
     const double phase = bj_fmodd(sample_index * phase_step, two_pi);
 
     switch (function) {
