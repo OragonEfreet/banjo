@@ -57,7 +57,7 @@ typedef bj_real bj_quat[4];
 /// Set quaternion to identity (no rotation).
 /// \param q Input quaternion.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_quat_identity(bj_quat q)
+static BJ_INLINE void bj_quat_identity(bj_quat q)
 {
     q[0] = q[1] = q[2] = BJ_F(0.0);
     q[3] = BJ_F(1.0);
@@ -70,7 +70,7 @@ static inline void bj_quat_identity(bj_quat q)
 /// \param q Input quaternion.
 /// \note Assumes unit-length quaternions for pure rotations.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q)
+static BJ_INLINE void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q)
 {
     bj_vec3 w, tmp;
 
@@ -89,7 +89,7 @@ static inline void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q)
 /// \param res Output quaternion.
 /// \param q Input quaternion.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_quat_conjugate(bj_quat res, const bj_quat q)
+static BJ_INLINE void bj_quat_conjugate(bj_quat res, const bj_quat q)
 {
     for (int i = 0; i < 3; ++i) {
         res[i] = -q[i];
@@ -105,7 +105,7 @@ static inline void bj_quat_conjugate(bj_quat res, const bj_quat q)
 /// \note Assumes unit-length quaternions for pure rotations.
 /// \warning If \p axis is near zero length, the result is implementation-defined.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 axis) {
+static BJ_INLINE void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 axis) {
     bj_vec3 axis_norm;
     bj_vec3_normalize(axis_norm, axis);
     const bj_real s = bj_sin(angle / BJ_F(2.0));
@@ -122,7 +122,7 @@ static inline void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3 ax
 /// \note Assumes unit-length quaternions for pure rotations.
 /// \returns The rotated vector in \p res.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 v) {
+static BJ_INLINE void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 v) {
     bj_vec3 t;
     bj_vec3 q_xyz = { q[0], q[1], q[2] };
     bj_vec3 u = { q[0], q[1], q[2] };
@@ -143,7 +143,7 @@ static inline void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 
 /// \param q Input quaternion.
 /// \note Assumes unit-length quaternions for pure rotations.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
+static BJ_INLINE void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
     bj_real a = q[3];
     bj_real b = q[0];
     bj_real c = q[1];
@@ -179,7 +179,7 @@ static inline void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
 /// \param q Input quaternion.
 /// \note Assumes unit-length quaternions for pure rotations.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj_quat q) {
+static BJ_INLINE void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj_quat q) {
     bj_quat_mul_vec3(R[0], q, M[0]);
     bj_quat_mul_vec3(R[1], q, M[1]);
     bj_quat_mul_vec3(R[2], q, M[2]);
@@ -198,7 +198,7 @@ static inline void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const bj
 /// \note Assumes unit-length quaternions for pure rotations.
 /// \note Uses a numerically stable branch based on the dominant diagonal term.
 ////////////////////////////////////////////////////////////////////////////////
-static inline void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
+static BJ_INLINE void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     bj_real r = BJ_F(0.0);
     int i, j, k;
 

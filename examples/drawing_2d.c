@@ -68,11 +68,29 @@ void draw(bj_bitmap* bmp) {
     }
 
     //Draw a checker board
-    bj_rect board = {.x = 100, .y = 100, .w = 80, .h = 80,};
+    bj_rect board = {.w = 10, .h = 10,};
+    for(size_t y = 0 ; y < 8 ; ++y) {
+        for(size_t x = 0 ; x < 8 ; ++x) {
+            board.x = 200 + x * board.w;
+            board.y = 50 + y * board.h;
+            if((x ^ y) & 1) {
+                bj_bitmap_draw_filled_rectangle(bmp,
+                    &board,
+                    color_red
+                );
+            } 
+        }
+    }
     bj_bitmap_draw_rectangle(bmp,
-        &board,
-        color_red
+        &(bj_rect) {.x = 200, .y = 50, .w = 80, .h = 80,},
+        color_cyan
     );
+
+
+    // Circle
+    for (int r = 80; r > 0; r -= 20) {
+        bj_bitmap_draw_filled_circle(bmp, 100, 400, r, (r/20) % 2 ? color_red : color_white);
+    }
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {

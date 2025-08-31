@@ -124,5 +124,21 @@ BANJO_EXPORT void bj_bitmap_draw_triangle(
     uint32_t   color
 );
 
+BANJO_EXPORT void bj_bitmap_draw_circle(
+    bj_bitmap* p_bitmap,
+    int        cx,
+    int        cy,
+    bj_real    radius,
+    uint32_t   color
+);
+
+BANJO_EXPORT void bj_bitmap_draw_filled_circle(
+    bj_bitmap* p_bitmap,
+    int        cx,
+    int        cy,
+    bj_real    radius,
+    uint32_t   color
+);
+
 #endif
 /// \} // End of drawing group

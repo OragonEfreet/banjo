@@ -132,6 +132,52 @@
 #    endif
 #endif
 
+#if defined(__cplusplus)
+    #if defined(__GNUC__) || defined(__clang__)
+        #define BJ_RESTRICT __restrict__
+    #elif defined(_MSC_VER)
+        #define BJ_RESTRICT __restrict
+    #else
+        #define BJ_RESTRICT /* nothing */
+    #endif
+#else
+  /* pure C (C99 or newer) */
+    #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+        #define BJ_RESTRICT restrict
+    #elif defined(__GNUC__) || defined(__clang__)
+        #define BJ_RESTRICT __restrict__
+    #elif defined(_MSC_VER)
+        #define BJ_RESTRICT __restrict
+    #else
+        #define BJ_RESTRICT /* nothing */
+    #endif
+#endif
+
+#if defined(_MSC_VER)
+    #if defined(BJ_API_FORCE_INLINE)
+        #define BJ_INLINE __forceinline
+    #else
+        #if !defined(__cplusplus) && !defined(inline)
+            #define BJ_INLINE __inline
+        #else
+            #define BJ_INLINE inline
+        #endif
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #if defined(BJ_API_FORCE_INLINE)
+        #define BJ_INLINE inline __attribute__((always_inline))
+    #else
+        #define BJ_INLINE inline
+    #endif
+#else
+    #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+        #define BJ_INLINE inline
+    #else
+        #define BJ_INLINE /* no inline available */
+    #endif
+#endif
+
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \typedef bj_bool
 /// \brief Boolean type used throughout the BJ codebase.
@@ -164,6 +210,17 @@ typedef uint32_t bj_bool;
 /// \see BJ_FALSE
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_TRUE ((bj_bool)1)
+
+#define BJ_USE_DOUBLE
+#ifdef BJ_USE_DOUBLE
+    typedef double bj_real;
+    #define BJ_F(x) x
+    #define BJ_EPSILON  BJ_F(1e-12)
+#else
+    typedef float  bj_real;
+    #define BJ_F(x) x##f
+    #define BJ_EPSILON  BJ_F(1e-6)
+#endif
 
 /// Structure holding build information of the binary
 typedef struct {

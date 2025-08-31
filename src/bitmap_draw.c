@@ -102,3 +102,86 @@ void bj_bitmap_draw_triangle(
     bj_bitmap_draw_line(bmp, x1, y1, x2, y2, c);
     bj_bitmap_draw_line(bmp, x2, y2, x0, y0, c);
 }
+
+void bj_bitmap_draw_circle(
+    bj_bitmap* p_bitmap,
+    int        cx,
+    int        cy,
+    bj_real    radius,
+    uint32_t   color)
+{
+    int r = (int)(radius + BJ_F(0.5));
+    if (r <= 0) {
+        bj_bitmap_draw_line(p_bitmap, cx, cy, cx, cy, color);
+        return;
+    }
+
+    int x = r;
+    int y = 0;
+    int err = 1 - r;
+
+    while (x >= y) {
+        /* plot 8 symmetric points via 1-pixel lines */
+        bj_bitmap_draw_line(p_bitmap, cx + x, cy + y, cx + x, cy + y, color);
+        bj_bitmap_draw_line(p_bitmap, cx + y, cy + x, cx + y, cy + x, color);
+        bj_bitmap_draw_line(p_bitmap, cx - y, cy + x, cx - y, cy + x, color);
+        bj_bitmap_draw_line(p_bitmap, cx - x, cy + y, cx - x, cy + y, color);
+        bj_bitmap_draw_line(p_bitmap, cx - x, cy - y, cx - x, cy - y, color);
+        bj_bitmap_draw_line(p_bitmap, cx - y, cy - x, cx - y, cy - x, color);
+        bj_bitmap_draw_line(p_bitmap, cx + y, cy - x, cx + y, cy - x, color);
+        bj_bitmap_draw_line(p_bitmap, cx + x, cy - y, cx + x, cy - y, color);
+
+        ++y;
+        if (err < 0) {
+            err += (y << 1) + 1;
+        } else {
+            --x;
+            err += ((y - x) << 1) + 1;
+        }
+    }
+}
+
+void bj_bitmap_draw_filled_circle(
+    bj_bitmap* p_bitmap,
+    int        cx,
+    int        cy,
+    bj_real    radius,
+    uint32_t   color)
+{
+    int r = (int)(radius + BJ_F(0.5));
+    if (r <= 0) {
+        bj_bitmap_draw_line(p_bitmap, cx, cy, cx, cy, color);
+        return;
+    }
+
+    int x = r;
+    int y = 0;
+    int err = 1 - r;
+
+    while (x >= y) {
+        /* Horizontal spans for the four scanlines of this octant step */
+        /* y offsets */
+        int y_top    = cy - y;
+        int y_bottom = cy + y;
+        int y_top2   = cy - x;
+        int y_bot2   = cy + x;
+
+        /* spans centered at cx: [cx-x, cx+x] and [cx-y, cx+y] */
+        bj_bitmap_draw_line(p_bitmap, cx - x, y_top,    cx + x, y_top,    color);
+        bj_bitmap_draw_line(p_bitmap, cx - x, y_bottom, cx + x, y_bottom, color);
+
+        /* Avoid redundant spans when x == y (would duplicate the same line) */
+        if (x != y) {
+            bj_bitmap_draw_line(p_bitmap, cx - y, y_top2,  cx + y, y_top2,  color);
+            bj_bitmap_draw_line(p_bitmap, cx - y, y_bot2,  cx + y, y_bot2,  color);
+        }
+
+        ++y;
+        if (err < 0) {
+            err += (y << 1) + 1;
+        } else {
+            --x;
+            err += ((y - x) << 1) + 1;
+        }
+    }
+}
