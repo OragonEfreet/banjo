@@ -35,18 +35,6 @@
 #define _USE_MATH_DEFINES 
 #include <math.h>
 
-/*-------------------------- Precision & literals ---------------------------*/
-
-#define BJ_USE_DOUBLE
-#ifdef BJ_USE_DOUBLE
-    typedef double bj_real;
-    #define BJ_F(x) x
-    #define BJ_EPSILON  BJ_F(1e-12)
-#else
-    typedef float  bj_real;
-    #define BJ_F(x) x##f
-    #define BJ_EPSILON  BJ_F(1e-6)
-#endif
 
 /*-------------------------------- Constants --------------------------------*/
 #define BJ_PI_F  3.14159265358979323846f
