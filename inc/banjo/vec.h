@@ -70,8 +70,12 @@ static BJ_INLINE void bj_vec2_add(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 
 /// \param b Input component or vector b.
 /// \param s Scalar factor.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_add_scaled(bj_vec2 res, const bj_vec2 a, const bj_vec2 b, bj_real s)
-{
+static BJ_INLINE void bj_vec2_add_scaled(
+    bj_vec2 res,
+    const bj_vec2 a,
+    const bj_vec2 b,
+    bj_real s
+) {
     res[0] = a[0] + b[0] * s;
     res[1] = a[1] + b[1] * s;
 }

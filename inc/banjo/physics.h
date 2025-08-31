@@ -50,35 +50,6 @@ static BJ_INLINE bj_real bj_kinematics(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Computes positions at time \a t under given constant accelerations.
-///
-/// Uses the standard constant-acceleration kinematics formula, where for each
-/// index i:
-/// `x[i] = 0.5 * a[i] * t[i]^2 + v0[i] * t + x0[i]`
-///
-/// \param n            Number of positions to compute
-/// \param out          A pointer to the _n_ resulting positions
-/// \param position     A pointer to the _n_ initial positions [L]
-/// \param velocity     A pointer to the _n_ initial velocities [L T^-1]
-/// \param acceleration A pointer to the _n_ constant accelerations [L T^-2]
-/// \param time         Elapsed time [T]
-///
-/// \return Position at time \a t, in [L] in the chosen system.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_kinematics_array(
-    size_t                     n,
-    bj_real*       BJ_RESTRICT out,
-    const bj_real* BJ_RESTRICT position,
-    const bj_real* BJ_RESTRICT velocity,
-    const bj_real* BJ_RESTRICT acceleration,
-    bj_real        time
-) {
-    for(size_t i = 0 ; i < n ; ++i) {
-        out[i] = bj_kinematics(position[i], velocity[i], acceleration[i], time);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
 /// \brief Computes 2D positions at time \a t under given constant accelerations.
 ///
 /// Uses the standard constant-acceleration kinematics formula, where for each
@@ -93,15 +64,13 @@ static BJ_INLINE void bj_kinematics_array(
 ///
 /// \return Position at time \a t, in [L] in the chosen system.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_kinematics_2d(
+BANJO_EXPORT void bj_kinematics_2d(
     bj_real       out[BJ_RESTRICT static 2],
     const bj_real position[BJ_RESTRICT static 2],
     const bj_real velocity[BJ_RESTRICT static 2],
     const bj_real acceleration[BJ_RESTRICT static 2],
     bj_real time
-) {
-    bj_kinematics_array(2, out, position, velocity, acceleration, time);
-}
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Computes 3D positions at time \a t under given constant accelerations.
@@ -119,15 +88,13 @@ static BJ_INLINE void bj_kinematics_2d(
 ///
 /// \return Position at time \a t, in [L] in the chosen system.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_kinematics_3d(
+BANJO_EXPORT void bj_kinematics_3d(
     bj_real       out[BJ_RESTRICT static 3],
     const bj_real position[BJ_RESTRICT static 3],
     const bj_real velocity[BJ_RESTRICT static 3],
     const bj_real acceleration[BJ_RESTRICT static 3],
     bj_real time
-) {
-    bj_kinematics_array(3, out, position, velocity, acceleration, time);
-}
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Computes velocity at time \a t under constant acceleration.
@@ -149,33 +116,6 @@ static BJ_INLINE bj_real bj_kinematics_velocity(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Computes velocities at time \a t under given constant accelerations.
-///
-/// Uses the standard constant-acceleration kinematics formula, where for each
-/// index i:
-/// `v[i] = a[i] * t + v0[i]`
-///
-/// \param n            Number of velocities to compute
-/// \param out          A pointer to the _n_ resulting velocities [L T^-1]
-/// \param velocity     A pointer to the _n_ initial velocities [L T^-1]
-/// \param acceleration A pointer to the _n_ constant accelerations [L T^-2]
-/// \param time         Elapsed time [T]
-///
-/// \return Velocity at time \a t, in [L T^-1] in the chosen system.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_kinematics_velocity_array(
-    size_t                     n,
-    bj_real*       BJ_RESTRICT out,
-    const bj_real* BJ_RESTRICT velocity,
-    const bj_real* BJ_RESTRICT acceleration,
-    bj_real                    time
-) {
-    for (size_t i = 0; i < n; ++i) {
-        out[i] = bj_kinematics_velocity(velocity[i], acceleration[i], time);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
 /// \brief Computes 2D velocity at time \a t under constant acceleration.
 ///
 /// Uses the standard constant-acceleration kinematics formula, applied
@@ -189,14 +129,12 @@ static BJ_INLINE void bj_kinematics_velocity_array(
 ///
 /// \return 2D velocity at time \a t, in [L T^-1] in the chosen system.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_kinematics_velocity_2d(
+BANJO_EXPORT void bj_kinematics_velocity_2d(
     bj_real              out[ BJ_RESTRICT static 2 ],
     const bj_real        velocity[ BJ_RESTRICT static 2 ],
     const bj_real        acceleration[ BJ_RESTRICT static 2 ],
     bj_real              time
-) {
-    bj_kinematics_velocity_array(2, out, velocity, acceleration, time);
-}
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Computes 3D velocity at time \a t under constant acceleration.
@@ -213,14 +151,44 @@ static BJ_INLINE void bj_kinematics_velocity_2d(
 ///
 /// \return 3D velocity at time \a t, in [L T^-1] in the chosen system.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_kinematics_velocity_3d(
+BANJO_EXPORT void bj_kinematics_velocity_3d(
     bj_real              out[ BJ_RESTRICT static 3 ],
     const bj_real        velocity[ BJ_RESTRICT static 3 ],
     const bj_real        acceleration[ BJ_RESTRICT static 3 ],
     bj_real              time
-) {
-    bj_kinematics_velocity_array(3, out, velocity, acceleration, time);
-}
+);
+
+BANJO_EXPORT void bj_particle_integrate(
+    bj_real* out_pos,
+    bj_real* out_vel,
+    bj_real  pos,
+    bj_real  vel,
+    bj_real  accel,
+    bj_real  forces,
+    bj_real  inv_mass,
+    bj_real  damping,
+    bj_real  dt
+);
+
+BANJO_EXPORT void bj_particle_integrate_2d(
+    bj_real        pos[BJ_RESTRICT static 2],
+    bj_real        vel[BJ_RESTRICT static 2],
+    const bj_real  accel[BJ_RESTRICT static 2],
+    const bj_real  forces[BJ_RESTRICT static 2],
+    bj_real        inv_mass,
+    bj_real        damping,
+    bj_real        dt
+);
+
+BANJO_EXPORT void bj_particle_integrate_3d(
+    bj_real        pos[BJ_RESTRICT static 3],
+    bj_real        vel[BJ_RESTRICT static 3],
+    const bj_real  accel[BJ_RESTRICT static 3],
+    const bj_real  forces[BJ_RESTRICT static 3],
+    bj_real        inv_mass,
+    bj_real        damping,
+    bj_real        dt
+);
 
 
 /// \}

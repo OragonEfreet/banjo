@@ -128,7 +128,7 @@ BANJO_EXPORT void bj_bitmap_draw_circle(
     bj_bitmap* p_bitmap,
     int        cx,
     int        cy,
-    bj_real    radius,
+    int        radius,
     uint32_t   color
 );
 
@@ -136,7 +136,7 @@ BANJO_EXPORT void bj_bitmap_draw_filled_circle(
     bj_bitmap* p_bitmap,
     int        cx,
     int        cy,
-    bj_real    radius,
+    int        radius,
     uint32_t   color
 );
 
