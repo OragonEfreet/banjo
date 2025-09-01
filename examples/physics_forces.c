@@ -21,18 +21,18 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
-#define CANVAS_WIDTH 200
-#define CANVAS_HEIGHT 150
+#define CANVAS_WIDTH 800
+#define CANVAS_HEIGHT 600
 
 bj_window* window      = 0;
 bj_bitmap* framebuffer = 0;
 bj_mat3 projection;
 
-#define PARTICLES_LEN 3
-#define PARTICLES_PXL_RADIUS 3
+#define PARTICLES_LEN 4000
 
 /* #define G BJ_F(6.67430e-11) */
-#define G BJ_F(10)
+#define G BJ_F(100)
+#define SOFTENING BJ_F(1.0)    // epsilon in world units
 
 #define MASS BJ_F(1)
 
@@ -78,11 +78,19 @@ static void update_projection() {
 }
 
 static void reset_particle(particle_t* p) {
-    bj_vec2_set(p->position, 
-        ((bj_real)rand() / (bj_real)RAND_MAX) * CANVAS_WIDTH - (CANVAS_WIDTH / BJ_F(2.0)),
+    bj_vec2_set(p->position,
+        ((bj_real)rand() / (bj_real)RAND_MAX) * CANVAS_WIDTH  - (CANVAS_WIDTH  / BJ_F(2.0)),
         ((bj_real)rand() / (bj_real)RAND_MAX) * CANVAS_HEIGHT - (CANVAS_HEIGHT / BJ_F(2.0))
     );
-    /* bj_vec2_copy(p->acceleration, gravity); */
+
+    // Small random tangential kick
+    bj_vec2_set(p->velocity,
+        ( ((bj_real)rand()/(bj_real)RAND_MAX) - BJ_F(0.5)) * BJ_F(5.0),
+        ( ((bj_real)rand()/(bj_real)RAND_MAX) - BJ_F(0.5)) * BJ_F(5.0)
+    );
+
+    bj_vec2_set(p->forces, BJ_F(0), BJ_F(0));
+    /* bj_vec2_copy(p->acceleration, gravity); */  // leave 0 unless you want global gravity
     p->damping = BJ_F(1.0);
     p->inverse_mass = BJ_F(1.0) / MASS;
 }
@@ -124,52 +132,67 @@ static void integrate_particle(particle_t* part, bj_real dt) {
 
 static void update(bj_real dt) {
 
-    bj_vec2 p1p2;
-
-    // Manage forces
-    for(size_t p1 = 0 ; p1 < PARTICLES_LEN ; ++p1) {
+    for (size_t p1 = 0; p1 < PARTICLES_LEN; ++p1) {
         reset_forces(&particles[p1]);
-        for(size_t p2 = 0 ; p2 < PARTICLES_LEN ; ++p2) {
-            if(p1 == p2) {
-                continue;
-            }
+    }
 
-            bj_vec2_sub(p1p2, particles[p2].position, particles[p1].position);
+    for (size_t p1 = 0; p1 < PARTICLES_LEN; ++p1) {
+        for (size_t p2 = p1 + 1; p2 < PARTICLES_LEN; ++p2) {   // compute each pair once
+            bj_vec2 r12;
+            bj_vec2_sub(r12, particles[p2].position, particles[p1].position);
 
-            bj_vec2_set_len(
-                p1p2, p1p2,
-                G * (MASS * MASS) / bj_vec2_dist_squared(
-                    particles[p1].position,
-                    particles[p2].position
-                )
-            );
+            bj_real dist2 = bj_vec2_dist_squared(particles[p1].position, particles[p2].position);
+            bj_real inv = BJ_F(1.0) / (dist2 + SOFTENING * SOFTENING); // softened 1/r^2
+            bj_real mag = G * (MASS * MASS) * inv;                     // |F| = G m1 m2 / (r^2+e^2)
 
-            add_force(&particles[p1], p1p2);
+            // Normalize direction safely
+            bj_real dist = bj_sqrt(dist2);
+            bj_real dirx = (dist > BJ_EPSILON) ? (r12[0] / dist) : BJ_F(0.0);
+            bj_real diry = (dist > BJ_EPSILON) ? (r12[1] / dist) : BJ_F(0.0);
 
+            bj_vec2 f12 = { dirx * mag, diry * mag };
+
+            // Action-reaction: +F on p1, -F on p2
+            add_force(&particles[p1], f12);
+            bj_vec2 negf = { -f12[0], -f12[1] };
+            add_force(&particles[p2], negf);
         }
     }
 
+    // Clamp dt to avoid huge steps
+    const bj_real max_dt = BJ_F(1.0) / BJ_F(30.0);
+    if (dt > max_dt) dt = max_dt;
 
-    for(size_t p = 0 ; p < PARTICLES_LEN ; ++p) {
+    // (re)compute forces here (the loop above), then:
+    for (size_t p = 0; p < PARTICLES_LEN; ++p) {
         integrate_particle(&particles[p], dt);
     }
 }
 
 static void draw() {
     bj_bitmap_clear(framebuffer);
-    const uint32_t color = bj_bitmap_pixel_value(framebuffer, 0x00, 0xCC, 0x44);
+    const uint32_t color = bj_bitmap_pixel_value(framebuffer, 0x00, 0xFF, 0x44);
+    const uint32_t color1 = bj_bitmap_pixel_value(framebuffer, 0xFF, 0x00, 0x44);
 
     bj_vec3 c = {0.0, 0.0, 1.0};
     bj_vec3 pc = {0.0, 0.0, 1.0};
 
     for(size_t p = 0 ; p < PARTICLES_LEN ; ++p) {
 
+
         bj_vec2_copy(c, particles[p].position);
         bj_mat3_mul_vec3(pc, projection, c);
 
-        bj_bitmap_draw_filled_circle(framebuffer,
-            pc[0], pc[1], BJ_F(PARTICLES_PXL_RADIUS), color
+        bj_bitmap_put_pixel(framebuffer,
+            pc[0], pc[1], color
         );
+        
+        if(p == 0) {
+            bj_bitmap_draw_circle(framebuffer,
+                pc[0], pc[1], BJ_F(5), color1
+            );
+        }
+
     }
 
 }
