@@ -34,7 +34,7 @@ bj_mat3 projection;
 #define G BJ_F(100)
 #define SOFTENING BJ_F(1.0)    // epsilon in world units
 
-#define MASS BJ_F(1)
+#define MASS BJ_F(10)
 
 typedef struct {
     // Linear position of the particle in world space
