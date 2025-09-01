@@ -15,18 +15,26 @@
 #include <banjo/vec.h>
 #include <banjo/window.h>
 
+#include <stdlib.h>
+#include <time.h>
+
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
 
-#define CANVAS_WIDTH 400
-#define CANVAS_HEIGHT 300
+#define CANVAS_WIDTH 200
+#define CANVAS_HEIGHT 150
 
 bj_window* window      = 0;
 bj_bitmap* framebuffer = 0;
 bj_mat3 projection;
 
-#define PARTICLES_LEN 1
+#define PARTICLES_LEN 3
 #define PARTICLES_PXL_RADIUS 3
+
+/* #define G BJ_F(6.67430e-11) */
+#define G BJ_F(10)
+
+#define MASS BJ_F(1)
 
 typedef struct {
     // Linear position of the particle in world space
@@ -70,9 +78,13 @@ static void update_projection() {
 }
 
 static void reset_particle(particle_t* p) {
-    bj_vec2_set(p->position, BJ_F(0), BJ_F(0));
-    bj_vec2_copy(p->acceleration, gravity);
+    bj_vec2_set(p->position, 
+        ((bj_real)rand() / (bj_real)RAND_MAX) * CANVAS_WIDTH - (CANVAS_WIDTH / BJ_F(2.0)),
+        ((bj_real)rand() / (bj_real)RAND_MAX) * CANVAS_HEIGHT - (CANVAS_HEIGHT / BJ_F(2.0))
+    );
+    /* bj_vec2_copy(p->acceleration, gravity); */
     p->damping = BJ_F(1.0);
+    p->inverse_mass = BJ_F(1.0) / MASS;
 }
 
 static void initialize() {
@@ -83,6 +95,10 @@ static void initialize() {
     }
 }
 
+
+static void reset_forces(particle_t* p) {
+    bj_vec2_set(p->forces, BJ_F(0), BJ_F(0));
+}
 
 static void add_force(particle_t* p, const bj_vec2 force) {
     bj_vec2_add(p->forces, p->forces, force);
@@ -107,6 +123,33 @@ static void integrate_particle(particle_t* part, bj_real dt) {
 }
 
 static void update(bj_real dt) {
+
+    bj_vec2 p1p2;
+
+    // Manage forces
+    for(size_t p1 = 0 ; p1 < PARTICLES_LEN ; ++p1) {
+        reset_forces(&particles[p1]);
+        for(size_t p2 = 0 ; p2 < PARTICLES_LEN ; ++p2) {
+            if(p1 == p2) {
+                continue;
+            }
+
+            bj_vec2_sub(p1p2, particles[p2].position, particles[p1].position);
+
+            bj_vec2_set_len(
+                p1p2, p1p2,
+                G * (MASS * MASS) / bj_vec2_dist_squared(
+                    particles[p1].position,
+                    particles[p2].position
+                )
+            );
+
+            add_force(&particles[p1], p1p2);
+
+        }
+    }
+
+
     for(size_t p = 0 ; p < PARTICLES_LEN ; ++p) {
         integrate_particle(&particles[p], dt);
     }
@@ -133,6 +176,8 @@ static void draw() {
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
+
+    srand(time(NULL));
 
     bj_error* p_error = 0;
 

@@ -133,6 +133,44 @@ static BJ_INLINE bj_real bj_vec2_len(const bj_vec2 v) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Scale a 2D vector to a given length.
+/// \param res Output 2D vector.
+/// \param v Input vector.
+/// \param target_len Desired length of the result.
+/// \warning Undefined if the input vector has zero length.
+/// \ingroup math
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_vec2_set_len(bj_vec2 res, const bj_vec2 v, bj_real target_len) {
+    bj_real len = bj_vec2_len(v);
+    bj_real scale = target_len / len;
+    bj_vec2_scale(res, v, scale);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Squared Euclidean distance between two 2D vectors.
+/// \param a Input vector a.
+/// \param b Input vector b.
+/// \returns The squared distance ||a - b||^2.
+/// \ingroup math
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_real bj_vec2_dist_squared(const bj_vec2 a, const bj_vec2 b) {
+    const bj_real dx = a[0] - b[0];
+    const bj_real dy = a[1] - b[1];
+    return dx * dx + dy * dy;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Euclidean distance between two 2D vectors.
+/// \param a Input vector a.
+/// \param b Input vector b.
+/// \returns The Euclidean distance ||a - b||.
+/// \ingroup math
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_real bj_vec2_dist(const bj_vec2 a, const bj_vec2 b) {
+    return bj_sqrt(bj_vec2_dist_squared(a, b));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 /// Normalize a 2D vector to unit length.
 /// \param res Output 2D vector.
 /// \param v Input vector.
@@ -262,6 +300,46 @@ static BJ_INLINE bj_real bj_vec3_dot(const bj_vec3 a, const bj_vec3 b) {
 static BJ_INLINE bj_real bj_vec3_len(const bj_vec3 v) {
     return bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// Scale a 3D vector to a given length.
+/// \param res Output 3D vector.
+/// \param v Input vector.
+/// \param target_len Desired length of the result.
+/// \warning Undefined if the input vector has zero length.
+/// \ingroup math
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_vec3_set_len(bj_vec3 res, const bj_vec3 v, bj_real target_len) {
+    bj_real len = bj_vec3_len(v);
+    bj_real scale = target_len / len;
+    bj_vec3_scale(res, v, scale);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Squared Euclidean distance between two 3D vectors.
+/// \param a Input vector a.
+/// \param b Input vector b.
+/// \returns The squared distance ||a - b||^2.
+/// \ingroup math
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_real bj_vec3_dist_squared(const bj_vec3 a, const bj_vec3 b) {
+    const bj_real dx = a[0] - b[0];
+    const bj_real dy = a[1] - b[1];
+    const bj_real dz = a[2] - b[2];
+    return dx * dx + dy * dy + dz * dz;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Euclidean distance between two 3D vectors.
+/// \param a Input vector a.
+/// \param b Input vector b.
+/// \returns The Euclidean distance ||a - b||.
+/// \ingroup math
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_real bj_vec3_dist(const bj_vec3 a, const bj_vec3 b) {
+    return bj_sqrt(bj_vec3_dist_squared(a, b));
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Normalize a 3D vector to unit length.
