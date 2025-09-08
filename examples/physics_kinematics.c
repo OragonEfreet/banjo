@@ -23,7 +23,7 @@ bj_window* window      = 0;
 bj_bitmap* framebuffer = 0;
 
 #define BALLS_LEN 1000
-#define BALLS_RADIUS 3
+#define BALLS_RADIUS BJ_F(3.0)
 #define GRAVITY BJ_F(9.80)
 
 struct {
@@ -101,7 +101,7 @@ static void draw() {
 
     for(size_t b = 0 ; b < BALLS_LEN ; ++b) {
         bj_bitmap_draw_filled_circle(framebuffer,
-            balls[b].position[0], balls[b].position[1], BJ_F(BALLS_RADIUS),
+            balls[b].position[0], balls[b].position[1], BALLS_RADIUS,
             balls[b].color
         );
     }

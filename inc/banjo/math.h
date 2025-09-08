@@ -35,7 +35,6 @@
 #define _USE_MATH_DEFINES 
 #include <math.h>
 
-#define BJ_API_FLOAT64
 #ifdef BJ_API_FLOAT64
     typedef double bj_real;
     #define BJ_F(x) x

@@ -31,10 +31,10 @@ bj_mat3 projection;
 #define PARTICLES_LEN 4000
 
 /* #define G BJ_F(6.67430e-11) */
-#define G BJ_F(100)
+#define G BJ_F(100.0)
 #define SOFTENING BJ_F(1.0)    // epsilon in world units
 
-#define MASS BJ_F(10)
+#define MASS BJ_F(10.0)
 
 typedef struct {
     // Linear position of the particle in world space
@@ -89,14 +89,14 @@ static void reset_particle(particle_t* p) {
         ( ((bj_real)rand()/(bj_real)RAND_MAX) - BJ_F(0.5)) * BJ_F(5.0)
     );
 
-    bj_vec2_set(p->forces, BJ_F(0), BJ_F(0));
+    bj_vec2_set(p->forces, BJ_F(0.0), BJ_F(0.0));
     /* bj_vec2_copy(p->acceleration, gravity); */  // leave 0 unless you want global gravity
     p->damping = BJ_F(1.0);
     p->inverse_mass = BJ_F(1.0) / MASS;
 }
 
 static void initialize() {
-    bj_vec2_set(gravity, BJ_F(0), BJ_F(-9.807));
+    bj_vec2_set(gravity, BJ_F(0.0), BJ_F(-9.807));
 
     for(size_t p = 0 ; p < PARTICLES_LEN ; ++p) {
         reset_particle(&particles[p]);
@@ -105,7 +105,7 @@ static void initialize() {
 
 
 static void reset_forces(particle_t* p) {
-    bj_vec2_set(p->forces, BJ_F(0), BJ_F(0));
+    bj_vec2_set(p->forces, BJ_F(0.0), BJ_F(0.0));
 }
 
 static void add_force(particle_t* p, const bj_vec2 force) {
@@ -189,7 +189,7 @@ static void draw() {
         
         if(p == 0) {
             bj_bitmap_draw_circle(framebuffer,
-                pc[0], pc[1], BJ_F(5), color1
+                pc[0], pc[1], BJ_F(5.0), color1
             );
         }
 

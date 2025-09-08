@@ -13,117 +13,117 @@
 
 TEST_CASE(kinematics_scalar_zero_time)
 {
-    bj_real p = BJ_F(5), v = BJ_F(3), a = BJ_F(2), t = BJ_F(0);
+    bj_real p = BJ_F(5.0), v = BJ_F(3.0), a = BJ_F(2.0), t = BJ_F(0.0);
     bj_real x = bj_kinematics(p, v, a, t);
     REQUIRE_EQ(x, p);
 }
 
 TEST_CASE(kinematics_scalar_zero_accel)
 {
-    bj_real p = BJ_F(7), v = BJ_F(4), a = BJ_F(0), t = BJ_F(6);
+    bj_real p = BJ_F(7.0), v = BJ_F(4.0), a = BJ_F(0.0), t = BJ_F(6.0);
     bj_real x = bj_kinematics(p, v, a, t);
     REQUIRE_EQ(x, p + v * t);
 }
 
 TEST_CASE(kinematics_scalar_positive_values)
 {
-    bj_real p = BJ_F(5), v = BJ_F(3), a = BJ_F(2), t = BJ_F(4);
+    bj_real p = BJ_F(5.0), v = BJ_F(3.0), a = BJ_F(2.0), t = BJ_F(4.0);
     bj_real x = bj_kinematics(p, v, a, t);            // 0.5*2*16 + 3*4 + 5 = 33
-    REQUIRE_EQ(x, BJ_F(33));
+    REQUIRE_EQ(x, BJ_F(33.0));
 }
 
 TEST_CASE(kinematics_scalar_negative_time)
 {
-    bj_real p = BJ_F(10), v = BJ_F(-2), a = BJ_F(4), t = BJ_F(-5);
+    bj_real p = BJ_F(10.0), v = BJ_F(-2.0), a = BJ_F(4.0), t = BJ_F(-5.0);
     bj_real x = bj_kinematics(p, v, a, t);            // 0.5*4*25 + (-2)*(-5) + 10 = 50 + 10 + 10 = 70
-    REQUIRE_EQ(x, BJ_F(70));
+    REQUIRE_EQ(x, BJ_F(70.0));
 }
 
 /* --- Position: 2D & 3D wrappers ---------------------------------------- */
 
 TEST_CASE(kinematics_2d_basic_and_sentinel)
 {
-    bj_real p[3] = { BJ_F(5), BJ_F(6), BJ_F(777) };  // [0..1] used, [2] sentinel
-    bj_real v[3] = { BJ_F(3), BJ_F(-1), BJ_F(888) };
-    bj_real a[3] = { BJ_F(2), BJ_F(4), BJ_F(999) };
-    bj_real out[3] = { BJ_F(0), BJ_F(0), BJ_F(12345) };
-    bj_real t = BJ_F(4);
+    bj_real p[3] = { BJ_F(5.0), BJ_F(6.0), BJ_F(777.0) };  // [0..1] used, [2] sentinel
+    bj_real v[3] = { BJ_F(3.0), BJ_F(-1.0), BJ_F(888.0) };
+    bj_real a[3] = { BJ_F(2.0), BJ_F(4.0), BJ_F(999.0) };
+    bj_real out[3] = { BJ_F(0.0), BJ_F(0.0), BJ_F(12345.0) };
+    bj_real t = BJ_F(4.0);
 
     bj_kinematics_2d(out, p, v, a, t);
 
     REQUIRE_EQ(out[0], X_EXPECT(p[0], v[0], a[0], t));
     REQUIRE_EQ(out[1], X_EXPECT(p[1], v[1], a[1], t));
-    REQUIRE_EQ(out[2], BJ_F(12345)); // untouched sentinel
+    REQUIRE_EQ(out[2], BJ_F(12345.0)); // untouched sentinel
 }
 
 TEST_CASE(kinematics_3d_basic_and_sentinel)
 {
-    bj_real p[4] = { BJ_F(10), BJ_F(20), BJ_F(30), BJ_F(777) };
-    bj_real v[4] = { BJ_F(-2), BJ_F(0),  BJ_F(5),  BJ_F(888) };
-    bj_real a[4] = { BJ_F(4),  BJ_F(6),  BJ_F(2),  BJ_F(999) };
-    bj_real out[4] = { BJ_F(0), BJ_F(0), BJ_F(0), BJ_F(4242) };
-    bj_real t = BJ_F(5);
+    bj_real p[4] = { BJ_F(10.0), BJ_F(20.0), BJ_F(30.0), BJ_F(777.0) };
+    bj_real v[4] = { BJ_F(-2.0), BJ_F(0.0),  BJ_F(5.0),  BJ_F(888.0) };
+    bj_real a[4] = { BJ_F(4.0),  BJ_F(6.0),  BJ_F(2.0),  BJ_F(999.0) };
+    bj_real out[4] = { BJ_F(0.0), BJ_F(0.0), BJ_F(0.0), BJ_F(4242.0) };
+    bj_real t = BJ_F(5.0);
 
     bj_kinematics_3d(out, p, v, a, t);
 
     REQUIRE_EQ(out[0], X_EXPECT(p[0], v[0], a[0], t)); // 0.5*4*25 + (-2)*5 + 10 = 50 - 10 + 10 = 50
     REQUIRE_EQ(out[1], X_EXPECT(p[1], v[1], a[1], t)); // 0.5*6*25 + 0 + 20 = 75 + 20 = 95
     REQUIRE_EQ(out[2], X_EXPECT(p[2], v[2], a[2], t)); // 0.5*2*25 + 5*5 + 30 = 25 + 25 + 30 = 80
-    REQUIRE_EQ(out[3], BJ_F(4242)); // untouched sentinel
+    REQUIRE_EQ(out[3], BJ_F(4242.0)); // untouched sentinel
 }
 
 /* --- Velocity: scalar --------------------------------------------------- */
 
 TEST_CASE(kinematics_velocity_scalar_zero_time)
 {
-    bj_real v0 = BJ_F(7), a = BJ_F(3), t = BJ_F(0);
+    bj_real v0 = BJ_F(7.0), a = BJ_F(3.0), t = BJ_F(0.0);
     bj_real v = bj_kinematics_velocity(v0, a, t);
     REQUIRE_EQ(v, v0);
 }
 
 TEST_CASE(kinematics_velocity_scalar_positive)
 {
-    bj_real v0 = BJ_F(-2), a = BJ_F(4), t = BJ_F(5);   // 4*5 - 2 = 18
+    bj_real v0 = BJ_F(-2.0), a = BJ_F(4.0), t = BJ_F(5.0);   // 4*5 - 2 = 18
     bj_real v = bj_kinematics_velocity(v0, a, t);
-    REQUIRE_EQ(v, BJ_F(18));
+    REQUIRE_EQ(v, BJ_F(18.0));
 }
 
 TEST_CASE(kinematics_velocity_scalar_negative_time)
 {
-    bj_real v0 = BJ_F(3), a = BJ_F(2), t = BJ_F(-4);   // 2*(-4) + 3 = -5
+    bj_real v0 = BJ_F(3.0), a = BJ_F(2.0), t = BJ_F(-4.0);   // 2*(-4) + 3 = -5
     bj_real v = bj_kinematics_velocity(v0, a, t);
-    REQUIRE_EQ(v, BJ_F(-5));
+    REQUIRE_EQ(v, BJ_F(-5.0));
 }
 
 /* --- Velocity: 2D & 3D wrappers ---------------------------------------- */
 
 TEST_CASE(kinematics_velocity_2d_basic_and_sentinel)
 {
-    bj_real v0[3] = { BJ_F(3), BJ_F(-1), BJ_F(777) };
-    bj_real a [3] = { BJ_F(2), BJ_F(4),  BJ_F(888) };
-    bj_real out[3] = { BJ_F(0), BJ_F(0), BJ_F(12345) };
-    bj_real t = BJ_F(4);
+    bj_real v0[3] = { BJ_F(3.0), BJ_F(-1.0), BJ_F(777.0) };
+    bj_real a [3] = { BJ_F(2.0), BJ_F(4.0),  BJ_F(888.0) };
+    bj_real out[3] = { BJ_F(0.0), BJ_F(0.0), BJ_F(12345.0) };
+    bj_real t = BJ_F(4.0);
 
     bj_kinematics_velocity_2d(out, v0, a, t);
 
     REQUIRE_EQ(out[0], V_EXPECT(v0[0], a[0], t));
     REQUIRE_EQ(out[1], V_EXPECT(v0[1], a[1], t));
-    REQUIRE_EQ(out[2], BJ_F(12345)); // untouched sentinel
+    REQUIRE_EQ(out[2], BJ_F(12345.0)); // untouched sentinel
 }
 
 TEST_CASE(kinematics_velocity_3d_basic_and_sentinel)
 {
-    bj_real v0[4] = { BJ_F(-2), BJ_F(0), BJ_F(5), BJ_F(777) };
-    bj_real a [4] = { BJ_F(4),  BJ_F(6), BJ_F(2), BJ_F(888) };
-    bj_real out[4] = { BJ_F(0), BJ_F(0), BJ_F(0), BJ_F(4242) };
-    bj_real t = BJ_F(5);
+    bj_real v0[4] = { BJ_F(-2.0), BJ_F(0.0), BJ_F(5.0), BJ_F(777.0) };
+    bj_real a [4] = { BJ_F(4.0),  BJ_F(6.0), BJ_F(2.0), BJ_F(888.0) };
+    bj_real out[4] = { BJ_F(0.0), BJ_F(0.0), BJ_F(0.0), BJ_F(4242.0) };
+    bj_real t = BJ_F(5.0);
 
     bj_kinematics_velocity_3d(out, v0, a, t);
 
     REQUIRE_EQ(out[0], V_EXPECT(v0[0], a[0], t)); // 4*5 - 2 = 18
     REQUIRE_EQ(out[1], V_EXPECT(v0[1], a[1], t)); // 6*5 + 0 = 30
     REQUIRE_EQ(out[2], V_EXPECT(v0[2], a[2], t)); // 2*5 + 5 = 15
-    REQUIRE_EQ(out[3], BJ_F(4242)); // untouched sentinel
+    REQUIRE_EQ(out[3], BJ_F(4242.0)); // untouched sentinel
 }
 
 /* --- Main: run them all ------------------------------------------------- */
