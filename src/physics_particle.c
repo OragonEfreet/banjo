@@ -1,6 +1,7 @@
 #include <banjo/assert.h>
 #include <banjo/math.h>
 #include <banjo/physics.h>
+#include <banjo/vec.h>
 
 static BJ_INLINE void bj_particle_integrate_array(
     size_t                     len,
@@ -12,21 +13,16 @@ static BJ_INLINE void bj_particle_integrate_array(
     bj_real                    damping,
     bj_real                    dt
 ) {
-    bj_assert(BJ_REAL_GT(dt, BJ_F(0.0)));
-
-    if (inv_mass == 0) {
+    if (inv_mass == BJ_F(0.0)) {
         return;
     }
 
-    damping = bj_clamp(damping, BJ_F(0.0), BJ_F(1.0));
-    const bj_real damp_factor = bj_powf(damping, dt);
+    const bj_real damp_factor = bj_pow(damping, dt);
 
     for (size_t i = 0; i < len; ++i) {
-        const bj_real a = accel[i] + forces[i] * inv_mass;
-        bj_real v = vel[i] + a * dt;
-        v *= damp_factor;
-        vel[i] = v;
-        pos[i] += v * dt;
+        const bj_real acc = accel[i] + forces[i] * inv_mass;
+        pos[i] += vel[i] * dt;
+        vel[i] = (vel[i] + acc * dt) * damp_factor;
     }
 }
 
