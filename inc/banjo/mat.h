@@ -883,10 +883,10 @@ static BJ_INLINE void bj_mat4_rotate(bj_mat4x4 res, const bj_mat4x4 mat, bj_real
         bj_mat4_mul_outer(T, u, u);
 
         bj_mat4x4 S = {
-            {    BJ_F(0),  u[2], -u[1], BJ_F(0)},
-            {-u[2],     BJ_F(0),  u[0], BJ_F(0)},
-            { u[1], -u[0],     BJ_F(0), BJ_F(0)},
-            {    BJ_F(0),     BJ_F(0),     BJ_F(0), BJ_F(0)}
+            {    BJ_F(0.0),  u[2], -u[1], BJ_F(0.0)},
+            {-u[2],     BJ_F(0.0),  u[0], BJ_F(0.0)},
+            { u[1], -u[0],     BJ_F(0.0), BJ_F(0.0)},
+            {    BJ_F(0.0),     BJ_F(0.0),     BJ_F(0.0), BJ_F(0.0)}
         };
         bj_mat4_scale(S, S, s);
 
