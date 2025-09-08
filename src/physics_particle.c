@@ -14,6 +14,10 @@ static BJ_INLINE void bj_particle_integrate_array(
 ) {
     bj_assert(BJ_REAL_GT(dt, BJ_F(0.0)));
 
+    if (inv_mass == 0) {
+        return;
+    }
+
     damping = bj_clamp(damping, BJ_F(0.0), BJ_F(1.0));
     const bj_real damp_factor = bj_powf(damping, dt);
 
@@ -37,16 +41,19 @@ BANJO_EXPORT void bj_particle_integrate(
     bj_real  damping,
     bj_real  dt
 ) {
-    bj_assert(BJ_REAL_GT(dt, BJ_F(0.0)));
-    damping = bj_clamp(damping, BJ_F(0.0), BJ_F(1.0));
-    const bj_real damp_factor = bj_powf(damping, dt);
+    bj_particle_integrate_array(
+        1,
+        &pos,
+        &vel,
+        &accel,
+        &forces,
+        inv_mass,
+        damping,
+        dt
+    );
 
-    const bj_real a = accel + forces * inv_mass;
-    bj_real v = vel + a * dt;
-    v *= damp_factor;
-
-    *out_vel = v;
-    *out_pos = pos + v * dt;
+    *out_pos = pos;
+    *out_vel = vel;
 }
 
 void bj_particle_integrate_2d(
