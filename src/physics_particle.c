@@ -13,7 +13,7 @@ static BJ_INLINE void bj_particle_integrate_array(
     bj_real                    damping,
     bj_real                    dt
 ) {
-    if (inv_mass == BJ_F(0.0)) {
+    if (inv_mass == BJ_FZERO) {
         return;
     }
 
@@ -24,32 +24,6 @@ static BJ_INLINE void bj_particle_integrate_array(
         pos[i] += vel[i] * dt;
         vel[i] = (vel[i] + acc * dt) * damp_factor;
     }
-}
-
-BANJO_EXPORT void bj_particle_integrate(
-    bj_real* out_pos,
-    bj_real* out_vel,
-    bj_real  pos,
-    bj_real  vel,
-    bj_real  accel,
-    bj_real  forces,
-    bj_real  inv_mass,
-    bj_real  damping,
-    bj_real  dt
-) {
-    bj_particle_integrate_array(
-        1,
-        &pos,
-        &vel,
-        &accel,
-        &forces,
-        inv_mass,
-        damping,
-        dt
-    );
-
-    *out_pos = pos;
-    *out_vel = vel;
 }
 
 void bj_particle_integrate_2d(
@@ -90,6 +64,62 @@ void bj_particle_integrate_3d(
         damping,
         dt
     );
+}
+
+bj_real bj_particle_drag_coefficient_3d(
+    const bj_vec3 vel,
+    const bj_real k1,
+    const bj_real k2
+) {
+    bj_real coef = bj_vec3_len(vel);
+    if(bj_real_is_zero(coef)) {
+        return BJ_FZERO;
+    }
+    return k1 * coef + k2 * coef * coef;
+}
+
+bj_real bj_particle_drag_coefficient_2d(
+    const bj_vec2 vel,
+    const bj_real k1,
+    const bj_real k2
+) {
+    bj_real coef = bj_vec2_len(vel);
+    if(bj_real_is_zero(coef)) {
+        return BJ_FZERO;
+    }
+    return k1 * coef + k2 * coef * coef;
+}
+
+bj_bool bj_particle_drag_force_3d(
+    bj_real result[BJ_RESTRICT static 3],
+    const bj_real vel[BJ_RESTRICT static 3],
+    const bj_real k1,
+    const bj_real k2
+) {
+    bj_real coef = bj_particle_drag_coefficient_3d(vel, k1, k2);
+
+    if(bj_real_is_zero(coef)) {
+        bj_vec3_set(result, BJ_FZERO, BJ_FZERO, BJ_FZERO);
+        return BJ_FALSE;
+    }
+    bj_vec3_set_len(result, vel, -coef);
+    return BJ_TRUE;
+}
+
+bj_bool bj_particle_drag_force_2d(
+    bj_real result[BJ_RESTRICT static 2],
+    const bj_real vel[BJ_RESTRICT static 2],
+    const bj_real k1,
+    const bj_real k2
+) {
+    bj_real coef = bj_particle_drag_coefficient_2d(vel, k1, k2);
+
+    if(bj_real_is_zero(coef)) {
+        bj_vec2_set(result, BJ_FZERO, BJ_FZERO);
+        return BJ_FALSE;
+    }
+    bj_vec2_set_len(result, vel, -coef);
+    return BJ_TRUE;
 }
 
 

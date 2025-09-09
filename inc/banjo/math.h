@@ -1,211 +1,40 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file math.h
-/// \defgroup math Math
-/// \ingroup core
-///
-/// \brief C99 math shim with macro forwarding and bj_real-only utilities.
-///
-/// Define BJ_API_FLOAT64 to make bj_real = double (else float).
-/// Naming:
-///   - bj_*   → operates on bj_real (auto-switch with BJ_USE_DOUBLE)
-///   - bj_*f  → explicit float forwards (1:1 to <math.h>)
-///   - bj_*d  → explicit double forwards (1:1 to <math.h>)
-///
-/// The Math group also provides usual facilities for linear math, including
-/// - vector types: \ref bj_vec2, \ref bj_vec3 and \ref bj_vec4
-/// - 3x3 matrix with \ref bj_mat3
-/// - 3x2 matrix with \ref bj_mat3x2
-/// - 4x4 matrix with \ref bj_mat4
-/// - 4x3 matrix with \ref bj_mat4x3
-/// - Quaternion with \ref bj_quat
-///
-/// This library is initially a direct adaptation of 
-/// [linmath.h](https://github.com/datenwolf/linmath.h) 
-/// by Wolfgang Draxinger, but since I added some new types.
-///
-///
-/// Utilities (clamp/step/smoothstep/fract/mod) exist **only** as bj_real.
+// math.h — C99 math shim with bj_real and utilities
+// Modes:
+//   BJ_API_LONG_DOUBLE → bj_real = long double
+//   BJ_API_FLOAT64     → bj_real = double
+//   (default)          → bj_real = float
 ////////////////////////////////////////////////////////////////////////////////
-
 #ifndef BJ_MATH_H
 #define BJ_MATH_H
 
-#include <banjo/api.h>
-
-#define _USE_MATH_DEFINES 
 #include <math.h>
+#include <float.h>
 
-#ifdef BJ_API_FLOAT64
+#if defined(BJ_API_LONG_DOUBLE)
+    typedef long double bj_real;
+    #define BJ_F(x) x##L
+    #define BJ_EPSILON (LDBL_EPSILON)
+#elif defined(BJ_API_FLOAT64)
     typedef double bj_real;
     #define BJ_F(x) x
-    #define BJ_EPSILON  BJ_F(1e-12)
+    #define BJ_EPSILON (DBL_EPSILON)
 #else
-    typedef float  bj_real;
+    typedef float bj_real;
     #define BJ_F(x) x##f
-    #define BJ_EPSILON  BJ_F(1e-6)
+    #define BJ_EPSILON (FLT_EPSILON)
 #endif
+#define BJ_FZERO (BJ_F(0.0))
 
+#define BJ_PI_F   (3.14159265358979323846f)
+#define BJ_TAU_F  (6.28318530717958647692f)
+#define BJ_PI_D   (3.14159265358979323846264338327950288)
+#define BJ_TAU_D  (6.28318530717958647692528676655900576)
+#define BJ_PI_L   (3.141592653589793238462643383279502884L)
+#define BJ_TAU_L  (6.283185307179586476925286766559005768L)
+#define BJ_PI     (BJ_F(3.141592653589793238462643383279502884))
+#define BJ_TAU    (BJ_F(6.283185307179586476925286766559005768))
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Absolute-epsilon equality: \c |a - b| <= BJ_EPSILON.
-/// \param a First value.
-/// \param b Second value.
-/// \return \c true if within absolute tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_EQ(a, b)    (bj_absf((a) - (b)) <= BJ_EPSILON)
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Absolute-epsilon inequality: logical negation of \c BJ_REAL_EQ.
-/// \param a First value.
-/// \param b Second value.
-/// \return \c true if not within absolute tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_NEQ(a, b)   (!BJ_REAL_EQ(a, b))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Strict less-than with absolute epsilon guard.
-/// \details Returns true if \c b - a exceeds \c BJ_EPSILON.
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \return \c true if \c a < b (beyond tolerance).
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_LT(a, b)    (((b) - (a)) >  BJ_EPSILON)
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Less-than-or-equal with absolute epsilon.
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \return \c true if \c a <= b within tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_LTE(a, b)   (!BJ_REAL_GT(a, b))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Strict greater-than with absolute epsilon guard.
-/// \details Returns true if \c a - b exceeds \c BJ_EPSILON.
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \return \c true if \c a > b (beyond tolerance).
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_GT(a, b)    (((a) - (b)) >  BJ_EPSILON)
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Greater-than-or-equal with absolute epsilon.
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \return \c true if \c a >= b within tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_GTE(a, b)   (!BJ_REAL_LT(a, b))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Three-way compare (absolute epsilon).
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \retval -1 if \c a < b (beyond epsilon)
-/// \retval  0 if \c a and \c b are equal within epsilon
-/// \retval +1 if \c a > b (beyond epsilon)
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_CMP(a, b)   (BJ_REAL_LT((a),(b)) ? -1 : (BJ_REAL_GT((a),(b)) ? 1 : 0))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Relative-epsilon equality: \c |a - b| <= BJ_EPSILON * max(1, |a|, |b|).
-/// \details Scales tolerance with magnitude to remain robust for large/small values.
-/// \param a First value.
-/// \param b Second value.
-/// \return \c true if within relative tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_EQ_REL(a, b)   (bj_absf((a) - (b)) <= (BJ_EPSILON * bj_maxf(BJ_F(1.0), bj_maxf(bj_absf(a), bj_absf(b)))))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Relative-epsilon inequality: logical negation of \c BJ_REAL_EQ_REL.
-/// \param a First value.
-/// \param b Second value.
-/// \return \c true if not within relative tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_NEQ_REL(a, b)  (!BJ_REAL_EQ_REL(a, b))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Strict less-than with relative epsilon guard.
-/// \details Returns true if \c b - a exceeds the scaled tolerance.
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \return \c true if \c a < b (beyond relative tolerance).
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_LT_REL(a, b)   (((b) - (a)) >  (BJ_EPSILON * bj_maxf(BJ_F(1.0), bj_maxf(bj_absf(a), bj_absf(b)))))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Less-than-or-equal with relative epsilon.
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \return \c true if \c a <= b within relative tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_LTE_REL(a, b)  (!BJ_REAL_GT_REL(a, b))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Strict greater-than with relative epsilon guard.
-/// \details Returns true if \c a - b exceeds the scaled tolerance.
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \return \c true if \c a > b (beyond relative tolerance).
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_GT_REL(a, b)   (((a) - (b)) >  (BJ_EPSILON * bj_maxf(BJ_F(1.0), bj_maxf(bj_absf(a), bj_absf(b)))))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Greater-than-or-equal with relative epsilon.
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \return \c true if \c a >= b within relative tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_GTE_REL(a, b)  (!BJ_REAL_LT_REL(a, b))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Three-way compare (relative epsilon).
-/// \param a Left-hand side.
-/// \param b Right-hand side.
-/// \retval -1 if \c a < b (beyond relative tolerance)
-/// \retval  0 if \c a and \c b are equal within relative tolerance
-/// \retval +1 if \c a > b (beyond relative tolerance)
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_CMP_REL(a, b)  (BJ_REAL_LT_REL((a),(b)) ? -1 : (BJ_REAL_GT_REL((a),(b)) ? 1 : 0))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Check if a value is effectively zero (absolute epsilon).
-/// \param x Value to test.
-/// \return \c true if \c |x| <= BJ_EPSILON.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_IS_ZERO(x) (bj_absf(x) <= BJ_EPSILON)
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Check if a value is effectively zero (relative epsilon).
-/// \details Uses scaled tolerance: \c |x| <= BJ_EPSILON * max(1, |x|).
-/// \param x Value to test.
-/// \return \c true if \c x is zero within relative tolerance.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_IS_ZERO_REL(x) (bj_absf(x) <= (BJ_EPSILON * bj_maxf(BJ_F(1.0), bj_absf(x))))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Snap a value to 0 if it is within absolute epsilon.
-/// \param x Value to test.
-/// \return \c 0 if \c |x| <= BJ_EPSILON, otherwise returns \c x.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_SNAP_ZERO(x) ((bj_absf(x) <= BJ_EPSILON) ? BJ_F(0.0) : (x))
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Safe normalize of a scalar (divide by length with zero guard).
-/// \details Equivalent to \c (x / len) but returns 0 if \c len is within epsilon.
-/// \param x Value to normalize.
-/// \param len Length (denominator).
-/// \return Normalized value or 0 if length is ~0.
-////////////////////////////////////////////////////////////////////////////////
-#define BJ_REAL_SNORM_SAFE(x, len) ((BJ_REAL_IS_ZERO(len)) ? BJ_F(0.0) : ((x) / (len)))
-
-#define BJ_PI_F  3.14159265358979323846f
-#define BJ_TAU_F 6.28318530717958647692f
-#define BJ_PI_D  3.14159265358979323846264338327950288
-#define BJ_TAU_D 6.28318530717958647692528676655900576
-#define BJ_PI    BJ_F(3.14159265358979323846264338327950288)
-#define BJ_TAU   BJ_F(6.28318530717958647692528676655900576)
-
-/* Explicit float */
 #define bj_absf       fabsf
 #define bj_acosf      acosf
 #define bj_copysignf  copysignf
@@ -221,7 +50,6 @@
 #define bj_sqrtf      sqrtf
 #define bj_tanf       tanf
 
-/* Explicit double */
 #define bj_absd       fabs
 #define bj_acosd      acos
 #define bj_copysignd  copysign
@@ -239,11 +67,45 @@
 #define bj_tand       tan
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #ifdef BJ_USE_DOUBLE
 =======
 /* Auto-dispatch to bj_real */
 #ifdef BJ_API_FLOAT64
 >>>>>>> ce258a6 (Particles)
+=======
+#define bj_absl       fabsl
+#define bj_maxl       fmaxl
+#define bj_minl       fminl
+#define bj_floorl     floorl
+#define bj_roundl     roundl
+#define bj_sinl       sinl
+#define bj_cosl       cosl
+#define bj_tanl       tanl
+#define bj_acosl      acosl
+#define bj_expl       expl
+#define bj_sqrtl      sqrtl
+#define bj_powl       powl
+#define bj_fmodl      fmodl
+#define bj_copysignl  copysignl
+
+#if defined(BJ_API_LONG_DOUBLE)
+    #define bj_abs       bj_absl
+    #define bj_max       bj_maxl
+    #define bj_min       bj_minl
+    #define bj_floor     bj_floorl
+    #define bj_round     bj_roundl
+    #define bj_sin       bj_sinl
+    #define bj_cos       bj_cosl
+    #define bj_tan       bj_tanl
+    #define bj_acos      bj_acosl
+    #define bj_exp       bj_expl
+    #define bj_sqrt      bj_sqrtl
+    #define bj_pow       bj_powl
+    #define bj_fmod      bj_fmodl
+    #define bj_copysign  bj_copysignl
+#elif defined(BJ_API_FLOAT64)
+>>>>>>> 3b828be (.)
     #define bj_abs       bj_absd
     #define bj_acos      bj_acosd
     #define bj_copysign  bj_copysignd
@@ -282,12 +144,12 @@ static inline bj_real bj_clamp(bj_real x, bj_real lo, bj_real hi) {
 }
 
 static inline bj_real bj_step(bj_real edge, bj_real x) {
-    return (x < edge) ? BJ_F(0.0) : BJ_F(1.0);
+    return (x < edge) ? BJ_FZERO : BJ_F(1.0);
 }
 
 static inline bj_real bj_smoothstep(bj_real e0, bj_real e1, bj_real x) {
     bj_real t = (x - e0) / (e1 - e0);
-    t = (t < BJ_F(0.0)) ? BJ_F(0.0) : (t > BJ_F(1.0)) ? BJ_F(1.0) : t;
+    t = (t < BJ_FZERO) ? BJ_FZERO : (t > BJ_F(1.0)) ? BJ_F(1.0) : t;
     return t * t * (BJ_F(3.0) - BJ_F(2.0) * t);
 }
 
@@ -296,7 +158,37 @@ static inline bj_real bj_fract(bj_real x) {
 }
 
 static inline bj_real bj_mod(bj_real x, bj_real y) {
-    return x - y * bj_floor(x / y);
+    bj_real m = bj_fmod(x, y);
+    if (m < BJ_FZERO) m += (y < BJ_FZERO) ? -y : y;
+    return m;
 }
 
-#endif
+static inline int  bj_real_eq (bj_real a, bj_real b) { return bj_abs(a - b) <= BJ_EPSILON; }
+static inline int  bj_real_neq(bj_real a, bj_real b) { return !bj_real_eq(a, b); }
+static inline int  bj_real_lt (bj_real a, bj_real b) { return (b - a) >  BJ_EPSILON; }
+static inline int  bj_real_gt (bj_real a, bj_real b) { return (a - b) >  BJ_EPSILON; }
+static inline int  bj_real_lte(bj_real a, bj_real b) { return !bj_real_gt(a, b); }
+static inline int  bj_real_gte(bj_real a, bj_real b) { return !bj_real_lt(a, b); }
+static inline int  bj_real_cmp(bj_real a, bj_real b) { return bj_real_lt(a,b) ? -1 : (bj_real_gt(a,b) ? 1 : 0); }
+
+static inline bj_real bj__rel_scale(bj_real a, bj_real b) {
+    return bj_max(BJ_F(1.0), bj_max(bj_abs(a), bj_abs(b)));
+}
+static inline int  bj_real_eq_rel (bj_real a, bj_real b) { bj_real s = bj__rel_scale(a,b); return bj_abs(a - b) <= (BJ_EPSILON * s); }
+static inline int  bj_real_neq_rel(bj_real a, bj_real b) { return !bj_real_eq_rel(a, b); }
+static inline int  bj_real_lt_rel (bj_real a, bj_real b) { bj_real s = bj__rel_scale(a,b); return (b - a) >  (BJ_EPSILON * s); }
+static inline int  bj_real_gt_rel (bj_real a, bj_real b) { bj_real s = bj__rel_scale(a,b); return (a - b) >  (BJ_EPSILON * s); }
+static inline int  bj_real_lte_rel(bj_real a, bj_real b) { return !bj_real_gt_rel(a, b); }
+static inline int  bj_real_gte_rel(bj_real a, bj_real b) { return !bj_real_lt_rel(a, b); }
+static inline int  bj_real_cmp_rel(bj_real a, bj_real b) { return bj_real_lt_rel(a,b) ? -1 : (bj_real_gt_rel(a,b) ? 1 : 0); }
+
+/* zero tests and helpers */
+static inline int   bj_real_is_zero(bj_real x) { return bj_abs(x) <= BJ_EPSILON; }
+static inline int   bj_real_is_zero_scaled(bj_real x, bj_real scale) {
+    bj_real s = bj_max(BJ_F(1.0), bj_abs(scale));
+    return bj_abs(x) <= (BJ_EPSILON * s);
+}
+static inline bj_real bj_real_snap_zero(bj_real x) { return bj_real_is_zero(x) ? BJ_FZERO : x; }
+static inline bj_real bj_real_snorm_safe(bj_real x, bj_real len) { return bj_real_is_zero(len) ? BJ_FZERO : (x / len); }
+
+#endif /* BJ_MATH_H */

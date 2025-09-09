@@ -59,7 +59,7 @@ typedef bj_real bj_quat[4];
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_quat_identity(bj_quat q)
 {
-    q[0] = q[1] = q[2] = BJ_F(0.0);
+    q[0] = q[1] = q[2] = BJ_FZERO;
     q[3] = BJ_F(1.0);
 }
 
@@ -156,19 +156,19 @@ static BJ_INLINE void bj_mat4_from_quat(bj_mat4 res, const bj_quat q) {
     res[0][0] = a2 + b2 - c2 - d2;
     res[0][1] = BJ_F(2.0) * (b * c + a * d);
     res[0][2] = BJ_F(2.0) * (b * d - a * c);
-    res[0][3] = BJ_F(0.0);
+    res[0][3] = BJ_FZERO;
 
     res[1][0] = BJ_F(2) * (b * c - a * d);
     res[1][1] = a2 - b2 + c2 - d2;
     res[1][2] = BJ_F(2.0) * (c * d + a * b);
-    res[1][3] = BJ_F(0.0);
+    res[1][3] = BJ_FZERO;
 
     res[2][0] = BJ_F(2.0) * (b * d + a * c);
     res[2][1] = BJ_F(2.0) * (c * d - a * b);
     res[2][2] = a2 - b2 - c2 + d2;
-    res[2][3] = BJ_F(0.0);
+    res[2][3] = BJ_FZERO;
 
-    res[3][0] = res[3][1] = res[3][2] = BJ_F(0.0);
+    res[3][0] = res[3][1] = res[3][2] = BJ_FZERO;
     res[3][3] = BJ_F(1.0);
 }
 
@@ -184,7 +184,7 @@ static BJ_INLINE void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const
     bj_quat_mul_vec3(R[1], q, M[1]);
     bj_quat_mul_vec3(R[2], q, M[2]);
 
-    R[3][0] = R[3][1] = R[3][2] = BJ_F(0.0);
+    R[3][0] = R[3][1] = R[3][2] = BJ_FZERO;
     R[0][3] = M[0][3];
     R[1][3] = M[1][3];
     R[2][3] = M[2][3];
@@ -199,7 +199,7 @@ static BJ_INLINE void bj_mat4_rotate_from_quat(bj_mat4 R, const bj_mat4 M, const
 /// \note Uses a numerically stable branch based on the dominant diagonal term.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
-    bj_real r = BJ_F(0.0);
+    bj_real r = BJ_FZERO;
     int i, j, k;
 
     int perm[] = { 0, 1, 2, 0, 1 };
@@ -220,9 +220,9 @@ static BJ_INLINE void bj_quat_from_mat4(bj_quat q, const bj_mat4 M) {
     r = bj_sqrt(BJ_F(1.0) + M[i][i] - M[j][j] - M[k][k]);
 
     if (r < BJ_F(1e-6)) {
-        q[0] = BJ_F(0.0);
-        q[1] = BJ_F(0.0);
-        q[2] = BJ_F(0.0);
+        q[0] = BJ_FZERO;
+        q[1] = BJ_FZERO;
+        q[2] = BJ_FZERO;
         q[3] = BJ_F(1.0);
         return;
     }

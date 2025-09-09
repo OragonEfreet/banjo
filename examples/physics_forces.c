@@ -89,14 +89,14 @@ static void reset_particle(particle_t* p) {
         ( ((bj_real)rand()/(bj_real)RAND_MAX) - BJ_F(0.5)) * BJ_F(5.0)
     );
 
-    bj_vec2_set(p->forces, BJ_F(0.0), BJ_F(0.0));
+    bj_vec2_set(p->forces, BJ_FZERO, BJ_FZERO);
     /* bj_vec2_copy(p->acceleration, gravity); */  // leave 0 unless you want global gravity
     p->damping = BJ_F(1.0);
     p->inverse_mass = BJ_F(1.0) / MASS;
 }
 
 static void initialize() {
-    bj_vec2_set(gravity, BJ_F(0.0), BJ_F(-9.807));
+    bj_vec2_set(gravity, BJ_FZERO, BJ_F(-9.807));
 
     for(size_t p = 0 ; p < PARTICLES_LEN ; ++p) {
         reset_particle(&particles[p]);
@@ -105,7 +105,7 @@ static void initialize() {
 
 
 static void reset_forces(particle_t* p) {
-    bj_vec2_set(p->forces, BJ_F(0.0), BJ_F(0.0));
+    bj_vec2_set(p->forces, BJ_FZERO, BJ_FZERO);
 }
 
 static void add_force(particle_t* p, const bj_vec2 force) {
@@ -147,8 +147,8 @@ static void update(bj_real dt) {
 
             // Normalize direction safely
             bj_real dist = bj_sqrt(dist2);
-            bj_real dirx = (dist > BJ_EPSILON) ? (r12[0] / dist) : BJ_F(0.0);
-            bj_real diry = (dist > BJ_EPSILON) ? (r12[1] / dist) : BJ_F(0.0);
+            bj_real dirx = (dist > BJ_EPSILON) ? (r12[0] / dist) : BJ_FZERO;
+            bj_real diry = (dist > BJ_EPSILON) ? (r12[1] / dist) : BJ_FZERO;
 
             bj_vec2 f12 = { dirx * mag, diry * mag };
 

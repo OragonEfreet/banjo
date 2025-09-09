@@ -125,7 +125,7 @@ inline static double make_note_value(
     double   phase_step
 ) {
     const uint64_t sample_index = base_sample_index + i;
-    const double two_pi = BJ_TAU_D; /* 2PI exactly in double */
+    const double two_pi = BJ_TAU; /* 2PI exactly in double */
 
     /* Use the double variant explicitly to avoid accidental float truncation
        when BJ_API_FLOAT64 is off. */
@@ -166,7 +166,7 @@ void bj_audio_play_note(
     const double freq        = (double)data->frequency;
     const double amplitude   = (double)p_audio->amplitude;   /* scale for int16 path */
     const double sample_rate = (double)p_audio->sample_rate;
-    const double phase_step  = BJ_TAU_D * freq / sample_rate;
+    const double phase_step  = BJ_TAU * freq / sample_rate;
     const int    channels    = p_audio->channels;
 
     for (unsigned i = 0; i < frames; ++i) {

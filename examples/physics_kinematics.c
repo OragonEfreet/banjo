@@ -86,8 +86,8 @@ static void update(bj_real dt) {
         const bj_real x = balls[b].position[0];
         const bj_real y = balls[b].position[1];
 
-        if (x + BALLS_RADIUS < BJ_F(0.0) || x - BALLS_RADIUS > (bj_real)SCREEN_WIDTH ||
-            y + BALLS_RADIUS < BJ_F(0.0) || y - BALLS_RADIUS > (bj_real)SCREEN_HEIGHT
+        if (x + BALLS_RADIUS < BJ_FZERO || x - BALLS_RADIUS > (bj_real)SCREEN_WIDTH ||
+            y + BALLS_RADIUS < BJ_FZERO || y - BALLS_RADIUS > (bj_real)SCREEN_HEIGHT
         ) {
             reset_ball(b);
         }
