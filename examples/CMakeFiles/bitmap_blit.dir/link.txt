@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/bitmap_blit.dir/link.d CMakeFiles/bitmap_blit.dir/bitmap_blit.c.o -o bitmap_blit  ../libbanjo.a -lm

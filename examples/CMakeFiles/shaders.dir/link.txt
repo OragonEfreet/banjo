@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/shaders.dir/link.d CMakeFiles/shaders.dir/shaders.c.o -o shaders  ../libbanjo.a -lm

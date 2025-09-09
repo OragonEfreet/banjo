@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/handling_errors.dir/link.d CMakeFiles/handling_errors.dir/handling_errors.c.o -o handling_errors  ../libbanjo.a -lm

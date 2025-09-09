@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/memory_callbacks.dir/link.d CMakeFiles/memory_callbacks.dir/memory_callbacks.c.o -o memory_callbacks  ../libbanjo.a -lm

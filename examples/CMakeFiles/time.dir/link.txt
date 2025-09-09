@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/time.dir/link.d CMakeFiles/time.dir/time.c.o -o time  ../libbanjo.a -lm

@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/logging.dir/link.d CMakeFiles/logging.dir/logging.c.o -o logging  ../libbanjo.a -lm

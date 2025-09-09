@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/test_unit_build_info.dir/link.d CMakeFiles/test_unit_build_info.dir/unit_build_info.c.o -o unit_build_info  ../libbanjo.a -lm

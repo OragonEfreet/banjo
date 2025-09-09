@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/test_valid_bitmap.dir/link.d CMakeFiles/test_valid_bitmap.dir/valid_bitmap.c.o -o valid_bitmap  ../libbanjo.a -lm

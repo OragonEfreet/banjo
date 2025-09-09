@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/assert.dir/link.d CMakeFiles/assert.dir/assert.c.o -o assert  ../libbanjo.a -lm

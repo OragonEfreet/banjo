@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/test_unit_pixel.dir/link.d CMakeFiles/test_unit_pixel.dir/unit_pixel.c.o -o unit_pixel  ../libbanjo.a -lm

@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/event_callbacks.dir/link.d CMakeFiles/event_callbacks.dir/event_callbacks.c.o -o event_callbacks  ../libbanjo.a -lm

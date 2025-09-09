@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/pixel_mode.dir/link.d CMakeFiles/pixel_mode.dir/pixel_mode.c.o -o pixel_mode  ../libbanjo.a -lm

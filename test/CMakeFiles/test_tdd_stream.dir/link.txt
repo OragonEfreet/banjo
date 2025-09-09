@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/test_tdd_stream.dir/link.d CMakeFiles/test_tdd_stream.dir/tdd_stream.c.o -o tdd_stream  ../libbanjo.a -lm

@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/template.dir/link.d CMakeFiles/template.dir/template.c.o -o template  ../libbanjo.a -lm

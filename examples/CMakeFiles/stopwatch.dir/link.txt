@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/stopwatch.dir/link.d CMakeFiles/stopwatch.dir/stopwatch.c.o -o stopwatch  ../libbanjo.a -lm

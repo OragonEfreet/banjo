@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/drawing_text.dir/link.d CMakeFiles/drawing_text.dir/drawing_text.c.o -o drawing_text  ../libbanjo.a -lm

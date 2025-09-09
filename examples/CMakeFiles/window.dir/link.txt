@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/window.dir/link.d CMakeFiles/window.dir/window.c.o -o window  ../libbanjo.a -lm

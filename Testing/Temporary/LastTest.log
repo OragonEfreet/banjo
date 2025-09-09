@@ -1,0 +1,303 @@
+Start testing: Sep 09 23:26 CEST
+----------------------------------------------------------
+1/6 Testing: [TDD] tdd_stream
+1/6 Test: [TDD] tdd_stream
+Command: "/home/oragon/ws/banjo/test/tdd_stream"
+Directory: /home/oragon/ws/banjo/test
+"[TDD] tdd_stream" start time: Sep 09 23:26 CEST
+Output:
+----------------------------------------------------------
+[OK]   | init_from_buffer_but_zero_size_returns_valid_object
+[OK]   | init_from_buffer_contains_pointer_to_the_buffer
+[OK]   | init_from_null_buffer_and_non_zero_size_returns_valid_object
+[OK]   | init_from_null_buffer_returns_valid
+[OK]   | reading_n_bytes_returns_the_number_of_read_bytes
+[OK]   | reading_n_bytes_shift_tell_return_to_n_bytes
+[OK]   | reading_n_bytes_shift_the_position_to_n_bytes
+[OK]   | reading_to_get_values
+Ran 8 test cases, 53 asserts.
+0 test failed.
+
+Application allocated:	 0 (max: 32)
+Total allocated:	 0 (max: 48)
+8 allocs, 0 reallocs, 8 frees
+No leak detected
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"[TDD] tdd_stream" end time: Sep 09 23:26 CEST
+"[TDD] tdd_stream" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/6 Testing: [Unit] unit_build_info
+2/6 Test: [Unit] unit_build_info
+Command: "/home/oragon/ws/banjo/test/unit_build_info"
+Directory: /home/oragon/ws/banjo/test
+"[Unit] unit_build_info" start time: Sep 09 23:26 CEST
+Output:
+----------------------------------------------------------
+[OK]   | get_build_info
+Ran 1 test cases, 4 asserts.
+0 test failed.
+
+Application allocated:	 0 (max: 0)
+Total allocated:	 0 (max: 0)
+0 allocs, 0 reallocs, 0 frees
+No leak detected
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"[Unit] unit_build_info" end time: Sep 09 23:26 CEST
+"[Unit] unit_build_info" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/6 Testing: [Unit] unit_memory
+3/6 Test: [Unit] unit_memory
+Command: "/home/oragon/ws/banjo/test/unit_memory"
+Directory: /home/oragon/ws/banjo/test
+"[Unit] unit_memory" start time: Sep 09 23:26 CEST
+Output:
+----------------------------------------------------------
+[OK]   | fallback_allocator_works
+[OK]   | forcing_default_allocators_is_possible
+[OK]   | test_custom_default_allocators
+Ran 3 test cases, 80 asserts.
+0 test failed.
+
+Application allocated:	 0 (max: 0)
+Total allocated:	 0 (max: 0)
+0 allocs, 0 reallocs, 0 frees
+No leak detected
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"[Unit] unit_memory" end time: Sep 09 23:26 CEST
+"[Unit] unit_memory" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/6 Testing: [Unit] unit_pixel
+4/6 Test: [Unit] unit_pixel
+Command: "/home/oragon/ws/banjo/test/unit_pixel"
+Directory: /home/oragon/ws/banjo/test
+"[Unit] unit_pixel" start time: Sep 09 23:26 CEST
+Output:
+----------------------------------------------------------
+[OK]   | pixel_mode {.enumval=BJ_PIXEL_MODE_INDEXED_1, .expr=BJ_PIXEL_MODE_MAKE_INDEXED(1)}
+[OK]   | pixel_mode {.enumval=BJ_PIXEL_MODE_INDEXED_4, .expr=BJ_PIXEL_MODE_MAKE_INDEXED(4)}
+[OK]   | pixel_mode {.enumval=BJ_PIXEL_MODE_INDEXED_8, .expr=BJ_PIXEL_MODE_MAKE_INDEXED(8)}
+[OK]   | pixel_mode {.enumval=BJ_PIXEL_MODE_XRGB1555, .expr=BJ_PIXEL_MODE_MAKE_BITFIELD_16(BJ_PIXEL_LAYOUT_1555, BJ_PIXEL_ORDER_XRGB)}
+[OK]   | pixel_mode {.enumval=BJ_PIXEL_MODE_RGB565, .expr=BJ_PIXEL_MODE_MAKE_BITFIELD_16(BJ_PIXEL_LAYOUT_565, BJ_PIXEL_ORDER_XRGB)}
+[OK]   | pixel_mode {.enumval=BJ_PIXEL_MODE_XRGB8888, .expr=BJ_PIXEL_MODE_MAKE_BITFIELD_32(BJ_PIXEL_LAYOUT_8888, BJ_PIXEL_ORDER_XRGB)}
+[OK]   | pixel_mode {.enumval=BJ_PIXEL_MODE_BGR24, .expr=BJ_PIXEL_MODE_MAKE_BYTES(24, BJ_PIXEL_ORDER_BGR)}
+[OK]   | conversion
+Ran 8 test cases, 8 asserts.
+0 test failed.
+
+Application allocated:	 0 (max: 0)
+Total allocated:	 0 (max: 0)
+0 allocs, 0 reallocs, 0 frees
+No leak detected
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"[Unit] unit_pixel" end time: Sep 09 23:26 CEST
+"[Unit] unit_pixel" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/6 Testing: [Unit] unit_rect
+5/6 Test: [Unit] unit_rect
+Command: "/home/oragon/ws/banjo/test/unit_rect"
+Directory: /home/oragon/ws/banjo/test
+"[Unit] unit_rect" start time: Sep 09 23:26 CEST
+Output:
+----------------------------------------------------------
+[OK]   | rect_intersect {.rect={.x=2, .y=2, .w=8, .h=8}, .result={.x=2,.y=2,.w=8, .h= 8}}
+[OK]   | rect_intersect {.rect={.x=0, .y=0, .w=10,.h= 10},.result={.x=0,.y=0,.w=10,.h= 10}}
+[OK]   | rect_intersect {.rect={.x=2, .y=-2,.w=8, .h=8}, .result={.x=2,.y=0,.w=8, .h = 6}}
+[OK]   | rect_intersect {.rect={.x=8, .y=-2,.w=8, .h= 8}, .result={.x=8,.y=0,.w=2, .h= 6}}
+[OK]   | rect_intersect {.rect={.x=8, .y=2, .w=8, .h= 8}, .result={.x=8,.y=2,.w=2, .h= 8}}
+[OK]   | rect_intersect {.rect={.x=8, .y=8, .w=8, .h= 8}, .result={.x=8,.y=8,.w=2, .h= 2}}
+[OK]   | rect_intersect {.rect={.x=2, .y=8, .w=8, .h= 8}, .result={.x=2,.y=8,.w=8, .h= 2}}
+[OK]   | rect_intersect {.rect={.x=-2,.y=8, .w=8, .h= 8}, .result={.x=0,.y=8,.w=6, .h= 2}}
+[OK]   | rect_intersect {.rect={.x=-2,.y=2, .w=8, .h= 8}, .result={.x=0,.y=2,.w=6, .h= 8}}
+[OK]   | rect_intersect {.rect={.x=-2,.y=-2,.w=8, .h= 8}, .result={.x=0,.y=0,.w=6, .h= 6}}
+[OK]   | rect_no_intersect {.rect={.x=-10,.y=-10,.w=2, .h= 2},}
+[OK]   | rect_no_intersect {.rect={.x=-10,.y=-10,.w=0, .h= 0},}
+[OK]   | rect_no_intersect {.rect={0},}
+[OK]   | rect_no_intersect {.rect={.x=2,.y=2,.w=0, .h= 0},}
+Ran 14 test cases, 70 asserts.
+0 test failed.
+
+Application allocated:	 0 (max: 0)
+Total allocated:	 0 (max: 0)
+0 allocs, 0 reallocs, 0 frees
+No leak detected
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"[Unit] unit_rect" end time: Sep 09 23:26 CEST
+"[Unit] unit_rect" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/6 Testing: [Validation] valid_bitmap
+6/6 Test: [Validation] valid_bitmap
+Command: "/home/oragon/ws/banjo/test/valid_bitmap"
+Directory: /home/oragon/ws/banjo/test
+"[Validation] valid_bitmap" start time: Sep 09 23:26 CEST
+Output:
+----------------------------------------------------------
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/8bpp-colorsimportant-large.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/8bpp-colorsimportant-negative.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/8bpp-colorsused-large.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/8bpp-colorsused-negative.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/bitdepth-large.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/bitdepth-odd.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/bitdepth-zero.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/colormasks-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/colormasks-missing.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/compression-bad-rle4-for-8bpp.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/compression-bad-rle8-for-4bpp.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/compression-unknown.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/emptyfile.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/fileinfoheader-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/height-zero.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/infoheader-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/infoheader-missing.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/infoheadersize-large.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/infoheadersize-small.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/infoheadersize-zero.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/magicnumber-bad.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/magicnumber-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/offbits-large.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/offbits-negative.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/offbits-zero.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/palette-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/palette-missing.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/palette-too-big.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/rle4-no-end-of-line-marker.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/rle8-deltaleavesimage.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/rle8-no-end-of-line-marker.bmp", .code = BJ_ERROR_INVALID_FORMAT}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/width-negative.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/width-times-height-overflow.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+[OK]   | is_corrupt_bmp {.name = "/bmp/test/corrupt/width-zero.bmp", .code = BJ_ERROR_INCORRECT_VALUE}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:499) 1bpp bitmap stream contains no color table
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/1bpp-no-palette.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:148) unexpected end of bitmap stream
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/1bpp-pixeldata-cropped.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:148) unexpected end of bitmap stream
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/24bpp-pixeldata-cropped.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:148) unexpected end of bitmap stream
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/32bpp-pixeldata-cropped.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:499) 4bpp bitmap stream contains no color table
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/4bpp-no-palette.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:148) unexpected end of bitmap stream
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/4bpp-pixeldata-cropped.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:148) unexpected end of bitmap stream
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/555-pixeldata-cropped.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:499) 8bpp bitmap stream contains no color table
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/8bpp-no-palette.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:148) unexpected end of bitmap stream
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/8bpp-pixeldata-cropped.bmp"}
+23:26:49 WARN (/home/oragon/ws/banjo/src/bitmap_dib.c:148) unexpected end of bitmap stream
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/pixeldata-missing.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/rle4-absolute-cropped.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/rle4-delta-cropped.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/rle4-runlength-cropped.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/rle8-absolute-cropped.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/rle8-delta-cropped.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/corrupt/rle8-runlength-cropped.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/ spaces in  filename.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-1x1.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-320x240-color.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-320x240-overlappingcolor.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-321x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-322x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-323x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-324x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-325x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-326x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-327x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-328x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-329x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-330x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-331x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-332x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-333x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-334x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-335x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/1bpp-topdown-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/24bpp-1x1.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/24bpp-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/24bpp-321x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/24bpp-322x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/24bpp-323x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/24bpp-imagesize-zero.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/24bpp-topdown-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/32bpp-101110-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/32bpp-1x1.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/32bpp-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/32bpp-888-optimalpalette-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/32bpp-optimalpalette-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/32bpp-topdown-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-1x1.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-321x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-322x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-323x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-324x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-325x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-326x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-327x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/4bpp-topdown-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/555-1x1.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/555-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/555-321x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/565-1x1.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/565-320x240-topdown.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/565-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/565-321x240-topdown.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/565-321x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/565-322x240-topdown.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/565-322x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-1x1.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-1x64000.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-321x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-322x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-323x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-colorsimportant-two.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-colorsused-zero.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/8bpp-topdown-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/misleadingextension.jpg"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/nofileextension"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle4-absolute-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle4-alternate-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle4-delta-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle4-encoded-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle8-64000x1.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle8-absolute-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle8-blank-160x120.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle8-delta-320x240.bmp"}
+[OK]   | is_valid_bmp {.name = "/bmp/test/valid/rle8-encoded-320x240.bmp"}
+Ran 124 test cases, 158 asserts.
+0 test failed.
+
+Application allocated:	 0 (max: 768318)
+Total allocated:	 0 (max: 768446)
+782 allocs, 0 reallocs, 782 frees
+No leak detected
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"[Validation] valid_bitmap" end time: Sep 09 23:26 CEST
+"[Validation] valid_bitmap" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 09 23:26 CEST

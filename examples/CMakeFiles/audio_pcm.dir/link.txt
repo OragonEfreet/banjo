@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/audio_pcm.dir/link.d CMakeFiles/audio_pcm.dir/audio_pcm.c.o -o audio_pcm  ../libbanjo.a -lm

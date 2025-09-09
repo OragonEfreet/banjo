@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/sprite_animation.dir/link.d CMakeFiles/sprite_animation.dir/sprite_animation.c.o -o sprite_animation  ../libbanjo.a -lm

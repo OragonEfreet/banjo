@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/load_bmp.dir/link.d CMakeFiles/load_bmp.dir/load_bmp.c.o -o load_bmp  ../libbanjo.a -lm

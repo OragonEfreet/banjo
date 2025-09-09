@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/event_polling.dir/link.d CMakeFiles/event_polling.dir/event_polling.c.o -o event_polling  ../libbanjo.a -lm

@@ -1,0 +1,1 @@
+/usr/bin/cc -Wl,--dependency-file=CMakeFiles/template_callbacks.dir/link.d CMakeFiles/template_callbacks.dir/template_callbacks.c.o -o template_callbacks  ../libbanjo.a -lm
