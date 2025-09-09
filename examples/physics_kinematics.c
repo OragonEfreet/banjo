@@ -7,7 +7,7 @@
 #include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
-#include <banjo/physics.h>
+#include <banjo/physics_2d.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/vec.h>
