@@ -9,7 +9,7 @@
 #include <banjo/log.h>
 #include <banjo/main.h>
 #include <banjo/mat.h>
-#include <banjo/physics.h>
+#include <banjo/physics_2d.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/vec.h>
@@ -28,7 +28,7 @@ bj_window* window      = 0;
 bj_bitmap* framebuffer = 0;
 bj_mat3 projection;
 
-#define PARTICLES_LEN 4000
+#define PARTICLES_LEN 400
 
 /* #define G BJ_F(6.67430e-11) */
 #define G BJ_F(100.0)
@@ -36,35 +36,7 @@ bj_mat3 projection;
 
 #define MASS BJ_F(10.0)
 
-typedef struct {
-    // Linear position of the particle in world space
-    bj_vec2 position;
-
-    // Holds the linear velocity of the particle in world space
-    bj_vec2 velocity;
-
-    // Accumulated force
-    bj_vec2 forces;
-
-    // Holds the acceleration of the particle.
-    // This value can be used to set acceleration due to gravity 
-    // (its primary use) or any other constant acceleration.
-    bj_vec2 acceleration;
-
-    // Holds the amount of damping applied to linear motion.
-    // Damping is required to remove energy added through numerical instability
-    // in the integrator.
-    bj_real damping;
-
-    // Holds the inverse of the mass of the particle.
-    // It is more useful to hold the inverse mass because integration is
-    // simpler and because in real-time simulation it is more useful to
-    // have objects with infinite mass(immovable) than zero mass
-    // (completely unstable in numerical simulation).
-    bj_real inverse_mass;
-} particle_t;
-
-particle_t particles[PARTICLES_LEN];
+bj_particle_2d particles[PARTICLES_LEN];
 
 bj_vec2 gravity; // g
 bj_stopwatch stopwatch;
@@ -77,7 +49,7 @@ static void update_projection() {
     bj_mat3_mul(projection, viewport, ortho);
 }
 
-static void reset_particle(particle_t* p) {
+static void reset_particle(bj_particle_2d* p) {
     bj_vec2_set(p->position,
         ((bj_real)rand() / (bj_real)RAND_MAX) * CANVAS_WIDTH  - (CANVAS_WIDTH  / BJ_F(2.0)),
         ((bj_real)rand() / (bj_real)RAND_MAX) * CANVAS_HEIGHT - (CANVAS_HEIGHT / BJ_F(2.0))
@@ -104,30 +76,12 @@ static void initialize() {
 }
 
 
-static void reset_forces(particle_t* p) {
+static void reset_forces(bj_particle_2d* p) {
     bj_vec2_set(p->forces, BJ_FZERO, BJ_FZERO);
 }
 
-static void add_force(particle_t* p, const bj_vec2 force) {
+static void add_force(bj_particle_2d* p, const bj_vec2 force) {
     bj_vec2_add(p->forces, p->forces, force);
-}
-
-// Integrate the particle forward in time by the given amount.
-// This function uses a Newton-Euler integration method, which is a linear
-// approximation of the correct integral. For this reason it may be inaccurate
-// in some cases.
-static void integrate_particle(particle_t* part, bj_real dt) {
-
-    bj_particle_integrate_2d(
-        part->position,
-        part->velocity,
-        part->acceleration,
-        part->forces,
-        part->inverse_mass,
-        part->damping,
-        dt
-    );
-        
 }
 
 static void update(bj_real dt) {
@@ -165,7 +119,7 @@ static void update(bj_real dt) {
 
     // (re)compute forces here (the loop above), then:
     for (size_t p = 0; p < PARTICLES_LEN; ++p) {
-        integrate_particle(&particles[p], dt);
+        bj_integrate_particle_2d(&particles[p], dt);
     }
 }
 

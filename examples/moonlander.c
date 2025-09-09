@@ -9,6 +9,7 @@
 #include <banjo/mat.h>
 #include <banjo/math.h>
 #include <banjo/physics.h>
+#include <banjo/physics_2d.h>
 #include <banjo/shader.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
@@ -31,16 +32,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Game Data
 typedef struct {
-    bj_vec2 position;
-    bj_vec2 velocity;
-    bj_vec2 acceleration;
-    bj_real damping;
-    bj_real inverse_mass;
-    bj_vec2 forces;
-} particle;
-
-typedef struct {
-    particle particle;
+    bj_particle_2d particle;
 
     bj_real drag_k1;
     bj_real drag_k2;
@@ -60,10 +52,8 @@ typedef struct {
     bj_window*   window;
     bj_stopwatch stopwatch;
 
-    bj_force_registry* force_registry;
-
     struct {
-        bj_vec2           gravity;
+        bj_real g;
     } world;
 
     lander lander;
@@ -76,46 +66,6 @@ typedef struct {
     } draw;
 
 } game_data;
-
-static void gravity_force_generator(bj_real* force, bj_real dt, void* data) {
-    (void)dt;
-    if(data == 0) { return; }
-    bj_vec2_add(force, force, (bj_real*)data);
-}
-
-static void drag_force_generator(bj_real* forces, bj_real dt, void* data) {
-    (void)dt;
-    if(data == 0) { return; }
-
-    lander* l = data;
-
-    bj_vec2 force;
-    bj_particle_drag_force_2d(
-        force,
-        l->particle.velocity,
-        l->drag_k1, l->drag_k2
-    );
-    bj_vec2_add(forces, forces, force);
-}
-
-static void thrusters_force_generator(bj_real* forces, bj_real dt, void* data) {
-    (void)dt;
-    if(data == 0) { return; }
-    lander* l = (lander*)data;
-
-    if(l->thrusters.up) {
-        bj_vec2 force;
-        const bj_real angle = l->angle;
-
-        bj_vec2_set(force, 
-            bj_sin(-angle) * l->thrusters.magnitude,
-            bj_cos(angle) * l->thrusters.magnitude
-        );
-
-        bj_vec2_add(forces, forces, force);
-    }
-}
-
 
 static void prepare_assets(game_data* data) {
 
@@ -250,18 +200,26 @@ static void events(game_data* data) {
     }
 }
 
+static void accumulate_thrusters(bj_particle_2d* part, lander* l) {
+    if(l->thrusters.up) {
+        bj_vec2 force;
+        const bj_real angle = l->angle;
+
+        bj_vec2_set(force, 
+            bj_sin(-angle) * l->thrusters.magnitude,
+            bj_cos(angle) * l->thrusters.magnitude
+        );
+
+        bj_vec2_add(part->forces, part->forces, force);
+    }
+}
+
+
 static void physics(game_data* data, double delta_time) {
-    bj_apply_force_registry(data->force_registry, delta_time);
-    bj_particle_integrate_2d(
-        data->lander.particle.position,
-        data->lander.particle.velocity,
-        data->lander.particle.acceleration,
-        data->lander.particle.forces,
-        data->lander.particle.inverse_mass,
-        data->lander.particle.damping,
-        delta_time
-    );
-    bj_vec2_zero(data->lander.particle.forces);
+    bj_accumulate_world_gravity_2d(&data->lander.particle, data->world.g);
+    bj_accumulate_drag_2d(&data->lander.particle, data->lander.drag_k1, data->lander.drag_k2);
+    accumulate_thrusters(&data->lander.particle, &data->lander);
+    bj_integrate_particle_2d(&data->lander.particle, delta_time);
 }
 
 static void gameplay(game_data* data, double dt) {
@@ -293,21 +251,15 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     game_data* data        = bj_calloc(sizeof(game_data));
     data->window           = bj_window_new("Moonlander", 0,0, SCREEN_W, SCREEN_H, 0);
     data->draw.framebuffer = bj_window_get_framebuffer(data->window, 0);
-    data->force_registry   = bj_create_force_registry();
 
     bj_vec2_set(data->lander.particle.position, BJ_F(0.0), BJ_F(0.0));
     data->lander.particle.inverse_mass = BJ_F(1.);
     data->lander.particle.damping = BJ_F(1.);
     data->lander.thrusters.magnitude = BJ_F(30.);
 
-    bj_register_force(data->force_registry, data->lander.particle.forces, thrusters_force_generator, &data->lander);
-
-    bj_vec2_set(data->world.gravity, 0, -9.807);
-    bj_register_force(data->force_registry, data->lander.particle.forces, gravity_force_generator, data->world.gravity);
-
+    data->world.g = 9.807;
     data->lander.drag_k1 = BJ_F(0.490);
     data->lander.drag_k2 = BJ_F(0.049);
-    bj_register_force(data->force_registry, data->lander.particle.forces, drag_force_generator, &data->lander);
 
     *user_data          = data;
 
@@ -338,7 +290,6 @@ int bj_app_iterate(void* user_data) {
 
 int bj_app_end(void* user_data, int status) {
     game_data* data = (game_data*)user_data;
-    bj_delete_force_registry(data->force_registry);
     bj_window_del(data->window);
     bj_end(0);
     return status;

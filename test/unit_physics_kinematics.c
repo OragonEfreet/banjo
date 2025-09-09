@@ -1,6 +1,8 @@
 #include "test.h"
 
 #include <banjo/physics.h>
+#include <banjo/physics_2d.h>
+#include <banjo/physics_3d.h>
 
 #include <math.h>
 #include <string.h>

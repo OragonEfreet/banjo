@@ -1,7 +1,11 @@
 #include <banjo/assert.h>
 #include <banjo/math.h>
 #include <banjo/physics.h>
+#include <banjo/physics_2d.h>
+#include <banjo/physics_3d.h>
 #include <banjo/vec.h>
+
+#include "check.h"
 
 static BJ_INLINE void bj_particle_integrate_array(
     size_t                     len,
@@ -26,44 +30,74 @@ static BJ_INLINE void bj_particle_integrate_array(
     }
 }
 
-void bj_particle_integrate_2d(
-    bj_real        pos[BJ_RESTRICT static 2],
-    bj_real        vel[BJ_RESTRICT static 2],
-    const bj_real  accel[BJ_RESTRICT static 2],
-    const bj_real  forces[BJ_RESTRICT static 2],
-    bj_real        inv_mass,
-    bj_real        damping,
-    bj_real        dt
+void bj_integrate_particle_2d(
+    bj_particle_2d* p_particle,
+    bj_real dt
 ) {
+    bj_check(p_particle);
+
     bj_particle_integrate_array(2,
-        pos,
-        vel,
-        accel,
-        forces,
-        inv_mass,
-        damping,
+        p_particle->position,
+        p_particle->velocity,
+        p_particle->acceleration,
+        p_particle->forces,
+        p_particle->inverse_mass,
+        p_particle->damping,
         dt
     );
+    bj_vec2_zero(p_particle->forces);
 }
 
-void bj_particle_integrate_3d(
-    bj_real        pos[BJ_RESTRICT static 3],
-    bj_real        vel[BJ_RESTRICT static 3],
-    const bj_real  accel[BJ_RESTRICT static 3],
-    const bj_real  forces[BJ_RESTRICT static 3],
-    bj_real        inv_mass,
-    bj_real        damping,
-    bj_real        dt
+void bj_integrate_particle_3d(
+    bj_particle_3d* p_particle,
+    bj_real dt
 ) {
+    bj_check(p_particle);
+
     bj_particle_integrate_array(3,
-        pos,
-        vel,
-        accel,
-        forces,
-        inv_mass,
-        damping,
+        p_particle->position,
+        p_particle->velocity,
+        p_particle->acceleration,
+        p_particle->forces,
+        p_particle->inverse_mass,
+        p_particle->damping,
         dt
     );
+    bj_vec2_zero(p_particle->forces);
+}
+
+void bj_accumulate_world_gravity_2d(
+    bj_particle_2d* p_particle,
+    bj_real         gravity
+) {
+    p_particle->forces[1] -= gravity;
+}
+
+void bj_accumulate_world_gravity_3d(
+    bj_particle_3d* p_particle,
+    bj_real         gravity
+) {
+    p_particle->forces[1] -= gravity;
+}
+
+void bj_accumulate_drag_2d(
+    bj_particle_2d* p_particle,
+    bj_real k1,
+    bj_real k2
+) {
+    bj_vec2 force;
+    bj_particle_drag_force_2d(force, p_particle->velocity, k1, k2);
+    bj_vec2_add(p_particle->forces, p_particle->forces, force);
+}
+
+void bj_accumulate_drag_3d(
+    bj_particle_3d* p_particle,
+    bj_real k1,
+    bj_real k2
+) {
+    bj_vec3 force;
+    bj_particle_drag_force_3d(force, p_particle->velocity, k1, k2);
+    bj_vec3_add(p_particle->forces, p_particle->forces, force);
 }
 
 bj_real bj_particle_drag_coefficient_3d(
