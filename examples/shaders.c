@@ -38,12 +38,12 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
     bj_real time = *(bj_real*)data;
 
     bj_vec2 uv;
-    bj_vec3 final_color = { BJ_F(0.0), BJ_F(0.0), BJ_F(0.0) };
+    bj_vec3 final_color = { BJ_FZERO, BJ_FZERO, BJ_FZERO };
 
     bj_vec2_copy(uv, frag_coords);
     const bj_real uv0_len = bj_vec2_len(uv);
     
-    for (bj_real i = BJ_F(0.0); i < BJ_F(4.0); i += BJ_F(1.0)) {
+    for (bj_real i = BJ_FZERO; i < BJ_F(4.0); i += BJ_F(1.0)) {
         bj_vec3 col;
         palette(col, uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
         

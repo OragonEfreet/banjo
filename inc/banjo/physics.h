@@ -2,6 +2,7 @@
 #define BJ_PHYSICS_H
 
 #include <banjo/math.h>
+#include <banjo/vec.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \file physics.h
@@ -158,18 +159,6 @@ BANJO_EXPORT void bj_kinematics_velocity_3d(
     bj_real              time
 );
 
-BANJO_EXPORT void bj_particle_integrate(
-    bj_real* out_pos,
-    bj_real* out_vel,
-    bj_real  pos,
-    bj_real  vel,
-    bj_real  accel,
-    bj_real  forces,
-    bj_real  inv_mass,
-    bj_real  damping,
-    bj_real  dt
-);
-
 BANJO_EXPORT void bj_particle_integrate_2d(
     bj_real        pos[BJ_RESTRICT static 2],
     bj_real        vel[BJ_RESTRICT static 2],
@@ -189,6 +178,37 @@ BANJO_EXPORT void bj_particle_integrate_3d(
     bj_real        damping,
     bj_real        dt
 );
+
+BANJO_EXPORT bj_real bj_particle_drag_coefficient_3d(
+    const bj_vec3 vel,
+    const bj_real k1,
+    const bj_real k2
+);
+
+BANJO_EXPORT bj_real bj_particle_drag_coefficient_2d(
+    const bj_vec2 vel,
+    const bj_real k1,
+    const bj_real k2
+);
+
+BANJO_EXPORT bj_bool bj_particle_drag_force_3d(
+    bj_real result[BJ_RESTRICT static 3],
+    const bj_real vel[BJ_RESTRICT static 3],
+    const bj_real k1,
+    const bj_real k2
+);
+
+BANJO_EXPORT bj_bool bj_particle_drag_force_2d(
+    bj_real result[BJ_RESTRICT static 2],
+    const bj_real vel[BJ_RESTRICT static 2],
+    const bj_real k1,
+    const bj_real k2
+);
+
+
+
+
+
 
 
 /// \}

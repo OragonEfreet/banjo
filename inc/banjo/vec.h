@@ -47,6 +47,10 @@ static BJ_INLINE void bj_vec2_set(bj_vec2 res, bj_real a, bj_real b) {
     res[0] = a; res[1] = b;
 }
 
+static BJ_INLINE void bj_vec2_zero(bj_vec2 res) {
+    res[0] = res[1] = BJ_FZERO;
+}
+
 static BJ_INLINE void bj_vec2_apply(bj_vec2 res, const bj_vec2 a, bj_real(*f)(bj_real)) {
     res[0] = f(a[0]);
     res[1] = f(a[1]);
@@ -223,6 +227,10 @@ static BJ_INLINE void bj_vec2_copy(bj_vec2 res, const bj_vec2 src) {
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_vec3_set(bj_vec3 res, bj_real a, bj_real b, bj_real c) {
     res[0] = a; res[1] = b; res[2] = c;
+}
+
+static BJ_INLINE void bj_vec3_zero(bj_vec3 res) {
+    res[0] = res[1] = res[2] = BJ_FZERO;
 }
 
 static BJ_INLINE void bj_vec3_apply(bj_vec3 res, const bj_vec3 a, bj_real(*f)(bj_real)) {
