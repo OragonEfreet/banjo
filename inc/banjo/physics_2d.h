@@ -1,3 +1,25 @@
+////////////////////////////////////////////////////////////////////////////////
+/// \file physics_2d.h
+/// Physics helpers (SI units, but dimensionally consistent with any unit system).
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup physics_2d 2D Physics
+/// \ingroup physics
+///
+/// \brief 2D physics utilities (particles, forces, kinematics).
+///
+/// This header provides small helpers for common 2D physics operations. By default,
+/// quantities are interpreted in **SI units** (meters, seconds), but formulas are
+/// **dimensionally homogeneous**: results are correct for **any consistent unit
+/// system** (e.g., km and s; cm and s), provided all inputs use the same system.
+///
+/// Dimensionality uses the base dimensions **L** (length) and **T** (time). For example:
+/// - position: [L]
+/// - velocity: [L T^-1]
+/// - acceleration: [L T^-2]
+/// - time: [T]
+///
+/// \{
+////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_PHYSICS_2D_H
 #define BJ_PHYSICS_2D_H
 
@@ -118,7 +140,6 @@ BANJO_EXPORT bj_bool bj_particle_drag_force_2d(
     const bj_real k2
 );
 
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Computes 2D positions at time \a t under given constant accelerations.
 ///
@@ -163,4 +184,8 @@ BANJO_EXPORT void bj_kinematics_velocity_2d(
     bj_real              time
 );
 
-#endif
+////////////////////////////////////////////////////////////////////////////////
+/// \}
+////////////////////////////////////////////////////////////////////////////////
+
+#endif /* BJ_PHYSICS_2D_H */

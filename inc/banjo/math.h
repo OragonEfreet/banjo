@@ -1,9 +1,26 @@
 ////////////////////////////////////////////////////////////////////////////////
-// math.h — C99 math shim with bj_real and utilities
-// Modes:
-//   BJ_API_LONG_DOUBLE → bj_real = long double
-//   BJ_API_FLOAT64     → bj_real = double
-//   (default)          → bj_real = float
+/// \file math.h
+/// C99 math shim with bj_real precision type and scalar utilities.
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup math Math
+/// \ingroup core
+///
+/// \brief Math utilities (precision abstraction, constants, scalar functions).
+///
+/// This header provides:
+/// - Compile-time selection of real precision (\ref bj_real).
+/// - Constants such as PI and TAU in multiple precisions.
+/// - Typed wrappers for C math functions.
+/// - Generic `bj_*` math macros mapped to the selected \ref bj_real type.
+/// - Scalar helpers: clamp, step, smoothstep, fract, modulus.
+/// - Floating-point comparison utilities (absolute and relative epsilon).
+/// - Zero tests and safe normalization.
+///
+/// All functions are thin wrappers around `<math.h>` with consistent naming and
+/// precision handling. They are **dimensionless** utilities: values are treated
+/// as pure scalars without physical units.
+///
+/// \{
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_MATH_H
 #define BJ_MATH_H
@@ -12,17 +29,13 @@
 #include <float.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Real type selection and helpers.
-///
-/// Pick the precision at compile time via preprocessor defines. Also exposes:
-/// - BJ_F(x): literal suffix helper to match \ref bj_real
-/// - BJ_EPSILON: machine epsilon matching \ref bj_real
-/// - BJ_FZERO: zero in \ref bj_real
+/// \name Real type selection and helpers
+/// @{
 ////////////////////////////////////////////////////////////////////////////////
 #if defined(BJ_API_LONG_DOUBLE)
-    typedef long double bj_real;
-    #define BJ_F(x) x##L
-    #define BJ_EPSILON (LDBL_EPSILON)
+    typedef long double bj_real;           ///< Selected real type
+    #define BJ_F(x) x##L                   ///< Literal suffix helper
+    #define BJ_EPSILON (LDBL_EPSILON)      ///< Epsilon for bj_real
 #elif defined(BJ_API_FLOAT64)
     typedef double bj_real;
     #define BJ_F(x) x
@@ -32,11 +45,11 @@
     #define BJ_F(x) x##f
     #define BJ_EPSILON (FLT_EPSILON)
 #endif
-#define BJ_FZERO (BJ_F(0.0))
+#define BJ_FZERO (BJ_F(0.0))               ///< Zero constant in bj_real
+/// @}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \name Circle constants
-/// Common constants in single, double, long double, and bj_real.
 /// @{
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_PI_F   (3.14159265358979323846f)
@@ -111,7 +124,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \name Precision-dispatch to match bj_real
-/// Map generic bj_* names to the correct precision.
 /// @{
 ////////////////////////////////////////////////////////////////////////////////
 #if defined(BJ_API_LONG_DOUBLE)
@@ -164,7 +176,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \name Scalar utilities
-/// Clamp, step, smoothstep, fract, and positive modulus.
 /// @{
 ////////////////////////////////////////////////////////////////////////////////
 static inline bj_real bj_clamp(bj_real x, bj_real lo, bj_real hi) {
@@ -193,7 +204,7 @@ static inline bj_real bj_mod(bj_real x, bj_real y) {
 /// @}
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \name Absolute-epsilon comparisons on bj_real
+/// \name Absolute-epsilon comparisons
 /// @{
 ////////////////////////////////////////////////////////////////////////////////
 static inline int  bj_real_eq (bj_real a, bj_real b) { return bj_abs(a - b) <= BJ_EPSILON; }
@@ -206,8 +217,7 @@ static inline int  bj_real_cmp(bj_real a, bj_real b) { return bj_real_lt(a,b) ? 
 /// @}
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \name Relative-epsilon comparisons on bj_real
-/// Scale epsilon by max(1, |a|, |b|).
+/// \name Relative-epsilon comparisons
 /// @{
 ////////////////////////////////////////////////////////////////////////////////
 static inline bj_real bj__rel_scale(bj_real a, bj_real b) {
@@ -237,5 +247,9 @@ static inline bj_real bj_real_snap_zero(bj_real x) { return bj_real_is_zero(x) ?
 
 static inline bj_real bj_real_snorm_safe(bj_real x, bj_real len) { return bj_real_is_zero(len) ? BJ_FZERO : (x / len); }
 /// @}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \}
+////////////////////////////////////////////////////////////////////////////////
 
 #endif /* BJ_MATH_H */
