@@ -11,6 +11,14 @@
 #include <math.h>
 #include <float.h>
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Real type selection and helpers.
+///
+/// Pick the precision at compile time via preprocessor defines. Also exposes:
+/// - BJ_F(x): literal suffix helper to match \ref bj_real
+/// - BJ_EPSILON: machine epsilon matching \ref bj_real
+/// - BJ_FZERO: zero in \ref bj_real
+////////////////////////////////////////////////////////////////////////////////
 #if defined(BJ_API_LONG_DOUBLE)
     typedef long double bj_real;
     #define BJ_F(x) x##L
@@ -26,6 +34,11 @@
 #endif
 #define BJ_FZERO (BJ_F(0.0))
 
+////////////////////////////////////////////////////////////////////////////////
+/// \name Circle constants
+/// Common constants in single, double, long double, and bj_real.
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 #define BJ_PI_F   (3.14159265358979323846f)
 #define BJ_TAU_F  (6.28318530717958647692f)
 #define BJ_PI_D   (3.14159265358979323846264338327950288)
@@ -34,46 +47,52 @@
 #define BJ_TAU_L  (6.283185307179586476925286766559005768L)
 #define BJ_PI     (BJ_F(3.141592653589793238462643383279502884))
 #define BJ_TAU    (BJ_F(6.283185307179586476925286766559005768))
+/// @}
 
+////////////////////////////////////////////////////////////////////////////////
+/// \name Typed wrappers (float)
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 #define bj_absf       fabsf
-#define bj_acosf      acosf
-#define bj_copysignf  copysignf
-#define bj_cosf       cosf
-#define bj_expf       expf
-#define bj_floorf     floorf
-#define bj_fmodf      fmodf
 #define bj_maxf       fmaxf
 #define bj_minf       fminf
-#define bj_powf       powf
+#define bj_floorf     floorf
 #define bj_roundf     roundf
 #define bj_sinf       sinf
-#define bj_sqrtf      sqrtf
+#define bj_cosf       cosf
 #define bj_tanf       tanf
+#define bj_acosf      acosf
+#define bj_expf       expf
+#define bj_sqrtf      sqrtf
+#define bj_powf       powf
+#define bj_fmodf      fmodf
+#define bj_copysignf  copysignf
+/// @}
 
+////////////////////////////////////////////////////////////////////////////////
+/// \name Typed wrappers (double)
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 #define bj_absd       fabs
-#define bj_acosd      acos
-#define bj_copysignd  copysign
-#define bj_cosd       cos
-#define bj_expd       exp
-#define bj_floord     floor
-#define bj_fmodd      fmod
-#define bj_logd       log
 #define bj_maxd       fmax
 #define bj_mind       fmin
-#define bj_powd       pow
+#define bj_floord     floor
 #define bj_roundd     round
 #define bj_sind       sin
-#define bj_sqrtd      sqrt
+#define bj_cosd       cos
 #define bj_tand       tan
+#define bj_acosd      acos
+#define bj_expd       exp
+#define bj_sqrtd      sqrt
+#define bj_powd       pow
+#define bj_fmodd      fmod
+#define bj_copysignd  copysign
+/// @}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-#ifdef BJ_USE_DOUBLE
-=======
-/* Auto-dispatch to bj_real */
-#ifdef BJ_API_FLOAT64
->>>>>>> ce258a6 (Particles)
-=======
+////////////////////////////////////////////////////////////////////////////////
+/// \name Typed wrappers (long double)
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 #define bj_absl       fabsl
 #define bj_maxl       fmaxl
 #define bj_minl       fminl
@@ -88,7 +107,13 @@
 #define bj_powl       powl
 #define bj_fmodl      fmodl
 #define bj_copysignl  copysignl
+/// @}
 
+////////////////////////////////////////////////////////////////////////////////
+/// \name Precision-dispatch to match bj_real
+/// Map generic bj_* names to the correct precision.
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 #if defined(BJ_API_LONG_DOUBLE)
     #define bj_abs       bj_absl
     #define bj_max       bj_maxl
@@ -105,40 +130,43 @@
     #define bj_fmod      bj_fmodl
     #define bj_copysign  bj_copysignl
 #elif defined(BJ_API_FLOAT64)
->>>>>>> 3b828be (.)
     #define bj_abs       bj_absd
-    #define bj_acos      bj_acosd
-    #define bj_copysign  bj_copysignd
-    #define bj_cos       bj_cosd
-    #define bj_exp       bj_expd
-    #define bj_floor     bj_floord
-    #define bj_fmod      bj_fmodd
-    #define bj_log       bj_logd
     #define bj_max       bj_maxd
     #define bj_min       bj_mind
-    #define bj_pow       bj_powd
+    #define bj_floor     bj_floord
     #define bj_round     bj_roundd
     #define bj_sin       bj_sind
-    #define bj_sqrt      bj_sqrtd
+    #define bj_cos       bj_cosd
     #define bj_tan       bj_tand
+    #define bj_acos      bj_acosd
+    #define bj_exp       bj_expd
+    #define bj_sqrt      bj_sqrtd
+    #define bj_pow       bj_powd
+    #define bj_fmod      bj_fmodd
+    #define bj_copysign  bj_copysignd
 #else
     #define bj_abs       bj_absf
-    #define bj_acos      bj_acosf
-    #define bj_copysign  bj_copysignf
-    #define bj_cos       bj_cosf
-    #define bj_exp       bj_expf
-    #define bj_floor     bj_floorf
-    #define bj_fmod      bj_fmodf
-    #define bj_log       bj_logf
     #define bj_max       bj_maxf
     #define bj_min       bj_minf
-    #define bj_pow       bj_powf
+    #define bj_floor     bj_floorf
     #define bj_round     bj_roundf
     #define bj_sin       bj_sinf
-    #define bj_sqrt      bj_sqrtf
+    #define bj_cos       bj_cosf
     #define bj_tan       bj_tanf
+    #define bj_acos      bj_acosf
+    #define bj_exp       bj_expf
+    #define bj_sqrt      bj_sqrtf
+    #define bj_pow       bj_powf
+    #define bj_fmod      bj_fmodf
+    #define bj_copysign  bj_copysignf
 #endif
+/// @}
 
+////////////////////////////////////////////////////////////////////////////////
+/// \name Scalar utilities
+/// Clamp, step, smoothstep, fract, and positive modulus.
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 static inline bj_real bj_clamp(bj_real x, bj_real lo, bj_real hi) {
     return (x < lo) ? lo : (x > hi) ? hi : x;
 }
@@ -162,7 +190,12 @@ static inline bj_real bj_mod(bj_real x, bj_real y) {
     if (m < BJ_FZERO) m += (y < BJ_FZERO) ? -y : y;
     return m;
 }
+/// @}
 
+////////////////////////////////////////////////////////////////////////////////
+/// \name Absolute-epsilon comparisons on bj_real
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 static inline int  bj_real_eq (bj_real a, bj_real b) { return bj_abs(a - b) <= BJ_EPSILON; }
 static inline int  bj_real_neq(bj_real a, bj_real b) { return !bj_real_eq(a, b); }
 static inline int  bj_real_lt (bj_real a, bj_real b) { return (b - a) >  BJ_EPSILON; }
@@ -170,7 +203,13 @@ static inline int  bj_real_gt (bj_real a, bj_real b) { return (a - b) >  BJ_EPSI
 static inline int  bj_real_lte(bj_real a, bj_real b) { return !bj_real_gt(a, b); }
 static inline int  bj_real_gte(bj_real a, bj_real b) { return !bj_real_lt(a, b); }
 static inline int  bj_real_cmp(bj_real a, bj_real b) { return bj_real_lt(a,b) ? -1 : (bj_real_gt(a,b) ? 1 : 0); }
+/// @}
 
+////////////////////////////////////////////////////////////////////////////////
+/// \name Relative-epsilon comparisons on bj_real
+/// Scale epsilon by max(1, |a|, |b|).
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 static inline bj_real bj__rel_scale(bj_real a, bj_real b) {
     return bj_max(BJ_F(1.0), bj_max(bj_abs(a), bj_abs(b)));
 }
@@ -181,14 +220,22 @@ static inline int  bj_real_gt_rel (bj_real a, bj_real b) { bj_real s = bj__rel_s
 static inline int  bj_real_lte_rel(bj_real a, bj_real b) { return !bj_real_gt_rel(a, b); }
 static inline int  bj_real_gte_rel(bj_real a, bj_real b) { return !bj_real_lt_rel(a, b); }
 static inline int  bj_real_cmp_rel(bj_real a, bj_real b) { return bj_real_lt_rel(a,b) ? -1 : (bj_real_gt_rel(a,b) ? 1 : 0); }
+/// @}
 
-/* zero tests and helpers */
+////////////////////////////////////////////////////////////////////////////////
+/// \name Zero tests and helpers
+/// @{
+////////////////////////////////////////////////////////////////////////////////
 static inline int   bj_real_is_zero(bj_real x) { return bj_abs(x) <= BJ_EPSILON; }
+
 static inline int   bj_real_is_zero_scaled(bj_real x, bj_real scale) {
     bj_real s = bj_max(BJ_F(1.0), bj_abs(scale));
     return bj_abs(x) <= (BJ_EPSILON * s);
 }
+
 static inline bj_real bj_real_snap_zero(bj_real x) { return bj_real_is_zero(x) ? BJ_FZERO : x; }
+
 static inline bj_real bj_real_snorm_safe(bj_real x, bj_real len) { return bj_real_is_zero(len) ? BJ_FZERO : (x / len); }
+/// @}
 
 #endif /* BJ_MATH_H */
