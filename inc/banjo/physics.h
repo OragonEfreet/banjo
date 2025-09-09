@@ -205,6 +205,39 @@ BANJO_EXPORT bj_bool bj_particle_drag_force_2d(
     const bj_real k2
 );
 
+typedef struct bj_force_registry_t bj_force_registry;
+
+typedef void (*bj_force_generator)(bj_real*, bj_real, void*);
+
+BANJO_EXPORT bj_force_registry* bj_create_force_registry(
+    void
+);
+
+BANJO_EXPORT void bj_delete_force_registry(
+    bj_force_registry* registry
+);
+
+BANJO_EXPORT void bj_register_force(
+    bj_force_registry* registry,
+    bj_real*           force,
+    bj_force_generator generator,
+    void*              data
+);
+
+BANJO_EXPORT void bj_clear_force_registry(
+    bj_force_registry* registry
+);
+
+BANJO_EXPORT void bj_apply_force_registry(
+    bj_force_registry* registry,
+    double             delta_time
+);
+
+
+
+
+
+
 
 
 
