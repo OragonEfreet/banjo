@@ -12,33 +12,34 @@ Banjo is a lightweight, self-contained C99 framework built on four core principl
 
 ## Features At a Glance
 
-- Basic container types (sequential array, linked list, hash map)
+- Windowing and Event
 - Bitmap manipulation and loading, blitting
 - Basic primitive drawings
-- Windowing and Event
 - Logging system
 - Custom allocators
+- Math functions (vec2, vec3, vec4, mat3, mat4, quat)
+
+See [Development Status](https://codework-orange.io/banjo/roadmap.html) for more.
+
+## How to Build and Test the Project
+
+Banjo main build system uses CMake, but it's possible to build without.
+See [Building the API](https://codework-orange.io/banjo/build.html)
 
 ## Support
 
 Code is multi-platform, but I'm testing on the following environments:
 
-| **Distribution**        | **Compiler**                                   | **CMake** |
-|-------------------------|------------------------------------------------|-----------|
-| **Manjaro Linux**       | GCC 13.2.1 20230801 / GNU libc 2.38            | 3.28.1    |
-| **Ubuntu 23.10 Mantic** | GCC 13.2.0-4ubuntu3 / GNU libc 2.38-1ubuntu6.1 | 3.27.4    |
-| **Windows 11 64 bit**   | Microsoft Visual C++ 2022 4.8.09032            | 3.28.1    |
+| **Distribution**        | **Compiler**               | **CMake** |
+|-------------------------|----------------------------|-----------|
+| **Ubuntu 25.04 Plucky** | GCC 14.2.0 / GNU libc 2.41 | 3.31.6    |
+| **Ubuntu 23.10 Mantic** | GCC 13.2.0 / GNU libc 2.38 | 3.27.4    |
+| **Windows 11 64 bit**   | Microsoft Visual C++ 2022  | 3.28.1    |
+| **macOS 15.6.1**        | Apple clang 16.0.0         | 3.29.3    |
 
 Here, "testing" corresponds to building the entire project and running all tests successfully.
 
 ## Demo Code
 
 See [Examples](examples.html)
-
-
-
-
-
-
-
 

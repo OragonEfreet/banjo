@@ -19,6 +19,7 @@ I owe the progress of this project some acknowledgements.
 
 - [Computer Graphics from Scratch](https://gabrielgambetta.com/computer-graphics-from-scratch/index.html), by [Gabriel Gambetta](https://gabrielgambetta.com/index.html). This book became the starting motivation for making my own 2D renderer.
 - [The Book of Shaders](https://thebookofshaders.com/), by [Patricio Gonzales Vivo](https://patriciogonzalezvivo.com/) and [Jen Lowe](https://www.jenlowe.net/).
+- *Game Physics Engine Development*, by [Ian Millington](https://github.com/idmillington/cyclone-physics).
 
 ## Projects
 
