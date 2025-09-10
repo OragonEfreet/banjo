@@ -55,6 +55,12 @@ struct bj_particle_2d_t {
 ////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_particle_2d_t bj_particle_2d;
 
+BANJO_EXPORT void bj_particle_set_mass_2d(
+    bj_particle_2d* p_particle,
+    bj_real         mass
+);
+
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Integrates particle state forward by \a dt seconds.
 ///
@@ -83,6 +89,19 @@ BANJO_EXPORT void bj_integrate_particle_2d(
 BANJO_EXPORT void bj_accumulate_world_gravity_2d(
     bj_particle_2d* p_particle,
     bj_real         gravity
+);
+
+BANJO_EXPORT void bj_accumulate_point_gravity_2d(
+    bj_particle_2d* BJ_RESTRICT       p_particle_from,
+    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    const bj_real                     gravity_factor
+);
+
+BANJO_EXPORT void bj_accumulate_point_gravity_softened_2d(
+    bj_particle_2d*       BJ_RESTRICT p_particle_from,
+    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    const bj_real                     gravity_factor,
+    const bj_real                     epsilon
 );
 
 ////////////////////////////////////////////////////////////////////////////////

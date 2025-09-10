@@ -57,6 +57,25 @@ struct bj_particle_3d_t {
 ////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_particle_3d_t bj_particle_3d;
 
+BANJO_EXPORT void bj_particle_set_mass_3d(
+    bj_particle_3d* p_particle,
+    bj_real         mass
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Integrates particle state forward by \a dt seconds.
+///
+/// Advances velocity and position using current acceleration and accumulated
+/// forces. Applies damping to velocity. Intended for fixed-timestep updates.
+///
+/// \param p_particle Particle to integrate
+/// \param dt         Time step [T]
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_integrate_particle_3d(
+    bj_particle_3d* p_particle,
+    bj_real dt
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Computes the scalar drag coefficient for a 3D velocity.
 ///
