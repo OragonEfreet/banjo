@@ -4,6 +4,8 @@
 #include <banjo/math.h>
 #include <banjo/vec.h>
 
+#define BJ_GRAVITATIONAL_CONSTANT_SI BJ_F(6.67430e-11)
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \file physics.h
 /// Physics helpers (SI units, but dimensionally consistent with any unit system).
@@ -67,6 +69,65 @@ static BJ_INLINE bj_real bj_kinematics_velocity(
     bj_real time
 ) {
     return acceleration * time + velocity;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Computes the Newtonian gravitational force magnitude between two masses.
+///
+/// Uses the standard law of universal gravitation:
+/// \f[
+///   F = G \cdot \frac{m_1 \cdot m_2}{r^2}
+/// \f]
+/// where:
+/// - \a G is the gravitational constant
+/// - \a m1 and \a m2 are the interacting masses
+/// - \a r is the separation distance
+///
+/// \param m1 Mass of first body [M]
+/// \param m2 Mass of second body [M]
+/// \param r  Separation distance [L]
+/// \param g  Gravitational constant \a G [L^3 M^-1 T^-2]
+///
+/// \return Gravitational force magnitude [M L T^-2].
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_real bj_gravity(
+    bj_real m1,
+    bj_real m2,
+    bj_real r,
+    bj_real g
+) {
+    return g * (m1 * m2) / (r * r);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Softened Newtonian gravitational force magnitude between two masses.
+///
+/// Plummer softening:
+/// \f[
+///   \|\mathbf{F}\| = G\,m_1 m_2 \frac{r}{\left(r^2 + \varepsilon^2\right)^{3/2}}
+/// \f]
+/// so that \f$\mathbf{F} = \|\mathbf{F}\|\,\hat{\mathbf{r}}\f$ equals
+/// \f$G\,m_1 m_2\,\mathbf{r}/\left(r^2+\varepsilon^2\right)^{3/2}\f$.
+///
+/// \param m1  Mass of first body [M]
+/// \param m2  Mass of second body [M]
+/// \param r   Separation distance [L]
+/// \param g   Gravitational constant \a G [L^3 M^-1 T^-2]
+/// \param eps Softening length \a ε [L]
+///
+/// \return Softened force magnitude [M L T^-2].
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_real bj_gravity_softened(
+    bj_real m1,
+    bj_real m2,
+    bj_real r,
+    bj_real g,
+    bj_real eps
+) {
+    const bj_real r2    = r * r;
+    const bj_real e2    = eps * eps;
+    const bj_real denom = bj_pow(r2 + e2, BJ_F(1.5));
+    return (denom > BJ_FZERO) ? (g * m1 * m2 * r) / denom : BJ_FZERO;
 }
 
 /// \}

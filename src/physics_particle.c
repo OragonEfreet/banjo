@@ -7,6 +7,24 @@
 
 #include "check.h"
 
+void bj_particle_set_mass_2d(
+    bj_particle_2d* p_particle,
+    bj_real         mass
+) {
+    bj_check(p_particle);
+    bj_assert(!bj_real_is_zero(mass));
+    p_particle->inverse_mass = BJ_F(1.0) / mass;
+}
+
+void bj_particle_set_mass_3d(
+    bj_particle_3d* p_particle,
+    bj_real         mass
+) {
+    bj_check(p_particle);
+    bj_assert(!bj_real_is_zero(mass));
+    p_particle->inverse_mass = BJ_F(1.0) / mass;
+}
+
 static BJ_INLINE void bj_particle_integrate_array(
     size_t                     len,
     bj_real*       BJ_RESTRICT pos,
@@ -79,6 +97,47 @@ void bj_accumulate_world_gravity_3d(
 ) {
     p_particle->forces[1] -= gravity;
 }
+
+void bj_accumulate_point_gravity_2d(
+    bj_particle_2d* BJ_RESTRICT       p_particle_from,
+    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    const bj_real                     gravity_factor
+) {
+    bj_vec2 force = {BJ_FZERO, BJ_FZERO};
+
+    bj_real g = bj_gravity(
+        BJ_F(1.0) / p_particle_from->inverse_mass,
+        BJ_F(1.0) / p_particle_to->inverse_mass,
+        bj_vec2_dist(p_particle_from->position, p_particle_to->position),
+        gravity_factor
+    );
+
+    bj_vec2_sub(force, p_particle_to->position, p_particle_from->position);
+    bj_vec2_set_len(force, force, g);
+
+    bj_vec2_add(p_particle_from->forces, p_particle_from->forces, force);
+}
+
+void bj_accumulate_point_gravity_softened_2d(
+    bj_particle_2d*       BJ_RESTRICT p_particle_from,
+    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    const bj_real                     gravity_factor,
+    const bj_real                     epsilon
+) {
+    bj_vec2 force = { BJ_FZERO, BJ_FZERO };
+
+    const bj_real m1 = BJ_F(1.0) / p_particle_from->inverse_mass;
+    const bj_real m2 = BJ_F(1.0) / p_particle_to->inverse_mass;
+    const bj_real r  = bj_vec2_dist(p_particle_from->position, p_particle_to->position);
+
+    const bj_real g = bj_gravity_softened(m1, m2, r, gravity_factor, epsilon);
+
+    bj_vec2_sub(force, p_particle_to->position, p_particle_from->position);
+    bj_vec2_set_len(force, force, g);
+
+    bj_vec2_add(p_particle_from->forces, p_particle_from->forces, force);
+}
+
 
 void bj_accumulate_drag_2d(
     bj_particle_2d* p_particle,
