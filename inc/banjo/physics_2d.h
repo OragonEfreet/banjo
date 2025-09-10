@@ -104,6 +104,13 @@ BANJO_EXPORT void bj_accumulate_point_gravity_softened_2d(
     const bj_real                     epsilon
 );
 
+BANJO_EXPORT void bj_accumulate_anchor_spring_2d(
+    bj_particle_2d* BJ_RESTRICT p_particle_from,
+    const bj_vec2 anchor,
+    bj_real rest_length,
+    bj_real k
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Accumulates aerodynamic drag into the particle’s force buffer.
 ///
