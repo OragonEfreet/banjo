@@ -9,7 +9,7 @@ static BJ_INLINE void bj_kinematics_array(
     bj_real        time
 ) {
     for(size_t i = 0 ; i < n ; ++i) {
-        out[i] = bj_kinematics(position[i], velocity[i], acceleration[i], time);
+        out[i] = bj_galileo_position(position[i], velocity[i], acceleration[i], time);
     }
 }
 
@@ -21,7 +21,7 @@ static BJ_INLINE void bj_kinematics_velocity_array(
     bj_real                    time
 ) {
     for (size_t i = 0; i < n; ++i) {
-        out[i] = bj_kinematics_velocity(velocity[i], acceleration[i], time);
+        out[i] = bj_galileo_velocity(velocity[i], acceleration[i], time);
     }
 }
 

@@ -105,7 +105,7 @@ void bj_accumulate_point_gravity_2d(
 ) {
     bj_vec2 force = {BJ_FZERO, BJ_FZERO};
 
-    bj_real g = bj_gravity(
+    bj_real g = bj_newton_gravitation(
         BJ_F(1.0) / p_particle_from->inverse_mass,
         BJ_F(1.0) / p_particle_to->inverse_mass,
         bj_vec2_dist(p_particle_from->position, p_particle_to->position),
@@ -130,7 +130,7 @@ void bj_accumulate_point_gravity_softened_2d(
     const bj_real m2 = BJ_F(1.0) / p_particle_to->inverse_mass;
     const bj_real r  = bj_vec2_dist(p_particle_from->position, p_particle_to->position);
 
-    const bj_real g = bj_gravity_softened(m1, m2, r, gravity_factor, epsilon);
+    const bj_real g = bj_newton_plummer_gravitation(m1, m2, r, gravity_factor, epsilon);
 
     bj_vec2_sub(force, p_particle_to->position, p_particle_from->position);
     bj_vec2_set_len(force, force, g);

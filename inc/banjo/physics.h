@@ -31,19 +31,19 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Computes position at time \a t under constant acceleration.
+/// \brief Galileo’s uniformly accelerated motion — position at time \a t.
 ///
-/// Uses the standard constant-acceleration kinematics formula:
-/// `x = 0.5 * a * t^2 + v0 * t + x0`
+/// Uses:
+/// `x(t) = x0 + v0 * t + 0.5 * a * t^2`
 ///
 /// \param position     Initial position [L]
 /// \param velocity     Initial velocity [L T^-1]
 /// \param acceleration Constant acceleration [L T^-2]
 /// \param time         Elapsed time [T]
 ///
-/// \return Position at time \a t, in [L] in the chosen system.
+/// \return Position at time \a t, in [L].
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_kinematics(
+static BJ_INLINE bj_real bj_galileo_position(
     bj_real position,
     bj_real velocity,
     bj_real acceleration,
@@ -53,9 +53,10 @@ static BJ_INLINE bj_real bj_kinematics(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Computes velocity at time \a t under constant acceleration.
+/// \brief Galileo’s uniformly accelerated motion — velocity at time \a t.
 ///
-/// Uses: `v(t) = a * t + v0`
+/// Uses:
+/// `v(t) = v0 + a * t`
 ///
 /// \param velocity     Initial velocity [L T^-1]
 /// \param acceleration Constant acceleration [L T^-2]
@@ -63,7 +64,7 @@ static BJ_INLINE bj_real bj_kinematics(
 ///
 /// \return Velocity at time \a t, in [L T^-1].
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_kinematics_velocity(
+static BJ_INLINE bj_real bj_galileo_velocity(
     bj_real velocity,
     bj_real acceleration,
     bj_real time
@@ -72,25 +73,18 @@ static BJ_INLINE bj_real bj_kinematics_velocity(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Computes the Newtonian gravitational force magnitude between two masses.
+/// \brief Newton’s law of universal gravitation — force magnitude.
 ///
-/// Uses the standard law of universal gravitation:
-/// \f[
-///   F = G \cdot \frac{m_1 \cdot m_2}{r^2}
-/// \f]
-/// where:
-/// - \a G is the gravitational constant
-/// - \a m1 and \a m2 are the interacting masses
-/// - \a r is the separation distance
+/// \f$ F = G\,\dfrac{m_1 m_2}{r^2} \f$
 ///
 /// \param m1 Mass of first body [M]
 /// \param m2 Mass of second body [M]
 /// \param r  Separation distance [L]
 /// \param g  Gravitational constant \a G [L^3 M^-1 T^-2]
 ///
-/// \return Gravitational force magnitude [M L T^-2].
+/// \return Force magnitude [M L T^-2].
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_gravity(
+static BJ_INLINE bj_real bj_newton_gravitation(
     bj_real m1,
     bj_real m2,
     bj_real r,
@@ -100,14 +94,9 @@ static BJ_INLINE bj_real bj_gravity(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Softened Newtonian gravitational force magnitude between two masses.
+/// \brief Newtonian gravitation with Plummer softening — force magnitude.
 ///
-/// Plummer softening:
-/// \f[
-///   \|\mathbf{F}\| = G\,m_1 m_2 \frac{r}{\left(r^2 + \varepsilon^2\right)^{3/2}}
-/// \f]
-/// so that \f$\mathbf{F} = \|\mathbf{F}\|\,\hat{\mathbf{r}}\f$ equals
-/// \f$G\,m_1 m_2\,\mathbf{r}/\left(r^2+\varepsilon^2\right)^{3/2}\f$.
+/// \f$ \|\mathbf{F}\| = G\,m_1 m_2 \dfrac{r}{(r^2+\varepsilon^2)^{3/2}} \f$
 ///
 /// \param m1  Mass of first body [M]
 /// \param m2  Mass of second body [M]
@@ -117,7 +106,7 @@ static BJ_INLINE bj_real bj_gravity(
 ///
 /// \return Softened force magnitude [M L T^-2].
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_gravity_softened(
+static BJ_INLINE bj_real bj_newton_plummer_gravitation(
     bj_real m1,
     bj_real m2,
     bj_real r,
