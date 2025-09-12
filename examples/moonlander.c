@@ -28,16 +28,13 @@
 #define LANDER_VERTICES_LEN 22
 #define LANDER_EDGES_LEN 25
 
-
 ////////////////////////////////////////////////////////////////////////////////
 /// Game Data
 typedef struct {
-    bj_particle_2d particle;
+    bj_rigid_body_2d body;
 
     bj_real drag_k1;
     bj_real drag_k2;
-
-    float angle;
 
     struct {
         bj_bool left;
@@ -123,17 +120,17 @@ static void draw(game_data* data) {
     const uint32_t color = bj_bitmap_pixel_value(target, 0x00, 0xCC, 0x44);
     bj_bitmap_clear(target);
 
-    const float x = data->lander.particle.position[0];
-    const float y = data->lander.particle.position[1];
+    const float x = data->lander.body.point_mass.position[0];
+    const float y = data->lander.body.point_mass.position[1];
 
     bj_vec3 p0, q0;
     bj_vec3 p1, q1;
 
     for (size_t e = 0; e < LANDER_EDGES_LEN; ++e) {
         const float r0 = data->draw.coords[data->draw.edges[e][0]].radius;
-        const float a0 = data->draw.coords[data->draw.edges[e][0]].angle  + data->lander.angle;
+        const float a0 = data->draw.coords[data->draw.edges[e][0]].angle  + data->lander.body.angular.value;
         const float r1 = data->draw.coords[data->draw.edges[e][1]].radius;
-        const float a1 = data->draw.coords[data->draw.edges[e][1]].angle  + data->lander.angle;
+        const float a1 = data->draw.coords[data->draw.edges[e][1]].angle  + data->lander.body.angular.value;
 
         bj_vec3_set(q0, bj_cosf(a0) * r0 + x, bj_sinf(a0) * r0 + y, 1.f);
         bj_vec3_set(q1, bj_cosf(a1) * r1 + x, bj_sinf(a1) * r1 + y, 1.f);
@@ -159,7 +156,7 @@ static void draw(game_data* data) {
         data->lander.thrusters.right == BJ_TRUE ? "\x1B[32mYES\x1B[0m" : " \x1B[31mno\x1B[0m"
     );
 
-    bj_bitmap_printf(target, 10, 10, size, white, "angle: \x1B[37m%.2lf\x1B[0m deg", data->lander.angle * 180.f / BJ_PI);
+    bj_bitmap_printf(target, 10, 10, size, white, "angle: \x1B[37m%.2lf\x1B[0m deg", data->lander.body.angular.value * 180.f / BJ_PI);
 }
 
 
@@ -200,43 +197,37 @@ static void events(game_data* data) {
     }
 }
 
-static void accumulate_thrusters(bj_particle_2d* part, lander* l) {
+static void accumulate_thrusters(bj_rigid_body_2d* p_body, lander* l) {
     if(l->thrusters.up) {
         bj_vec2 force;
-        const bj_real angle = l->angle;
+        const bj_real angle = l->body.angular.value;
 
         bj_vec2_set(force, 
             bj_sin(-angle) * l->thrusters.magnitude,
             bj_cos(angle) * l->thrusters.magnitude
         );
 
-        bj_vec2_add(part->forces, part->forces, force);
+        bj_point_mass_add_force_2d(&p_body->point_mass, force);
+    }
+
+    const float torque = 10.f;
+
+    if(l->thrusters.left) {
+        bj_add_angular_torque_2d(&l->body.angular, torque);
+    }
+    if(l->thrusters.right) {
+        bj_add_angular_torque_2d(&l->body.angular, -torque);
     }
 }
 
 
 static void physics(game_data* data, double delta_time) {
-    bj_accumulate_world_gravity_2d(&data->lander.particle, data->world.g);
-    bj_accumulate_drag_2d(&data->lander.particle, data->lander.drag_k1, data->lander.drag_k2);
-    accumulate_thrusters(&data->lander.particle, &data->lander);
-    bj_integrate_particle_2d(&data->lander.particle, delta_time);
-}
+    bj_accumulate_world_gravity_2d(&data->lander.body.point_mass, data->world.g);
+    bj_accumulate_drag_2d(&data->lander.body.point_mass, data->lander.drag_k1, data->lander.drag_k2);
+    accumulate_thrusters(&data->lander.body, &data->lander);
 
-static void gameplay(game_data* data, double dt) {
-
-    const float angular_speed = 1.f;
-
-    // Just roll the lander
-    if(data->lander.thrusters.left) {
-      data->lander.angle += (float)dt * angular_speed;
-    }
-    if(data->lander.thrusters.right) {
-        data->lander.angle -= (float)dt * angular_speed;
-    }
-
-    const float TWO_PI = 6.28318530718f;
-    if (data->lander.angle > TWO_PI || data->lander.angle < -TWO_PI) data->lander.angle = fmodf(data->lander.angle, TWO_PI);
-
+    bj_integrate_point_mass_2d(&data->lander.body.point_mass, delta_time);
+    bj_integrate_angular_2d(&data->lander.body.angular, delta_time);
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
@@ -252,14 +243,18 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     data->window           = bj_window_new("Moonlander", 0,0, SCREEN_W, SCREEN_H, 0);
     data->draw.framebuffer = bj_window_get_framebuffer(data->window, 0);
 
-    bj_vec2_set(data->lander.particle.position, BJ_F(0.0), BJ_F(0.0));
-    data->lander.particle.inverse_mass = BJ_F(1.);
-    data->lander.particle.damping = BJ_F(1.);
-    data->lander.thrusters.magnitude = BJ_F(30.);
+    bj_vec2_set(data->lander.body.point_mass.position, BJ_F(0.0), BJ_F(40.0));
+    data->lander.body.point_mass.inverse_mass = BJ_F(1.)/BJ_F(8.0);
+    data->lander.body.point_mass.damping = BJ_F(.995);
+    data->lander.body.angular.inverse_inertia = BJ_F(1.)/BJ_F(3.);
+    data->lander.body.angular.damping = BJ_F(.96);
+    data->lander.thrusters.magnitude = BJ_F(90.);
 
-    data->world.g = 9.807;
-    data->lander.drag_k1 = BJ_F(0.490);
-    data->lander.drag_k2 = BJ_F(0.049);
+    data->world.g = 12;
+    /* data->lander.drag_k1 = BJ_F(0.490); */
+    /* data->lander.drag_k2 = BJ_F(0.049); */
+    data->lander.drag_k1 = BJ_FZERO;
+    data->lander.drag_k2 = BJ_FZERO;
 
     *user_data          = data;
 
@@ -274,7 +269,6 @@ int bj_app_iterate(void* user_data) {
     const double dt = bj_stopwatch_step_delay(&data->stopwatch);
 
     events(data);
-    gameplay(data, dt);
     physics(data, dt);
     draw(data);
 

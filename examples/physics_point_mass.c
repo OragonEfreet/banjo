@@ -35,17 +35,17 @@ bj_mat3 projection;
 #define M_JUPITER  BJ_F(317.8)
 
 typedef struct {
-    bj_particle_2d body;
+    bj_point_mass_2d body;
     bj_real radius;
     uint32_t color;
 } planet_t;
 
 #define N_PLANETS 5
 planet_t planets[N_PLANETS];
-bj_particle_2d sun = {0};
+bj_point_mass_2d sun = {0};
 
 #define N_ASTEROIDS 800
-bj_particle_2d asteroids[N_ASTEROIDS];
+bj_point_mass_2d asteroids[N_ASTEROIDS];
 uint32_t asteroid_color;
 
 bj_stopwatch stopwatch;
@@ -65,7 +65,7 @@ static bj_real orbital_speed_soft(bj_real G, bj_real M, bj_real r, bj_real eps) 
 
 static void init_sun() {
     sun.damping = BJ_F(1.0);
-    bj_particle_set_mass_2d(&sun, M_SUN);
+    bj_point_mass_set_mass_2d(&sun, M_SUN);
 }
 
 static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj_real draw_r, bj_real phase) {
@@ -81,7 +81,7 @@ static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj
 
     bj_vec2_zero(p->body.forces);
     p->body.damping = BJ_F(1.0);
-    bj_particle_set_mass_2d(&p->body, mass);
+    bj_point_mass_set_mass_2d(&p->body, mass);
 
     p->radius = draw_r;
     p->color = color;
@@ -107,7 +107,7 @@ static void init_asteroids() {
 
         bj_vec2_zero(asteroids[i].forces);
         asteroids[i].damping = BJ_F(1.0);
-        bj_particle_set_mass_2d(&asteroids[i], 1.0);
+        bj_point_mass_set_mass_2d(&asteroids[i], 1.0);
     }
 }
 
@@ -138,11 +138,11 @@ static void physics(bj_real dt) {
 
     for (size_t i = 0; i < N_PLANETS; ++i) {
         bj_accumulate_point_gravity_softened_2d(&planets[i].body, &sun, G_SUN, SOFTENING);
-        bj_integrate_particle_2d(&planets[i].body, dt);
+        bj_integrate_point_mass_2d(&planets[i].body, dt);
     }
     for (size_t i = 0; i < N_ASTEROIDS; ++i) {
         bj_accumulate_point_gravity_softened_2d(&asteroids[i], &sun, G_SUN, SOFTENING);
-        bj_integrate_particle_2d(&asteroids[i], dt);
+        bj_integrate_point_mass_2d(&asteroids[i], dt);
     }
 }
 

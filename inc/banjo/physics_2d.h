@@ -5,7 +5,7 @@
 /// \defgroup physics_2d 2D Physics
 /// \ingroup physics
 ///
-/// \brief 2D physics utilities (particles, forces, kinematics).
+/// \brief 2D physics utilities (point masses, forces, kinematics).
 ///
 /// This header provides small helpers for common 2D physics operations. By default,
 /// quantities are interpreted in **SI units** (meters, seconds), but formulas are
@@ -28,7 +28,7 @@
 #include <banjo/vec.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief 2D particle state and physical properties.
+/// \brief 2D point mass state and physical properties.
 ///
 /// Positions, velocities, accelerations and force accumulator are expressed in
 /// world space. Damping is a unitless velocity decay factor applied per-step.
@@ -41,7 +41,7 @@
 /// \param damping      Velocity damping factor in [0, 1]
 /// \param inverse_mass Inverse of mass [M^-1]; 0 ⇒ infinite mass
 ////////////////////////////////////////////////////////////////////////////////
-struct bj_particle_2d_t {
+struct bj_point_mass_2d_t {
     bj_vec2 position;
     bj_vec2 velocity;
     bj_vec2 acceleration;
@@ -51,71 +51,75 @@ struct bj_particle_2d_t {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Shorthand alias for \ref bj_particle_2d_t.
+/// \brief Shorthand alias for \ref bj_point_mass_2d_t.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct bj_particle_2d_t bj_particle_2d;
+typedef struct bj_point_mass_2d_t bj_point_mass_2d;
 
-BANJO_EXPORT void bj_particle_set_mass_2d(
-    bj_particle_2d* p_particle,
+BANJO_EXPORT void bj_point_mass_set_mass_2d(
+    bj_point_mass_2d* p_point_mass,
     bj_real         mass
 );
 
+BANJO_EXPORT void bj_point_mass_add_force_2d(
+    bj_point_mass_2d* p_point_mass,
+    const bj_vec2 force
+);
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Integrates particle state forward by \a dt seconds.
+/// \brief Integrates point mass state forward by \a dt seconds.
 ///
 /// Advances velocity and position using current acceleration and accumulated
 /// forces. Applies damping to velocity. Intended for fixed-timestep updates.
 ///
-/// \param p_particle Particle to integrate
+/// \param p_point_mass Particle to integrate
 /// \param dt         Time step [T]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_integrate_particle_2d(
-    bj_particle_2d* p_particle,
+BANJO_EXPORT void bj_integrate_point_mass_2d(
+    bj_point_mass_2d* p_point_mass,
     bj_real dt
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Accumulates uniform world gravity into the particle’s force buffer.
+/// \brief Accumulates uniform world gravity into the point mass’ force buffer.
 ///
 /// Adds gravitational force for the next integration step:
 /// `F_g = m * g * d`, where \a g is the scalar gravity magnitude [L T^-2],
 /// \a m is mass (= 1 / inverse_mass), and \a d is the engine’s world-down
 /// unit vector.
 ///
-/// \param p_particle Particle to modify
+/// \param p_point_mass Particle to modify
 /// \param gravity    Gravity magnitude [L T^-2]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_accumulate_world_gravity_2d(
-    bj_particle_2d* p_particle,
+    bj_point_mass_2d* p_point_mass,
     bj_real         gravity
 );
 
 BANJO_EXPORT void bj_accumulate_point_gravity_2d(
-    bj_particle_2d* BJ_RESTRICT       p_particle_from,
-    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    bj_point_mass_2d* BJ_RESTRICT       p_point_mass_from,
+    const bj_point_mass_2d* BJ_RESTRICT p_point_mass_to,
     const bj_real                     gravity_factor
 );
 
 BANJO_EXPORT void bj_accumulate_point_gravity_softened_2d(
-    bj_particle_2d*       BJ_RESTRICT p_particle_from,
-    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    bj_point_mass_2d*       BJ_RESTRICT p_point_mass_from,
+    const bj_point_mass_2d* BJ_RESTRICT p_point_mass_to,
     const bj_real                     gravity_factor,
     const bj_real                     epsilon
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Accumulates aerodynamic drag into the particle’s force buffer.
+/// \brief Accumulates aerodynamic drag into the point mass’ force buffer.
 ///
-/// Computes 2D drag based on current particle velocity and adds it to
-/// \c p_particle->forces. See \ref bj_particle_drag_force_2d.
+/// Computes 2D drag based on current point mass velocity and adds it to
+/// \c p_point_mass->forces. See \ref bj_point_mass_drag_force_2d.
 ///
-/// \param p_particle Particle to modify
+/// \param p_point_mass Particle to modify
 /// \param k1         Linear drag constant [M T^-1]
 /// \param k2         Quadratic drag constant [M L^-1]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_accumulate_drag_2d(
-    bj_particle_2d* p_particle,
+    bj_point_mass_2d* p_point_mass,
     bj_real k1,
     bj_real k2
 );
@@ -133,7 +137,7 @@ BANJO_EXPORT void bj_accumulate_drag_2d(
 ///
 /// \return Drag coefficient \a c >= 0 in [M T^-1].
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_real bj_particle_drag_coefficient_2d(
+BANJO_EXPORT bj_real bj_point_mass_drag_coefficient_2d(
     const bj_vec2 vel,
     const bj_real k1,
     const bj_real k2
@@ -142,7 +146,7 @@ BANJO_EXPORT bj_real bj_particle_drag_coefficient_2d(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Computes the 2D drag force for a velocity and coefficients.
 ///
-/// Uses the same model as \ref bj_particle_drag_coefficient_2d and writes:
+/// Uses the same model as \ref bj_point_mass_drag_coefficient_2d and writes:
 /// `result = -c * \hat{v}`, with `c = k1 * |v| + k2 * |v|^2`.
 ///
 /// \param result Output force vector F_d [M L T^-2]
@@ -152,7 +156,7 @@ BANJO_EXPORT bj_real bj_particle_drag_coefficient_2d(
 ///
 /// \return BJ_TRUE on success; BJ_FALSE if |v| == 0 (force set to {0,0}).
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_particle_drag_force_2d(
+BANJO_EXPORT bj_bool bj_point_mass_drag_force_2d(
     bj_real result[BJ_RESTRICT static 2],
     const bj_real vel[BJ_RESTRICT static 2],
     const bj_real k1,
@@ -202,6 +206,45 @@ BANJO_EXPORT void bj_kinematics_velocity_2d(
     const bj_real        acceleration[ BJ_RESTRICT static 2 ],
     bj_real              time
 );
+
+struct bj_angular_2d_t {
+    bj_real value;
+    bj_real velocity;
+    bj_real acceleration;
+    bj_real torque;
+    bj_real damping;
+    bj_real inverse_inertia;
+};
+typedef struct bj_angular_2d_t bj_angular_2d;
+
+BANJO_EXPORT void bj_add_angular_torque_2d(
+    bj_angular_2d* angular,
+    bj_real torque
+);
+
+BANJO_EXPORT void bj_integrate_angular_2d(
+    bj_angular_2d* angular,
+    double         delta_time
+);
+
+struct bj_rigid_body_2d_t {
+    struct bj_point_mass_2d_t point_mass;
+    struct bj_angular_2d_t    angular;
+};
+
+typedef struct bj_rigid_body_2d_t bj_rigid_body_2d;
+
+BANJO_EXPORT void bj_rigid_body_add_force_2d(
+    bj_rigid_body_2d* body,
+    const bj_vec2 force
+);
+
+BANJO_EXPORT void bj_integrate_rigid_body_2d(
+    bj_angular_2d* angular,
+    double         delta_time
+);
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \}
