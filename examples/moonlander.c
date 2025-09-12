@@ -63,6 +63,8 @@ typedef struct {
 
 } game_data;
 
+///////////////////////////////////////////////////////////////////////////////
+/// Drawing
 static void prepare_assets(game_data* data) {
 
     const float lander_coords_m[][2] = {
@@ -119,8 +121,8 @@ static void draw(game_data* data) {
     const uint32_t color = bj_bitmap_pixel_value(target, 0x00, 0xCC, 0x44);
     bj_bitmap_clear(target);
 
-    const float x = data->lander.body.point_mass.position[0];
-    const float y = data->lander.body.point_mass.position[1];
+    const float x = data->lander.body.particle.position[0];
+    const float y = data->lander.body.particle.position[1];
 
     bj_vec3 p0, q0;
     bj_vec3 p1, q1;
@@ -157,44 +159,8 @@ static void draw(game_data* data) {
     bj_bitmap_printf(target, 10, 10, size, white, "angle: \x1B[37m%.2lf\x1B[0m deg", data->lander.body.angular.value * 180.f / BJ_PI);
 }
 
-
-static void events(game_data* data) {
-    bj_event e;
-
-    while(bj_poll_events(&e)) {
-        switch(e.type) {
-
-            // Event keys
-            case BJ_EVENT_KEY:
-                switch(e.key.key) {
-                    case BJ_KEY_SPACE:
-                        bj_stopwatch_reset(&data->stopwatch);
-                        break;
-                    case BJ_KEY_LEFT:
-                        data->lander.thrusters.left = e.key.action == BJ_PRESS;
-                        break;
-                    case BJ_KEY_UP:
-                        data->lander.thrusters.up = e.key.action == BJ_PRESS;
-                        break;
-                    case BJ_KEY_RIGHT:
-                        data->lander.thrusters.right = e.key.action == BJ_PRESS;
-                        break;
-                    case BJ_KEY_ESCAPE:
-                        if(e.key.action == BJ_RELEASE) {
-                            bj_window_set_should_close(e.window);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            
-            default:
-                break;
-        }
-    }
-}
-
+////////////////////////////////////////////////////////////////////////////////
+/// Physics
 static void apply_thrusters(bj_rigid_body_2d* p_body, lander* l) {
     if(l->thrusters.up) {
         bj_vec2 force;
@@ -205,27 +171,29 @@ static void apply_thrusters(bj_rigid_body_2d* p_body, lander* l) {
             bj_cos(angle) * l->thrusters.magnitude
         );
 
-        bj_point_mass_add_force_2d(&p_body->point_mass, force);
+        bj_particle_apply_force_2d(&p_body->particle, force);
     }
 
-    const float torque = 10.f;
+    const float torque = BJ_F(10.0);
 
     if(l->thrusters.left) {
-        bj_add_angular_torque_2d(&l->body.angular, torque);
+        bj_apply_angular_torque_2d(&l->body.angular, torque);
     }
     if(l->thrusters.right) {
-        bj_add_angular_torque_2d(&l->body.angular, -torque);
+        bj_apply_angular_torque_2d(&l->body.angular, -torque);
     }
 }
 
 static void physics(game_data* data, double delta_time) {
-    bj_apply_gravity_2d(&data->lander.body.point_mass, data->world.g);
-    bj_apply_drag_2d(&data->lander.body.point_mass, data->lander.drag_k1, data->lander.drag_k2);
+    bj_apply_gravity_2d(&data->lander.body.particle, data->world.g);
+    bj_apply_drag_2d(&data->lander.body.particle, data->lander.drag_k1, data->lander.drag_k2);
     apply_thrusters(&data->lander.body, &data->lander);
 
     bj_step_rigid_body_2d(&data->lander.body, delta_time);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// Program
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)argc; (void)argv;
 
@@ -239,23 +207,22 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     data->window           = bj_window_new("Moonlander", 0,0, SCREEN_W, SCREEN_H, 0);
     data->draw.framebuffer = bj_window_get_framebuffer(data->window, 0);
 
-    bj_vec2_set(data->lander.body.point_mass.position, BJ_F(0.0), BJ_F(40.0));
-    data->lander.body.point_mass.inverse_mass = BJ_FI(8.0);
-    data->lander.body.point_mass.damping      = BJ_F(.995);
+    bj_vec2_set(data->lander.body.particle.position, BJ_F(0.0), BJ_F(40.0));
+    data->lander.body.particle.inverse_mass   = BJ_FI(8.0);
+    data->lander.body.particle.damping        = BJ_F(.995);
     data->lander.body.angular.inverse_inertia = BJ_FI(3.);
     data->lander.body.angular.damping         = BJ_F(.96);
     data->lander.thrusters.magnitude          = BJ_F(90.);
-
-    data->world.g = 12;
-    /* data->lander.drag_k1 = BJ_F(0.490); */
-    /* data->lander.drag_k2 = BJ_F(0.049); */
-    data->lander.drag_k1 = BJ_FZERO;
-    data->lander.drag_k2 = BJ_FZERO;
+    data->world.g                             = BJ_F(12.);
+    data->lander.drag_k1                      = BJ_F(0.490);
+    data->lander.drag_k2                      = BJ_F(0.049);
 
     *user_data          = data;
 
     prepare_assets(data);
     update_projection(data);
+
+    bj_set_key_callback(bj_close_on_escape, 0);
 
     return bj_callback_continue;
 }
@@ -264,11 +231,14 @@ int bj_app_iterate(void* user_data) {
     game_data* data = (game_data*)user_data;
     const double dt = bj_stopwatch_step_delay(&data->stopwatch);
 
-    events(data);
+    bj_dispatch_events();
+
+    data->lander.thrusters.up    = bj_window_get_key(data->window, BJ_KEY_UP);
+    data->lander.thrusters.right = bj_window_get_key(data->window, BJ_KEY_RIGHT);
+    data->lander.thrusters.left  = bj_window_get_key(data->window, BJ_KEY_LEFT);
+
     physics(data, dt);
     draw(data);
-
-    // Update framebuffer
     bj_window_update_framebuffer(data->window);
 
     bj_sleep(15);

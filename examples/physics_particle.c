@@ -35,17 +35,17 @@ bj_mat3 projection;
 #define M_JUPITER  BJ_F(317.8)
 
 typedef struct {
-    bj_point_mass_2d body;
+    bj_particle_2d body;
     bj_real radius;
     uint32_t color;
 } planet_t;
 
 #define N_PLANETS 5
 planet_t planets[N_PLANETS];
-bj_point_mass_2d sun = {0};
+bj_particle_2d sun = {0};
 
 #define N_ASTEROIDS 800
-bj_point_mass_2d asteroids[N_ASTEROIDS];
+bj_particle_2d asteroids[N_ASTEROIDS];
 uint32_t asteroid_color;
 
 bj_stopwatch stopwatch;
@@ -138,11 +138,11 @@ static void physics(bj_real dt) {
 
     for (size_t i = 0; i < N_PLANETS; ++i) {
         bj_apply_point_gravity_softened_2d(&planets[i].body, &sun, G_SUN, SOFTENING);
-        bj_step_point_mass_2d(&planets[i].body, dt);
+        bj_step_particle_2d(&planets[i].body, dt);
     }
     for (size_t i = 0; i < N_ASTEROIDS; ++i) {
         bj_apply_point_gravity_softened_2d(&asteroids[i], &sun, G_SUN, SOFTENING);
-        bj_step_point_mass_2d(&asteroids[i], dt);
+        bj_step_particle_2d(&asteroids[i], dt);
     }
 }
 
