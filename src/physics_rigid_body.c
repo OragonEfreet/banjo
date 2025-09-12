@@ -10,10 +10,13 @@ void bj_rigid_body_add_force_2d(
     // TODO Add torque by mean of force
 }
 
-void bj_integrate_rigid_body_2d(
-    bj_angular_2d* angular,
-    double         delta_time
+void bj_step_rigid_body_2d(
+    bj_rigid_body_2d* body,
+    double            delta_time
 ) {
+    bj_check(body);
+    bj_step_point_mass_2d(&body->point_mass, delta_time);
+    bj_step_angular_2d(&body->angular, delta_time);
 }
 
 

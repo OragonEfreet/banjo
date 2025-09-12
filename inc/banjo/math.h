@@ -45,6 +45,7 @@
     #define BJ_F(x) x##f
     #define BJ_EPSILON (FLT_EPSILON)
 #endif
+#define BJ_FI(x) BJ_F(1.0) / BJ_F(x)
 #define BJ_FZERO (BJ_F(0.0))               ///< Zero constant in bj_real
 /// @}
 
