@@ -1,7 +1,7 @@
 #include <banjo/physics_2d.h>
 #include "check.h"
 
-void bj_add_angular_torque_2d(
+void bj_apply_angular_torque_2d(
     bj_angular_2d* angular,
     bj_real torque
 ) {

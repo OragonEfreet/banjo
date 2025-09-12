@@ -1,4 +1,5 @@
 #include <banjo/video.h>
+#include <banjo/event.h>
 
 #include "check.h"
 #include "window_t.h"
@@ -81,4 +82,16 @@ int bj_window_get_size(
 ) {
     bj_check_or_0(p_window);
     return s_video->get_window_size(s_video, p_window, width, height);
+}
+
+int bj_window_get_key(
+    const bj_window* p_window,
+    int              key
+) {
+    bj_check_or_return(p_window, BJ_RELEASE);
+    const unsigned uk = (unsigned)key;
+    if (uk >= 0xFFu) {
+        return BJ_RELEASE;
+    }
+    return p_window->keystates[uk];
 }

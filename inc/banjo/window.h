@@ -122,6 +122,16 @@ BANJO_EXPORT uint8_t bj_window_get_flags(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Query the current state of a key for a given window.
+/// Returns one of `BJ_RELEASE` or `BJ_PRESS`.
+/// If p_window is 0 or key is out of range [0,0xFE], BJ_RELEASE is returned.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT int bj_window_get_key(
+    const bj_window* p_window,
+    int              key
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Return the framebuffer attached to the window.
 ///
 /// The framebuffer is an instance of \ref bj_bitmap attached (and owned) by

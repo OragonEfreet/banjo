@@ -56,7 +56,7 @@ BANJO_EXPORT void bj_kinematics_velocity_2d(
 /// \param damping      Velocity damping factor in [0, 1]
 /// \param inverse_mass Inverse of mass [M^-1]; 0 ⇒ infinite mass
 ////////////////////////////////////////////////////////////////////////////////
-struct bj_point_mass_2d_t {
+struct bj_particle_2d_t {
     bj_vec2 position;
     bj_vec2 velocity;
     bj_vec2 acceleration;
@@ -64,49 +64,49 @@ struct bj_point_mass_2d_t {
     bj_real damping;
     bj_real inverse_mass;
 };
-typedef struct bj_point_mass_2d_t bj_point_mass_2d;
+typedef struct bj_particle_2d_t bj_particle_2d;
 
-BANJO_EXPORT void bj_point_mass_add_force_2d(
-    bj_point_mass_2d* p_point_mass,
+BANJO_EXPORT void bj_particle_apply_force_2d(
+    bj_particle_2d* p_particle,
     const bj_vec2 force
 );
 
-BANJO_EXPORT void bj_step_point_mass_2d(
-    bj_point_mass_2d* p_point_mass,
+BANJO_EXPORT void bj_step_particle_2d(
+    bj_particle_2d* p_particle,
     bj_real dt
 );
 
 BANJO_EXPORT void bj_apply_gravity_2d(
-    bj_point_mass_2d* p_point_mass,
+    bj_particle_2d* p_particle,
     bj_real           gravity
 );
 
 BANJO_EXPORT void bj_apply_point_gravity_2d(
-    bj_point_mass_2d* BJ_RESTRICT       p_point_mass_from,
-    const bj_point_mass_2d* BJ_RESTRICT p_point_mass_to,
+    bj_particle_2d* BJ_RESTRICT       p_particle_from,
+    const bj_particle_2d* BJ_RESTRICT p_particle_to,
     const bj_real                     gravity_factor
 );
 
 BANJO_EXPORT void bj_apply_point_gravity_softened_2d(
-    bj_point_mass_2d*       BJ_RESTRICT p_point_mass_from,
-    const bj_point_mass_2d* BJ_RESTRICT p_point_mass_to,
+    bj_particle_2d*       BJ_RESTRICT p_particle_from,
+    const bj_particle_2d* BJ_RESTRICT p_particle_to,
     const bj_real                       gravity_factor,
     const bj_real                       epsilon
 );
 
 BANJO_EXPORT void bj_apply_drag_2d(
-    bj_point_mass_2d* p_point_mass,
+    bj_particle_2d* p_particle,
     bj_real k1,
     bj_real k2
 );
 
-BANJO_EXPORT bj_real bj_point_mass_drag_coefficient_2d(
+BANJO_EXPORT bj_real bj_particle_drag_coefficient_2d(
     const bj_vec2 vel,
     const bj_real k1,
     const bj_real k2
 );
 
-BANJO_EXPORT bj_bool bj_point_mass_drag_force_2d(
+BANJO_EXPORT bj_bool bj_particle_drag_force_2d(
     bj_real result[BJ_RESTRICT static 2],
     const bj_real vel[BJ_RESTRICT static 2],
     const bj_real k1,
@@ -126,7 +126,7 @@ struct bj_angular_2d_t {
 };
 typedef struct bj_angular_2d_t bj_angular_2d;
 
-BANJO_EXPORT void bj_add_angular_torque_2d(
+BANJO_EXPORT void bj_apply_angular_torque_2d(
     bj_angular_2d* angular,
     bj_real torque
 );
@@ -137,12 +137,12 @@ BANJO_EXPORT void bj_step_angular_2d(
 );
 
 struct bj_rigid_body_2d_t {
-    struct bj_point_mass_2d_t point_mass;
+    struct bj_particle_2d_t particle;
     struct bj_angular_2d_t    angular;
 };
 typedef struct bj_rigid_body_2d_t bj_rigid_body_2d;
 
-BANJO_EXPORT void bj_rigid_body_add_force_2d(
+BANJO_EXPORT void bj_rigid_body_apply_force_2d(
     bj_rigid_body_2d* body,
     const bj_vec2 force
 );
