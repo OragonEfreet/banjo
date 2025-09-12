@@ -45,7 +45,7 @@ void bj_bitmap_apply_shader(
         by = (ky * by) - (ky * sy); ay *= ky;
     }
 
-    const bj_real inv255 = BJ_F(1.0) / BJ_F(255.0);
+    const bj_real inv255 = BJ_FI(255.0);
 
     for (size_t y = 0; y < H; ++y) {
         for (size_t x = 0; x < W; ++x) {

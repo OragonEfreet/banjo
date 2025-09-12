@@ -23,7 +23,7 @@ void bj_point_mass_add_force_2d(
     bj_vec2_add(p_point_mass->forces, p_point_mass->forces, force);
 }
 
-void bj_integrate_point_mass_2d(bj_point_mass_2d* p, bj_real dt) {
+void bj_step_point_mass_2d(bj_point_mass_2d* p, bj_real dt) {
     bj_check(p);
     if (p->inverse_mass != BJ_FZERO) {
         bj_vec2 acc;
@@ -35,14 +35,14 @@ void bj_integrate_point_mass_2d(bj_point_mass_2d* p, bj_real dt) {
     bj_vec2_zero(p->forces);
 }
 
-void bj_accumulate_world_gravity_2d(
+void bj_apply_gravity_2d(
     bj_point_mass_2d* p_point_mass,
     bj_real         gravity
 ) {
     p_point_mass->forces[1] -= gravity;
 }
 
-void bj_accumulate_point_gravity_2d(
+void bj_apply_point_gravity_2d(
     bj_point_mass_2d* BJ_RESTRICT       p_point_mass_from,
     const bj_point_mass_2d* BJ_RESTRICT p_point_mass_to,
     const bj_real                     gravity_factor
@@ -62,7 +62,7 @@ void bj_accumulate_point_gravity_2d(
     bj_point_mass_add_force_2d(p_point_mass_from, force);
 }
 
-void bj_accumulate_point_gravity_softened_2d(
+void bj_apply_point_gravity_softened_2d(
     bj_point_mass_2d*       BJ_RESTRICT p_point_mass_from,
     const bj_point_mass_2d* BJ_RESTRICT p_point_mass_to,
     const bj_real                     gravity_factor,
@@ -83,7 +83,7 @@ void bj_accumulate_point_gravity_softened_2d(
 }
 
 
-void bj_accumulate_drag_2d(
+void bj_apply_drag_2d(
     bj_point_mass_2d* p_point_mass,
     bj_real k1,
     bj_real k2

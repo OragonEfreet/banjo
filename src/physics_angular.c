@@ -9,7 +9,7 @@ void bj_add_angular_torque_2d(
     angular->torque += torque;
 }
 
-void bj_integrate_angular_2d(bj_angular_2d* a, double dt) {
+void bj_step_angular_2d(bj_angular_2d* a, double dt) {
     bj_check(a);
     if (a->inverse_inertia != BJ_FZERO) {
         a->velocity = (

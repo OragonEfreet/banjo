@@ -65,7 +65,7 @@ static bj_real orbital_speed_soft(bj_real G, bj_real M, bj_real r, bj_real eps) 
 
 static void init_sun() {
     sun.damping = BJ_F(1.0);
-    bj_point_mass_set_mass_2d(&sun, M_SUN);
+    sun.inverse_mass = BJ_F(1.0) / M_SUN;
 }
 
 static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj_real draw_r, bj_real phase) {
@@ -81,7 +81,7 @@ static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj
 
     bj_vec2_zero(p->body.forces);
     p->body.damping = BJ_F(1.0);
-    bj_point_mass_set_mass_2d(&p->body, mass);
+    p->body.inverse_mass = BJ_F(1.0) / mass;
 
     p->radius = draw_r;
     p->color = color;
@@ -107,7 +107,7 @@ static void init_asteroids() {
 
         bj_vec2_zero(asteroids[i].forces);
         asteroids[i].damping = BJ_F(1.0);
-        bj_point_mass_set_mass_2d(&asteroids[i], 1.0);
+        asteroids[i].inverse_mass = 1.0;
     }
 }
 
@@ -137,12 +137,12 @@ static void physics(bj_real dt) {
     if (dt > DT_CLAMP) dt = DT_CLAMP;
 
     for (size_t i = 0; i < N_PLANETS; ++i) {
-        bj_accumulate_point_gravity_softened_2d(&planets[i].body, &sun, G_SUN, SOFTENING);
-        bj_integrate_point_mass_2d(&planets[i].body, dt);
+        bj_apply_point_gravity_softened_2d(&planets[i].body, &sun, G_SUN, SOFTENING);
+        bj_step_point_mass_2d(&planets[i].body, dt);
     }
     for (size_t i = 0; i < N_ASTEROIDS; ++i) {
-        bj_accumulate_point_gravity_softened_2d(&asteroids[i], &sun, G_SUN, SOFTENING);
-        bj_integrate_point_mass_2d(&asteroids[i], dt);
+        bj_apply_point_gravity_softened_2d(&asteroids[i], &sun, G_SUN, SOFTENING);
+        bj_step_point_mass_2d(&asteroids[i], dt);
     }
 }
 

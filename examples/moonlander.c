@@ -40,7 +40,6 @@ typedef struct {
         bj_bool left;
         bj_bool right;
         bj_bool up;
-        bj_bool down;
         bj_real magnitude;
     } thrusters;
 } lander;
@@ -149,9 +148,8 @@ static void draw(game_data* data) {
     // UI text
     const unsigned size = 18;
     const uint32_t white = bj_bitmap_pixel_value(target, 0xAA, 0xAA, 0xAA);
-    bj_bitmap_printf(target, 10, SCREEN_H - 10 - size, size, white, "up: %s  down: %s  left: %s  right: %s", 
+    bj_bitmap_printf(target, 10, SCREEN_H - 10 - size, size, white, "up: %s  left: %s  right: %s", 
         data->lander.thrusters.up == BJ_TRUE ? "\x1B[32mYES\x1B[0m" : " \x1B[31mno\x1B[0m",
-        data->lander.thrusters.down == BJ_TRUE ? "\x1B[32mYES\x1B[0m" : " \x1B[31mno\x1B[0m",
         data->lander.thrusters.left == BJ_TRUE ? "\x1B[32mYES\x1B[0m" : " \x1B[31mno\x1B[0m",
         data->lander.thrusters.right == BJ_TRUE ? "\x1B[32mYES\x1B[0m" : " \x1B[31mno\x1B[0m"
     );
@@ -197,7 +195,7 @@ static void events(game_data* data) {
     }
 }
 
-static void accumulate_thrusters(bj_rigid_body_2d* p_body, lander* l) {
+static void apply_thrusters(bj_rigid_body_2d* p_body, lander* l) {
     if(l->thrusters.up) {
         bj_vec2 force;
         const bj_real angle = l->body.angular.value;
@@ -220,14 +218,12 @@ static void accumulate_thrusters(bj_rigid_body_2d* p_body, lander* l) {
     }
 }
 
-
 static void physics(game_data* data, double delta_time) {
-    bj_accumulate_world_gravity_2d(&data->lander.body.point_mass, data->world.g);
-    bj_accumulate_drag_2d(&data->lander.body.point_mass, data->lander.drag_k1, data->lander.drag_k2);
-    accumulate_thrusters(&data->lander.body, &data->lander);
+    bj_apply_gravity_2d(&data->lander.body.point_mass, data->world.g);
+    bj_apply_drag_2d(&data->lander.body.point_mass, data->lander.drag_k1, data->lander.drag_k2);
+    apply_thrusters(&data->lander.body, &data->lander);
 
-    bj_integrate_point_mass_2d(&data->lander.body.point_mass, delta_time);
-    bj_integrate_angular_2d(&data->lander.body.angular, delta_time);
+    bj_step_rigid_body_2d(&data->lander.body, delta_time);
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
@@ -244,11 +240,11 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     data->draw.framebuffer = bj_window_get_framebuffer(data->window, 0);
 
     bj_vec2_set(data->lander.body.point_mass.position, BJ_F(0.0), BJ_F(40.0));
-    data->lander.body.point_mass.inverse_mass = BJ_F(1.)/BJ_F(8.0);
-    data->lander.body.point_mass.damping = BJ_F(.995);
-    data->lander.body.angular.inverse_inertia = BJ_F(1.)/BJ_F(3.);
-    data->lander.body.angular.damping = BJ_F(.96);
-    data->lander.thrusters.magnitude = BJ_F(90.);
+    data->lander.body.point_mass.inverse_mass = BJ_FI(8.0);
+    data->lander.body.point_mass.damping      = BJ_F(.995);
+    data->lander.body.angular.inverse_inertia = BJ_FI(3.);
+    data->lander.body.angular.damping         = BJ_F(.96);
+    data->lander.thrusters.magnitude          = BJ_F(90.);
 
     data->world.g = 12;
     /* data->lander.drag_k1 = BJ_F(0.490); */
