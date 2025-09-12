@@ -119,36 +119,6 @@ static BJ_INLINE bj_real bj_newton_plummer_gravitation(
     return (denom > BJ_FZERO) ? (g * m1 * m2 * r) / denom : BJ_FZERO;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Hooke’s law for a linear spring (1D magnitude).
-///
-/// Computes the restoring force magnitude:
-/// \f[
-///   F = -k \,(l - l_0)
-/// \f]
-/// where:
-/// - \a k  is the spring constant [M T^-2]
-/// - \a l  is the current length [L]
-/// - \a l0 is the rest length [L]
-///
-/// The force is negative when the spring is stretched beyond rest length
-/// (pulling back), and positive when compressed (pushing out).
-///
-/// \param k  Spring stiffness constant [M T^-2]
-/// \param l  Current length [L]
-/// \param l0 Rest length [L]
-///
-/// \return Restoring force magnitude [M L T^-2].
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_hook_spring(
-    bj_real k,
-    bj_real l,
-    bj_real l0
-) {
-    return -k * (l - l0);
-}
-
-
 
 /// \}
 

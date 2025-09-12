@@ -149,25 +149,6 @@ void bj_accumulate_drag_2d(
     bj_vec2_add(p_particle->forces, p_particle->forces, force);
 }
 
-BANJO_EXPORT void bj_accumulate_anchor_spring_2d(
-    bj_particle_2d* BJ_RESTRICT p_particle,
-    const bj_vec2                anchor,
-    bj_real                      rest_length,
-    bj_real                      k
-) {
-    if (k <= BJ_FZERO) return;
-    if (rest_length < BJ_FZERO) rest_length = BJ_FZERO;
-
-    bj_vec2 d; 
-    bj_vec2_sub(d, p_particle->position, anchor);        /* d = x - x0 */
-    const bj_real l = bj_vec2_len(d);                    /* l = |d|    */
-    if (bj_real_is_zero(l)) return;                      /* direction indéfinie */
-
-    const bj_real scale = (rest_length - l) * k / l;     /* F = ((l0 - l)k / l) * d */
-    p_particle->forces[0] += d[0] * scale;
-    p_particle->forces[1] += d[1] * scale;
-}
-
 void bj_accumulate_drag_3d(
     bj_particle_3d* p_particle,
     bj_real k1,
