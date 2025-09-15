@@ -6,6 +6,7 @@ I owe the progress of this project some acknowledgements.
 
 - [Daniel Hepper](https://epicco.de/), who hosted a [rather convenient 8x8 font](https://github.com/dhepper/font8x8) that I used for built-in font drawing.
 - [Juho Snellman](https://www.snellman.net/blog/archive/about/), who provided a [simple yet efficient implementation for ring buffers](https://www.snellman.net/blog/archive/2016-12-13-ring-buffers/), which I use for event queues.
+- [Melissa E. O'Neill](https://www.cs.hmc.edu/~oneill/index.html), wrote [The PCG Paper](https://www.pcg-random.org/paper.html#download-and-read-it).
 - [Wolfgang Drawinger](https://datenwolf.net/), author of [linmath.h](https://github.com/datenwolf/linmath.h) that I directly took and adapted for Banjo.
 
 ## Videos
