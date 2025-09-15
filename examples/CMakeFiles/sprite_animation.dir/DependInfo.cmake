@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/sprite_animation.c" "examples/CMakeFiles/sprite_animation.dir/sprite_animation.c.o" "gcc" "examples/CMakeFiles/sprite_animation.dir/sprite_animation.c.o.d"
-  "" "examples/sprite_animation" "gcc" "examples/CMakeFiles/sprite_animation.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/sprite_animation.c" "examples/CMakeFiles/sprite_animation.dir/sprite_animation.c.o" "gcc" "examples/CMakeFiles/sprite_animation.dir/sprite_animation.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

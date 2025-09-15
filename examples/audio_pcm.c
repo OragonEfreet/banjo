@@ -50,7 +50,7 @@ int bj_app_iterate(void* user_data) {
     };
     enum { MELODY_LEN = 9 };
 
-    int note = (int)bj_get_time();  /* changes once per second */
+    int note = (int)bj_get_run_time();  /* changes once per second */
 
     if (note >= MELODY_LEN)
         return bj_callback_exit_success;

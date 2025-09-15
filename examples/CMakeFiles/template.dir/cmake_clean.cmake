@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/template.dir/link.d"
   "CMakeFiles/template.dir/template.c.o"
   "CMakeFiles/template.dir/template.c.o.d"
   "template"

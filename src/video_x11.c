@@ -109,7 +109,7 @@ static void* x11_get_symbol(x11* p_x11, const char* p_name) {
 }
 
 static void x11_wait_for_map_notify(x11* p_x11, Window window) {
-    double start_time = bj_get_time();
+    double start_time = bj_get_run_time();
 
     while ((bj_get_time() - start_time) < 1.f) {
         while (p_x11->XPending(p_x11->display)) {

@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/drawing_2d.c" "examples/CMakeFiles/drawing_2d.dir/drawing_2d.c.o" "gcc" "examples/CMakeFiles/drawing_2d.dir/drawing_2d.c.o.d"
-  "" "examples/drawing_2d" "gcc" "examples/CMakeFiles/drawing_2d.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/drawing_2d.c" "examples/CMakeFiles/drawing_2d.dir/drawing_2d.c.o" "gcc" "examples/CMakeFiles/drawing_2d.dir/drawing_2d.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

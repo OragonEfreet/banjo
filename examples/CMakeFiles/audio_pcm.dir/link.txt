@@ -1,1 +1,1 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/audio_pcm.dir/link.d CMakeFiles/audio_pcm.dir/audio_pcm.c.o -o audio_pcm  ../libbanjo.a -lm
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc  -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/audio_pcm.dir/audio_pcm.c.o -o audio_pcm  ../libbanjo.a -lm

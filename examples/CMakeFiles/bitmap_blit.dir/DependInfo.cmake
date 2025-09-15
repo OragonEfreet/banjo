@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/bitmap_blit.c" "examples/CMakeFiles/bitmap_blit.dir/bitmap_blit.c.o" "gcc" "examples/CMakeFiles/bitmap_blit.dir/bitmap_blit.c.o.d"
-  "" "examples/bitmap_blit" "gcc" "examples/CMakeFiles/bitmap_blit.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/bitmap_blit.c" "examples/CMakeFiles/bitmap_blit.dir/bitmap_blit.c.o" "gcc" "examples/CMakeFiles/bitmap_blit.dir/bitmap_blit.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

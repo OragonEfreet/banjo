@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/pixel_mode.dir/link.d"
   "CMakeFiles/pixel_mode.dir/pixel_mode.c.o"
   "CMakeFiles/pixel_mode.dir/pixel_mode.c.o.d"
   "pixel_mode"

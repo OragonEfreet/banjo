@@ -24,7 +24,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 int bj_app_iterate(void* user_data) {
     (void)user_data;
 
-    double elapsed = bj_get_time();
+    double elapsed = bj_get_run_time();
     bj_trace("- %lf", elapsed);
 
     bj_sleep(300);

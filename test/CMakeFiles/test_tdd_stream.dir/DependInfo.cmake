@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/test/tdd_stream.c" "test/CMakeFiles/test_tdd_stream.dir/tdd_stream.c.o" "gcc" "test/CMakeFiles/test_tdd_stream.dir/tdd_stream.c.o.d"
-  "" "test/tdd_stream" "gcc" "test/CMakeFiles/test_tdd_stream.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/test/tdd_stream.c" "test/CMakeFiles/test_tdd_stream.dir/tdd_stream.c.o" "gcc" "test/CMakeFiles/test_tdd_stream.dir/tdd_stream.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/memory_callbacks.dir/link.d"
   "CMakeFiles/memory_callbacks.dir/memory_callbacks.c.o"
   "CMakeFiles/memory_callbacks.dir/memory_callbacks.c.o.d"
   "memory_callbacks"

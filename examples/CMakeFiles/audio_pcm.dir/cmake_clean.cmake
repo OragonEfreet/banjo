@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/audio_pcm.dir/link.d"
   "CMakeFiles/audio_pcm.dir/audio_pcm.c.o"
   "CMakeFiles/audio_pcm.dir/audio_pcm.c.o.d"
   "audio_pcm"

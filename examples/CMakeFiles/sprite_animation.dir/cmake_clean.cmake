@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/sprite_animation.dir/link.d"
   "CMakeFiles/sprite_animation.dir/sprite_animation.c.o"
   "CMakeFiles/sprite_animation.dir/sprite_animation.c.o.d"
   "sprite_animation"

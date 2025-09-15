@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/shaders.c" "examples/CMakeFiles/shaders.dir/shaders.c.o" "gcc" "examples/CMakeFiles/shaders.dir/shaders.c.o.d"
-  "" "examples/shaders" "gcc" "examples/CMakeFiles/shaders.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/shaders.c" "examples/CMakeFiles/shaders.dir/shaders.c.o" "gcc" "examples/CMakeFiles/shaders.dir/shaders.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

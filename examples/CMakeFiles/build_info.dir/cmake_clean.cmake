@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/build_info.dir/link.d"
   "CMakeFiles/build_info.dir/build_info.c.o"
   "CMakeFiles/build_info.dir/build_info.c.o.d"
   "build_info"

@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/test_tdd_stream.dir/link.d"
   "CMakeFiles/test_tdd_stream.dir/tdd_stream.c.o"
   "CMakeFiles/test_tdd_stream.dir/tdd_stream.c.o.d"
   "tdd_stream"

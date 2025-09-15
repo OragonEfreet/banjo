@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/event_polling.dir/link.d"
   "CMakeFiles/event_polling.dir/event_polling.c.o"
   "CMakeFiles/event_polling.dir/event_polling.c.o.d"
   "event_polling"

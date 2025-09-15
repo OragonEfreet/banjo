@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/bitmap_blit.dir/link.d"
   "CMakeFiles/bitmap_blit.dir/bitmap_blit.c.o"
   "CMakeFiles/bitmap_blit.dir/bitmap_blit.c.o.d"
   "bitmap_blit"

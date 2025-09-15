@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/template_callbacks.dir/link.d"
   "CMakeFiles/template_callbacks.dir/template_callbacks.c.o"
   "CMakeFiles/template_callbacks.dir/template_callbacks.c.o.d"
   "template_callbacks"

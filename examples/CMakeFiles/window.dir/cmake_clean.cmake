@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/window.dir/link.d"
   "CMakeFiles/window.dir/window.c.o"
   "CMakeFiles/window.dir/window.c.o.d"
   "window"

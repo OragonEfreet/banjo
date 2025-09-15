@@ -25,6 +25,18 @@ void bj_begin_time(
     s_timer_base = bj_get_time_counter();
 }
 
+uint64_t bj_time(
+    void
+) {
+    FILETIME ft;
+    ULARGE_INTEGER li;
+    GetSystemTimeAsFileTime(&ft);
+    li.LowPart  = ft.dwLowDateTime;
+    li.HighPart = ft.dwHighDateTime;
+    const uint64_t EPOCH_DIFF = 11644473600ULL;
+    return (li.QuadPart / 10000000ULL) - EPOCH_DIFF;
+}
+
 uint64_t bj_get_time_counter(
     void
 ) {
@@ -46,7 +58,7 @@ void bj_sleep(
 }
 
 // TODO merge with unix one?
-double bj_get_time(
+double bj_get_run_time(
     void
 ) {
     return (double)(bj_get_time_counter() - s_timer_base) / bj_get_time_frequency();

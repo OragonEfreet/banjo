@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/assert.dir/link.d"
   "CMakeFiles/assert.dir/assert.c.o"
   "CMakeFiles/assert.dir/assert.c.o.d"
   "assert"

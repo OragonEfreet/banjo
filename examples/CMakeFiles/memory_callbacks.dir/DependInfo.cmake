@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/memory_callbacks.c" "examples/CMakeFiles/memory_callbacks.dir/memory_callbacks.c.o" "gcc" "examples/CMakeFiles/memory_callbacks.dir/memory_callbacks.c.o.d"
-  "" "examples/memory_callbacks" "gcc" "examples/CMakeFiles/memory_callbacks.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/memory_callbacks.c" "examples/CMakeFiles/memory_callbacks.dir/memory_callbacks.c.o" "gcc" "examples/CMakeFiles/memory_callbacks.dir/memory_callbacks.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

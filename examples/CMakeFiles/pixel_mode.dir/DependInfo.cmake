@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/pixel_mode.c" "examples/CMakeFiles/pixel_mode.dir/pixel_mode.c.o" "gcc" "examples/CMakeFiles/pixel_mode.dir/pixel_mode.c.o.d"
-  "" "examples/pixel_mode" "gcc" "examples/CMakeFiles/pixel_mode.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/pixel_mode.c" "examples/CMakeFiles/pixel_mode.dir/pixel_mode.c.o" "gcc" "examples/CMakeFiles/pixel_mode.dir/pixel_mode.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

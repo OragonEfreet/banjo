@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/event_callbacks.dir/link.d"
   "CMakeFiles/event_callbacks.dir/event_callbacks.c.o"
   "CMakeFiles/event_callbacks.dir/event_callbacks.c.o.d"
   "event_callbacks"

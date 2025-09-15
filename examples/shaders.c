@@ -91,7 +91,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 int bj_app_iterate(void* user_data) {
     (void)user_data;
     bj_dispatch_events();
-    bj_real time = (bj_real)bj_get_time();
+    bj_real time = (bj_real)bj_get_run_time();
     bj_bitmap_apply_shader(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
     bj_window_update_framebuffer(window);
     bj_sleep(15);

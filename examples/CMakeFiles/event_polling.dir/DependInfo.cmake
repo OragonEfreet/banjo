@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/event_polling.c" "examples/CMakeFiles/event_polling.dir/event_polling.c.o" "gcc" "examples/CMakeFiles/event_polling.dir/event_polling.c.o.d"
-  "" "examples/event_polling" "gcc" "examples/CMakeFiles/event_polling.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/event_polling.c" "examples/CMakeFiles/event_polling.dir/event_polling.c.o" "gcc" "examples/CMakeFiles/event_polling.dir/event_polling.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

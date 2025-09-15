@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/time.dir/link.d"
   "CMakeFiles/time.dir/time.c.o"
   "CMakeFiles/time.dir/time.c.o.d"
   "time"

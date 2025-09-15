@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/load_bmp.c" "examples/CMakeFiles/load_bmp.dir/load_bmp.c.o" "gcc" "examples/CMakeFiles/load_bmp.dir/load_bmp.c.o.d"
-  "" "examples/load_bmp" "gcc" "examples/CMakeFiles/load_bmp.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/load_bmp.c" "examples/CMakeFiles/load_bmp.dir/load_bmp.c.o" "gcc" "examples/CMakeFiles/load_bmp.dir/load_bmp.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

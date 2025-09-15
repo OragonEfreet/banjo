@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/test/unit_memory.c" "test/CMakeFiles/test_unit_memory.dir/unit_memory.c.o" "gcc" "test/CMakeFiles/test_unit_memory.dir/unit_memory.c.o.d"
-  "" "test/unit_memory" "gcc" "test/CMakeFiles/test_unit_memory.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/test/unit_memory.c" "test/CMakeFiles/test_unit_memory.dir/unit_memory.c.o" "gcc" "test/CMakeFiles/test_unit_memory.dir/unit_memory.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

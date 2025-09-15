@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/drawing_text.dir/link.d"
   "CMakeFiles/drawing_text.dir/drawing_text.c.o"
   "CMakeFiles/drawing_text.dir/drawing_text.c.o.d"
   "drawing_text"

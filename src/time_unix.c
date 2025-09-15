@@ -28,6 +28,15 @@ void bj_begin_time(
     s_timer_base = bj_get_time_counter();
 }
 
+uint64_t bj_time(
+    void
+) {
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (uint64_t) ts.tv_sec;
+}
+
+
 uint64_t bj_get_time_counter(
     void
 ) {
@@ -51,7 +60,7 @@ void bj_sleep(
     nanosleep(&ts, NULL);
 }
 
-double bj_get_time(
+double bj_get_run_time(
     void
 ) {
     return (double)(bj_get_time_counter() - s_timer_base) / bj_get_time_frequency();

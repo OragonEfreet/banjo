@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/load_bmp.dir/link.d"
   "CMakeFiles/load_bmp.dir/load_bmp.c.o"
   "CMakeFiles/load_bmp.dir/load_bmp.c.o.d"
   "load_bmp"

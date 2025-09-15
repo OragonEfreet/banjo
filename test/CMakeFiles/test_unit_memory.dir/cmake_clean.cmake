@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/test_unit_memory.dir/link.d"
   "CMakeFiles/test_unit_memory.dir/unit_memory.c.o"
   "CMakeFiles/test_unit_memory.dir/unit_memory.c.o.d"
   "unit_memory"

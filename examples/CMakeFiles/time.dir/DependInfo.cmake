@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/time.c" "examples/CMakeFiles/time.dir/time.c.o" "gcc" "examples/CMakeFiles/time.dir/time.c.o.d"
-  "" "examples/time" "gcc" "examples/CMakeFiles/time.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/time.c" "examples/CMakeFiles/time.dir/time.c.o" "gcc" "examples/CMakeFiles/time.dir/time.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

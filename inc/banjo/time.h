@@ -15,6 +15,10 @@
 #include <banjo/api.h>
 #include <banjo/error.h>
 
+uint64_t bj_time(
+    void
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Suspends the current thread for a specified duration.
 ///
@@ -40,7 +44,7 @@ void bj_sleep(
 ///
 /// \see bj_get_time_counter, bj_get_time_frequency
 ////////////////////////////////////////////////////////////////////////////////
-double bj_get_time(
+double bj_get_run_time(
     void
 );
 

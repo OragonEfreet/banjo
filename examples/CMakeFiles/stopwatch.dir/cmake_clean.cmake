@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/stopwatch.dir/link.d"
   "CMakeFiles/stopwatch.dir/stopwatch.c.o"
   "CMakeFiles/stopwatch.dir/stopwatch.c.o.d"
   "stopwatch"

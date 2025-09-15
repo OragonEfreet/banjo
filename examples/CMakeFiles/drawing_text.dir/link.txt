@@ -1,1 +1,1 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/drawing_text.dir/link.d CMakeFiles/drawing_text.dir/drawing_text.c.o -o drawing_text  ../libbanjo.a -lm
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc  -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/drawing_text.dir/drawing_text.c.o -o drawing_text  ../libbanjo.a -lm

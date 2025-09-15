@@ -8,8 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/oragon/ws/banjo/examples/event_callbacks.c" "examples/CMakeFiles/event_callbacks.dir/event_callbacks.c.o" "gcc" "examples/CMakeFiles/event_callbacks.dir/event_callbacks.c.o.d"
-  "" "examples/event_callbacks" "gcc" "examples/CMakeFiles/event_callbacks.dir/link.d"
+  "/Users/kevin.dorange/ws/banjo/examples/event_callbacks.c" "examples/CMakeFiles/event_callbacks.dir/event_callbacks.c.o" "gcc" "examples/CMakeFiles/event_callbacks.dir/event_callbacks.c.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
