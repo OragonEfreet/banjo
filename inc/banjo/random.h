@@ -62,10 +62,12 @@ int bj_rand(void);
 /// \note The internal layout is part of the public ABI. Do not change
 ///       without bumping the major version.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct {
+struct bj_pcg32_t {
     uint64_t state; ///< Current internal state (updated each step).
     uint64_t inc;   ///< Stream selector; odd recommended, 0 allowed.
-} bj_pcg32_t;
+};
+
+typedef struct bj_pcg32_t bj_pcg32;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the generator state from seed and sequence.
@@ -74,7 +76,7 @@ typedef struct {
 /// \param seq       Stream selector (LSB forced to 1 internally).
 ////////////////////////////////////////////////////////////////////////////////
 void bj_pcg32_seed(
-    bj_pcg32_t* generator,
+    bj_pcg32* generator,
     uint64_t    seed,
     uint64_t    seq
 );
@@ -85,7 +87,7 @@ void bj_pcg32_seed(
 /// \return Next 32-bit pseudo-random value.
 ////////////////////////////////////////////////////////////////////////////////
 uint32_t bj_pcg32_next(
-    bj_pcg32_t* generator
+    bj_pcg32* generator
 );
 
 
@@ -95,7 +97,7 @@ uint32_t bj_pcg32_next(
 /// \param z         Number of steps to skip ahead.
 ////////////////////////////////////////////////////////////////////////////////
 void bj_pcg32_discard(
-    bj_pcg32_t* generator,
+    bj_pcg32* generator,
     uint64_t    z
 );
 
@@ -118,23 +120,23 @@ uint32_t bj_pcg32_max(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Adapter for distribution API (void* state).
 ///
-/// This wrapper allows \ref bj_pcg32_t to be used with the generic
+/// This wrapper allows \ref bj_pcg32 to be used with the generic
 /// distribution functions, which expect a function pointer of the form
 /// `uint32_t (*)(void* state)`.
 ///
 /// Typical usage:
 /// \code
-/// bj_pcg32_t rng = {0};
+/// bj_pcg32 rng = {0};
 /// bj_pcg32_seed(&rng, 123, 456);
-/// int v = bj_uniform_int32_distribution(bj_pcg32, &rng, 0, 9);
+/// int v = bj_uniform_int32_distribution(bj_pcg32_generator, &rng, 0, 9);
 /// \endcode
 ///
-/// \param state Pointer to bj_pcg32_t.
+/// \param state Pointer to bj_pcg32.
 /// \return Next 32-bit pseudo-random value.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-static inline uint32_t bj_pcg32(void* state) {
-    return bj_pcg32_next((bj_pcg32_t*)state);
+static inline uint32_t bj_pcg32_generator(void* state) {
+    return bj_pcg32_next((bj_pcg32*)state);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,7 +148,7 @@ typedef uint32_t (*bj_random_u32_fn_t)(void* state);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Uniform 32-bit integer in [low, high].
-/// \param next   RNG callback (e.g., bj_pcg32).
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
 /// \param state  Opaque engine state for \p next.
 /// \param low    Inclusive lower bound.
 /// \param high   Inclusive upper bound.
@@ -161,7 +163,7 @@ int32_t bj_uniform_int32_distribution(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Uniform float in [low, high).
-/// \param next   RNG callback (e.g., bj_pcg32).
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
 /// \param state  Opaque engine state for \p next.
 /// \param low    Inclusive lower bound.
 /// \param high   Exclusive upper bound.
@@ -176,7 +178,7 @@ float bj_uniform_float_distribution(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Uniform double in [low, high).
-/// \param next   RNG callback (e.g., bj_pcg32).
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
 /// \param state  Opaque engine state for \p next.
 /// \param low    Inclusive lower bound.
 /// \param high   Exclusive upper bound.
@@ -197,12 +199,12 @@ double bj_uniform_double_distribution(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Bernoulli(probability).
-/// \param next        RNG callback (e.g., bj_pcg32).
+/// \param next        RNG callback (e.g., bj_pcg32_generator).
 /// \param state       Opaque engine state for \p next.
 /// \param probability Probability in [0,1].
 /// \return 1 with probability, else 0.
 ////////////////////////////////////////////////////////////////////////////////
-int bj_bernouilli_distribution(
+int bj_bernoulli_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     bj_real            probability
@@ -210,7 +212,7 @@ int bj_bernouilli_distribution(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Normal float N(mean, standard_deviation^2).
-/// \param next                RNG callback (e.g., bj_pcg32).
+/// \param next                RNG callback (e.g., bj_pcg32_generator).
 /// \param state               Opaque engine state for \p next.
 /// \param mean                Mean.
 /// \param standard_deviation  Standard deviation (>= 0).
@@ -225,7 +227,7 @@ float bj_normal_float_distribution(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Normal double N(mean, standard_deviation^2).
-/// \param next                RNG callback (e.g., bj_pcg32).
+/// \param next                RNG callback (e.g., bj_pcg32_generator).
 /// \param state               Opaque engine state for \p next.
 /// \param mean                Mean.
 /// \param standard_deviation  Standard deviation (>= 0).

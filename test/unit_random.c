@@ -32,8 +32,8 @@ TEST_CASE(rand_range_is_0_to_RAND_MAX_inclusive) {
 }
 
 TEST_CASE(pcg32_zero_init_is_valid_and_deterministic) {
-    bj_pcg32_t g1 = {0};
-    bj_pcg32_t g2 = {0};
+    bj_pcg32 g1 = {0};
+    bj_pcg32 g2 = {0};
 
     uint32_t a0 = bj_pcg32_next(&g1);
     uint32_t a1 = bj_pcg32_next(&g1);
@@ -45,7 +45,7 @@ TEST_CASE(pcg32_zero_init_is_valid_and_deterministic) {
 }
 
 TEST_CASE(pcg32_seed_reproducibility) {
-    bj_pcg32_t g1 = {0}, g2 = {0};
+    bj_pcg32 g1 = {0}, g2 = {0};
     bj_pcg32_seed(&g1, 0x0123456789ABCDEFULL, 0xDEADBEEFCAFEBABEULL);
     bj_pcg32_seed(&g2, 0x0123456789ABCDEFULL, 0xDEADBEEFCAFEBABEULL);
 
@@ -58,7 +58,7 @@ TEST_CASE(pcg32_min_max_contract) {
     REQUIRE_EQ(bj_pcg32_min(), 0u);
     REQUIRE_EQ(bj_pcg32_max(), 0xFFFFFFFFu);
 
-    bj_pcg32_t g = {0};
+    bj_pcg32 g = {0};
     for (int i = 0; i < 1000; ++i) {
         uint32_t v = bj_pcg32_next(&g);
         REQUIRE(v >= bj_pcg32_min());
@@ -67,7 +67,7 @@ TEST_CASE(pcg32_min_max_contract) {
 }
 
 TEST_CASE(pcg32_discard_equivalence) {
-    bj_pcg32_t g1 = {0}, g2 = {0};
+    bj_pcg32 g1 = {0}, g2 = {0};
     bj_pcg32_seed(&g1, 1234, 999);
     bj_pcg32_seed(&g2, 1234, 999);
 
@@ -82,7 +82,7 @@ TEST_CASE(pcg32_discard_equivalence) {
 }
 
 TEST_CASE(pcg32_streams_differ_with_different_seq) {
-    bj_pcg32_t a = {0}, b = {0};
+    bj_pcg32 a = {0}, b = {0};
     bj_pcg32_seed(&a, 42, 1);
     bj_pcg32_seed(&b, 42, 2);
 
