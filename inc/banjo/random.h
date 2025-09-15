@@ -191,7 +191,23 @@ double bj_uniform_double_distribution(
     double             high
 );
 
-#ifdef BJ_USE_DOUBLE
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Uniform double in [low, high).
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
+/// \param state  Opaque engine state for \p next.
+/// \param low    Inclusive lower bound.
+/// \param high   Exclusive upper bound.
+/// \return double in [low, high).
+////////////////////////////////////////////////////////////////////////////////
+long double bj_uniform_long_double_distribution(
+    bj_random_u32_fn_t next,
+    void*              state,
+    long double        low,
+    long double        high
+);
+
+#if defined(BJ_API_LONG_DOUBLE)
+#elif defined(BJ_API_FLOAT64)
 # define bj_uniform_real_distribution  bj_uniform_double_distribution
 #else
 # define bj_uniform_real_distribution  bj_uniform_float_distribution
@@ -240,13 +256,29 @@ double bj_normal_double_distribution(
     double             standard_deviation
 );
 
-#ifdef BJ_USE_DOUBLE
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normal double N(mean, standard_deviation^2).
+/// \param next                RNG callback (e.g., bj_pcg32_generator).
+/// \param state               Opaque engine state for \p next.
+/// \param mean                Mean.
+/// \param standard_deviation  Standard deviation (>= 0).
+/// \return double sample.
+////////////////////////////////////////////////////////////////////////////////
+long double bj_normal_long_double_distribution(
+    bj_random_u32_fn_t next,
+    void*              state,
+    long double        mean,
+    long double        standard_deviation
+);
+
+#if defined(BJ_API_LONG_DOUBLE)
+# define bj_normal_real_distribution  bj_normal_long_double_distribution
+#elif defined(BJ_API_FLOAT64)
 # define bj_normal_real_distribution  bj_normal_double_distribution
-typedef struct bj_normald_cache_t bj_normal_cache;
 #else
 # define bj_normal_real_distribution  bj_normal_float_distribution
-typedef struct bj_normalf_cache_t bj_normal_cache;
 #endif
 
 #endif
 /// \} // end of random group
+
