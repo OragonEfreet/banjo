@@ -50,5 +50,68 @@ void bj_srand(unsigned int seed);
 ////////////////////////////////////////////////////////////////////////////////
 int bj_rand(void);
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief PCG32 generator state.
+///
+/// Zero-initialization is valid and yields a deterministic stream.
+/// The structure is plain-old-data: safe for stack allocation, copying,
+/// or static storage. The \p inc field selects an independent sequence;
+/// it is recommended to use an odd value, though zero is allowed.
+///
+/// \note The internal layout is part of the public ABI. Do not change
+///       without bumping the major version.
+////////////////////////////////////////////////////////////////////////////////
+typedef struct {
+    uint64_t state; ///< Current internal state (updated each step).
+    uint64_t inc;   ///< Stream selector; odd recommended, 0 allowed.
+} bj_pcg32_t;
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Set the generator state from seed and sequence.
+/// \param g Generator pointer (must not be NULL).
+/// \param seed Initial seed value.
+/// \param seq  Stream selector (LSB forced to 1 internally).
+////////////////////////////////////////////////////////////////////////////////
+void bj_pcg32_seed(
+    bj_pcg32_t* generator,
+    uint64_t    seed,
+    uint64_t    seq
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Advance the generator and return the next 32-bit value.
+/// \param g Generator pointer (must not be NULL).
+/// \return Next 32-bit pseudo-random value.
+////////////////////////////////////////////////////////////////////////////////
+uint32_t bj_pcg32(
+    bj_pcg32_t* generator
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Advance the generator state by \p z steps.
+/// \param g Generator pointer (must not be NULL).
+/// \param z Number of steps to skip ahead.
+////////////////////////////////////////////////////////////////////////////////
+void bj_pcg32_discard(
+    bj_pcg32_t* generator,
+    uint64_t    z
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Smallest possible value returned by the generator.
+/// \return Always 0.
+////////////////////////////////////////////////////////////////////////////////
+uint32_t bj_pcg32_min(
+    void
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Largest possible value returned by the generator.
+/// \return Always 0xFFFFFFFF.
+////////////////////////////////////////////////////////////////////////////////
+uint32_t bj_pcg32_max(
+    void
+);
+
 #endif
 /// \} // end of random group
