@@ -242,8 +242,10 @@ double bj_normal_double_distribution(
 
 #ifdef BJ_USE_DOUBLE
 # define bj_normal_real_distribution  bj_normal_double_distribution
+typedef struct bj_normald_cache_t bj_normal_cache;
 #else
 # define bj_normal_real_distribution  bj_normal_float_distribution
+typedef struct bj_normalf_cache_t bj_normal_cache;
 #endif
 
 #endif
