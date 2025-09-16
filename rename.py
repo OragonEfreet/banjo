@@ -11,7 +11,7 @@ RENAME = {
     "bj_apply_point_gravity_softened_2d": None,
 
     # audio control
-    "bj_audio_device_is_playing": "bj_is_audio_device_playing",
+    "bj_audio_device_is_playing": "bj_audio_playing",
     "bj_audio_device_pause": "bj_pause_audio_device",
     "bj_audio_device_play": "bj_play_audio_device",
     "bj_audio_device_reset": "bj_reset_audio_device",
@@ -19,52 +19,52 @@ RENAME = {
     "bj_audio_play_note": "bj_play_audio_note",
 
     # lifecycle
-    "bj_begin": "bj_init",
+    "bj_begin": "bj_initialize",
     "bj_begin_audio": None,
     "bj_begin_event": None,
     "bj_begin_time": None,
     "bj_begin_video": None,
 
     # distributions
-    "bj_bernoulli_distribution": "bj_sample_bernoulli",
+    "bj_bernoulli_distribution": None,
 
     # bitmap
     "bj_bitmap_alloc": "bj_allocate_bitmap",
-    "bj_bitmap_apply_shader": "bj_apply_bitmap_shader",
-    "bj_bitmap_blit": "bj_blit_bitmap",
-    "bj_bitmap_blit_mask": "bj_blit_bitmap_mask",
-    "bj_bitmap_blit_mask_stretched": "bj_blit_bitmap_mask_stretched",
-    "bj_bitmap_blit_stretched": "bj_blit_bitmap_stretched",
-    "bj_bitmap_blit_text": "bj_blit_bitmap_text",
+    "bj_bitmap_apply_shader": "bj_shader_bitmap",
+    "bj_bitmap_blit": "bj_blit",
+    "bj_bitmap_blit_mask": "bj_blit_mask",
+    "bj_bitmap_blit_mask_stretched": "bj_blit_mask_stretched",
+    "bj_bitmap_blit_stretched": "bj_blit_stretched",
+    "bj_bitmap_blit_text": "bj_blit_text",
     "bj_bitmap_clear": "bj_clear_bitmap",
     "bj_bitmap_convert": "bj_convert_bitmap",
     "bj_bitmap_copy": "bj_copy_bitmap",
     "bj_bitmap_del": "bj_destroy_bitmap",
-    "bj_bitmap_draw_circle": "bj_draw_bitmap_circle",
-    "bj_bitmap_draw_filled_circle": "bj_draw_bitmap_filled_circle",
-    "bj_bitmap_draw_filled_rectangle": "bj_draw_bitmap_filled_rectangle",
-    "bj_bitmap_draw_line": "bj_draw_bitmap_line",
-    "bj_bitmap_draw_rectangle": "bj_draw_bitmap_rectangle",
-    "bj_bitmap_draw_triangle": "bj_draw_bitmap_triangle",
-    "bj_bitmap_get": None,  # ambiguous; leaving unchanged
-    "bj_bitmap_height": "bj_get_bitmap_height",
+    "bj_bitmap_draw_circle": "bj_draw_circle",
+    "bj_bitmap_draw_filled_circle": "bj_draw_filled_circle",
+    "bj_bitmap_draw_filled_rectangle": "bj_draw_filled_rectangle",
+    "bj_bitmap_draw_line": "bj_draw_line",
+    "bj_bitmap_draw_rectangle": "bj_draw_rectangle",
+    "bj_bitmap_draw_triangle": "bj_draw_triangle",
+    "bj_bitmap_get": "bj_bitmap_pixel",  # ambiguous; leaving unchanged
+    "bj_bitmap_height": "bj_bitmap_height",
     "bj_bitmap_init": "bj_init_bitmap",
-    "bj_bitmap_mode": "bj_get_bitmap_mode",
+    "bj_bitmap_mode": "bj_bitmap_mode",
     "bj_bitmap_new": "bj_create_bitmap",
     "bj_bitmap_new_from_file": "bj_create_bitmap_from_file",
     "bj_bitmap_new_from_pixels": "bj_create_bitmap_from_pixels",
-    "bj_bitmap_pixels": "bj_get_bitmap_pixels",
-    "bj_bitmap_pixel_value": "bj_get_bitmap_pixel_value",
-    "bj_bitmap_print": "bj_print_bitmap",
-    "bj_bitmap_printf": "bj_printf_bitmap",
-    "bj_bitmap_put_pixel": "bj_put_bitmap_pixel",
+    "bj_bitmap_pixels": None,
+    "bj_bitmap_pixel_value": "bj_make_bitmap_pixel",
+    "bj_bitmap_print": "bj_draw_text",
+    "bj_bitmap_printf": "bj_draw_textf",
+    "bj_bitmap_put_pixel": "bj_put_pixel",
     "bj_bitmap_reset": "bj_reset_bitmap",
     "bj_bitmap_rgb": "bj_make_bitmap_rgb",
     "bj_bitmap_set_clear_color": "bj_set_bitmap_clear_color",
     "bj_bitmap_set_colorkey": "bj_set_bitmap_colorkey",
-    "bj_bitmap_stride": "bj_get_bitmap_stride",
-    "bj_bitmap_vprintf": "bj_vprintf_bitmap",
-    "bj_bitmap_width": "bj_get_bitmap_width",
+    "bj_bitmap_stride": "bj_bitmap_stride",
+    "bj_bitmap_vprintf": "bj_draw_vtextf",
+    "bj_bitmap_width": "bj_bitmap_width",
 
     # misc/system
     "bj_call_main": None,
@@ -76,7 +76,7 @@ RENAME = {
     "bj_close_audio_device": None,
     "bj_open_audio_device": None,
 
-    "bj_close_on_escape": "bj_enable_window_close_on_escape",
+    "bj_close_on_escape": None,
     "bj_compute_bitmap_stride": None,
     "bj_compute_pixel_mode": None,
 
@@ -95,12 +95,12 @@ RENAME = {
     "bj_error_check": "bj_check_error",
     "bj_forward_error": None,
     "bj_free": None,
-    "bj_get_build_info": None,
-    "bj_get_key_name": None,
-    "bj_get_run_time": None,
-    "bj_get_symbol": "bj_get_library_symbol",
-    "bj_get_time_counter": None,
-    "bj_get_time_frequency": None,
+    "bj_get_build_info": "bj_build_info",
+    "bj_get_key_name": "bj_key_name",
+    "bj_get_run_time": "bj_run_time",
+    "bj_get_symbol": "bj_library_symbol",
+    "bj_get_time_counter": "bj_time_counter",
+    "bj_get_time_frequency": "bj_time_frequency",
 
     # kinematics
     "bj_kinematics_2d": "bj_compute_kinematics_2d",
@@ -127,9 +127,9 @@ RENAME = {
     "bj_message": "bj_log_message",
 
     # normals
-    "bj_normal_double_distribution": "bj_sample_normal_double",
-    "bj_normal_float_distribution": "bj_sample_normal_float",
-    "bj_normal_long_double_distribution": "bj_sample_normal_long_double",
+    "bj_normal_double_distribution": None,
+    "bj_normal_float_distribution": None,
+    "bj_normal_long_double_distribution": None,
 
     # particles/rigid body
     "bj_particle_apply_force_2d": "bj_apply_particle_force_2d",
@@ -161,7 +161,7 @@ RENAME = {
     "bj_realloc": None,
 
     # geometry
-    "bj_rect_intersect": "bj_intersect_rect",
+    "bj_rect_intersect": "bj_rect_intersection",
 
     # rigid body
     "bj_rigid_body_apply_force_2d": "bj_apply_rigidbody_force_2d",
@@ -183,11 +183,11 @@ RENAME = {
     "bj_step_rigid_body_2d": None,
 
     # stopwatch
-    "bj_stopwatch_delay": "bj_delay_stopwatch",
-    "bj_stopwatch_elapsed": "bj_get_stopwatch_elapsed",
+    "bj_stopwatch_delay": None,
+    "bj_stopwatch_elapsed": "bj_stopwatch_elapsed",
     "bj_stopwatch_reset": "bj_reset_stopwatch",
     "bj_stopwatch_step": "bj_step_stopwatch",
-    "bj_stopwatch_step_delay": "bj_step_stopwatch_delay",
+    "bj_stopwatch_step_delay": "bj_step_delay_stopwatch",
 
     # streams
     "bj_stream_alloc": "bj_allocate_stream",
@@ -203,18 +203,18 @@ RENAME = {
     "bj_time": "bj_get_time",
 
     # uniforms
-    "bj_uniform_double_distribution": "bj_sample_uniform_double",
-    "bj_uniform_float_distribution": "bj_sample_uniform_float",
-    "bj_uniform_int32_distribution": "bj_sample_uniform_int32",
-    "bj_uniform_long_double_distribution": "bj_sample_uniform_long_double",
+    "bj_uniform_double_distribution": None,
+    "bj_uniform_float_distribution": None,
+    "bj_uniform_int32_distribution": None,
+    "bj_uniform_long_double_distribution": None,
 
     # window
-    "bj_window_del": "bj_destroy_window",
+    "bj_window_del": "bj_unbind_window",
     "bj_window_get_flags": "bj_get_window_flags",
     "bj_window_get_framebuffer": "bj_get_window_framebuffer",
-    "bj_window_get_key": "bj_get_window_key",
+    "bj_window_get_key": "bj_get_key",
     "bj_window_get_size": "bj_get_window_size",
-    "bj_window_new": "bj_create_window",
+    "bj_window_new": "bj_bind_window",
     "bj_window_set_should_close": "bj_set_window_should_close",
     "bj_window_should_close": "bj_should_close_window",
     "bj_window_update_framebuffer": "bj_update_window_framebuffer",
