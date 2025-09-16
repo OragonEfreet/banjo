@@ -17,7 +17,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
-    if (!bj_begin(&p_error)) {
+    if (!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     }
@@ -29,14 +29,14 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         .amplitude   = 16000,                /* used only for INT16 path */
         .sample_rate = 44100,
         .channels    = 2,
-    }, bj_audio_play_note, &data, &p_error);
+    }, bj_play_audio_note, &data, &p_error);
 
     if (!p_device) {
         if (p_error) bj_err("cannot open audio: %s (%x)", p_error->message, p_error->code);
         return bj_callback_exit_error;
     }
 
-    bj_audio_device_play(p_device);
+    bj_play_audio_device(p_device);
     return bj_callback_continue;
 }
 
@@ -50,7 +50,7 @@ int bj_app_iterate(void* user_data) {
     };
     enum { MELODY_LEN = 9 };
 
-    int note = (int)bj_get_run_time();  /* changes once per second */
+    int note = (int)bj_run_time();  /* changes once per second */
 
     if (note >= MELODY_LEN)
         return bj_callback_exit_success;
@@ -62,6 +62,6 @@ int bj_app_iterate(void* user_data) {
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
     if (p_device) bj_close_audio_device(p_device);
-    bj_end(0);
+    bj_shutdown(0);
     return status;
 }

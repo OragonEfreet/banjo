@@ -15,7 +15,16 @@
 #include <banjo/api.h>
 #include <banjo/error.h>
 
-uint64_t bj_time(
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Get the current system time in seconds since the Unix epoch.
+///
+/// The returned value is the number of whole seconds elapsed since
+/// 1970-01-01 00:00:00 UTC (Unix epoch). This is the standard "wall-clock"
+/// system time.
+///
+/// \return Seconds since Unix epoch
+////////////////////////////////////////////////////////////////////////////////
+uint64_t bj_get_time(
     void
 );
 
@@ -28,7 +37,7 @@ uint64_t bj_time(
 ///
 /// \param milliseconds Number of milliseconds to sleep.
 ///
-/// \see bj_get_time, bj_get_time_counter, bj_get_time_frequency
+/// \see bj_get_time, bj_time_counter, bj_time_frequency
 ////////////////////////////////////////////////////////////////////////////////
 void bj_sleep(
     int milliseconds
@@ -37,14 +46,14 @@ void bj_sleep(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Gets the current time in seconds since Banjo initialization.
 ///
-/// This function returns the time in seconds since \ref bj_begin was called.
+/// This function returns the time in seconds since \ref bj_initialize was called.
 /// It is suitable for general-purpose timing, but not for high-resolution use.
 ///
 /// \return The current time in seconds.
 ///
-/// \see bj_get_time_counter, bj_get_time_frequency
+/// \see bj_time_counter, bj_time_frequency
 ////////////////////////////////////////////////////////////////////////////////
-double bj_get_run_time(
+double bj_run_time(
     void
 );
 
@@ -53,27 +62,27 @@ double bj_get_run_time(
 ///
 /// This value is in platform-dependent ticks and is suitable for precise
 /// timing and performance measurements. To convert ticks to seconds, divide
-/// by the result of \ref bj_get_time_frequency.
+/// by the result of \ref bj_time_frequency.
 ///
 /// \return The current time counter in ticks.
 ///
-/// \see bj_get_time, bj_get_time_frequency
+/// \see bj_get_time, bj_time_frequency
 ////////////////////////////////////////////////////////////////////////////////
-uint64_t bj_get_time_counter(
+uint64_t bj_time_counter(
     void
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Returns the frequency of the high-resolution counter.
 ///
-/// This is the number of ticks per second returned by \ref bj_get_time_counter.
+/// This is the number of ticks per second returned by \ref bj_time_counter.
 /// Use this to convert tick counts to seconds.
 ///
 /// \return Ticks per second (frequency).
 ///
-/// \see bj_get_time_counter
+/// \see bj_time_counter
 ////////////////////////////////////////////////////////////////////////////////
-uint64_t bj_get_time_frequency(
+uint64_t bj_time_frequency(
     void
 );
 
@@ -98,9 +107,9 @@ typedef struct bj_stopwatch
 ///
 /// \param p_stopwatch Pointer to the stopwatch.
 ///
-/// \see bj_stopwatch_step, bj_stopwatch_elapsed, bj_stopwatch_delay
+/// \see bj_step_stopwatch, bj_stopwatch_elapsed, bj_stopwatch_delay
 ////////////////////////////////////////////////////////////////////////////////
-void bj_stopwatch_reset(
+void bj_reset_stopwatch(
     bj_stopwatch* p_stopwatch
 );
 
@@ -109,13 +118,13 @@ void bj_stopwatch_reset(
 ///
 /// Updates the internal step timestamp. This does not affect the reset time,
 /// but is used to measure time deltas via \ref bj_stopwatch_delay or
-/// \ref bj_stopwatch_step_delay.
+/// \ref bj_step_delay_stopwatch.
 ///
 /// \param p_stopwatch Pointer to the stopwatch.
 ///
-/// \see bj_stopwatch_step_delay
+/// \see bj_step_delay_stopwatch
 ////////////////////////////////////////////////////////////////////////////////
-void bj_stopwatch_step(
+void bj_step_stopwatch(
     bj_stopwatch* p_stopwatch
 );
 
@@ -129,7 +138,7 @@ void bj_stopwatch_step(
 ///
 /// \return Elapsed time in seconds.
 ///
-/// \see bj_stopwatch_reset
+/// \see bj_reset_stopwatch
 ////////////////////////////////////////////////////////////////////////////////
 double bj_stopwatch_elapsed(
     const bj_stopwatch* p_stopwatch
@@ -145,7 +154,7 @@ double bj_stopwatch_elapsed(
 ///
 /// \return Time in seconds since the last step.
 ///
-/// \see bj_stopwatch_step
+/// \see bj_step_stopwatch
 ////////////////////////////////////////////////////////////////////////////////
 double bj_stopwatch_delay(
     const bj_stopwatch* p_stopwatch
@@ -155,15 +164,15 @@ double bj_stopwatch_delay(
 /// \brief Steps the stopwatch and returns the delay since the previous step.
 ///
 /// Equivalent to calling \ref bj_stopwatch_delay followed by
-/// \ref bj_stopwatch_step, but more efficient and concise.
+/// \ref bj_step_stopwatch, but more efficient and concise.
 ///
 /// \param p_stopwatch Pointer to the stopwatch.
 ///
 /// \return Time in seconds since the previous step.
 ///
-/// \see bj_stopwatch_step, bj_stopwatch_delay
+/// \see bj_step_stopwatch, bj_stopwatch_delay
 ////////////////////////////////////////////////////////////////////////////////
-double bj_stopwatch_step_delay(
+double bj_step_delay_stopwatch(
     bj_stopwatch* p_stopwatch
 );
 

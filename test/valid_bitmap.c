@@ -11,7 +11,7 @@ TEST_CASE_ARGS(is_valid_bmp, {const char* name;}) {
     sprintf(bmp_path, "%s/%s", folder, test_data->name);
 
     bj_error* p_error = 0;
-    bj_bitmap_del(bj_bitmap_new_from_file(bmp_path, &p_error));
+    bj_destroy_bitmap(bj_create_bitmap_from_file(bmp_path, &p_error));
     REQUIRE_NULL(p_error);
 
     bj_free(bmp_path);
@@ -24,7 +24,7 @@ TEST_CASE_ARGS(is_corrupt_bmp, {const char* name;bj_error_code code;}) {
     sprintf(bmp_path, "%s/%s", folder, test_data->name);
 
     bj_error* p_error = 0;
-    bj_bitmap_del(bj_bitmap_new_from_file(bmp_path, &p_error));
+    bj_destroy_bitmap(bj_create_bitmap_from_file(bmp_path, &p_error));
 
     REQUIRE_VALUE(p_error);
     REQUIRE_EQ(p_error->code, (uint32_t)test_data->code);

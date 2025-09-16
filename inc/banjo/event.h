@@ -1,6 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
+/// \file event.h
+/// Sytem event management API
+////////////////////////////////////////////////////////////////////////////////
 /// \defgroup event Event
-/// \ingroup core
 ///
 /// \brief Handle input events such as keyboard, mouse and focus
 ///
@@ -285,7 +287,7 @@ typedef enum bj_key_t {
 ///
 /// \see bj_key
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT const char* bj_get_key_name(int key);
+BANJO_EXPORT const char* bj_key_name(int key);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define event action types for keys or mouse buttons.
@@ -454,12 +456,22 @@ BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
 /// \brief Handle the ESC key to close a window.
 ///
 /// This utility callback closes the window when \ref BJ_KEY_ESCAPE is pressed.
-/// Can be passed directly to \ref bj_set_key_callback.
+/// Can be passed directly to \ref bj_set_key_callback or called manually
+/// by your event system.
+///
+/// \param p_window     Target window pointer (must not be NULL).
+/// \param p_event      Key event data (must not be NULL).
+/// \param p_user_data  Opaque user pointer provided at callback registration.
+///                     Not used by this function.
 ///
 /// \see bj_key_callback_fn_t
 /// \see bj_set_key_callback
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_close_on_escape(bj_window*, const bj_key_event*, void* p_user_data);
+BANJO_EXPORT void bj_close_on_escape(
+    bj_window*           p_window,
+    const bj_key_event*  p_event,
+    void*                p_user_data
+);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Push a custom event to the internal event queue.
@@ -531,9 +543,31 @@ void bj_push_enter_event(bj_window* p_window, bj_bool enter, int x, int y);
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_dispatch_events(void);
 
-BANJO_EXPORT bj_bool bj_poll_events(bj_event* p_event);
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Poll the next pending event from the system queue.
+///
+/// Retrieves and removes the next event, if any.  
+/// If no events are available, returns BJ_FALSE and does not modify \p p_event.
+///
+/// \param p_event Pointer to a bj_event structure to be filled (must not be NULL).
+/// \retval BJ_TRUE  An event was retrieved and written to \p p_event.
+/// \retval BJ_FALSE No event available.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT bj_bool bj_poll_events(
+    bj_event* p_event
+);
 
-BANJO_EXPORT void bj_dispatch_event(const bj_event* p_event);
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Dispatch a single event to registered callbacks.
+///
+/// Invokes the appropriate callback(s) associated with the event type.
+/// Does not take ownership of \p p_event; the caller manages its lifetime.
+///
+/// \param p_event Pointer to the event to dispatch (must not be NULL).
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_dispatch_event(
+    const bj_event* p_event
+);
 
 
 #endif

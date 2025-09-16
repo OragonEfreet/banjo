@@ -56,7 +56,7 @@ static bj_bitmap* unpalletized(bj_bitmap* p_original, dib_table_rgb* p_color_tab
                 const size_t width = bj_bitmap_width(p_original);
                 const size_t height = bj_bitmap_height(p_original);
 
-                bj_bitmap* p_bitmap = bj_bitmap_new(
+                bj_bitmap* p_bitmap = bj_create_bitmap(
                     width, height, BJ_PIXEL_MODE_BGR24, 0
                 );
 
@@ -98,7 +98,7 @@ static bj_bitmap* unpalletized(bj_bitmap* p_original, dib_table_rgb* p_color_tab
                     p_dest_row += dest_stride;
                 }
 
-                bj_bitmap_del(p_original);
+                bj_destroy_bitmap(p_original);
                 return p_bitmap;
             }
             break;
@@ -144,7 +144,7 @@ static void dib_read_uncompressed_raster(
     const size_t copy_stride = src_stride < dst_stride ? src_stride : dst_stride;
 
     while(p_dst_row >= dst_pixels && p_dst_row < dst_end) {
-        if(bj_stream_read(p_stream, p_dst_row, copy_stride) < copy_stride) {
+        if(bj_read_stream(p_stream, p_dst_row, copy_stride) < copy_stride) {
             bj_warn("unexpected end of bitmap stream");
             return;
         }
@@ -310,7 +310,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
         return 0;
     }
 
-    if(dib_data_offset == 0 || dib_data_offset >= dib_file_size || dib_data_offset > bj_stream_len(p_stream)) {
+    if(dib_data_offset == 0 || dib_data_offset >= dib_file_size || dib_data_offset > bj_get_stream_length(p_stream)) {
         bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, ERR_MSG_BAD_RASTER_OFFSET);
         return 0;
     }
@@ -495,7 +495,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
         }
 
         // Sometimes, the color table is not encoded, we know it because
-        if ((bj_stream_tell(p_stream) == dib_data_offset)) {
+        if ((bj_tell_stream(p_stream) == dib_data_offset)) {
             bj_warn("%dbpp bitmap stream contains no color table", dib_bit_count);
             // In this case, we fill the color table with white, with exception
             // to the first index, that is set to black
@@ -512,16 +512,16 @@ bj_bitmap* dib_create_bitmap_from_stream(
     }
 
     // Check the current position is the same as the data offset
-    if(bj_stream_tell(p_stream) != dib_data_offset) {
+    if(bj_tell_stream(p_stream) != dib_data_offset) {
         bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, ERR_MSG_BAD_RASTER_OFFSET);
         bj_free(color_table);
         return 0;
     }
-    bj_stream_seek(p_stream, dib_data_offset, BJ_SEEK_BEGIN);
+    bj_seek_stream(p_stream, dib_data_offset, BJ_SEEK_BEGIN);
 
     // Stride of the bitmap is either the computed dib size (if mode is unknown) or 0.
     // If 0, the bitmap initialized will set to the best choice for us.
-    bj_bitmap* p_bitmap = bj_bitmap_new(
+    bj_bitmap* p_bitmap = bj_create_bitmap(
         dib_width, _ABS(dib_height), 
         src_mode, 
         src_mode == BJ_PIXEL_MODE_UNKNOWN ? dib_uncompressed_row_size(dib_width, dib_bit_count) : 0
@@ -552,13 +552,13 @@ bj_bitmap* dib_create_bitmap_from_stream(
             break;
         default:
             bj_set_error(p_error, BJ_ERROR, ERR_MSG_UNSUPPORTED_COMPRESSION);
-            bj_bitmap_del(p_bitmap);
+            bj_destroy_bitmap(p_bitmap);
             bj_free(color_table);
             return 0;
     }
     if(p_inner_error) {
         bj_forward_error(p_inner_error, p_error);
-        bj_bitmap_del(p_bitmap);
+        bj_destroy_bitmap(p_bitmap);
         bj_free(color_table);
         return 0;
     }

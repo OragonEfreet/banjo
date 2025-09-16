@@ -1,9 +1,7 @@
-/// \file
+/// \file error.h
 /// Recoverable error handling
-///
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup error Error Management
-/// \ingroup core
 ///
 /// \brief Recoverable error handling facilities
 ///
@@ -23,6 +21,7 @@
 /// \snippet handling_errors.c Return Errors
 ///
 /// \{
+////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_ERROR_H
 #define BJ_ERROR_H
 
@@ -167,7 +166,7 @@ BANJO_EXPORT void bj_set_error(
 ///
 /// \return _true_ if `p_error` matches `code`, _false_ otherwise.
 ///
-BANJO_EXPORT bj_bool bj_error_check(
+BANJO_EXPORT bj_bool bj_check_error(
     const bj_error* p_error,
     uint32_t code
 );

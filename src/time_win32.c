@@ -11,7 +11,7 @@
 
 #include "check.h"
 
-extern uint64_t bj_time_frequency;
+extern uint64_t bj__time_frequency;
 static uint64_t    s_timer_base;
 
 void bj_end_time() {
@@ -21,11 +21,11 @@ void bj_end_time() {
 void bj_begin_time(
     void
 ) {
-    QueryPerformanceFrequency((LARGE_INTEGER*)&bj_time_frequency);
-    s_timer_base = bj_get_time_counter();
+    QueryPerformanceFrequency((LARGE_INTEGER*)&bj__time_frequency);
+    s_timer_base = bj_time_counter();
 }
 
-uint64_t bj_time(
+uint64_t bj_get_time(
     void
 ) {
     FILETIME ft;
@@ -37,7 +37,7 @@ uint64_t bj_time(
     return (li.QuadPart / 10000000ULL) - EPOCH_DIFF;
 }
 
-uint64_t bj_get_time_counter(
+uint64_t bj_time_counter(
     void
 ) {
     uint64_t result = 0;
@@ -45,10 +45,10 @@ uint64_t bj_get_time_counter(
     return result;
 }
 
-uint64_t bj_get_time_frequency(
+uint64_t bj_time_frequency(
     void
 ) {
-    return bj_time_frequency;
+    return bj__time_frequency;
 }
 
 void bj_sleep(
@@ -58,10 +58,10 @@ void bj_sleep(
 }
 
 // TODO merge with unix one?
-double bj_get_run_time(
+double bj_run_time(
     void
 ) {
-    return (double)(bj_get_time_counter() - s_timer_base) / bj_get_time_frequency();
+    return (double)(bj_time_counter() - s_timer_base) / bj_time_frequency();
 }
 
 #endif

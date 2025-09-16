@@ -108,7 +108,7 @@ static bj_bool alsa_load_library(bj_error** p_error) {
 		return BJ_FALSE;
 	}
 
-#define ALSA_BIND(name) if(!(ALSA.name = (pfn_ ## name)bj_get_symbol(ALSA.p_handle, #name))) {bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot load ALSA function " #name); alsa_unload_library(); return 0;}
+#define ALSA_BIND(name) if(!(ALSA.name = (pfn_ ## name)bj_library_symbol(ALSA.p_handle, #name))) {bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot load ALSA function " #name); alsa_unload_library(); return 0;}
     ALSA_BIND(snd_pcm_avail_update)
     ALSA_BIND(snd_pcm_close)
     ALSA_BIND(snd_pcm_drain)

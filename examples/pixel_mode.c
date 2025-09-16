@@ -3,7 +3,7 @@
 #include <banjo/pixel.h>
 
 void display_value(bj_pixel_mode mode, uint8_t red, uint8_t green, uint8_t blue) {
-    const uint32_t val = bj_pixel_value(mode, red, green, blue);
+    const uint32_t val = bj_get_pixel_value(mode, red, green, blue);
 
     char binarystr[33] = {0};
     for(size_t b = 0 ; b < 32 ; ++b) {

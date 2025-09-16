@@ -169,7 +169,7 @@ static bj_bitmap* win32_create_window_framebuffer(
     }
     SelectObject(p_window->fbdc, p_window->fbmp);
 
-    return bj_bitmap_new_from_pixels(pixels, width, height, pixel_mode, stride);
+    return bj_create_bitmap_from_pixels(pixels, width, height, pixel_mode, stride);
 }
 
 static int win32_get_window_size(
@@ -256,7 +256,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     switch (uMsg) {
 
         case WM_CLOSE:
-            bj_window_set_should_close((bj_window*)p_window);
+            bj_set_window_should_close((bj_window*)p_window);
             break;
 
         case WM_DESTROY:

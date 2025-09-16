@@ -5,7 +5,7 @@
 TEST_CASE_ARGS(rect_no_intersect, {bj_rect rect;}) {
     const bj_rect a = {.x = 0, .y = 0, .w = 10, .h = 10};
     bj_rect result = {0};
-    bj_bool intersect = bj_rect_intersect(&a, &test_data->rect, &result);
+    bj_bool intersect = bj_rect_intersection(&a, &test_data->rect, &result);
     REQUIRE_EQ(intersect, BJ_FALSE);
     REQUIRE_EQ(result.x, 0);
     REQUIRE_EQ(result.y, 0);
@@ -16,7 +16,7 @@ TEST_CASE_ARGS(rect_no_intersect, {bj_rect rect;}) {
 TEST_CASE_ARGS(rect_intersect, {bj_rect rect; bj_rect result;}) {
     const bj_rect a = {.x = 0, .y = 0, .w = 10, .h = 10};
     bj_rect result = test_data->result;
-    bj_bool intersect = bj_rect_intersect(&a, &test_data->rect, &result);
+    bj_bool intersect = bj_rect_intersection(&a, &test_data->rect, &result);
     REQUIRE_EQ(intersect, BJ_TRUE);
     REQUIRE_EQ(test_data->result.x, result.x);
     REQUIRE_EQ(test_data->result.y, result.y);

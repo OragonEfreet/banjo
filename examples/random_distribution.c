@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \example drawing_2d.c
-///  2D primitive drawing demo.
+/// \example random_distribution.c
+/// Display of different random distribution results
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
@@ -42,17 +42,17 @@ bj_bitmap* framebuffer = 0;
 
 static void init_distributions(bj_bitmap* bmp) {
     distributions[0].name    = "uniform:   %ld draws in [0;Xmax[ ; y = how many x";
-    distributions[0].color   = bj_bitmap_pixel_value(bmp, 110, 231, 183);
+    distributions[0].color   = bj_make_bitmap_pixel(bmp, 110, 231, 183);
     distributions[0].min_y   = 0;
     distributions[0].max_y   = 0;
 
     distributions[1].name  = "bernoulli: %ld draws with a probability p (x) ; y = how many hits";
-    distributions[1].color = bj_bitmap_pixel_value(bmp, 147, 197, 253);
+    distributions[1].color = bj_make_bitmap_pixel(bmp, 147, 197, 253);
     distributions[1].min_y = 0;
     distributions[1].max_y = 0;
 
     distributions[2].name  = "normal:    %ld draws with Xmax/2 (mean) and 100 (deviation) ; y = how many x";
-    distributions[2].color = bj_bitmap_pixel_value(bmp, 196, 181, 253);
+    distributions[2].color = bj_make_bitmap_pixel(bmp, 196, 181, 253);
     distributions[2].min_y = 0;
     distributions[2].max_y = 0;
 }
@@ -101,18 +101,18 @@ static void run_distributions() {
 
 static uint32_t darken_color(uint32_t pixel, double factor, bj_bitmap* bmp) {
     uint8_t r, g, b;
-    bj_pixel_rgb(bj_bitmap_mode(bmp), pixel, &r, &g, &b);
+    bj_make_pixel_rgb(bj_bitmap_mode(bmp), pixel, &r, &g, &b);
     r = (uint8_t)(r * factor);
     g = (uint8_t)(g * factor);
     b = (uint8_t)(b * factor);
-    return bj_bitmap_pixel_value(bmp, r, g, b);
+    return bj_make_bitmap_pixel(bmp, r, g, b);
 }
 
 void draw(bj_bitmap* bmp) {
-    bj_bitmap_clear(bmp);
+    bj_clear_bitmap(bmp);
 
-    const uint32_t color_box  = bj_bitmap_pixel_value(bmp, 64, 72, 84);
-    const uint32_t white      = bj_bitmap_pixel_value(bmp, 224, 230, 238);
+    const uint32_t color_box  = bj_make_bitmap_pixel(bmp, 64, 72, 84);
+    const uint32_t white      = bj_make_bitmap_pixel(bmp, 224, 230, 238);
 
     bj_rect graph_box = (bj_rect){
         .x = BORDER_W,
@@ -120,7 +120,7 @@ void draw(bj_bitmap* bmp) {
         .w = GRAPH_W,
         .h = GRAPH_H
     };
-    bj_bitmap_draw_rectangle(bmp, &graph_box, color_box);
+    bj_draw_rectangle(bmp, &graph_box, color_box);
 
     for (size_t d = 0; d < N_DISTRIBUTIONS; ++d) {
         size_t min_y = distributions[d].min_y; /* 0 for histograms */
@@ -140,7 +140,7 @@ void draw(bj_bitmap* bmp) {
             if (yscaled > GRAPH_H - 1) yscaled = GRAPH_H - 1;
             int sx = graph_box.x + x;
             int sy = WINDOW_H - BORDER_H - 1 - yscaled;
-            bj_bitmap_put_pixel(bmp, sx, sy, color_dots);
+            bj_put_pixel(bmp, sx, sy, color_dots);
         }
 
         /* moving-average curve */
@@ -159,24 +159,24 @@ void draw(bj_bitmap* bmp) {
             int sx = graph_box.x + x;
             int sy = WINDOW_H - BORDER_H - 1 - yscaled;
 
-            if (prev_set) bj_bitmap_draw_line(bmp, px, py, sx, sy, color_curve);
+            if (prev_set) bj_draw_line(bmp, px, py, sx, sy, color_curve);
             px = sx; py = sy; prev_set = 1;
         }
 
         /* legend */
         int lx = BORDER_W, ly = 10 + 15 * (int)d;
-        bj_bitmap_draw_filled_rectangle(
+        bj_draw_filled_rectangle(
             bmp, &(bj_rect){ .x = lx, .y = ly, .w = 25, .h = 8 }, distributions[d].color);
-        bj_bitmap_printf(bmp, lx + 30, ly, 8, white, distributions[d].name, distributions[d].n_steps);
+        bj_draw_textf(bmp, lx + 30, ly, 8, white, distributions[d].name, distributions[d].n_steps);
     }
-    bj_bitmap_printf(bmp, BORDER_W, 10 + 15 * (N_DISTRIBUTIONS + 1), 8, white, "Use Left/Right arrow keys to change number of draws.");
+    bj_draw_textf(bmp, BORDER_W, 10 + 15 * (N_DISTRIBUTIONS + 1), 8, white, "Use Left/Right arrow keys to change number of draws.");
 
 }
 
 static void roll() {
     run_distributions();
     draw(framebuffer);
-    bj_window_update_framebuffer(window);
+    bj_update_window_framebuffer(window);
 }
 
 void key_callback(bj_window* p_window, const bj_key_event* e, void* data) {
@@ -193,7 +193,7 @@ void key_callback(bj_window* p_window, const bj_key_event* e, void* data) {
             if (n_steps_base < 0x20000000) { n_steps_base *= 2; roll(); }
             break;
         case BJ_KEY_ESCAPE:
-            bj_window_set_should_close(p_window);
+            bj_set_window_should_close(p_window);
             break;
         default: break;
     }
@@ -203,17 +203,17 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
 
     bj_error* p_error = 0;
-    if (!bj_begin(&p_error)) {
+    if (!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     }
 
-    window = bj_window_new("Random Distribution", 100, 100, WINDOW_W, WINDOW_H, 0);
+    window = bj_bind_window("Random Distribution", 100, 100, WINDOW_W, WINDOW_H, 0);
     bj_set_key_callback(key_callback, 0);
 
-    framebuffer = bj_window_get_framebuffer(window, 0);
+    framebuffer = bj_get_window_framebuffer(window, 0);
 
-    bj_bitmap_set_clear_color(framebuffer, bj_bitmap_pixel_value(framebuffer, 22, 26, 32));
+    bj_set_bitmap_clear_color(framebuffer, bj_make_bitmap_pixel(framebuffer, 22, 26, 32));
 
     init_distributions(framebuffer);
     roll();
@@ -224,14 +224,14 @@ int bj_app_iterate(void* user_data) {
     (void)user_data;
     bj_dispatch_events();
     bj_sleep(30);
-    return bj_window_should_close(window)
+    return bj_should_close_window(window)
          ? bj_callback_exit_success
          : bj_callback_continue;
 }
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
-    bj_window_del(window);
-    bj_end(0);
+    bj_unbind_window(window);
+    bj_shutdown(0);
     return status;
 }

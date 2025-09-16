@@ -60,7 +60,7 @@ void initialize_context(Context* context, int argc, char* argv[]) {
     }
 
     bj_memory_callbacks allocators = mock_allocators(&context->allocations);
-    bj_memory_set_defaults(&allocators);
+    bj_set_memory_defaults(&allocators);
 
     context->standard_out = stdout;
     // context->null_out = fopen(NUL_STDOUT, "w");

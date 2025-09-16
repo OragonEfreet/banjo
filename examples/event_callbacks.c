@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \example events.c
+/// \example event_callbacks.c
 /// Basic event handling.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
@@ -49,11 +49,11 @@ void key_callback(bj_window* p_window, const bj_key_event* e, void* data) {
     }
 
     bj_info("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s", 
-        e->key, bj_get_key_name(e->key), e->scancode, action_str
+        e->key, bj_key_name(e->key), e->scancode, action_str
     );
 
     if(e->key == BJ_KEY_ESCAPE) {
-        bj_window_set_should_close(p_window);
+        bj_set_window_should_close(p_window);
     }
 }
 
@@ -72,12 +72,12 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
-    if(!bj_begin(&p_error)) {
+    if(!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     } 
 
-    window = bj_window_new("Event Callbacks", 100, 100, 800, 600, 0);
+    window = bj_bind_window("Event Callbacks", 100, 100, 800, 600, 0);
 
     event_counter* counter = bj_calloc(sizeof(event_counter));
 
@@ -96,7 +96,7 @@ int bj_app_iterate(void* user_data) {
     bj_dispatch_events();
     bj_sleep(30);
 
-    return bj_window_should_close(window) 
+    return bj_should_close_window(window) 
          ? bj_callback_exit_success 
          : bj_callback_continue;
 }
@@ -109,8 +109,8 @@ int bj_app_end(void* user_data, int status) {
     );
     bj_free(counter);
 
-    bj_window_del(window);
-    bj_end(0);
+    bj_unbind_window(window);
+    bj_shutdown(0);
     return status;
 }
 

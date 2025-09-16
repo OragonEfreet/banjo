@@ -3,7 +3,6 @@
 /// \brief Basic audio library interface.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup audio Audio
-/// \ingroup core
 ///
 /// \brief Provide basic PCM audio playback
 ///
@@ -18,29 +17,75 @@
 
 #include <banjo/error.h>
 #include <banjo/api.h>
+#include <stdint.h>
 
-/// Opaque handle to an audio device instance.
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Opaque handle to an audio device instance.
+///
+/// Instances are created with bj_open_audio_device and must be released
+/// with bj_close_audio_device.
+///
 /// \see bj_open_audio_device
 /// \see bj_close_audio_device
+////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_audio_device_t bj_audio_device;
 
-
 ////////////////////////////////////////////////////////////////////////////////
-/// Describes how and audio device encodes sound samples.
+/// \brief Audio sample format descriptor.
 ///
-/// \see bj_audio_properties
+/// Encodes sample width, sign, float/integer, and endianness flags.
+/// Use the helper macros to inspect properties.
+///
+/// \see BJ_AUDIO_FORMAT_WIDTH
+/// \see BJ_AUDIO_FORMAT_FLOAT
+/// \see BJ_AUDIO_FORMAT_INT
+/// \see BJ_AUDIO_FORMAT_BIG_ENDIAN
+/// \see BJ_AUDIO_FORMAT_SIGNED
 ////////////////////////////////////////////////////////////////////////////////
 typedef enum bj_audio_format_t {
-    BJ_AUDIO_FORMAT_UNKNOWN = 0x0000,  ///!< Unknown
-    BJ_AUDIO_FORMAT_INT16   = 0x8010,  ///!< 16-bit signed integer
-    BJ_AUDIO_FORMAT_F32     = 0x8120, ///!< 32-bit float
+    BJ_AUDIO_FORMAT_UNKNOWN = 0x0000,  ///< Unknown/unspecified format.
+    BJ_AUDIO_FORMAT_INT16   = 0x8010,  ///< 16-bit signed integer PCM.
+    BJ_AUDIO_FORMAT_F32     = 0x8120,  ///< 32-bit IEEE-754 float PCM.
 } bj_audio_format;
 
-
+////////////////////////////////////////////////////////////////////////////////
+/// \def BJ_AUDIO_FORMAT_WIDTH(x)
+/// \brief Extract the sample width (in bits) from an audio format code.
+/// \param x Audio format code (bj_audio_format).
+/// \return Unsigned integer width in bits (e.g., 16 or 32).
+////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUDIO_FORMAT_WIDTH(x)         ((x) & (0xFFu))
+
+////////////////////////////////////////////////////////////////////////////////
+/// \def BJ_AUDIO_FORMAT_FLOAT(x)
+/// \brief Test whether the audio format is floating point.
+/// \param x Audio format code (bj_audio_format).
+/// \return Non-zero if float, zero otherwise.
+////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUDIO_FORMAT_FLOAT(x)         ((x) & (1u<<8))
+
+////////////////////////////////////////////////////////////////////////////////
+/// \def BJ_AUDIO_FORMAT_INT(x)
+/// \brief Test whether the audio format is integer PCM.
+/// \param x Audio format code (bj_audio_format).
+/// \return Non-zero if integer PCM, zero otherwise.
+////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUDIO_FORMAT_INT(x)           (!((x) & (1u<<8)))
+
+////////////////////////////////////////////////////////////////////////////////
+/// \def BJ_AUDIO_FORMAT_BIG_ENDIAN(x)
+/// \brief Test whether the audio format uses big-endian byte order.
+/// \param x Audio format code (bj_audio_format).
+/// \return Non-zero if big-endian, zero otherwise.
+////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUDIO_FORMAT_BIG_ENDIAN(x)    ((x) & (1u<<12))
+
+////////////////////////////////////////////////////////////////////////////////
+/// \def BJ_AUDIO_FORMAT_SIGNED(x)
+/// \brief Test whether integer samples are signed.
+/// \param x Audio format code (bj_audio_format).
+/// \return Non-zero if signed, zero otherwise.
+////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUDIO_FORMAT_SIGNED(x)        ((x) & (1u<<15))
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -64,46 +109,40 @@ typedef struct bj_audio_properties_t {
 /// This callback is called periodically from a dedicated audio thread to
 /// generate PCM audio data.
 ///
-/// \param buffer               Output buffer to write `int16_t` samples into.
-/// \param frames               Number of audio frames to generate.
-/// \param audio                Pointer to audio device properties (readonly).
-/// \param user_data            User-defined pointer passed at device creation.
-/// \param base_sample_index    Index of the first sample in the current buffer.
+/// \param buffer            Output buffer to write int16_t samples into.
+/// \param frames            Number of audio frames to generate.
+/// \param audio             Pointer to audio device properties (read-only).
+/// \param user_data         User-defined pointer passed at device creation.
+/// \param base_sample_index Index of the first sample in the current buffer.
 ///
 /// \see bj_open_audio_device
 /// \see bj_audio_properties
 ////////////////////////////////////////////////////////////////////////////////
 typedef void (*bj_audio_callback_t)(
-    void* buffer,
-    unsigned                   frames,
+    void*                     buffer,
+    unsigned                  frames,
     const bj_audio_properties* audio,
-    void* user_data,
-    uint64_t                   base_sample_index
+    void*                     user_data,
+    uint64_t                  base_sample_index
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Open the default audio device for playback.
 ///
-/// This initializes the audio backend and starts playback immediately
-/// using the provided callback.
+/// Initializes the audio backend and starts playback immediately using
+/// the provided callback.
 ///
-/// \param p_properties          An optional pointer to required properties, can be _0_.
-/// \param p_callback            Function pointer to the user-provided audio callback.
-/// \param p_callback_user_data  User-defined pointer passed to the callback.
-/// \param p_error               Pointer to receive error information.
-///
+/// \param p_properties         Optional pointer to requested properties, or NULL.
+///                             The opened device may differ from the request.
+/// \param p_callback           User audio callback used to produce samples.
+/// \param p_callback_user_data Opaque pointer passed to the callback on each call.
+/// \param p_error              Optional pointer to receive error information on failure.
 /// \return A handle to the opened audio device, or NULL on failure.
-///
-/// \par Behavior
-///
-/// If `p_properties` is set, the driver will attempt to open a device with the
-/// provided properties.
-/// The opened device may not have the requested requirements.
 ///
 /// \see bj_audio_callback_t
 /// \see bj_close_audio_device
-/// \see bj_audio_device_play
-/// \see bj_audio_device_pause
+/// \see bj_play_audio_device
+/// \see bj_pause_audio_device
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_audio_device* bj_open_audio_device(
     const bj_audio_properties* p_properties,
@@ -115,7 +154,7 @@ BANJO_EXPORT bj_audio_device* bj_open_audio_device(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Close an audio device and release all associated resources.
 ///
-/// This stops playback and joins the audio thread before cleanup.
+/// Stops playback and joins the audio thread before cleanup.
 ///
 /// \param p_device Pointer to the audio device to close.
 ///
@@ -132,11 +171,11 @@ BANJO_EXPORT void bj_close_audio_device(
 ///
 /// \param p_device Pointer to the audio device.
 ///
-/// \see bj_audio_device_pause
-/// \see bj_audio_device_stop
-/// \see bj_audio_device_is_playing
+/// \see bj_pause_audio_device
+/// \see bj_stop_audio_device
+/// \see bj_audio_playing
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_device_play(
+BANJO_EXPORT void bj_play_audio_device(
     bj_audio_device* p_device
 );
 
@@ -147,39 +186,39 @@ BANJO_EXPORT void bj_audio_device_play(
 ///
 /// \param p_device Pointer to the audio device.
 ///
-/// \see bj_audio_device_play
-/// \see bj_audio_device_stop
-/// \see bj_audio_device_is_playing
+/// \see bj_play_audio_device
+/// \see bj_stop_audio_device
+/// \see bj_audio_playing
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_device_pause(
+BANJO_EXPORT void bj_pause_audio_device(
     bj_audio_device* p_device
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Reset the playback stream sample index to 0.
 ///
-/// This does not stop or pause playback, but restarts timing from zero.
+/// Does not stop or pause playback. Only resets timing.
 ///
 /// \param p_device Pointer to the audio device.
 ///
-/// \see bj_audio_device_stop
+/// \see bj_stop_audio_device
 /// \see bj_audio_callback_t
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_device_reset(
+BANJO_EXPORT void bj_reset_audio_device(
     bj_audio_device* p_device
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Stop playback and reset the sample stream.
 ///
-/// This is equivalent to calling pause followed by reset.
+/// Equivalent to calling pause followed by reset.
 ///
 /// \param p_device Pointer to the audio device.
 ///
-/// \see bj_audio_device_pause
-/// \see bj_audio_device_reset
+/// \see bj_pause_audio_device
+/// \see bj_reset_audio_device
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_device_stop(
+BANJO_EXPORT void bj_stop_audio_device(
     bj_audio_device* p_device
 );
 
@@ -189,20 +228,19 @@ BANJO_EXPORT void bj_audio_device_stop(
 /// \param p_device Pointer to the audio device.
 /// \return BJ_TRUE if playing, BJ_FALSE if paused or stopped.
 ///
-/// \see bj_audio_device_play
-/// \see bj_audio_device_pause
+/// \see bj_play_audio_device
+/// \see bj_pause_audio_device
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_audio_device_is_playing(
+BANJO_EXPORT bj_bool bj_audio_playing(
     const bj_audio_device* p_device
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define parameters for generating simple waveforms.
 ///
-/// Used in conjunction with \ref bj_audio_play_note to synthesize
-/// basic musical tones such as sine or square waves.
+/// Used with bj_play_audio_note to synthesize tones such as sine or square.
 ///
-/// \see bj_audio_play_note
+/// \see bj_play_audio_note
 ////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_audio_play_note_data_t {
     enum {
@@ -218,31 +256,29 @@ typedef struct bj_audio_play_note_data_t {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Generate a basic waveform tone using a built-in callback.
 ///
-/// This function can be passed as a \ref bj_audio_callback_t and uses the
-/// data provided in \ref bj_audio_play_note_data_t to generate tones.
+/// Can be used as a bj_audio_callback_t and uses bj_audio_play_note_data_t.
 ///
-/// \param buffer               Output buffer to write samples into.
-/// \param frames               Number of frames to generate.
-/// \param audio                Audio device properties.
-/// \param user_data            Pointer to a \ref bj_audio_play_note_data_t instance.
-/// \param base_sample_index    Starting sample index (used to compute phase).
+/// \param buffer            Output buffer to write samples into.
+/// \param frames            Number of frames to generate.
+/// \param audio             Audio device properties.
+/// \param user_data         Pointer to a bj_audio_play_note_data_t instance.
+/// \param base_sample_index Starting sample index (for phase computation).
 ///
 /// \see bj_audio_play_note_data_t
 /// \see bj_audio_callback_t
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_play_note(
-    void* buffer,
-    unsigned frames,
+BANJO_EXPORT void bj_play_audio_note(
+    void*                      buffer,
+    unsigned                   frames,
     const bj_audio_properties* audio,
-    void* user_data,
-    uint64_t base_sample_index
+    void*                      user_data,
+    uint64_t                   base_sample_index
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Represent an audio backend (ALSA, MME, etc).
 ///
-/// This internal structure handles platform-specific device control
-/// and is used to abstract away the OS details.
+/// Internal structure used to abstract platform-specific device control.
 ////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_audio_layer_t {
     ////////////////////////////////////////////////////////////////////////////
@@ -250,7 +286,7 @@ typedef struct bj_audio_layer_t {
     ///
     /// Called during deinitialization to release all backend-related resources.
     ///
-    /// \param self Pointer to the audio layer instance.
+    /// \param self    Pointer to the audio layer instance.
     /// \param p_error Optional pointer to receive error information.
     ////////////////////////////////////////////////////////////////////////////
     void (*end)(struct bj_audio_layer_t* self, bj_error** p_error);
@@ -260,7 +296,7 @@ typedef struct bj_audio_layer_t {
     ///
     /// Used to stop and destroy a specific audio device instance.
     ///
-    /// \param self Pointer to the audio layer instance.
+    /// \param self   Pointer to the audio layer instance.
     /// \param device Pointer to the audio device to close.
     ////////////////////////////////////////////////////////////////////////////
     void (*close_device)(struct bj_audio_layer_t* self, bj_audio_device* device);
@@ -268,13 +304,13 @@ typedef struct bj_audio_layer_t {
     ////////////////////////////////////////////////////////////////////////////
     /// \brief Open an audio device through this backend.
     ///
-    /// Initializes a new audio device using the given callback and context.
+    /// Initializes a new audio device using the given properties and callback.
     ///
-    /// \param self Pointer to the audio layer instance.
-    /// \param p_error Optional pointer to receive error information.
-    /// \param callback User-provided callback for audio sample generation.
-    /// \param user_data Pointer to be passed to the audio callback.
-    ///
+    /// \param self         Pointer to the audio layer instance.
+    /// \param p_properties Optional requested device properties, or NULL.
+    /// \param callback     User-provided callback for audio sample generation.
+    /// \param user_data    Pointer passed to the audio callback on each call.
+    /// \param p_error      Optional pointer to receive error information.
     /// \return A new audio device instance, or NULL on failure.
     ////////////////////////////////////////////////////////////////////////////
     bj_audio_device* (*open_device)(
@@ -296,7 +332,7 @@ typedef struct bj_audio_layer_t {
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Declare a backend and its constructor function.
 ///
-/// Used at initialization time to register available backends such as ALSA,
+/// Used at initialization to register available backends such as ALSA,
 /// MME, or WebAudio.
 ///
 /// \see bj_audio_layer
@@ -306,5 +342,5 @@ typedef struct {
     bj_audio_layer* (*create)(bj_error**);     ///< Factory function to instantiate the backend.
 } bj_audio_layer_create_info;
 
-#endif
+#endif /* BJ_AUDIO_H */
 /// \} // end of audio group

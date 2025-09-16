@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example shaders.c
-/// A small example of using \ref bj_bitmap_apply_shader to generate animated
+/// A small example of using \ref bj_shader_bitmap to generate animated
 /// images.
 //  This shader comes from https://www.shadertoy.com/view/mtyGWy
 //  Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
@@ -38,12 +38,12 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
     bj_real time = *(bj_real*)data;
 
     bj_vec2 uv;
-    bj_vec3 final_color = { BJ_F(0.0), BJ_F(0.0), BJ_F(0.0) };
+    bj_vec3 final_color = { BJ_FZERO, BJ_FZERO, BJ_FZERO };
 
     bj_vec2_copy(uv, frag_coords);
     const bj_real uv0_len = bj_vec2_len(uv);
     
-    for (bj_real i = BJ_F(0.0); i < BJ_F(4.0); i += BJ_F(1.0)) {
+    for (bj_real i = BJ_FZERO; i < BJ_F(4.0); i += BJ_F(1.0)) {
         bj_vec3 col;
         palette(col, uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
         
@@ -75,15 +75,15 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
-    if (!bj_begin(&p_error)) {
+    if (!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     } 
 
-    window = bj_window_new("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
+    window = bj_bind_window("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
     bj_set_key_callback(bj_close_on_escape, 0);
 
-    framebuffer = bj_window_get_framebuffer(window, 0);
+    framebuffer = bj_get_window_framebuffer(window, 0);
 
     return bj_callback_continue;
 }
@@ -91,19 +91,19 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 int bj_app_iterate(void* user_data) {
     (void)user_data;
     bj_dispatch_events();
-    bj_real time = (bj_real)bj_get_run_time();
-    bj_bitmap_apply_shader(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
-    bj_window_update_framebuffer(window);
+    bj_real time = (bj_real)bj_run_time();
+    bj_shader_bitmap(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
+    bj_update_window_framebuffer(window);
     bj_sleep(15);
 
-    return bj_window_should_close(window) 
+    return bj_should_close_window(window) 
          ? bj_callback_exit_success 
          : bj_callback_continue;
 }
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
-    bj_window_del(window);
-    bj_end(0);
+    bj_unbind_window(window);
+    bj_shutdown(0);
     return status;
 }

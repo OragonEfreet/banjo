@@ -1,9 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
+/// \file draw.h
 /// Header file for \ref bitmap drawing functions.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup drawing Drawing
-/// \ingroup graphics
+/// \ingroup bitmap
 ///
 /// \brief 2D drawing facilities
 /// \{
@@ -36,7 +36,7 @@
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_draw_line(
+BANJO_EXPORT void bj_draw_line(
     bj_bitmap*     p_bitmap,
     int            x0,
     int            y0,
@@ -49,7 +49,7 @@ BANJO_EXPORT void bj_bitmap_draw_line(
 /// Draws a rectangle in the given bitmap
 ///
 /// The function draws an rectangle outline using 4 consecutive calls to
-/// \ref bj_bitmap_draw_line.
+/// \ref bj_draw_line.
 ///
 /// \param p_bitmap The bitmap object.
 /// \param p_area   The rectangle to draw.
@@ -63,7 +63,7 @@ BANJO_EXPORT void bj_bitmap_draw_line(
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_draw_rectangle(
+BANJO_EXPORT void bj_draw_rectangle(
     bj_bitmap*     p_bitmap,
     const bj_rect* p_area,
     uint32_t       pixel
@@ -87,7 +87,7 @@ BANJO_EXPORT void bj_bitmap_draw_rectangle(
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_draw_filled_rectangle(
+BANJO_EXPORT void bj_draw_filled_rectangle(
     bj_bitmap*     p_bitmap,
     const bj_rect* p_area,
     uint32_t       pixel
@@ -113,7 +113,7 @@ BANJO_EXPORT void bj_bitmap_draw_filled_rectangle(
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_draw_triangle(
+BANJO_EXPORT void bj_draw_triangle(
     bj_bitmap* p_bitmap,
     int        x0,
     int        y0,
@@ -121,6 +121,44 @@ BANJO_EXPORT void bj_bitmap_draw_triangle(
     int        y1,
     int        x2,
     int        y2,
+    uint32_t   color
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Draw the outline of a circle onto a bitmap.
+///
+/// Uses the midpoint circle algorithm (integer arithmetic).
+///
+/// \param p_bitmap Target bitmap (must not be NULL).
+/// \param cx       X-coordinate of circle center (pixels).
+/// \param cy       Y-coordinate of circle center (pixels).
+/// \param radius   Circle radius in pixels (>= 0).
+/// \param color    Pixel color in 0xAARRGGBB format.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_draw_circle(
+    bj_bitmap* p_bitmap,
+    int        cx,
+    int        cy,
+    int        radius,
+    uint32_t   color
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Draw a filled circle onto a bitmap.
+///
+/// Fills all pixels within radius distance from (cx, cy).
+///
+/// \param p_bitmap Target bitmap (must not be NULL).
+/// \param cx       X-coordinate of circle center (pixels).
+/// \param cy       Y-coordinate of circle center (pixels).
+/// \param radius   Circle radius in pixels (>= 0).
+/// \param color    Pixel color in 0xAARRGGBB format.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_draw_filled_circle(
+    bj_bitmap* p_bitmap,
+    int        cx,
+    int        cy,
+    int        radius,
     uint32_t   color
 );
 

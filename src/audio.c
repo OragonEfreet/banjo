@@ -37,7 +37,7 @@ bj_audio_layer* bj_begin_audio(bj_error** p_error) {
         s_audio = p_create_info->create(&sub_err);
 
         if (sub_err) {
-            bj_message(s_audio == 0 ? 0 : 1, 0, 0,
+            bj_log_message(s_audio == 0 ? 0 : 1, 0, 0,
                 "while trying %s audio layer: %s (code 0x%08X)",
                 p_create_info->name, sub_err->message, sub_err->code
             );
@@ -83,39 +83,39 @@ void bj_close_audio_device(
 }
 
 
-void bj_audio_device_play(
+void bj_play_audio_device(
     bj_audio_device* p_device
 ) {
     bj_check(p_device);
     p_device->playing = BJ_TRUE;
 }
 
-void bj_audio_device_pause(
+void bj_pause_audio_device(
     bj_audio_device* p_device
 ) {
     bj_check(p_device);
     p_device->playing = BJ_FALSE;
 }
 
-bj_bool bj_audio_device_is_playing(
+bj_bool bj_audio_playing(
     const bj_audio_device* p_device
 ) {
     return p_device ? p_device->playing : BJ_FALSE;
 }
 
-void bj_audio_device_reset(
+void bj_reset_audio_device(
     bj_audio_device* p_device
 ) {
     bj_check(p_device);
     p_device->should_reset = BJ_TRUE;
 }
 
-void bj_audio_device_stop(
+void bj_stop_audio_device(
     bj_audio_device* p_device
 ) {
     bj_check(p_device);
-    bj_audio_device_pause(p_device);
-    bj_audio_device_reset(p_device);
+    bj_pause_audio_device(p_device);
+    bj_reset_audio_device(p_device);
 }
 
 inline static double make_note_value(
@@ -125,10 +125,10 @@ inline static double make_note_value(
     double   phase_step
 ) {
     const uint64_t sample_index = base_sample_index + i;
-    const double two_pi = BJ_TAU_D; /* 2PI exactly in double */
+    const double two_pi = BJ_TAU; /* 2PI exactly in double */
 
     /* Use the double variant explicitly to avoid accidental float truncation
-       when BJ_USE_DOUBLE is off. */
+       when BJ_API_FLOAT64 is off. */
     const double phase = bj_fmodd(sample_index * phase_step, two_pi);
 
     switch (function) {
@@ -154,7 +154,7 @@ inline static double make_note_value(
     }
 }
 
-void bj_audio_play_note(
+void bj_play_audio_note(
     void*                        buffer,
     unsigned                     frames,
     const bj_audio_properties*   p_audio,
@@ -166,7 +166,7 @@ void bj_audio_play_note(
     const double freq        = (double)data->frequency;
     const double amplitude   = (double)p_audio->amplitude;   /* scale for int16 path */
     const double sample_rate = (double)p_audio->sample_rate;
-    const double phase_step  = BJ_TAU_D * freq / sample_rate;
+    const double phase_step  = BJ_TAU * freq / sample_rate;
     const int    channels    = p_audio->channels;
 
     for (unsigned i = 0; i < frames; ++i) {

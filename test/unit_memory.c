@@ -15,8 +15,8 @@ TEST_CASE(fallback_allocator_works) {
 TEST_CASE(forcing_default_allocators_is_possible) {
     bj_memory_callbacks allocators = mock_allocators(0);
 
-    bj_memory_set_defaults(&allocators);
-    bj_memory_set_defaults(0);
+    bj_set_memory_defaults(&allocators);
+    bj_set_memory_defaults(0);
 
     void* blocks = bj_malloc(s_mem_size);
     REQUIRE_VALUE(blocks);
@@ -46,7 +46,7 @@ TEST_CASE(test_custom_default_allocators) {
     CHECK_CLEAN_ALLOC(result);
     bj_memory_callbacks allocators = mock_allocators(&result);
 
-    bj_memory_set_defaults(&allocators);
+    bj_set_memory_defaults(&allocators);
 
     // Stack the allocated ptrs
     void* ptrs_fifo[n_ops];
@@ -95,14 +95,14 @@ TEST_CASE(test_custom_default_allocators) {
     CHECK_EQ(size_fifo_len, 0);
 
     REQUIRE_CLEAN_ALLOC(result);
-    bj_memory_unset_defaults();
+    bj_unset_memory_defaults();
 }
 
 int main(int argc, char* argv[]) {
     BEGIN_TESTS(argc, argv);
 
     // Special case of the unit tests where the mock_allocator are not used
-    bj_memory_unset_defaults();
+    bj_unset_memory_defaults();
 
 
     RUN_TEST(fallback_allocator_works);

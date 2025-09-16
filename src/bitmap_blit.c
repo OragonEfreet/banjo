@@ -5,7 +5,7 @@
 // TODO: I'll remake it myself later on.
 
 /* ---------- Public: color key ---------- */
-void bj_bitmap_set_colorkey(bj_bitmap* bmp, bj_bool enabled, uint32_t key_value) {
+void bj_set_bitmap_colorkey(bj_bitmap* bmp, bj_bool enabled, uint32_t key_value) {
     bj_check(bmp);
     bmp->colorkey_enabled = enabled;
     bmp->colorkey = key_value;
@@ -49,11 +49,11 @@ static inline void buffer_set_pixel_bits(
 /* ---------- Canonical RGB (8:8:8) converters via bj_pixel_* ---------- */
 
 static inline void unpack_rgb_from_native(bj_pixel_mode mode, uint32_t native, uint8_t* r, uint8_t* g, uint8_t* b) {
-    bj_pixel_rgb(mode, native, r, g, b);
+    bj_make_pixel_rgb(mode, native, r, g, b);
 }
 
 static inline uint32_t pack_rgb_to_native(bj_pixel_mode mode, uint8_t r, uint8_t g, uint8_t b) {
-    return bj_pixel_value(mode, r, g, b);
+    return bj_get_pixel_value(mode, r, g, b);
 }
 
 /* Optional: you can provide direct fast paths for known modes:
@@ -355,21 +355,21 @@ static bj_bool do_blit_dispatch(
 
 /* ---------- Public: clipped blit (no scaling) using existing clipper ---------- */
 
-bj_bool bj_bitmap_blit(
+bj_bool bj_blit(
     const bj_bitmap* p_src, const bj_rect* p_src_area,
     bj_bitmap* p_dst, const bj_rect* p_dst_area,
     bj_blit_op op)
 {
     bj_check_or_0(p_src && p_dst);
 
-    /* Build default rects & clip like current bj_bitmap_blit */
+    /* Build default rects & clip like current bj_blit */
     bj_rect src_rect = {0,0,(uint16_t)p_src->width,(uint16_t)p_src->height};
     bj_rect dst_rect = {0,0,0,0};
 
     if (p_dst_area) { dst_rect.x = p_dst_area->x; dst_rect.y = p_dst_area->y; }
     if (p_src_area) {
         bj_rect tmp;
-        if (bj_rect_intersect(p_src_area, &src_rect, &tmp) == 0) return BJ_FALSE;
+        if (bj_rect_intersection(p_src_area, &src_rect, &tmp) == 0) return BJ_FALSE;
         dst_rect.x += tmp.x - p_src_area->x;
         dst_rect.y += tmp.y - p_src_area->y;
         src_rect = tmp;
@@ -378,7 +378,7 @@ bj_bool bj_bitmap_blit(
 
     bj_rect dst_bounds = (bj_rect){0,0,(uint16_t)p_dst->width,(uint16_t)p_dst->height};
     bj_rect inter;
-    if (bj_rect_intersect(&dst_rect, &dst_bounds, &inter) == 0) return BJ_FALSE;
+    if (bj_rect_intersection(&dst_rect, &dst_bounds, &inter) == 0) return BJ_FALSE;
 
     /* Adjust source accordingly */
     src_rect.x += inter.x - dst_rect.x;
@@ -399,7 +399,7 @@ static inline size_t map_nn(size_t i, size_t src_len, size_t dst_len) {
     return (size_t)((uint64_t)i * (uint64_t)src_len / (uint64_t)dst_len);
 }
 
-bj_bool bj_bitmap_blit_stretched(
+bj_bool bj_blit_stretched(
     const bj_bitmap* src, const bj_rect* src_area,
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op)
@@ -415,8 +415,8 @@ bj_bool bj_bitmap_blit_stretched(
 
     bj_rect sbounds = (bj_rect){0,0,(uint16_t)src->width,(uint16_t)src->height};
     bj_rect dbounds = (bj_rect){0,0,(uint16_t)dst->width,(uint16_t)dst->height};
-    if (bj_rect_intersect(&s, &sbounds, &s) == 0) return BJ_FALSE;
-    if (bj_rect_intersect(&d, &dbounds, &d) == 0) return BJ_FALSE;
+    if (bj_rect_intersection(&s, &sbounds, &s) == 0) return BJ_FALSE;
+    if (bj_rect_intersection(&d, &dbounds, &d) == 0) return BJ_FALSE;
 
     /* If sizes match, delegate to non-stretched fast path */
     if (s.w == d.w && s.h == d.h) {

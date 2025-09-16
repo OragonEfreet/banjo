@@ -1,9 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
+/// \file bitmap.h
 /// Header file for \ref bitmap type.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup bitmap Bitmap
-/// \ingroup graphics
 ///
 /// \brief Matrix of pixels
 /// \{
@@ -20,7 +19,7 @@
 /// \brief Raster operation (ROP) to apply during blitting.
 ///
 /// These operations define how source pixels combine with destination pixels
-/// during \ref bj_bitmap_blit and \ref bj_bitmap_blit_stretched.
+/// during \ref bj_blit and \ref bj_blit_stretched.
 /// Some operations are optimized on specific formats (e.g., 32bpp).
 ///
 /// \note For mismatched pixel formats, colors are combined in linear integer
@@ -45,7 +44,7 @@ typedef struct bj_bitmap_t bj_bitmap;
 ///
 /// \return A new \ref bj_bitmap instance
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
+BANJO_EXPORT bj_bitmap* bj_allocate_bitmap(
     void
 );
 
@@ -64,7 +63,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_alloc(
 /// is used.
 /// Set it to _0_ to automatically compute the stride.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bitmap* bj_bitmap_new(
+BANJO_EXPORT bj_bitmap* bj_create_bitmap(
     size_t           width,
     size_t           height,
     bj_pixel_mode    mode,
@@ -76,7 +75,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new(
 ///
 /// \param p_bitmap Pointer to the bj_bitmap object to delete.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_del(
+BANJO_EXPORT void bj_destroy_bitmap(
     bj_bitmap*     p_bitmap
 );
 
@@ -87,7 +86,7 @@ BANJO_EXPORT void bj_bitmap_del(
 /// \param p_error  Pointer to an error object to store any errors encountered during loading.
 /// \return A pointer to the newly created bj_bitmap object, or 0 if loading failed.
 ///
-/// The new object must be deleted using \ref bj_bitmap_del.
+/// The new object must be deleted using \ref bj_destroy_bitmap.
 ///
 /// \par Pixel Mode
 ///
@@ -146,7 +145,7 @@ BANJO_EXPORT void bj_bitmap_del(
 ///
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
+BANJO_EXPORT bj_bitmap* bj_create_bitmap_from_file(
     const char*       p_path,
     bj_error**        p_error
 );
@@ -154,7 +153,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
 ////////////////////////////////////////////////////////////////////////////////
 /// Creates a new bj_bitmap with the specified width and height.
 ///
-/// Contrary to \ref bj_bitmap_new, the pixel data is explicitely provided
+/// Contrary to \ref bj_create_bitmap, the pixel data is explicitely provided
 /// by the caller through `p_pixels`.
 /// The caller is responsible for ensuring the allocated pixel data matches
 /// `width, `height`, `mode` and `stride`.
@@ -179,12 +178,12 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_file(
 ///
 /// The caller is responsible for the memory management of `p_pixels`.
 /// \ref bj_bitmap will not modify it and it will not be released upon calling
-/// \ref bj_bitmap_del.
+/// \ref bj_destroy_bitmap.
 ///
-/// The caller is responsible for releasing the bitmap using \ref bj_bitmap_del.
+/// The caller is responsible for releasing the bitmap using \ref bj_destroy_bitmap.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_pixels(
+BANJO_EXPORT bj_bitmap* bj_create_bitmap_from_pixels(
     void*            p_pixels,
     size_t           width,
     size_t           height,
@@ -204,14 +203,14 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_new_from_pixels(
 /// \par Memory Management
 ///
 /// The caller is responsible from releasing the bitmap using 
-/// \ref bj_bitmap_del.
+/// \ref bj_destroy_bitmap.
 ///
-/// If `p_source` was initially created using \ref bj_bitmap_new_from_pixels,
+/// If `p_source` was initially created using \ref bj_create_bitmap_from_pixels,
 /// the "weak" property of the bitmap is not maintained in the new bitmap and
 /// the caller is not responsible for manually releasing its pixel data.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bitmap* bj_bitmap_copy(
+BANJO_EXPORT bj_bitmap* bj_copy_bitmap(
     const bj_bitmap* p_bitmap
 );
 
@@ -229,21 +228,21 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_copy(
 ///
 /// \par Behaviour
 ///
-/// Returns `bj_bitmap_copy(p_bitmap)` if `mode == bj_bitmap_mode(p_bitmap)`.
+/// Returns `bj_copy_bitmap(p_bitmap)` if `mode == bj_bitmap_mode(p_bitmap)`.
 ///
 /// Returns _0_ if `mode` is \ref BJ_PIXEL_MODE_UNKNOWN or an unsupported value.
 ///
 /// \par Memory Management
 ///
 /// The caller is responsible from releasing the bitmap using 
-/// \ref bj_bitmap_del.
+/// \ref bj_destroy_bitmap.
 ///
-/// If `p_bitmap` was initially created using \ref bj_bitmap_new_from_pixels,
+/// If `p_bitmap` was initially created using \ref bj_create_bitmap_from_pixels,
 /// the "weak" property of the bitmap is not maintained in the new bitmap and
 /// the caller is not responsible for manually releasing its pixel data.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bitmap* bj_bitmap_convert(
+BANJO_EXPORT bj_bitmap* bj_convert_bitmap(
     const bj_bitmap* p_bitmap,
     bj_pixel_mode    mode
 );
@@ -266,7 +265,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_convert(
 /// If the value is less than the required stride, the actual minimum stride
 /// is used.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bitmap* bj_bitmap_init(
+BANJO_EXPORT bj_bitmap* bj_init_bitmap(
     bj_bitmap* p_bitmap,
     void* p_pixels,
     size_t width,
@@ -280,7 +279,7 @@ BANJO_EXPORT bj_bitmap* bj_bitmap_init(
 ///
 /// \param p_bitmap Pointer to the bj_bitmap object to reset.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_reset(
+BANJO_EXPORT void bj_reset_bitmap(
     bj_bitmap* p_bitmap
 );
 
@@ -345,7 +344,7 @@ BANJO_EXPORT size_t bj_bitmap_stride(
 /// \param p_blue     A location to the blue component
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_rgb(
+BANJO_EXPORT void bj_make_bitmap_rgb(
     const bj_bitmap* p_bitmap,
     size_t           x,
     size_t           y,
@@ -364,7 +363,7 @@ BANJO_EXPORT void bj_bitmap_rgb(
 /// \return         An opaque `uint32_t` value.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT uint32_t bj_bitmap_pixel_value(
+BANJO_EXPORT uint32_t bj_make_bitmap_pixel(
     bj_bitmap* p_bitmap,
     uint8_t    red,
     uint8_t    green,
@@ -379,7 +378,7 @@ BANJO_EXPORT uint32_t bj_bitmap_pixel_value(
 /// \param y        The Y coordinate of the pixel.
 /// \param value    The pixel value to put.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_put_pixel(
+BANJO_EXPORT void bj_put_pixel(
     bj_bitmap* p_bitmap,
     size_t     x,
     size_t     y,
@@ -391,11 +390,11 @@ BANJO_EXPORT void bj_bitmap_put_pixel(
 ///
 /// \param p_bitmap The bitmap object to reset.
 ///
-/// The clear color can be set with \ref bj_bitmap_set_clear_color.
+/// The clear color can be set with \ref bj_set_bitmap_clear_color.
 /// This function effectively fills all the pixels of the bitmap with
 /// the clear color.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_clear(
+BANJO_EXPORT void bj_clear_bitmap(
     bj_bitmap* p_bitmap
 );
 
@@ -409,7 +408,7 @@ BANJO_EXPORT void bj_bitmap_clear(
 /// When color keying is enabled on the **source** bitmap, blitters skip any
 /// source pixel equal to `key_value`.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_set_colorkey(
+BANJO_EXPORT void bj_set_bitmap_colorkey(
     bj_bitmap*  p_bitmap,
     bj_bool     enabled,
     uint32_t    key_value
@@ -431,7 +430,7 @@ BANJO_EXPORT void bj_bitmap_set_colorkey(
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT uint32_t bj_bitmap_get(
+BANJO_EXPORT uint32_t bj_bitmap_pixel(
     const bj_bitmap* p_bitmap,
     size_t           x,
     size_t           y
@@ -443,7 +442,7 @@ BANJO_EXPORT uint32_t bj_bitmap_get(
 /// \param p_bitmap    The target bitmap.
 /// \param clear_color The new clear color.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_set_clear_color(
+BANJO_EXPORT void bj_set_bitmap_clear_color(
     bj_bitmap* p_bitmap,
     uint32_t clear_color
 );
@@ -468,7 +467,7 @@ BANJO_EXPORT void bj_bitmap_set_clear_color(
 ///
 /// \par Color Key
 ///
-/// If the *source* bitmap has color keying enabled via \ref bj_bitmap_set_colorkey,
+/// If the *source* bitmap has color keying enabled via \ref bj_set_bitmap_colorkey,
 /// any source pixel equal to the key value is skipped.
 ///
 /// \par Pixel Formats
@@ -481,7 +480,7 @@ BANJO_EXPORT void bj_bitmap_set_clear_color(
 /// Sub-byte formats (1/4/8bpp) are supported but may be slower due to bit packing.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_bitmap_blit(
+BANJO_EXPORT bj_bool bj_blit(
     const bj_bitmap* src, const bj_rect* src_area,
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op);
@@ -497,7 +496,7 @@ BANJO_EXPORT bj_bool bj_bitmap_blit(
 /// \return           *BJ_TRUE* if a blit actually happened, *BJ_FALSE* otherwise.
 ///
 /// If source and destination rectangles have the same size, this function
-/// delegates to \ref bj_bitmap_blit and uses the same fast paths.
+/// delegates to \ref bj_blit and uses the same fast paths.
 ///
 /// \par Clipping
 ///
@@ -506,10 +505,10 @@ BANJO_EXPORT bj_bool bj_bitmap_blit(
 ///
 /// \par Color Key
 ///
-/// Color keying on the *source* bitmap is honored (see \ref bj_bitmap_set_colorkey).
+/// Color keying on the *source* bitmap is honored (see \ref bj_set_bitmap_colorkey).
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_bitmap_blit_stretched(
+BANJO_EXPORT bj_bool bj_blit_stretched(
     const bj_bitmap* src, const bj_rect* src_area,
     bj_bitmap* dst, const bj_rect* dst_area,
     bj_blit_op op);
@@ -562,7 +561,7 @@ typedef enum {
 ///
 /// The mask must be 8 bits per pixel. Destination can be any supported pixel
 /// mode; colors must be provided in destination-native format (see
-/// \ref bj_bitmap_pixel_value).
+/// \ref bj_make_bitmap_pixel).
 ///
 /// \par Clipping
 ///
@@ -570,7 +569,7 @@ typedef enum {
 /// is clipped to the mask bounds. Both rectangles must have identical sizes.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_bitmap_blit_mask(
+BANJO_EXPORT bj_bool bj_blit_mask(
     const bj_bitmap* mask,
     const bj_rect*   mask_area,     /* NULL = full mask */
     bj_bitmap*       dst,
@@ -605,7 +604,7 @@ BANJO_EXPORT bj_bool bj_bitmap_blit_mask(
 /// integer arithmetic: `mix(dst, src, a)` → `(dst*(255-a) + src*a)/255`.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_bitmap_blit_mask_stretched(
+BANJO_EXPORT bj_bool bj_blit_mask_stretched(
     const bj_bitmap* mask,
     const bj_rect*   mask_area,     /* NULL = full mask */
     bj_bitmap*       dst,
@@ -636,7 +635,7 @@ BANJO_EXPORT bj_bool bj_bitmap_blit_mask_stretched(
 /// - `\x1B[39m`     Reset foreground to the default provided in the call.
 /// - `\x1B[38;2;R;G;Bm` Set truecolor foreground.
 /// - Background-related codes are ignored by this function (use
-///   \ref bj_bitmap_blit_text for background control).
+///   \ref bj_blit_text for background control).
 ///
 /// \par Behavior
 ///
@@ -648,7 +647,7 @@ BANJO_EXPORT bj_bool bj_bitmap_blit_mask_stretched(
 /// Text is clipped to the destination bounds. Out-of-range glyphs are skipped.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_print(
+BANJO_EXPORT void bj_draw_text(
     bj_bitmap*      dst,
     int             x,
     int             y,
@@ -661,7 +660,7 @@ BANJO_EXPORT void bj_bitmap_print(
 /// Prints formatted text into a bitmap, similar to `printf`.
 ///
 /// This function formats the full string using `vsnprintf` into a temporary
-/// buffer (heap-allocated), then renders it with \ref bj_bitmap_print.
+/// buffer (heap-allocated), then renders it with \ref bj_draw_text.
 ///
 /// \param p_bitmap   The destination bitmap.
 /// \param x          The X coordinate (top-left) where the text begins.
@@ -676,9 +675,9 @@ BANJO_EXPORT void bj_bitmap_print(
 /// precision (including `*`), length modifiers, and conversions are supported.
 ///
 /// \note This routine renders **foreground only**. For background or mask modes,
-///       use \ref bj_bitmap_blit_text (or provide a printf variant of it).
+///       use \ref bj_blit_text (or provide a printf variant of it).
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_printf(
+BANJO_EXPORT void bj_draw_textf(
     bj_bitmap*     p_bitmap,
     int            x,
     int            y,
@@ -741,7 +740,7 @@ BANJO_EXPORT void bj_bitmap_printf(
 /// nearest-neighbor scaling and an inner loop with integer blending.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_blit_text(
+BANJO_EXPORT void bj_blit_text(
     bj_bitmap*      dst,
     int             x,
     int             y,

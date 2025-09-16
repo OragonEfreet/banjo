@@ -3,7 +3,6 @@
 /// \brief Header file for bj_stream_t struct and related functions
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup stream Data Stream
-/// \ingroup io
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_STREAM_H
@@ -36,7 +35,7 @@ typedef enum {
 ///
 /// The object pointed by the returned value must be deleted using bj_free.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_stream* bj_stream_alloc(
+BANJO_EXPORT bj_stream* bj_allocate_stream(
     void
 );
 
@@ -47,7 +46,7 @@ BANJO_EXPORT bj_stream* bj_stream_alloc(
 /// \param length Length of the data buffer in bytes.
 /// \return A pointer to the newly created bj_stream object.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_stream* bj_stream_new_read(
+BANJO_EXPORT bj_stream* bj_open_stream_read(
     const void* p_data,
     size_t length
 );
@@ -61,7 +60,7 @@ BANJO_EXPORT bj_stream* bj_stream_new_read(
 ///
 /// The file memory is entirely copied to internal memory buffer.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_stream* bj_stream_new_read_from_file(
+BANJO_EXPORT bj_stream* bj_open_stream_file(
     const char*       p_path,
     bj_error**        p_error
 );
@@ -71,7 +70,7 @@ BANJO_EXPORT bj_stream* bj_stream_new_read_from_file(
 ///
 /// \param p_stream Pointer to the bj_stream object to delete.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_stream_del(
+BANJO_EXPORT void bj_close_stream(
     bj_stream* p_stream
 );
 
@@ -92,7 +91,7 @@ BANJO_EXPORT void bj_stream_del(
 /// It is the caller's responsibility to ensure `p_dest` has enough space
 /// to hold `count` bytes.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT size_t bj_stream_read(
+BANJO_EXPORT size_t bj_read_stream(
     bj_stream* p_stream,
     void* p_dest,
     size_t count
@@ -104,7 +103,7 @@ BANJO_EXPORT size_t bj_stream_read(
 /// \param p_stream Pointer to the stream instance.
 /// \return The size of the stream, in bytes
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT size_t bj_stream_len(
+BANJO_EXPORT size_t bj_get_stream_length(
     bj_stream* p_stream
 );
 
@@ -119,7 +118,7 @@ BANJO_EXPORT size_t bj_stream_len(
 /// The function clamps the new position to stay within the valid range
 /// of the stream, from 0 to the length of the stream.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT size_t bj_stream_seek(
+BANJO_EXPORT size_t bj_seek_stream(
     bj_stream* p_stream,
     ptrdiff_t position,
     bj_seek_origin from
@@ -131,7 +130,7 @@ BANJO_EXPORT size_t bj_stream_seek(
 /// \param p_stream Pointer to the stream instance.
 /// \return The current position within the stream.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT size_t bj_stream_tell(
+BANJO_EXPORT size_t bj_tell_stream(
     bj_stream* p_stream
 );
 
@@ -142,7 +141,7 @@ BANJO_EXPORT size_t bj_stream_tell(
 /// \param type Data type to read.
 /// \param buffer Pointer to the buffer to store the read data.
 ///
-#define bj_stream_read_t(stream, type, buffer) bj_stream_read(stream, buffer, sizeof(type))
+#define bj_stream_read_t(stream, type, buffer) bj_read_stream(stream, buffer, sizeof(type))
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Skips reading data of a specified type from the stream.
@@ -150,7 +149,7 @@ BANJO_EXPORT size_t bj_stream_tell(
 /// \param stream Pointer to the stream instance.
 /// \param type Data type to skip.
 ///
-#define bj_stream_skip_t(stream, type) bj_stream_read(stream, 0, sizeof(type))
+#define bj_stream_skip_t(stream, type) bj_read_stream(stream, 0, sizeof(type))
 
 #endif
 /// \} // End of stream group

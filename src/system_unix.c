@@ -16,7 +16,7 @@ void bj_unload_library(
     dlclose(p_handle);
 }
 
-void* bj_get_symbol(
+void* bj_library_symbol(
     void*       p_handle,
     const char* p_name
 ) {

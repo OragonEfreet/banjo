@@ -15,16 +15,16 @@
 bj_window* window = 0;
 
 void draw(bj_bitmap* bmp) {
-    bj_bitmap_clear(bmp);
+    bj_clear_bitmap(bmp);
 
-    const uint32_t color_red = bj_bitmap_pixel_value(bmp, 0xFF, 0x00, 0x00);
-    const uint32_t color_cyan = bj_bitmap_pixel_value(bmp, 0x7F, 0xFF, 0xD4);
-    const uint32_t color_white = bj_bitmap_pixel_value(bmp, 0xFF, 0xFF, 0xFF);
+    const uint32_t color_red = bj_make_bitmap_pixel(bmp, 0xFF, 0x00, 0x00);
+    const uint32_t color_cyan = bj_make_bitmap_pixel(bmp, 0x7F, 0xFF, 0xD4);
+    const uint32_t color_white = bj_make_bitmap_pixel(bmp, 0xFF, 0xFF, 0xFF);
 
     // Draw pixels individually
     for (size_t x = 10; x < 490; ++x) {
         if (x % 7 == 0) {
-            bj_bitmap_put_pixel(bmp, x, 10, color_red);
+            bj_put_pixel(bmp, x, 10, color_red);
         }
     }
 
@@ -36,7 +36,7 @@ void draw(bj_bitmap* bmp) {
     };
 
     for (size_t p = 0; p < 18; ++p) {
-        bj_bitmap_draw_line(bmp,
+        bj_draw_line(bmp,
             points[p][0],
             points[p][1],
             points[(p + 1) % 18][0],
@@ -59,7 +59,7 @@ void draw(bj_bitmap* bmp) {
     };
 
     for (size_t t = 0; t < 13; ++t) {
-        bj_bitmap_draw_triangle(bmp,
+        bj_draw_triangle(bmp,
             verts[tris[t][0]][0], verts[tris[t][0]][1], 
             verts[tris[t][1]][0], verts[tris[t][1]][1], 
             verts[tris[t][2]][0], verts[tris[t][2]][1],
@@ -68,11 +68,29 @@ void draw(bj_bitmap* bmp) {
     }
 
     //Draw a checker board
-    bj_rect board = {.x = 100, .y = 100, .w = 80, .h = 80,};
-    bj_bitmap_draw_rectangle(bmp,
-        &board,
-        color_red
+    bj_rect board = {.w = 10, .h = 10,};
+    for(size_t y = 0 ; y < 8 ; ++y) {
+        for(size_t x = 0 ; x < 8 ; ++x) {
+            board.x = 200 + x * board.w;
+            board.y = 50 + y * board.h;
+            if((x ^ y) & 1) {
+                bj_draw_filled_rectangle(bmp,
+                    &board,
+                    color_red
+                );
+            } 
+        }
+    }
+    bj_draw_rectangle(bmp,
+        &(bj_rect) {.x = 200, .y = 50, .w = 80, .h = 80,},
+        color_cyan
     );
+
+
+    // Circle
+    for (int r = 80; r > 0; r -= 20) {
+        bj_draw_filled_circle(bmp, 100, 400, r, (r/20) % 2 ? color_red : color_white);
+    }
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
@@ -80,17 +98,17 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
-    if(!bj_begin(&p_error)) {
+    if(!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     } 
 
-    window = bj_window_new("Simple Text", 100, 100, 500, 500, 0);
+    window = bj_bind_window("Simple Text", 100, 100, 500, 500, 0);
     bj_set_key_callback(bj_close_on_escape, 0);
 
-    bj_bitmap* framebuffer = bj_window_get_framebuffer(window, 0);
+    bj_bitmap* framebuffer = bj_get_window_framebuffer(window, 0);
     draw(framebuffer);
-    bj_window_update_framebuffer(window);
+    bj_update_window_framebuffer(window);
 
     return bj_callback_continue;
 }
@@ -100,15 +118,15 @@ int bj_app_iterate(void* user_data) {
     bj_dispatch_events();
     bj_sleep(300);
 
-    return bj_window_should_close(window) 
+    return bj_should_close_window(window) 
          ? bj_callback_exit_success 
          : bj_callback_continue;
 }
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
-    bj_window_del(window);
-    bj_end(0);
+    bj_unbind_window(window);
+    bj_shutdown(0);
     return status;
 }
 

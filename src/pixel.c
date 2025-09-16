@@ -35,7 +35,7 @@ static struct bitfield bitfields[] = {
     },
 };
 
-void bj_pixel_rgb(
+void bj_make_pixel_rgb(
     bj_pixel_mode mode,
     uint32_t      value,
     uint8_t*      p_red,
@@ -77,7 +77,7 @@ void bj_pixel_rgb(
     }
 }
 
-uint32_t bj_pixel_value(
+uint32_t bj_get_pixel_value(
     bj_pixel_mode mode, 
     uint8_t red,
     uint8_t green,

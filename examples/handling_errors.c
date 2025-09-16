@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     }
     /// [Using bj_error]
     
-    if (bj_error_check(error, CODE)) {
+    if (bj_check_error(error, CODE)) {
         bj_info("Error domain and code match");
     }
 
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 
     function_calling_failing_function(&error);
 
-    if (bj_error_check(error, CODE)) {
+    if (bj_check_error(error, CODE)) {
         bj_info("Error from nested function");
     }
 

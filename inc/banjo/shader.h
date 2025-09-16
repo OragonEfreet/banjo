@@ -1,10 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file shader.h
 /// \brief Basic shader-like bitmap manipulation
-///
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup shaders Shaders
-/// \ingroup graphics
+/// \ingroup bitmap
 ///
 /// Software shader-like API for \ref bj_bitmap.
 ///
@@ -13,16 +12,13 @@
 ///
 /// A shader function is any user-provided function that corresponds to the
 /// \ref bj_bitmap_shading_fn_t signature.
-/// Such function is passed to \ref bj_bitmap_apply_shader which calls the
+/// Such function is passed to \ref bj_shader_bitmap which calls the
 /// shader fonction on every pixel of the bitmap.
 ///
-/// This header file also provides some math functions usually found in
-/// most shader languages, such as \ref bj_step and \ref bj_smoothstep.
-/// Other useful math-related functions can be found in \ref math.h.
+/// Useful math-related functions can be found in \ref math.h.
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-
 #ifndef BJ_SHADER_H
 #define BJ_SHADER_H
 
@@ -33,13 +29,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Function type for a bitmap shading operation.
 ///
-/// A shader function pointer is provided to \ref bj_bitmap_apply_shader and
+/// A shader function pointer is provided to \ref bj_shader_bitmap and
 /// will be called for each pixel of the provided bitmap.
 ///
 /// \param out_color   Pointer to the output color (in linear RGB space).
 /// \param pixel_coord Position of the pixel in 2D coordinates.
 /// \param user_data   Optional user data passed through from 
-///                    \ref bj_bitmap_apply_shader.
+///                    \ref bj_shader_bitmap.
 /// \return _1_ on success, non-zero if the pixel should be skipped or discarded.
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +44,7 @@ typedef int (*bj_bitmap_shading_fn_t)(bj_vec3 out_color, const bj_vec2 pixel_coo
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Shader input control flags
 ///
-/// These flags are passed to \ref bj_bitmap_apply_shader to control how
+/// These flags are passed to \ref bj_shader_bitmap to control how
 /// the inputs to the shader function (\ref bj_bitmap_shading_fn_t) are transformed.
 /// They affect how the pixel coordinates are interpreted and how the shader's
 /// output color is handled.
@@ -134,9 +130,9 @@ typedef enum bj_shader_flag_t {
 } bj_shader_flag;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Flagset alias for \ref bj_bitmap_apply_shader.
+/// Flagset alias for \ref bj_shader_bitmap.
 ///
-/// This flagset value can be passed to \ref bj_bitmap_apply_shader and
+/// This flagset value can be passed to \ref bj_shader_bitmap and
 /// corresponds to the most commonly used flags:
 ///
 /// - Invert Y (orient from bottom-left corner),
@@ -158,7 +154,7 @@ typedef enum bj_shader_flag_t {
 /// \param flags Combination of \ref bj_shader_flag controlling coordinate
 ///        and color behavior.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_bitmap_apply_shader(
+BANJO_EXPORT void bj_shader_bitmap(
     bj_bitmap*             p_bitmap,
     bj_bitmap_shading_fn_t p_shader,
     void*                  p_data,

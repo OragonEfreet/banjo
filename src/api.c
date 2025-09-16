@@ -91,7 +91,7 @@ static const bj_build_info s_build_info = {
 
 };
 
-const bj_build_info* bj_get_build_info(void) {
+const bj_build_info* bj_build_information(void) {
     return &s_build_info;
 }
 

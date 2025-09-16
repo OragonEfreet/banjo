@@ -4,7 +4,7 @@
 
 TEST_CASE(conversion) {
 
-    uint32_t val = bj_pixel_value(BJ_PIXEL_MODE_RGB565, 0, 0, 0);
+    uint32_t val = bj_get_pixel_value(BJ_PIXEL_MODE_RGB565, 0, 0, 0);
     
     REQUIRE_EQ(val, 0);
 

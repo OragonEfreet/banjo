@@ -1,9 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
+/// \file pixel.h
 /// Header file for general pixel manipulation facilities.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup pixel Pixel Definition
-/// \ingroup graphics
+/// \ingroup bitmap
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_PIXEL_H
@@ -36,7 +36,7 @@ typedef enum {
 /// \param p_blue     A location to the blue component
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_pixel_rgb(
+BANJO_EXPORT void bj_make_pixel_rgb(
     bj_pixel_mode mode,
     uint32_t      value,
     uint8_t*      p_red,
@@ -54,7 +54,7 @@ BANJO_EXPORT void bj_pixel_rgb(
 /// \return         An opaque `uint32_t` value.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT uint32_t bj_pixel_value(
+BANJO_EXPORT uint32_t bj_get_pixel_value(
     bj_pixel_mode mode, 
     uint8_t red,
     uint8_t green,

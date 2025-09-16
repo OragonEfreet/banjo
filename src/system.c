@@ -21,7 +21,7 @@ void bj_end_time(void);
 void bj_begin_event(void);
 void bj_end_event(void);
 
-bj_bool bj_begin(
+bj_bool bj_initialize(
     bj_error** p_error
 ) {
     bj_error* error = 0;
@@ -36,7 +36,7 @@ bj_bool bj_begin(
     if (error) {
         bj_err("cannot initialize: %s (code %x)", error->message, error->code);
         bj_forward_error(error, p_error);
-        bj_end(0);
+        bj_shutdown(0);
         return BJ_FALSE;
     }
 
@@ -44,14 +44,14 @@ bj_bool bj_begin(
     if (error) {
         bj_err("cannot initialize: %s (code %x)", error->message, error->code);
         bj_forward_error(error, p_error);
-        bj_end(0);
+        bj_shutdown(0);
         return BJ_FALSE;
     }
     
     return BJ_TRUE;
 }
 
-void bj_end(
+void bj_shutdown(
     bj_error** p_error
 ) {
 

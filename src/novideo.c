@@ -89,7 +89,7 @@ static bj_bitmap* novideo_create_window_framebuffer(
     (void)p_layer;
     (void)p_error;
     novideo_window* p_window = (novideo_window*)p_abstract_window;
-    return bj_bitmap_new(
+    return bj_create_bitmap(
         p_window->width, p_window->height,
         BJ_PIXEL_MODE_INDEXED_1, 0
     );

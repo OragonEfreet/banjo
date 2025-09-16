@@ -41,14 +41,14 @@ static const bj_bitmap* get_charset_mask(bj_bitmap* p_bitmap)
     const size_t charset_pixel_width  = (size_t)CHARSET_CHAR_PER_ROW * (size_t)CHAR_PIXEL_W;
     const size_t charset_pixel_height = charset_rows * (size_t)CHAR_PIXEL_H;
 
-    bj_bitmap* mask = bj_bitmap_new(
+    bj_bitmap* mask = bj_create_bitmap(
         charset_pixel_width, charset_pixel_height,
         BJ_PIXEL_MODE_INDEXED_8, 0
     );
     bj_check_or_0(mask);
 
-    bj_bitmap_set_clear_color(mask, 0x00u);
-    bj_bitmap_clear(mask);
+    bj_set_bitmap_clear_color(mask, 0x00u);
+    bj_clear_bitmap(mask);
 
     for (size_t idx = 0; idx < charset_char_len; ++idx) {
         const int base_x = CHAR_PIXEL_X((int)idx);
@@ -58,7 +58,7 @@ static const bj_bitmap* get_charset_mask(bj_bitmap* p_bitmap)
             const uint8_t rowbits = charset_latin1[idx][row];
             for (int col = 0; col < CHAR_PIXEL_W; ++col) {
                 if ((rowbits >> col) & 0x01u) {
-                    bj_bitmap_put_pixel(
+                    bj_put_pixel(
                         mask,
                         (size_t)(base_x + col),
                         (size_t)(base_y + row),
@@ -96,7 +96,7 @@ static void fast_fill_rect(bj_bitmap* dst, const bj_rect* r, uint32_t color_nati
     if ((bpp & 7u) != 0u) {
         for (int y = y0; y < y1; ++y) {
             for (int x = x0; x < x1; ++x) {
-                bj_bitmap_put_pixel(dst, (size_t)x, (size_t)y, color_native);
+                bj_put_pixel(dst, (size_t)x, (size_t)y, color_native);
             }
         }
         return;
@@ -106,7 +106,7 @@ static void fast_fill_rect(bj_bitmap* dst, const bj_rect* r, uint32_t color_nati
 
     for (int y = y0; y < y1; ++y) {
         /* Seed first pixel via API to ensure correct native packing. */
-        bj_bitmap_put_pixel(dst, (size_t)x0, (size_t)y, color_native);
+        bj_put_pixel(dst, (size_t)x0, (size_t)y, color_native);
 
         /* Then double the written region using in-place memcpy. */
         uint8_t* row_start = (uint8_t*)dst->buffer + (size_t)y * dst->stride + (size_t)x0 * bytes_per_px;
@@ -143,7 +143,7 @@ static void ansi_basic_rgb(uint8_t idx, uint8_t* r, uint8_t* g, uint8_t* b, bj_b
 
 static uint32_t pack_native_rgb(const bj_bitmap* dst, uint8_t r, uint8_t g, uint8_t b)
 {
-    return bj_bitmap_pixel_value((bj_bitmap*)dst, r, g, b);
+    return bj_make_bitmap_pixel((bj_bitmap*)dst, r, g, b);
 }
 
 /* Parse a sequence starting at text[i] which is after the ESC '['.
@@ -425,7 +425,7 @@ static void render_text_masked(
 
         /* If anything remains, blit the (possibly clipped) glyph */
         if (dst_box.w > 0 && dst_box.h > 0 && src_adj.w > 0 && src_adj.h > 0) {
-            bj_bitmap_blit_mask_stretched(
+            bj_blit_mask_stretched(
                 mask, &src_adj,
                 dst, &dst_box,
                 fg, bg, mode
@@ -452,7 +452,7 @@ static void render_text_masked(
 }
 
 /* Public: FG+BG with selectable background mode */
-void bj_bitmap_blit_text(
+void bj_blit_text(
     bj_bitmap*      dst,
     int             x,
     int             y,
@@ -465,7 +465,7 @@ void bj_bitmap_blit_text(
     render_text_masked(dst, x, y, height, fg_native, bg_native, mode, text);
 }
 
-void bj_bitmap_print(
+void bj_draw_text(
     bj_bitmap*      dst,
     int             x,
     int             y,
@@ -476,7 +476,7 @@ void bj_bitmap_print(
     render_text_masked(dst, x, y, height, fg_native, 0, BJ_MASK_BG_TRANSPARENT, text);
 }
 
-void bj_bitmap_vprintf(
+void bj_draw_vtextf(
     bj_bitmap*     p_bitmap,
     int            x,
     int            y,
@@ -504,7 +504,7 @@ void bj_bitmap_vprintf(
     if (dyn) {
         int written = vsnprintf(dyn, (size_t)needed + 1u, fmt, args);
         if (written >= 0) {
-            bj_bitmap_print(p_bitmap, x, y, height, fg_native, dyn);
+            bj_draw_text(p_bitmap, x, y, height, fg_native, dyn);
         }
         bj_free(dyn);
         return;
@@ -516,12 +516,12 @@ void bj_bitmap_vprintf(
         int written = vsnprintf(small, sizeof small, fmt, args);
         if (written >= 0) {
             small[sizeof small - 1] = '\0';
-            bj_bitmap_print(p_bitmap, x, y, height, fg_native, small);
+            bj_draw_text(p_bitmap, x, y, height, fg_native, small);
         }
     }
 }
 
-void bj_bitmap_printf(
+void bj_draw_textf(
     bj_bitmap*     p_bitmap,
     int            x,
     int            y,
@@ -532,6 +532,6 @@ void bj_bitmap_printf(
 ) {
     va_list args;
     va_start(args, fmt);
-    bj_bitmap_vprintf(p_bitmap, x, y, height, fg_native, fmt, args);
+    bj_draw_vtextf(p_bitmap, x, y, height, fg_native, fmt, args);
     va_end(args);
 }

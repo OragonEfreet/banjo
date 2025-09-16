@@ -8,7 +8,7 @@
 #define X 0
 #define Y 1
 
-BANJO_EXPORT void bj_bitmap_draw_line(
+BANJO_EXPORT void bj_draw_line(
     bj_bitmap*     bmp,
     int            x0,
     int            y0,
@@ -24,7 +24,7 @@ BANJO_EXPORT void bj_bitmap_draw_line(
     int err = dx - dy;
 
     while (1) {
-        bj_bitmap_put_pixel(bmp, x0, y0, pixel);
+        bj_put_pixel(bmp, x0, y0, pixel);
         if (x0 == x1 && y0 == y1) break;
         const int e2 = 2 * err;
         if (e2 > -dy) {
@@ -38,7 +38,7 @@ BANJO_EXPORT void bj_bitmap_draw_line(
     }
 }
 
-BANJO_EXPORT void bj_bitmap_draw_rectangle(
+BANJO_EXPORT void bj_draw_rectangle(
     bj_bitmap*     p_bitmap,
     const bj_rect* p_area,
     uint32_t       pixel
@@ -54,27 +54,27 @@ BANJO_EXPORT void bj_bitmap_draw_rectangle(
     const bj_bool vertical = x0 == x1;
 
     if(horizontal && vertical) {
-        bj_bitmap_put_pixel(p_bitmap, x0, y0, pixel);
+        bj_put_pixel(p_bitmap, x0, y0, pixel);
         return;
     }
 
     if(horizontal) {
-        bj_bitmap_draw_line(p_bitmap, x0, y0, x1, y0, pixel);
+        bj_draw_line(p_bitmap, x0, y0, x1, y0, pixel);
         return;
     }
 
     if(vertical) {
-        bj_bitmap_draw_line(p_bitmap, x0, y0, x0, y1, pixel);
+        bj_draw_line(p_bitmap, x0, y0, x0, y1, pixel);
         return;
     }
 
-    bj_bitmap_draw_line(p_bitmap, x0, y0, x1, y0, pixel);
-    bj_bitmap_draw_line(p_bitmap, x0, y1, x1, y1, pixel);
-    bj_bitmap_draw_line(p_bitmap, x0, y0+1, x0, y1-1, pixel);
-    bj_bitmap_draw_line(p_bitmap, x1, y0+1, x1, y1-1, pixel);
+    bj_draw_line(p_bitmap, x0, y0, x1, y0, pixel);
+    bj_draw_line(p_bitmap, x0, y1, x1, y1, pixel);
+    bj_draw_line(p_bitmap, x0, y0+1, x0, y1-1, pixel);
+    bj_draw_line(p_bitmap, x1, y0+1, x1, y1-1, pixel);
 }
 
-BANJO_EXPORT void bj_bitmap_draw_filled_rectangle(
+BANJO_EXPORT void bj_draw_filled_rectangle(
     bj_bitmap*     p_bitmap,
     const bj_rect* p_area,
     uint32_t       pixel
@@ -83,12 +83,12 @@ BANJO_EXPORT void bj_bitmap_draw_filled_rectangle(
     bj_check(p_area);
     for (int x = p_area->x; x < p_area->x + p_area->w; ++x) {
         for (int y = p_area->y; y < p_area->y + p_area->h; ++y) {
-            bj_bitmap_put_pixel(p_bitmap, x, y, pixel);
+            bj_put_pixel(p_bitmap, x, y, pixel);
         }
     }
 }
 
-void bj_bitmap_draw_triangle(
+void bj_draw_triangle(
     bj_bitmap* bmp,
     int        x0,
     int        y0,
@@ -98,7 +98,90 @@ void bj_bitmap_draw_triangle(
     int        y2,
     uint32_t   c
 ) {
-    bj_bitmap_draw_line(bmp, x0, y0, x1, y1, c);
-    bj_bitmap_draw_line(bmp, x1, y1, x2, y2, c);
-    bj_bitmap_draw_line(bmp, x2, y2, x0, y0, c);
+    bj_draw_line(bmp, x0, y0, x1, y1, c);
+    bj_draw_line(bmp, x1, y1, x2, y2, c);
+    bj_draw_line(bmp, x2, y2, x0, y0, c);
+}
+
+void bj_draw_circle(
+    bj_bitmap* p_bitmap,
+    int        cx,
+    int        cy,
+    int        radius,
+    uint32_t   color)
+{
+    int r = (int)((bj_real)radius + BJ_F(0.5));
+    if (r <= 0) {
+        bj_draw_line(p_bitmap, cx, cy, cx, cy, color);
+        return;
+    }
+
+    int x = r;
+    int y = 0;
+    int err = 1 - r;
+
+    while (x >= y) {
+        /* plot 8 symmetric points via 1-pixel lines */
+        bj_draw_line(p_bitmap, cx + x, cy + y, cx + x, cy + y, color);
+        bj_draw_line(p_bitmap, cx + y, cy + x, cx + y, cy + x, color);
+        bj_draw_line(p_bitmap, cx - y, cy + x, cx - y, cy + x, color);
+        bj_draw_line(p_bitmap, cx - x, cy + y, cx - x, cy + y, color);
+        bj_draw_line(p_bitmap, cx - x, cy - y, cx - x, cy - y, color);
+        bj_draw_line(p_bitmap, cx - y, cy - x, cx - y, cy - x, color);
+        bj_draw_line(p_bitmap, cx + y, cy - x, cx + y, cy - x, color);
+        bj_draw_line(p_bitmap, cx + x, cy - y, cx + x, cy - y, color);
+
+        ++y;
+        if (err < 0) {
+            err += (y << 1) + 1;
+        } else {
+            --x;
+            err += ((y - x) << 1) + 1;
+        }
+    }
+}
+
+void bj_draw_filled_circle(
+    bj_bitmap* p_bitmap,
+    int        cx,
+    int        cy,
+    int        radius,
+    uint32_t   color)
+{
+    int r = (int)((bj_real)radius + BJ_F(0.5));
+    if (r <= 0) {
+        bj_draw_line(p_bitmap, cx, cy, cx, cy, color);
+        return;
+    }
+
+    int x = r;
+    int y = 0;
+    int err = 1 - r;
+
+    while (x >= y) {
+        /* Horizontal spans for the four scanlines of this octant step */
+        /* y offsets */
+        int y_top    = cy - y;
+        int y_bottom = cy + y;
+        int y_top2   = cy - x;
+        int y_bot2   = cy + x;
+
+        /* spans centered at cx: [cx-x, cx+x] and [cx-y, cx+y] */
+        bj_draw_line(p_bitmap, cx - x, y_top,    cx + x, y_top,    color);
+        bj_draw_line(p_bitmap, cx - x, y_bottom, cx + x, y_bottom, color);
+
+        /* Avoid redundant spans when x == y (would duplicate the same line) */
+        if (x != y) {
+            bj_draw_line(p_bitmap, cx - y, y_top2,  cx + y, y_top2,  color);
+            bj_draw_line(p_bitmap, cx - y, y_bot2,  cx + y, y_bot2,  color);
+        }
+
+        ++y;
+        if (err < 0) {
+            err += (y << 1) + 1;
+        } else {
+            --x;
+            err += ((y - x) << 1) + 1;
+        }
+    }
 }

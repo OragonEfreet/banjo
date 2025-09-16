@@ -8,12 +8,12 @@ It provides a rough vision of the project's direction but is **not exhaustive**.
 Features are added over time and are **not listed in priority order**.  
 Some features may exist in the API but not be listed here, and vice versa.  
 - [ ] Basic System Layers
-  - [ ] Window management (\ref window.c)
+  - [ ] Window management 
     - [X] Windows API
     - [ ] Wayland
     - [ ] Cocoa
     - [X] X11
-  - [ ] Keyboard events (\ref events.c)
+  - [ ] Keyboard events 
     - [ ] Text
       - [ ] Windows API
       - [ ] Wayland
@@ -48,12 +48,12 @@ Some features may exist in the API but not be listed here, and vice versa.
 - [ ] Software Rendering
   - [ ] 3D Rendering
     - [ ] Simple Programmable Pipeline
-  - [X] Bitmap Structure (\ref bj_bitmap)
+  - [X] Bitmap Structure 
   - [X] 2D pixel drawing 
-  - [X] 2D primitives drawing (\ref drawing_2d.c)
+  - [X] 2D primitives drawing 
 - [ ] BMP File Support
   - [ ] Writing to disk
-  - [X] Loading from disk (\ref load_bmp.c)
+  - [X] Loading from disk 
 - [ ] Sound support
   - [X] Windows
   - [X] GNU/Linux
@@ -65,12 +65,9 @@ Some features may exist in the API but not be listed here, and vice versa.
   - [ ] Entity-Component System
 - [ ] Data Structures
   - [ ] Standard Algorithms
-  - [X] Sequential Array (\ref array.c)
-  - [X] Hash Map (\ref htable.c)
-  - [X] Linked List (\ref list.c)
 - [X] Make CMake not mandatory.
-- [X] Custom Allocators (\ref memory_callbacks.c)
-- [X] Logging System (\ref logging.c)
+- [X] Custom Allocators 
+- [X] Logging System 
 - [X] Time System 
 
 

@@ -1,9 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
+/// \file memory.h
 /// All memory-related functions, including custom allocators.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup memory Memory Management
-/// \ingroup core
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +66,7 @@ typedef void (*bj_free_fn)(
 /// reallocation, and deallocation callbacks along with user data.
 ///
 /// These callbacks can be assigned per-object or set globally
-/// with \ref bj_memory_set_defaults.
+/// with \ref bj_set_memory_defaults.
 ////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_memory_callbacks {
     void*         p_user_data;       ///< General purpose context data.
@@ -133,7 +132,7 @@ BANJO_EXPORT void bj_free(
 ///
 /// \param[in] p_allocator Pointer to custom allocator callbacks.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_memory_set_defaults(
+BANJO_EXPORT void bj_set_memory_defaults(
     const bj_memory_callbacks* p_allocator
 );
 
@@ -142,7 +141,7 @@ BANJO_EXPORT void bj_memory_set_defaults(
 ///
 /// Sets allocators back to standard system functions (`malloc`, `realloc`, `free`).
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_memory_unset_defaults(void);
+BANJO_EXPORT void bj_unset_memory_defaults(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Copy `mem_size` bytes from `p_src` to `p_dest`.

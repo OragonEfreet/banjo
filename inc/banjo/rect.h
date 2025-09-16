@@ -1,9 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
+/// \file rect.h
 /// Defines the bj_rect struct representing a rectangle with position and dimensions.
 ////////////////////////////////////////////////////////////////////////////////
-/// \defgroup rect Rectangle
-/// \ingroup graphics
+/// \addtogroup math
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_RECT_H
@@ -44,12 +43,12 @@ struct bj_rect_t {
 /// bj_rect rect_a = {0, 0, 10, 10};
 /// bj_rect rect_b = {5, 5, 15, 15};
 /// bj_rect result;
-/// if (bj_rect_intersect(&rect_a, &rect_b, 0)) {
+/// if (bj_rect_intersection(&rect_a, &rect_b, 0)) {
 ///     // There is an intersection between rect_a and rect_b.
 /// }
 /// \endcode
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_rect_intersect(
+BANJO_EXPORT bj_bool bj_rect_intersection(
     const bj_rect* p_rect_a,
     const bj_rect* p_rect_b,
     bj_rect*       p_result

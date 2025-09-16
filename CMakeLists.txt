@@ -47,7 +47,7 @@ if (BJ_CONFIG_FASTMATH)
 endif()
 
 if(NOT MSVC)
-    target_link_libraries(banjo PRIVATE m)
+    target_link_libraries(banjo PUBLIC m)
 endif()
 
 if(BUILD_SHARED_LIBS)

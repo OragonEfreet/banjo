@@ -24,7 +24,7 @@
 ///
 /// \return _true_ if the system is properly initialized, BJ_FALSE otherswise.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_begin(
+BANJO_EXPORT bj_bool bj_initialize(
     bj_error** p_error
 );
 
@@ -33,7 +33,7 @@ BANJO_EXPORT bj_bool bj_begin(
 ///
 /// \param p_error An optional location to an error object.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_end(
+BANJO_EXPORT void bj_shutdown(
     bj_error** p_error
 );
 
@@ -42,7 +42,7 @@ BANJO_EXPORT void bj_end(
 ///
 /// This function is an abstraction over the platform specific function like
 /// `dlopen` and `LoadLibrary`.
-/// The provided pointer can be used with \ref bj_get_symbol to get a function
+/// The provided pointer can be used with \ref bj_library_symbol to get a function
 /// from the loaded library.
 ///
 /// \param p_path A C-string path to the library to load.
@@ -60,7 +60,7 @@ BANJO_EXPORT void bj_end(
 /// bj_unload_library.
 ///
 /// 
-/// \see bj_get_symbol, bj_unload_library
+/// \see bj_library_symbol, bj_unload_library
 /// \see [dlopen()](https://linux.die.net/man/3/dlopen),
 ///      [LoadLibraryA()](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibrarya)
 ///
@@ -88,7 +88,7 @@ BANJO_EXPORT void* bj_load_library(
 /// bj_unload_library.
 ///
 /// 
-/// \see bj_get_symbol, bj_unload_library
+/// \see bj_library_symbol, bj_unload_library
 /// \see [dlclose()](https://linux.die.net/man/3/dlclose),
 ///      [FreeLibrary()](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-freelibrary)
 ///
@@ -124,7 +124,7 @@ BANJO_EXPORT void bj_unload_library(
 ///      [GetProcAddress()](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getprocaddress)
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void* bj_get_symbol(
+BANJO_EXPORT void* bj_library_symbol(
     void*       p_handle,
     const char* p_name
 );

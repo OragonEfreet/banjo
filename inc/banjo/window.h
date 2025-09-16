@@ -1,9 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
+/// \file window.h
 /// Header file for \ref bj_window type.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup window Windows
-/// \ingroup system
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -20,9 +19,9 @@ typedef struct bj_window_t bj_window;
 ////////////////////////////////////////////////////////////////////////////////
 /// A set of flags describing some properties of a \ref bj_window.
 ///
-/// These flags can be provided at window creation with \ref bj_window_new.
+/// These flags can be provided at window creation with \ref bj_bind_window.
 /// The may also change during the window lifetime.
-/// You can use \ref bj_window_get_flags to query the status of any flag on an
+/// You can use \ref bj_get_window_flags to query the status of any flag on an
 /// active window instance.
 ////////////////////////////////////////////////////////////////////////////////
 typedef enum bj_window_flag_t {
@@ -47,10 +46,10 @@ typedef enum bj_window_flag_t {
 /// \par Memory Management
 ///
 /// The caller is responsible for releasing the returned \ref bj_window object
-/// with \ref bj_window_del.
+/// with \ref bj_unbind_window.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_window* bj_window_new(
+BANJO_EXPORT bj_window* bj_bind_window(
     const char* p_title,
     uint16_t x,
     uint16_t y,
@@ -64,7 +63,7 @@ BANJO_EXPORT bj_window* bj_window_new(
 ///
 /// \param p_window Pointer to the window object to delete.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_window_del(
+BANJO_EXPORT void bj_unbind_window(
     bj_window* p_window
 );
 
@@ -72,7 +71,7 @@ BANJO_EXPORT void bj_window_del(
 /// Flag a given window to be closed.
 ///
 /// Once, flagged, the window is not automatically closed.
-/// Instead, call \ref bj_window_del.
+/// Instead, call \ref bj_unbind_window.
 /// 
 /// Note that it is not possible to remove a closed flag once set.
 ///
@@ -81,11 +80,11 @@ BANJO_EXPORT void bj_window_del(
 /// \remark
 ///
 /// This function effectively returns 
-/// `bj_window_get_flags(p_window, BJ_WINDOW_FLAG_CLOSE) > 0`.
+/// `bj_get_window_flags(p_window, BJ_WINDOW_FLAG_CLOSE) > 0`.
 ///
-/// \see bj_window_should_close
+/// \see bj_should_close_window
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_window_set_should_close(
+BANJO_EXPORT void bj_set_window_should_close(
     bj_window* p_window
 );
 
@@ -97,9 +96,9 @@ BANJO_EXPORT void bj_window_set_should_close(
 ///
 /// If `p_window` is *0*, the function returns *BJ_TRUE*.
 ///
-/// \see bj_window_set_should_close
+/// \see bj_set_window_should_close
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_window_should_close(
+BANJO_EXPORT bj_bool bj_should_close_window(
     bj_window* p_window
 );
 
@@ -116,9 +115,25 @@ BANJO_EXPORT bj_bool bj_window_should_close(
 /// \return An OR'd combination of \ref bj_window_flag_t filtered by `flags`.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT uint8_t bj_window_get_flags(
+BANJO_EXPORT uint8_t bj_get_window_flags(
     bj_window* p_window,
     uint8_t    flags
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Query the current state of a key for a given window.
+///
+/// Returns the state of the specified key as either `BJ_RELEASE` or `BJ_PRESS`.
+/// If \p p_window is NULL or if \p key is outside the valid range [0, 0xFE],
+/// the function returns `BJ_RELEASE`.
+///
+/// \param p_window Pointer to the target window, or NULL
+/// \param key      Key code in [0, 0xFE]
+/// \return `BJ_PRESS` if the key is currently pressed, `BJ_RELEASE` otherwise
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT int bj_get_key(
+    const bj_window* p_window,
+    int              key
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +141,7 @@ BANJO_EXPORT uint8_t bj_window_get_flags(
 ///
 /// The framebuffer is an instance of \ref bj_bitmap attached (and owned) by
 /// the window.
-/// If necessary, \ref bj_window_get_flags will create (or recreate) the
+/// If necessary, \ref bj_get_window_flags will create (or recreate) the
 /// framebuffer object upon calling this function.
 /// This can happen when the window is resize, minimized or any even that
 /// invalidate the window drawing area.
@@ -149,7 +164,7 @@ BANJO_EXPORT uint8_t bj_window_get_flags(
 /// The library is responsible for the return \ref bj_bitmap object.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bitmap* bj_window_get_framebuffer(
+BANJO_EXPORT bj_bitmap* bj_get_window_framebuffer(
     bj_window* p_window,
     bj_error** p_error
 );
@@ -175,7 +190,7 @@ BANJO_EXPORT bj_bitmap* bj_window_get_framebuffer(
 /// You are responsible for the memory of `width`  and `height`.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT int bj_window_get_size(
+BANJO_EXPORT int bj_get_window_size(
     const bj_window* p_window,
     int*             width,
     int*             height
@@ -193,10 +208,10 @@ BANJO_EXPORT int bj_window_get_size(
 /// The function performs nothing if `p_window` is _0_ or does not contain any
 /// framebuffer.
 ///
-/// \see bj_window_get_framebuffer
+/// \see bj_get_window_framebuffer
 ///
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_window_update_framebuffer(
+BANJO_EXPORT void bj_update_window_framebuffer(
     bj_window* p_window
 );
 

@@ -1,46 +1,56 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
-/// General-purpose definitions for Banjo API.
+/// \file api.h
+/// \brief General-purpose definitions for Banjo API.
+////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup core Core
-/// General-purpose API
+/// \brief General-purpose API.
 ///
 /// \{
+////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_API_H
 #define BJ_API_H
 
 #include <stddef.h>
 #include <stdint.h>
 
-/// Extracts the major version number from a 32-bit version number.
+/// \brief Extract major version from a 32-bit version value.
+/// \param version Packed version from BJ_MAKE_VERSION.
+/// \return Major version in [0, 1023].
 #define BJ_VERSION_MAJOR(version) (((version) >> 22U) & 0x3FFU)
 
-/// Extracts the minor version number from a 32-bit version number.
+/// \brief Extract minor version from a 32-bit version value.
+/// \param version Packed version from BJ_MAKE_VERSION.
+/// \return Minor version in [0, 1023].
 #define BJ_VERSION_MINOR(version) (((version) >> 12U) & 0x3FFU)
 
-/// Extracts the patch version number from a 32-bit version number.
+/// \brief Extract patch version from a 32-bit version value.
+/// \param version Packed version from BJ_MAKE_VERSION.
+/// \return Patch version in [0, 4095].
 #define BJ_VERSION_PATCH(version) ((version) & 0xFFFU)
 
-/// Constructs an API version number into 32bits.
-///
-/// \param major The major version number
-/// \param minor The minor version number
-/// \param patch The patch version number
+/// \brief Construct a packed 32-bit version value: [major:10 | minor:10 | patch:12].
+/// \param major Major version in [0, 1023].
+/// \param minor Minor version in [0, 1023].
+/// \param patch Patch version in [0, 4095].
+/// \return Packed version suitable for BJ_VERSION_* macros.
 #define BJ_MAKE_VERSION(major, minor, patch) \
     ((((uint32_t)(major)) << 22U) | (((uint32_t)(minor)) << 12U) | ((uint32_t)(patch)))
 
-#define BJ_VERSION_MAJOR_NUMBER 0 ///< Banjo current major version
-#define BJ_VERSION_MINOR_NUMBER 1 ///< Banjo current minor version
-#define BJ_VERSION_PATCH_NUMBER 0 ///< Banjo current patch version
+#define BJ_VERSION_MAJOR_NUMBER 0 ///< Current major version number.
+#define BJ_VERSION_MINOR_NUMBER 1 ///< Current minor version number.
+#define BJ_VERSION_PATCH_NUMBER 0 ///< Current patch version number.
 
-/// Expands to a 32bits representatin of the current version the API.
+/// \brief Current API version as a packed 32-bit representation.
 #define BJ_VERSION BJ_MAKE_VERSION(BJ_VERSION_MAJOR_NUMBER, BJ_VERSION_MINOR_NUMBER, BJ_VERSION_PATCH_NUMBER)
 
-/// Name of the library.
+/// \brief Library name string.
 #define BJ_NAME "Banjo"
 
-/// Platform detection
+/// \name Platform detection
+/// \brief One of these will be defined to indicate the target OS.
+/// @{
 #if defined(__EMSCRIPTEN__)
 #   define BJ_OS_EMSCRIPTEN
 #elif defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
@@ -68,8 +78,12 @@
 #if defined(__unix__)
 #   define BJ_OS_UNIX
 #endif
+/// @}
 
-// Compiler Detection
+/// \name Compiler detection
+/// \brief One of these will be defined to indicate the compiler in use.
+/// Additionally BJ_COMPILER_NAME and BJ_COMPILER_VERSION are provided.
+/// @{
 #if defined(__EMSCRIPTEN__)
     #include <emscripten/version.h>
     #define BJ_COMPILER_EMSCRIPTEN
@@ -96,13 +110,21 @@
     #define BJ_COMPILER_NAME "Unknown"
     #define BJ_COMPILER_VERSION 0
 #endif
+/// @}
 
+/// \name Build configuration
+/// \brief Exactly one of BJ_BUILD_DEBUG or BJ_BUILD_RELEASE is defined.
+/// @{
 #ifdef NDEBUG
 #   define BJ_BUILD_RELEASE
 #else
 #   define BJ_BUILD_DEBUG
 #endif
+/// @}
 
+/// \name Export/visibility helpers
+/// \brief BANJO_EXPORT marks public symbols. BANJO_NO_EXPORT hides symbols.
+/// @{
 #ifdef BANJO_STATIC
 #  define BANJO_EXPORT
 #  define BANJO_NO_EXPORT
@@ -131,12 +153,69 @@
 #      endif
 #    endif
 #endif
+/// @}
+
+/// \name Restrict qualifier macro
+/// \def BJ_RESTRICT
+/// \brief BJ_RESTRICT expands to the appropriate restrict qualifier per toolchain.
+/// @{
+#if defined(__cplusplus)
+    #if defined(__GNUC__) || defined(__clang__)
+        #define BJ_RESTRICT __restrict__
+    #elif defined(_MSC_VER)
+        #define BJ_RESTRICT __restrict
+    #else
+        #define BJ_RESTRICT /* nothing */
+    #endif
+#else
+    /* pure C (C99 or newer) */
+    #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+        #define BJ_RESTRICT restrict
+    #elif defined(__GNUC__) || defined(__clang__)
+        #define BJ_RESTRICT __restrict__
+    #elif defined(_MSC_VER)
+        #define BJ_RESTRICT __restrict
+    #else
+        #define BJ_RESTRICT /* nothing */
+    #endif
+#endif
+/// @}
+
+/// \name Inline helper macro
+/// \def BJ_INLINE
+/// \brief BJ_INLINE expands to an inline specifier appropriate for the toolchain.
+/// If BJ_API_FORCE_INLINE is defined, stronger inlining is requested.
+/// @{
+#if defined(_MSC_VER)
+    #if defined(BJ_API_FORCE_INLINE)
+        #define BJ_INLINE __forceinline
+    #else
+        #if !defined(__cplusplus) && !defined(inline)
+            #define BJ_INLINE __inline
+        #else
+            #define BJ_INLINE inline
+        #endif
+    #endif
+#elif defined(__GNUC__) || defined(__clang__)
+    #if defined(BJ_API_FORCE_INLINE)
+        #define BJ_INLINE inline __attribute__((always_inline))
+    #else
+        #define BJ_INLINE inline
+    #endif
+#else
+    #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+        #define BJ_INLINE inline
+    #else
+        #define BJ_INLINE /* no inline available */
+    #endif
+#endif
+/// @}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \typedef bj_bool
-/// \brief Boolean type used throughout the BJ codebase.
+/// \brief Boolean type used throughout the Banjo API.
 ///
-/// Defined as a 32-bit unsigned integer for compatibility and clarity.
+/// Defined as a 32-bit unsigned integer for portability and ABI clarity.
 ///
 /// \see BJ_FALSE
 /// \see BJ_TRUE
@@ -145,9 +224,7 @@ typedef uint32_t bj_bool;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \def BJ_FALSE
-/// \brief Boolean false value.
-///
-/// Represents the false value for the bj_bool type, defined as zero.
+/// \brief Boolean false value (0).
 ///
 /// \see bj_bool
 /// \see BJ_TRUE
@@ -156,43 +233,41 @@ typedef uint32_t bj_bool;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \def BJ_TRUE
-/// \brief Boolean true value.
-///
-/// Represents the true value for the bj_bool type, defined as one.
+/// \brief Boolean true value (1).
 ///
 /// \see bj_bool
 /// \see BJ_FALSE
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_TRUE ((bj_bool)1)
 
-/// Structure holding build information of the binary
+/// \brief Structure holding build information of the binary.
 typedef struct {
-    const char* p_name;              ///< API Name (\ref BJ_NAME)
-    uint32_t    version;             ///< Built version (\ref BJ_VERSION)
-    const char* compiler_name;       ///< Compiler C-String name
-    int         compiler_version;    ///< Compiler version specifier
-    bj_bool     debug;               ///< Built with debug information
-    bj_bool     feature_win32;       ///< Compiled with support for Win32 windows.
-    bj_bool     feature_emscripten;  ///< Compiled with support for Emscripten.
-    bj_bool     feature_x11;         ///< Compiled with support for Win32 windows.
-    bj_bool     feature_mme;         ///< Compiled with support for Windows Multimedia Extension (for audio).
-    bj_bool     feature_alsa;        ///< Compiled with support for ALSA (for audio).
-    bj_bool     config_checks_abort; ///< When checks feature is on, a failed check will abort execution
-    bj_bool     config_checks_log;   ///< If checks feature is on, failed check with log
-    bj_bool     config_log_color;    ///< Banjo logs will have colored output
-    bj_bool     config_pedantic;     ///< Banjo runtime will make costly extra checks
-    bj_bool     config_fastmath;     ///< Banjo compiled with floating point math optimizations
+    const char* p_name;              ///< API name (see BJ_NAME).
+    uint32_t    version;             ///< Packed API version (see BJ_VERSION).
+    const char* compiler_name;       ///< Compiler name string.
+    int         compiler_version;    ///< Compiler version number.
+    bj_bool     debug;               ///< Non-zero if built with debug info.
+    bj_bool     feature_win32;       ///< Built with Win32 window support.
+    bj_bool     feature_emscripten;  ///< Built with Emscripten support.
+    bj_bool     feature_x11;         ///< Built with X11 window support.
+    bj_bool     feature_mme;         ///< Built with Windows MME audio.
+    bj_bool     feature_alsa;        ///< Built with ALSA audio.
+    bj_bool     config_checks_abort; ///< Checks abort execution on failure.
+    bj_bool     config_checks_log;   ///< Checks log failures.
+    bj_bool     config_log_color;    ///< Colored log output enabled.
+    bj_bool     config_pedantic;     ///< Extra runtime checks enabled.
+    bj_bool     config_fastmath;     ///< Built with fast-math optimizations.
 } bj_build_info;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Returns the build information of the runtime Banjo binaries.
+/// \brief Get runtime build information for the loaded Banjo binaries.
 ///
-/// The function returns a pointer to \ref bj_build_info that is always the same
-/// in between different calls.
+/// The returned pointer is owned by the library and remains valid for the
+/// lifetime of the process. The content is immutable.
 ///
-/// \return A description of runtime build information
-///
-BANJO_EXPORT const bj_build_info* bj_get_build_info(void);
+/// \return Pointer to a bj_build_info structure describing the runtime build.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT const bj_build_info* bj_build_information(void);
 
-#endif
+#endif /* BJ_API_H */
 /// \} End of core

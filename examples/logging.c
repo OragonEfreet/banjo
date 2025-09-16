@@ -14,12 +14,12 @@ int main(int argc, char* argv[]) {
     // BJ_LOG_TRACE < BJ_LOG_DEBUG < BJ_LOG_INFO,
     // BJ_LOG_WARN <  BJ_LOG_ERROR < BJ_LOG_FATAL.
     // The default log level on application start is 0 (TRACE)
-    const int default_level = bj_log_get_level();
+    const int default_level = bj_get_log_level();
     bj_assert(default_level == 0);
     bj_info("Default log level: %d\n", default_level);
 
     // To set the current log level:
-    bj_log_set_level(BJ_LOG_INFO);
+    bj_set_log_level(BJ_LOG_INFO);
     // Since level are signed int, you can provide any custom log level outside
     // the range [0;5].
 
