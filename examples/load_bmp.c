@@ -19,16 +19,16 @@ bj_bitmap* bmp_sprite_sheet     = 0;
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
 
-    bmp_sprite_sheet = bj_bitmap_new_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
+    bmp_sprite_sheet = bj_create_bitmap_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
 
     bj_error* p_error = 0;
 
-    if(!bj_begin(&p_error)) {
+    if(!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     } 
 
-    window = bj_window_new("sprite sheet - Banjo", 0, 0, 
+    window = bj_bind_window("sprite sheet - Banjo", 0, 0, 
         bj_bitmap_width(bmp_sprite_sheet) * 10,
         bj_bitmap_height(bmp_sprite_sheet) * 10,
         0
@@ -36,9 +36,9 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_set_key_callback(bj_close_on_escape, 0);
 
-    p_window_framebuffer = bj_window_get_framebuffer(window, 0);
-    bj_bitmap_blit_stretched(bmp_sprite_sheet, 0, p_window_framebuffer, 0, BJ_BLIT_OP_COPY);
-    bj_window_update_framebuffer(window);
+    p_window_framebuffer = bj_get_window_framebuffer(window, 0);
+    bj_blit_stretched(bmp_sprite_sheet, 0, p_window_framebuffer, 0, BJ_BLIT_OP_COPY);
+    bj_update_window_framebuffer(window);
 
     return bj_callback_continue;
 }
@@ -49,17 +49,17 @@ int bj_app_iterate(void* user_data) {
 
     bj_dispatch_events();
 
-    return bj_window_should_close(window) 
+    return bj_should_close_window(window) 
          ? bj_callback_exit_success 
          : bj_callback_continue;
 }
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
-    bj_window_del(window);
-    bj_end(0);
+    bj_unbind_window(window);
+    bj_shutdown(0);
 
-    bj_bitmap_del(bmp_sprite_sheet);
+    bj_destroy_bitmap(bmp_sprite_sheet);
     return status;
 }
 

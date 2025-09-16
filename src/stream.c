@@ -3,17 +3,17 @@
 #include "check.h"
 #include <stdio.h>
 
-bj_stream* bj_stream_alloc(
+bj_stream* bj_allocate_stream(
     void
 ) {
     return bj_malloc(sizeof(bj_stream));
 }
 
-bj_stream* bj_stream_new_read(
+bj_stream* bj_open_stream_read(
     const void*  p_data,
     size_t        length
 ){
-    bj_stream* p_stream = bj_stream_alloc();
+    bj_stream* p_stream = bj_allocate_stream();
     if(p_stream != 0) {
         bj_memset(p_stream, 0, sizeof(bj_stream));
         p_stream->p_data.r = p_data;
@@ -24,7 +24,7 @@ bj_stream* bj_stream_new_read(
     return p_stream;
 }
 
-bj_stream* bj_stream_new_read_from_file(
+bj_stream* bj_open_stream_file(
     const char*       p_path,
     bj_error**        p_error
 ) {
@@ -64,15 +64,15 @@ bj_stream* bj_stream_new_read_from_file(
             return 0;
         }
 
-        bj_stream* p_stream = bj_stream_new_read(buffer, bytes_read);
+        bj_stream* p_stream = bj_open_stream_read(buffer, bytes_read);
         p_stream->weak   = BJ_FALSE;
         return p_stream;
     }
 
-    return bj_stream_new_read(0, 0);
+    return bj_open_stream_read(0, 0);
 }
 
-void bj_stream_del(
+void bj_close_stream(
     bj_stream* p_stream
 ) {
     bj_check(p_stream != 0);
@@ -84,7 +84,7 @@ void bj_stream_del(
     bj_free(p_stream);
 }
 
-size_t bj_stream_read(
+size_t bj_read_stream(
     bj_stream* p_stream,
     void*      p_buffer,
     size_t      count
@@ -102,7 +102,7 @@ size_t bj_stream_read(
    return bytes_to_read;
 }
 
-BANJO_EXPORT size_t bj_stream_len(
+BANJO_EXPORT size_t bj_get_stream_length(
     bj_stream* p_stream
 ) {
     bj_check_or_0(p_stream);
@@ -110,7 +110,7 @@ BANJO_EXPORT size_t bj_stream_len(
 }
 
 
-size_t bj_stream_seek(
+size_t bj_seek_stream(
     bj_stream*     p_stream,
     ptrdiff_t           offset,
     bj_seek_origin from
@@ -129,7 +129,7 @@ size_t bj_stream_seek(
     return new_position;
 }
 
-size_t bj_stream_tell(
+size_t bj_tell_stream(
     bj_stream*     p_stream
 ) {
     return p_stream->position;

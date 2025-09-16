@@ -17,7 +17,7 @@ static inline uint32_t pcg32_step(bj_pcg32 *g) {
     return (xorshifted >> rot) | (xorshifted << ((-rot) & 31u));
 }
 
-void bj_pcg32_seed(bj_pcg32 *g, uint64_t initstate, uint64_t initseq) {
+void bj_seed_pcg32(bj_pcg32 *g, uint64_t initstate, uint64_t initseq) {
     bj_pcg32* r = pcg32_resolve(g);
     r->state = 0u;
     r->inc   = (initseq << 1u) | 1u;
@@ -26,11 +26,11 @@ void bj_pcg32_seed(bj_pcg32 *g, uint64_t initstate, uint64_t initseq) {
     (void)pcg32_step(r);
 }
 
-uint32_t bj_pcg32_next(bj_pcg32 *g) {
+uint32_t bj_next_pcg32(bj_pcg32 *g) {
     return pcg32_step(pcg32_resolve(g));
 }
 
-void bj_pcg32_discard(bj_pcg32 *g, uint64_t z) {
+void bj_discard_pcg32(bj_pcg32 *g, uint64_t z) {
     bj_pcg32* r = pcg32_resolve(g);
     uint64_t cur_mult = PCG32_MULT;
     uint64_t cur_plus = (r->inc | 1ULL);
@@ -49,5 +49,5 @@ void bj_pcg32_discard(bj_pcg32 *g, uint64_t z) {
     r->state = acc_mult * r->state + acc_plus;
 }
 
-uint32_t bj_pcg32_min(void) { return 0u; }
-uint32_t bj_pcg32_max(void) { return 0xFFFFFFFFu; }
+uint32_t bj_min_pcg32(void) { return 0u; }
+uint32_t bj_max_pcg32(void) { return 0xFFFFFFFFu; }

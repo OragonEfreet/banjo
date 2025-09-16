@@ -1,6 +1,6 @@
 #include <banjo/rect.h>
 
-bj_bool bj_rect_intersect(
+bj_bool bj_rect_intersection(
     const bj_rect* p_rect_a,
     const bj_rect* p_rect_b,
     bj_rect* result

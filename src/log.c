@@ -24,15 +24,15 @@ static const struct {
     { .name = "FATAL", .color = "\x1b[35m", .payload = 5, }, 
 };
 
-const char* bj_log_get_level_string(int level) {
+const char* bj_get_log_level_string(int level) {
     return level_info[level].name;
 }
 
-void bj_log_set_level(int level) {
+void bj_set_log_level(int level) {
     s_context.level = level;
 }
 
-int bj_log_get_level(void) {
+int bj_get_log_level(void) {
     return s_context.level;
 }
 
@@ -50,7 +50,7 @@ static const bj_bool use_colors = BJ_FALSE;
 
 #define BUFFER_WRAP 50
 
-size_t bj_message(
+size_t bj_log_message(
     int level,
     const char* p_file,
     int line,

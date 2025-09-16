@@ -50,7 +50,7 @@ TEST_CASE(kinematics_2d_basic_and_sentinel)
     bj_real out[3] = { BJ_FZERO, BJ_FZERO, BJ_F(12345.0) };
     bj_real t = BJ_F(4.0);
 
-    bj_kinematics_2d(out, p, v, a, t);
+    bj_compute_kinematics_2d(out, p, v, a, t);
 
     REQUIRE_EQ(out[0], X_EXPECT(p[0], v[0], a[0], t));
     REQUIRE_EQ(out[1], X_EXPECT(p[1], v[1], a[1], t));
@@ -89,7 +89,7 @@ TEST_CASE(kinematics_velocity_2d_basic_and_sentinel)
     bj_real out[3] = { BJ_FZERO, BJ_FZERO, BJ_F(12345.0) };
     bj_real t = BJ_F(4.0);
 
-    bj_kinematics_velocity_2d(out, v0, a, t);
+    bj_compute_kinematics_velocity_2d(out, v0, a, t);
 
     REQUIRE_EQ(out[0], V_EXPECT(v0[0], a[0], t));
     REQUIRE_EQ(out[1], V_EXPECT(v0[1], a[1], t));

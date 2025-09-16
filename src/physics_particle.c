@@ -6,7 +6,7 @@
 
 #include "check.h"
 
-void bj_particle_set_mass_2d(
+void bj_set_particle_mass_2d(
     bj_particle_2d* p_particle,
     bj_real         mass
 ) {
@@ -15,7 +15,7 @@ void bj_particle_set_mass_2d(
     p_particle->inverse_mass = BJ_F(1.0) / mass;
 }
 
-void bj_particle_apply_force_2d(
+void bj_apply_particle_force_2d(
     bj_particle_2d* p_particle,
     const bj_vec2 force
 ) {
@@ -59,7 +59,7 @@ void bj_apply_point_gravity_2d(
     bj_vec2_sub(force, p_particle_to->position, p_particle_from->position);
     bj_vec2_set_len(force, force, g);
 
-    bj_particle_apply_force_2d(p_particle_from, force);
+    bj_apply_particle_force_2d(p_particle_from, force);
 }
 
 void bj_apply_point_gravity_softened_2d(
@@ -79,7 +79,7 @@ void bj_apply_point_gravity_softened_2d(
     bj_vec2_sub(force, p_particle_to->position, p_particle_from->position);
     bj_vec2_set_len(force, force, g);
 
-    bj_particle_apply_force_2d(p_particle_from, force);
+    bj_apply_particle_force_2d(p_particle_from, force);
 }
 
 
@@ -89,11 +89,11 @@ void bj_apply_drag_2d(
     bj_real k2
 ) {
     bj_vec2 force;
-    bj_particle_drag_force_2d(force, p_particle->velocity, k1, k2);
-    bj_particle_apply_force_2d(p_particle, force);
+    bj_compute_particle_drag_force_2d(force, p_particle->velocity, k1, k2);
+    bj_apply_particle_force_2d(p_particle, force);
 }
 
-bj_real bj_particle_drag_coefficient_2d(
+bj_real bj_compute_particle_drag_coefficient_2d(
     const bj_vec2 vel,
     const bj_real k1,
     const bj_real k2
@@ -105,13 +105,13 @@ bj_real bj_particle_drag_coefficient_2d(
     return k1 * coef + k2 * coef * coef;
 }
 
-bj_bool bj_particle_drag_force_2d(
+bj_bool bj_compute_particle_drag_force_2d(
     bj_real result[BJ_RESTRICT static 2],
     const bj_real vel[BJ_RESTRICT static 2],
     const bj_real k1,
     const bj_real k2
 ) {
-    bj_real coef = bj_particle_drag_coefficient_2d(vel, k1, k2);
+    bj_real coef = bj_compute_particle_drag_coefficient_2d(vel, k1, k2);
 
     if(bj_real_is_zero(coef)) {
         bj_vec2_set(result, BJ_FZERO, BJ_FZERO);

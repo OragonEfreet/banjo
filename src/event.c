@@ -168,7 +168,7 @@ void bj_close_on_escape(
     (void)p_window;
 
     if (p_event->key == BJ_KEY_ESCAPE && p_event->action == BJ_RELEASE) {
-        bj_window_set_should_close(p_window);
+        bj_set_window_should_close(p_window);
     }
 }
 
@@ -209,7 +209,7 @@ void bj_push_key_event(
         
         if (action == BJ_PRESS) {
             if (*keystate == BJ_PRESS) {
-                if(!bj_window_get_flags(p_window, BJ_WINDOW_FLAG_KEY_REPEAT)) {
+                if(!bj_get_window_flags(p_window, BJ_WINDOW_FLAG_KEY_REPEAT)) {
                     return;
                 }
                 action = BJ_REPEAT;
@@ -277,7 +277,7 @@ void bj_push_enter_event(
     );
 }
 
-const char* bj_get_key_name(int key) {
+const char* bj_key_name(int key) {
     switch(key) {
         case BJ_KEY_UNKNOWN:             return "UNKNOWN";
         case BJ_KEY_LBUTTON:             return "LBUTTON";

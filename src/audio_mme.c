@@ -79,7 +79,7 @@ static bj_bool mme_load_library(bj_error** p_error) {
     }
 
 #define MME_BIND(fn) \
-    if (!(MME.fn = (pfn_##fn)bj_get_symbol(MME.dll, #fn))) { \
+    if (!(MME.fn = (pfn_##fn)bj_library_symbol(MME.dll, #fn))) { \
         bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot load MME function " #fn); \
         mme_unload_library(); \
         return BJ_FALSE; \

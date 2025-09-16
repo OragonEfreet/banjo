@@ -267,7 +267,7 @@ typedef struct {
 ///
 /// \return Pointer to a bj_build_info structure describing the runtime build.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT const bj_build_info* bj_get_build_info(void);
+BANJO_EXPORT const bj_build_info* bj_build_information(void);
 
 #endif /* BJ_API_H */
 /// \} End of core

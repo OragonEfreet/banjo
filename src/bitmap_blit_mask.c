@@ -44,7 +44,7 @@ static bj_bool bj__setup_mask_rects(
 
     /* Clip mask area to mask bounds */
     bj_rect mask_bounds = full_mask;
-    if (bj_rect_intersect(&mask_bounds, mask_area, mask_area) == 0) return BJ_FALSE;
+    if (bj_rect_intersection(&mask_bounds, mask_area, mask_area) == 0) return BJ_FALSE;
     if (mask_area->w == 0 || mask_area->h == 0) return BJ_FALSE;
 
     return BJ_TRUE;
@@ -71,7 +71,7 @@ static inline void bj__src_over_rgb(
 /* Non-stretched mask blit                                                    */
 /* -------------------------------------------------------------------------- */
 
-bj_bool bj_bitmap_blit_mask(
+bj_bool bj_blit_mask(
     const bj_bitmap* mask,
     const bj_rect*   mask_area_in,
     bj_bitmap*       dst,
@@ -94,7 +94,7 @@ bj_bool bj_bitmap_blit_mask(
         .h = (uint16_t)bj__min_size_t(dst->height, UINT16_MAX)
     };
     bj_rect inter;
-    if (bj_rect_intersect(&ds, &dst_bounds, &inter) == 0) return BJ_FALSE;
+    if (bj_rect_intersection(&ds, &dst_bounds, &inter) == 0) return BJ_FALSE;
 
     ms.x += inter.x - ds.x; ms.y += inter.y - ds.y;
     ms.w  = inter.w;        ms.h  = inter.h;
@@ -104,8 +104,8 @@ bj_bool bj_bitmap_blit_mask(
     /* Unpack FG and BG once */
     uint8_t fr, fg, fb;
     uint8_t br, bg, bb;
-    bj_pixel_rgb(dst->mode, fg_native, &fr, &fg, &fb);
-    bj_pixel_rgb(dst->mode, bg_native, &br, &bg, &bb);
+    bj_make_pixel_rgb(dst->mode, fg_native, &fr, &fg, &fb);
+    bj_make_pixel_rgb(dst->mode, bg_native, &br, &bg, &bb);
 
     for (uint16_t r = 0; r < ds.h; ++r) {
         const size_t my = (size_t)ms.y + r;
@@ -123,26 +123,26 @@ bj_bool bj_bitmap_blit_mask(
                 /* FG over dst where a>0; keep dst where a==0 */
                 if (a == 0) continue;
                 if (a == 255) {
-                    bj_bitmap_put_pixel(dst, dx, dy, fg_native);
+                    bj_put_pixel(dst, dx, dy, fg_native);
                 } else {
-                    const uint32_t dval = bj_bitmap_get(dst, dx, dy);
-                    uint8_t dr,dg2,db; bj_pixel_rgb(dst->mode, dval, &dr,&dg2,&db);
+                    const uint32_t dval = bj_bitmap_pixel(dst, dx, dy);
+                    uint8_t dr,dg2,db; bj_make_pixel_rgb(dst->mode, dval, &dr,&dg2,&db);
                     uint8_t or_,og,ob;  bj__src_over_rgb(a, fr,fg,fb, dr,dg2,db, &or_,&og,&ob);
-                    bj_bitmap_put_pixel(dst, dx, dy, bj_bitmap_pixel_value(dst, or_,og,ob));
+                    bj_put_pixel(dst, dx, dy, bj_make_bitmap_pixel(dst, or_,og,ob));
                 }
                 break;
 
             case BJ_MASK_BG_OPAQUE:
                 /* out = mix(BG,FG,a); ignore dst altogether */
                 if (a == 0) {
-                    bj_bitmap_put_pixel(dst, dx, dy, bg_native);
+                    bj_put_pixel(dst, dx, dy, bg_native);
                 } else if (a == 255) {
-                    bj_bitmap_put_pixel(dst, dx, dy, fg_native);
+                    bj_put_pixel(dst, dx, dy, fg_native);
                 } else {
                     const uint8_t or_ = bj__mix_u8(a, fr, br);
                     const uint8_t og  = bj__mix_u8(a, fg, bg);
                     const uint8_t ob  = bj__mix_u8(a, fb, bb);
-                    bj_bitmap_put_pixel(dst, dx, dy, bj_bitmap_pixel_value(dst, or_,og,ob));
+                    bj_put_pixel(dst, dx, dy, bj_make_bitmap_pixel(dst, or_,og,ob));
                 }
                 break;
 
@@ -153,13 +153,13 @@ bj_bool bj_bitmap_blit_mask(
                     /* fully covered by glyph: keep dst */
                 } else if (a_bg == 255) {
                     /* fully outside glyph: paint BG */
-                    bj_bitmap_put_pixel(dst, dx, dy, bg_native);
+                    bj_put_pixel(dst, dx, dy, bg_native);
                 } else {
                     /* blend BG over dst with alpha (1-a) */
-                    const uint32_t dval = bj_bitmap_get(dst, dx, dy);
-                    uint8_t dr,dg2,db; bj_pixel_rgb(dst->mode, dval, &dr,&dg2,&db);
+                    const uint32_t dval = bj_bitmap_pixel(dst, dx, dy);
+                    uint8_t dr,dg2,db; bj_make_pixel_rgb(dst->mode, dval, &dr,&dg2,&db);
                     uint8_t or_,og,ob;  bj__src_over_rgb(a_bg, br,bg,bb, dr,dg2,db, &or_,&og,&ob);
-                    bj_bitmap_put_pixel(dst, dx, dy, bj_bitmap_pixel_value(dst, or_,og,ob));
+                    bj_put_pixel(dst, dx, dy, bj_make_bitmap_pixel(dst, or_,og,ob));
                 }
             } break;
             }
@@ -173,7 +173,7 @@ bj_bool bj_bitmap_blit_mask(
 /* Stretched mask blit (nearest neighbor)                                     */
 /* -------------------------------------------------------------------------- */
 
-bj_bool bj_bitmap_blit_mask_stretched(
+bj_bool bj_blit_mask_stretched(
     const bj_bitmap* mask,
     const bj_rect*   mask_area_in,
     bj_bitmap*       dst,
@@ -199,7 +199,7 @@ bj_bool bj_bitmap_blit_mask_stretched(
         .h = (uint16_t)bj__min_size_t(dst->height, UINT16_MAX)
     };
     bj_rect inter;
-    if (bj_rect_intersect(&ds, &dst_bounds, &inter) == 0) return BJ_FALSE;
+    if (bj_rect_intersection(&ds, &dst_bounds, &inter) == 0) return BJ_FALSE;
     ds = inter;
 
     /* If the whole requested box is off-screen, nothing to do */
@@ -254,8 +254,8 @@ bj_bool bj_bitmap_blit_mask_stretched(
     /* Unpack FG and BG once (dst-native) */
     uint8_t fr, fg, fb;
     uint8_t br, bg, bb;
-    bj_pixel_rgb(dst->mode, fg_native, &fr, &fg, &fb);
-    bj_pixel_rgb(dst->mode, bg_native, &br, &bg, &bb);
+    bj_make_pixel_rgb(dst->mode, fg_native, &fr, &fg, &fb);
+    bj_make_pixel_rgb(dst->mode, bg_native, &br, &bg, &bb);
 
     const size_t sw = ms.w, sh = ms.h;
     const size_t dw = ds.w, dh = ds.h;
@@ -275,25 +275,25 @@ bj_bool bj_bitmap_blit_mask_stretched(
             case BJ_MASK_BG_TRANSPARENT:
                 if (a == 0) continue;
                 if (a == 255) {
-                    bj_bitmap_put_pixel(dst, out_x, out_y, fg_native);
+                    bj_put_pixel(dst, out_x, out_y, fg_native);
                 } else {
-                    const uint32_t dval = bj_bitmap_get(dst, out_x, out_y);
-                    uint8_t dr,dg2,db; bj_pixel_rgb(dst->mode, dval, &dr,&dg2,&db);
+                    const uint32_t dval = bj_bitmap_pixel(dst, out_x, out_y);
+                    uint8_t dr,dg2,db; bj_make_pixel_rgb(dst->mode, dval, &dr,&dg2,&db);
                     uint8_t or_,og,ob;  bj__src_over_rgb(a, fr,fg,fb, dr,dg2,db, &or_,&og,&ob);
-                    bj_bitmap_put_pixel(dst, out_x, out_y, bj_bitmap_pixel_value(dst, or_,og,ob));
+                    bj_put_pixel(dst, out_x, out_y, bj_make_bitmap_pixel(dst, or_,og,ob));
                 }
                 break;
 
             case BJ_MASK_BG_OPAQUE:
                 if (a == 0) {
-                    bj_bitmap_put_pixel(dst, out_x, out_y, bg_native);
+                    bj_put_pixel(dst, out_x, out_y, bg_native);
                 } else if (a == 255) {
-                    bj_bitmap_put_pixel(dst, out_x, out_y, fg_native);
+                    bj_put_pixel(dst, out_x, out_y, fg_native);
                 } else {
                     const uint8_t or_ = bj__mix_u8(a, fr, br);
                     const uint8_t og  = bj__mix_u8(a, fg, bg);
                     const uint8_t ob  = bj__mix_u8(a, fb, bb);
-                    bj_bitmap_put_pixel(dst, out_x, out_y, bj_bitmap_pixel_value(dst, or_,og,ob));
+                    bj_put_pixel(dst, out_x, out_y, bj_make_bitmap_pixel(dst, or_,og,ob));
                 }
                 break;
 
@@ -301,12 +301,12 @@ bj_bool bj_bitmap_blit_mask_stretched(
                 const uint8_t a_bg = (uint8_t)(255u - a);
                 if (a_bg == 0) { /* inside glyph → keep dst */ }
                 else if (a_bg == 255) {
-                    bj_bitmap_put_pixel(dst, out_x, out_y, bg_native);
+                    bj_put_pixel(dst, out_x, out_y, bg_native);
                 } else {
-                    const uint32_t dval = bj_bitmap_get(dst, out_x, out_y);
-                    uint8_t dr,dg2,db; bj_pixel_rgb(dst->mode, dval, &dr,&dg2,&db);
+                    const uint32_t dval = bj_bitmap_pixel(dst, out_x, out_y);
+                    uint8_t dr,dg2,db; bj_make_pixel_rgb(dst->mode, dval, &dr,&dg2,&db);
                     uint8_t or_,og,ob;  bj__src_over_rgb(a_bg, br,bg,bb, dr,dg2,db, &or_,&og,&ob);
-                    bj_bitmap_put_pixel(dst, out_x, out_y, bj_bitmap_pixel_value(dst, or_,og,ob));
+                    bj_put_pixel(dst, out_x, out_y, bj_make_bitmap_pixel(dst, or_,og,ob));
                 }
             } break;
             }

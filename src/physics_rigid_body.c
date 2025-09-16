@@ -1,12 +1,12 @@
 #include <banjo/physics_2d.h>
 #include "check.h"
 
-void bj_rigid_body_apply_force_2d(
+void bj_apply_rigidbody_force_2d(
     bj_rigid_body_2d* body,
     const bj_vec2 force
 ) {
     bj_check(body);
-    bj_particle_apply_force_2d(&body->particle, force);
+    bj_apply_particle_force_2d(&body->particle, force);
     // TODO Add torque by mean of force
 }
 

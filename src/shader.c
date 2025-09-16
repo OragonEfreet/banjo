@@ -2,7 +2,7 @@
 #include "bitmap_t.h"
 #include "check.h"
 
-void bj_bitmap_apply_shader(
+void bj_shader_bitmap(
     bj_bitmap*               p_bitmap,
     bj_bitmap_shading_fn_t   p_shader,
     void*                    p_data,
@@ -50,7 +50,7 @@ void bj_bitmap_apply_shader(
     for (size_t y = 0; y < H; ++y) {
         for (size_t x = 0; x < W; ++x) {
             uint8_t r, g, b;
-            bj_bitmap_rgb(p_bitmap, x, y, &r, &g, &b);
+            bj_make_bitmap_rgb(p_bitmap, x, y, &r, &g, &b);
 
             bj_vec3 color = { (bj_real)r * inv255, (bj_real)g * inv255, (bj_real)b * inv255 };
             bj_vec2 frag_coords = { ax * (bj_real)x + bx, ay * (bj_real)y + by };
@@ -66,7 +66,7 @@ void bj_bitmap_apply_shader(
                 g = (uint8_t)(color[1] * BJ_F(255.0) + BJ_F(0.5));
                 b = (uint8_t)(color[2] * BJ_F(255.0) + BJ_F(0.5));
 
-                bj_bitmap_put_pixel(p_bitmap, x, y, bj_bitmap_pixel_value(p_bitmap, r, g, b));
+                bj_put_pixel(p_bitmap, x, y, bj_make_bitmap_pixel(p_bitmap, r, g, b));
             }
         }
     }

@@ -141,8 +141,8 @@ typedef void (*bj_audio_callback_t)(
 ///
 /// \see bj_audio_callback_t
 /// \see bj_close_audio_device
-/// \see bj_audio_device_play
-/// \see bj_audio_device_pause
+/// \see bj_play_audio_device
+/// \see bj_pause_audio_device
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_audio_device* bj_open_audio_device(
     const bj_audio_properties* p_properties,
@@ -171,11 +171,11 @@ BANJO_EXPORT void bj_close_audio_device(
 ///
 /// \param p_device Pointer to the audio device.
 ///
-/// \see bj_audio_device_pause
-/// \see bj_audio_device_stop
-/// \see bj_audio_device_is_playing
+/// \see bj_pause_audio_device
+/// \see bj_stop_audio_device
+/// \see bj_audio_playing
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_device_play(
+BANJO_EXPORT void bj_play_audio_device(
     bj_audio_device* p_device
 );
 
@@ -186,11 +186,11 @@ BANJO_EXPORT void bj_audio_device_play(
 ///
 /// \param p_device Pointer to the audio device.
 ///
-/// \see bj_audio_device_play
-/// \see bj_audio_device_stop
-/// \see bj_audio_device_is_playing
+/// \see bj_play_audio_device
+/// \see bj_stop_audio_device
+/// \see bj_audio_playing
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_device_pause(
+BANJO_EXPORT void bj_pause_audio_device(
     bj_audio_device* p_device
 );
 
@@ -201,10 +201,10 @@ BANJO_EXPORT void bj_audio_device_pause(
 ///
 /// \param p_device Pointer to the audio device.
 ///
-/// \see bj_audio_device_stop
+/// \see bj_stop_audio_device
 /// \see bj_audio_callback_t
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_device_reset(
+BANJO_EXPORT void bj_reset_audio_device(
     bj_audio_device* p_device
 );
 
@@ -215,10 +215,10 @@ BANJO_EXPORT void bj_audio_device_reset(
 ///
 /// \param p_device Pointer to the audio device.
 ///
-/// \see bj_audio_device_pause
-/// \see bj_audio_device_reset
+/// \see bj_pause_audio_device
+/// \see bj_reset_audio_device
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_device_stop(
+BANJO_EXPORT void bj_stop_audio_device(
     bj_audio_device* p_device
 );
 
@@ -228,19 +228,19 @@ BANJO_EXPORT void bj_audio_device_stop(
 /// \param p_device Pointer to the audio device.
 /// \return BJ_TRUE if playing, BJ_FALSE if paused or stopped.
 ///
-/// \see bj_audio_device_play
-/// \see bj_audio_device_pause
+/// \see bj_play_audio_device
+/// \see bj_pause_audio_device
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_audio_device_is_playing(
+BANJO_EXPORT bj_bool bj_audio_playing(
     const bj_audio_device* p_device
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define parameters for generating simple waveforms.
 ///
-/// Used with bj_audio_play_note to synthesize tones such as sine or square.
+/// Used with bj_play_audio_note to synthesize tones such as sine or square.
 ///
-/// \see bj_audio_play_note
+/// \see bj_play_audio_note
 ////////////////////////////////////////////////////////////////////////////////
 typedef struct bj_audio_play_note_data_t {
     enum {
@@ -267,7 +267,7 @@ typedef struct bj_audio_play_note_data_t {
 /// \see bj_audio_play_note_data_t
 /// \see bj_audio_callback_t
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_audio_play_note(
+BANJO_EXPORT void bj_play_audio_note(
     void*                      buffer,
     unsigned                   frames,
     const bj_audio_properties* audio,

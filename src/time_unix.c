@@ -4,7 +4,7 @@
 
 #include <time.h>
 
-extern uint64_t bj_time_frequency;
+extern uint64_t bj__time_frequency;
 static clockid_t   s_clock;
 static uint64_t    s_timer_base;
 
@@ -16,7 +16,7 @@ void bj_begin_time(
     void
 ) {
     s_clock = CLOCK_REALTIME;
-    bj_time_frequency = 1000000000;
+    bj__time_frequency = 1000000000;
 
 #if defined(_POSIX_MONOTONIC_CLOCK)
     struct timespec spec;
@@ -25,10 +25,10 @@ void bj_begin_time(
     }
 #endif
 
-    s_timer_base = bj_get_time_counter();
+    s_timer_base = bj_time_counter();
 }
 
-uint64_t bj_time(
+uint64_t bj_get_time(
     void
 ) {
     struct timespec ts;
@@ -37,18 +37,18 @@ uint64_t bj_time(
 }
 
 
-uint64_t bj_get_time_counter(
+uint64_t bj_time_counter(
     void
 ) {
     struct timespec spec;
     clock_gettime(s_clock, &spec);
-    return (uint64_t) spec.tv_sec * bj_time_frequency + (uint64_t) spec.tv_nsec;
+    return (uint64_t) spec.tv_sec * bj__time_frequency + (uint64_t) spec.tv_nsec;
 }
 
-uint64_t bj_get_time_frequency(
+uint64_t bj_time_frequency(
     void
 ) {
-    return bj_time_frequency;
+    return bj__time_frequency;
 }
 
 void bj_sleep(
@@ -60,10 +60,10 @@ void bj_sleep(
     nanosleep(&ts, NULL);
 }
 
-double bj_get_run_time(
+double bj_run_time(
     void
 ) {
-    return (double)(bj_get_time_counter() - s_timer_base) / bj_get_time_frequency();
+    return (double)(bj_time_counter() - s_timer_base) / bj_time_frequency();
 }
 
 #endif

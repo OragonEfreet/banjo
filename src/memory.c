@@ -48,7 +48,7 @@ void bj_free(void* p_memory) {
 }
 
 
-void bj_memory_set_defaults(
+void bj_set_memory_defaults(
     const bj_memory_callbacks* p_allocator
 ) {
     if(p_allocator == 0) {
@@ -68,8 +68,8 @@ void bj_memory_set_defaults(
     }
 }
 
-void bj_memory_unset_defaults(void) {
-    bj_memory_set_defaults(0);
+void bj_unset_memory_defaults(void) {
+    bj_set_memory_defaults(0);
 }
 
 void* bj_memcpy(

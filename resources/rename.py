@@ -95,7 +95,7 @@ RENAME = {
     "bj_error_check": "bj_check_error",
     "bj_forward_error": None,
     "bj_free": None,
-    "bj_get_build_info": "bj_build_info",
+    "bj_get_build_info": "bj_build_information",
     "bj_get_key_name": "bj_key_name",
     "bj_get_run_time": "bj_run_time",
     "bj_get_symbol": "bj_library_symbol",

@@ -166,7 +166,7 @@ BANJO_EXPORT void bj_set_error(
 ///
 /// \return _true_ if `p_error` matches `code`, _false_ otherwise.
 ///
-BANJO_EXPORT bj_bool bj_error_check(
+BANJO_EXPORT bj_bool bj_check_error(
     const bj_error* p_error,
     uint32_t code
 );

@@ -118,8 +118,8 @@ static void update_projection(game_data* data) {
 static void draw(game_data* data) {
     bj_bitmap* target = data->draw.framebuffer;
 
-    const uint32_t color = bj_bitmap_pixel_value(target, 0x00, 0xCC, 0x44);
-    bj_bitmap_clear(target);
+    const uint32_t color = bj_make_bitmap_pixel(target, 0x00, 0xCC, 0x44);
+    bj_clear_bitmap(target);
 
     const float x = data->lander.body.particle.position[0];
     const float y = data->lander.body.particle.position[1];
@@ -139,7 +139,7 @@ static void draw(game_data* data) {
         bj_mat3_mul_vec3(p0, data->draw.projection, q0);
         bj_mat3_mul_vec3(p1, data->draw.projection, q1);
 
-        bj_bitmap_draw_line(
+        bj_draw_line(
             target,
             p0[0], p0[1], 
             p1[0], p1[1], 
@@ -149,14 +149,14 @@ static void draw(game_data* data) {
 
     // UI text
     const unsigned size = 18;
-    const uint32_t white = bj_bitmap_pixel_value(target, 0xAA, 0xAA, 0xAA);
-    bj_bitmap_printf(target, 10, SCREEN_H - 10 - size, size, white, "up: %s  left: %s  right: %s", 
+    const uint32_t white = bj_make_bitmap_pixel(target, 0xAA, 0xAA, 0xAA);
+    bj_draw_textf(target, 10, SCREEN_H - 10 - size, size, white, "up: %s  left: %s  right: %s", 
         data->lander.thrusters.up == BJ_TRUE ? "\x1B[32mYES\x1B[0m" : " \x1B[31mno\x1B[0m",
         data->lander.thrusters.left == BJ_TRUE ? "\x1B[32mYES\x1B[0m" : " \x1B[31mno\x1B[0m",
         data->lander.thrusters.right == BJ_TRUE ? "\x1B[32mYES\x1B[0m" : " \x1B[31mno\x1B[0m"
     );
 
-    bj_bitmap_printf(target, 10, 10, size, white, "angle: \x1B[37m%.2lf\x1B[0m deg", data->lander.body.angular.value * 180.f / BJ_PI);
+    bj_draw_textf(target, 10, 10, size, white, "angle: \x1B[37m%.2lf\x1B[0m deg", data->lander.body.angular.value * 180.f / BJ_PI);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +171,7 @@ static void apply_thrusters(bj_rigid_body_2d* p_body, lander* l) {
             bj_cos(angle) * l->thrusters.magnitude
         );
 
-        bj_particle_apply_force_2d(&p_body->particle, force);
+        bj_apply_particle_force_2d(&p_body->particle, force);
     }
 
     const float torque = BJ_F(10.0);
@@ -198,14 +198,14 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)argc; (void)argv;
 
     bj_error* p_error = 0;
-    if(!bj_begin(&p_error)) {
+    if(!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     } 
 
     game_data* data        = bj_calloc(sizeof(game_data));
-    data->window           = bj_window_new("Moonlander", 0,0, SCREEN_W, SCREEN_H, 0);
-    data->draw.framebuffer = bj_window_get_framebuffer(data->window, 0);
+    data->window           = bj_bind_window("Moonlander", 0,0, SCREEN_W, SCREEN_H, 0);
+    data->draw.framebuffer = bj_get_window_framebuffer(data->window, 0);
 
     bj_vec2_set(data->lander.body.particle.position, BJ_F(0.0), BJ_F(40.0));
     data->lander.body.particle.inverse_mass   = BJ_FI(8.0);
@@ -229,28 +229,28 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
 int bj_app_iterate(void* user_data) {
     game_data* data = (game_data*)user_data;
-    const double dt = bj_stopwatch_step_delay(&data->stopwatch);
+    const double dt = bj_step_delay_stopwatch(&data->stopwatch);
 
     bj_dispatch_events();
 
-    data->lander.thrusters.up    = bj_window_get_key(data->window, BJ_KEY_UP);
-    data->lander.thrusters.right = bj_window_get_key(data->window, BJ_KEY_RIGHT);
-    data->lander.thrusters.left  = bj_window_get_key(data->window, BJ_KEY_LEFT);
+    data->lander.thrusters.up    = bj_get_key(data->window, BJ_KEY_UP);
+    data->lander.thrusters.right = bj_get_key(data->window, BJ_KEY_RIGHT);
+    data->lander.thrusters.left  = bj_get_key(data->window, BJ_KEY_LEFT);
 
     physics(data, dt);
     draw(data);
-    bj_window_update_framebuffer(data->window);
+    bj_update_window_framebuffer(data->window);
 
     bj_sleep(15);
 
-    return bj_window_should_close(data->window) 
+    return bj_should_close_window(data->window) 
          ? bj_callback_exit_success 
          : bj_callback_continue;
 }
 
 int bj_app_end(void* user_data, int status) {
     game_data* data = (game_data*)user_data;
-    bj_window_del(data->window);
-    bj_end(0);
+    bj_unbind_window(data->window);
+    bj_shutdown(0);
     return status;
 }

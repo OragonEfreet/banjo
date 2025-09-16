@@ -27,7 +27,7 @@ void bj_set_error(
     }
 }
 
-bj_bool bj_error_check(
+bj_bool bj_check_error(
     const bj_error* p_error,
     uint32_t code
 ) {

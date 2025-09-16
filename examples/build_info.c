@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
     (void)argv;
 
     bj_info("%s", BANJO_ASSETS_DIR);
-    const bj_build_info* info = bj_get_build_info();
+    const bj_build_info* info = bj_build_information();
 
     bj_info("%s API Version %d.%d.%d (0x%08X), %s build",
         info->p_name,

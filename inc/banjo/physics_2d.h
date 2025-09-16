@@ -38,7 +38,7 @@
 /// \param acceleration  Constant acceleration [L T^-2]
 /// \param time          Elapsed time t [T]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_kinematics_2d(
+BANJO_EXPORT void bj_compute_kinematics_2d(
     bj_real       out[BJ_RESTRICT static 2],
     const bj_real position[BJ_RESTRICT static 2],
     const bj_real velocity[BJ_RESTRICT static 2],
@@ -56,7 +56,7 @@ BANJO_EXPORT void bj_kinematics_2d(
 /// \param acceleration  Constant acceleration [L T^-2]
 /// \param time          Elapsed time t [T]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_kinematics_velocity_2d(
+BANJO_EXPORT void bj_compute_kinematics_velocity_2d(
     bj_real              out[ BJ_RESTRICT static 2 ],
     const bj_real        velocity[ BJ_RESTRICT static 2 ],
     const bj_real        acceleration[ BJ_RESTRICT static 2 ],
@@ -97,7 +97,7 @@ typedef struct bj_particle_2d_t bj_particle_2d;
 /// \param p_particle Particle to modify
 /// \param force      Force to add [M L T^-2]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_particle_apply_force_2d(
+BANJO_EXPORT void bj_apply_particle_force_2d(
     bj_particle_2d* p_particle,
     const bj_vec2 force
 );
@@ -187,7 +187,7 @@ BANJO_EXPORT void bj_apply_drag_2d(
 /// \param k2  Quadratic drag coefficient [M L^-1]
 /// \return c >= 0 [M T^-1]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_real bj_particle_drag_coefficient_2d(
+BANJO_EXPORT bj_real bj_compute_particle_drag_coefficient_2d(
     const bj_vec2 vel,
     const bj_real k1,
     const bj_real k2
@@ -205,7 +205,7 @@ BANJO_EXPORT bj_real bj_particle_drag_coefficient_2d(
 /// \retval BJ_TRUE  result written
 /// \retval BJ_FALSE velocity too small to define direction; result set to (0,0)
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_particle_drag_force_2d(
+BANJO_EXPORT bj_bool bj_compute_particle_drag_force_2d(
     bj_real result[BJ_RESTRICT static 2],
     const bj_real vel[BJ_RESTRICT static 2],
     const bj_real k1,
@@ -287,7 +287,7 @@ typedef struct bj_rigid_body_2d_t bj_rigid_body_2d;
 /// \param body   Rigid body to modify
 /// \param force  Force to add [M L T^-2]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_rigid_body_apply_force_2d(
+BANJO_EXPORT void bj_apply_rigidbody_force_2d(
     bj_rigid_body_2d* body,
     const bj_vec2 force
 );

@@ -56,7 +56,7 @@ typedef struct bj_pcg32_t bj_pcg32;
 /// \param seed      Initial seed value.
 /// \param seq       Stream selector (LSB forced to 1 internally).
 ////////////////////////////////////////////////////////////////////////////////
-void bj_pcg32_seed(
+void bj_seed_pcg32(
     bj_pcg32* generator,
     uint64_t  seed,
     uint64_t  seq
@@ -67,7 +67,7 @@ void bj_pcg32_seed(
 /// \param generator Generator pointer (must not be NULL).
 /// \return Next 32-bit pseudo-random value.
 ////////////////////////////////////////////////////////////////////////////////
-uint32_t bj_pcg32_next(
+uint32_t bj_next_pcg32(
     bj_pcg32* generator
 );
 
@@ -76,7 +76,7 @@ uint32_t bj_pcg32_next(
 /// \param generator Generator pointer (must not be NULL).
 /// \param z         Number of steps to skip ahead.
 ////////////////////////////////////////////////////////////////////////////////
-void bj_pcg32_discard(
+void bj_discard_pcg32(
     bj_pcg32* generator,
     uint64_t  z
 );
@@ -85,13 +85,13 @@ void bj_pcg32_discard(
 /// \brief Smallest possible value returned by the generator.
 /// \return Always 0.
 ////////////////////////////////////////////////////////////////////////////////
-uint32_t bj_pcg32_min(void);
+uint32_t bj_min_pcg32(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Largest possible value returned by the generator.
 /// \return Always 0xFFFFFFFF.
 ////////////////////////////////////////////////////////////////////////////////
-uint32_t bj_pcg32_max(void);
+uint32_t bj_max_pcg32(void);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Adapter for distribution API (void* state).
@@ -103,7 +103,7 @@ uint32_t bj_pcg32_max(void);
 /// \return Next 32-bit pseudo-random value.
 ////////////////////////////////////////////////////////////////////////////////
 static inline uint32_t bj_pcg32_generator(void* state) {
-    return bj_pcg32_next((bj_pcg32*)state);
+    return bj_next_pcg32((bj_pcg32*)state);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

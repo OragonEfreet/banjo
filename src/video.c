@@ -34,7 +34,7 @@ bj_video_layer* bj_begin_video(
         bj_video_layer* p_layer = p_create_info->create(&sub_err);
 
         if(sub_err) {
-            bj_message(p_layer == 0 ? 0 : 1, 0, 0,
+            bj_log_message(p_layer == 0 ? 0 : 1, 0, 0,
                 "while trying %s video layer: %s (code 0x%08X)",
                 p_create_info->name, sub_err->message, sub_err->code
             );

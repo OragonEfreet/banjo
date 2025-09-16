@@ -42,9 +42,9 @@ static void reset_ball(size_t at) {
     const uint8_t b = (uint8_t)(128 + rand() % 128);
 
     switch (rand() % 3) {
-        case 0: balls[at].color = bj_bitmap_pixel_value(framebuffer, 100, g, b); break;
-        case 1: balls[at].color = bj_bitmap_pixel_value(framebuffer, r, 100, b); break;
-        default: balls[at].color = bj_bitmap_pixel_value(framebuffer, r, g, 100); break;
+        case 0: balls[at].color = bj_make_bitmap_pixel(framebuffer, 100, g, b); break;
+        case 1: balls[at].color = bj_make_bitmap_pixel(framebuffer, r, 100, b); break;
+        default: balls[at].color = bj_make_bitmap_pixel(framebuffer, r, g, 100); break;
     }
 
     const bj_real angle_rand = (bj_real)rand() / (bj_real)RAND_MAX;
@@ -75,7 +75,7 @@ static void initialize_balls() {
 static void update(bj_real dt) {
     for(size_t b = 0 ; b < BALLS_LEN ; ++b) {
         balls[b].time_alive += dt;
-        bj_kinematics_2d(
+        bj_compute_kinematics_2d(
             balls[b].position,
             initial_position,
             balls[b].initial_velocity,
@@ -97,10 +97,10 @@ static void update(bj_real dt) {
 }
 
 static void draw() {
-    bj_bitmap_clear(framebuffer);
+    bj_clear_bitmap(framebuffer);
 
     for(size_t b = 0 ; b < BALLS_LEN ; ++b) {
-        bj_bitmap_draw_filled_circle(framebuffer,
+        bj_draw_filled_circle(framebuffer,
             balls[b].position[0], balls[b].position[1], BALLS_RADIUS,
             balls[b].color
         );
@@ -113,15 +113,15 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
-    if(!bj_begin(&p_error)) {
+    if(!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     } 
 
-    window = bj_window_new("2D Kinematics", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    window = bj_bind_window("2D Kinematics", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     bj_set_key_callback(bj_close_on_escape, 0);
 
-    framebuffer = bj_window_get_framebuffer(window, 0);
+    framebuffer = bj_get_window_framebuffer(window, 0);
 
     initialize_balls();
 
@@ -132,20 +132,20 @@ int bj_app_iterate(void* user_data) {
     (void)user_data;
     bj_dispatch_events();
 
-    update(bj_stopwatch_step_delay(&stopwatch));
+    update(bj_step_delay_stopwatch(&stopwatch));
     draw();
-    bj_window_update_framebuffer(window);
+    bj_update_window_framebuffer(window);
     bj_sleep(15);
 
-    return bj_window_should_close(window) 
+    return bj_should_close_window(window) 
          ? bj_callback_exit_success 
          : bj_callback_continue;
 }
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
-    bj_window_del(window);
-    bj_end(0);
+    bj_unbind_window(window);
+    bj_shutdown(0);
     return status;
 }
 

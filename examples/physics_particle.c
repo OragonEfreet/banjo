@@ -88,7 +88,7 @@ static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj
 }
 
 static void init_asteroids() {
-    asteroid_color = bj_bitmap_pixel_value(framebuffer, 0xB0, 0xB0, 0xB0);
+    asteroid_color = bj_make_bitmap_pixel(framebuffer, 0xB0, 0xB0, 0xB0);
     for (size_t i = 0; i < N_ASTEROIDS; ++i) {
         const bj_real rmin = BJ_F(190.0), rmax = BJ_F(260.0);
         const bj_real t = (bj_real)rand() / (bj_real)RAND_MAX;
@@ -114,11 +114,11 @@ static void init_asteroids() {
 static void initialize() {
     init_sun();
 
-    uint32_t col_mercury = bj_bitmap_pixel_value(framebuffer, 0xC8, 0xC8, 0xC8);
-    uint32_t col_venus   = bj_bitmap_pixel_value(framebuffer, 0xD4, 0xA3, 0x58);
-    uint32_t col_earth   = bj_bitmap_pixel_value(framebuffer, 0x30, 0xA0, 0xFF);
-    uint32_t col_mars    = bj_bitmap_pixel_value(framebuffer, 0xD0, 0x50, 0x30);
-    uint32_t col_jupiter = bj_bitmap_pixel_value(framebuffer, 0xD2, 0xB4, 0x8C);
+    uint32_t col_mercury = bj_make_bitmap_pixel(framebuffer, 0xC8, 0xC8, 0xC8);
+    uint32_t col_venus   = bj_make_bitmap_pixel(framebuffer, 0xD4, 0xA3, 0x58);
+    uint32_t col_earth   = bj_make_bitmap_pixel(framebuffer, 0x30, 0xA0, 0xFF);
+    uint32_t col_mars    = bj_make_bitmap_pixel(framebuffer, 0xD0, 0x50, 0x30);
+    uint32_t col_jupiter = bj_make_bitmap_pixel(framebuffer, 0xD2, 0xB4, 0x8C);
 
     init_planet(&planets[0], BJ_F(60.0),  M_MERCURY, col_mercury, BJ_F(2.0), BJ_F(0.0));
     init_planet(&planets[1], BJ_F(90.0),  M_VENUS,   col_venus,   BJ_F(3.0), BJ_F(1.2));
@@ -147,25 +147,25 @@ static void physics(bj_real dt) {
 }
 
 static void draw() {
-    bj_bitmap_clear(framebuffer);
+    bj_clear_bitmap(framebuffer);
 
-    const uint32_t col_sun = bj_bitmap_pixel_value(framebuffer, 0xFF, 0xCC, 0x44);
+    const uint32_t col_sun = bj_make_bitmap_pixel(framebuffer, 0xFF, 0xCC, 0x44);
 
     bj_vec3 c = { sun.position[0], sun.position[1], BJ_F(1.0) };
     bj_vec3 pc;
     bj_mat3_mul_vec3(pc, projection, c);
-    bj_bitmap_draw_filled_circle(framebuffer, pc[0], pc[1], BJ_F(10.0), col_sun);
+    bj_draw_filled_circle(framebuffer, pc[0], pc[1], BJ_F(10.0), col_sun);
 
     for (size_t i = 0; i < N_PLANETS; ++i) {
         c[0] = planets[i].body.position[0]; c[1] = planets[i].body.position[1];
         bj_mat3_mul_vec3(pc, projection, c);
-        bj_bitmap_draw_filled_circle(framebuffer, pc[0], pc[1], planets[i].radius, planets[i].color);
+        bj_draw_filled_circle(framebuffer, pc[0], pc[1], planets[i].radius, planets[i].color);
     }
 
     for (size_t i = 0; i < N_ASTEROIDS; ++i) {
         c[0] = asteroids[i].position[0]; c[1] = asteroids[i].position[1];
         bj_mat3_mul_vec3(pc, projection, c);
-        bj_bitmap_put_pixel(framebuffer, (int)pc[0], (int)pc[1], asteroid_color);
+        bj_put_pixel(framebuffer, (int)pc[0], (int)pc[1], asteroid_color);
     }
 }
 
@@ -175,15 +175,15 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     srand((unsigned)time(NULL));
 
     bj_error* p_error = 0;
-    if (!bj_begin(&p_error)) {
+    if (!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     }
 
-    window = bj_window_new("2D Solar System + Asteroids", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    window = bj_bind_window("2D Solar System + Asteroids", 100, 100, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     bj_set_key_callback(bj_close_on_escape, 0);
 
-    framebuffer = bj_window_get_framebuffer(window, 0);
+    framebuffer = bj_get_window_framebuffer(window, 0);
 
     update_projection();
     initialize();
@@ -198,17 +198,17 @@ int bj_app_iterate(void* user_data) {
     update(bj_stopwatch_elapsed(&stopwatch));
     physics(bj_stopwatch_delay(&stopwatch));
     draw();
-    bj_window_update_framebuffer(window);
+    bj_update_window_framebuffer(window);
     bj_sleep(15);
 
-    return bj_window_should_close(window)
+    return bj_should_close_window(window)
          ? bj_callback_exit_success
          : bj_callback_continue;
 }
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
-    bj_window_del(window);
-    bj_end(0);
+    bj_unbind_window(window);
+    bj_shutdown(0);
     return status;
 }

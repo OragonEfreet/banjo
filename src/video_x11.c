@@ -105,13 +105,13 @@ typedef struct {
 } x11_window;
 
 static void* x11_get_symbol(x11* p_x11, const char* p_name) {
-    return bj_get_symbol(p_x11->p_handle, p_name);
+    return bj_library_symbol(p_x11->p_handle, p_name);
 }
 
 static void x11_wait_for_map_notify(x11* p_x11, Window window) {
-    double start_time = bj_get_run_time();
+    double start_time = bj_run_time();
 
-    while ((bj_get_run_time() - start_time) < 1.f) {
+    while ((bj_run_time() - start_time) < 1.f) {
         while (p_x11->XPending(p_x11->display)) {
             XEvent event;
             p_x11->XNextEvent(p_x11->display, &event);
@@ -290,7 +290,7 @@ static void x11_dispatch_callback(
             if (event->xclient.message_type == p_x11->wm_protocols) {
                 
                 if ((Atom)event->xclient.data.l[0] == p_x11->wm_delete_window) {
-                    bj_window_set_should_close(&p_window->common);
+                    bj_set_window_should_close(&p_window->common);
                 }
             }
             return;
@@ -634,7 +634,7 @@ static bj_bitmap* x11_create_window_framebuffer(
         return 0;
     }
 
-    bj_bitmap* p_bitmap = bj_bitmap_new(
+    bj_bitmap* p_bitmap = bj_create_bitmap(
         attributes.width,
         attributes.height,
         mode, 0

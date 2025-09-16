@@ -228,7 +228,7 @@ static bj_bitmap* emscripten_create_window_framebuffer(
     (void)p_layer;
     (void)p_error;
     emscripten_window* p_window = (emscripten_window*)p_abstract_window;
-    return bj_bitmap_new(
+    return bj_create_bitmap(
         p_window->width, p_window->height,
         BJ_PIXEL_MODE_XRGB8888, 0
     );

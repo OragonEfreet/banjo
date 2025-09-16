@@ -25,7 +25,7 @@ static BJ_INLINE void bj_kinematics_velocity_array(
     }
 }
 
-void bj_kinematics_2d(
+void bj_compute_kinematics_2d(
     bj_real       out[BJ_RESTRICT static 2],
     const bj_real position[BJ_RESTRICT static 2],
     const bj_real velocity[BJ_RESTRICT static 2],
@@ -35,7 +35,7 @@ void bj_kinematics_2d(
     bj_kinematics_array(2, out, position, velocity, acceleration, time);
 }
 
-void bj_kinematics_velocity_2d(
+void bj_compute_kinematics_velocity_2d(
     bj_real              out[ BJ_RESTRICT static 2 ],
     const bj_real        velocity[ BJ_RESTRICT static 2 ],
     const bj_real        acceleration[ BJ_RESTRICT static 2 ],
