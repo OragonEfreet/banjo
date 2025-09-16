@@ -1,9 +1,7 @@
-/// \file
+/// \file error.h
 /// Recoverable error handling
-///
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup error Error Management
-/// \ingroup core
 ///
 /// \brief Recoverable error handling facilities
 ///
@@ -23,6 +21,7 @@
 /// \snippet handling_errors.c Return Errors
 ///
 /// \{
+////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_ERROR_H
 #define BJ_ERROR_H
 

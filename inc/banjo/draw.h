@@ -1,9 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
+/// \file draw.h
 /// Header file for \ref bitmap drawing functions.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup drawing Drawing
-/// \ingroup graphics
+/// \ingroup bitmap
 ///
 /// \brief 2D drawing facilities
 /// \{
@@ -124,6 +124,17 @@ BANJO_EXPORT void bj_bitmap_draw_triangle(
     uint32_t   color
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Draw the outline of a circle onto a bitmap.
+///
+/// Uses the midpoint circle algorithm (integer arithmetic).
+///
+/// \param p_bitmap Target bitmap (must not be NULL).
+/// \param cx       X-coordinate of circle center (pixels).
+/// \param cy       Y-coordinate of circle center (pixels).
+/// \param radius   Circle radius in pixels (>= 0).
+/// \param color    Pixel color in 0xAARRGGBB format.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_bitmap_draw_circle(
     bj_bitmap* p_bitmap,
     int        cx,
@@ -132,6 +143,17 @@ BANJO_EXPORT void bj_bitmap_draw_circle(
     uint32_t   color
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Draw a filled circle onto a bitmap.
+///
+/// Fills all pixels within radius distance from (cx, cy).
+///
+/// \param p_bitmap Target bitmap (must not be NULL).
+/// \param cx       X-coordinate of circle center (pixels).
+/// \param cy       Y-coordinate of circle center (pixels).
+/// \param radius   Circle radius in pixels (>= 0).
+/// \param color    Pixel color in 0xAARRGGBB format.
+////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_bitmap_draw_filled_circle(
     bj_bitmap* p_bitmap,
     int        cx,

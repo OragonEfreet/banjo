@@ -4,14 +4,11 @@
 #include <banjo/math.h>
 #include <banjo/vec.h>
 
-#define BJ_GRAVITATIONAL_CONSTANT_SI BJ_F(6.67430e-11)
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \file physics.h
 /// Physics helpers (SI units, but dimensionally consistent with any unit system).
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup physics Physics
-/// \ingroup core
 ///
 /// \brief Basic physics utilities (constant-acceleration kinematics, etc.)
 ///
@@ -29,6 +26,18 @@
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+/// \def BJ_GRAVITATIONAL_CONSTANT_SI
+/// \brief Newtonian constant of gravitation in SI units.
+///
+/// Defines the physical constant G = 6.67430 × 10⁻¹¹ m³·kg⁻¹·s⁻²,
+/// expressed in the active \ref bj_real precision type.
+///
+/// \note Use only when working in SI units (meters, kilograms, seconds).
+////////////////////////////////////////////////////////////////////////////////
+#define BJ_GRAVITATIONAL_CONSTANT_SI BJ_F(6.67430e-11)
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Galileo’s uniformly accelerated motion — position at time \a t.

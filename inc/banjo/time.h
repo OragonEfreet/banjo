@@ -15,6 +15,15 @@
 #include <banjo/api.h>
 #include <banjo/error.h>
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Get the current system time in seconds since the Unix epoch.
+///
+/// The returned value is the number of whole seconds elapsed since
+/// 1970-01-01 00:00:00 UTC (Unix epoch). This is the standard "wall-clock"
+/// system time.
+///
+/// \return Seconds since Unix epoch
+////////////////////////////////////////////////////////////////////////////////
 uint64_t bj_time(
     void
 );

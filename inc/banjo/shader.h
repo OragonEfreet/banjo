@@ -1,10 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file shader.h
 /// \brief Basic shader-like bitmap manipulation
-///
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup shaders Shaders
-/// \ingroup graphics
+/// \ingroup bitmap
 ///
 /// Software shader-like API for \ref bj_bitmap.
 ///
@@ -16,13 +15,10 @@
 /// Such function is passed to \ref bj_bitmap_apply_shader which calls the
 /// shader fonction on every pixel of the bitmap.
 ///
-/// This header file also provides some math functions usually found in
-/// most shader languages, such as \ref bj_step and \ref bj_smoothstep.
-/// Other useful math-related functions can be found in \ref math.h.
+/// Useful math-related functions can be found in \ref math.h.
 ///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
-
 #ifndef BJ_SHADER_H
 #define BJ_SHADER_H
 

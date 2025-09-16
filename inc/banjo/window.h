@@ -1,9 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file
+/// \file window.h
 /// Header file for \ref bj_window type.
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup window Windows
-/// \ingroup system
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -122,9 +121,15 @@ BANJO_EXPORT uint8_t bj_window_get_flags(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Query the current state of a key for a given window.
-/// Returns one of `BJ_RELEASE` or `BJ_PRESS`.
-/// If p_window is 0 or key is out of range [0,0xFE], BJ_RELEASE is returned.
+/// \brief Query the current state of a key for a given window.
+///
+/// Returns the state of the specified key as either `BJ_RELEASE` or `BJ_PRESS`.
+/// If \p p_window is NULL or if \p key is outside the valid range [0, 0xFE],
+/// the function returns `BJ_RELEASE`.
+///
+/// \param p_window Pointer to the target window, or NULL
+/// \param key      Key code in [0, 0xFE]
+/// \return `BJ_PRESS` if the key is currently pressed, `BJ_RELEASE` otherwise
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT int bj_window_get_key(
     const bj_window* p_window,
