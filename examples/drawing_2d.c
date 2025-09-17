@@ -29,21 +29,9 @@ void draw(bj_bitmap* bmp) {
     }
 
     // Draw lines (shapes a banjo)
-    int points[][2] = {
-        {100, 20},  {95,  25},  {95,  50},  {100, 55},  {100, 100}, {95,  100},
-        {75,  120}, {75,  145}, {95,  165}, {120, 165}, {140, 145}, {140, 120},
-        {120, 100}, {115, 100}, {115, 55},  {120, 50},  {120, 25},  {115, 20},
-    };
-
-    for (size_t p = 0; p < 18; ++p) {
-        bj_draw_line(bmp,
-            points[p][0],
-            points[p][1],
-            points[(p + 1) % 18][0],
-            points[(p + 1) % 18][1],
-            color_cyan
-        );
-    }
+    int poly_x[] = { 100, 95, 95, 100, 100, 95,  75,  75,  95,  120, 140, 140, 120, 115, 115, 120, 120, 115, };
+    int poly_y[] = { 20,  25, 50, 55,  100, 100, 120, 145, 165, 165, 145, 120, 100, 100, 55,  50,  25,  20, };
+    bj_draw_polyline(bmp, 18, poly_x, poly_y, BJ_TRUE, color_cyan);
 
     // Draw triangles (shapes a fox)
     int verts[][2] = {

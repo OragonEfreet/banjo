@@ -162,5 +162,28 @@ BANJO_EXPORT void bj_draw_filled_circle(
     uint32_t   color
 );
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Draw a polyline from C-style coordinate arrays.
+///
+/// Draws line segments between successive vertex pairs (x[i], y[i]) -> (x[i+1], y[i+1]).
+/// If loop != 0 and count >= 2, an extra segment connects the last vertex to the first.
+///
+/// \param p_bitmap Target bitmap.
+/// \param x        Pointer to array of x coordinates (length >= count).
+/// \param y        Pointer to array of y coordinates (length >= count).
+/// \param count    Number of vertices. Segments drawn for i = 0..count-2.
+/// \param color    Pixel color in 0xAARRGGBB format.
+/// \param loop     Nonzero to close the polyline.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_draw_polyline(
+    bj_bitmap*   p_bitmap,
+    size_t       count,
+    const int*   x,
+    const int*   y,
+    bj_bool      loop,
+    uint32_t     color
+);
+
+
 #endif
 /// \} // End of drawing group

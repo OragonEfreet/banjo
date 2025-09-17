@@ -185,3 +185,27 @@ void bj_draw_filled_circle(
         }
     }
 }
+
+void bj_draw_polyline(
+    bj_bitmap*   bmp,
+    size_t       count,
+    const int*   x,
+    const int*   y,
+    bj_bool      loop,
+    uint32_t     color
+){
+    if (!bmp || !x || !y || count <= 0) {
+        return;
+    }
+    if (count == 1) {
+        // single point: draw nothing
+        return;
+    }
+    // draw consecutive segments
+    for (size_t i = 0; i < count - 1; ++i) {
+        bj_draw_line(bmp, x[i], y[i], x[i+1], y[i+1], color);
+    }
+    if (loop && count >= 2) {
+        bj_draw_line(bmp, x[count-1], y[count-1], x[0], y[0], color);
+    }
+}
