@@ -1,0 +1,38 @@
+////////////////////////////////////////////////////////////////////////////////
+/// \file geometry_2d.h
+/// 2D Geometry helpers
+////////////////////////////////////////////////////////////////////////////////
+/// \defgroup geometry
+/// \ingroup math
+///
+/// \brief 2D Geometry utilities
+///
+/// \{
+////////////////////////////////////////////////////////////////////////////////
+#ifndef BJ_GEOMETRY_2D_H
+#define BJ_GEOMETRY_2D_H
+
+#include <banjo/api.h>
+#include <banjo/vec.h>
+
+// Return 1 if segments [a0,a1] and [b0,b1] intersect, else 0.
+BANJO_EXPORT bj_bool bj_check_segments_hit(
+    const bj_vec2 a0,
+    const bj_vec2 a1,
+    const bj_vec2 b0,
+    const bj_vec2 b1
+);
+
+BANJO_EXPORT bj_bool bj_check_circle_segment_hit(
+    const bj_vec2 c,
+    bj_real       r,
+    const bj_vec2 l0, 
+    const bj_vec2 l1
+);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// \}
+////////////////////////////////////////////////////////////////////////////////
+
+#endif /* BJ_GEOMETRY_2D_H */
