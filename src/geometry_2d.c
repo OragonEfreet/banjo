@@ -6,8 +6,6 @@ BANJO_EXPORT bj_bool bj_check_segments_hit(
     const bj_vec2 b0,
     const bj_vec2 b1
 ) {
-    const bj_real EPS = BJ_EPSILON;
-
     bj_vec2 r, s, qp;
     bj_vec2_sub(r, a1, a0);
     bj_vec2_sub(s, b1, b0);
@@ -22,18 +20,17 @@ BANJO_EXPORT bj_bool bj_check_segments_hit(
             bj_vec2 ab0; bj_vec2_sub(ab0, a0, b0);
             bj_real ss = bj_vec2_dot(s, s);
             if (bj_real_is_zero(ss)) {
-                return bj_vec2_dot(ab0, ab0) <= EPS*EPS;
+                return bj_vec2_dot(ab0, ab0) <= BJ_EPSILON*BJ_EPSILON;
             }
             bj_real t = bj_vec2_dot(ab0, s) / ss;
-            return bj_real_lte(BJ_F(0.0), t) && bj_real_lte(t, BJ_F(1.0)); // :contentReference[oaicite:3]{index=3}
+            return bj_real_lte(BJ_F(0.0), t) && bj_real_lte(t, BJ_F(1.0));
         }
 
         const bj_real t0 = bj_vec2_dot(qp, r) / rr;
         const bj_real t1 = t0 + bj_vec2_dot(s, r) / rr;
         const bj_real lo = (t0 < t1) ? t0 : t1;
         const bj_real hi = (t0 < t1) ? t1 : t0;
-        return bj_real_lte(BJ_F(0.0), hi) && bj_real_lte(lo, BJ_F(1.0));   // :contentReference[oaicite:4]{index=4}
-    }
+        return bj_real_lte(BJ_F(0.0), hi) && bj_real_lte(lo, BJ_F(1.0)); }
 
     if (bj_real_is_zero(rxs)) return 0;
 
@@ -48,14 +45,13 @@ BANJO_EXPORT bj_bool bj_check_segments_hit(
 bj_bool bj_check_circle_segment_hit(
     const bj_vec2 c,
     bj_real       r,
-    const bj_vec2 l0, 
+    const bj_vec2 l0,
     const bj_vec2 l1
 ) {
-    const bj_real EPS = BJ_EPSILON;
 
     bj_vec2 d;  bj_vec2_sub(d, l1, l0);
     bj_real dd = bj_vec2_dot(d, d);
-    if (dd <= EPS) { // segment dégénéré -> point
+    if (dd <= BJ_EPSILON) { // segment dégénéré -> point
         bj_vec2 v; bj_vec2_sub(v, l0, c);
         return bj_vec2_dot(v, v) <= r*r;
     }

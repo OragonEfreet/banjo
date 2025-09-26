@@ -97,6 +97,7 @@
 
 #define bj_absf       fabsf      ///< Absolute value (float)
 #define bj_acosf      acosf      ///< Arc cosine (float)
+#define bj_atan2f     atan2f     ///< Arc tangent (float)
 #define bj_copysignf  copysignf  ///< Copy sign (float)
 #define bj_cosf       cosf       ///< Cosine (float)
 #define bj_expf       expf       ///< Exponential (float)
@@ -121,6 +122,7 @@
 
 #define bj_absd       fabs       ///< Absolute value (double)
 #define bj_acosd      acos       ///< Arc cosine (double)
+#define bj_atan2d     atan2      ///< Arc tangent (float)
 #define bj_copysignd  copysign   ///< Copy sign (double)
 #define bj_cosd       cos        ///< Cosine (double)
 #define bj_expd       exp        ///< Exponential (double)
@@ -145,6 +147,7 @@
 
 #define bj_absl       fabsl      ///< Absolute value (long double)
 #define bj_acosl      acosl      ///< Arc cosine (long double)
+#define bj_atan2l     atan2l     ///< Arc tangent (float)
 #define bj_copysignl  copysignl  ///< Copy sign (long double)
 #define bj_cosl       cosl       ///< Cosine (long double)
 #define bj_expl       expl       ///< Exponential (long double)
@@ -170,6 +173,7 @@
 #if defined(BJ_API_LONG_DOUBLE)
     #define bj_abs       bj_absl
     #define bj_acos      bj_acosl
+    #define bj_atan2     bj_atan2l
     #define bj_copysign  bj_copysignl
     #define bj_cos       bj_cosl
     #define bj_exp       bj_expl
@@ -186,6 +190,7 @@
 #elif defined(BJ_API_FLOAT64)
     #define bj_abs       bj_absd
     #define bj_acos      bj_acosd
+    #define bj_atan2     bj_atan2d
     #define bj_copysign  bj_copysignd
     #define bj_cos       bj_cosd
     #define bj_exp       bj_expd
@@ -200,21 +205,22 @@
     #define bj_sqrt      bj_sqrtd
     #define bj_tan       bj_tand
 #else
-    #define bj_abs       bj_absf      ///< Absolute value (float)
-    #define bj_acos      bj_acosf     ///< Arc cosine (float)
-    #define bj_copysign  bj_copysignf ///< Copy sign (float)
-    #define bj_cos       bj_cosf      ///< Cosine (float)
-    #define bj_exp       bj_expf      ///< Exponential (float)
-    #define bj_floor     bj_floorf    ///< Floor (float)
-    #define bj_fmod      bj_fmodf     ///< Floating modulus (float)
-    #define bj_log       bj_logf      ///< Natural logarithm (float)
+    #define bj_abs       bj_absf      ///< Absolute value 
+    #define bj_acos      bj_acosf     ///< Arc cosine 
+    #define bj_atan2     bj_atan2f    ///< Arc tangent 
+    #define bj_copysign  bj_copysignf ///< Copy sign 
+    #define bj_cos       bj_cosf      ///< Cosine 
+    #define bj_exp       bj_expf      ///< Exponential 
+    #define bj_floor     bj_floorf    ///< Floor 
+    #define bj_fmod      bj_fmodf     ///< Floating modulus 
+    #define bj_log       bj_logf      ///< Natural logarithm 
     #define bj_max       bj_maxf      ///< Maximum of two floats
     #define bj_min       bj_minf      ///< Minimum of two floats
-    #define bj_pow       bj_powf      ///< Power (float)
-    #define bj_round     bj_roundf    ///< Round to nearest integer (float)
-    #define bj_sin       bj_sinf      ///< Sine (float)
-    #define bj_sqrt      bj_sqrtf     ///< Square root (float)
-    #define bj_tan       bj_tanf      ///< Tangent (float)
+    #define bj_pow       bj_powf      ///< Power 
+    #define bj_round     bj_roundf    ///< Round to nearest integer 
+    #define bj_sin       bj_sinf      ///< Sine 
+    #define bj_sqrt      bj_sqrtf     ///< Square root 
+    #define bj_tan       bj_tanf      ///< Tangent 
 #endif
 
 /// @}
