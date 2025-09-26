@@ -131,6 +131,14 @@ static BJ_INLINE bj_real bj_vec2_dot(const bj_vec2 a, const bj_vec2 b) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// 2D "cross product" (perp dot): returns scalar a.x*b.y - a.y*b.x.
+/// Useful for orientation tests, signed area, segment intersection.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_real bj_vec2_cross(const bj_vec2 a, const bj_vec2 b) {
+    return a[0]*b[1] - a[1]*b[0];
+}
+
+////////////////////////////////////////////////////////////////////////////////
 /// Euclidean length (L2 norm) of a 2D vector.
 /// \param v Input vector.
 /// \returns The Euclidean norm.
