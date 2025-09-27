@@ -106,8 +106,8 @@ bj_real bj_compute_particle_drag_coefficient_2d(
 }
 
 bj_bool bj_compute_particle_drag_force_2d(
-    bj_real result[BJ_RESTRICT static 2],
-    const bj_real vel[BJ_RESTRICT static 2],
+    BJ_ARRAY      (bj_real, 2, result),
+    BJ_CONST_ARRAY(bj_real, 2, vel),
     const bj_real k1,
     const bj_real k2
 ) {

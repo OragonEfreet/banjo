@@ -52,16 +52,6 @@ static struct mme_lib_t {
     pfn_waveOutUnprepareHeader waveOutUnprepareHeader;
 } MME = { 0 };
 
-static void mme_set_error(bj_error** p_error, MMRESULT result) {
-    char msg[256] = { 0 };
-    if (MME.waveOutGetErrorTextA(result, msg, sizeof(msg)) == MMSYSERR_NOERROR) {
-        bj_set_error(p_error, BJ_ERROR_AUDIO, msg);
-    }
-    else {
-        bj_set_error(p_error, BJ_ERROR_AUDIO, "MME error");
-    }
-}
-
 static void mme_unload_library(void) {
     if (MME.dll) {
         bj_unload_library(MME.dll);
@@ -105,6 +95,9 @@ static void CALLBACK waveOutProcWrap(
     DWORD_PTR dwParam1,
     DWORD_PTR dwParam2
 ) {
+    (void)hWaveOut;
+    (void)dwParam1;
+    (void)dwParam2;
     if (uMsg == WOM_DONE) {
         bj_audio_device* dev = (bj_audio_device*)dwInstance;
         mme_device* mme = (mme_device*)dev->data;
@@ -138,7 +131,7 @@ static void mme_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device)
 }
 
 static DWORD WINAPI mme_playback_thread(LPVOID param) {
-    bj_check(param);
+    bj_check_or_0(param);
     bj_audio_device* dev = (bj_audio_device*)param;
     mme_device* mme = (mme_device*)dev->data;
 
@@ -170,11 +163,11 @@ static DWORD WINAPI mme_playback_thread(LPVOID param) {
             size_t block_bytes = total_frames * channels * bps;
 
             if (dev->silence == 0) {
-                memset(hdr->lpData, 0, block_bytes);
+                bj_memset(hdr->lpData, 0, block_bytes);
             } else {
                 uint8_t* dst = (uint8_t*)hdr->lpData;
                 for (size_t i = 0; i < total_frames * channels; ++i) {
-                    memcpy(dst + i * bps, &dev->silence, bps);
+                    bj_memcpy(dst + i * bps, &dev->silence, bps);
                 }
             }
         }

@@ -20,22 +20,22 @@ int bj_call_main(int ignore_argc, char* ignore_argv[], int (*function)(int argc,
     (void)ignore_argc;(void)ignore_argv;
     int argc = 0;
     LPWSTR* argvw = CommandLineToArgvW(GetCommandLineW(), &argc);
-    assert(argvw != NULL);
+    assert(argvw != 0);
 
     char** argv = (char**)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, (argc + 1) * sizeof(*argv));
-    assert(argv != NULL);
+    assert(argv != 0);
     int i;
     for (i = 0; i < argc; ++i) {
-        const int utf8_size = WideCharToMultiByte(CP_UTF8, 0, argvw[i], -1, NULL, 0, NULL, NULL);
+        const int utf8_size = WideCharToMultiByte(CP_UTF8, 0, argvw[i], -1, 0, 0, 0, 0);
         assert(utf8_size > 0);
 
         argv[i] = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, utf8_size);
-        assert(argv[i] > NULL);
+        assert(argv[i] > 0);
 
-        const int bytes_written = WideCharToMultiByte(CP_UTF8, 0, argvw[i], -1, argv[i], utf8_size, NULL, NULL);
+        const int bytes_written = WideCharToMultiByte(CP_UTF8, 0, argvw[i], -1, argv[i], utf8_size, 0, 0);
         assert(bytes_written > 0);
     }
-    argv[i] = NULL;
+    argv[i] = 0;
     LocalFree(argvw);
     const int main_res = function(argc, argv);
     for (i = 0; i < argc; ++i) {

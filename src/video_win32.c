@@ -104,6 +104,27 @@ static void win32_window_del(
     bj_free(p_window);
 }
 
+
+
+static int win32_get_window_size(
+    bj_video_layer* p_video,
+    const bj_window* p_abstract_window,
+    int* width,
+    int* height
+) {
+    (void)p_video;
+    win32_window* p_window = (win32_window*)p_abstract_window;
+    RECT rect;
+
+    if (GetClientRect(p_window->handle, &rect)) {
+        *width = rect.right;
+        *height = rect.bottom;
+        return 1;
+    }
+
+    return 0;
+}
+
 static bj_bitmap* win32_create_window_framebuffer(
     bj_video_layer* p_video,
     const bj_window* p_abstract_window,
@@ -113,13 +134,13 @@ static bj_bitmap* win32_create_window_framebuffer(
 
     int width = 0;
     int height = 0;
-    if (!win32_get_window_size(p_video, p_window, &width, &height)) {
+    if (!win32_get_window_size(p_video, (const bj_window*)p_window, &width, &height)) {
         bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot get window dimension");
         return 0;
     }
 
     win32_delete_window_framebuffer(p_window);
-    
+
     const size_t info_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
     LPBITMAPINFO p_bmp_info = bj_malloc(info_size);
     bj_memset(p_bmp_info, 0, info_size);
@@ -147,7 +168,7 @@ static bj_bitmap* win32_create_window_framebuffer(
 
     const size_t stride = bj_compute_bitmap_stride(width, pixel_mode);
 
-    if(stride == 0) {
+    if (stride == 0) {
         bj_set_error(p_error, BJ_ERROR_VIDEO, "Invalid window pixel format");
         bj_free(p_bmp_info);
         return 0;
@@ -172,26 +193,6 @@ static bj_bitmap* win32_create_window_framebuffer(
     return bj_create_bitmap_from_pixels(pixels, width, height, pixel_mode, stride);
 }
 
-static int win32_get_window_size(
-    bj_video_layer* p_video,
-    const bj_window* p_abstract_window,
-    int* width,
-    int* height
-) {
-    (void)p_video;
-    win32_window* p_window = (win32_window*)p_abstract_window;
-    HWND handle = p_window->handle;
-    RECT rect;
-
-    if (GetClientRect(p_window->handle, &rect)) {
-        *width = rect.right;
-        *height = rect.bottom;
-        return 1;
-    }
-
-    return 0;
-}
-
 static void win32_flush_window_framebuffer(
     bj_video_layer* p_video,
     const bj_window*   p_abstract_window
@@ -201,7 +202,7 @@ static void win32_flush_window_framebuffer(
 
     int width = 0;
     int height = 0;
-    if (win32_get_window_size(p_video, p_window, &width, &height)) {
+    if (win32_get_window_size(p_video, (const bj_window*)p_window, &width, &height)) {
         BitBlt(p_window->hdc, 0, 0, width, height, p_window->fbdc, 0, 0, SRCCOPY);
     }
 }

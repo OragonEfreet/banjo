@@ -39,10 +39,10 @@
 /// \param time          Elapsed time t [T]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_compute_kinematics_2d(
-    bj_real       out[BJ_RESTRICT static 2],
-    const bj_real position[BJ_RESTRICT static 2],
-    const bj_real velocity[BJ_RESTRICT static 2],
-    const bj_real acceleration[BJ_RESTRICT static 2],
+    BJ_ARRAY      (bj_real, 2, out),
+    BJ_CONST_ARRAY(bj_real, 2, position),
+    BJ_CONST_ARRAY(bj_real, 2, velocity),
+    BJ_CONST_ARRAY(bj_real, 2, acceleration),
     bj_real time
 );
 
@@ -57,10 +57,10 @@ BANJO_EXPORT void bj_compute_kinematics_2d(
 /// \param time          Elapsed time t [T]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_compute_kinematics_velocity_2d(
-    bj_real              out[ BJ_RESTRICT static 2 ],
-    const bj_real        velocity[ BJ_RESTRICT static 2 ],
-    const bj_real        acceleration[ BJ_RESTRICT static 2 ],
-    bj_real              time
+    BJ_ARRAY      (bj_real, 2, out),
+    BJ_CONST_ARRAY(bj_real, 2, velocity),
+    BJ_CONST_ARRAY(bj_real, 2, acceleration),
+    bj_real time
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,7 +85,6 @@ struct bj_particle_2d_t {
     bj_real damping;
     bj_real inverse_mass;
 };
-/// \brief Alias for bj_particle_2d_t.
 typedef struct bj_particle_2d_t bj_particle_2d;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +125,7 @@ BANJO_EXPORT void bj_step_particle_2d(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_gravity_2d(
     bj_particle_2d* p_particle,
-    bj_real           gravity
+    bj_real gravity
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +139,7 @@ BANJO_EXPORT void bj_apply_gravity_2d(
 /// \param gravity_factor   Gravitational constant G [L^3 M^-1 T^-2]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_point_gravity_2d(
-    bj_particle_2d* BJ_RESTRICT       p_particle_from,
+    bj_particle_2d*       BJ_RESTRICT p_particle_from,
     const bj_particle_2d* BJ_RESTRICT p_particle_to,
     const bj_real                     gravity_factor
 );
@@ -158,8 +157,8 @@ BANJO_EXPORT void bj_apply_point_gravity_2d(
 BANJO_EXPORT void bj_apply_point_gravity_softened_2d(
     bj_particle_2d*       BJ_RESTRICT p_particle_from,
     const bj_particle_2d* BJ_RESTRICT p_particle_to,
-    const bj_real                       gravity_factor,
-    const bj_real                       epsilon
+    const bj_real                     gravity_factor,
+    const bj_real                     epsilon
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -206,8 +205,8 @@ BANJO_EXPORT bj_real bj_compute_particle_drag_coefficient_2d(
 /// \retval BJ_FALSE velocity too small to define direction; result set to (0,0)
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_compute_particle_drag_force_2d(
-    bj_real result[BJ_RESTRICT static 2],
-    const bj_real vel[BJ_RESTRICT static 2],
+    BJ_ARRAY      (bj_real, 2, result),
+    BJ_CONST_ARRAY(bj_real, 2, vel),
     const bj_real k1,
     const bj_real k2
 );
@@ -237,7 +236,6 @@ struct bj_angular_2d_t {
     bj_real damping;
     bj_real inverse_inertia;
 };
-/// \brief Alias for bj_angular_2d_t.
 typedef struct bj_angular_2d_t bj_angular_2d;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -276,7 +274,6 @@ struct bj_rigid_body_2d_t {
     struct bj_particle_2d_t particle;
     struct bj_angular_2d_t  angular;
 };
-/// \brief Alias for bj_rigid_body_2d_t.
 typedef struct bj_rigid_body_2d_t bj_rigid_body_2d;
 
 ////////////////////////////////////////////////////////////////////////////////
