@@ -660,7 +660,7 @@ static BJ_INLINE void bj_mat4_rotate(bj_mat4x4 res, const bj_mat4x4 mat, bj_real
     bj_vec3 u = { x, y, z };
 
     if (bj_vec3_len(u) > BJ_F(1e-4)) {
-        bj_vec3_normalize(&u, u);
+        u = bj_vec3_normalize(u);
         bj_mat4x4 T; bj_mat4_mul_outer(T, u, u);
 
         bj_mat4x4 S = {
@@ -793,22 +793,21 @@ static BJ_INLINE void bj_mat4_orthonormalize(bj_mat4x4 res, const bj_mat4x4 mat)
     bj_vec3 c2 = (bj_vec3){ res[2][0], res[2][1], res[2][2] };
 
     /* Gram–Schmidt: Z, then Y, then X */
-    bj_vec3_normalize(&c2, c2);
+    c2 = bj_vec3_normalize(c2);
 
     bj_real s; bj_vec3 h;
 
-    s = bj_vec3_dot(c1, c2);
-    h = bj_vec3_scale(c2, s);
+    s  = bj_vec3_dot(c1, c2);
+    h  = bj_vec3_scale(c2, s);
     c1 = bj_vec3_sub(c1, h);
-    bj_vec3_normalize(&c1, c1);
-
-    s = bj_vec3_dot(c0, c2);
-    h = bj_vec3_scale(c2, s);
+    c1 = bj_vec3_normalize(c1);
+    s  = bj_vec3_dot(c0, c2);
+    h  = bj_vec3_scale(c2, s);
     c0 = bj_vec3_sub(c0, h);
-    s = bj_vec3_dot(c0, c1);
-    h = bj_vec3_scale(c1, s);
+    s  = bj_vec3_dot(c0, c1);
+    h  = bj_vec3_scale(c1, s);
     c0 = bj_vec3_sub(c0, h);
-    bj_vec3_normalize(&c0, c0);
+    c0 = bj_vec3_normalize(c0);
 
     /* store back into upper-left 3×3, leave last row/col as-is */
     res[0][0]=c0.x; res[0][1]=c0.y; res[0][2]=c0.z;
@@ -921,8 +920,8 @@ static BJ_INLINE void bj_mat4_lookat(
     const bj_vec3 center,
     const bj_vec3 up
 ) {
-    bj_vec3 f;  f = bj_vec3_sub(center, eye);  bj_vec3_normalize(&f, f);
-    bj_vec3 s;  bj_vec3_cross(&s, up, f);      bj_vec3_normalize(&s, s);
+    bj_vec3 f;  f = bj_vec3_sub(center, eye);  f = bj_vec3_normalize(f);
+    bj_vec3 s;  bj_vec3_cross(&s, up, f);      s = bj_vec3_normalize(s);
     bj_vec3 t;  bj_vec3_cross(&t, f, s);
 
     m[0][0]=s.x; m[0][1]=t.x; m[0][2]=f.x; m[0][3]=BJ_FZERO;

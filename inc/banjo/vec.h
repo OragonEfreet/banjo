@@ -324,15 +324,13 @@ static BJ_INLINE bj_real bj_vec3_dist(bj_vec3 a, bj_vec3 b) {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Normalize a 3D vector to unit length.
-/// \param res Output 3D vector.
 /// \param v Input vector.
+/// \return Normalized `v`
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_normalize(bj_vec3* res, bj_vec3 v) {
-    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-    res->x = v.x * inv_len;
-    res->y = v.y * inv_len;
-    res->z = v.z * inv_len;
+static BJ_INLINE bj_vec3 bj_vec3_normalize(bj_vec3 v) {
+    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y);
+    return (bj_vec3){ v.x * inv_len, v.y * inv_len, v.z * inv_len,};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
