@@ -202,9 +202,8 @@ static BJ_INLINE bj_vec2 bj_vec2_min(bj_vec2 a, bj_vec2 b) {
 /// \param a Input component or vector a.
 /// \param b Input component or vector b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_max(bj_vec2* res, bj_vec2 a, bj_vec2 b) {
-    res->x = a.x > b.x ? a.x : b.x;
-    res->y = a.y > b.y ? a.y : b.y;
+static BJ_INLINE bj_vec2 bj_vec2_max(bj_vec2 a, bj_vec2 b) {
+    return (bj_vec2){a.x > b.x ? a.x : b.x, a.y > b.y ? a.y : b.y, };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
