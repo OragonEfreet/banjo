@@ -208,13 +208,13 @@ static BJ_INLINE void bj_mat3_mul_vec3(
 /// Transform a point (homogeneous w=1).
 /// \note Column-major convention: \c res = m * p.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_mul_point(bj_vec2* res, const bj_mat3x3 m, bj_vec2 p) {
+static BJ_INLINE bj_vec2 bj_mat3_mul_point(const bj_mat3x3 m, bj_vec2 p) {
     bj_vec3 v = { p.x, p.y, BJ_F(1.0) };
     bj_vec3 o;
     bj_mat3_mul_vec3(o, m, v);
     bj_real w = o[2];
-    if (w != BJ_FZERO) { res->x = o[0] / w; res->y = o[1] / w; }
-    else               { res->x = o[0];     res->y = o[1];     }
+    if (w != BJ_FZERO) return (bj_vec2){ o[0] / w, o[1] / w, };
+    else               return (bj_vec2){ o[0],     o[1],     };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
