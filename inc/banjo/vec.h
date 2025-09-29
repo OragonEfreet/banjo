@@ -354,17 +354,6 @@ static BJ_INLINE bj_vec3 bj_vec3_max(bj_vec3 a, bj_vec3 b) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Copy a 3D vector.
-/// \param res Output 3D vector.
-/// \param src Source vector to copy from.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_copy(bj_vec3* res, bj_vec3 src) {
-    res->x = src.x;
-    res->y = src.y;
-    res->z = src.z;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 /// 3D cross product: res = l × r (right-hand rule).
 /// \param res Output 3D vector.
 /// \param l Left-hand input vector.
