@@ -104,16 +104,15 @@ static BJ_INLINE bj_vec2 bj_vec2_scale(bj_vec2 v, bj_real s) {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Per-component scaling: res[i] = v[i] * s[i].
-/// \param res Output 2D vector.
 /// \param v Input vector.
 /// \param s Scalar factor.
+/// \return The result of `v * s`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_scale_each(bj_vec2* res,
+static BJ_INLINE bj_vec2 bj_vec2_scale_each(
     const bj_vec2 v,
     const bj_vec2 s
 ) {
-    res->x = v.x * s.x;
-    res->y = v.y * s.y;
+    return (bj_vec2){ .x = v.x * s.x, .y = v.y * s.y, };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
