@@ -177,14 +177,13 @@ static BJ_INLINE bj_real bj_vec2_dist(const bj_vec2 a, const bj_vec2 b) {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Normalize a 2D vector to unit length.
-/// \param res Output 2D vector.
 /// \param v Input vector.
+/// \return Normalized `v`
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_normalize(bj_vec2* res, bj_vec2 v) {
+static BJ_INLINE bj_vec2 bj_vec2_normalize(bj_vec2 v) {
     bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y);
-    res->x = v.x * inv_len;
-    res->y = v.y * inv_len;
+    return (bj_vec2){ v.x * inv_len, v.y * inv_len,};
 }
 
 ////////////////////////////////////////////////////////////////////////////////

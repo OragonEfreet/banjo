@@ -724,8 +724,8 @@ static BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4x4 R, const bj_mat4x4 M, bj_
 {
     bj_real z_a = BJ_FZERO, z_b = BJ_FZERO;
 
-    if (bj_vec2_len(a) < BJ_F(1.0)) z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a, a)); else bj_vec2_normalize(&a, a);
-    if (bj_vec2_len(b) < BJ_F(1.0)) z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b, b)); else bj_vec2_normalize(&b, b);
+    if (bj_vec2_len(a) < BJ_F(1.0)) z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a, a)); else a = bj_vec2_normalize(a);
+    if (bj_vec2_len(b) < BJ_F(1.0)) z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b, b)); else b = bj_vec2_normalize(b);
 
     bj_vec3 a_ = { a.x, a.y, z_a };
     bj_vec3 b_ = { b.x, b.y, z_b };
