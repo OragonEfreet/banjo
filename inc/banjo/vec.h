@@ -247,14 +247,15 @@ static BJ_INLINE bj_vec3 bj_vec3_add_scaled(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise subtraction of two 3D vectors: res = lhs - rhs.
-/// \param res Output 3D vector.
 /// \param lhs Left-hand input vector.
 /// \param rhs Right-hand input vector.
+/// \return `lhs` - `rhs`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_sub(bj_vec3* res, bj_vec3 lhs, bj_vec3 rhs) {
-    res->x = lhs.x - rhs.x;
-    res->y = lhs.y - rhs.y;
-    res->z = lhs.z - rhs.z;
+static BJ_INLINE bj_vec3 bj_vec3_sub(
+    const bj_vec3 lhs,
+    const bj_vec3 rhs
+) {
+    return (bj_vec3){ .x = lhs.x - rhs.x, .y = lhs.y - rhs.y, .z = lhs.z - rhs.z, };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
