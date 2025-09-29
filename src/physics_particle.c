@@ -28,7 +28,7 @@ void bj_step_particle_2d(bj_particle_2d* p, bj_real dt) {
     if (p->inverse_mass != BJ_FZERO) {
         bj_vec2 acc = bj_vec2_add_scaled(p->acceleration, p->forces, p->inverse_mass);
         p->velocity = bj_vec2_add_scaled(p->velocity, acc, dt);
-        bj_vec2_scale(&p->velocity, p->velocity, bj_pow(p->damping, dt));
+        p->velocity = bj_vec2_scale(p->velocity, bj_pow(p->damping, dt));
         p->position = bj_vec2_add_scaled(p->position, p->velocity, dt);
     }
     p->forces = BJ_VEC2_ZERO;

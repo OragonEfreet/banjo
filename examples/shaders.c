@@ -47,7 +47,7 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
         bj_vec3 col;
         palette(col, uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
         
-        bj_vec2_scale(&uv, uv, BJ_F(1.5));
+        uv = bj_vec2_scale(uv, BJ_F(1.5));
         uv = bj_vec2_apply(uv, bj_fract);
         uv = bj_vec2_sub(uv, (bj_vec2){ BJ_F(0.5), BJ_F(0.5) });
 

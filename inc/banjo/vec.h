@@ -94,13 +94,12 @@ static BJ_INLINE bj_vec2 bj_vec2_sub(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Uniform scaling by scalar: res = v * s.
-/// \param res Output 2D vector.
 /// \param v Input vector.
 /// \param s Scalar factor.
+/// \return The result of `v * s`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_scale(bj_vec2* res, bj_vec2 v, bj_real s) {
-    res->x = v.x * s;
-    res->y = v.y * s;
+static BJ_INLINE bj_vec2 bj_vec2_scale(bj_vec2 v, bj_real s) {
+    return (bj_vec2){ .x = v.x * s, .y = v.y * s, };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,9 +152,7 @@ static BJ_INLINE bj_real bj_vec2_len(bj_vec2 v) {
 /// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_vec2_set_len(bj_vec2* res, bj_vec2 v, bj_real target_len) {
-    bj_real len = bj_vec2_len(v);
-    bj_real scale = target_len / len;
-    bj_vec2_scale(res, v, scale);
+    *res = bj_vec2_scale(v, target_len / bj_vec2_len(v));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
