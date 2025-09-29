@@ -39,7 +39,7 @@
 /// \return _1_ on success, non-zero if the pixel should be skipped or discarded.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-typedef int (*bj_bitmap_shading_fn_t)(bj_vec3 out_color, const bj_vec2 pixel_coord, void* user_data);
+typedef int (*bj_bitmap_shading_fn_t)(bj_vec3* out_color, const bj_vec2 pixel_coord, void* user_data);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Shader input control flags

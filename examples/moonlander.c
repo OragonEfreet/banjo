@@ -277,24 +277,24 @@ static void draw(game_data* data) {
 
             const bj_vec2 displacement = bj_vec2_sub(res, initial_position);
 
-            bj_vec3_set(q0, x0 + displacement.x + x, y0 + displacement.y + y, BJ_F(1.0));
-            bj_vec3_set(q1, x1 + displacement.x + x, y1 + displacement.y + y, BJ_F(1.0));
+            bj_vec3_set(&q0, x0 + displacement.x + x, y0 + displacement.y + y, BJ_F(1.0));
+            bj_vec3_set(&q1, x1 + displacement.x + x, y1 + displacement.y + y, BJ_F(1.0));
 
         }
         else {
-            bj_vec3_set(q0, x0 + x, y0 + y, BJ_F(1.0));
-            bj_vec3_set(q1, x1 + x, y1 + y, BJ_F(1.0));
+            bj_vec3_set(&q0, x0 + x, y0 + y, BJ_F(1.0));
+            bj_vec3_set(&q1, x1 + x, y1 + y, BJ_F(1.0));
         }
 
 
-        bj_mat3_mul_vec3(p0, data->draw.projection, q0);
-        bj_mat3_mul_vec3(p1, data->draw.projection, q1);
+        bj_mat3_mul_vec3(&p0, data->draw.projection, q0);
+        bj_mat3_mul_vec3(&p1, data->draw.projection, q1);
 
         bj_draw_line(
             target,
-            p0[0], p0[1],
-            p1[0], p1[1],
-            check_state(data, EXPLODE) && (((int)(p0[0] + p0[1]) % 2)) ? color_b : color_a
+            p0.x, p0.y,
+            p1.x, p1.y,
+            check_state(data, EXPLODE) && (((int)(p0.x + p0.y) % 2)) ? color_b : color_a
         );
 
     }
@@ -338,15 +338,15 @@ static void draw(game_data* data) {
             int fire_y[3];
 
             for (size_t c = 0; c < 3; ++c) {
-                bj_vec3_set(q0,
+                bj_vec3_set(&q0,
                     bj_cos(fire_coords[c].angle + data->lander.body.angular.value) * fire_coords[c].radius + x,
                     bj_sin(fire_coords[c].angle + data->lander.body.angular.value) * fire_coords[c].radius + y,
                     BJ_F(1.)
                 );
 
-                bj_mat3_mul_vec3(p0, data->draw.projection, q0);
-                fire_x[c] = p0[0];
-                fire_y[c] = p0[1];
+                bj_mat3_mul_vec3(&p0, data->draw.projection, q0);
+                fire_x[c] = p0.x;
+                fire_y[c] = p0.y;
             }
 
 
@@ -359,27 +359,26 @@ static void draw(game_data* data) {
 #if TERRAIN_HEIGHTS_LEN > 1
     const bj_real terrain_length = TERRAIN_MAX_X - TERRAIN_MIN_X;
     for (size_t h = 0; h < TERRAIN_HEIGHTS_LEN - 1; ++h) {
-        bj_vec3_set(q0,
+        bj_vec3_set(&q0,
             TERRAIN_MIN_X + ((bj_real)h) / ((bj_real)TERRAIN_HEIGHTS_LEN - 1) * terrain_length,
             data->terrain.heights[h],
             BJ_F(1.)
         );
-        bj_vec3_set(q1,
+        bj_vec3_set(&q1,
             TERRAIN_MIN_X + ((bj_real)h + 1) / ((bj_real)TERRAIN_HEIGHTS_LEN - 1) * terrain_length,
             data->terrain.heights[h + 1],
             BJ_F(1.)
         );
 
-        bj_mat3_mul_vec3(p0, data->draw.projection, q0);
-        bj_mat3_mul_vec3(p1, data->draw.projection, q1);
+        bj_mat3_mul_vec3(&p0, data->draw.projection, q0);
+        bj_mat3_mul_vec3(&p1, data->draw.projection, q1);
 
         const bj_real floor_angle = bj_atan2(
-            p1[1] - p0[1],
-            p1[0] - p0[0]
+            p1.y - p0.y, p1.x - p0.x
         );
         const uint32_t c = floor_is_flat(floor_angle, TERRAIN_FLAT_TOLERANCE) ? color_a : color_b;
 
-        bj_draw_line(target, p0[0], p0[1], p1[0], p1[1], c);
+        bj_draw_line(target, p0.x, p0.y, p1.x, p1.y, c);
 
 
 

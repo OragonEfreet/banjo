@@ -149,19 +149,19 @@ static void draw() {
 
     bj_vec3 c = { sun.position.x, sun.position.y, BJ_F(1.0) };
     bj_vec3 pc;
-    bj_mat3_mul_vec3(pc, projection, c);
-    bj_draw_filled_circle(framebuffer, pc[0], pc[1], BJ_F(10.0), col_sun);
+    bj_mat3_mul_vec3(&pc, projection, c);
+    bj_draw_filled_circle(framebuffer, pc.x, pc.y, BJ_F(10.0), col_sun);
 
     for (size_t i = 0; i < N_PLANETS; ++i) {
-        c[0] = planets[i].body.position.x; c[1] = planets[i].body.position.y;
-        bj_mat3_mul_vec3(pc, projection, c);
-        bj_draw_filled_circle(framebuffer, pc[0], pc[1], planets[i].radius, planets[i].color);
+        c.x = planets[i].body.position.x; c.y = planets[i].body.position.y;
+        bj_mat3_mul_vec3(&pc, projection, c);
+        bj_draw_filled_circle(framebuffer, pc.x, pc.y, planets[i].radius, planets[i].color);
     }
 
     for (size_t i = 0; i < N_ASTEROIDS; ++i) {
-        c[0] = asteroids[i].position.x; c[1] = asteroids[i].position.y;
-        bj_mat3_mul_vec3(pc, projection, c);
-        bj_put_pixel(framebuffer, (int)pc[0], (int)pc[1], asteroid_color);
+        c.x = asteroids[i].position.x; c.y = asteroids[i].position.y;
+        bj_mat3_mul_vec3(&pc, projection, c);
+        bj_put_pixel(framebuffer, (int)pc.x, (int)pc.y, asteroid_color);
     }
 }
 

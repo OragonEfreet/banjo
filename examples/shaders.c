@@ -21,7 +21,7 @@
 bj_window* window      = 0;
 bj_bitmap* framebuffer = 0;
 
-void palette(bj_vec3 res, bj_real t) {
+void palette(bj_vec3* res, bj_real t) {
     const bj_real f = BJ_F(6.28318);
 
     const bj_vec3 a = { BJ_F(0.5), BJ_F(0.5), BJ_F(0.5) };
@@ -29,12 +29,12 @@ void palette(bj_vec3 res, bj_real t) {
     const bj_vec3 c = { BJ_F(1.0), BJ_F(1.0), BJ_F(1.0) };
     const bj_vec3 d = { BJ_F(0.263), BJ_F(0.416), BJ_F(0.557) };
 
-    res[0] = a[0] + b[0] * bj_cos(f * (c[0] * t + d[0]));
-    res[1] = a[1] + b[1] * bj_cos(f * (c[1] * t + d[1]));
-    res[2] = a[2] + b[2] * bj_cos(f * (c[2] * t + d[2]));
+    res->x = a.x + b.x * bj_cos(f * (c.x * t + d.x));
+    res->y = a.y + b.y * bj_cos(f * (c.y * t + d.y));
+    res->z = a.z + b.z * bj_cos(f * (c.z * t + d.z));
 }
 
-int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
+int shader_code(bj_vec3* frag_color, const bj_vec2 frag_coords, void* data) {
     bj_real time = *(bj_real*)data;
 
     bj_vec3 final_color = { BJ_FZERO, BJ_FZERO, BJ_FZERO };
@@ -44,7 +44,7 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
     
     for (bj_real i = BJ_FZERO; i < BJ_F(4.0); i += BJ_F(1.0)) {
         bj_vec3 col;
-        palette(col, uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
+        palette(&col, uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
         
         uv = bj_vec2_scale(uv, BJ_F(1.5));
         uv = bj_vec2_apply(uv, bj_fract);
@@ -61,8 +61,8 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
             BJ_F(1.2)
         );
 
-        bj_vec3_scale(col, col, d);
-        bj_vec3_add(final_color, final_color, col);
+        bj_vec3_scale(&col, col, d);
+        bj_vec3_add(&final_color, final_color, col);
     }
 
     bj_vec3_copy(frag_color, final_color);

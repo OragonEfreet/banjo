@@ -7,7 +7,7 @@ if (MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
 else()
-    add_compile_options(-Wall -Wextra)
+    add_compile_options(-Wall -Wextra -ferror-limit=1)
 endif()
 
 option(BJ_FEATURE_WIN32       "Add Win32 support"                                              OFF)

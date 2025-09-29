@@ -55,16 +55,16 @@ void bj_shader_bitmap(
             bj_vec3 color = { (bj_real)r * inv255, (bj_real)g * inv255, (bj_real)b * inv255 };
             bj_vec2 frag_coords = { ax * (bj_real)x + bx, ay * (bj_real)y + by };
 
-            if (p_shader(color, frag_coords, p_data) > 0) {
+            if (p_shader(&color, frag_coords, p_data) > 0) {
                 if (clamp_color) {
-                    color[0] = bj_clamp(color[0], BJ_FZERO, BJ_F(1.0));
-                    color[1] = bj_clamp(color[1], BJ_FZERO, BJ_F(1.0));
-                    color[2] = bj_clamp(color[2], BJ_FZERO, BJ_F(1.0));
+                    color.x = bj_clamp(color.x, BJ_FZERO, BJ_F(1.0));
+                    color.y = bj_clamp(color.y, BJ_FZERO, BJ_F(1.0));
+                    color.z = bj_clamp(color.z, BJ_FZERO, BJ_F(1.0));
                 }
 
-                r = (uint8_t)(color[0] * BJ_F(255.0) + BJ_F(0.5));
-                g = (uint8_t)(color[1] * BJ_F(255.0) + BJ_F(0.5));
-                b = (uint8_t)(color[2] * BJ_F(255.0) + BJ_F(0.5));
+                r = (uint8_t)(color.x * BJ_F(255.0) + BJ_F(0.5));
+                g = (uint8_t)(color.y * BJ_F(255.0) + BJ_F(0.5));
+                b = (uint8_t)(color.z * BJ_F(255.0) + BJ_F(0.5));
 
                 bj_put_pixel(p_bitmap, x, y, bj_make_bitmap_pixel(p_bitmap, r, g, b));
             }
