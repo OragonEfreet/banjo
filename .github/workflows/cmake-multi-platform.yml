@@ -19,6 +19,8 @@ jobs:
         include:
           - os: windows-latest
             c_compiler: cl
+          - os: windows-latest
+            c_compiler: clang
           - os: ubuntu-latest
             c_compiler: gcc
           - os: ubuntu-latest
@@ -26,10 +28,6 @@ jobs:
           - os: macos-latest
             c_compiler: clang
         exclude:
-          - os: windows-latest
-            c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
           - os: ubuntu-latest
             c_compiler: cl
           - os: macos-latest
@@ -40,9 +38,36 @@ jobs:
       with:
         lfs: true
 
-    - name: Configure CMake
+    # Ensure Ninja for non-MSVC builds
+    - name: Install Ninja (Ubuntu)
+      if: matrix.os == 'ubuntu-latest' && matrix.c_compiler != 'cl'
+      run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+    - name: Install Ninja (macOS)
+      if: matrix.os == 'macos-latest' && matrix.c_compiler != 'cl'
+      run: brew install ninja
+
+    - name: Install LLVM + Ninja (Windows Clang)
+      if: matrix.os == 'windows-latest' && matrix.c_compiler == 'clang'
+      run: |
+        choco install -y llvm ninja
+        echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    # Configure
+    - name: Configure CMake (MSVC)
+      if: matrix.c_compiler == 'cl'
       run: >
         cmake -B ${{ github.workspace }}/build-${{ matrix.libtype }}
+        -DCMAKE_C_COMPILER=cl
+        -DCMAKE_BUILD_TYPE=Release
+        -DBUILD_SHARED_LIBS=${{ matrix.libtype == 'shared' && 'ON' || 'OFF' }}
+        -S ${{ github.workspace }}
+
+    - name: Configure CMake (Ninja: gcc/clang/clang on Windows)
+      if: matrix.c_compiler != 'cl'
+      run: >
+        cmake -G Ninja
+        -B ${{ github.workspace }}/build-${{ matrix.libtype }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=Release
         -DBUILD_SHARED_LIBS=${{ matrix.libtype == 'shared' && 'ON' || 'OFF' }}
