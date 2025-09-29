@@ -212,17 +212,6 @@ static BJ_INLINE bj_vec2 bj_vec2_max(bj_vec2 a, bj_vec2 b) {
     return (bj_vec2){a.x > b.x ? a.x : b.x, a.y > b.y ? a.y : b.y, };
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// Set a 3D vector from components (x, y, z).
-/// \param res Output 3D vector.
-/// \param a Input component or vector a.
-/// \param b Input component or vector b.
-/// \param c Input component or vector c.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_set(bj_vec3* res, bj_real a, bj_real b, bj_real c) {
-    res->x = a; res->y = b; res->z = c;
-}
-
 static BJ_INLINE void bj_vec3_zero(bj_vec3* res) {
     res->x = res->y = res->z = BJ_FZERO;
 }
