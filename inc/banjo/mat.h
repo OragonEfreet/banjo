@@ -798,15 +798,15 @@ static BJ_INLINE void bj_mat4_orthonormalize(bj_mat4x4 res, const bj_mat4x4 mat)
     bj_real s; bj_vec3 h;
 
     s = bj_vec3_dot(c1, c2);
-    bj_vec3_scale(&h, c2, s);
+    h = bj_vec3_scale(c2, s);
     c1 = bj_vec3_sub(c1, h);
     bj_vec3_normalize(&c1, c1);
 
     s = bj_vec3_dot(c0, c2);
-    bj_vec3_scale(&h, c2, s);
+    h = bj_vec3_scale(c2, s);
     c0 = bj_vec3_sub(c0, h);
     s = bj_vec3_dot(c0, c1);
-    bj_vec3_scale(&h, c1, s);
+    h = bj_vec3_scale(c1, s);
     c0 = bj_vec3_sub(c0, h);
     bj_vec3_normalize(&c0, c0);
 

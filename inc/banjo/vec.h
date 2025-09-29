@@ -260,14 +260,12 @@ static BJ_INLINE bj_vec3 bj_vec3_sub(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Uniform scaling by scalar: res = v * s.
-/// \param res Output 3D vector.
 /// \param v Input vector.
 /// \param s Scalar factor.
+/// \return The result of `v * s`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_scale(bj_vec3* res, bj_vec3 v, bj_real s) {
-    res->x = v.x * s;
-    res->y = v.y * s;
-    res->z = v.z * s;
+static BJ_INLINE bj_vec3 bj_vec3_scale(bj_vec3 v, bj_real s) {
+    return (bj_vec3){ .x = v.x * s, .y = v.y * s, .z = v.z * s,};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -299,7 +297,7 @@ static BJ_INLINE bj_real bj_vec3_len(bj_vec3 v) {
 static BJ_INLINE void bj_vec3_set_len(bj_vec3* res, bj_vec3 v, bj_real target_len) {
     bj_real len = bj_vec3_len(v);
     bj_real scale = target_len / len;
-    bj_vec3_scale(res, v, scale);
+    *res = bj_vec3_scale(v, scale);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
