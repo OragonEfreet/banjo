@@ -55,16 +55,14 @@ static BJ_INLINE bj_vec2 bj_vec2_apply(
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise addition of two 2D vectors: res = lhs + rhs.
 ///
-/// \param res Output 2D vector.
 /// \param lhs Left-hand input vector.
 /// \param rhs Right-hand input vector.
+/// \return Sum of `lhs` and `rhs`.  
 ///
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_add(bj_vec2* res, bj_vec2 lhs, bj_vec2 rhs) {
-    res->x = lhs.x + rhs.x;
-    res->y = lhs.y + rhs.y;
+static BJ_INLINE bj_vec2 bj_vec2_add(bj_vec2 lhs, bj_vec2 rhs) {
+    return (bj_vec2){ .x = lhs.x + rhs.x, .y = lhs.y + rhs.y, };
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Add a scaled vector: res = a + s * b.

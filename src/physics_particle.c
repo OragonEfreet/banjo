@@ -20,7 +20,7 @@ void bj_apply_particle_force_2d(
     bj_vec2 force
 ) {
     bj_check(p_particle);
-    bj_vec2_add(&p_particle->forces, p_particle->forces, force);
+    p_particle->forces = bj_vec2_add(p_particle->forces, force);
 }
 
 void bj_step_particle_2d(bj_particle_2d* p, bj_real dt) {
