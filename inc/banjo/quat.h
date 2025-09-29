@@ -77,13 +77,13 @@ static BJ_INLINE void bj_quat_mul(bj_quat res, const  bj_quat p, const bj_quat q
 {
     bj_vec3 w, tmp;
 
-    bj_vec3_cross(tmp, p, q);
-    bj_vec3_scale(w, p, q[3]);
-    bj_vec3_add(tmp, tmp, w);
-    bj_vec3_scale(w, q, p[3]);
-    bj_vec3_add(tmp, tmp, w);
+    bj_vec3_cross(&tmp, p, q);
+    bj_vec3_scale(&w, p, q[3]);
+    tmp = bj_vec3_add(tmp, w);
+    bj_vec3_scale(&w, q, p[3]);
+    tmp = bj_vec3_add(tmp, w);
 
-    bj_vec3_copy(res, tmp);
+    bj_vec3_copy(&res, tmp);
     res[3] = p[3] * q[3] - bj_vec3_dot(p, q);
 }
 
@@ -135,8 +135,8 @@ static BJ_INLINE void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_ve
     bj_vec3_cross(u, q_xyz, t);
     bj_vec3_scale(t, t, q[3]);
 
-    bj_vec3_add(res, v, t);
-    bj_vec3_add(res, res, u);
+    res = bj_vec3_add(v, t);
+    res = bj_vec3_add(res, u);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

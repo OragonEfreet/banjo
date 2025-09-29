@@ -7,13 +7,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
+#include <banjo/event.h>
+#include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/shader.h>
+#include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
-#include <banjo/event.h>
-#include <banjo/main.h>
-#include <banjo/log.h>
-#include <banjo/system.h>
 
 #define CANVAS_W 512
 #define CANVAS_H 512
@@ -62,7 +62,7 @@ int shader_code(bj_vec3* frag_color, const bj_vec2 frag_coords, void* data) {
         );
 
         bj_vec3_scale(&col, col, d);
-        bj_vec3_add(&final_color, final_color, col);
+        final_color = bj_vec3_add(final_color, col);
     }
 
     bj_vec3_copy(frag_color, final_color);
