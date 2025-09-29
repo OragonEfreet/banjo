@@ -339,10 +339,8 @@ static BJ_INLINE bj_vec3 bj_vec3_normalize(bj_vec3 v) {
 /// \param a Input component or vector a.
 /// \param b Input component or vector b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_min(bj_vec3* res, bj_vec3 a, bj_vec3 b) {
-    res->x = a.x < b.x ? a.x : b.x;
-    res->y = a.y < b.y ? a.y : b.y;
-    res->z = a.z < b.z ? a.z : b.z;
+static BJ_INLINE bj_vec3 bj_vec3_min(bj_vec3 a, bj_vec3 b) {
+    return (bj_vec3){a.x < b.x ? a.x : b.x, a.y < b.y ? a.y : b.y, a.z < b.z ? a.z : b.z,};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
