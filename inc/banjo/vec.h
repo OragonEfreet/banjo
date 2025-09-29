@@ -81,16 +81,15 @@ static BJ_INLINE bj_vec2 bj_vec2_add_scaled(
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise subtraction of two 2D vectors: res = lhs - rhs.
-/// \param res Output 2D vector.
 /// \param lhs Left-hand input vector.
 /// \param rhs Right-hand input vector.
+/// \return `lhs` - `rhs`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_sub(bj_vec2* res,
+static BJ_INLINE bj_vec2 bj_vec2_sub(
     const bj_vec2 lhs,
     const bj_vec2 rhs
 ) {
-    res->x = lhs.x - rhs.x;
-    res->y = lhs.y - rhs.y;
+    return (bj_vec2){ .x = lhs.x - rhs.x, .y = lhs.y - rhs.y, };
 }
 
 ////////////////////////////////////////////////////////////////////////////////

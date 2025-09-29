@@ -276,8 +276,7 @@ static void draw(game_data* data) {
                 bj_stopwatch_elapsed(&data->state_since)
             );
 
-            bj_vec2 displacement;
-            bj_vec2_sub(&displacement, res, initial_position);
+            const bj_vec2 displacement = bj_vec2_sub(res, initial_position);
 
             bj_vec3_set(q0, x0 + displacement.x + x, y0 + displacement.y + y, BJ_F(1.0));
             bj_vec3_set(q1, x1 + displacement.x + x, y1 + displacement.y + y, BJ_F(1.0));

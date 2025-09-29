@@ -49,7 +49,7 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
         
         bj_vec2_scale(&uv, uv, BJ_F(1.5));
         uv = bj_vec2_apply(uv, bj_fract);
-        bj_vec2_sub(&uv, uv, (bj_vec2){ BJ_F(0.5), BJ_F(0.5) });
+        uv = bj_vec2_sub(uv, (bj_vec2){ BJ_F(0.5), BJ_F(0.5) });
 
         const bj_real d = bj_pow(
             BJ_F(0.01) / (
