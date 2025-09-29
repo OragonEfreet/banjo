@@ -77,7 +77,7 @@ static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj
     p->body.velocity.x = -v * bj_sin(a);
     p->body.velocity.y =  v * bj_cos(a);
 
-    bj_vec2_zero(&p->body.forces);
+    p->body.forces = BJ_VEC2_ZERO;
     p->body.damping = BJ_F(1.0);
     p->body.inverse_mass = BJ_F(1.0) / mass;
 
@@ -101,7 +101,7 @@ static void init_asteroids() {
         asteroids[i].velocity.x = -v * bj_sin(a);
         asteroids[i].velocity.y =  v * bj_cos(a);
 
-        bj_vec2_zero(&asteroids[i].forces);
+        asteroids[i].forces = BJ_VEC2_ZERO;
         asteroids[i].damping = BJ_F(1.0);
         asteroids[i].inverse_mass = 1.0;
     }

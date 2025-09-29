@@ -29,6 +29,8 @@ struct bj_vec2_t {
 };
 typedef struct bj_vec2_t bj_vec2;
 
+#define BJ_VEC2_ZERO ((bj_vec2){BJ_FZERO, BJ_FZERO})
+
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_vec3: 3D vector of bj_real values.
 /// Intended for lightweight math operations and POD interop.
@@ -42,10 +44,6 @@ typedef bj_real bj_vec3[3];
 /// Components are indexed as 0..3.
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_real bj_vec4[4];
-
-static BJ_INLINE void bj_vec2_zero(bj_vec2* res) {
-    res->x = res->y = BJ_FZERO;
-}
 
 static BJ_INLINE void bj_vec2_apply(bj_vec2* res, bj_vec2 a, bj_real(*f)(bj_real)) {
     res->x = f(a.x);

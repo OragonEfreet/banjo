@@ -32,7 +32,7 @@ void bj_step_particle_2d(bj_particle_2d* p, bj_real dt) {
         bj_vec2_scale(&p->velocity, p->velocity, bj_pow(p->damping, dt));
         bj_vec2_add_scaled(&p->position, p->position, p->velocity, dt);
     }
-    bj_vec2_zero(&p->forces);
+    p->forces = BJ_VEC2_ZERO;
 }
 
 void bj_apply_gravity_2d(
@@ -114,7 +114,7 @@ bj_bool bj_compute_particle_drag_force_2d(
     bj_real coef = bj_compute_particle_drag_coefficient_2d(vel, k1, k2);
 
     if(bj_real_is_zero(coef)) {
-        bj_vec2_zero(result);
+        *result = BJ_VEC2_ZERO;
         return BJ_FALSE;
     }
     bj_vec2_set_len(result, vel, -coef);
