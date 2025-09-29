@@ -426,12 +426,13 @@ static void apply_thrusters(bj_rigid_body_2d* p_body, lander* l) {
     }
 }
 
+
 static void handle_collision(game_data* data) {
 #if TERRAIN_HEIGHTS_LEN > 1
-    bj_vec2 c, l0, l1;
+    bj_vec2 l0, l1;
 
-    bj_vec2_copy(&c, data->lander.body.particle.position);
-    bj_real r = data->lander.bounding_radius;
+    const bj_vec2 c = data->lander.body.particle.position;
+    const bj_real r = data->lander.bounding_radius;
 
     const bj_real terrain_length = TERRAIN_MAX_X - TERRAIN_MIN_X;
     size_t h = 0;

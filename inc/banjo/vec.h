@@ -207,16 +207,6 @@ static BJ_INLINE bj_vec2 bj_vec2_max(bj_vec2 a, bj_vec2 b) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Copy a 2D vector.
-/// \param res Output 2D vector.
-/// \param src Source vector to copy from.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_copy(bj_vec2* res, const bj_vec2 src) {
-    res->x = src.x;
-    res->y = src.y;
-}
-
-////////////////////////////////////////////////////////////////////////////////
 /// Set a 3D vector from components (x, y, z).
 /// \param res Output 3D vector.
 /// \param a Input component or vector a.
