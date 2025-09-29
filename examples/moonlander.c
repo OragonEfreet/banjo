@@ -287,8 +287,8 @@ static void draw(game_data* data) {
         }
 
 
-        bj_mat3_mul_vec3(&p0, data->draw.projection, q0);
-        bj_mat3_mul_vec3(&p1, data->draw.projection, q1);
+        p0 = bj_mat3_mul_vec3(data->draw.projection, q0);
+        p1 = bj_mat3_mul_vec3(data->draw.projection, q1);
 
         bj_draw_line(
             target,
@@ -344,7 +344,7 @@ static void draw(game_data* data) {
                     BJ_F(1.),
                 };
 
-                bj_mat3_mul_vec3(&p0, data->draw.projection, q0);
+                p0 = bj_mat3_mul_vec3(data->draw.projection, q0);
                 fire_x[c] = p0.x;
                 fire_y[c] = p0.y;
             }
@@ -370,8 +370,8 @@ static void draw(game_data* data) {
             BJ_F(1.),
         };
 
-        bj_mat3_mul_vec3(&p0, data->draw.projection, q0);
-        bj_mat3_mul_vec3(&p1, data->draw.projection, q1);
+        p0 = bj_mat3_mul_vec3(data->draw.projection, q0);
+        p1 = bj_mat3_mul_vec3(data->draw.projection, q1);
 
         const bj_real floor_angle = bj_atan2(
             p1.y - p0.y, p1.x - p0.x

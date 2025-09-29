@@ -355,30 +355,34 @@ static BJ_INLINE bj_vec3 bj_vec3_max(bj_vec3 a, bj_vec3 b) {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 3D cross product: res = l × r (right-hand rule).
-/// \param res Output 3D vector.
 /// \param l Left-hand input vector.
 /// \param r Right-hand input vector.
+/// \return Resulting cross product.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_cross(bj_vec3* res, bj_vec3 l, bj_vec3 r)
+static BJ_INLINE bj_vec3 bj_vec3_cross(bj_vec3 l, bj_vec3 r)
 {
-    res->x = l.y * r.z - l.z * r.y;
-    res->y = l.z * r.x - l.x * r.z;
-    res->z = l.x * r.y - l.y * r.x;
+    return (bj_vec3) {
+        .x = l.y * r.z - l.z * r.y,
+        .y = l.z * r.x - l.x * r.z,
+        .z = l.x * r.y - l.y * r.x,
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Reflect a vector about a normal: res = v - 2*dot(v, n)*n.
-/// \param res Output 3D vector.
 /// \param v Input vector.
 /// \param n Surface normal (expected normalized).
+/// \reutrn Resulting reflect vector.
 /// \note The normal \p n should be normalized for a true reflection.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_reflect(bj_vec3* res, bj_vec3 v, bj_vec3 n)
+static BJ_INLINE bj_vec3 bj_vec3_reflect(bj_vec3 v, bj_vec3 n)
 {
     const bj_real p = BJ_F(2.) * bj_vec3_dot(v, n);
-    res->x = v.x - p * n.x;
-    res->y = v.y - p * n.y;
-    res->z = v.z - p * n.z;
+    return (bj_vec3) {
+        .x = v.x - p * n.x,
+        .y = v.y - p * n.y,
+        .z = v.z - p * n.z,
+    };
 }
 
 

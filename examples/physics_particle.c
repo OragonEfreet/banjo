@@ -148,19 +148,18 @@ static void draw() {
     const uint32_t col_sun = bj_make_bitmap_pixel(framebuffer, 0xFF, 0xCC, 0x44);
 
     bj_vec3 c = { sun.position.x, sun.position.y, BJ_F(1.0) };
-    bj_vec3 pc;
-    bj_mat3_mul_vec3(&pc, projection, c);
+    bj_vec3 pc = bj_mat3_mul_vec3(projection, c);
     bj_draw_filled_circle(framebuffer, pc.x, pc.y, BJ_F(10.0), col_sun);
 
     for (size_t i = 0; i < N_PLANETS; ++i) {
         c.x = planets[i].body.position.x; c.y = planets[i].body.position.y;
-        bj_mat3_mul_vec3(&pc, projection, c);
+        pc = bj_mat3_mul_vec3(projection, c);
         bj_draw_filled_circle(framebuffer, pc.x, pc.y, planets[i].radius, planets[i].color);
     }
 
     for (size_t i = 0; i < N_ASTEROIDS; ++i) {
         c.x = asteroids[i].position.x; c.y = asteroids[i].position.y;
-        bj_mat3_mul_vec3(&pc, projection, c);
+        pc = bj_mat3_mul_vec3(projection, c);
         bj_put_pixel(framebuffer, (int)pc.x, (int)pc.y, asteroid_color);
     }
 }
