@@ -66,19 +66,17 @@ static BJ_INLINE bj_vec2 bj_vec2_add(bj_vec2 lhs, bj_vec2 rhs) {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Add a scaled vector: res = a + s * b.
-/// \param res Output 2D vector.
-/// \param a Input component or vector a.
-/// \param b Input component or vector b.
-/// \param s Scalar factor.
+/// \param lhs Input component or vector a.
+/// \param rhs Input component or vector b.
+/// \param s   Scalar factor.
+/// \return Sum of `lhs` and `rhs * s`.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_add_scaled(
-    bj_vec2* res,
-    bj_vec2 a,
-    bj_vec2 b,
+static BJ_INLINE bj_vec2 bj_vec2_add_scaled(
+    bj_vec2 lhs,
+    bj_vec2 rhs,
     bj_real s
 ) {
-    res->x = a.x + b.x * s;
-    res->y = a.y + b.y * s;
+    return (bj_vec2){ .x = lhs.x + rhs.x * s, .y = lhs.y + rhs.y * s, };
 }
 
 ////////////////////////////////////////////////////////////////////////////////

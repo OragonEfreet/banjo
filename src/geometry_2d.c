@@ -63,7 +63,7 @@ bj_bool bj_check_circle_segment_hit(
     else if (t > BJ_F(1.0)) t = BJ_F(1.0);
 
     // point le plus proche sur le segment
-    bj_vec2 p;  bj_vec2_add_scaled(&p, l0, d, t);
+    bj_vec2 p = bj_vec2_add_scaled(l0, d, t);
 
     // collision si la distance au centre ≤ r
     bj_vec2 pc; bj_vec2_sub(&pc, p, c);
