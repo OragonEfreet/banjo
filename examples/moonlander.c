@@ -103,7 +103,7 @@ static bj_bool check_state(const game_data* data, int flags) {
 }
 
 static void prepare_data(game_data* data) {
-    bj_vec2_set(&data->lander.body.particle.position, BJ_F(20.0), BJ_F(-40.0));
+    data->lander.body.particle.position = (bj_vec2){BJ_F(20.0), BJ_F(-40.0)};
     data->lander.body.particle.inverse_mass = BJ_FI(8.0);
     data->lander.body.particle.damping = BJ_F(.995);
     data->lander.body.angular.inverse_inertia = BJ_FI(3.);
@@ -407,13 +407,12 @@ static void draw(game_data* data) {
 
 static void apply_thrusters(bj_rigid_body_2d* p_body, lander* l) {
     if (l->thrusters.up) {
-        bj_vec2 force;
         const bj_real angle = l->body.angular.value;
 
-        bj_vec2_set(&force,
-            bj_sin(-angle) * l->thrusters.magnitude,
-            bj_cos(angle) * l->thrusters.magnitude
-        );
+        const bj_vec2 force = {
+            .x = bj_sin(-angle) * l->thrusters.magnitude,
+            .y = bj_cos(angle) * l->thrusters.magnitude,
+        };
 
         bj_apply_particle_force_2d(&p_body->particle, force);
     }
@@ -438,8 +437,12 @@ static void handle_collision(game_data* data) {
     const bj_real terrain_length = TERRAIN_MAX_X - TERRAIN_MIN_X;
     size_t h = 0;
     for (; h < TERRAIN_HEIGHTS_LEN - 1; ++h) {
-        bj_vec2_set(&l0, TERRAIN_MIN_X + ((bj_real)h) / ((bj_real)TERRAIN_HEIGHTS_LEN - 1) * terrain_length, data->terrain.heights[h]);
-        bj_vec2_set(&l1, TERRAIN_MIN_X + ((bj_real)h + 1) / ((bj_real)TERRAIN_HEIGHTS_LEN - 1) * terrain_length, data->terrain.heights[h + 1]);
+
+        l0.x = TERRAIN_MIN_X + ((bj_real)h) / ((bj_real)TERRAIN_HEIGHTS_LEN - 1) * terrain_length;
+        l0.y = data->terrain.heights[h];
+
+        l1.x = TERRAIN_MIN_X + ((bj_real)h + 1) / ((bj_real)TERRAIN_HEIGHTS_LEN - 1) * terrain_length;
+        l1.y = data->terrain.heights[h + 1];
 
         if (bj_check_circle_segment_hit(c, r, l0, l1)) {
             break;

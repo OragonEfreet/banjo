@@ -70,14 +70,12 @@ static void init_sun() {
 
 static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj_real draw_r, bj_real phase) {
     const bj_real a = phase;
-    const bj_real x = r * bj_cos(a);
-    const bj_real y = r * bj_sin(a);
-    bj_vec2_set(&p->body.position, x, y);
+    p->body.position.x = r * bj_cos(a);
+    p->body.position.y = r * bj_sin(a);
 
     const bj_real v = orbital_speed_soft(G_SUN, M_SUN, r, SOFTENING);
-    const bj_real vx = -v * bj_sin(a);
-    const bj_real vy =  v * bj_cos(a);
-    bj_vec2_set(&p->body.velocity, vx, vy);
+    p->body.velocity.x = -v * bj_sin(a);
+    p->body.velocity.y =  v * bj_cos(a);
 
     bj_vec2_zero(&p->body.forces);
     p->body.damping = BJ_F(1.0);
@@ -96,14 +94,12 @@ static void init_asteroids() {
         const bj_real r = rmin + (rmax - rmin) * t;
         const bj_real a = BJ_TAU * u;
 
-        const bj_real x = r * bj_cos(a);
-        const bj_real y = r * bj_sin(a);
-        bj_vec2_set(&asteroids[i].position, x, y);
+        asteroids[i].position.x = r * bj_cos(a);
+        asteroids[i].position.y = r * bj_sin(a);
 
         const bj_real v = orbital_speed_soft(G_SUN, M_SUN, r, SOFTENING);
-        const bj_real vx = -v * bj_sin(a);
-        const bj_real vy =  v * bj_cos(a);
-        bj_vec2_set(&asteroids[i].velocity, vx, vy);
+        asteroids[i].velocity.x = -v * bj_sin(a);
+        asteroids[i].velocity.y =  v * bj_cos(a);
 
         bj_vec2_zero(&asteroids[i].forces);
         asteroids[i].damping = BJ_F(1.0);

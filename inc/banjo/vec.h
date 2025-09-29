@@ -43,16 +43,6 @@ typedef bj_real bj_vec3[3];
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_real bj_vec4[4];
 
-////////////////////////////////////////////////////////////////////////////////
-/// Set a 2D vector from components (x, y).
-/// \param res Output 2D vector.
-/// \param a Input component or vector a.
-/// \param b Input component or vector b.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_set(bj_vec2* res, bj_real a, bj_real b) {
-    res->x = a; res->y = b;
-}
-
 static BJ_INLINE void bj_vec2_zero(bj_vec2* res) {
     res->x = res->y = BJ_FZERO;
 }

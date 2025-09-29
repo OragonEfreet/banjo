@@ -114,7 +114,7 @@ bj_bool bj_compute_particle_drag_force_2d(
     bj_real coef = bj_compute_particle_drag_coefficient_2d(vel, k1, k2);
 
     if(bj_real_is_zero(coef)) {
-        bj_vec2_set(result, BJ_FZERO, BJ_FZERO);
+        bj_vec2_zero(result);
         return BJ_FALSE;
     }
     bj_vec2_set_len(result, vel, -coef);
