@@ -148,10 +148,9 @@ static BJ_INLINE bj_real bj_vec2_len(bj_vec2 v) {
 /// \param v Input vector.
 /// \param target_len Desired length of the result.
 /// \warning Undefined if the input vector has zero length.
-/// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_set_len(bj_vec2* res, bj_vec2 v, bj_real target_len) {
-    *res = bj_vec2_scale(v, target_len / bj_vec2_len(v));
+static BJ_INLINE bj_vec2 bj_vec2_set_len(bj_vec2 v, bj_real target_len) {
+    return bj_vec2_scale(v, target_len / bj_vec2_len(v));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -159,7 +158,6 @@ static BJ_INLINE void bj_vec2_set_len(bj_vec2* res, bj_vec2 v, bj_real target_le
 /// \param a Input vector a.
 /// \param b Input vector b.
 /// \returns The squared distance ||a - b||^2.
-/// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_real bj_vec2_dist_squared(bj_vec2 a, bj_vec2 b) {
     const bj_real dx = a.x - b.x;
@@ -172,7 +170,6 @@ static BJ_INLINE bj_real bj_vec2_dist_squared(bj_vec2 a, bj_vec2 b) {
 /// \param a Input vector a.
 /// \param b Input vector b.
 /// \returns The Euclidean distance ||a - b||.
-/// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_real bj_vec2_dist(const bj_vec2 a, const bj_vec2 b) {
     return bj_sqrt(bj_vec2_dist_squared(a, b));
@@ -319,7 +316,6 @@ static BJ_INLINE bj_real bj_vec3_len(const bj_vec3 v) {
 /// \param v Input vector.
 /// \param target_len Desired length of the result.
 /// \warning Undefined if the input vector has zero length.
-/// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_vec3_set_len(bj_vec3 res, const bj_vec3 v, bj_real target_len) {
     bj_real len = bj_vec3_len(v);
@@ -332,7 +328,6 @@ static BJ_INLINE void bj_vec3_set_len(bj_vec3 res, const bj_vec3 v, bj_real targ
 /// \param a Input vector a.
 /// \param b Input vector b.
 /// \returns The squared distance ||a - b||^2.
-/// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_real bj_vec3_dist_squared(const bj_vec3 a, const bj_vec3 b) {
     const bj_real dx = a[0] - b[0];
@@ -346,7 +341,6 @@ static BJ_INLINE bj_real bj_vec3_dist_squared(const bj_vec3 a, const bj_vec3 b) 
 /// \param a Input vector a.
 /// \param b Input vector b.
 /// \returns The Euclidean distance ||a - b||.
-/// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_real bj_vec3_dist(const bj_vec3 a, const bj_vec3 b) {
     return bj_sqrt(bj_vec3_dist_squared(a, b));

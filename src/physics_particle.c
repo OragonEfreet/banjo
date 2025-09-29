@@ -53,11 +53,10 @@ void bj_apply_point_gravity_2d(
         gravity_factor
     );
 
-    bj_vec2 force = bj_vec2_sub(
+    const bj_vec2 force = bj_vec2_set_len(bj_vec2_sub(
         p_particle_to->position,
         p_particle_from->position
-    );
-    bj_vec2_set_len(&force, force, g);
+    ), g);
 
     bj_apply_particle_force_2d(p_particle_from, force);
 }
@@ -74,8 +73,10 @@ void bj_apply_point_gravity_softened_2d(
 
     const bj_real g = bj_newton_plummer_gravitation(m1, m2, r, gravity_factor, epsilon);
 
-    bj_vec2 force = bj_vec2_sub(p_particle_to->position, p_particle_from->position);
-    bj_vec2_set_len(&force, force, g);
+    const bj_vec2 force = bj_vec2_set_len(bj_vec2_sub(
+        p_particle_to->position,
+        p_particle_from->position
+    ), g);
 
     bj_apply_particle_force_2d(p_particle_from, force);
 }
@@ -115,7 +116,7 @@ bj_bool bj_compute_particle_drag_force_2d(
         *result = BJ_VEC2_ZERO;
         return BJ_FALSE;
     }
-    bj_vec2_set_len(result, vel, -coef);
+    *result = bj_vec2_set_len(vel, -coef);
     return BJ_TRUE;
 }
 
