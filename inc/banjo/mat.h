@@ -221,10 +221,10 @@ static BJ_INLINE bj_vec2 bj_mat3_mul_point(const bj_mat3x3 m, bj_vec2 p) {
 /// Transform a direction (w=0; ignores translation).
 /// \note Column-major convention: \c res = m * v2.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_mul_vector2(bj_vec2* res, const bj_mat3x3 m, bj_vec2 v2) {
+static BJ_INLINE bj_vec2 bj_mat3_mul_vector2(const bj_mat3x3 m, bj_vec2 v2) {
     bj_vec3 v = { v2.x, v2.y, BJ_FZERO };
     bj_vec3 o; bj_mat3_mul_vec3(o, m, v);
-    res->x = o[0]; res->y = o[1];
+    return (bj_vec2){ o[0], o[1],};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
