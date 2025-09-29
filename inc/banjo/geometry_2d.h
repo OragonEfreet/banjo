@@ -2,7 +2,7 @@
 /// \file geometry_2d.h
 /// 2D Geometry helpers
 ////////////////////////////////////////////////////////////////////////////////
-/// \defgroup geometry
+/// \defgroup geometry Geometry 2D
 /// \ingroup math
 ///
 /// \brief 2D Geometry utilities

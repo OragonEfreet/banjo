@@ -123,7 +123,6 @@ static BJ_INLINE void bj_quat_rotation(bj_quat res, bj_real angle, const bj_vec3
 /// \param q Input quaternion.
 /// \param v 3D vector.
 /// \note Assumes unit-length quaternions for pure rotations.
-/// \returns The rotated vector in \p res.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_quat_mul_vec3(bj_vec3 res, const bj_quat q, const bj_vec3 v) {
     bj_vec3 t;

@@ -82,50 +82,60 @@
 
 /// \name Compiler detection
 /// \brief One of these will be defined to indicate the compiler in use.
+///
 /// Additionally BJ_COMPILER_NAME and BJ_COMPILER_VERSION are provided.
 /// @{
-#if defined(__EMSCRIPTEN__)
-    #include <emscripten/version.h>
-    #define BJ_COMPILER_EMSCRIPTEN
-    #define BJ_COMPILER_NAME "Emscripten"
-    #define BJ_COMPILER_VERSION __EMSCRIPTEN_major__
+#if defined(BJ_COMPILER_DOXYGEN)
+#    define BJ_COMPILER_NAME "Doxygen"
+#    define BJ_COMPILER_VERSION 0
+#elif defined(__EMSCRIPTEN__)
+#    include <emscripten/version.h>
+#    define BJ_COMPILER_EMSCRIPTEN
+#    define BJ_COMPILER_NAME "Emscripten"
+#    define BJ_COMPILER_VERSION __EMSCRIPTEN_major__
 #elif defined(__GNUC__) && !defined(__clang__)
-    #define BJ_COMPILER_GCC
-    #define BJ_COMPILER_NAME "GCC"
-    #define BJ_COMPILER_VERSION __GNUC__
+#    define BJ_COMPILER_GCC
+#    define BJ_COMPILER_NAME "GCC"
+#    define BJ_COMPILER_VERSION __GNUC__
 #elif defined(__clang__)
-    #define BJ_COMPILER_CLANG
-    #define BJ_COMPILER_NAME "Clang"
-    #define BJ_COMPILER_VERSION __clang_major__
+#    define BJ_COMPILER_CLANG
+#    define BJ_COMPILER_NAME "Clang"
+#    define BJ_COMPILER_VERSION __clang_major__
 #elif defined(_MSC_VER)
-    #define BJ_COMPILER_MSVC
-    #define BJ_COMPILER_NAME "MSVC"
-    #define BJ_COMPILER_VERSION _MSC_VER
+#    define BJ_COMPILER_MSVC
+#    define BJ_COMPILER_NAME "MSVC"
+#    define BJ_COMPILER_VERSION _MSC_VER
 #elif defined(__MINGW32__)
-    #define BJ_COMPILER_MINGW
-    #define BJ_COMPILER_NAME "MinGW"
-    #define BJ_COMPILER_VERSION 0
+#    define BJ_COMPILER_MINGW
+#    define BJ_COMPILER_NAME "MinGW"
+#    define BJ_COMPILER_VERSION 0
 #else
-    #define BJ_COMPILER_UNKNOWN
-    #define BJ_COMPILER_NAME "Unknown"
-    #define BJ_COMPILER_VERSION 0
+#    define BJ_COMPILER_UNKNOWN
+#    define BJ_COMPILER_NAME "Unknown"
+#    define BJ_COMPILER_VERSION 0
 #endif
 /// @}
 
 /// \name Build configuration
 /// \brief Exactly one of BJ_BUILD_DEBUG or BJ_BUILD_RELEASE is defined.
 /// @{
-#ifdef NDEBUG
+/// \def BJ_BUILD_RELEASE
+/// Set when Banjo was built on release mode (`NDEBUG` defined).
+#if defined(NDEBUG) || defined(BJ_COMPILER_DOXYGEN)
 #   define BJ_BUILD_RELEASE
-#else
+#endif
+/// \def BJ_BUILD_DEBUG
+/// Set when Banjo was built on debug mode (`NDEBUG` not defined).
+#if !defined(NDEBUG) || defined(BJ_COMPILER_DOXYGEN)
 #   define BJ_BUILD_DEBUG
 #endif
+
 /// @}
 
 /// \name Export/visibility helpers
 /// \brief BANJO_EXPORT marks public symbols. BANJO_NO_EXPORT hides symbols.
 /// @{
-#ifdef BANJO_STATIC
+#if defined(BANJO_STATIC) || defined(BJ_COMPILER_DOXYGEN)
 #  define BANJO_EXPORT
 #  define BANJO_NO_EXPORT
 #else
@@ -169,7 +179,7 @@
     #endif
 #else
     /* pure C (C99 or newer) */
-    #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+    #if defined(BJ_COMPILER_DOXYGEN) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
         #define BJ_RESTRICT restrict
     #elif defined(__GNUC__) || defined(__clang__)
         #define BJ_RESTRICT __restrict__
@@ -210,7 +220,7 @@
         #define BJ_CONST_ARRAY_2D(T,n,m,name) _In_reads_((n)*(m)) const T (* BJ_RESTRICT name)[m]
         #define BJ_ARRAY_2D(T,n,m,name)       _Out_writes_((n)*(m))        T (* BJ_RESTRICT name)[m]
     #endif
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#elif defined(BJ_COMPILER_DOXYGEN) || (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L))
     #define BJ_CONST_ARRAY(T,n,name)      const T name[BJ_RESTRICT static (n)]
     #define BJ_ARRAY(T,n,name)                  T name[BJ_RESTRICT static (n)]
     #define BJ_CONST_ARRAY_2D(T,n,m,name) const T name[BJ_RESTRICT static (n)][m]
@@ -246,7 +256,7 @@
         #define BJ_INLINE inline
     #endif
 #else
-    #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+    #if defined(BJ_COMPILER_DOXYGEN) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
         #define BJ_INLINE inline
     #else
         #define BJ_INLINE /* no inline available */

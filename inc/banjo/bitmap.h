@@ -62,6 +62,7 @@ BANJO_EXPORT bj_bitmap* bj_allocate_bitmap(
 /// If the value is less than the required stride, the actual minimum stride
 /// is used.
 /// Set it to _0_ to automatically compute the stride.
+///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bitmap* bj_create_bitmap(
     size_t           width,
@@ -150,13 +151,14 @@ BANJO_EXPORT bj_bitmap* bj_create_bitmap_from_file(
     bj_error**        p_error
 );
 
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Creates a new bj_bitmap with the specified width and height.
 ///
 /// Contrary to \ref bj_create_bitmap, the pixel data is explicitely provided
 /// by the caller through `p_pixels`.
-/// The caller is responsible for ensuring the allocated pixel data matches
-/// `width, `height`, `mode` and `stride`.
+/// The caller is reponsible for ensuring the allocated pixel data matches
+/// `width`, `height`, `mode` and `stride`.
 ///
 /// You can use \ref bj_compute_bitmap_stride with `width` and `mode` to
 /// retrieve the most suitable value for `stride`.
