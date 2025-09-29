@@ -294,10 +294,8 @@ static BJ_INLINE bj_real bj_vec3_len(bj_vec3 v) {
 /// \param target_len Desired length of the result.
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_set_len(bj_vec3* res, bj_vec3 v, bj_real target_len) {
-    bj_real len = bj_vec3_len(v);
-    bj_real scale = target_len / len;
-    *res = bj_vec3_scale(v, scale);
+static BJ_INLINE bj_vec3 bj_vec3_set_len(bj_vec3 v, bj_real target_len) {
+    return bj_vec3_scale(v, target_len / bj_vec3_len(v));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
