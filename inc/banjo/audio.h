@@ -10,6 +10,13 @@
 /// playback with a callback-based interface, suitable for retro-style
 /// games and basic procedural sound generation.
 ///
+/// Banjo supports audio manipulation for Windows, GNU/Linux and WebAssembly.
+///
+/// \todo Add support for audio on macOS 
+/// \todo Add support for audio push-based API
+/// \todo Add support for audio WAVE format
+/// \todo Add support for audio MIDI format
+///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_AUDIO_H

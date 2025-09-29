@@ -5,6 +5,26 @@
 /// \defgroup bitmap Bitmap
 ///
 /// \brief Matrix of pixels
+///
+/// 2D pixel buffers and blit utilities. Create, destroy, load from files,
+/// convert pixel modes, access pixels, and render via blit, masked blit,
+/// stretched blit, and text drawing. Integrates with \ref bj_pixel_mode,
+/// \ref bj_rect, and window framebuffers.
+///
+/// Typical usage:
+/// - Create with \ref bj_create_bitmap or \ref bj_create_bitmap_from_file.
+/// - Query size and mode, or access raw pixels.
+/// - Draw: \ref bj_blit, \ref bj_blit_stretched, \ref bj_blit_mask,
+///   \ref bj_blit_mask_stretched, \ref bj_draw_text, \ref bj_blit_text.
+/// - Destroy with \ref bj_destroy_bitmap.
+///
+/// \note Public APIs use destination-native packed colors unless stated
+///       otherwise. Use \ref bj_make_bitmap_pixel to pack values.
+///
+/// \todo Add support for writing bitmaps to disk (e.g., BMP/PNG) with a
+///       `bj_write_bitmap_*` API.
+///
+///
 /// \{
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef BJ_BITMAP_H
