@@ -231,15 +231,17 @@ static BJ_INLINE bj_vec3 bj_vec3_add(bj_vec3 lhs, bj_vec3 rhs) {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Add a scaled vector: res = a + s * b.
-/// \param res Output 3D vector.
-/// \param a Input component or vector a.
-/// \param b Input component or vector b.
-/// \param s Scalar factor.
+/// \param lhs Input component or vector a.
+/// \param rhs Input component or vector b.
+/// \param s   Scalar factor.
+/// \return Sum of `lhs` and `rhs * s`.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec3_add_scaled(bj_vec3* res, bj_vec3 a, bj_vec3 b, bj_real s) {
-    res->x = a.x + b.x * s;
-    res->y = a.y + b.y * s;
-    res->z = a.z + b.z * s;
+static BJ_INLINE bj_vec3 bj_vec3_add_scaled(
+    bj_vec3 lhs,
+    bj_vec3 rhs,
+    bj_real s
+) {
+    return (bj_vec3){ .x = lhs.x + rhs.x * s, .y = lhs.y + rhs.y * s, .z = lhs.z + rhs.z * s,  };
 }
 
 
