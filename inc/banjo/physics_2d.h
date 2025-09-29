@@ -39,11 +39,11 @@
 /// \param time          Elapsed time t [T]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_compute_kinematics_2d(
-    BJ_ARRAY      (bj_real, 2, out),
-    BJ_CONST_ARRAY(bj_real, 2, position),
-    BJ_CONST_ARRAY(bj_real, 2, velocity),
-    BJ_CONST_ARRAY(bj_real, 2, acceleration),
-    bj_real time
+    bj_vec2* out,
+    bj_vec2  position,
+    bj_vec2  velocity,
+    bj_vec2  acceleration,
+    bj_real  time
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,10 +205,10 @@ BANJO_EXPORT bj_real bj_compute_particle_drag_coefficient_2d(
 /// \retval BJ_FALSE velocity too small to define direction; result set to (0,0)
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_compute_particle_drag_force_2d(
-    BJ_ARRAY      (bj_real, 2, result),
-    BJ_CONST_ARRAY(bj_real, 2, vel),
-    const bj_real k1,
-    const bj_real k2
+    bj_vec2* result,
+    bj_vec2  vel,
+    const    bj_real k1,
+    const    bj_real k2
 );
 
 ////////////////////////////////////////////////////////////////////////////////

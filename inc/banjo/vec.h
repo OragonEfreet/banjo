@@ -22,9 +22,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_vec2: 2D vector of bj_real values.
 /// Intended for lightweight math operations and POD interop.
-/// Components are indexed as 0..1.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_real bj_vec2[2];
+struct bj_vec2_t {
+    bj_real x;
+    bj_real y;
+};
+typedef struct bj_vec2_t bj_vec2;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_vec3: 3D vector of bj_real values.
@@ -46,17 +49,17 @@ typedef bj_real bj_vec4[4];
 /// \param a Input component or vector a.
 /// \param b Input component or vector b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_set(bj_vec2 res, bj_real a, bj_real b) {
-    res[0] = a; res[1] = b;
+static BJ_INLINE void bj_vec2_set(bj_vec2* res, bj_real a, bj_real b) {
+    res->x = a; res->y = b;
 }
 
-static BJ_INLINE void bj_vec2_zero(bj_vec2 res) {
-    res[0] = res[1] = BJ_FZERO;
+static BJ_INLINE void bj_vec2_zero(bj_vec2* res) {
+    res->x = res->y = BJ_FZERO;
 }
 
-static BJ_INLINE void bj_vec2_apply(bj_vec2 res, const bj_vec2 a, bj_real(*f)(bj_real)) {
-    res[0] = f(a[0]);
-    res[1] = f(a[1]);
+static BJ_INLINE void bj_vec2_apply(bj_vec2* res, bj_vec2 a, bj_real(*f)(bj_real)) {
+    res->x = f(a.x);
+    res->y = f(a.y);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,9 +70,9 @@ static BJ_INLINE void bj_vec2_apply(bj_vec2 res, const bj_vec2 a, bj_real(*f)(bj
 /// \param rhs Right-hand input vector.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_add(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
-    res[0] = lhs[0] + rhs[0];
-    res[1] = lhs[1] + rhs[1];
+static BJ_INLINE void bj_vec2_add(bj_vec2* res, bj_vec2 lhs, bj_vec2 rhs) {
+    res->x = lhs.x + rhs.x;
+    res->y = lhs.y + rhs.y;
 }
 
 
@@ -81,13 +84,13 @@ static BJ_INLINE void bj_vec2_add(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 
 /// \param s Scalar factor.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_vec2_add_scaled(
-    bj_vec2 res,
-    const bj_vec2 a,
-    const bj_vec2 b,
+    bj_vec2* res,
+    bj_vec2 a,
+    bj_vec2 b,
     bj_real s
 ) {
-    res[0] = a[0] + b[0] * s;
-    res[1] = a[1] + b[1] * s;
+    res->x = a.x + b.x * s;
+    res->y = a.y + b.y * s;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -96,9 +99,12 @@ static BJ_INLINE void bj_vec2_add_scaled(
 /// \param lhs Left-hand input vector.
 /// \param rhs Right-hand input vector.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_sub(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 rhs) {
-    res[0] = lhs[0] - rhs[0];
-    res[1] = lhs[1] - rhs[1];
+static BJ_INLINE void bj_vec2_sub(bj_vec2* res,
+    const bj_vec2 lhs,
+    const bj_vec2 rhs
+) {
+    res->x = lhs.x - rhs.x;
+    res->y = lhs.y - rhs.y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,9 +113,9 @@ static BJ_INLINE void bj_vec2_sub(bj_vec2 res, const bj_vec2 lhs, const bj_vec2 
 /// \param v Input vector.
 /// \param s Scalar factor.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_scale(bj_vec2 res, const bj_vec2 v, bj_real s) {
-    res[0] = v[0] * s;
-    res[1] = v[1] * s;
+static BJ_INLINE void bj_vec2_scale(bj_vec2* res, bj_vec2 v, bj_real s) {
+    res->x = v.x * s;
+    res->y = v.y * s;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,9 +124,12 @@ static BJ_INLINE void bj_vec2_scale(bj_vec2 res, const bj_vec2 v, bj_real s) {
 /// \param v Input vector.
 /// \param s Scalar factor.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_scale_each(bj_vec2 res, const bj_vec2 v, const bj_vec2 s) {
-    res[0] = v[0] * s[0];
-    res[1] = v[1] * s[1];
+static BJ_INLINE void bj_vec2_scale_each(bj_vec2* res,
+    const bj_vec2 v,
+    const bj_vec2 s
+) {
+    res->x = v.x * s.x;
+    res->y = v.y * s.y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -129,16 +138,16 @@ static BJ_INLINE void bj_vec2_scale_each(bj_vec2 res, const bj_vec2 v, const bj_
 /// \param b Input component or vector b.
 /// \returns The scalar dot product.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec2_dot(const bj_vec2 a, const bj_vec2 b) {
-    return a[0] * b[0] + a[1] * b[1];
+static BJ_INLINE bj_real bj_vec2_dot(bj_vec2 a, bj_vec2 b) {
+    return a.x * b.x + a.y * b.y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 2D "cross product" (perp dot): returns scalar a.x*b.y - a.y*b.x.
 /// Useful for orientation tests, signed area, segment intersection.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec2_cross(const bj_vec2 a, const bj_vec2 b) {
-    return a[0]*b[1] - a[1]*b[0];
+static BJ_INLINE bj_real bj_vec2_cross(bj_vec2 a, bj_vec2 b) {
+    return a.x*b.y - a.y*b.x;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -146,8 +155,8 @@ static BJ_INLINE bj_real bj_vec2_cross(const bj_vec2 a, const bj_vec2 b) {
 /// \param v Input vector.
 /// \returns The Euclidean norm.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec2_len(const bj_vec2 v) {
-    return bj_sqrt(v[0] * v[0] + v[1] * v[1]);
+static BJ_INLINE bj_real bj_vec2_len(bj_vec2 v) {
+    return bj_sqrt(v.x * v.x + v.y * v.y);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,7 +167,7 @@ static BJ_INLINE bj_real bj_vec2_len(const bj_vec2 v) {
 /// \warning Undefined if the input vector has zero length.
 /// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_set_len(bj_vec2 res, const bj_vec2 v, bj_real target_len) {
+static BJ_INLINE void bj_vec2_set_len(bj_vec2* res, bj_vec2 v, bj_real target_len) {
     bj_real len = bj_vec2_len(v);
     bj_real scale = target_len / len;
     bj_vec2_scale(res, v, scale);
@@ -171,9 +180,9 @@ static BJ_INLINE void bj_vec2_set_len(bj_vec2 res, const bj_vec2 v, bj_real targ
 /// \returns The squared distance ||a - b||^2.
 /// \ingroup math
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec2_dist_squared(const bj_vec2 a, const bj_vec2 b) {
-    const bj_real dx = a[0] - b[0];
-    const bj_real dy = a[1] - b[1];
+static BJ_INLINE bj_real bj_vec2_dist_squared(bj_vec2 a, bj_vec2 b) {
+    const bj_real dx = a.x - b.x;
+    const bj_real dy = a.y - b.y;
     return dx * dx + dy * dy;
 }
 
@@ -194,10 +203,10 @@ static BJ_INLINE bj_real bj_vec2_dist(const bj_vec2 a, const bj_vec2 b) {
 /// \param v Input vector.
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_normalize(bj_vec2 res, const bj_vec2 v) {
-    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v[0] * v[0] + v[1] * v[1]);
-    res[0] = v[0] * inv_len;
-    res[1] = v[1] * inv_len;
+static BJ_INLINE void bj_vec2_normalize(bj_vec2* res, bj_vec2 v) {
+    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y);
+    res->x = v.x * inv_len;
+    res->y = v.y * inv_len;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -206,9 +215,9 @@ static BJ_INLINE void bj_vec2_normalize(bj_vec2 res, const bj_vec2 v) {
 /// \param a Input component or vector a.
 /// \param b Input component or vector b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_min(bj_vec2 res, const bj_vec2 a, const bj_vec2 b) {
-    res[0] = a[0] < b[0] ? a[0] : b[0];
-    res[1] = a[1] < b[1] ? a[1] : b[1];
+static BJ_INLINE void bj_vec2_min(bj_vec2* res, bj_vec2 a, bj_vec2 b) {
+    res->x = a.x < b.x ? a.x : b.x;
+    res->y = a.y < b.y ? a.y : b.y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -217,9 +226,9 @@ static BJ_INLINE void bj_vec2_min(bj_vec2 res, const bj_vec2 a, const bj_vec2 b)
 /// \param a Input component or vector a.
 /// \param b Input component or vector b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_max(bj_vec2 res, const bj_vec2 a, const bj_vec2 b) {
-    res[0] = a[0] > b[0] ? a[0] : b[0];
-    res[1] = a[1] > b[1] ? a[1] : b[1];
+static BJ_INLINE void bj_vec2_max(bj_vec2* res, bj_vec2 a, bj_vec2 b) {
+    res->x = a.x > b.x ? a.x : b.x;
+    res->y = a.y > b.y ? a.y : b.y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -227,9 +236,9 @@ static BJ_INLINE void bj_vec2_max(bj_vec2 res, const bj_vec2 a, const bj_vec2 b)
 /// \param res Output 2D vector.
 /// \param src Source vector to copy from.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec2_copy(bj_vec2 res, const bj_vec2 src) {
-    res[0] = src[0];
-    res[1] = src[1];
+static BJ_INLINE void bj_vec2_copy(bj_vec2* res, const bj_vec2 src) {
+    res->x = src.x;
+    res->y = src.y;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

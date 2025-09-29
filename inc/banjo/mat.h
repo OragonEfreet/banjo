@@ -208,23 +208,23 @@ static BJ_INLINE void bj_mat3_mul_vec3(
 /// Transform a point (homogeneous w=1).
 /// \note Column-major convention: \c res = m * p.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_mul_point(bj_vec2 res, const bj_mat3x3 m, const bj_vec2 p) {
-    bj_vec3 v = { p[0], p[1], BJ_F(1.0) };
+static BJ_INLINE void bj_mat3_mul_point(bj_vec2* res, const bj_mat3x3 m, bj_vec2 p) {
+    bj_vec3 v = { p.x, p.y, BJ_F(1.0) };
     bj_vec3 o;
     bj_mat3_mul_vec3(o, m, v);
     bj_real w = o[2];
-    if (w != BJ_FZERO) { res[0] = o[0] / w; res[1] = o[1] / w; }
-    else                { res[0] = o[0];     res[1] = o[1];     }
+    if (w != BJ_FZERO) { res->x = o[0] / w; res->y = o[1] / w; }
+    else               { res->x = o[0];     res->y = o[1];     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Transform a direction (w=0; ignores translation).
 /// \note Column-major convention: \c res = m * v2.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_mul_vector2(bj_vec2 res, const bj_mat3x3 m, const bj_vec2 v2) {
-    bj_vec3 v = { v2[0], v2[1], BJ_FZERO };
+static BJ_INLINE void bj_mat3_mul_vector2(bj_vec2* res, const bj_mat3x3 m, bj_vec2 v2) {
+    bj_vec3 v = { v2.x, v2.y, BJ_FZERO };
     bj_vec3 o; bj_mat3_mul_vec3(o, m, v);
-    res[0] = o[0]; res[1] = o[1];
+    res->x = o[0]; res->y = o[1];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -720,18 +720,15 @@ static BJ_INLINE void bj_mat4_rotate_z(bj_mat4x4 res, const bj_mat4x4 mat, bj_re
 ////////////////////////////////////////////////////////////////////////////////
 /// Arcball rotation.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4x4 R, const bj_mat4x4 M, bj_vec2 const _a, bj_vec2 const _b, bj_real s)
+static BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4x4 R, const bj_mat4x4 M, bj_vec2 a, bj_vec2 b, bj_real s)
 {
-    bj_vec2 a = { _a[0], _a[1] };
-    bj_vec2 b = { _b[0], _b[1] };
-
     bj_real z_a = BJ_FZERO, z_b = BJ_FZERO;
 
-    if (bj_vec2_len(a) < BJ_F(1.0)) z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a, a)); else bj_vec2_normalize(a, a);
-    if (bj_vec2_len(b) < BJ_F(1.0)) z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b, b)); else bj_vec2_normalize(b, b);
+    if (bj_vec2_len(a) < BJ_F(1.0)) z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a, a)); else bj_vec2_normalize(&a, a);
+    if (bj_vec2_len(b) < BJ_F(1.0)) z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b, b)); else bj_vec2_normalize(&b, b);
 
-    bj_vec3 a_ = { a[0], a[1], z_a };
-    bj_vec3 b_ = { b[0], b[1], z_b };
+    bj_vec3 a_ = { a.x, a.y, z_a };
+    bj_vec3 b_ = { b.x, b.y, z_b };
 
     bj_vec3 c_; bj_vec3_cross(c_, a_, b_);
     bj_real const angle = bj_acos(bj_vec3_dot(a_, b_)) * s;

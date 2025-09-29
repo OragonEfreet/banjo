@@ -72,14 +72,14 @@ static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj
     const bj_real a = phase;
     const bj_real x = r * bj_cos(a);
     const bj_real y = r * bj_sin(a);
-    bj_vec2_set(p->body.position, x, y);
+    bj_vec2_set(&p->body.position, x, y);
 
     const bj_real v = orbital_speed_soft(G_SUN, M_SUN, r, SOFTENING);
     const bj_real vx = -v * bj_sin(a);
     const bj_real vy =  v * bj_cos(a);
-    bj_vec2_set(p->body.velocity, vx, vy);
+    bj_vec2_set(&p->body.velocity, vx, vy);
 
-    bj_vec2_zero(p->body.forces);
+    bj_vec2_zero(&p->body.forces);
     p->body.damping = BJ_F(1.0);
     p->body.inverse_mass = BJ_F(1.0) / mass;
 
@@ -98,14 +98,14 @@ static void init_asteroids() {
 
         const bj_real x = r * bj_cos(a);
         const bj_real y = r * bj_sin(a);
-        bj_vec2_set(asteroids[i].position, x, y);
+        bj_vec2_set(&asteroids[i].position, x, y);
 
         const bj_real v = orbital_speed_soft(G_SUN, M_SUN, r, SOFTENING);
         const bj_real vx = -v * bj_sin(a);
         const bj_real vy =  v * bj_cos(a);
-        bj_vec2_set(asteroids[i].velocity, vx, vy);
+        bj_vec2_set(&asteroids[i].velocity, vx, vy);
 
-        bj_vec2_zero(asteroids[i].forces);
+        bj_vec2_zero(&asteroids[i].forces);
         asteroids[i].damping = BJ_F(1.0);
         asteroids[i].inverse_mass = 1.0;
     }
@@ -151,19 +151,19 @@ static void draw() {
 
     const uint32_t col_sun = bj_make_bitmap_pixel(framebuffer, 0xFF, 0xCC, 0x44);
 
-    bj_vec3 c = { sun.position[0], sun.position[1], BJ_F(1.0) };
+    bj_vec3 c = { sun.position.x, sun.position.y, BJ_F(1.0) };
     bj_vec3 pc;
     bj_mat3_mul_vec3(pc, projection, c);
     bj_draw_filled_circle(framebuffer, pc[0], pc[1], BJ_F(10.0), col_sun);
 
     for (size_t i = 0; i < N_PLANETS; ++i) {
-        c[0] = planets[i].body.position[0]; c[1] = planets[i].body.position[1];
+        c[0] = planets[i].body.position.x; c[1] = planets[i].body.position.y;
         bj_mat3_mul_vec3(pc, projection, c);
         bj_draw_filled_circle(framebuffer, pc[0], pc[1], planets[i].radius, planets[i].color);
     }
 
     for (size_t i = 0; i < N_ASTEROIDS; ++i) {
-        c[0] = asteroids[i].position[0]; c[1] = asteroids[i].position[1];
+        c[0] = asteroids[i].position.x; c[1] = asteroids[i].position.y;
         bj_mat3_mul_vec3(pc, projection, c);
         bj_put_pixel(framebuffer, (int)pc[0], (int)pc[1], asteroid_color);
     }

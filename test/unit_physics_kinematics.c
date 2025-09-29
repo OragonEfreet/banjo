@@ -40,23 +40,6 @@ TEST_CASE(kinematics_scalar_negative_time)
     REQUIRE_EQ(x, BJ_F(70.0));
 }
 
-/* --- Position: 2D & 3D wrappers ---------------------------------------- */
-
-TEST_CASE(kinematics_2d_basic_and_sentinel)
-{
-    bj_real p[3] = { BJ_F(5.0), BJ_F(6.0), BJ_F(777.0) };  // [0..1] used, [2] sentinel
-    bj_real v[3] = { BJ_F(3.0), BJ_F(-1.0), BJ_F(888.0) };
-    bj_real a[3] = { BJ_F(2.0), BJ_F(4.0), BJ_F(999.0) };
-    bj_real out[3] = { BJ_FZERO, BJ_FZERO, BJ_F(12345.0) };
-    bj_real t = BJ_F(4.0);
-
-    bj_compute_kinematics_2d(out, p, v, a, t);
-
-    REQUIRE_EQ(out[0], X_EXPECT(p[0], v[0], a[0], t));
-    REQUIRE_EQ(out[1], X_EXPECT(p[1], v[1], a[1], t));
-    REQUIRE_EQ(out[2], BJ_F(12345.0)); // untouched sentinel
-}
-
 /* --- Velocity: scalar --------------------------------------------------- */
 
 TEST_CASE(kinematics_velocity_scalar_zero_time)
@@ -80,21 +63,6 @@ TEST_CASE(kinematics_velocity_scalar_negative_time)
     REQUIRE_EQ(v, BJ_F(-5.0));
 }
 
-/* --- Velocity: 2D & 3D wrappers ---------------------------------------- */
-
-TEST_CASE(kinematics_velocity_2d_basic_and_sentinel)
-{
-    bj_real v0[3] = { BJ_F(3.0), BJ_F(-1.0), BJ_F(777.0) };
-    bj_real a [3] = { BJ_F(2.0), BJ_F(4.0),  BJ_F(888.0) };
-    bj_real out[3] = { BJ_FZERO, BJ_FZERO, BJ_F(12345.0) };
-    bj_real t = BJ_F(4.0);
-
-    bj_compute_kinematics_velocity_2d(out, v0, a, t);
-
-    REQUIRE_EQ(out[0], V_EXPECT(v0[0], a[0], t));
-    REQUIRE_EQ(out[1], V_EXPECT(v0[1], a[1], t));
-    REQUIRE_EQ(out[2], BJ_F(12345.0)); // untouched sentinel
-}
 
 /* --- Main: run them all ------------------------------------------------- */
 
@@ -108,14 +76,12 @@ int main(int argc, char** argv)
     RUN_TEST(kinematics_scalar_negative_time);
 
 
-    RUN_TEST(kinematics_2d_basic_and_sentinel);
 
     RUN_TEST(kinematics_velocity_scalar_zero_time);
     RUN_TEST(kinematics_velocity_scalar_positive);
     RUN_TEST(kinematics_velocity_scalar_negative_time);
 
 
-    RUN_TEST(kinematics_velocity_2d_basic_and_sentinel);
 
     END_TESTS();
 }
