@@ -212,12 +212,12 @@ static BJ_INLINE bj_vec2 bj_vec2_max(bj_vec2 a, bj_vec2 b) {
     return (bj_vec2){a.x > b.x ? a.x : b.x, a.y > b.y ? a.y : b.y, };
 }
 
-static BJ_INLINE void bj_vec3_apply(bj_vec3* res, bj_vec3 a, bj_real(*f)(bj_real)) {
-    res->x = f(a.x);
-    res->y = f(a.y);
-    res->z = f(a.z);
+static BJ_INLINE bj_vec3 bj_vec3_apply(
+    bj_vec3 a,
+    bj_real(*f)(bj_real)
+) {
+    return (bj_vec3){ .x = f(a.x), .y = f(a.y), .z = f(a.z), };
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise addition of two 3D vectors: res = lhs + rhs.
