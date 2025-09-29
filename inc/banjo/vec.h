@@ -45,9 +45,11 @@ typedef bj_real bj_vec3[3];
 ////////////////////////////////////////////////////////////////////////////////
 typedef bj_real bj_vec4[4];
 
-static BJ_INLINE void bj_vec2_apply(bj_vec2* res, bj_vec2 a, bj_real(*f)(bj_real)) {
-    res->x = f(a.x);
-    res->y = f(a.y);
+static BJ_INLINE bj_vec2 bj_vec2_apply(
+    bj_vec2 a,
+    bj_real(*f)(bj_real)
+) {
+    return (bj_vec2){ .x = f(a.x), .y = f(a.y), };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
