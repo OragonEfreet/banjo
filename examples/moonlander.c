@@ -268,8 +268,7 @@ static void draw(game_data* data) {
             };
             const bj_vec2 acceleration = { BJ_FZERO, -data->world.g };
             bj_vec2 res = { BJ_FZERO, BJ_FZERO };
-            bj_compute_kinematics_2d(
-                &res,
+            res = bj_compute_kinematics_2d(
                 initial_position,
                 initial_velocity,
                 acceleration,

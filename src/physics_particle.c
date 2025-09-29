@@ -87,9 +87,10 @@ void bj_apply_drag_2d(
     bj_real k1,
     bj_real k2
 ) {
-    bj_vec2 force;
-    bj_compute_particle_drag_force_2d(&force, p_particle->velocity, k1, k2);
-    bj_apply_particle_force_2d(p_particle, force);
+    bj_apply_particle_force_2d(
+        p_particle,
+        bj_compute_particle_drag_force_2d(p_particle->velocity, k1, k2)
+    );
 }
 
 bj_real bj_compute_particle_drag_coefficient_2d(
@@ -104,20 +105,13 @@ bj_real bj_compute_particle_drag_coefficient_2d(
     return k1 * coef + k2 * coef * coef;
 }
 
-bj_bool bj_compute_particle_drag_force_2d(
-    bj_vec2* result,
+bj_vec2 bj_compute_particle_drag_force_2d(
     bj_vec2  vel,
     const    bj_real k1,
     const    bj_real k2
 ) {
-    bj_real coef = bj_compute_particle_drag_coefficient_2d(vel, k1, k2);
-
-    if(bj_real_is_zero(coef)) {
-        *result = BJ_VEC2_ZERO;
-        return BJ_FALSE;
-    }
-    *result = bj_vec2_set_len(vel, -coef);
-    return BJ_TRUE;
+    const bj_real coef = bj_compute_particle_drag_coefficient_2d(vel, k1, k2);
+    return bj_real_is_zero(coef) ? BJ_VEC2_ZERO : bj_vec2_set_len(vel, -coef);
 }
 
 

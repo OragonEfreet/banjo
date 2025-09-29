@@ -71,8 +71,7 @@ static void initialize_balls() {
 static void update(bj_real dt) {
     for(size_t b = 0 ; b < BALLS_LEN ; ++b) {
         balls[b].time_alive += dt;
-        bj_compute_kinematics_2d(
-            &balls[b].position,
+        balls[b].position = bj_compute_kinematics_2d(
             initial_position,
             balls[b].initial_velocity,
             gravity,
