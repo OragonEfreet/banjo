@@ -212,10 +212,6 @@ static BJ_INLINE bj_vec2 bj_vec2_max(bj_vec2 a, bj_vec2 b) {
     return (bj_vec2){a.x > b.x ? a.x : b.x, a.y > b.y ? a.y : b.y, };
 }
 
-static BJ_INLINE void bj_vec3_zero(bj_vec3* res) {
-    res->x = res->y = res->z = BJ_FZERO;
-}
-
 static BJ_INLINE void bj_vec3_apply(bj_vec3* res, bj_vec3 a, bj_real(*f)(bj_real)) {
     res->x = f(a.x);
     res->y = f(a.y);
