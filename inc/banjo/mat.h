@@ -42,7 +42,7 @@ typedef bj_vec2 bj_mat3x2[3];
 /// bj_mat4x4: 4×4 column-major matrix backed by bj_vec4.
 /// Columns are arrays of 4 components.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_vec4 bj_mat4x4[4];
+typedef bj_real bj_mat4x4[4][4];
 
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_mat4: Alias for bj_mat4x4
@@ -478,23 +478,32 @@ static BJ_INLINE void bj_mat4_identity(bj_mat4x4 mat)
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_copy(bj_mat4x4 to, const bj_mat4x4 from)
 {
-    for (int i = 0; i < 4; ++i) bj_vec4_copy(to[i], from[i]);
+    for (size_t i = 0; i < 16; i+=4) {
+        to[i][0] = from[i][0];
+        to[i][1] = from[i][1];
+        to[i][2] = from[i][2];
+        to[i][3] = from[i][3];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Extract 4×4 row.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_row(bj_vec4 res, const bj_mat4x4 mat, int r)
+static BJ_INLINE bj_vec4 bj_mat4_row(const bj_mat4x4 mat, int r)
 {
-    for (int k = 0; k < 4; ++k) res[k] = mat[k][r];
+    return (bj_vec4) {
+        .x = mat[0][r], .y = mat[1][r], .z = mat[2][r], .w = mat[3][r],
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Extract 4×4 column.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_col(bj_vec4 res, const bj_mat4x4 mat, int c)
+static BJ_INLINE bj_vec4 bj_mat4_col(const bj_mat4x4 mat, int c)
 {
-    for (int k = 0; k < 4; ++k) res[k] = mat[c][k];
+    return (bj_vec4) {
+        .x = mat[c][0], .y = mat[c][1], .z = mat[c][2], .w = mat[c][3],
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -512,7 +521,12 @@ static BJ_INLINE void bj_mat4_transpose(bj_mat4x4 res, const bj_mat4x4 mat)
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_add(bj_mat4x4 res, const bj_mat4x4 lhs, const bj_mat4x4 rhs)
 {
-    for (int i = 0; i < 4; ++i) bj_vec4_add(res[i], lhs[i], rhs[i]);
+    for (int i = 0; i < 4; ++i) {
+        res[i][0] = lhs[i][0] + rhs[i][0];
+        res[i][1] = lhs[i][1] + rhs[i][1];
+        res[i][2] = lhs[i][2] + rhs[i][2];
+        res[i][3] = lhs[i][3] + rhs[i][3];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -520,26 +534,32 @@ static BJ_INLINE void bj_mat4_add(bj_mat4x4 res, const bj_mat4x4 lhs, const bj_m
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_sub(bj_mat4x4 res, const bj_mat4x4 lhs, const bj_mat4x4 rhs)
 {
-    for (int i = 0; i < 4; ++i) bj_vec4_sub(res[i], lhs[i], rhs[i]);
+    for (int i = 0; i < 4; ++i) {
+        res[i][0] = lhs[i][0] - rhs[i][0];
+        res[i][1] = lhs[i][1] - rhs[i][1];
+        res[i][2] = lhs[i][2] - rhs[i][2];
+        res[i][3] = lhs[i][3] - rhs[i][3];
+    }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// Scale 4×4 by k.
-////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_scale(bj_mat4x4 res, const bj_mat4x4 lhs, bj_real k)
 {
-    for (int i = 0; i < 4; ++i) bj_vec4_scale(res[i], lhs[i], k);
+    for (int i = 0; i < 4; ++i) {
+        res[i][0] = lhs[i][0] * k;
+        res[i][1] = lhs[i][1] * k;
+        res[i][2] = lhs[i][2] * k;
+        res[i][3] = lhs[i][3] * k;
+    }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// Scale basis vectors.
-////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_scale_xyz(bj_mat4x4 res, const bj_mat4x4 mat, bj_real x, bj_real y, bj_real z)
 {
-    bj_vec4_scale(res[0], mat[0], x);
-    bj_vec4_scale(res[1], mat[1], y);
-    bj_vec4_scale(res[2], mat[2], z);
-    bj_vec4_copy(res[3], mat[3]);
+    for (int j = 0; j < 4; ++j) {
+        res[0][j] = mat[0][j] * x;
+        res[1][j] = mat[1][j] * y;
+        res[2][j] = mat[2][j] * z;
+        res[3][j] = mat[3][j];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -623,14 +643,17 @@ static BJ_INLINE void bj_mat4_translation(bj_mat4x4 res, bj_real x, bj_real y, b
 ////////////////////////////////////////////////////////////////////////////////
 /// Apply 4×4 translation in-place.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_translation_inplace(bj_mat4x4 M, bj_real x, bj_real y, bj_real z)
-{
-    bj_vec4 t = { x, y, z, BJ_FZERO };
-    bj_vec4 r;
-    for (int i = 0; i < 4; ++i) {
-        bj_mat4_row(r, M, i);
-        M[3][i] += bj_vec4_dot(r, t);
-    }
+static BJ_INLINE void bj_mat4_translation_inplace(
+    bj_mat4x4 M,
+    bj_real   x,
+    bj_real   y,
+    bj_real   z
+) {
+    /* column-major: M[3] is the translation column */
+    M[3][0] += M[0][0]*x + M[1][0]*y + M[2][0]*z;
+    M[3][1] += M[0][1]*x + M[1][1]*y + M[2][1]*z;
+    M[3][2] += M[0][2]*x + M[1][2]*y + M[2][2]*z;
+    M[3][3] += M[0][3]*x + M[1][3]*y + M[2][3]*z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

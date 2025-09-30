@@ -32,7 +32,7 @@ typedef struct bj_vec2_t bj_vec2;
 #define BJ_VEC2_ZERO ((bj_vec2){BJ_FZERO, BJ_FZERO})
 
 ////////////////////////////////////////////////////////////////////////////////
-/// bj_vec2: 2D vector of bj_real values.
+/// bj_vec3: 3D vector of bj_real values.
 /// Intended for lightweight math operations and POD interop.
 ////////////////////////////////////////////////////////////////////////////////
 struct bj_vec3_t {
@@ -47,9 +47,16 @@ typedef struct bj_vec3_t bj_vec3;
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_vec4: 4D vector of bj_real values.
 /// Intended for lightweight math operations and POD interop.
-/// Components are indexed as 0..3.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_real bj_vec4[4];
+struct bj_vec4_t {
+    bj_real x;
+    bj_real y;
+    bj_real z;
+    bj_real w;
+};
+typedef struct bj_vec4_t bj_vec4;
+
+#define BJ_VEC3_ZERO ((bj_vec3){BJ_FZERO, BJ_FZERO, BJ_FZERO})
 
 static BJ_INLINE bj_vec2 bj_vec2_apply(
     bj_vec2 a,
@@ -226,7 +233,11 @@ static BJ_INLINE bj_vec3 bj_vec3_apply(
 /// \param rhs Right-hand input vector.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_vec3_add(bj_vec3 lhs, bj_vec3 rhs) {
-    return (bj_vec3){ .x = lhs.x + rhs.x, .y = lhs.y + rhs.y, .z = lhs.z + rhs.z,};
+    return (bj_vec3){ 
+        .x = lhs.x + rhs.x,
+        .y = lhs.y + rhs.y,
+        .z = lhs.z + rhs.z,
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -241,7 +252,11 @@ static BJ_INLINE bj_vec3 bj_vec3_add_scaled(
     bj_vec3 rhs,
     bj_real s
 ) {
-    return (bj_vec3){ .x = lhs.x + rhs.x * s, .y = lhs.y + rhs.y * s, .z = lhs.z + rhs.z * s,  };
+    return (bj_vec3){ 
+        .x = lhs.x + rhs.x * s,
+        .y = lhs.y + rhs.y * s,
+        .z = lhs.z + rhs.z * s,  
+    };
 }
 
 
@@ -252,10 +267,14 @@ static BJ_INLINE bj_vec3 bj_vec3_add_scaled(
 /// \return `lhs` - `rhs`
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_vec3_sub(
-    const bj_vec3 lhs,
-    const bj_vec3 rhs
+    bj_vec3 lhs,
+    bj_vec3 rhs
 ) {
-    return (bj_vec3){ .x = lhs.x - rhs.x, .y = lhs.y - rhs.y, .z = lhs.z - rhs.z, };
+    return (bj_vec3){ 
+        .x = lhs.x - rhs.x,
+        .y = lhs.y - rhs.y,
+        .z = lhs.z - rhs.z, 
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -265,7 +284,11 @@ static BJ_INLINE bj_vec3 bj_vec3_sub(
 /// \return The result of `v * s`
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_vec3_scale(bj_vec3 v, bj_real s) {
-    return (bj_vec3){ .x = v.x * s, .y = v.y * s, .z = v.z * s,};
+    return (bj_vec3){ 
+        .x = v.x * s,
+        .y = v.y * s,
+        .z = v.z * s,
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -329,7 +352,7 @@ static BJ_INLINE bj_real bj_vec3_dist(bj_vec3 a, bj_vec3 b) {
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_vec3_normalize(bj_vec3 v) {
-    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y);
+    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
     return (bj_vec3){ v.x * inv_len, v.y * inv_len, v.z * inv_len,};
 }
 
@@ -340,7 +363,11 @@ static BJ_INLINE bj_vec3 bj_vec3_normalize(bj_vec3 v) {
 /// \param b Input component or vector b.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_vec3_min(bj_vec3 a, bj_vec3 b) {
-    return (bj_vec3){a.x < b.x ? a.x : b.x, a.y < b.y ? a.y : b.y, a.z < b.z ? a.z : b.z,};
+    return (bj_vec3){
+        a.x < b.x ? a.x : b.x,
+        a.y < b.y ? a.y : b.y,
+        a.z < b.z ? a.z : b.z,
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -385,77 +412,79 @@ static BJ_INLINE bj_vec3 bj_vec3_reflect(bj_vec3 v, bj_vec3 n)
     };
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-/// Set a 4D vector from components (x, y, z, w).
-/// \param res Output 4D vector.
-/// \param a Input component or vector a.
-/// \param b Input component or vector b.
-/// \param c Input component or vector c.
-/// \param d Input component or vector d.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_set(bj_vec4 res, bj_real a, bj_real b, bj_real c, bj_real d) {
-    res[0] = a; res[1] = b; res[2] = c; res[3] = d;
-}
-
-static BJ_INLINE void bj_vec4_apply(bj_vec4 res, const bj_vec4 a, bj_real(*f)(bj_real)) {
-    res[0] = f(a[0]);
-    res[1] = f(a[1]);
-    res[2] = f(a[2]);
-    res[3] = f(a[3]);
+static BJ_INLINE bj_vec4 bj_vec4_apply(
+    bj_vec4 a,
+    bj_real(*f)(bj_real)
+) {
+    return (bj_vec4){ .x = f(a.x), .y = f(a.y), .z = f(a.z), .w = f(a.w), };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise addition of two 4D vectors: res = lhs + rhs.
-/// \param res Output 4D vector.
 /// \param lhs Left-hand input vector.
 /// \param rhs Right-hand input vector.
+/// \return Result of `lhs` + `rhs`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_add(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
-    res[0] = lhs[0] + rhs[0];
-    res[1] = lhs[1] + rhs[1];
-    res[2] = lhs[2] + rhs[2];
-    res[3] = lhs[3] + rhs[3];
+static BJ_INLINE bj_vec4 bj_vec4_add(bj_vec4 lhs, bj_vec4 rhs) {
+    return (bj_vec4){ 
+        .x = lhs.x + rhs.x,
+        .y = lhs.y + rhs.y,
+        .z = lhs.z + rhs.z,
+        .w = lhs.w + rhs.w, 
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Add a scaled vector: res = a + s * b.
-/// \param res Output 4D vector.
-/// \param a Input component or vector a.
-/// \param b Input component or vector b.
-/// \param s Scalar factor.
+/// \param lhs Input component or vector a.
+/// \param rhs Input component or vector b.
+/// \param s   Scalar factor.
+/// \return Sum of `lhs` and `rhs * s`.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_add_scaled(bj_vec4 res, const bj_vec4 a, const bj_vec4 b, bj_real s) {
-    res[0] = a[0] + b[0] * s;
-    res[1] = a[1] + b[1] * s;
-    res[2] = a[2] + b[2] * s;
-    res[3] = a[3] + b[3] * s;
+static BJ_INLINE bj_vec4 bj_vec4_add_scaled(
+    bj_vec4 lhs,
+    bj_vec4 rhs,
+    bj_real s
+) {
+    return (bj_vec4){ 
+        .x = lhs.x + rhs.x * s,
+        .y = lhs.y + rhs.y * s,
+        .z = lhs.z + rhs.z * s,  
+        .w = lhs.w + rhs.w * s,  
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise subtraction of two 4D vectors: res = lhs - rhs.
-/// \param res Output 4D vector.
 /// \param lhs Left-hand input vector.
 /// \param rhs Right-hand input vector.
+/// \return `lhs` - `rhs`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_sub(bj_vec4 res, const bj_vec4 lhs, const bj_vec4 rhs) {
-    res[0] = lhs[0] - rhs[0];
-    res[1] = lhs[1] - rhs[1];
-    res[2] = lhs[2] - rhs[2];
-    res[3] = lhs[3] - rhs[3];
+static BJ_INLINE bj_vec4 bj_vec4_sub(
+    bj_vec4 lhs,
+    bj_vec4 rhs
+) {
+    return (bj_vec4){ 
+        .x = lhs.x - rhs.x,
+        .y = lhs.y - rhs.y,
+        .z = lhs.z - rhs.z, 
+        .w = lhs.w - rhs.w, 
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Uniform scaling by scalar: res = v * s.
-/// \param res Output 4D vector.
 /// \param v Input vector.
 /// \param s Scalar factor.
+/// \return The result of `v * s`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_scale(bj_vec4 res, const bj_vec4 v, bj_real s) {
-    res[0] = v[0] * s;
-    res[1] = v[1] * s;
-    res[2] = v[2] * s;
-    res[3] = v[3] * s;
+static BJ_INLINE bj_vec4 bj_vec4_scale(bj_vec4 v, bj_real s) {
+    return (bj_vec4){ 
+        .x = v.x * s,
+        .y = v.y * s,
+        .z = v.z * s,
+        .w = v.w * s,
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -464,8 +493,8 @@ static BJ_INLINE void bj_vec4_scale(bj_vec4 res, const bj_vec4 v, bj_real s) {
 /// \param b Input component or vector b.
 /// \returns The scalar dot product.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec4_dot(const bj_vec4 a, const bj_vec4 b) {
-    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+static BJ_INLINE bj_real bj_vec4_dot(bj_vec4 a, bj_vec4 b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -473,22 +502,19 @@ static BJ_INLINE bj_real bj_vec4_dot(const bj_vec4 a, const bj_vec4 b) {
 /// \param v Input vector.
 /// \returns The Euclidean norm.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec4_len(const bj_vec4 v) {
-    return bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
+static BJ_INLINE bj_real bj_vec4_len(bj_vec4 v) {
+    return bj_sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Normalize a 4D vector to unit length.
-/// \param res Output 4D vector.
 /// \param v Input vector.
+/// \return Normalized `v`
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_normalize(bj_vec4 res, const bj_vec4 v) {
-    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]);
-    res[0] = v[0] * inv_len;
-    res[1] = v[1] * inv_len;
-    res[2] = v[2] * inv_len;
-    res[3] = v[3] * inv_len;
+static BJ_INLINE bj_vec4 bj_vec4_normalize(bj_vec4 v) {
+    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
+    return (bj_vec4){ v.x * inv_len, v.y * inv_len, v.z * inv_len, v.z * inv_len };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -497,11 +523,13 @@ static BJ_INLINE void bj_vec4_normalize(bj_vec4 res, const bj_vec4 v) {
 /// \param a Input component or vector a.
 /// \param b Input component or vector b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_min(bj_vec4 res, const bj_vec4 a, const bj_vec4 b) {
-    res[0] = a[0] < b[0] ? a[0] : b[0];
-    res[1] = a[1] < b[1] ? a[1] : b[1];
-    res[2] = a[2] < b[2] ? a[2] : b[2];
-    res[3] = a[3] < b[3] ? a[3] : b[3];
+static BJ_INLINE bj_vec4 bj_vec4_min(bj_vec4 a, bj_vec4 b) {
+    return (bj_vec4){
+        a.x < b.x ? a.x : b.x,
+        a.y < b.y ? a.y : b.y,
+        a.z < b.z ? a.z : b.z,
+        a.w < b.w ? a.w : b.w,
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -510,23 +538,13 @@ static BJ_INLINE void bj_vec4_min(bj_vec4 res, const bj_vec4 a, const bj_vec4 b)
 /// \param a Input component or vector a.
 /// \param b Input component or vector b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_max(bj_vec4 res, const bj_vec4 a, const bj_vec4 b) {
-    res[0] = a[0] > b[0] ? a[0] : b[0];
-    res[1] = a[1] > b[1] ? a[1] : b[1];
-    res[2] = a[2] > b[2] ? a[2] : b[2];
-    res[3] = a[3] > b[3] ? a[3] : b[3];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Copy a 4D vector.
-/// \param res Output 4D vector.
-/// \param src Source vector to copy from.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_copy(bj_vec4 res, const bj_vec4 src) {
-    res[0] = src[0];
-    res[1] = src[1];
-    res[2] = src[2];
-    res[3] = src[3];
+static BJ_INLINE bj_vec4 bj_vec4_max(bj_vec4 a, bj_vec4 b) {
+    return (bj_vec4){
+        a.x > b.x ? a.x : b.x,
+        a.y > b.y ? a.y : b.y,
+        a.z > b.z ? a.z : b.z,
+        a.w > b.w ? a.w : b.w,
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -536,12 +554,14 @@ static BJ_INLINE void bj_vec4_copy(bj_vec4 res, const bj_vec4 src) {
 /// \param r Right-hand input vector.
 /// \note Uses only xyz components; the result w component is set to 1.0.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_cross(bj_vec4 res, const bj_vec4 l, const bj_vec4 r)
+static BJ_INLINE bj_vec4 bj_vec4_cross(bj_vec4 l, bj_vec4 r)
 {
-    res[0] = l[1] * r[2] - l[2] * r[1];
-    res[1] = l[2] * r[0] - l[0] * r[2];
-    res[2] = l[0] * r[1] - l[1] * r[0];
-    res[3] = BJ_F(1.0);
+    return (bj_vec4) {
+        .x = l.y * r.z - l.z * r.y,
+        .y = l.z * r.x - l.x * r.z,
+        .z = l.x * r.y - l.y * r.x,
+        .w = BJ_F(1.0),
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -551,12 +571,15 @@ static BJ_INLINE void bj_vec4_cross(bj_vec4 res, const bj_vec4 l, const bj_vec4 
 /// \param n Surface normal (expected normalized).
 /// \note The normal \p n should be normalized for a true reflection.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_vec4_reflect(bj_vec4 res, const bj_vec4 v, const bj_vec4 n)
+static BJ_INLINE bj_vec4 bj_vec4_reflect(bj_vec4 v, bj_vec4 n)
 {
     bj_real p = BJ_F(2.0) * bj_vec4_dot(v, n);
-    for (int i = 0; i < 4; ++i) {
-        res[i] = v[i] - p * n[i];
-    }
+    return (bj_vec4) {
+        .x = v.x - p * n.x,
+        .y = v.y - p * n.y,
+        .z = v.z - p * n.z,
+        .w = v.w - p * n.w,
+    };
 }
 
 
