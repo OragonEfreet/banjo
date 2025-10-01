@@ -21,16 +21,25 @@
 #include <banjo/math.h>
 #include <banjo/vec.h>
 
-////////////////////////////////////////////////////////////////////////////////
-/// bj_mat3x3: 3×3 column-major matrix backed by bj_vec3.
-/// Columns are arrays of 3 components.
-////////////////////////////////////////////////////////////////////////////////
-typedef bj_real bj_mat3x3[3][3];
+// struct bj_mat3x2_t { bj_real m[6];  };
+// struct bj_mat4x4_t { bj_real m[16]; };
+// struct bj_mat4x3_t { bj_real m[12]; };
 
-////////////////////////////////////////////////////////////////////////////////
-/// bj_mat3: Alias for bj_mat3x3
-////////////////////////////////////////////////////////////////////////////////
-typedef bj_mat3x3 bj_mat3;
+// typedef struct bj_mat3x2_t bj_mat3x2;
+// typedef struct bj_mat3x2_t bj_mat3;
+// typedef struct bj_mat4x4_t bj_mat4x4;
+// typedef struct bj_mat4x4_t bj_mat4;
+// typedef struct bj_mat4x3_t bj_mat4x3;
+// typedef struct bj_mat4x3_t bj_mat4;
+
+// #define BJ_M32(c,r)   ((c)*2 + (r))   /* 0<=c<3, 0<=r<2 */
+// #define BJ_M4(c,r)    ((c)*4 + (r))   /* 0<=c,r<4) */
+// #define BJ_M43(c,r)   ((c)*3 + (r))   /* 0<=c<4, 0<=r<3 */
+
+struct bj_mat3x3_t { bj_real m[9];  };
+typedef struct bj_mat3x3_t bj_mat3x3;
+typedef struct bj_mat3x3_t bj_mat3;
+#define BJ_M3(c,r)    ((c)*3 + (r))   /* 0<=c,r<3 */
 
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_mat3x2: 3×2 column-major matrix backed by bj_vec2. (2D affine: 2×2 linear block plus translation column).
@@ -59,10 +68,11 @@ typedef bj_vec3 bj_mat4x3[4];
 /// Set to identity matrix.
 /// \param m Output buffer.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_identity(bj_mat3x3 m) {
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-            m[i][j] = (i == j) ? BJ_F(1.0) : BJ_FZERO;
+static BJ_INLINE void bj_mat3_identity(bj_mat3* BJ_RESTRICT M) {
+    bj_real* m = M->m;
+    m[BJ_M3(0, 0)] = BJ_F(1.0); m[BJ_M3(0, 1)] = BJ_FZERO;  m[BJ_M3(0, 2)] = BJ_FZERO;
+    m[BJ_M3(1, 0)] = BJ_FZERO;  m[BJ_M3(1, 1)] = BJ_F(1.0); m[BJ_M3(1, 2)] = BJ_FZERO;
+    m[BJ_M3(2, 0)] = BJ_FZERO;  m[BJ_M3(2, 1)] = BJ_FZERO;  m[BJ_M3(2, 2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,11 +80,12 @@ static BJ_INLINE void bj_mat3_identity(bj_mat3x3 m) {
 /// \param to Output matrix.
 /// \param from Input matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_copy(bj_mat3x3 to, const bj_mat3x3 from) {
-    for (int i = 0; i < 3; ++i) {
-        to[i][0] = from[i][0];
-        to[i][1] = from[i][1];
-        to[i][2] = from[i][2];
+static BJ_INLINE void bj_mat3_copy(
+    bj_mat3* BJ_RESTRICT       dst,
+    const bj_mat3* BJ_RESTRICT src
+) {
+    for (int i = 0 ; i < 9 ; ++i) {
+        dst->m[i] = src->m[i];
     }
 }
 
@@ -84,9 +95,10 @@ static BJ_INLINE void bj_mat3_copy(bj_mat3x3 to, const bj_mat3x3 from) {
 /// \param m Input matrix.
 /// \param r Row index.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec3 bj_mat3_row(const bj_mat3x3 m, int r) {
-    return (bj_vec3) {
-        .x = m[0][r], .y = m[1][r], .z = m[2][r],
+static BJ_INLINE bj_vec3 bj_mat3_row(const bj_mat3* BJ_RESTRICT M, int r) {
+    const bj_real* m = M->m;
+    return (bj_vec3){ 
+        m[BJ_M3(0, r)], m[BJ_M3(1, r)], m[BJ_M3(2, r)] 
     };
 }
 
@@ -96,10 +108,9 @@ static BJ_INLINE bj_vec3 bj_mat3_row(const bj_mat3x3 m, int r) {
 /// \param m Input matrix.
 /// \param c Column index.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec3 bj_mat3_col(const bj_mat3x3 m, int c) {
-    return (bj_vec3) {
-        .x = m[c][0], .y = m[c][1], .z = m[c][2],
-    };
+static BJ_INLINE bj_vec3 bj_mat3_col(const bj_mat3* BJ_RESTRICT M, int c) {
+    const bj_real* m = M->m;
+    return (bj_vec3){ m[BJ_M3(c, 0)], m[BJ_M3(c, 1)], m[BJ_M3(c, 2)] };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
