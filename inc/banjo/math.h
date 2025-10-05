@@ -37,7 +37,6 @@
 
 /*-------------------------- Precision & literals ---------------------------*/
 
-#define BJ_USE_DOUBLE
 #ifdef BJ_USE_DOUBLE
     typedef double bj_real;
     #define BJ_F(x) x
