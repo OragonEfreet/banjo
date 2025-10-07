@@ -21,20 +21,6 @@
 #include <banjo/math.h>
 #include <banjo/vec.h>
 
-// struct bj_mat3x2_t { bj_real m[6];  };
-// struct bj_mat4x4_t { bj_real m[16]; };
-// struct bj_mat4x3_t { bj_real m[12]; };
-
-// typedef struct bj_mat3x2_t bj_mat3x2;
-// typedef struct bj_mat3x2_t bj_mat3;
-// typedef struct bj_mat4x4_t bj_mat4x4;
-// typedef struct bj_mat4x4_t bj_mat4;
-// typedef struct bj_mat4x3_t bj_mat4x3;
-// typedef struct bj_mat4x3_t bj_mat4;
-
-// #define BJ_M32(c,r)   ((c)*2 + (r))   /* 0<=c<3, 0<=r<2 */
-// #define BJ_M4(c,r)    ((c)*4 + (r))   /* 0<=c,r<4) */
-// #define BJ_M43(c,r)   ((c)*3 + (r))   /* 0<=c<4, 0<=r<3 */
 
 struct bj_mat3x3_t { bj_real m[9];  };
 typedef struct bj_mat3x3_t bj_mat3x3;
@@ -45,13 +31,18 @@ typedef struct bj_mat3x3_t bj_mat3;
 /// bj_mat3x2: 3×2 column-major matrix backed by bj_vec2. (2D affine: 2×2 linear block plus translation column).
 /// Columns are arrays of 2 components.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_vec2 bj_mat3x2[3];
+struct bj_mat3x2_t { bj_real m[6];  };
+typedef struct bj_mat3x2_t bj_mat3x2;
+#define BJ_M32(c,r)   ((c)*2 + (r))   /* 0<=c<3, 0<=r<2 */
 
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_mat4x4: 4×4 column-major matrix backed by bj_vec4.
 /// Columns are arrays of 4 components.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_real bj_mat4x4[4][4];
+struct bj_mat4x4_t { bj_real m[16]; };
+typedef struct bj_mat4x4_t bj_mat4x4;
+typedef struct bj_mat4x4_t bj_mat4;
+#define BJ_M4(c,r)    ((c)*4 + (r))   /* 0<=c,r<4 */
 
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_mat4: Alias for bj_mat4x4
@@ -62,7 +53,9 @@ typedef bj_mat4x4 bj_mat4;
 /// bj_mat4x3: 4×3 column-major matrix backed by bj_vec3. (3D affine: 3×3 linear block plus translation row).
 /// Columns are arrays of 3 components.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_vec3 bj_mat4x3[4];
+struct bj_mat4x3_t { bj_real m[12]; };
+typedef struct bj_mat4x3_t bj_mat4x3;
+#define BJ_M43(c,r)   ((c)*3 + (r))   /* 0<=c<4, 0<=r<3 */
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set to identity matrix.
@@ -97,7 +90,7 @@ static BJ_INLINE void bj_mat3_copy(
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_mat3_row(const bj_mat3* BJ_RESTRICT M, int r) {
     const bj_real* m = M->m;
-    return (bj_vec3){ 
+    return (bj_vec3) { 
         m[BJ_M3(0, r)], m[BJ_M3(1, r)], m[BJ_M3(2, r)] 
     };
 }
@@ -110,7 +103,7 @@ static BJ_INLINE bj_vec3 bj_mat3_row(const bj_mat3* BJ_RESTRICT M, int r) {
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_mat3_col(const bj_mat3* BJ_RESTRICT M, int c) {
     const bj_real* m = M->m;
-    return (bj_vec3){ m[BJ_M3(c, 0)], m[BJ_M3(c, 1)], m[BJ_M3(c, 2)] };
+    return (bj_vec3) { m[BJ_M3(c, 0)], m[BJ_M3(c, 1)], m[BJ_M3(c, 2)] };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,42 +111,58 @@ static BJ_INLINE bj_vec3 bj_mat3_col(const bj_mat3* BJ_RESTRICT M, int c) {
 /// \param res Output matrix.
 /// \param m Input matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_transpose(bj_mat3x3 res, const bj_mat3x3 m) {
-    for (int j = 0; j < 3; ++j)
-        for (int i = 0; i < 3; ++i)
-            res[i][j] = m[j][i];
+static BJ_INLINE void bj_mat3_transpose(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A
+){
+    const bj_real* a = A->m; bj_real* o = out->m;
+    o[BJ_M3(0,0)] = a[BJ_M3(0,0)];
+    o[BJ_M3(0,1)] = a[BJ_M3(1,0)];
+    o[BJ_M3(0,2)] = a[BJ_M3(2,0)];
+    o[BJ_M3(1,0)] = a[BJ_M3(0,1)];
+    o[BJ_M3(1,1)] = a[BJ_M3(1,1)];
+    o[BJ_M3(1,2)] = a[BJ_M3(2,1)];
+    o[BJ_M3(2,0)] = a[BJ_M3(0,2)];
+    o[BJ_M3(2,1)] = a[BJ_M3(1,2)];
+    o[BJ_M3(2,2)] = a[BJ_M3(2,2)];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise addition: res = a + b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_add(bj_mat3x3 res, const bj_mat3x3 a, const bj_mat3x3 b) {
-    for (int i = 0; i < 3; ++i) {
-        res[i][0] = a[i][0] + b[i][0];
-        res[i][1] = a[i][1] + b[i][1];
-        res[i][2] = a[i][2] + b[i][2];
+static BJ_INLINE void bj_mat3_add(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A,
+    const bj_mat3* BJ_RESTRICT B
+) {
+    for (int i = 0 ; i < 9 ; ++i) {
+        out->m[i] = A->m[i] + B->m[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise subtraction: res = a - b.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_sub(bj_mat3x3 res, const bj_mat3x3 a, const bj_mat3x3 b) {
-    for (int i = 0; i < 3; ++i) {
-        res[i][0] = a[i][0] - b[i][0];
-        res[i][1] = a[i][1] - b[i][1];
-        res[i][2] = a[i][2] - b[i][2];
+static BJ_INLINE void bj_mat3_sub(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A,
+    const bj_mat3* BJ_RESTRICT B
+) {
+    for (int i = 0 ; i < 9 ; ++i) {
+        out->m[i] = A->m[i] - B->m[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Uniformly scale all elements by scalar k.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_scale(bj_mat3x3 res, const bj_mat3x3 m, bj_real k) {
-    for (int i = 0; i < 3; ++i) {
-        res[i][0] = m[i][0] * k;
-        res[i][1] = m[i][1] * k;
-        res[i][2] = m[i][2] * k;
+static BJ_INLINE void bj_mat3_scale(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A,
+    bj_real                    k
+) {
+    for (int i = 0 ; i < 9 ; ++i) {
+        out->m[i] = A->m[i] * k;
     }
 }
 
@@ -162,38 +171,22 @@ static BJ_INLINE void bj_mat3_scale(bj_mat3x3 res, const bj_mat3x3 m, bj_real k)
 /// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3_mul(
-    BJ_ARRAY_2D      (bj_real, 3, 3, res),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 3, lhs),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 3, rhs)
+    bj_mat3* BJ_RESTRICT out,
+    const bj_mat3* BJ_RESTRICT A,
+    const bj_mat3* BJ_RESTRICT B
 ) {
-#ifdef BJ_MAT_NO_UNROLL
-    bj_mat3 tmp;
-    for (int c = 0; c < 3; ++c) {
-        for (int r = 0; r < 3; ++r) {
-            tmp[c][r] = BJ_FZERO;
-            for (int k = 0; k < 3; ++k)
-                tmp[c][r] += lhs[k][r] * rhs[c][k];
-        }
-    }
-    bj_mat3_copy(res, tmp);
-#else
-    const bj_real a0 = lhs[0][0], b0 = lhs[1][0], c0 = lhs[2][0];
-    const bj_real a1 = lhs[0][1], b1 = lhs[1][1], c1 = lhs[2][1];
-    const bj_real a2 = lhs[0][2], b2 = lhs[1][2], c2 = lhs[2][2];
+    const bj_real* a = A->m;
+    const bj_real* b = B->m;
+    bj_real* o       = out->m;
 
-    { const bj_real r0 = rhs[0][0], r1 = rhs[0][1], r2 = rhs[0][2];
-      res[0][0] = a0*r0 + b0*r1 + c0*r2;
-      res[0][1] = a1*r0 + b1*r1 + c1*r2;
-      res[0][2] = a2*r0 + b2*r1 + c2*r2; }
-    { const bj_real r0 = rhs[1][0], r1 = rhs[1][1], r2 = rhs[1][2];
-      res[1][0] = a0*r0 + b0*r1 + c0*r2;
-      res[1][1] = a1*r0 + b1*r1 + c1*r2;
-      res[1][2] = a2*r0 + b2*r1 + c2*r2; }
-    { const bj_real r0 = rhs[2][0], r1 = rhs[2][1], r2 = rhs[2][2];
-      res[2][0] = a0*r0 + b0*r1 + c0*r2;
-      res[2][1] = a1*r0 + b1*r1 + c1*r2;
-      res[2][2] = a2*r0 + b2*r1 + c2*r2; }
-#endif
+    for (int c = 0; c < 3; ++c) {
+        const bj_real b0 = b[BJ_M3(c, 0)];
+        const bj_real b1 = b[BJ_M3(c, 1)];
+        const bj_real b2 = b[BJ_M3(c, 2)];
+        o[BJ_M3(c,0)] = a[BJ_M3(0,0)] * b0 + a[BJ_M3(1,0)] * b1 + a[BJ_M3(2,0)] * b2;
+        o[BJ_M3(c,1)] = a[BJ_M3(0,1)] * b0 + a[BJ_M3(1,1)] * b1 + a[BJ_M3(2,1)] * b2;
+        o[BJ_M3(c,2)] = a[BJ_M3(0,2)] * b0 + a[BJ_M3(1,2)] * b1 + a[BJ_M3(2,2)] * b2;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,14 +194,14 @@ static BJ_INLINE void bj_mat3_mul(
 /// \note Column-major convention: \c res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_mat3_mul_vec3(
-    BJ_CONST_ARRAY_2D(bj_real, 3, 3, m),
-    bj_vec3 v
+    const bj_mat3* BJ_RESTRICT M,
+    bj_vec3                    v
 ) {
-    const bj_real vx = v.x, vy = v.y, vz = v.z;
+    const bj_real* m = M->m;
     return (bj_vec3) {
-        .x = m[0][0]*vx + m[1][0]*vy + m[2][0]*vz,
-        .y = m[0][1]*vx + m[1][1]*vy + m[2][1]*vz,
-        .z = m[0][2]*vx + m[1][2]*vy + m[2][2]*vz,
+        m[BJ_M3(0,0)] * v.x + m[BJ_M3(1,0)] * v.y + m[BJ_M3(2,0)] * v.z,
+        m[BJ_M3(0,1)] * v.x + m[BJ_M3(1,1)] * v.y + m[BJ_M3(2,1)] * v.z,
+        m[BJ_M3(0,2)] * v.x + m[BJ_M3(1,2)] * v.y + m[BJ_M3(2,2)] * v.z
     };
 }
 
@@ -216,939 +209,1243 @@ static BJ_INLINE bj_vec3 bj_mat3_mul_vec3(
 /// Transform a point (homogeneous w=1).
 /// \note Column-major convention: \c res = m * p.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec2 bj_mat3_mul_point(const bj_mat3x3 m, bj_vec2 p) {
-    const bj_vec3 v = { p.x, p.y, BJ_F(1.0) };
-    const bj_vec3 o = bj_mat3_mul_vec3(m, v);
-    bj_real w = o.z;
-    if (w != BJ_FZERO) return (bj_vec2){ o.x / w, o.y / w, };
-    else               return (bj_vec2){ o.x,     o.y,     };
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Transform a direction (w=0; ignores translation).
-/// \note Column-major convention: \c res = m * v2.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec2 bj_mat3_mul_vector2(const bj_mat3x3 m, bj_vec2 v2) {
-    const bj_vec3 v = { v2.x, v2.y, BJ_FZERO };
-    const bj_vec3 o = bj_mat3_mul_vec3(m, v);
-    return (bj_vec2){ o.x, o.y,};
+static BJ_INLINE bj_vec2 bj_mat3_mul_point(
+    const bj_mat3* BJ_RESTRICT M,
+    bj_vec2                    p
+) {
+    const bj_real* m = M->m;
+    const bj_real x  = p.x;
+    const bj_real y  = p.y;
+    const bj_real w  = m[BJ_M3(0,2)] * x + m[BJ_M3(1,2)] * y + m[BJ_M3(2,2)];
+    bj_real rx = m[BJ_M3(0,0)] * x + m[BJ_M3(1,0)] * y + m[BJ_M3(2,0)];
+    bj_real ry = m[BJ_M3(0,1)] * x + m[BJ_M3(1,1)] * y + m[BJ_M3(2,1)];
+    if (!bj_real_is_zero(w)) { 
+        rx /= w;
+        ry /= w; 
+    }
+    return (bj_vec2) { rx, ry };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a translation matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_translation(bj_mat3x3 res, bj_real tx, bj_real ty) {
-    bj_mat3_identity(res);
-    res[2][0] = tx;
-    res[2][1] = ty;
+static BJ_INLINE void bj_mat3_translation(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              tx,
+    bj_real              ty
+) {
+    bj_mat3_identity(M);
+    M->m[BJ_M3(2,0)] = tx;
+    M->m[BJ_M3(2,1)] = ty;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Apply a translation in-place.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_translation_inplace(bj_mat3x3 M, bj_real tx, bj_real ty) {
+static BJ_INLINE void bj_mat3_translation_inplace(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              tx,
+    bj_real              ty
+) {
     const bj_vec3 t = { tx, ty, BJ_FZERO };
-    for (int i = 0; i < 3; ++i) {
-        const bj_vec3 r = bj_mat3_row(M, i);
-        M[2][i] += r.x*t.x + r.y*t.y + r.z*t.z;
+    for (int r = 0 ; r<3 ; ++r) {
+        const bj_vec3 row = bj_mat3_row(M, r);
+        M->m[BJ_M3(2,r)] +=  row.x * t.x + row.y * t.y + row.z * t.z;
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create 2D scaling matrix with independent X/Y scales.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_scale_xy(bj_mat3x3 res, bj_real sx, bj_real sy) {
-    bj_mat3_identity(res);
-    res[0][0] = sx;
-    res[1][1] = sy;
+static BJ_INLINE void bj_mat3_scale_xy(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              sx,
+    bj_real              sy
+) {
+    bj_mat3_identity(M);
+    M->m[BJ_M3(0,0)] = sx;
+    M->m[BJ_M3(1,1)] = sy;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create 2D shear matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_shear(bj_mat3x3 res, bj_real shx, bj_real shy) {
-    bj_mat3_identity(res);
-    res[1][0] = shy;
-    res[0][1] = shx;
+static BJ_INLINE void bj_mat3_shear(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              shx,
+    bj_real              shy
+) {
+    bj_mat3_identity(M);
+    M->m[BJ_M3(1,0)] = shy;
+    M->m[BJ_M3(0,1)] = shx;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Rotate 2D about Z.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_rotate(bj_mat3x3 res, bj_real angle) {
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    res[0][0] =  c;  res[0][1] =  s;  res[0][2] = BJ_FZERO;
-    res[1][0] = -s;  res[1][1] =  c;  res[1][2] = BJ_FZERO;
-    res[2][0] = BJ_FZERO; res[2][1] = BJ_FZERO; res[2][2] = BJ_F(1.0);
+static BJ_INLINE void bj_mat3_rotate(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              angle
+) {
+    const bj_real s = bj_sin(angle);
+    const bj_real c = bj_cos(angle);
+    bj_real* m = M->m;
+    m[BJ_M3(0,0)] =  c;
+    m[BJ_M3(0,1)] =  s;
+    m[BJ_M3(0,2)] = BJ_FZERO;
+    m[BJ_M3(1,0)] = -s;
+    m[BJ_M3(1,1)] =  c;
+    m[BJ_M3(1,2)] = BJ_FZERO;
+    m[BJ_M3(2,0)] = BJ_FZERO;
+    m[BJ_M3(2,1)] = BJ_FZERO;
+    m[BJ_M3(2,2)] = BJ_F(1.0);
+}
+
+static BJ_INLINE bj_real bj_mat3_determinant(
+    const bj_mat3* BJ_RESTRICT A
+) {
+    const bj_real* m = A->m;
+    return
+      m[BJ_M3(0,0)] * (m[BJ_M3(1,1)] * m[BJ_M3(2,2)]-m[BJ_M3(2,1)] * m[BJ_M3(1,2)])
+    - m[BJ_M3(1,0)] * (m[BJ_M3(0,1)] * m[BJ_M3(2,2)]-m[BJ_M3(2,1)] * m[BJ_M3(0,2)])
+    + m[BJ_M3(2,0)] * (m[BJ_M3(0,1)] * m[BJ_M3(1,2)]-m[BJ_M3(1,1)] * m[BJ_M3(0,2)]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Invert a 3×3.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_inverse(bj_mat3x3 res, const bj_mat3x3 m) {
-    bj_real a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
-    bj_real a10 = m[1][0], a11 = m[1][1], a12 = m[1][2];
-    bj_real a20 = m[2][0], a21 = m[2][1], a22 = m[2][2];
-
-    bj_real b01 =  a22*a11 - a12*a21;
-    bj_real b11 = -a22*a10 + a12*a20;
-    bj_real b21 =  a21*a10 - a11*a20;
-
-    bj_real det = a00*b01 + a01*b11 + a02*b21;
-    bj_real inv_det = BJ_F(1.0) / det;
-
-    res[0][0] = b01 * inv_det;
-    res[0][1] = (-a22*a01 + a02*a21) * inv_det;
-    res[0][2] = ( a12*a01 - a02*a11) * inv_det;
-
-    res[1][0] = b11 * inv_det;
-    res[1][1] = ( a22*a00 - a02*a20) * inv_det;
-    res[1][2] = (-a12*a00 + a02*a10) * inv_det;
-
-    res[2][0] = b21 * inv_det;
-    res[2][1] = (-a21*a00 + a01*a20) * inv_det;
-    res[2][2] = ( a11*a00 - a01*a10) * inv_det;
+static BJ_INLINE int bj_mat3_inverse(
+    bj_mat3* BJ_RESTRICT out,
+    const bj_mat3* BJ_RESTRICT A
+) {
+    const bj_real* m = A->m;
+    const bj_real c00 =  (m[BJ_M3(1,1)] * m[BJ_M3(2,2)]-m[BJ_M3(2,1)] * m[BJ_M3(1,2)]);
+    const bj_real c01 = -(m[BJ_M3(0,1)] * m[BJ_M3(2,2)]-m[BJ_M3(2,1)] * m[BJ_M3(0,2)]);
+    const bj_real c02 =  (m[BJ_M3(0,1)] * m[BJ_M3(1,2)]-m[BJ_M3(1,1)] * m[BJ_M3(0,2)]);
+    const bj_real c10 = -(m[BJ_M3(1,0)] * m[BJ_M3(2,2)]-m[BJ_M3(2,0)] * m[BJ_M3(1,2)]);
+    const bj_real c11 =  (m[BJ_M3(0,0)] * m[BJ_M3(2,2)]-m[BJ_M3(2,0)] * m[BJ_M3(0,2)]);
+    const bj_real c12 = -(m[BJ_M3(0,0)] * m[BJ_M3(1,2)]-m[BJ_M3(1,0)] * m[BJ_M3(0,2)]);
+    const bj_real c20 =  (m[BJ_M3(1,0)] * m[BJ_M3(2,1)]-m[BJ_M3(2,0)] * m[BJ_M3(1,1)]);
+    const bj_real c21 = -(m[BJ_M3(0,0)] * m[BJ_M3(2,1)]-m[BJ_M3(2,0)] * m[BJ_M3(0,1)]);
+    const bj_real c22 =  (m[BJ_M3(0,0)] * m[BJ_M3(1,1)]-m[BJ_M3(1,0)] * m[BJ_M3(0,1)]);
+    const bj_real det = m[BJ_M3(0,0)] * c00 + m[BJ_M3(1,0)] * c01 + m[BJ_M3(2,0)]*c02;
+    if (det ==  BJ_FZERO) {
+        return 0;
+    }
+    const bj_real id = BJ_F(1.0)/det;
+    out->m[BJ_M3(0,0)] = c00 * id;
+    out->m[BJ_M3(1,0)] = c10 * id;
+    out->m[BJ_M3(2,0)] = c20 * id;
+    out->m[BJ_M3(0,1)] = c01 * id;
+    out->m[BJ_M3(1,1)] = c11 * id;
+    out->m[BJ_M3(2,1)] = c21 * id;
+    out->m[BJ_M3(0,2)] = c02 * id;
+    out->m[BJ_M3(1,2)] = c12 * id;
+    out->m[BJ_M3(2,2)] = c22 * id;
+    return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Orthographic projection matrix (3×3).
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3_ortho(
-    BJ_ARRAY_2D(bj_real, 3, 3, omat),
+    bj_mat3* BJ_RESTRICT M,
     bj_real l, bj_real r,
     bj_real b, bj_real t
 ) {
-    omat[0][0] = BJ_F(2.0) / (r - l);
-    omat[0][1] = BJ_FZERO;
-    omat[0][2] = BJ_FZERO;
+    bj_real* m = M->m;
+    m[BJ_M3(0,0)] = BJ_F(2.0)/(r-l);
+    m[BJ_M3(0,1)] = BJ_FZERO;
+    m[BJ_M3(0,2)] = BJ_FZERO;
 
-    omat[1][0] = BJ_FZERO;
-    omat[1][1] = BJ_F(-2.0) / (t - b);
-    omat[1][2] = BJ_FZERO;
+    m[BJ_M3(1,0)] = BJ_FZERO;
+    m[BJ_M3(1,1)] = BJ_F(-2.0)/(t-b);
+    m[BJ_M3(1,2)] = BJ_FZERO;
 
-    omat[2][0] = -(r + l) / (r - l);
-    omat[2][1] =  (t + b) / (t - b);
-    omat[2][2] = BJ_F(1.0);
+    m[BJ_M3(2,0)] = -(r+l)/(r-l);
+    m[BJ_M3(2,1)] =  (t+b)/(t-b);
+    m[BJ_M3(2,2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Viewport transform matrix (3×3).
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3_viewport(
-    BJ_ARRAY_2D(bj_real, 3, 3, vpmat),
-    bj_real x, bj_real y,
-    bj_real w, bj_real h
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              x,
+    bj_real              y,
+    bj_real              w,
+    bj_real              h
 ) {
-    vpmat[0][0] = BJ_F(0.5) * w;  vpmat[0][1] = BJ_FZERO;       vpmat[0][2] = BJ_FZERO;
-    vpmat[1][0] = BJ_FZERO;       vpmat[1][1] = BJ_F(0.5) * h;  vpmat[1][2] = BJ_FZERO;
-    vpmat[2][0] = x + BJ_F(0.5) * w;
-    vpmat[2][1] = y + BJ_F(0.5) * h;
-    vpmat[2][2] = BJ_F(1.0);
+    bj_real* m = M->m;
+    m[BJ_M3(0,0)] = BJ_F(0.5) * w;
+    m[BJ_M3(0,1)] = BJ_FZERO;
+    m[BJ_M3(0,2)] = BJ_FZERO;
+    m[BJ_M3(1,0)] = BJ_FZERO;
+    m[BJ_M3(1,1)] = BJ_F(0.5) * h;
+    m[BJ_M3(1,2)] = BJ_FZERO;
+    m[BJ_M3(2,0)] = x + BJ_F(0.5) * w;
+    m[BJ_M3(2,1)] = y + BJ_F(0.5) * h;
+    m[BJ_M3(2,2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set 3×2 to identity.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3x2_identity(
-    BJ_ARRAY_2D(bj_real, 3, 2, m)
+    bj_mat3x2* BJ_RESTRICT M
 ) {
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]=BJ_F(1.0);
-    m[2][0]=BJ_FZERO;  m[2][1]=BJ_FZERO;
+    bj_real* m = M->m;
+    m[BJ_M32(0,0)] = BJ_F(1.0);
+    m[BJ_M32(0,1)] = BJ_FZERO;
+    m[BJ_M32(1,0)] = BJ_FZERO;
+    m[BJ_M32(1,1)] = BJ_F(1.0);
+    m[BJ_M32(2,0)] = BJ_FZERO;
+    m[BJ_M32(2,1)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Build 3×2 translation.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3x2_translate(
-    BJ_ARRAY_2D(bj_real, 3, 2, m), bj_real tx, bj_real ty
+    bj_mat3x2* BJ_RESTRICT M,
+    bj_real                tx,
+    bj_real                ty
 ) {
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]=BJ_F(1.0);
-    m[2][0]=tx;        m[2][1]=ty;
+    bj_mat3x2_identity(M);
+    M->m[BJ_M32(2,0)] = tx;
+    M->m[BJ_M32(2,1)] = ty;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Build 3×2 scale.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3x2_scale(
-    BJ_ARRAY_2D(bj_real, 3, 2, m), bj_real sx, bj_real sy
+    bj_mat3x2* BJ_RESTRICT M,
+    bj_real                sx,
+    bj_real                sy
 ) {
-    m[0][0]=sx;        m[0][1]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]=sy;
-    m[2][0]=BJ_FZERO;  m[2][1]=BJ_FZERO;
+    bj_mat3x2_identity(M);
+    M->m[BJ_M32(0,0)] = sx;
+    M->m[BJ_M32(1,1)] = sy;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Build 3×2 rotation.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3x2_rotate(
-    BJ_ARRAY_2D(bj_real, 3, 2, m), bj_real angle
+    bj_mat3x2* BJ_RESTRICT M,
+    bj_real                angle
 ) {
-    const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
-    m[0][0]= c;  m[0][1]= s;
-    m[1][0]=-s;  m[1][1]= c;
-    m[2][0]=BJ_FZERO; m[2][1]=BJ_FZERO;
+    const bj_real c = bj_cos(angle);
+    const bj_real s = bj_sin(angle);
+    bj_real* m = M->m;
+    m[BJ_M32(0,0)] =  c;
+    m[BJ_M32(0,1)] =  s;
+    m[BJ_M32(1,0)] = -s;
+    m[BJ_M32(1,1)] =  c;
+    m[BJ_M32(2,0)] = BJ_FZERO;
+    m[BJ_M32(2,1)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 3×2 multiplication: res = A * B.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3x2_mul(
-    BJ_ARRAY_2D      (bj_real, 3, 2, res),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, A),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, B)
+    bj_mat3x2* BJ_RESTRICT       out,
+    const bj_mat3x2* BJ_RESTRICT A,
+    const bj_mat3x2* BJ_RESTRICT B
 ) {
-#ifdef BJ_MAT_NO_UNROLL
-    res[0][0] = A[0][0]*B[0][0] + A[1][0]*B[1][0];
-    res[0][1] = A[0][1]*B[0][0] + A[1][1]*B[1][0];
+    const bj_real a00 = A->m[BJ_M32(0,0)];
+    const bj_real a10 = A->m[BJ_M32(0,1)];
+    const bj_real a01 = A->m[BJ_M32(1,0)];
+    const bj_real a11 = A->m[BJ_M32(1,1)];
+    const bj_real a02 = A->m[BJ_M32(2,0)];
+    const bj_real a12 = A->m[BJ_M32(2,1)];
 
-    res[1][0] = A[0][0]*B[0][1] + A[1][0]*B[1][1];
-    res[1][1] = A[0][1]*B[0][1] + A[1][1]*B[1][1];
+    const bj_real b00 = B->m[BJ_M32(0,0)];
+    const bj_real b10 = B->m[BJ_M32(0,1)];
+    const bj_real b01 = B->m[BJ_M32(1,0)];
+    const bj_real b11 = B->m[BJ_M32(1,1)];
+    const bj_real b02 = B->m[BJ_M32(2,0)];
+    const bj_real b12 = B->m[BJ_M32(2,1)];
 
-    res[2][0] = A[0][0]*B[2][0] + A[1][0]*B[2][1] + A[2][0];
-    res[2][1] = A[0][1]*B[2][0] + A[1][1]*B[2][1] + A[2][1];
-#else
-    const bj_real a00=A[0][0], a10=A[0][1];
-    const bj_real a01=A[1][0], a11=A[1][1];
-    const bj_real a02=A[2][0], a12=A[2][1];
-
-    const bj_real b00=B[0][0], b10=B[0][1];
-    const bj_real b01=B[1][0], b11=B[1][1];
-    const bj_real b02=B[2][0], b12=B[2][1];
-
-    res[0][0] = a00*b00 + a01*b10; res[0][1] = a10*b00 + a11*b10;
-    res[1][0] = a00*b01 + a01*b11; res[1][1] = a10*b01 + a11*b11;
-    res[2][0] = a00*b02 + a01*b12 + a02;
-    res[2][1] = a10*b02 + a11*b12 + a12;
-#endif
+    out->m[BJ_M32(0,0)] = a00*b00 + a01*b10;
+    out->m[BJ_M32(0,1)] = a10*b00 + a11*b10;
+    out->m[BJ_M32(1,0)] = a00*b01 + a01*b11;
+    out->m[BJ_M32(1,1)] = a10*b01 + a11*b11;
+    out->m[BJ_M32(2,0)] = a00*b02 + a01*b12 + a02;
+    out->m[BJ_M32(2,1)] = a10*b02 + a11*b12 + a12;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 3×2 transform point.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3x2_mul_point(
-    BJ_ARRAY      (bj_real, 2, r),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, m),
-    BJ_CONST_ARRAY(bj_real, 2, p)
+static BJ_INLINE bj_vec2 bj_mat3x2_mul_point(
+    const bj_mat3x2* BJ_RESTRICT M,
+    bj_vec2                      p
 ) {
-    const bj_real x=p[0], y=p[1];
-    r[0] = m[0][0]*x + m[1][0]*y + m[2][0];
-    r[1] = m[0][1]*x + m[1][1]*y + m[2][1];
+    const bj_real* m = M->m;
+    const bj_real x = p.x;
+    const bj_real y = p.y;
+    return (bj_vec2) {
+        m[BJ_M32(0,0)] * x + m[BJ_M32(1,0)] * y + m[BJ_M32(2,0)],
+        m[BJ_M32(0,1)] * x + m[BJ_M32(1,1)] * y + m[BJ_M32(2,1)]
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 3×2 transform direction (no translation).
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3x2_mul_dir(
-    BJ_ARRAY      (bj_real, 2, r),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, m),
-    BJ_CONST_ARRAY(bj_real, 2, v)
+static BJ_INLINE bj_vec2 bj_mat3x2_mul_dir(
+    const bj_mat3x2* BJ_RESTRICT M,
+    bj_vec2                      v
 ) {
-    const bj_real x=v[0], y=v[1];
-    r[0] = m[0][0]*x + m[1][0]*y;
-    r[1] = m[0][1]*x + m[1][1]*y;
+    const bj_real* m = M->m;
+    const bj_real x  = v.x;
+    const bj_real y  = v.y;
+    return (bj_vec2) {
+        m[BJ_M32(0,0)] * x + m[BJ_M32(1,0)] * y,
+        m[BJ_M32(0,1)] * x + m[BJ_M32(1,1)] * y
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Promote 3×2 to 3×3 homogeneous.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3_from_mat3x2(
-    BJ_ARRAY_2D      (bj_real, 3, 3, out3x3),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, a)
+    bj_mat3* BJ_RESTRICT         M,
+    const bj_mat3x2* BJ_RESTRICT A
 ) {
-    out3x3[0][0]=a[0][0]; out3x3[0][1]=a[0][1]; out3x3[0][2]=BJ_FZERO;
-    out3x3[1][0]=a[1][0]; out3x3[1][1]=a[1][1]; out3x3[1][2]=BJ_FZERO;
-    out3x3[2][0]=a[2][0]; out3x3[2][1]=a[2][1]; out3x3[2][2]=BJ_F(1.0);
+    bj_real* o = M->m;
+    const bj_real* a = A->m;
+    o[BJ_M3(0,0)] = a[BJ_M32(0,0)];
+    o[BJ_M3(0,1)] = a[BJ_M32(0,1)];
+    o[BJ_M3(0,2)] = BJ_FZERO;
+    o[BJ_M3(1,0)] = a[BJ_M32(1,0)];
+    o[BJ_M3(1,1)] = a[BJ_M32(1,1)];
+    o[BJ_M3(1,2)] = BJ_FZERO;
+    o[BJ_M3(2,0)] = a[BJ_M32(2,0)];
+    o[BJ_M3(2,1)] = a[BJ_M32(2,1)];
+    o[BJ_M3(2,2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Extract 3×2 from 3×3.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3x2_from_mat3(
-    BJ_ARRAY_2D      (bj_real, 3, 2, out3x2),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 3, m)
+    bj_mat3x2* BJ_RESTRICT     M,
+    const bj_mat3* BJ_RESTRICT A
 ) {
-    out3x2[0][0]=m[0][0]; out3x2[0][1]=m[0][1];
-    out3x2[1][0]=m[1][0]; out3x2[1][1]=m[1][1];
-    out3x2[2][0]=m[2][0]; out3x2[2][1]=m[2][1];
+    const bj_real* a = A->m;
+    bj_real* o = M->m;
+    o[BJ_M32(0,0)] = a[BJ_M3(0,0)];
+    o[BJ_M32(0,1)] = a[BJ_M3(0,1)];
+    o[BJ_M32(1,0)] = a[BJ_M3(1,0)];
+    o[BJ_M32(1,1)] = a[BJ_M3(1,1)];
+    o[BJ_M32(2,0)] = a[BJ_M3(2,0)];
+    o[BJ_M32(2,1)] = a[BJ_M3(2,1)];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set 4×4 to identity.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_identity(bj_mat4x4 mat)
-{
-    for (int i = 0; i < 4; ++i)
-        for (int j = 0; j < 4; ++j)
-            mat[i][j] = i == j ? BJ_F(1.0) : BJ_FZERO;
+static BJ_INLINE void bj_mat4_identity(
+    bj_mat4* BJ_RESTRICT M
+) {
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = BJ_F(1.0);
+    m[BJ_M4(0,1)] = BJ_FZERO;
+    m[BJ_M4(0,2)] = BJ_FZERO;
+    m[BJ_M4(0,3)] = BJ_FZERO;
+    m[BJ_M4(1,0)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = BJ_F(1.0);
+    m[BJ_M4(1,2)] = BJ_FZERO;
+    m[BJ_M4(1,3)] = BJ_FZERO;
+    m[BJ_M4(2,0)] = BJ_FZERO;
+    m[BJ_M4(2,1)] = BJ_FZERO;
+    m[BJ_M4(2,2)] = BJ_F(1.0);
+    m[BJ_M4(2,3)] = BJ_FZERO;
+    m[BJ_M4(3,0)] = BJ_FZERO;
+    m[BJ_M4(3,1)] = BJ_FZERO;
+    m[BJ_M4(3,2)] = BJ_FZERO;
+    m[BJ_M4(3,3)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Copy 4×4.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_copy(bj_mat4x4 to, const bj_mat4x4 from)
-{
-    for (size_t i = 0; i < 16; i+=4) {
-        to[i][0] = from[i][0];
-        to[i][1] = from[i][1];
-        to[i][2] = from[i][2];
-        to[i][3] = from[i][3];
+static BJ_INLINE void bj_mat4_copy(
+    bj_mat4* BJ_RESTRICT       dst,
+    const bj_mat4* BJ_RESTRICT src
+) {
+    for(int i = 0 ; i < 16 ; ++i) {
+        dst->m[i] = src->m[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Extract 4×4 row.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec4 bj_mat4_row(const bj_mat4x4 mat, int r)
-{
-    return (bj_vec4) {
-        .x = mat[0][r], .y = mat[1][r], .z = mat[2][r], .w = mat[3][r],
+static BJ_INLINE bj_vec4 bj_mat4_row(
+    const bj_mat4* BJ_RESTRICT M,
+    int                        r
+) {
+    const bj_real* m = M->m;
+    return (bj_vec4) { 
+        m[BJ_M4(0,r)],
+        m[BJ_M4(1,r)],
+        m[BJ_M4(2,r)],
+        m[BJ_M4(3,r)] 
     };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Extract 4×4 column.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec4 bj_mat4_col(const bj_mat4x4 mat, int c)
-{
-    return (bj_vec4) {
-        .x = mat[c][0], .y = mat[c][1], .z = mat[c][2], .w = mat[c][3],
+static BJ_INLINE bj_vec4 bj_mat4_col(
+    const bj_mat4* BJ_RESTRICT M,
+    int                        c
+) {
+    const bj_real* m = M->m;
+    return (bj_vec4) { 
+        m[BJ_M4(c,0)],
+        m[BJ_M4(c,1)],
+        m[BJ_M4(c,2)],
+        m[BJ_M4(c,3)] 
     };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Transpose 4×4.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_transpose(bj_mat4x4 res, const bj_mat4x4 mat)
-{
-    for (int j = 0; j < 4; ++j)
-        for (int i = 0; i < 4; ++i)
-            res[i][j] = mat[j][i];
+static BJ_INLINE void bj_mat4_transpose(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A
+){
+    const bj_real* a = A->m; bj_real* o = out->m;
+    o[BJ_M4(0,0)] = a[BJ_M4(0,0)];
+    o[BJ_M4(0,1)] = a[BJ_M4(1,0)];
+    o[BJ_M4(0,2)] = a[BJ_M4(2,0)];
+    o[BJ_M4(0,3)] = a[BJ_M4(3,0)];
+    o[BJ_M4(1,0)] = a[BJ_M4(0,1)];
+    o[BJ_M4(1,1)] = a[BJ_M4(1,1)];
+    o[BJ_M4(1,2)] = a[BJ_M4(2,1)];
+    o[BJ_M4(1,3)] = a[BJ_M4(3,1)];
+    o[BJ_M4(2,0)] = a[BJ_M4(0,2)];
+    o[BJ_M4(2,1)] = a[BJ_M4(1,2)];
+    o[BJ_M4(2,2)] = a[BJ_M4(2,2)];
+    o[BJ_M4(2,3)] = a[BJ_M4(3,2)];
+    o[BJ_M4(3,0)] = a[BJ_M4(0,3)];
+    o[BJ_M4(3,1)] = a[BJ_M4(1,3)];
+    o[BJ_M4(3,2)] = a[BJ_M4(2,3)];
+    o[BJ_M4(3,3)] = a[BJ_M4(3,3)];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Add 4×4.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_add(bj_mat4x4 res, const bj_mat4x4 lhs, const bj_mat4x4 rhs)
-{
-    for (int i = 0; i < 4; ++i) {
-        res[i][0] = lhs[i][0] + rhs[i][0];
-        res[i][1] = lhs[i][1] + rhs[i][1];
-        res[i][2] = lhs[i][2] + rhs[i][2];
-        res[i][3] = lhs[i][3] + rhs[i][3];
+static BJ_INLINE void bj_mat4_add(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    const bj_mat4* BJ_RESTRICT B
+) {
+
+    for(int i = 0 ; i < 16 ; ++i) {
+        out->m[i] = A->m[i] + B->m[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Sub 4×4.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_sub(bj_mat4x4 res, const bj_mat4x4 lhs, const bj_mat4x4 rhs)
-{
-    for (int i = 0; i < 4; ++i) {
-        res[i][0] = lhs[i][0] - rhs[i][0];
-        res[i][1] = lhs[i][1] - rhs[i][1];
-        res[i][2] = lhs[i][2] - rhs[i][2];
-        res[i][3] = lhs[i][3] - rhs[i][3];
+static BJ_INLINE void bj_mat4_sub(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    const bj_mat4* BJ_RESTRICT B
+) {
+
+    for(int i = 0 ; i < 16 ; ++i) {
+        out->m[i] = A->m[i] - B->m[i];
     }
 }
 
-static BJ_INLINE void bj_mat4_scale(bj_mat4x4 res, const bj_mat4x4 lhs, bj_real k)
-{
-    for (int i = 0; i < 4; ++i) {
-        res[i][0] = lhs[i][0] * k;
-        res[i][1] = lhs[i][1] * k;
-        res[i][2] = lhs[i][2] * k;
-        res[i][3] = lhs[i][3] * k;
+static BJ_INLINE void bj_mat4_scale(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    bj_real                    k
+) {
+
+    for(int i = 0;i<16;++i) {
+        out->m[i] = A->m[i] * k;
     }
 }
 
-static BJ_INLINE void bj_mat4_scale_xyz(bj_mat4x4 res, const bj_mat4x4 mat, bj_real x, bj_real y, bj_real z)
-{
-    for (int j = 0; j < 4; ++j) {
-        res[0][j] = mat[0][j] * x;
-        res[1][j] = mat[1][j] * y;
-        res[2][j] = mat[2][j] * z;
-        res[3][j] = mat[3][j];
-    }
+static BJ_INLINE void bj_mat4_scale_xyz(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    bj_real                    sx,
+    bj_real                    sy,
+    bj_real                    sz
+) {
+
+    const bj_real* a = A->m;
+    bj_real* m = out->m;
+    m[BJ_M4(0,0)] = a[BJ_M4(0,0)] * sx;
+    m[BJ_M4(0,1)] = a[BJ_M4(0,1)] * sx;
+    m[BJ_M4(0,2)] = a[BJ_M4(0,2)] * sx;
+    m[BJ_M4(0,3)] = a[BJ_M4(0,3)] * sx;
+    m[BJ_M4(1,0)] = a[BJ_M4(1,0)] * sy;
+    m[BJ_M4(1,1)] = a[BJ_M4(1,1)] * sy;
+    m[BJ_M4(1,2)] = a[BJ_M4(1,2)] * sy;
+    m[BJ_M4(1,3)] = a[BJ_M4(1,3)] * sy;
+    m[BJ_M4(2,0)] = a[BJ_M4(2,0)] * sz;
+    m[BJ_M4(2,1)] = a[BJ_M4(2,1)] * sz;
+    m[BJ_M4(2,2)] = a[BJ_M4(2,2)] * sz;
+    m[BJ_M4(2,3)] = a[BJ_M4(2,3)] * sz;
+    m[BJ_M4(3,0)] = a[BJ_M4(3,0)];
+    m[BJ_M4(3,1)] = a[BJ_M4(3,1)];
+    m[BJ_M4(3,2)] = a[BJ_M4(3,2)];
+    m[BJ_M4(3,3)] = a[BJ_M4(3,3)];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 4×4 multiplication: res = lhs * rhs.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_mul(
-    BJ_ARRAY_2D      (bj_real, 4, 4, res),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 4, lhs),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 4, rhs)
-) {
-#ifdef BJ_MAT_NO_UNROLL
-    bj_mat4x4 temp;
-    for (int c = 0; c < 4; ++c) {
-        for (int r = 0; r < 4; ++r) {
-            temp[c][r] = BJ_FZERO;
-            for (int k = 0; k < 4; ++k)
-                temp[c][r] += lhs[k][r] * rhs[c][k];
-        }
-    }
-    bj_mat4_copy(res, temp);
-#else
-    const bj_real a0 = lhs[0][0], b0 = lhs[1][0], c0 = lhs[2][0], d0 = lhs[3][0];
-    const bj_real a1 = lhs[0][1], b1 = lhs[1][1], c1 = lhs[2][1], d1 = lhs[3][1];
-    const bj_real a2 = lhs[0][2], b2 = lhs[1][2], c2 = lhs[2][2], d2 = lhs[3][2];
-    const bj_real a3 = lhs[0][3], b3 = lhs[1][3], c3 = lhs[2][3], d3 = lhs[3][3];
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    const bj_mat4* BJ_RESTRICT B
+)
+{
+    const bj_real* a = A->m;
+    const bj_real* b = B->m;
+    bj_real* o = out->m;
 
-    { const bj_real r0 = rhs[0][0], r1 = rhs[0][1], r2 = rhs[0][2], r3 = rhs[0][3];
-      res[0][0] = a0*r0 + b0*r1 + c0*r2 + d0*r3;
-      res[0][1] = a1*r0 + b1*r1 + c1*r2 + d1*r3;
-      res[0][2] = a2*r0 + b2*r1 + c2*r2 + d2*r3;
-      res[0][3] = a3*r0 + b3*r1 + c3*r2 + d3*r3; }
-    { const bj_real r0 = rhs[1][0], r1 = rhs[1][1], r2 = rhs[1][2], r3 = rhs[1][3];
-      res[1][0] = a0*r0 + b0*r1 + c0*r2 + d0*r3;
-      res[1][1] = a1*r0 + b1*r1 + c1*r2 + d1*r3;
-      res[1][2] = a2*r0 + b2*r1 + c2*r2 + d2*r3;
-      res[1][3] = a3*r0 + b3*r1 + c3*r2 + d3*r3; }
-    { const bj_real r0 = rhs[2][0], r1 = rhs[2][1], r2 = rhs[2][2], r3 = rhs[2][3];
-      res[2][0] = a0*r0 + b0*r1 + c0*r2 + d0*r3;
-      res[2][1] = a1*r0 + b1*r1 + c1*r2 + d1*r3;
-      res[2][2] = a2*r0 + b2*r1 + c2*r2 + d2*r3;
-      res[2][3] = a3*r0 + b3*r1 + c3*r2 + d3*r3; }
-    { const bj_real r0 = rhs[3][0], r1 = rhs[3][1], r2 = rhs[3][2], r3 = rhs[3][3];
-      res[3][0] = a0*r0 + b0*r1 + c0*r2 + d0*r3;
-      res[3][1] = a1*r0 + b1*r1 + c1*r2 + d1*r3;
-      res[3][2] = a2*r0 + b2*r1 + c2*r2 + d2*r3;
-      res[3][3] = a3*r0 + b3*r1 + c3*r2 + d3*r3; }
-#endif
+    for (int c = 0; c < 4; ++c) {
+        const bj_real b0 = b[BJ_M4(c,0)];
+        const bj_real b1 = b[BJ_M4(c,1)];
+        const bj_real b2 = b[BJ_M4(c,2)];
+        const bj_real b3 = b[BJ_M4(c,3)];
+
+        o[BJ_M4(c,0)] = a[BJ_M4(0,0)] * b0 
+                      + a[BJ_M4(1,0)] * b1 
+                      + a[BJ_M4(2,0)] * b2 
+                      + a[BJ_M4(3,0)] * b3;
+        o[BJ_M4(c,1)] = a[BJ_M4(0,1)] * b0 
+                      + a[BJ_M4(1,1)] * b1 
+                      + a[BJ_M4(2,1)] * b2 
+                      + a[BJ_M4(3,1)] * b3;
+        o[BJ_M4(c,2)] = a[BJ_M4(0,2)] * b0 
+                      + a[BJ_M4(1,2)] * b1 
+                      + a[BJ_M4(2,2)] * b2 
+                      + a[BJ_M4(3,2)] * b3;
+        o[BJ_M4(c,3)] = a[BJ_M4(0,3)] * b0 
+                      + a[BJ_M4(1,3)] * b1 
+                      + a[BJ_M4(2,3)] * b2 
+                      + a[BJ_M4(3,3)] * b3;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 4×4 multiply by vec4.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_mul_vec4(
-    BJ_ARRAY      (bj_real, 4, res),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 4, mat),
-    BJ_CONST_ARRAY(bj_real, 4, v)
+static BJ_INLINE bj_vec4 bj_mat4_mul_vec4(
+    const bj_mat4* BJ_RESTRICT M,
+    bj_vec4                    v
 ) {
-#ifdef BJ_MAT_NO_UNROLL
-    for (int j = 0; j < 4; ++j) {
-        res[j] = BJ_FZERO;
-        for (int i = 0; i < 4; ++i) res[j] += mat[i][j] * v[i];
-    }
-#else
-    const bj_real vx = v[0], vy = v[1], vz = v[2], vw = v[3];
-    res[0] = mat[0][0]*vx + mat[1][0]*vy + mat[2][0]*vz + mat[3][0]*vw;
-    res[1] = mat[0][1]*vx + mat[1][1]*vy + mat[2][1]*vz + mat[3][1]*vw;
-    res[2] = mat[0][2]*vx + mat[1][2]*vy + mat[2][2]*vz + mat[3][2]*vw;
-    res[3] = mat[0][3]*vx + mat[1][3]*vy + mat[2][3]*vz + mat[3][3]*vw;
-#endif
+    const bj_real* m = M->m;
+    return (bj_vec4) {
+        m[BJ_M4(0,0)] * v.x + m[BJ_M4(1,0)] * v.y + 
+        m[BJ_M4(2,0)] * v.z + m[BJ_M4(3,0)] * v.w,
+        m[BJ_M4(0,1)] * v.x + m[BJ_M4(1,1)] * v.y + 
+        m[BJ_M4(2,1)] * v.z + m[BJ_M4(3,1)] * v.w,
+        m[BJ_M4(0,2)] * v.x + m[BJ_M4(1,2)] * v.y + 
+        m[BJ_M4(2,2)] * v.z + m[BJ_M4(3,2)] * v.w,
+        m[BJ_M4(0,3)] * v.x + m[BJ_M4(1,3)] * v.y + 
+        m[BJ_M4(2,3)] * v.z + m[BJ_M4(3,3)] * v.w
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create 4×4 translation matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_translation(bj_mat4x4 res, bj_real x, bj_real y, bj_real z)
-{
-    bj_mat4_identity(res);
-    res[3][0] = x; res[3][1] = y; res[3][2] = z;
+static BJ_INLINE void bj_mat4_translation(
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              x,
+    bj_real              y,
+    bj_real              z
+) {
+    bj_mat4_identity(M);
+    M->m[BJ_M4(3,0)] = x;
+    M->m[BJ_M4(3,1)] = y;
+    M->m[BJ_M4(3,2)] = z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Apply 4×4 translation in-place.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_translation_inplace(
-    bj_mat4x4 M,
-    bj_real   x,
-    bj_real   y,
-    bj_real   z
+    bj_mat4* BJ_RESTRICT M,
+    bj_real x,
+    bj_real y,
+    bj_real z
 ) {
-    /* column-major: M[3] is the translation column */
-    M[3][0] += M[0][0]*x + M[1][0]*y + M[2][0]*z;
-    M[3][1] += M[0][1]*x + M[1][1]*y + M[2][1]*z;
-    M[3][2] += M[0][2]*x + M[1][2]*y + M[2][2]*z;
-    M[3][3] += M[0][3]*x + M[1][3]*y + M[2][3]*z;
+    const bj_vec4 t = { x, y, z, BJ_FZERO };
+    for (int r = 0 ; r<4 ; ++r) {
+        const bj_vec4 row = bj_mat4_row(M, r);
+        M->m[BJ_M4(3,r)] +=  bj_vec4_dot(row, t);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Outer product to upper-left 3×3 block of 4×4.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_mul_outer(bj_mat4x4 res, bj_vec3 a, bj_vec3 b)
-{
-    res[0][0] = a.x * b.x;  res[0][1] = a.x * b.y;  res[0][2] = a.x * b.z;
-    res[1][0] = a.y * b.x;  res[1][1] = a.y * b.y;  res[1][2] = a.y * b.z;
-    res[2][0] = a.z * b.x;  res[2][1] = a.z * b.y;  res[2][2] = a.z * b.z;
-    res[0][3] = BJ_FZERO;
-    res[1][3] = BJ_FZERO;
-    res[2][3] = BJ_FZERO;
-    res[3][0] = BJ_FZERO;
-    res[3][1] = BJ_FZERO;
-    res[3][2] = BJ_FZERO;
-    res[3][3] = BJ_FZERO;
+static BJ_INLINE void bj_mat4_mul_outer(
+    bj_mat4* BJ_RESTRICT out,
+    bj_vec3              a,
+    bj_vec3              b
+) {
+    bj_real* m = out->m;
+    m[BJ_M4(0,0)] = a.x*b.x;
+    m[BJ_M4(1,0)] = a.y*b.x;
+    m[BJ_M4(2,0)] = a.z*b.x;
+    m[BJ_M4(3,0)] = BJ_FZERO;
+    m[BJ_M4(0,1)] = a.x*b.y;
+    m[BJ_M4(1,1)] = a.y*b.y;
+    m[BJ_M4(2,1)] = a.z*b.y;
+    m[BJ_M4(3,1)] = BJ_FZERO;
+    m[BJ_M4(0,2)] = a.x*b.z;
+    m[BJ_M4(1,2)] = a.y*b.z;
+    m[BJ_M4(2,2)] = a.z*b.z;
+    m[BJ_M4(3,2)] = BJ_FZERO;
+    m[BJ_M4(0,3)] = BJ_FZERO;
+    m[BJ_M4(1,3)] = BJ_FZERO;
+    m[BJ_M4(2,3)] = BJ_FZERO;
+    m[BJ_M4(3,3)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Rotate about axis, post-multiply.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_rotate(bj_mat4x4 res, const bj_mat4x4 mat, bj_real x, bj_real y, bj_real z, bj_real angle)
-{
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    bj_vec3 u = { x, y, z };
+static BJ_INLINE void bj_mat4_rotate_axis(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT M,
+    bj_vec3                 axis,
+    bj_real                 angle
+) {
+    const bj_real s = bj_sin(angle);
+    const bj_real c = bj_cos(angle);
+    const bj_real len = bj_vec3_len(axis);
+    if (len <= BJ_F(1e-4)) { 
+        bj_mat4_copy(out, M);
+        return; 
+    }
 
-    if (bj_vec3_len(u) > BJ_F(1e-4)) {
-        u = bj_vec3_normalize(u);
-        bj_mat4x4 T; bj_mat4_mul_outer(T, u, u);
+    const bj_real inv = BJ_F(1.0) / len;
+    const bj_real ux = axis.x * inv, uy = axis.y * inv, uz = axis.z * inv;
+    const bj_real t = BJ_F(1.0) - c;
 
-        bj_mat4x4 S = {
-            {    BJ_FZERO, u.z,      -u.y,     BJ_FZERO},
-            {-u.z,         BJ_FZERO, u.x,      BJ_FZERO},
-            { u.y,         -u.x,     BJ_FZERO, BJ_FZERO},
-            {    BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_FZERO}
-        };
-        bj_mat4_scale(S, S, s);
+    /* 3x3 rotation block */
+    const bj_real r00 = c + t*ux*ux;
+    const bj_real r01 = t*ux*uy + s*uz;
+    const bj_real r02 = t*ux*uz - s*uy;
 
-        bj_mat4x4 C; bj_mat4_identity(C); bj_mat4_sub(C, C, T); bj_mat4_scale(C, C, c);
+    const bj_real r10 = t*uy*ux - s*uz;
+    const bj_real r11 = c + t*uy*uy;
+    const bj_real r12 = t*uy*uz + s*ux;
 
-        bj_mat4_add(T, T, C); bj_mat4_add(T, T, S);
-        T[3][3] = BJ_F(1.0);
-        bj_mat4_mul(res, mat, T);
-    } else {
-        bj_mat4_copy(res, mat);
+    const bj_real r20 = t*uz*ux + s*uy;
+    const bj_real r21 = t*uz*uy - s*ux;
+    const bj_real r22 = c + t*uz*uz;
+
+    const bj_real* m = M->m;
+    bj_real* o = out->m;
+
+    /* Columns of M (column-major) */
+    const bj_real* m0 = &m[BJ_M4(0,0)];
+    const bj_real* m1 = &m[BJ_M4(1,0)];
+    const bj_real* m2 = &m[BJ_M4(2,0)];
+    const bj_real* m3 = &m[BJ_M4(3,0)];
+
+    bj_real* o0 = &o[BJ_M4(0,0)];
+    bj_real* o1 = &o[BJ_M4(1,0)];
+    bj_real* o2 = &o[BJ_M4(2,0)];
+    bj_real* o3 = &o[BJ_M4(3,0)];
+
+    for (int r = 0; r < 4; ++r) {
+        const bj_real M0 = m0[r], M1 = m1[r], M2 = m2[r];
+        o0[r] = M0*r00 + M1*r10 + M2*r20;
+        o1[r] = M0*r01 + M1*r11 + M2*r21;
+        o2[r] = M0*r02 + M1*r12 + M2*r22;
+        o3[r] = m3[r];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Rotate about X/Y/Z, post-multiply.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_rotate_x(bj_mat4x4 res, const bj_mat4x4 mat, bj_real angle)
-{
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    bj_mat4x4 R = {
-        {BJ_F(1.0), BJ_FZERO, BJ_FZERO, BJ_FZERO},
-        {BJ_FZERO,   c,   s, BJ_FZERO},
-        {BJ_FZERO,  -s,   c, BJ_FZERO},
-        {BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_F(1.0)}
-    };
-    bj_mat4_mul(res, mat, R);
+static BJ_INLINE void bj_mat4_rotate_x(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT M,
+    bj_real                 a
+) {
+
+    const bj_real s = bj_sin(a), c = bj_cos(a);
+    const bj_real* m = M->m; bj_real* o = out->m;
+
+    const bj_real* m0 = &m[BJ_M4(0,0)];
+    const bj_real* m1 = &m[BJ_M4(1,0)];
+    const bj_real* m2 = &m[BJ_M4(2,0)];
+    const bj_real* m3 = &m[BJ_M4(3,0)];
+
+    bj_real* o0 = &o[BJ_M4(0,0)];
+    bj_real* o1 = &o[BJ_M4(1,0)];
+    bj_real* o2 = &o[BJ_M4(2,0)];
+    bj_real* o3 = &o[BJ_M4(3,0)];
+
+    for (int r = 0; r < 4; ++r) {
+        const bj_real M1 = m1[r], M2 = m2[r];
+        o0[r] = m0[r];
+        o1[r] =  c*M1 - s*M2;
+        o2[r] =  s*M1 + c*M2;
+        o3[r] = m3[r];
+    }
 }
 
-static BJ_INLINE void bj_mat4_rotate_y(bj_mat4x4 res, const bj_mat4x4 mat, bj_real angle)
-{
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    bj_mat4x4 R = {
-        {   c, BJ_FZERO,  -s, BJ_FZERO},
-        { BJ_FZERO, BJ_F(1.0), BJ_FZERO, BJ_FZERO},
-        {   s, BJ_FZERO,   c, BJ_FZERO},
-        { BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_F(1.0)}
-    };
-    bj_mat4_mul(res, mat, R);
+static BJ_INLINE void bj_mat4_rotate_y(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT M,
+    bj_real                 a
+) {
+    const bj_real s = bj_sin(a), c = bj_cos(a);
+    const bj_real* m = M->m; bj_real* o = out->m;
+
+    const bj_real* m0 = &m[BJ_M4(0,0)];
+    const bj_real* m1 = &m[BJ_M4(1,0)];
+    const bj_real* m2 = &m[BJ_M4(2,0)];
+    const bj_real* m3 = &m[BJ_M4(3,0)];
+
+    bj_real* o0 = &o[BJ_M4(0,0)];
+    bj_real* o1 = &o[BJ_M4(1,0)];
+    bj_real* o2 = &o[BJ_M4(2,0)];
+    bj_real* o3 = &o[BJ_M4(3,0)];
+
+    for (int r = 0; r < 4; ++r) {
+        const bj_real M0 = m0[r], M2 = m2[r];
+        o0[r] =  c*M0 + s*M2;
+        o1[r] =  m1[r];
+        o2[r] = -s*M0 + c*M2;
+        o3[r] =  m3[r];
+    }
 }
 
-static BJ_INLINE void bj_mat4_rotate_z(bj_mat4x4 res, const bj_mat4x4 mat, bj_real angle)
-{
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    bj_mat4x4 R = {
-        {   c,   s, BJ_FZERO, BJ_FZERO},
-        {  -s,   c, BJ_FZERO, BJ_FZERO},
-        { BJ_FZERO, BJ_FZERO, BJ_F(1.0), BJ_FZERO},
-        { BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_F(1.0)}
-    };
-    bj_mat4_mul(res, mat, R);
+static BJ_INLINE void bj_mat4_rotate_z(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT M,
+    bj_real                    a
+) {
+    const bj_real s = bj_sin(a), c = bj_cos(a);
+    const bj_real* m = M->m; bj_real* o = out->m;
+
+    const bj_real* m0 = &m[BJ_M4(0,0)];
+    const bj_real* m1 = &m[BJ_M4(1,0)];
+    const bj_real* m2 = &m[BJ_M4(2,0)];
+    const bj_real* m3 = &m[BJ_M4(3,0)];
+
+    bj_real* o0 = &o[BJ_M4(0,0)];
+    bj_real* o1 = &o[BJ_M4(1,0)];
+    bj_real* o2 = &o[BJ_M4(2,0)];
+    bj_real* o3 = &o[BJ_M4(3,0)];
+
+    for (int r = 0; r < 4; ++r) {
+        const bj_real M0 = m0[r], M1 = m1[r];
+        o0[r] =  c*M0 - s*M1;
+        o1[r] =  s*M0 + c*M1;
+        o2[r] =  m2[r];
+        o3[r] =  m3[r];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Arcball rotation.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4x4 R, const bj_mat4x4 M, bj_vec2 a, bj_vec2 b, bj_real s)
-{
-    bj_real z_a = BJ_FZERO, z_b = BJ_FZERO;
-
-    if (bj_vec2_len(a) < BJ_F(1.0)) z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a, a)); else a = bj_vec2_normalize(a);
-    if (bj_vec2_len(b) < BJ_F(1.0)) z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b, b)); else b = bj_vec2_normalize(b);
-
-    bj_vec3 a_ = { a.x, a.y, z_a };
-    bj_vec3 b_ = { b.x, b.y, z_b };
-
-    bj_vec3 c_ = bj_vec3_cross(a_, b_);
-    bj_real const angle = bj_acos(bj_vec3_dot(a_, b_)) * s;
-    bj_mat4_rotate(R, M, c_.x, c_.y, c_.z, angle);
+static BJ_INLINE void bj_mat4_rotate_arcball(
+    bj_mat4* BJ_RESTRICT       R,
+    const bj_mat4* BJ_RESTRICT M,
+    bj_vec2                    a,
+    bj_vec2                    b,
+    bj_real                    s
+) {
+    bj_real z_a = BJ_FZERO;
+    bj_real z_b = BJ_FZERO;
+    const bj_real la = bj_vec2_len(a);
+    const bj_real lb = bj_vec2_len(b);
+    if (la < BJ_F(1.0)) {
+        z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a,a));
+    } else {
+        a = bj_vec2_normalize(a);
+    }
+    if (lb < BJ_F(1.0)) {
+        z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b,b));
+    } else {
+        b = bj_vec2_normalize(b);
+    }
+    const bj_vec3 A = { a.x, a.y, z_a };
+    const bj_vec3 B = { b.x, b.y, z_b };
+    const bj_vec3 C = bj_vec3_cross(A,B);
+    const bj_real ang = bj_acos(bj_vec3_dot(A,B)) * s;
+    bj_mat4_rotate_axis(R, M, C, ang);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Invert 4×4.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_inverse(bj_mat4x4 res, const bj_mat4x4 mat) {
+static BJ_INLINE int bj_mat4_inverse(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT M
+) {
+    const bj_real* m = M->m;
     bj_real s[6], c[6];
-    s[0] = mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1];
-    s[1] = mat[0][0] * mat[1][2] - mat[1][0] * mat[0][2];
-    s[2] = mat[0][0] * mat[1][3] - mat[1][0] * mat[0][3];
-    s[3] = mat[0][1] * mat[1][2] - mat[1][1] * mat[0][2];
-    s[4] = mat[0][1] * mat[1][3] - mat[1][1] * mat[0][3];
-    s[5] = mat[0][2] * mat[1][3] - mat[1][2] * mat[0][3];
+    s[0] = m[BJ_M4(0,0)] * m[BJ_M4(1,1)] - m[BJ_M4(1,0)] * m[BJ_M4(0,1)];
+    s[1] = m[BJ_M4(0,0)] * m[BJ_M4(1,2)] - m[BJ_M4(1,0)] * m[BJ_M4(0,2)];
+    s[2] = m[BJ_M4(0,0)] * m[BJ_M4(1,3)] - m[BJ_M4(1,0)] * m[BJ_M4(0,3)];
+    s[3] = m[BJ_M4(0,1)] * m[BJ_M4(1,2)] - m[BJ_M4(1,1)] * m[BJ_M4(0,2)];
+    s[4] = m[BJ_M4(0,1)] * m[BJ_M4(1,3)] - m[BJ_M4(1,1)] * m[BJ_M4(0,3)];
+    s[5] = m[BJ_M4(0,2)] * m[BJ_M4(1,3)] - m[BJ_M4(1,2)] * m[BJ_M4(0,3)];
 
-    c[0] = mat[2][0] * mat[3][1] - mat[3][0] * mat[2][1];
-    c[1] = mat[2][0] * mat[3][2] - mat[3][0] * mat[2][2];
-    c[2] = mat[2][0] * mat[3][3] - mat[3][0] * mat[2][3];
-    c[3] = mat[2][1] * mat[3][2] - mat[3][1] * mat[2][2];
-    c[4] = mat[2][1] * mat[3][3] - mat[3][1] * mat[2][3];
-    c[5] = mat[2][2] * mat[3][3] - mat[3][2] * mat[2][3];
+    c[0] = m[BJ_M4(2,0)] * m[BJ_M4(3,1)] - m[BJ_M4(3,0)] * m[BJ_M4(2,1)];
+    c[1] = m[BJ_M4(2,0)] * m[BJ_M4(3,2)] - m[BJ_M4(3,0)] * m[BJ_M4(2,2)];
+    c[2] = m[BJ_M4(2,0)] * m[BJ_M4(3,3)] - m[BJ_M4(3,0)] * m[BJ_M4(2,3)];
+    c[3] = m[BJ_M4(2,1)] * m[BJ_M4(3,2)] - m[BJ_M4(3,1)] * m[BJ_M4(2,2)];
+    c[4] = m[BJ_M4(2,1)] * m[BJ_M4(3,3)] - m[BJ_M4(3,1)] * m[BJ_M4(2,3)];
+    c[5] = m[BJ_M4(2,2)] * m[BJ_M4(3,3)] - m[BJ_M4(3,2)] * m[BJ_M4(2,3)];
 
-    bj_real idet = BJ_F(1.0) / (s[0] * c[5] - s[1] * c[4] + s[2] * c[3] + s[3] * c[2] - s[4] * c[1] + s[5] * c[0]);
+    const bj_real det = s[0]*c[5] - s[1]*c[4] + s[2]*c[3] 
+                      + s[3]*c[2] - s[4]*c[1] + s[5]*c[0];
+    if (det ==  BJ_FZERO) {
+        return 0;
+    }
+    const bj_real id = BJ_F(1.0)/det;
+    bj_real* o = out->m;
 
-    res[0][0] = (mat[1][1] * c[5] - mat[1][2] * c[4] + mat[1][3] * c[3]) * idet;
-    res[0][1] = (-mat[0][1] * c[5] + mat[0][2] * c[4] - mat[0][3] * c[3]) * idet;
-    res[0][2] = (mat[3][1] * s[5] - mat[3][2] * s[4] + mat[3][3] * s[3]) * idet;
-    res[0][3] = (-mat[2][1] * s[5] + mat[2][2] * s[4] - mat[2][3] * s[3]) * idet;
+    o[BJ_M4(0,0)] = (m[BJ_M4(1,1)] * c[5] - m[BJ_M4(1,2)] * c[4] + m[BJ_M4(1,3)] * c[3]) * id;
+    o[BJ_M4(0,1)] = (-m[BJ_M4(0,1)] * c[5] + m[BJ_M4(0,2)] * c[4] - m[BJ_M4(0,3)] * c[3]) * id;
+    o[BJ_M4(0,2)] = (m[BJ_M4(3,1)] * s[5] - m[BJ_M4(3,2)] * s[4] + m[BJ_M4(3,3)] * s[3]) * id;
+    o[BJ_M4(0,3)] = (-m[BJ_M4(2,1)] * s[5] + m[BJ_M4(2,2)] * s[4] - m[BJ_M4(2,3)] * s[3]) * id;
 
-    res[1][0] = (-mat[1][0] * c[5] + mat[1][2] * c[2] - mat[1][3] * c[1]) * idet;
-    res[1][1] = (mat[0][0] * c[5] - mat[0][2] * c[2] + mat[0][3] * c[1]) * idet;
-    res[1][2] = (-mat[3][0] * s[5] + mat[3][2] * s[2] - mat[3][3] * s[1]) * idet;
-    res[1][3] = (mat[2][0] * s[5] - mat[2][2] * s[2] + mat[2][3] * s[1]) * idet;
+    o[BJ_M4(1,0)] = (-m[BJ_M4(1,0)] * c[5] + m[BJ_M4(1,2)] * c[2] - m[BJ_M4(1,3)] * c[1]) * id;
+    o[BJ_M4(1,1)] = (m[BJ_M4(0,0)] * c[5] - m[BJ_M4(0,2)] * c[2] + m[BJ_M4(0,3)] * c[1]) * id;
+    o[BJ_M4(1,2)] = (-m[BJ_M4(3,0)] * s[5] + m[BJ_M4(3,2)] * s[2] - m[BJ_M4(3,3)] * s[1]) * id;
+    o[BJ_M4(1,3)] = (m[BJ_M4(2,0)] * s[5] - m[BJ_M4(2,2)] * s[2] + m[BJ_M4(2,3)] * s[1]) * id;
 
-    res[2][0] = (mat[1][0] * c[4] - mat[1][1] * c[2] + mat[1][3] * c[0]) * idet;
-    res[2][1] = (-mat[0][0] * c[4] + mat[0][1] * c[2] - mat[0][3] * c[0]) * idet;
-    res[2][2] = (mat[3][0] * s[4] - mat[3][1] * s[2] + mat[3][3] * s[0]) * idet;
-    res[2][3] = (-mat[2][0] * s[4] + mat[2][1] * s[2] - mat[2][3] * s[0]) * idet;
+    o[BJ_M4(2,0)] = (m[BJ_M4(1,0)] * c[4] - m[BJ_M4(1,1)] * c[2] + m[BJ_M4(1,3)] * c[0]) * id;
+    o[BJ_M4(2,1)] = (-m[BJ_M4(0,0)] * c[4] + m[BJ_M4(0,1)] * c[2] - m[BJ_M4(0,3)] * c[0]) * id;
+    o[BJ_M4(2,2)] = (m[BJ_M4(3,0)] * s[4] - m[BJ_M4(3,1)] * s[2] + m[BJ_M4(3,3)] * s[0]) * id;
+    o[BJ_M4(2,3)] = (-m[BJ_M4(2,0)] * s[4] + m[BJ_M4(2,1)] * s[2] - m[BJ_M4(2,3)] * s[0]) * id;
 
-    res[3][0] = (-mat[1][0] * c[3] + mat[1][1] * c[1] - mat[1][2] * c[0]) * idet;
-    res[3][1] = (mat[0][0] * c[3] - mat[0][1] * c[1] + mat[0][2] * c[0]) * idet;
-    res[3][2] = (-mat[3][0] * s[3] + mat[3][1] * s[1] - mat[3][2] * s[0]) * idet;
-    res[3][3] = (mat[2][0] * s[3] - mat[2][1] * s[1] + mat[2][2] * s[0]) * idet;
+    o[BJ_M4(3,0)] = (-m[BJ_M4(1,0)] * c[3] + m[BJ_M4(1,1)] * c[1] - m[BJ_M4(1,2)] * c[0]) * id;
+    o[BJ_M4(3,1)] = (m[BJ_M4(0,0)] * c[3] - m[BJ_M4(0,1)] * c[1] + m[BJ_M4(0,2)] * c[0]) * id;
+    o[BJ_M4(3,2)] = (-m[BJ_M4(3,0)] * s[3] + m[BJ_M4(3,1)] * s[1] - m[BJ_M4(3,2)] * s[0]) * id;
+    o[BJ_M4(3,3)] = (m[BJ_M4(2,0)] * s[3] - m[BJ_M4(2,1)] * s[1] + m[BJ_M4(2,2)] * s[0]) * id;
+    return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Orthonormalize upper-left 3×3 of 4×4.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_orthonormalize(bj_mat4x4 res, const bj_mat4x4 mat)
-{
-    bj_mat4_copy(res, mat);                /* column-major: res[col][row] */
+static BJ_INLINE void bj_mat4_orthonormalize(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A
+){
+    const bj_real* m = A->m; bj_real* o = out->m;
 
-    /* load upper-left 3×3 columns into vec3 */
-    bj_vec3 c0 = (bj_vec3){ res[0][0], res[0][1], res[0][2] };
-    bj_vec3 c1 = (bj_vec3){ res[1][0], res[1][1], res[1][2] };
-    bj_vec3 c2 = (bj_vec3){ res[2][0], res[2][1], res[2][2] };
+    bj_vec3 z = { m[BJ_M4(2,0)], m[BJ_M4(2,1)], m[BJ_M4(2,2)] };
+    z = bj_vec3_normalize(z);
 
-    /* Gram–Schmidt: Z, then Y, then X */
-    c2 = bj_vec3_normalize(c2);
+    bj_vec3 y = { m[BJ_M4(1,0)], m[BJ_M4(1,1)], m[BJ_M4(1,2)] };
+    y = bj_vec3_sub(y, bj_vec3_scale(z, bj_vec3_dot(y,z)));
+    y = bj_vec3_normalize(y);
 
-    bj_real s; bj_vec3 h;
+    bj_vec3 x = { m[BJ_M4(0,0)], m[BJ_M4(0,1)], m[BJ_M4(0,2)] };
+    x = bj_vec3_sub(x, bj_vec3_scale(z, bj_vec3_dot(x,z)));
+    x = bj_vec3_sub(x, bj_vec3_scale(y, bj_vec3_dot(x,y)));
+    x = bj_vec3_normalize(x);
 
-    s  = bj_vec3_dot(c1, c2);
-    h  = bj_vec3_scale(c2, s);
-    c1 = bj_vec3_sub(c1, h);
-    c1 = bj_vec3_normalize(c1);
-    s  = bj_vec3_dot(c0, c2);
-    h  = bj_vec3_scale(c2, s);
-    c0 = bj_vec3_sub(c0, h);
-    s  = bj_vec3_dot(c0, c1);
-    h  = bj_vec3_scale(c1, s);
-    c0 = bj_vec3_sub(c0, h);
-    c0 = bj_vec3_normalize(c0);
+    o[BJ_M4(0,0)] = x.x; o[BJ_M4(0,1)] = x.y; o[BJ_M4(0,2)] = x.z;
+    o[BJ_M4(1,0)] = y.x; o[BJ_M4(1,1)] = y.y; o[BJ_M4(1,2)] = y.z;
+    o[BJ_M4(2,0)] = z.x; o[BJ_M4(2,1)] = z.y; o[BJ_M4(2,2)] = z.z;
 
-    /* store back into upper-left 3×3, leave last row/col as-is */
-    res[0][0]=c0.x; res[0][1]=c0.y; res[0][2]=c0.z;
-    res[1][0]=c1.x; res[1][1]=c1.y; res[1][2]=c1.z;
-    res[2][0]=c2.x; res[2][1]=c2.y; res[2][2]=c2.z;
+    /* preserve translation column from A */
+    o[BJ_M4(3,0)] = m[BJ_M4(3,0)];
+    o[BJ_M4(3,1)] = m[BJ_M4(3,1)];
+    o[BJ_M4(3,2)] = m[BJ_M4(3,2)];
+    o[BJ_M4(3,3)] = m[BJ_M4(3,3)];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Off-center perspective frustum (4×4).
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_frustum(
-    BJ_ARRAY_2D(bj_real, 4, 4, fmat),
-    bj_real l, bj_real r,
-    bj_real b, bj_real t,
-    bj_real n, bj_real f
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              l,
+    bj_real              r,
+    bj_real              b,
+    bj_real              t,
+    bj_real              n,
+    bj_real              f
 ) {
-    fmat[0][0] = BJ_F(2.0) * n / (r - l);
-    fmat[0][1] = fmat[0][2] = fmat[0][3] = BJ_FZERO;
 
-    fmat[1][0] = BJ_FZERO;
-    fmat[1][1] = BJ_F(-2.0) * n / (t - b);
-    fmat[1][2] = fmat[1][3] = BJ_FZERO;
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = BJ_F(2.0)*n/(r-l);
+    m[BJ_M4(0,1)] = m[BJ_M4(0,2)] = m[BJ_M4(0,3)] = BJ_FZERO;
 
-    fmat[2][0] = (r + l) / (r - l);
-    fmat[2][1] = (t + b) / (t - b);
+    m[BJ_M4(1,0)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = BJ_F(-2.0)*n/(t-b);
+    m[BJ_M4(1,2)] = m[BJ_M4(1,3)] = BJ_FZERO;
 
-    fmat[2][2] =  f / (f - n);
-    fmat[2][3] =  BJ_F(1.0);
+    m[BJ_M4(2,0)] = (r+l)/(r-l);
+    m[BJ_M4(2,1)] = (t+b)/(t-b);
+    m[BJ_M4(2,2)] =  f/(f-n);
+    m[BJ_M4(2,3)] =  BJ_F(1.0);
 
-    fmat[3][0] = BJ_FZERO;
-    fmat[3][1] = BJ_FZERO;
-    fmat[3][2] = -(f * n) / (f - n);
-    fmat[3][3] = BJ_FZERO;
+    m[BJ_M4(3,0)] = BJ_FZERO; m[BJ_M4(3,1)] = BJ_FZERO;
+    m[BJ_M4(3,2)] = -(f*n)/(f-n);
+    m[BJ_M4(3,3)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Orthographic projection (4×4).
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_ortho(
-    BJ_ARRAY_2D(bj_real, 4, 4, omat),
-    bj_real l, bj_real r,
-    bj_real b, bj_real t,
-    bj_real n, bj_real f
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              l,
+    bj_real              r,
+    bj_real              b,
+    bj_real              t,
+    bj_real              n,
+    bj_real              f
 ) {
-    omat[0][0] = BJ_F(2.0) / (r - l);
-    omat[0][1] = omat[0][2] = omat[0][3] = BJ_FZERO;
 
-    omat[1][0] = omat[1][2] = omat[1][3] = BJ_FZERO;
-    omat[1][1] = BJ_F(-2.0) / (t - b);
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = BJ_F(2.0)/(r-l);
+    m[BJ_M4(0,1)] = m[BJ_M4(0,2)] = m[BJ_M4(0,3)] = BJ_FZERO;
 
-    omat[2][0] = omat[2][1] = omat[2][3] = BJ_FZERO;
-    omat[2][2] = BJ_F(1.0) / (f - n);
+    m[BJ_M4(1,0)] = m[BJ_M4(1,2)] = m[BJ_M4(1,3)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = BJ_F(-2.0)/(t-b);
 
-    omat[3][0] = -(r + l) / (r - l);
-    omat[3][1] =  (t + b) / (t - b);
-    omat[3][2] = -n / (f - n);
-    omat[3][3] = BJ_F(1.0);
+    m[BJ_M4(2,0)] = m[BJ_M4(2,1)] = m[BJ_M4(2,3)] = BJ_FZERO;
+    m[BJ_M4(2,2)] = BJ_F(1.0)/(f-n);
+
+    m[BJ_M4(3,0)] = -(r+l)/(r-l);
+    m[BJ_M4(3,1)] =  (t+b)/(t-b);
+    m[BJ_M4(3,2)] = -n/(f-n);
+    m[BJ_M4(3,3)] = BJ_F(1.0);
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Symmetric perspective from FOV+aspect (4×4).
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_perspective(
-    BJ_ARRAY_2D(bj_real, 4, 4, pmat),
-    bj_real y_fov, bj_real aspect,
-    bj_real n, bj_real f
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              y_fov,
+    bj_real              aspect,
+    bj_real              n,
+    bj_real              f
 ) {
-    const bj_real a = BJ_F(1.0) / bj_tan(y_fov / BJ_F(2.0));
 
-    pmat[0][0] = a / aspect;
-    pmat[0][1] = pmat[0][2] = pmat[0][3] = BJ_FZERO;
+    const bj_real a = BJ_F(1.0)/bj_tan(y_fov/BJ_F(2.0));
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = a/aspect;
+    m[BJ_M4(0,1)] = m[BJ_M4(0,2)] = m[BJ_M4(0,3)] = BJ_FZERO;
 
-    pmat[1][0] = BJ_FZERO;
-    pmat[1][1] = -a;
-    pmat[1][2] = pmat[1][3] = BJ_FZERO;
+    m[BJ_M4(1,0)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = -a;
+    m[BJ_M4(1,2)] = m[BJ_M4(1,3)] = BJ_FZERO;
 
-    pmat[2][0] = BJ_FZERO; pmat[2][1] = BJ_FZERO;
-    pmat[2][2] = f / (f - n);
-    pmat[2][3] = BJ_F(1.0);
+    m[BJ_M4(2,0)] = BJ_FZERO; m[BJ_M4(2,1)] = BJ_FZERO;
+    m[BJ_M4(2,2)] = f/(f-n);
+    m[BJ_M4(2,3)] = BJ_F(1.0);
 
-    pmat[3][0] = BJ_FZERO; pmat[3][1] = BJ_FZERO;
-    pmat[3][2] = -(f * n) / (f - n);
-    pmat[3][3] = BJ_FZERO;
+    m[BJ_M4(3,0)] = BJ_FZERO; m[BJ_M4(3,1)] = BJ_FZERO;
+    m[BJ_M4(3,2)] = -(f*n)/(f-n);
+    m[BJ_M4(3,3)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Viewport transform (4×4).
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_viewport(
-    BJ_ARRAY_2D(bj_real, 4, 4, vpmat),
-    bj_real x, bj_real y,
-    bj_real w, bj_real h
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              x,
+    bj_real              y,
+    bj_real              w,
+    bj_real              h
 ) {
-    const bj_real z_min = BJ_FZERO, z_max = BJ_F(1.0);
-    const bj_real sx = BJ_F(0.50) * w, sy = BJ_F(0.50) * h, sz = (z_max - z_min);
-    const bj_real tx = x + BJ_F(0.50) * w, ty = y + BJ_F(0.50) * h, tz = z_min;
-
-    vpmat[0][0] = sx; vpmat[0][1] = BJ_FZERO; vpmat[0][2] = BJ_FZERO; vpmat[0][3] = BJ_FZERO;
-    vpmat[1][0] = BJ_FZERO; vpmat[1][1] = sy; vpmat[1][2] = BJ_FZERO; vpmat[1][3] = BJ_FZERO;
-    vpmat[2][0] = BJ_FZERO; vpmat[2][1] = BJ_FZERO; vpmat[2][2] = sz; vpmat[2][3] = BJ_FZERO;
-    vpmat[3][0] = tx; vpmat[3][1] = ty; vpmat[3][2] = tz; vpmat[3][3] = BJ_F(1.0);
+    const bj_real zmin = BJ_FZERO;
+    const bj_real zmax = BJ_F(1.0);
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = BJ_F(0.5) * w;
+    m[BJ_M4(0,1)] = BJ_FZERO;
+    m[BJ_M4(0,2)] = BJ_FZERO;
+    m[BJ_M4(0,3)] = BJ_FZERO;
+    m[BJ_M4(1,0)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = BJ_F(0.5) * h;
+    m[BJ_M4(1,2)] = BJ_FZERO;
+    m[BJ_M4(1,3)] = BJ_FZERO;
+    m[BJ_M4(2,0)] = BJ_FZERO;
+    m[BJ_M4(2,1)] = BJ_FZERO;
+    m[BJ_M4(2,2)] = (zmax - zmin);
+    m[BJ_M4(2,3)] = BJ_FZERO;
+    m[BJ_M4(3,0)] = x + BJ_F(0.5) * w;
+    m[BJ_M4(3,1)] = y + BJ_F(0.5) * h;
+    m[BJ_M4(3,2)] = zmin;
+    m[BJ_M4(3,3)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Look-at view matrix builder (4×4).
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_lookat(
-    BJ_ARRAY_2D(bj_real, 4, 4, m),
-    const bj_vec3 eye,
-    const bj_vec3 center,
-    const bj_vec3 up
+    bj_mat4* BJ_RESTRICT M,
+    bj_vec3              eye,
+    bj_vec3              center,
+    bj_vec3              up
 ) {
-    bj_vec3 f;  f = bj_vec3_sub(center, eye);  f = bj_vec3_normalize(f);
-    bj_vec3 s = bj_vec3_cross(up, f);      s = bj_vec3_normalize(s);
+    bj_vec3 f = bj_vec3_normalize(bj_vec3_sub(center, eye));
+    bj_vec3 s = bj_vec3_normalize(bj_vec3_cross(up, f));
     bj_vec3 t = bj_vec3_cross(f, s);
 
-    m[0][0]=s.x; m[0][1]=t.x; m[0][2]=f.x; m[0][3]=BJ_FZERO;
-    m[1][0]=s.y; m[1][1]=t.y; m[1][2]=f.y; m[1][3]=BJ_FZERO;
-    m[2][0]=s.z; m[2][1]=t.z; m[2][2]=f.z; m[2][3]=BJ_FZERO;
-    m[3][0]=BJ_FZERO; m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO; m[3][3]=BJ_F(1.0);
-
-    bj_mat4_translation_inplace(m, -eye.x, -eye.y, -eye.z);
+    bj_mat4_identity(M);
+    M->m[BJ_M4(0,0)] = s.x;
+    M->m[BJ_M4(0,1)] = t.x;
+    M->m[BJ_M4(0,2)] = f.x;
+    M->m[BJ_M4(1,0)] = s.y;
+    M->m[BJ_M4(1,1)] = t.y;
+    M->m[BJ_M4(1,2)] = f.y;
+    M->m[BJ_M4(2,0)] = s.z;
+    M->m[BJ_M4(2,1)] = t.z;
+    M->m[BJ_M4(2,2)] = f.z;
+    bj_mat4_translation_inplace(M, -eye.x, -eye.y, -eye.z);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Set 4×3 to identity.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4x3_identity(
-    BJ_ARRAY_2D(bj_real, 4, 3, m)
+    bj_mat4x3* BJ_RESTRICT M
 ) {
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO; m[0][2]=BJ_FZERO;
-    m[1][0]=BJ_FZERO; m[1][1]=BJ_F(1.0); m[1][2]=BJ_FZERO;
-    m[2][0]=BJ_FZERO; m[2][1]=BJ_FZERO; m[2][2]=BJ_F(1.0);
-    m[3][0]=BJ_FZERO; m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO;
+    bj_real* m = M->m;
+    m[BJ_M43(0,0)] = BJ_F(1.0);
+    m[BJ_M43(0,1)] = BJ_FZERO;
+    m[BJ_M43(0,2)] = BJ_FZERO;
+    m[BJ_M43(1,0)] = BJ_FZERO;
+    m[BJ_M43(1,1)] = BJ_F(1.0);
+    m[BJ_M43(1,2)] = BJ_FZERO;
+    m[BJ_M43(2,0)] = BJ_FZERO;
+    m[BJ_M43(2,1)] = BJ_FZERO;
+    m[BJ_M43(2,2)] = BJ_F(1.0);
+    m[BJ_M43(3,0)] = BJ_FZERO;
+    m[BJ_M43(3,1)] = BJ_FZERO;
+    m[BJ_M43(3,2)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 4×3 translation.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4x3_translate(
-    BJ_ARRAY_2D(bj_real, 4, 3, m),
-    bj_real tx, bj_real ty, bj_real tz
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                tx,
+    bj_real                ty,
+    bj_real                tz
 ) {
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO; m[0][2]=BJ_FZERO;
-    m[1][0]=BJ_FZERO; m[1][1]=BJ_F(1.0); m[1][2]=BJ_FZERO;
-    m[2][0]=BJ_FZERO; m[2][1]=BJ_FZERO; m[2][2]=BJ_F(1.0);
-    m[3][0]=tx;        m[3][1]=ty;        m[3][2]=tz;
+    bj_mat4x3_identity(M);
+    M->m[BJ_M43(3,0)] = tx;
+    M->m[BJ_M43(3,1)] = ty;
+    M->m[BJ_M43(3,2)] = tz;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 4×3 scale.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4x3_scale(
-    BJ_ARRAY_2D(bj_real, 4, 3, m),
-    bj_real sx, bj_real sy, bj_real sz
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                sx,
+    bj_real                sy,
+    bj_real                sz
 ) {
-    m[0][0]=sx;        m[0][1]=BJ_FZERO; m[0][2]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]=sy;       m[1][2]=BJ_FZERO;
-    m[2][0]=BJ_FZERO;  m[2][1]=BJ_FZERO; m[2][2]=sz;
-    m[3][0]=BJ_FZERO;  m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO;
+    bj_mat4x3_identity(M);
+    M->m[BJ_M43(0,0)] = sx;
+    M->m[BJ_M43(1,1)] = sy;
+    M->m[BJ_M43(2,2)] = sz;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 4×3 rotate X/Y/Z.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_rotate_x(BJ_ARRAY_2D(bj_real, 4, 3, m), bj_real angle) {
-    const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO; m[0][2]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]= c;       m[1][2]= s;
-    m[2][0]=BJ_FZERO;  m[2][1]=-s;       m[2][2]= c;
-    m[3][0]=BJ_FZERO;  m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO;
+static BJ_INLINE void bj_mat4x3_rotate_x(
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                a
+) {
+    const bj_real c = bj_cos(a), s = bj_sin(a);
+    bj_mat4x3_identity(M);
+    M->m[BJ_M43(1,1)] = c; M->m[BJ_M43(1,2)] = s;
+    M->m[BJ_M43(2,1)]  = -s; M->m[BJ_M43(2,2)] = c;
 }
-static BJ_INLINE void bj_mat4x3_rotate_y(BJ_ARRAY_2D(bj_real, 4, 3, m), bj_real angle) {
-    const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
-    m[0][0]= c;        m[0][1]=BJ_FZERO; m[0][2]=-s;
-    m[1][0]=BJ_FZERO;  m[1][1]=BJ_F(1.0);m[1][2]=BJ_FZERO;
-    m[2][0]= s;        m[2][1]=BJ_FZERO; m[2][2]= c;
-    m[3][0]=BJ_FZERO;  m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO;
+
+static BJ_INLINE void bj_mat4x3_rotate_y(
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                a
+) {
+    const bj_real c = bj_cos(a), s = bj_sin(a);
+    bj_mat4x3_identity(M);
+    M->m[BJ_M43(0,0)] = c; M->m[BJ_M43(0,2)] = -s;
+    M->m[BJ_M43(2,0)] = s; M->m[BJ_M43(2,2)] =  c;
 }
-static BJ_INLINE void bj_mat4x3_rotate_z(BJ_ARRAY_2D(bj_real, 4, 3, m), bj_real angle) {
-    const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
-    m[0][0]= c;        m[0][1]= s;        m[0][2]=BJ_FZERO;
-    m[1][0]=-s;        m[1][1]= c;        m[1][2]=BJ_FZERO;
-    m[2][0]=BJ_FZERO;  m[2][1]=BJ_FZERO;  m[2][2]=BJ_F(1.0);
-    m[3][0]=BJ_FZERO;  m[3][1]=BJ_FZERO;  m[3][2]=BJ_FZERO;
+
+static BJ_INLINE void bj_mat4x3_rotate_z(
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                a
+) {
+    const bj_real c = bj_cos(a), s = bj_sin(a);
+    bj_mat4x3_identity(M);
+    M->m[BJ_M43(0,0)] = c; M->m[BJ_M43(0,1)] = s;
+    M->m[BJ_M43(1,0)]  = -s; M->m[BJ_M43(1,1)] = c;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 4×3 multiplication: res = A * B.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4x3_mul(
-    BJ_ARRAY_2D      (bj_real, 4, 3, res),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, A),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, B)
-) {
-#ifdef BJ_MAT_NO_UNROLL
-    for (int r=0; r<3; ++r) {
-        res[0][r] = A[0][r]*B[0][0] + A[1][r]*B[1][0] + A[2][r]*B[2][0];
-        res[1][r] = A[0][r]*B[0][1] + A[1][r]*B[1][1] + A[2][r]*B[2][1];
-        res[2][r] = A[0][r]*B[0][2] + A[1][r]*B[1][2] + A[2][r]*B[2][2];
-        res[3][r] = A[0][r]*B[3][0] + A[1][r]*B[3][1] + A[2][r]*B[3][2] + A[3][r];
-    }
-#else
-    const bj_real a00=A[0][0], a10=A[1][0], a20=A[2][0], a30=A[3][0];
-    const bj_real a01=A[0][1], a11=A[1][1], a21=A[2][1], a31=A[3][1];
-    const bj_real a02=A[0][2], a12=A[1][2], a22=A[2][2], a32=A[3][2];
+    bj_mat4x3* BJ_RESTRICT       out,
+    const bj_mat4x3* BJ_RESTRICT A,
+    const bj_mat4x3* BJ_RESTRICT B
+){
 
-    const bj_real b00=B[0][0], b01=B[1][0], b02=B[2][0];
-    const bj_real b10=B[0][1], b11=B[1][1], b12=B[2][1];
-    const bj_real b20=B[0][2], b21=B[1][2], b22=B[2][2];
-    const bj_real bt0=B[3][0], bt1=B[3][1], bt2=B[3][2];
+    const bj_real a00 = A->m[BJ_M43(0,0)];
+    const bj_real a10 = A->m[BJ_M43(0,1)];
+    const bj_real a20 = A->m[BJ_M43(0,2)];
+    const bj_real a30 = A->m[BJ_M43(3,0)];
+    const bj_real a01 = A->m[BJ_M43(1,0)];
+    const bj_real a11 = A->m[BJ_M43(1,1)];
+    const bj_real a21 = A->m[BJ_M43(1,2)];
+    const bj_real a31 = A->m[BJ_M43(3,1)];
+    const bj_real a02 = A->m[BJ_M43(2,0)];
+    const bj_real a12 = A->m[BJ_M43(2,1)];
+    const bj_real a22 = A->m[BJ_M43(2,2)];
+    const bj_real a32 = A->m[BJ_M43(3,2)];
 
-    res[0][0] = a00*b00 + a10*b01 + a20*b02;
-    res[0][1] = a01*b00 + a11*b01 + a21*b02;
-    res[0][2] = a02*b00 + a12*b01 + a22*b02;
+    const bj_real b00 = B->m[BJ_M43(0,0)];
+    const bj_real b10 = B->m[BJ_M43(0,1)];
+    const bj_real b20 = B->m[BJ_M43(0,2)];
 
-    res[1][0] = a00*b10 + a10*b11 + a20*b12;
-    res[1][1] = a01*b10 + a11*b11 + a21*b12;
-    res[1][2] = a02*b10 + a12*b11 + a22*b12;
+    const bj_real b01 = B->m[BJ_M43(1,0)];
+    const bj_real b11 = B->m[BJ_M43(1,1)];
+    const bj_real b21 = B->m[BJ_M43(1,2)];
 
-    res[2][0] = a00*b20 + a10*b21 + a20*b22;
-    res[2][1] = a01*b20 + a11*b21 + a21*b22;
-    res[2][2] = a02*b20 + a12*b21 + a22*b22;
+    const bj_real b02 = B->m[BJ_M43(2,0)];
+    const bj_real b12 = B->m[BJ_M43(2,1)];
+    const bj_real b22 = B->m[BJ_M43(2,2)];
 
-    res[3][0] = a00*bt0 + a10*bt1 + a20*bt2 + a30;
-    res[3][1] = a01*bt0 + a11*bt1 + a21*bt2 + a31;
-    res[3][2] = a02*bt0 + a12*bt1 + a22*bt2 + a32;
-#endif
+    const bj_real bt0 = B->m[BJ_M43(3,0)];
+    const bj_real bt1 = B->m[BJ_M43(3,1)];
+    const bj_real bt2 = B->m[BJ_M43(3,2)];
+
+    out->m[BJ_M43(0,0)] = a00*b00 + a01*b10 + a02*b20;
+    out->m[BJ_M43(0,1)] = a10*b00 + a11*b10 + a12*b20;
+    out->m[BJ_M43(0,2)] = a20*b00 + a21*b10 + a22*b20;
+
+    out->m[BJ_M43(1,0)] = a00*b01 + a01*b11 + a02*b21;
+    out->m[BJ_M43(1,1)] = a10*b01 + a11*b11 + a12*b21;
+    out->m[BJ_M43(1,2)] = a20*b01 + a21*b11 + a22*b21;
+
+    out->m[BJ_M43(2,0)] = a00*b02 + a01*b12 + a02*b22;
+    out->m[BJ_M43(2,1)] = a10*b02 + a11*b12 + a12*b22;
+    out->m[BJ_M43(2,2)] = a20*b02 + a21*b12 + a22*b22;
+
+    out->m[BJ_M43(3,0)] = a00*bt0 + a01*bt1 + a02*bt2 + a30;
+    out->m[BJ_M43(3,1)] = a10*bt0 + a11*bt1 + a12*bt2 + a31;
+    out->m[BJ_M43(3,2)] = a20*bt0 + a21*bt1 + a22*bt2 + a32;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 4×3 transform point.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_mul_point(
-    BJ_ARRAY      (bj_real, 3, r),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, m),
-    BJ_CONST_ARRAY(bj_real, 3, p)
-) {
-    const bj_real x=p[0], y=p[1], z=p[2];
-    r[0] = m[0][0]*x + m[1][0]*y + m[2][0]*z + m[3][0];
-    r[1] = m[0][1]*x + m[1][1]*y + m[2][1]*z + m[3][1];
-    r[2] = m[0][2]*x + m[1][2]*y + m[2][2]*z + m[3][2];
+static BJ_INLINE bj_vec3 bj_mat4x3_mul_point(
+    const bj_mat4x3* BJ_RESTRICT M,
+    bj_vec3                      p
+){
+    const bj_real* m = M->m; const bj_real x = p.x,y = p.y,z = p.z;
+    return (bj_vec3){
+        m[BJ_M43(0,0)]*x + m[BJ_M43(1,0)]*y + m[BJ_M43(2,0)]*z + m[BJ_M43(3,0)],
+        m[BJ_M43(0,1)]*x + m[BJ_M43(1,1)]*y + m[BJ_M43(2,1)]*z + m[BJ_M43(3,1)],
+        m[BJ_M43(0,2)]*x + m[BJ_M43(1,2)]*y + m[BJ_M43(2,2)]*z + m[BJ_M43(3,2)]
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// 4×3 transform direction (no translation).
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_mul_dir(
-    BJ_ARRAY      (bj_real, 3, r),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, m),
-    BJ_CONST_ARRAY(bj_real, 3, v)
-) {
-    const bj_real x=v[0], y=v[1], z=v[2];
-    r[0] = m[0][0]*x + m[1][0]*y + m[2][0]*z;
-    r[1] = m[0][1]*x + m[1][1]*y + m[2][1]*z;
-    r[2] = m[0][2]*x + m[1][2]*y + m[2][2]*z;
+static BJ_INLINE bj_vec3 bj_mat4x3_mul_dir(
+    const bj_mat4x3* BJ_RESTRICT M,
+    bj_vec3                      v
+){
+    const bj_real* m = M->m; const bj_real x = v.x,y = v.y,z = v.z;
+    return (bj_vec3){
+        m[BJ_M43(0,0)]*x + m[BJ_M43(1,0)]*y + m[BJ_M43(2,0)]*z,
+        m[BJ_M43(0,1)]*x + m[BJ_M43(1,1)]*y + m[BJ_M43(2,1)]*z,
+        m[BJ_M43(0,2)]*x + m[BJ_M43(1,2)]*y + m[BJ_M43(2,2)]*z
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Promote 4×3 to 4×4 homogeneous.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_from_mat4x3(
-    bj_mat4x4 out,
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, a)
-) {
-    out[0][0]=a[0][0]; out[0][1]=a[0][1]; out[0][2]=a[0][2]; out[0][3]=BJ_FZERO;
-    out[1][0]=a[1][0]; out[1][1]=a[1][1]; out[1][2]=a[1][2]; out[1][3]=BJ_FZERO;
-    out[2][0]=a[2][0]; out[2][1]=a[2][1]; out[2][2]=a[2][2]; out[2][3]=BJ_FZERO;
-    out[3][0]=a[3][0]; out[3][1]=a[3][1]; out[3][2]=a[3][2]; out[3][3]=BJ_F(1.0);
+    bj_mat4* BJ_RESTRICT         M,
+    const bj_mat4x3* BJ_RESTRICT A
+){
+    const bj_real* a = A->m; bj_real* o = M->m;
+    o[BJ_M4(0,0)] = a[BJ_M43(0,0)];
+    o[BJ_M4(0,1)] = a[BJ_M43(0,1)];
+    o[BJ_M4(0,2)] = a[BJ_M43(0,2)];
+    o[BJ_M4(0,3)] = BJ_FZERO;
+    o[BJ_M4(1,0)] = a[BJ_M43(1,0)];
+    o[BJ_M4(1,1)] = a[BJ_M43(1,1)];
+    o[BJ_M4(1,2)] = a[BJ_M43(1,2)];
+    o[BJ_M4(1,3)] = BJ_FZERO;
+    o[BJ_M4(2,0)] = a[BJ_M43(2,0)];
+    o[BJ_M4(2,1)] = a[BJ_M43(2,1)];
+    o[BJ_M4(2,2)] = a[BJ_M43(2,2)];
+    o[BJ_M4(2,3)] = BJ_FZERO;
+    o[BJ_M4(3,0)] = a[BJ_M43(3,0)];
+    o[BJ_M4(3,1)] = a[BJ_M43(3,1)];
+    o[BJ_M4(3,2)] = a[BJ_M43(3,2)];
+    o[BJ_M4(3,3)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Extract 4×3 from 4×4.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4x3_from_mat4(
-    BJ_ARRAY_2D(bj_real, 4, 3, out43),
-    const bj_mat4x4 m
-) {
-    out43[0][0]=m[0][0]; out43[0][1]=m[0][1]; out43[0][2]=m[0][2];
-    out43[1][0]=m[1][0]; out43[1][1]=m[1][1]; out43[1][2]=m[1][2];
-    out43[2][0]=m[2][0]; out43[2][1]=m[2][1]; out43[2][2]=m[2][2];
-    out43[3][0]=m[3][0]; out43[3][1]=m[3][1]; out43[3][2]=m[3][2];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Look-at builder for 4×3.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_lookat(
-    BJ_ARRAY_2D(bj_real, 4, 3, m),
-    BJ_CONST_ARRAY(bj_real, 3, eye),
-    BJ_CONST_ARRAY(bj_real, 3, center),
-    BJ_CONST_ARRAY(bj_real, 3, up)
-) {
-    bj_real f[3] = { center[0]-eye[0], center[1]-eye[1], center[2]-eye[2] };
-    { const bj_real len2 = f[0]*f[0]+f[1]*f[1]+f[2]*f[2]; const bj_real inv = BJ_F(1.0)/bj_sqrt(len2);
-      f[0]*=inv; f[1]*=inv; f[2]*=inv; }
-    bj_real s[3] = { up[1]*f[2]-up[2]*f[1], up[2]*f[0]-up[0]*f[2], up[0]*f[1]-up[1]*f[0] };
-    { const bj_real len2 = s[0]*s[0]+s[1]*s[1]+s[2]*s[2]; const bj_real inv = BJ_F(1.0)/bj_sqrt(len2);
-      s[0]*=inv; s[1]*=inv; s[2]*=inv; }
-    const bj_real t[3] = { f[1]*s[2]-f[2]*s[1], f[2]*s[0]-f[0]*s[2], f[0]*s[1]-f[1]*s[0] };
-
-    m[0][0]=s[0]; m[0][1]=s[1]; m[0][2]=s[2];
-    m[1][0]=t[0]; m[1][1]=t[1]; m[1][2]=t[2];
-    m[2][0]=f[0]; m[2][1]=f[1]; m[2][2]=f[2];
-
-    m[3][0]=-(s[0]*eye[0] + s[1]*eye[1] + s[2]*eye[2]);
-    m[3][1]=-(t[0]*eye[0] + t[1]*eye[1] + t[2]*eye[2]);
-    m[3][2]=-(f[0]*eye[0] + f[1]*eye[1] + f[2]*eye[2]);
+    bj_mat4x3* BJ_RESTRICT     M,
+    const bj_mat4* BJ_RESTRICT A
+){
+    const bj_real* a = A->m; bj_real* o = M->m;
+    o[BJ_M43(0,0)] = a[BJ_M4(0,0)];
+    o[BJ_M43(0,1)] = a[BJ_M4(0,1)];
+    o[BJ_M43(0,2)] = a[BJ_M4(0,2)];
+    o[BJ_M43(1,0)] = a[BJ_M4(1,0)];
+    o[BJ_M43(1,1)] = a[BJ_M4(1,1)];
+    o[BJ_M43(1,2)] = a[BJ_M4(1,2)];
+    o[BJ_M43(2,0)] = a[BJ_M4(2,0)];
+    o[BJ_M43(2,1)] = a[BJ_M4(2,1)];
+    o[BJ_M43(2,2)] = a[BJ_M4(2,2)];
+    o[BJ_M43(3,0)] = a[BJ_M4(3,0)];
+    o[BJ_M43(3,1)] = a[BJ_M4(3,1)];
+    o[BJ_M43(3,2)] = a[BJ_M4(3,2)];
 }
 
 #endif

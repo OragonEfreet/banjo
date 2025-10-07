@@ -162,8 +162,12 @@ static BJ_INLINE bj_real bj_vec2_len(bj_vec2 v) {
 /// \param target_len Desired length of the result.
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec2 bj_vec2_set_len(bj_vec2 v, bj_real target_len) {
-    return bj_vec2_scale(v, target_len / bj_vec2_len(v));
+static BJ_INLINE bj_vec2 bj_vec2_set_len(bj_vec2 v, bj_real L){
+    const bj_real l = bj_vec2_len(v); 
+    if (bj_real_is_zero(l)){
+        return (bj_vec2){BJ_FZERO,BJ_FZERO};
+    }
+    return bj_vec2_scale(v, L / l);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -194,9 +198,13 @@ static BJ_INLINE bj_real bj_vec2_dist(const bj_vec2 a, const bj_vec2 b) {
 /// \return Normalized `v`
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec2 bj_vec2_normalize(bj_vec2 v) {
-    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y);
-    return (bj_vec2){ v.x * inv_len, v.y * inv_len,};
+static BJ_INLINE bj_vec2 bj_vec2_normalize(bj_vec2 v){
+    const bj_real l2 = v.x * v.x + v.y * v.y;
+    if (bj_real_is_zero(l2)) {
+        return (bj_vec2){BJ_FZERO,BJ_FZERO};
+    }
+    const bj_real inv = BJ_F(1.0)/bj_sqrt(l2);
+    return (bj_vec2){v.x*inv, v.y*inv};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -317,8 +325,12 @@ static BJ_INLINE bj_real bj_vec3_len(bj_vec3 v) {
 /// \param target_len Desired length of the result.
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec3 bj_vec3_set_len(bj_vec3 v, bj_real target_len) {
-    return bj_vec3_scale(v, target_len / bj_vec3_len(v));
+static BJ_INLINE bj_vec3 bj_vec3_set_len(bj_vec3 v, bj_real L){
+    const bj_real l = bj_vec3_len(v);
+    if (bj_real_is_zero(l)) {
+        return (bj_vec3){BJ_FZERO,BJ_FZERO,BJ_FZERO};
+    }
+    return bj_vec3_scale(v, L / l);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -351,9 +363,13 @@ static BJ_INLINE bj_real bj_vec3_dist(bj_vec3 a, bj_vec3 b) {
 /// \return Normalized `v`
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec3 bj_vec3_normalize(bj_vec3 v) {
-    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-    return (bj_vec3){ v.x * inv_len, v.y * inv_len, v.z * inv_len,};
+static BJ_INLINE bj_vec3 bj_vec3_normalize(bj_vec3 v){
+    const bj_real l2 = v.x * v.x + v.y * v.y + v.z * v.z;
+    if (bj_real_is_zero(l2)) {
+        return (bj_vec3){BJ_FZERO,BJ_FZERO,BJ_FZERO};
+    }
+    const bj_real inv = BJ_F(1.0)/bj_sqrt(l2);
+    return (bj_vec3){v.x*inv, v.y*inv, v.z*inv};
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -512,9 +528,15 @@ static BJ_INLINE bj_real bj_vec4_len(bj_vec4 v) {
 /// \return Normalized `v`
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec4 bj_vec4_normalize(bj_vec4 v) {
-    bj_real inv_len = BJ_F(1.0) / bj_sqrt(v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w);
-    return (bj_vec4){ v.x * inv_len, v.y * inv_len, v.z * inv_len, v.z * inv_len };
+static BJ_INLINE bj_vec4 bj_vec4_normalize(
+        bj_vec4 v
+) { 
+    const bj_real len2 = v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w;
+    if (bj_real_is_zero(len2)) { 
+        return (bj_vec4){ BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_FZERO };
+    }
+    const bj_real inv = BJ_F(1.0) / bj_sqrt(len2);
+    return (bj_vec4){ v.x*inv, v.y*inv, v.z*inv, v.w*inv };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -554,13 +576,12 @@ static BJ_INLINE bj_vec4 bj_vec4_max(bj_vec4 a, bj_vec4 b) {
 /// \param r Right-hand input vector.
 /// \note Uses only xyz components; the result w component is set to 1.0.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec4 bj_vec4_cross(bj_vec4 l, bj_vec4 r)
-{
-    return (bj_vec4) {
-        .x = l.y * r.z - l.z * r.y,
-        .y = l.z * r.x - l.x * r.z,
-        .z = l.x * r.y - l.y * r.x,
-        .w = BJ_F(1.0),
+static BJ_INLINE bj_vec4 bj_vec4_cross(bj_vec4 l, bj_vec4 r){
+    return (bj_vec4){ 
+        l.y*r.z - l.z*r.y,
+        l.z*r.x - l.x*r.z,
+        l.x*r.y - l.y*r.x,
+        BJ_FZERO
     };
 }
 
