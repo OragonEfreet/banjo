@@ -191,49 +191,6 @@
 #endif
 /// @}
 
-/// \name Array parameter helper macros
-/// \def BJ_CONST_ARRAY
-/// \def BJ_ARRAY
-/// \def BJ_CONST_ARRAY_2D
-/// \def BJ_ARRAY_2D
-/// \brief Expands to array parameter declarations appropriate for the toolchain.
-/// BJ_CONST_ARRAY/BJ_ARRAY are 1-D. BJ_CONST_ARRAY_2D/BJ_ARRAY_2D are 2-D (rows=n, cols=m).
-/// @{
-#if defined(_MSC_VER)
-    #if defined(__has_include)
-        #if __has_include(<sal.h>)
-            #include <sal.h>
-            #define BJ_CONST_ARRAY(T,n,name)      _In_reads_(n)             const T* BJ_RESTRICT name
-            #define BJ_ARRAY(T,n,name)            _Out_writes_(n)                  T* BJ_RESTRICT name
-            #define BJ_CONST_ARRAY_2D(T,n,m,name) _In_reads_((n)*(m)) const T (* BJ_RESTRICT name)[m]
-            #define BJ_ARRAY_2D(T,n,m,name)       _Out_writes_((n)*(m))        T (* BJ_RESTRICT name)[m]
-        #else
-            #define BJ_CONST_ARRAY(T,n,name)      const T* BJ_RESTRICT name
-            #define BJ_ARRAY(T,n,name)                  T* BJ_RESTRICT name
-            #define BJ_CONST_ARRAY_2D(T,n,m,name) const T (* BJ_RESTRICT name)[m]
-            #define BJ_ARRAY_2D(T,n,m,name)            T (* BJ_RESTRICT name)[m]
-        #endif
-    #else
-        #include <sal.h>
-        #define BJ_CONST_ARRAY(T,n,name)      _In_reads_(n)             const T* BJ_RESTRICT name
-        #define BJ_ARRAY(T,n,name)            _Out_writes_(n)                  T* BJ_RESTRICT name
-        #define BJ_CONST_ARRAY_2D(T,n,m,name) _In_reads_((n)*(m)) const T (* BJ_RESTRICT name)[m]
-        #define BJ_ARRAY_2D(T,n,m,name)       _Out_writes_((n)*(m))        T (* BJ_RESTRICT name)[m]
-    #endif
-#elif defined(BJ_COMPILER_DOXYGEN) || (defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L))
-    #define BJ_CONST_ARRAY(T,n,name)      const T name[BJ_RESTRICT static (n)]
-    #define BJ_ARRAY(T,n,name)                  T name[BJ_RESTRICT static (n)]
-    #define BJ_CONST_ARRAY_2D(T,n,m,name) const T name[BJ_RESTRICT static (n)][m]
-    #define BJ_ARRAY_2D(T,n,m,name)             T name[BJ_RESTRICT static (n)][m]
-#else
-    #define BJ_CONST_ARRAY(T,n,name)      const T* BJ_RESTRICT name        ///< pointer to >=n const T
-    #define BJ_ARRAY(T,n,name)                  T* BJ_RESTRICT name        ///< pointer to >=n T
-    #define BJ_CONST_ARRAY_2D(T,n,m,name) const T (* BJ_RESTRICT name)[m]  ///< pointer to >=n rows of m const T
-    #define BJ_ARRAY_2D(T,n,m,name)            T (* BJ_RESTRICT name)[m]   ///< pointer to >=n rows of m T
-#endif
-/// @}
-
-
 /// \name Inline helper macro
 /// \def BJ_INLINE
 /// \brief BJ_INLINE expands to an inline specifier appropriate for the toolchain.
