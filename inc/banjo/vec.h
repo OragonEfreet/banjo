@@ -56,9 +56,9 @@ struct bj_vec4_t {
 };
 typedef struct bj_vec4_t bj_vec4;
 
-#define BJ_VEC3_ZERO ((bj_vec3){BJ_FZERO, BJ_FZERO, BJ_FZERO})
+#define BJ_VEC4_ZERO ((bj_vec4){BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_FZERO})
 
-static BJ_INLINE bj_vec2 bj_vec2_apply(
+static BJ_INLINE bj_vec2 bj_vec2_map(
     bj_vec2 a,
     bj_real(*f)(bj_real)
 ) {
@@ -121,7 +121,7 @@ static BJ_INLINE bj_vec2 bj_vec2_scale(bj_vec2 v, bj_real s) {
 /// \param s Scalar factor.
 /// \return The result of `v * s`
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec2 bj_vec2_scale_each(
+static BJ_INLINE bj_vec2 bj_vec2_mul_comp(
     const bj_vec2 v,
     const bj_vec2 s
 ) {
@@ -142,7 +142,7 @@ static BJ_INLINE bj_real bj_vec2_dot(bj_vec2 a, bj_vec2 b) {
 /// 2D "cross product" (perp dot): returns scalar a.x*b.y - a.y*b.x.
 /// Useful for orientation tests, signed area, segment intersection.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec2_cross(bj_vec2 a, bj_vec2 b) {
+static BJ_INLINE bj_real bj_vec2_perp_dot(bj_vec2 a, bj_vec2 b) {
     return a.x*b.y - a.y*b.x;
 }
 
@@ -162,7 +162,7 @@ static BJ_INLINE bj_real bj_vec2_len(bj_vec2 v) {
 /// \param target_len Desired length of the result.
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec2 bj_vec2_set_len(bj_vec2 v, bj_real L){
+static BJ_INLINE bj_vec2 bj_vec2_scale_to_len(bj_vec2 v, bj_real L){
     const bj_real l = bj_vec2_len(v); 
     if (bj_real_is_zero(l)){
         return (bj_vec2){BJ_FZERO,BJ_FZERO};
@@ -176,7 +176,7 @@ static BJ_INLINE bj_vec2 bj_vec2_set_len(bj_vec2 v, bj_real L){
 /// \param b Input vector b.
 /// \returns The squared distance ||a - b||^2.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec2_dist_squared(bj_vec2 a, bj_vec2 b) {
+static BJ_INLINE bj_real bj_vec2_distance_sq(bj_vec2 a, bj_vec2 b) {
     const bj_real dx = a.x - b.x;
     const bj_real dy = a.y - b.y;
     return dx * dx + dy * dy;
@@ -188,24 +188,50 @@ static BJ_INLINE bj_real bj_vec2_dist_squared(bj_vec2 a, bj_vec2 b) {
 /// \param b Input vector b.
 /// \returns The Euclidean distance ||a - b||.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec2_dist(const bj_vec2 a, const bj_vec2 b) {
-    return bj_sqrt(bj_vec2_dist_squared(a, b));
+static BJ_INLINE bj_real bj_vec2_distance(const bj_vec2 a, const bj_vec2 b) {
+    return bj_sqrt(bj_vec2_distance_sq(a, b));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Normalize a 2D vector to unit length.
+/// \brief Normalize a 2D vector to unit length (safe).
+/// 
+/// \details Computes v / ||v||. If the squared length is zero according to
+/// bj_real_is_zero, returns the zero vector to avoid division by zero.
+/// Uses a single square root.
+/// 
 /// \param v Input vector.
-/// \return Normalized `v`
-/// \warning Undefined if the input vector has zero length.
+/// \return Unit-length copy of \p v, or {0,0} if ||v|| == 0 by bj_real_is_zero.
+/// 
+/// \warning Zero-detection follows bj_real_is_zero semantics and tolerance.
+/// \see bj_vec2_normalize_unsafe, bj_real_is_zero
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec2 bj_vec2_normalize(bj_vec2 v){
     const bj_real l2 = v.x * v.x + v.y * v.y;
     if (bj_real_is_zero(l2)) {
-        return (bj_vec2){BJ_FZERO,BJ_FZERO};
+        return (bj_vec2){ BJ_FZERO, BJ_FZERO };
     }
-    const bj_real inv = BJ_F(1.0)/bj_sqrt(l2);
-    return (bj_vec2){v.x*inv, v.y*inv};
+    const bj_real inv = BJ_F(1.0) / bj_sqrt(l2);
+    return (bj_vec2){ v.x * inv, v.y * inv };
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normalize a 2D vector to unit length (unsafe).
+/// 
+/// \details Computes v / ||v|| without any zero-length check.
+/// Faster on hot paths where nonzero length is guaranteed.
+/// 
+/// \param v Input vector (must be nonzero).
+/// \return Unit-length copy of \p v.
+/// 
+/// \pre ||v|| > 0 (caller guarantees).
+/// \warning Undefined results if ||v|| == 0. Consider bj_vec2_normalize instead.
+/// \see bj_vec2_normalize
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_vec2 bj_vec2_normalize_unsafe(bj_vec2 v) {
+    const bj_real inv = BJ_F(1.0) / bj_sqrt(v.x*v.x + v.y*v.y);
+    return (bj_vec2){ v.x * inv, v.y * inv };
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Component-wise minimum of two 2D vectors.
@@ -227,7 +253,7 @@ static BJ_INLINE bj_vec2 bj_vec2_max(bj_vec2 a, bj_vec2 b) {
     return (bj_vec2){a.x > b.x ? a.x : b.x, a.y > b.y ? a.y : b.y, };
 }
 
-static BJ_INLINE bj_vec3 bj_vec3_apply(
+static BJ_INLINE bj_vec3 bj_vec3_map(
     bj_vec3 a,
     bj_real(*f)(bj_real)
 ) {
@@ -325,7 +351,7 @@ static BJ_INLINE bj_real bj_vec3_len(bj_vec3 v) {
 /// \param target_len Desired length of the result.
 /// \warning Undefined if the input vector has zero length.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec3 bj_vec3_set_len(bj_vec3 v, bj_real L){
+static BJ_INLINE bj_vec3 bj_vec3_scale_to_len(bj_vec3 v, bj_real L){
     const bj_real l = bj_vec3_len(v);
     if (bj_real_is_zero(l)) {
         return (bj_vec3){BJ_FZERO,BJ_FZERO,BJ_FZERO};
@@ -339,7 +365,7 @@ static BJ_INLINE bj_vec3 bj_vec3_set_len(bj_vec3 v, bj_real L){
 /// \param b Input vector b.
 /// \returns The squared distance ||a - b||^2.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec3_dist_squared(bj_vec3 a, bj_vec3 b) {
+static BJ_INLINE bj_real bj_vec3_distance_sq(bj_vec3 a, bj_vec3 b) {
     const bj_real dx = a.x - b.x;
     const bj_real dy = a.y - b.y;
     const bj_real dz = a.z - b.z;
@@ -352,24 +378,46 @@ static BJ_INLINE bj_real bj_vec3_dist_squared(bj_vec3 a, bj_vec3 b) {
 /// \param b Input vector b.
 /// \returns The Euclidean distance ||a - b||.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_real bj_vec3_dist(bj_vec3 a, bj_vec3 b) {
-    return bj_sqrt(bj_vec3_dist_squared(a, b));
+static BJ_INLINE bj_real bj_vec3_distance(bj_vec3 a, bj_vec3 b) {
+    return bj_sqrt(bj_vec3_distance_sq(a, b));
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
-/// Normalize a 3D vector to unit length.
+/// \brief Normalize a 3D vector to unit length (safe).
+/// 
+/// \details Computes v / ||v||. Returns {0,0,0} if ||v|| is zero by
+/// bj_real_is_zero. Uses one square root.
+/// 
 /// \param v Input vector.
-/// \return Normalized `v`
-/// \warning Undefined if the input vector has zero length.
+/// \return Unit-length copy of \p v, or {0,0,0} if ||v|| == 0 by bj_real_is_zero.
+/// 
+/// \warning Zero-detection follows bj_real_is_zero semantics and tolerance.
+/// \see bj_vec3_normalize_unsafe, bj_real_is_zero
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_vec3 bj_vec3_normalize(bj_vec3 v){
     const bj_real l2 = v.x * v.x + v.y * v.y + v.z * v.z;
     if (bj_real_is_zero(l2)) {
-        return (bj_vec3){BJ_FZERO,BJ_FZERO,BJ_FZERO};
+        return (bj_vec3){ BJ_FZERO, BJ_FZERO, BJ_FZERO };
     }
-    const bj_real inv = BJ_F(1.0)/bj_sqrt(l2);
-    return (bj_vec3){v.x*inv, v.y*inv, v.z*inv};
+    const bj_real inv = BJ_F(1.0) / bj_sqrt(l2);
+    return (bj_vec3){ v.x * inv, v.y * inv, v.z * inv };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normalize a 3D vector to unit length (unsafe).
+/// 
+/// \details Computes v / ||v|| without any zero-length check.
+/// 
+/// \param v Input vector (must be nonzero).
+/// \return Unit-length copy of \p v.
+/// 
+/// \pre ||v|| > 0 (caller guarantees).
+/// \warning Undefined results if ||v|| == 0. Consider bj_vec3_normalize instead.
+/// \see bj_vec3_normalize
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_vec3 bj_vec3_normalize_unsafe(bj_vec3 v) {
+    const bj_real inv = BJ_F(1.0) / bj_sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+    return (bj_vec3){ v.x * inv, v.y * inv, v.z * inv };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -428,7 +476,7 @@ static BJ_INLINE bj_vec3 bj_vec3_reflect(bj_vec3 v, bj_vec3 n)
     };
 }
 
-static BJ_INLINE bj_vec4 bj_vec4_apply(
+static BJ_INLINE bj_vec4 bj_vec4_map(
     bj_vec4 a,
     bj_real(*f)(bj_real)
 ) {
@@ -523,20 +571,41 @@ static BJ_INLINE bj_real bj_vec4_len(bj_vec4 v) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Normalize a 4D vector to unit length.
+/// \brief Normalize a 4D vector to unit length (safe).
+/// 
+/// \details Computes v / ||v||. Returns {0,0,0,0} if ||v|| is zero by
+/// bj_real_is_zero. Uses one square root.
+/// 
 /// \param v Input vector.
-/// \return Normalized `v`
-/// \warning Undefined if the input vector has zero length.
+/// \return Unit-length copy of \p v, or {0,0,0,0} if ||v|| == 0 by bj_real_is_zero.
+/// 
+/// \warning Zero-detection follows bj_real_is_zero semantics and tolerance.
+/// \see bj_vec4_normalize_unsafe, bj_real_is_zero
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec4 bj_vec4_normalize(
-        bj_vec4 v
-) { 
+static BJ_INLINE bj_vec4 bj_vec4_normalize(bj_vec4 v) { 
     const bj_real len2 = v.x * v.x + v.y * v.y + v.z * v.z + v.w * v.w;
     if (bj_real_is_zero(len2)) { 
         return (bj_vec4){ BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_FZERO };
     }
     const bj_real inv = BJ_F(1.0) / bj_sqrt(len2);
-    return (bj_vec4){ v.x*inv, v.y*inv, v.z*inv, v.w*inv };
+    return (bj_vec4){ v.x * inv, v.y * inv, v.z * inv, v.w * inv };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normalize a 4D vector to unit length (unsafe).
+/// 
+/// \details Computes v / ||v|| without any zero-length check.
+/// 
+/// \param v Input vector (must be nonzero).
+/// \return Unit-length copy of \p v.
+/// 
+/// \pre ||v|| > 0 (caller guarantees).
+/// \warning Undefined results if ||v|| == 0. Consider bj_vec4_normalize instead.
+/// \see bj_vec4_normalize
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_vec4 bj_vec4_normalize_unsafe(bj_vec4 v) {
+    const bj_real inv = BJ_F(1.0) / bj_sqrt(v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w);
+    return (bj_vec4){ v.x * inv, v.y * inv, v.z * inv, v.w * inv };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -576,7 +645,7 @@ static BJ_INLINE bj_vec4 bj_vec4_max(bj_vec4 a, bj_vec4 b) {
 /// \param r Right-hand input vector.
 /// \note Uses only xyz components; the result w component is set to 1.0.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec4 bj_vec4_cross(bj_vec4 l, bj_vec4 r){
+static BJ_INLINE bj_vec4 bj_vec4_cross_xyz(bj_vec4 l, bj_vec4 r){
     return (bj_vec4){ 
         l.y*r.z - l.z*r.y,
         l.z*r.x - l.x*r.z,

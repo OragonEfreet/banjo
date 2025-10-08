@@ -343,7 +343,7 @@ static BJ_INLINE void bj_quat_to_mat4(
     bj_real xy = q.x * q.y, xz = q.x * q.z, yz = q.y * q.z;
     bj_real wx = q.w * q.x, wy = q.w * q.y, wz = q.w * q.z;
 
-    bj_mat4_identity(M);
+    bj_mat4_set_identity(M);
 
     bj_real* m = M->m;
     /* Column 0 */

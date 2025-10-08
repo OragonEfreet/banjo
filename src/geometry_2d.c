@@ -9,8 +9,8 @@ BANJO_EXPORT bj_bool bj_check_segments_hit(
     const bj_vec2 r    = bj_vec2_sub(a1, a0);
     const bj_vec2 s    = bj_vec2_sub(b1, b0);
     const bj_vec2 qp   = bj_vec2_sub(b0, a0);
-    const bj_real rxs  = bj_vec2_cross(r, s);
-    const bj_real qpxr = bj_vec2_cross(qp, r);
+    const bj_real rxs  = bj_vec2_perp_dot(r, s);
+    const bj_real qpxr = bj_vec2_perp_dot(qp, r);
 
     if (bj_real_is_zero(rxs) && bj_real_is_zero(qpxr)) {
         const bj_real rr = bj_vec2_dot(r, r);
@@ -33,7 +33,7 @@ BANJO_EXPORT bj_bool bj_check_segments_hit(
     if (bj_real_is_zero(rxs)) return 0;
 
     const bj_real inv = BJ_F(1.0) / rxs;
-    const bj_real t = bj_vec2_cross(qp, s) * inv;
+    const bj_real t = bj_vec2_perp_dot(qp, s) * inv;
     const bj_real u = qpxr * inv;
 
     return bj_real_lte(BJ_F(0.0), t) && bj_real_lte(t, BJ_F(1.0)) &&

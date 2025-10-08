@@ -188,7 +188,7 @@ static void update_projection(game_data* data) {
         const bj_real lx = (bj_real)ix * BOX_W + BOX_W * BJ_F(0.5);
         const bj_real ly = (bj_real)iy * BOX_H + BOX_H * BJ_F(0.5);
 
-        bj_mat3_ortho(&ortho,
+        bj_mat3_set_ortho(&ortho,
             lx - BOX_W * BJ_F(0.5),
             lx + BOX_W * BJ_F(0.5),
             ly - BOX_H * BJ_F(0.5),
@@ -196,10 +196,10 @@ static void update_projection(game_data* data) {
         );
     }
     else {
-        bj_mat3_ortho(&ortho, -CANVAS_W * BJ_F(0.5), CANVAS_W * BJ_F(0.5), -CANVAS_H * BJ_F(0.5), CANVAS_H * BJ_F(0.5));
+        bj_mat3_set_ortho(&ortho, -CANVAS_W * BJ_F(0.5), CANVAS_W * BJ_F(0.5), -CANVAS_H * BJ_F(0.5), CANVAS_H * BJ_F(0.5));
     }
 
-    bj_mat3_viewport(&viewport, BJ_FZERO, BJ_FZERO, SCREEN_W, SCREEN_H);
+    bj_mat3_set_viewport(&viewport, BJ_FZERO, BJ_FZERO, SCREEN_W, SCREEN_H);
     bj_mat3_mul(&data->draw.projection, &viewport, &ortho);
 }
 
@@ -287,8 +287,8 @@ static void draw(game_data* data) {
         }
 
 
-        p0 = bj_mat3_mul_vec3(&data->draw.projection, q0);
-        p1 = bj_mat3_mul_vec3(&data->draw.projection, q1);
+        p0 = bj_mat3_transform_vec3(&data->draw.projection, q0);
+        p1 = bj_mat3_transform_vec3(&data->draw.projection, q1);
 
         bj_draw_line(
             target,
@@ -344,7 +344,7 @@ static void draw(game_data* data) {
                     BJ_F(1.),
                 };
 
-                p0 = bj_mat3_mul_vec3(&data->draw.projection, q0);
+                p0 = bj_mat3_transform_vec3(&data->draw.projection, q0);
                 fire_x[c] = p0.x;
                 fire_y[c] = p0.y;
             }
@@ -370,8 +370,8 @@ static void draw(game_data* data) {
             BJ_F(1.),
         };
 
-        p0 = bj_mat3_mul_vec3(&data->draw.projection, q0);
-        p1 = bj_mat3_mul_vec3(&data->draw.projection, q1);
+        p0 = bj_mat3_transform_vec3(&data->draw.projection, q0);
+        p1 = bj_mat3_transform_vec3(&data->draw.projection, q1);
 
         const bj_real floor_angle = bj_atan2(
             p1.y - p0.y, p1.x - p0.x
