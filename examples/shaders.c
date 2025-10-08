@@ -7,13 +7,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
+#include <banjo/event.h>
+#include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/shader.h>
+#include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
-#include <banjo/event.h>
-#include <banjo/main.h>
-#include <banjo/log.h>
-#include <banjo/system.h>
 
 #define CANVAS_W 512
 #define CANVAS_H 512
@@ -21,7 +21,7 @@
 bj_window* window      = 0;
 bj_bitmap* framebuffer = 0;
 
-void palette(bj_vec3 res, bj_real t) {
+static bj_vec3 palette(bj_real t) {
     const bj_real f = BJ_F(6.28318);
 
     const bj_vec3 a = { BJ_F(0.5), BJ_F(0.5), BJ_F(0.5) };
@@ -29,27 +29,28 @@ void palette(bj_vec3 res, bj_real t) {
     const bj_vec3 c = { BJ_F(1.0), BJ_F(1.0), BJ_F(1.0) };
     const bj_vec3 d = { BJ_F(0.263), BJ_F(0.416), BJ_F(0.557) };
 
-    res[0] = a[0] + b[0] * bj_cos(f * (c[0] * t + d[0]));
-    res[1] = a[1] + b[1] * bj_cos(f * (c[1] * t + d[1]));
-    res[2] = a[2] + b[2] * bj_cos(f * (c[2] * t + d[2]));
-}
+    return (bj_vec3) {
+        .x = a.x + b.x * bj_cos(f * (c.x * t + d.x)),
+        .y = a.y + b.y * bj_cos(f * (c.y * t + d.y)),
+        .z = a.z + b.z * bj_cos(f * (c.z * t + d.z)),
+    };
 
-int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
+  }
+
+int shader_code(bj_vec3* frag_color, const bj_vec2 frag_coords, void* data) {
     bj_real time = *(bj_real*)data;
 
-    bj_vec2 uv;
     bj_vec3 final_color = { BJ_FZERO, BJ_FZERO, BJ_FZERO };
 
-    bj_vec2_copy(uv, frag_coords);
+    bj_vec2 uv = frag_coords;
     const bj_real uv0_len = bj_vec2_len(uv);
     
     for (bj_real i = BJ_FZERO; i < BJ_F(4.0); i += BJ_F(1.0)) {
-        bj_vec3 col;
-        palette(col, uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
+        bj_vec3 col = palette(uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
         
-        bj_vec2_scale(uv, uv, BJ_F(1.5));
-        bj_vec2_apply(uv, uv, bj_fract);
-        bj_vec2_sub(uv, uv, (bj_vec2){ BJ_F(0.5), BJ_F(0.5) });
+        uv = bj_vec2_scale(uv, BJ_F(1.5));
+        uv = bj_vec2_map(uv, bj_fract);
+        uv = bj_vec2_sub(uv, (bj_vec2){ BJ_F(0.5), BJ_F(0.5) });
 
         const bj_real d = bj_pow(
             BJ_F(0.01) / (
@@ -62,11 +63,11 @@ int shader_code(bj_vec3 frag_color, const bj_vec2 frag_coords, void* data) {
             BJ_F(1.2)
         );
 
-        bj_vec3_scale(col, col, d);
-        bj_vec3_add(final_color, final_color, col);
+        col = bj_vec3_scale(col, d);
+        final_color = bj_vec3_add(final_color, col);
     }
 
-    bj_vec3_copy(frag_color, final_color);
+    *frag_color = final_color;
     return 1;
 }
 

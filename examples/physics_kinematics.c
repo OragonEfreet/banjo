@@ -24,7 +24,7 @@ bj_bitmap* framebuffer = 0;
 
 #define BALLS_LEN 1000
 #define BALLS_RADIUS BJ_F(3.0)
-#define GRAVITY BJ_F(9.80)
+#define GRAVITY BJ_F(50.0)
 
 struct {
     bj_vec2 initial_velocity;
@@ -52,19 +52,15 @@ static void reset_ball(size_t at) {
 
     const bj_real magnitude = BJ_F(100.0) + ((bj_real)rand() / (bj_real)RAND_MAX) * BJ_F(100.0);
 
-    bj_vec2_set(
-        balls[at].initial_velocity,
-        bj_cos(angle) * magnitude,
-        bj_sin(angle) * magnitude
-    );
-
+    balls[at].initial_velocity.x = bj_cos(angle) * magnitude;
+    balls[at].initial_velocity.y = bj_sin(angle) * magnitude;
     balls[at].time_alive = 0;
 }
 
 static void initialize_balls() {
 
-    bj_vec2_set(gravity, 0, GRAVITY);
-    bj_vec2_set(initial_position, BALLS_RADIUS + 5, SCREEN_HEIGHT - BALLS_RADIUS - 5);
+    gravity = (bj_vec2){0, GRAVITY};
+    initial_position = (bj_vec2){BALLS_RADIUS + 5, SCREEN_HEIGHT - BALLS_RADIUS - 5};
 
     for(size_t b = 0 ; b < BALLS_LEN ; ++b) {
         reset_ball(b);
@@ -75,16 +71,15 @@ static void initialize_balls() {
 static void update(bj_real dt) {
     for(size_t b = 0 ; b < BALLS_LEN ; ++b) {
         balls[b].time_alive += dt;
-        bj_compute_kinematics_2d(
-            balls[b].position,
+        balls[b].position = bj_compute_kinematics_2d(
             initial_position,
             balls[b].initial_velocity,
             gravity,
             balls[b].time_alive
         );
 
-        const bj_real x = balls[b].position[0];
-        const bj_real y = balls[b].position[1];
+        const bj_real x = balls[b].position.x;
+        const bj_real y = balls[b].position.y;
 
         if (x + BALLS_RADIUS < BJ_FZERO || x - BALLS_RADIUS > (bj_real)SCREEN_WIDTH ||
             y + BALLS_RADIUS < BJ_FZERO || y - BALLS_RADIUS > (bj_real)SCREEN_HEIGHT
@@ -101,7 +96,7 @@ static void draw() {
 
     for(size_t b = 0 ; b < BALLS_LEN ; ++b) {
         bj_draw_filled_circle(framebuffer,
-            balls[b].position[0], balls[b].position[1], BALLS_RADIUS,
+            balls[b].position.x, balls[b].position.y, BALLS_RADIUS,
             balls[b].color
         );
     }

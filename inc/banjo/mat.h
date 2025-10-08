@@ -21,28 +21,29 @@
 #include <banjo/math.h>
 #include <banjo/vec.h>
 
-////////////////////////////////////////////////////////////////////////////////
-/// bj_mat3x3: 3×3 column-major matrix backed by bj_vec3.
-/// Columns are arrays of 3 components.
-////////////////////////////////////////////////////////////////////////////////
-typedef bj_vec3 bj_mat3x3[3];
+
+struct bj_mat3x3_t { bj_real m[9];  };
+typedef struct bj_mat3x3_t bj_mat3x3;
+typedef struct bj_mat3x3_t bj_mat3;
+#define BJ_M3(c,r)    ((c)*3 + (r))   /* 0<=c,r<3 */
 
 ////////////////////////////////////////////////////////////////////////////////
-/// bj_mat3: Alias for bj_mat3x3
-////////////////////////////////////////////////////////////////////////////////
-typedef bj_mat3x3 bj_mat3;
-
-////////////////////////////////////////////////////////////////////////////////
-/// bj_mat3x2: 3×2 column-major matrix backed by bj_vec2. (2D affine: 2×2 linear block plus translation column).
+/// bj_mat3x2: 3×2 column-major matrix backed by bj_vec2.
+/// (2D affine: 2×2 linear block plus translation column).
 /// Columns are arrays of 2 components.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_vec2 bj_mat3x2[3];
+struct bj_mat3x2_t { bj_real m[6];  };
+typedef struct bj_mat3x2_t bj_mat3x2;
+#define BJ_M32(c,r)   ((c)*2 + (r))   /* 0<=c<3, 0<=r<2 */
 
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_mat4x4: 4×4 column-major matrix backed by bj_vec4.
 /// Columns are arrays of 4 components.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_vec4 bj_mat4x4[4];
+struct bj_mat4x4_t { bj_real m[16]; };
+typedef struct bj_mat4x4_t bj_mat4x4;
+typedef struct bj_mat4x4_t bj_mat4;
+#define BJ_M4(c,r)    ((c)*4 + (r))   /* 0<=c,r<4) */
 
 ////////////////////////////////////////////////////////////////////////////////
 /// bj_mat4: Alias for bj_mat4x4
@@ -50,1062 +51,1735 @@ typedef bj_vec4 bj_mat4x4[4];
 typedef bj_mat4x4 bj_mat4;
 
 ////////////////////////////////////////////////////////////////////////////////
-/// bj_mat4x3: 4×3 column-major matrix backed by bj_vec3. (3D affine: 3×3 linear block plus translation row).
+/// bj_mat4x3: 4×3 column-major matrix backed by bj_vec3.
+/// (3D affine: 3×3 linear block plus translation row).
 /// Columns are arrays of 3 components.
 ////////////////////////////////////////////////////////////////////////////////
-typedef bj_vec3 bj_mat4x3[4];
+struct bj_mat4x3_t { bj_real m[12]; };
+typedef struct bj_mat4x3_t bj_mat4x3;
+#define BJ_M43(c,r)   ((c)*3 + (r))   /* 0<=c<4, 0<=r<3 */
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Set to identity matrix.
-/// \param m Output buffer.
+/// Set a 3×3 matrix to identity.
+/// \param M Output 3×3 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_identity(bj_mat3x3 m) {
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-            m[i][j] = (i == j) ? BJ_F(1.0) : BJ_FZERO;
+static BJ_INLINE void bj_mat3_set_identity(bj_mat3* BJ_RESTRICT M) {
+    bj_real* m = M->m;
+    m[BJ_M3(0, 0)] = BJ_F(1.0); m[BJ_M3(0, 1)] = BJ_FZERO;  m[BJ_M3(0, 2)] = BJ_FZERO;
+    m[BJ_M3(1, 0)] = BJ_FZERO;  m[BJ_M3(1, 1)] = BJ_F(1.0); m[BJ_M3(1, 2)] = BJ_FZERO;
+    m[BJ_M3(2, 0)] = BJ_FZERO;  m[BJ_M3(2, 1)] = BJ_FZERO;  m[BJ_M3(2, 2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Copy matrix contents.
-/// \param to Output matrix.
-/// \param from Input matrix.
+/// Copy a matrix.
+/// \param dst Output 3×3 matrix.
+/// \param src Input 3×3 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_copy(bj_mat3x3 to, const bj_mat3x3 from) {
-    for (int i = 0; i < 3; ++i) {
-        to[i][0] = from[i][0];
-        to[i][1] = from[i][1];
-        to[i][2] = from[i][2];
+static BJ_INLINE void bj_mat3_copy(
+    bj_mat3* BJ_RESTRICT       dst,
+    const bj_mat3* BJ_RESTRICT src
+) {
+    for (int i = 0 ; i < 9 ; ++i) {
+        dst->m[i] = src->m[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Extract a row as a vector (row index into second subscript).
-/// \param res Output vector.
-/// \param m Input matrix.
-/// \param r Row index.
+/// Extract a matrix row as a vector.
+/// \param M Input 3×3 matrix.
+/// \param r index (0-based).
+/// \return 3D vector result.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_row(bj_vec3 res, const bj_mat3x3 m, int r) {
-    for (int k = 0; k < 3; ++k) res[k] = m[k][r];
+static BJ_INLINE bj_vec3 bj_mat3_row(const bj_mat3* BJ_RESTRICT M, int r) {
+    const bj_real* m = M->m;
+    return (bj_vec3) { 
+        m[BJ_M3(0, r)], m[BJ_M3(1, r)], m[BJ_M3(2, r)] 
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Extract a column as a vector (column index into first subscript).
-/// \param res Output vector.
-/// \param m Input matrix.
-/// \param c Column index.
+/// Extract a matrix column as a vector.
+/// \param M Input 3×3 matrix.
+/// \param c index (0-based).
+/// \return 3D vector result.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_col(bj_vec3 res, const bj_mat3x3 m, int c) {
-    for (int k = 0; k < 3; ++k) res[k] = m[c][k];
+static BJ_INLINE bj_vec3 bj_mat3_col(const bj_mat3* BJ_RESTRICT M, int c) {
+    const bj_real* m = M->m;
+    return (bj_vec3) { m[BJ_M3(c, 0)], m[BJ_M3(c, 1)], m[BJ_M3(c, 2)] };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Transpose the matrix.
-/// \param res Output matrix.
-/// \param m Input matrix.
+/// Transpose a matrix.
+/// \param out Output 3×3 matrix.
+/// \param A Input 3×3 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_transpose(bj_mat3x3 res, const bj_mat3x3 m) {
-    for (int j = 0; j < 3; ++j)
-        for (int i = 0; i < 3; ++i)
-            res[i][j] = m[j][i];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Component-wise addition: res = a + b.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_add(bj_mat3x3 res, const bj_mat3x3 a, const bj_mat3x3 b) {
-    for (int i = 0; i < 3; ++i) {
-        res[i][0] = a[i][0] + b[i][0];
-        res[i][1] = a[i][1] + b[i][1];
-        res[i][2] = a[i][2] + b[i][2];
+static BJ_INLINE void bj_mat3_transpose(bj_mat3* BJ_RESTRICT out, const bj_mat3* BJ_RESTRICT A) {
+    const bj_real* a = A->m;
+    bj_real r[9];
+    r[BJ_M3(0,0)] = a[BJ_M3(0,0)];
+    r[BJ_M3(0,1)] = a[BJ_M3(1,0)];
+    r[BJ_M3(0,2)] = a[BJ_M3(2,0)];
+    r[BJ_M3(1,0)] = a[BJ_M3(0,1)];
+    r[BJ_M3(1,1)] = a[BJ_M3(1,1)];
+    r[BJ_M3(1,2)] = a[BJ_M3(2,1)];
+    r[BJ_M3(2,0)] = a[BJ_M3(0,2)];
+    r[BJ_M3(2,1)] = a[BJ_M3(1,2)];
+    r[BJ_M3(2,2)] = a[BJ_M3(2,2)];
+    for (int i = 0 ; i<9 ; ++i) {
+        out->m[i] = r[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Component-wise subtraction: res = a - b.
+/// Component-wise addition: out = A + B.
+/// \param out Output 3×3 matrix.
+/// \param A Input 3×3 matrix.
+/// \param B Input 3×3 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_sub(bj_mat3x3 res, const bj_mat3x3 a, const bj_mat3x3 b) {
-    for (int i = 0; i < 3; ++i) {
-        res[i][0] = a[i][0] - b[i][0];
-        res[i][1] = a[i][1] - b[i][1];
-        res[i][2] = a[i][2] - b[i][2];
+static BJ_INLINE void bj_mat3_add(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A,
+    const bj_mat3* BJ_RESTRICT B
+) {
+    for (int i = 0 ; i < 9 ; ++i) {
+        out->m[i] = A->m[i] + B->m[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Uniformly scale all elements by scalar k.
+/// Component-wise subtraction: out = A - B.
+/// \param out Output 3×3 matrix.
+/// \param A Input 3×3 matrix.
+/// \param B Input 3×3 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_scale(bj_mat3x3 res, const bj_mat3x3 m, bj_real k) {
-    for (int i = 0; i < 3; ++i) {
-        res[i][0] = m[i][0] * k;
-        res[i][1] = m[i][1] * k;
-        res[i][2] = m[i][2] * k;
+static BJ_INLINE void bj_mat3_sub(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A,
+    const bj_mat3* BJ_RESTRICT B
+) {
+    for (int i = 0 ; i < 9 ; ++i) {
+        out->m[i] = A->m[i] - B->m[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Matrix multiplication: res = lhs * rhs (column-major).
-/// \note Column-major convention: \c res = lhs * rhs.
+/// Scalar multiply: out = A * k.
+/// \param out Output 3×3 matrix.
+/// \param A Input 3×3 matrix.
+/// \param k Uniform scale factor.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat3_mul_scalar(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A,
+    bj_real                    k
+) {
+    for (int i = 0 ; i < 9 ; ++i) {
+        out->m[i] = A->m[i] * k;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Matrix product: out = A * B.
+/// \param out Output 3×3 matrix.
+/// \param A Input 3×3 matrix.
+/// \param B Input 3×3 matrix.
+/// \note Column-major storage. Vectors are columns. Right-multiply: r = M * v.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3_mul(
-    BJ_ARRAY_2D      (bj_real, 3, 3, res),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 3, lhs),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 3, rhs)
+    bj_mat3* BJ_RESTRICT out,
+    const bj_mat3* BJ_RESTRICT A,
+    const bj_mat3* BJ_RESTRICT B
 ) {
-#ifdef BJ_MAT_NO_UNROLL
-    bj_mat3 tmp;
+    const bj_real* a = A->m;
+    const bj_real* b = B->m;
+    bj_real* o       = out->m;
+
     for (int c = 0; c < 3; ++c) {
-        for (int r = 0; r < 3; ++r) {
-            tmp[c][r] = BJ_FZERO;
-            for (int k = 0; k < 3; ++k)
-                tmp[c][r] += lhs[k][r] * rhs[c][k];
-        }
+        const bj_real b0 = b[BJ_M3(c, 0)];
+        const bj_real b1 = b[BJ_M3(c, 1)];
+        const bj_real b2 = b[BJ_M3(c, 2)];
+        o[BJ_M3(c,0)] = a[BJ_M3(0,0)] * b0 + a[BJ_M3(1,0)] * b1 + a[BJ_M3(2,0)] * b2;
+        o[BJ_M3(c,1)] = a[BJ_M3(0,1)] * b0 + a[BJ_M3(1,1)] * b1 + a[BJ_M3(2,1)] * b2;
+        o[BJ_M3(c,2)] = a[BJ_M3(0,2)] * b0 + a[BJ_M3(1,2)] * b1 + a[BJ_M3(2,2)] * b2;
     }
-    bj_mat3_copy(res, tmp);
-#else
-    const bj_real a0 = lhs[0][0], b0 = lhs[1][0], c0 = lhs[2][0];
-    const bj_real a1 = lhs[0][1], b1 = lhs[1][1], c1 = lhs[2][1];
-    const bj_real a2 = lhs[0][2], b2 = lhs[1][2], c2 = lhs[2][2];
-
-    { const bj_real r0 = rhs[0][0], r1 = rhs[0][1], r2 = rhs[0][2];
-      res[0][0] = a0*r0 + b0*r1 + c0*r2;
-      res[0][1] = a1*r0 + b1*r1 + c1*r2;
-      res[0][2] = a2*r0 + b2*r1 + c2*r2; }
-    { const bj_real r0 = rhs[1][0], r1 = rhs[1][1], r2 = rhs[1][2];
-      res[1][0] = a0*r0 + b0*r1 + c0*r2;
-      res[1][1] = a1*r0 + b1*r1 + c1*r2;
-      res[1][2] = a2*r0 + b2*r1 + c2*r2; }
-    { const bj_real r0 = rhs[2][0], r1 = rhs[2][1], r2 = rhs[2][2];
-      res[2][0] = a0*r0 + b0*r1 + c0*r2;
-      res[2][1] = a1*r0 + b1*r1 + c1*r2;
-      res[2][2] = a2*r0 + b2*r1 + c2*r2; }
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Multiply 3×3 matrix by a 3D column vector: res = M * v.
-/// \note Column-major convention: \c res = lhs * rhs.
+/// Multiply a 3×3 matrix by a 3D vector: r = M * v.
+/// \param M Input 3×3 matrix.
+/// \param v Input vector.
+/// \return 3D vector result.
+/// \note Column-major storage. Vectors are columns. Right-multiply: r = M * v.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_mul_vec3(
-    BJ_ARRAY      (bj_real, 3, res),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 3, m),
-    BJ_CONST_ARRAY(bj_real, 3, v)
+static BJ_INLINE bj_vec3 bj_mat3_transform_vec3(
+    const bj_mat3* BJ_RESTRICT M,
+    bj_vec3                    v
 ) {
-#ifdef BJ_MAT_NO_UNROLL
-    for (int j = 0; j < 3; ++j) {
-        res[j] = BJ_FZERO;
-        for (int i = 0; i < 3; ++i)
-            res[j] += m[i][j] * v[i];
+    const bj_real* m = M->m;
+    return (bj_vec3) {
+        m[BJ_M3(0,0)] * v.x + m[BJ_M3(1,0)] * v.y + m[BJ_M3(2,0)] * v.z,
+        m[BJ_M3(0,1)] * v.x + m[BJ_M3(1,1)] * v.y + m[BJ_M3(2,1)] * v.z,
+        m[BJ_M3(0,2)] * v.x + m[BJ_M3(1,2)] * v.y + m[BJ_M3(2,2)] * v.z
+    };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Transform a 2D point by a 3×3 homogeneous transform.
+/// \param M Input 3×3 matrix.
+/// \param p Input point.
+/// \return 2D vector result.
+/// \note Homogeneous 2D. Applies projective divide if w ≠ 0.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_vec2 bj_mat3_transform_point(
+    const bj_mat3* BJ_RESTRICT M,
+    bj_vec2                    p
+) {
+    const bj_real* m = M->m;
+    const bj_real x  = p.x;
+    const bj_real y  = p.y;
+    const bj_real w  = m[BJ_M3(0,2)] * x + m[BJ_M3(1,2)] * y + m[BJ_M3(2,2)];
+    const bj_real rx = m[BJ_M3(0,0)] * x + m[BJ_M3(1,0)] * y + m[BJ_M3(2,0)];
+    const bj_real ry = m[BJ_M3(0,1)] * x + m[BJ_M3(1,1)] * y + m[BJ_M3(2,1)];
+    if (w !=  BJ_FZERO) {
+        return (bj_vec2) { rx / w, ry / w };
     }
-#else
-    const bj_real vx = v[0], vy = v[1], vz = v[2];
-    res[0] = m[0][0]*vx + m[1][0]*vy + m[2][0]*vz;
-    res[1] = m[0][1]*vx + m[1][1]*vy + m[2][1]*vz;
-    res[2] = m[0][2]*vx + m[1][2]*vy + m[2][2]*vz;
-#endif
+    return (bj_vec2) { rx, ry };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Transform a point (homogeneous w=1).
-/// \note Column-major convention: \c res = m * p.
+/// Build a 3×3 translation matrix.
+/// \param M Output 3×3 matrix.
+/// \param tx Translation along x.
+/// \param ty Translation along y.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_mul_point(bj_vec2 res, const bj_mat3x3 m, const bj_vec2 p) {
-    bj_vec3 v = { p[0], p[1], BJ_F(1.0) };
-    bj_vec3 o;
-    bj_mat3_mul_vec3(o, m, v);
-    bj_real w = o[2];
-    if (w != BJ_FZERO) { res[0] = o[0] / w; res[1] = o[1] / w; }
-    else                { res[0] = o[0];     res[1] = o[1];     }
+static BJ_INLINE void bj_mat3_set_translation(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              tx,
+    bj_real              ty
+) {
+    bj_mat3_set_identity(M);
+    M->m[BJ_M3(2,0)] = tx;
+    M->m[BJ_M3(2,1)] = ty;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Transform a direction (w=0; ignores translation).
-/// \note Column-major convention: \c res = m * v2.
+/// Right-multiply by a translation: M = M * T(tx,ty).
+/// \param M Output 3×3 matrix.
+/// \param tx Translation along x.
+/// \param ty Translation along y.
+/// \note Right-multiply in place.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_mul_vector2(bj_vec2 res, const bj_mat3x3 m, const bj_vec2 v2) {
-    bj_vec3 v = { v2[0], v2[1], BJ_FZERO };
-    bj_vec3 o; bj_mat3_mul_vec3(o, m, v);
-    res[0] = o[0]; res[1] = o[1];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Create a translation matrix.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_translation(bj_mat3x3 res, bj_real tx, bj_real ty) {
-    bj_mat3_identity(res);
-    res[2][0] = tx;
-    res[2][1] = ty;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Apply a translation in-place.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_translation_inplace(bj_mat3x3 M, bj_real tx, bj_real ty) {
-    bj_vec3 t = { tx, ty, BJ_FZERO };
-    bj_vec3 r;
-    for (int i = 0; i < 3; ++i) {
-        bj_mat3_row(r, M, i);
-        M[2][i] += r[0]*t[0] + r[1]*t[1] + r[2]*t[2];
+static BJ_INLINE void bj_mat3_translate(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              tx,
+    bj_real              ty
+) {
+    const bj_vec3 t = { tx, ty, BJ_FZERO };
+    for (int r = 0 ; r<3 ; ++r) {
+        const bj_vec3 row = bj_mat3_row(M, r);
+        M->m[BJ_M3(2,r)] +=  row.x * t.x + row.y * t.y + row.z * t.z;
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Create 2D scaling matrix with independent X/Y scales.
+/// Apply non-uniform XY scale to a 3×3 matrix.
+/// \param M Output 3×3 matrix.
+/// \param sx Scale on x.
+/// \param sy Scale on y.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_scale_xy(bj_mat3x3 res, bj_real sx, bj_real sy) {
-    bj_mat3_identity(res);
-    res[0][0] = sx;
-    res[1][1] = sy;
+static BJ_INLINE void bj_mat3_set_scaling_xy(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              sx,
+    bj_real              sy
+) {
+    bj_mat3_set_identity(M);
+    M->m[BJ_M3(0,0)] = sx;
+    M->m[BJ_M3(1,1)] = sy;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Create 2D shear matrix.
+/// Build an XY shear into a 3×3 matrix.
+/// \param M Output 3×3 matrix.
+/// \param shx Input scalar.
+/// \param shy Input scalar.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_shear(bj_mat3x3 res, bj_real shx, bj_real shy) {
-    bj_mat3_identity(res);
-    res[1][0] = shy;
-    res[0][1] = shx;
+static BJ_INLINE void bj_mat3_set_shear_xy(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              shx,
+    bj_real              shy
+) {
+    bj_mat3_set_identity(M);
+    M->m[BJ_M3(1,0)] = shy;
+    M->m[BJ_M3(0,1)] = shx;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Rotate 2D about Z.
+/// Matrix operation.
+/// \param M Output 3×3 matrix.
+/// \param angle Rotation angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_rotate(bj_mat3x3 res, bj_real angle) {
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    res[0][0] =  c;  res[0][1] =  s;  res[0][2] = BJ_FZERO;
-    res[1][0] = -s;  res[1][1] =  c;  res[1][2] = BJ_FZERO;
-    res[2][0] = BJ_FZERO; res[2][1] = BJ_FZERO; res[2][2] = BJ_F(1.0);
+static BJ_INLINE void bj_mat3_set_rotation_z(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              angle
+) {
+    const bj_real s = bj_sin(angle);
+    const bj_real c = bj_cos(angle);
+    bj_real* m = M->m;
+    m[BJ_M3(0,0)] =  c;
+    m[BJ_M3(0,1)] =  s;
+    m[BJ_M3(0,2)] = BJ_FZERO;
+    m[BJ_M3(1,0)] = -s;
+    m[BJ_M3(1,1)] =  c;
+    m[BJ_M3(1,2)] = BJ_FZERO;
+    m[BJ_M3(2,0)] = BJ_FZERO;
+    m[BJ_M3(2,1)] = BJ_FZERO;
+    m[BJ_M3(2,2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Invert a 3×3.
+/// Determinant of a 3×3 matrix.
+/// \param A Input 3×3 matrix.
+/// \return bj_real.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_inverse(bj_mat3x3 res, const bj_mat3x3 m) {
-    bj_real a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
-    bj_real a10 = m[1][0], a11 = m[1][1], a12 = m[1][2];
-    bj_real a20 = m[2][0], a21 = m[2][1], a22 = m[2][2];
-
-    bj_real b01 =  a22*a11 - a12*a21;
-    bj_real b11 = -a22*a10 + a12*a20;
-    bj_real b21 =  a21*a10 - a11*a20;
-
-    bj_real det = a00*b01 + a01*b11 + a02*b21;
-    bj_real inv_det = BJ_F(1.0) / det;
-
-    res[0][0] = b01 * inv_det;
-    res[0][1] = (-a22*a01 + a02*a21) * inv_det;
-    res[0][2] = ( a12*a01 - a02*a11) * inv_det;
-
-    res[1][0] = b11 * inv_det;
-    res[1][1] = ( a22*a00 - a02*a20) * inv_det;
-    res[1][2] = (-a12*a00 + a02*a10) * inv_det;
-
-    res[2][0] = b21 * inv_det;
-    res[2][1] = (-a21*a00 + a01*a20) * inv_det;
-    res[2][2] = ( a11*a00 - a01*a10) * inv_det;
+static BJ_INLINE bj_real bj_mat3_determinant(
+    const bj_mat3* BJ_RESTRICT A
+) {
+    const bj_real* m = A->m;
+    return
+      m[BJ_M3(0,0)] * (m[BJ_M3(1,1)] * m[BJ_M3(2,2)]-m[BJ_M3(2,1)] * m[BJ_M3(1,2)])
+    - m[BJ_M3(1,0)] * (m[BJ_M3(0,1)] * m[BJ_M3(2,2)]-m[BJ_M3(2,1)] * m[BJ_M3(0,2)])
+    + m[BJ_M3(2,0)] * (m[BJ_M3(0,1)] * m[BJ_M3(1,2)]-m[BJ_M3(1,1)] * m[BJ_M3(0,2)]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Orthographic projection matrix (3×3).
+/// \brief Invert a 3×3 matrix (safe, adjugate).
+/// 
+/// \details Computes A^{-1} = adj(A) / det(A). If det(A) is zero by
+/// bj_real_is_zero, returns 0 and leaves \p out unspecified.
+/// 
+/// \param out Output 3×3 matrix.
+/// \param A   Input 3×3 matrix.
+/// \return \ref BJ_TRUE on success, \ref BJ_FALSE if singular or 
+///         near-singular by bj_real_is_zero(det).
+/// 
+/// \warning Adj/Det method is numerically unstable for ill-conditioned A.
+/// \see bj_mat3_invert_unsafe
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_ortho(
-    BJ_ARRAY_2D(bj_real, 3, 3, omat),
+static BJ_INLINE bj_bool bj_mat3_invert(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A
+) {
+    const bj_real* m = A->m;
+    const bj_real c00 =  (m[BJ_M3(1,1)] * m[BJ_M3(2,2)] - m[BJ_M3(2,1)] * m[BJ_M3(1,2)]);
+    const bj_real c01 = -(m[BJ_M3(0,1)] * m[BJ_M3(2,2)] - m[BJ_M3(2,1)] * m[BJ_M3(0,2)]);
+    const bj_real c02 =  (m[BJ_M3(0,1)] * m[BJ_M3(1,2)] - m[BJ_M3(1,1)] * m[BJ_M3(0,2)]);
+    const bj_real c10 = -(m[BJ_M3(1,0)] * m[BJ_M3(2,2)] - m[BJ_M3(2,0)] * m[BJ_M3(1,2)]);
+    const bj_real c11 =  (m[BJ_M3(0,0)] * m[BJ_M3(2,2)] - m[BJ_M3(2,0)] * m[BJ_M3(0,2)]);
+    const bj_real c12 = -(m[BJ_M3(0,0)] * m[BJ_M3(1,2)] - m[BJ_M3(1,0)] * m[BJ_M3(0,2)]);
+    const bj_real c20 =  (m[BJ_M3(1,0)] * m[BJ_M3(2,1)] - m[BJ_M3(2,0)] * m[BJ_M3(1,1)]);
+    const bj_real c21 = -(m[BJ_M3(0,0)] * m[BJ_M3(2,1)] - m[BJ_M3(2,0)] * m[BJ_M3(0,1)]);
+    const bj_real c22 =  (m[BJ_M3(0,0)] * m[BJ_M3(1,1)] - m[BJ_M3(1,0)] * m[BJ_M3(0,1)]);
+    const bj_real det = m[BJ_M3(0,0)] * c00 + m[BJ_M3(1,0)] * c01 + m[BJ_M3(2,0)] * c02;
+
+    if (bj_real_is_zero(det)) {
+        return BJ_FALSE;
+    }
+    const bj_real id = BJ_F(1.0) / det;
+    out->m[BJ_M3(0,0)] = c00 * id; out->m[BJ_M3(1,0)] = c01 * id; out->m[BJ_M3(2,0)] = c02 * id;
+    out->m[BJ_M3(0,1)] = c10 * id; out->m[BJ_M3(1,1)] = c11 * id; out->m[BJ_M3(2,1)] = c12 * id;
+    out->m[BJ_M3(0,2)] = c20 * id; out->m[BJ_M3(1,2)] = c21 * id; out->m[BJ_M3(2,2)] = c22 * id;
+    return BJ_TRUE;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Invert a 3×3 matrix (unsafe, adjugate).
+/// 
+/// \details Same as bj_mat3_invert but skips the singularity check and divides
+/// by det(A) unconditionally. Faster when invertibility is guaranteed.
+/// 
+/// \param out Output 3×3 matrix.
+/// \param A   Input 3×3 matrix (must be nonsingular).
+/// \pre det(A) != 0 and A is well-conditioned for numerical stability.
+/// \warning Division by zero if det(A) == 0. Consider bj_mat3_invert instead.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat3_invert_unsafe(
+    bj_mat3* BJ_RESTRICT       out,
+    const bj_mat3* BJ_RESTRICT A
+) {
+    const bj_real* m = A->m;
+    const bj_real c00 =  (m[BJ_M3(1,1)] * m[BJ_M3(2,2)] - m[BJ_M3(2,1)] * m[BJ_M3(1,2)]);
+    const bj_real c01 = -(m[BJ_M3(0,1)] * m[BJ_M3(2,2)] - m[BJ_M3(2,1)] * m[BJ_M3(0,2)]);
+    const bj_real c02 =  (m[BJ_M3(0,1)] * m[BJ_M3(1,2)] - m[BJ_M3(1,1)] * m[BJ_M3(0,2)]);
+    const bj_real c10 = -(m[BJ_M3(1,0)] * m[BJ_M3(2,2)] - m[BJ_M3(2,0)] * m[BJ_M3(1,2)]);
+    const bj_real c11 =  (m[BJ_M3(0,0)] * m[BJ_M3(2,2)] - m[BJ_M3(2,0)] * m[BJ_M3(0,2)]);
+    const bj_real c12 = -(m[BJ_M3(0,0)] * m[BJ_M3(1,2)] - m[BJ_M3(1,0)] * m[BJ_M3(0,2)]);
+    const bj_real c20 =  (m[BJ_M3(1,0)] * m[BJ_M3(2,1)] - m[BJ_M3(2,0)] * m[BJ_M3(1,1)]);
+    const bj_real c21 = -(m[BJ_M3(0,0)] * m[BJ_M3(2,1)] - m[BJ_M3(2,0)] * m[BJ_M3(0,1)]);
+    const bj_real c22 =  (m[BJ_M3(0,0)] * m[BJ_M3(1,1)] - m[BJ_M3(1,0)] * m[BJ_M3(0,1)]);
+    const bj_real id  = BJ_F(1.0) / (m[BJ_M3(0,0)] * c00 + m[BJ_M3(1,0)] * c01 + m[BJ_M3(2,0)] * c02);
+
+    out->m[BJ_M3(0,0)] = c00 * id; out->m[BJ_M3(1,0)] = c01 * id; out->m[BJ_M3(2,0)] = c02 * id;
+    out->m[BJ_M3(0,1)] = c10 * id; out->m[BJ_M3(1,1)] = c11 * id; out->m[BJ_M3(2,1)] = c12 * id;
+    out->m[BJ_M3(0,2)] = c20 * id; out->m[BJ_M3(1,2)] = c21 * id; out->m[BJ_M3(2,2)] = c22 * id;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// Build a 2D orthographic projection into a 3×3 matrix.
+/// \param M Output 3×3 matrix.
+/// \param l Input scalar.
+/// \param r scalar (0-based).
+/// \param b Input scalar.
+/// \param t Input scalar.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat3_set_ortho(
+    bj_mat3* BJ_RESTRICT M,
     bj_real l, bj_real r,
     bj_real b, bj_real t
 ) {
-    omat[0][0] = BJ_F(2.0) / (r - l);
-    omat[0][1] = BJ_FZERO;
-    omat[0][2] = BJ_FZERO;
+    bj_real* m = M->m;
+    m[BJ_M3(0,0)] = BJ_F(2.0)/(r-l);
+    m[BJ_M3(0,1)] = BJ_FZERO;
+    m[BJ_M3(0,2)] = BJ_FZERO;
 
-    omat[1][0] = BJ_FZERO;
-    omat[1][1] = BJ_F(-2.0) / (t - b);
-    omat[1][2] = BJ_FZERO;
+    m[BJ_M3(1,0)] = BJ_FZERO;
+    m[BJ_M3(1,1)] = BJ_F(-2.0)/(t-b);
+    m[BJ_M3(1,2)] = BJ_FZERO;
 
-    omat[2][0] = -(r + l) / (r - l);
-    omat[2][1] =  (t + b) / (t - b);
-    omat[2][2] = BJ_F(1.0);
+    m[BJ_M3(2,0)] = -(r+l)/(r-l);
+    m[BJ_M3(2,1)] =  (t+b)/(t-b);
+    m[BJ_M3(2,2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Viewport transform matrix (3×3).
+/// Build a 2D viewport transform into a 3×3 matrix.
+/// \param M Output 3×3 matrix.
+/// \param x Viewport X origin in pixels.
+/// \param y Viewport Y origin in pixels.
+/// \param w Viewport width in pixels.
+/// \param h Viewport height in pixels.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3_viewport(
-    BJ_ARRAY_2D(bj_real, 3, 3, vpmat),
-    bj_real x, bj_real y,
-    bj_real w, bj_real h
+static BJ_INLINE void bj_mat3_set_viewport(
+    bj_mat3* BJ_RESTRICT M,
+    bj_real              x,
+    bj_real              y,
+    bj_real              w,
+    bj_real              h
 ) {
-    vpmat[0][0] = BJ_F(0.5) * w;  vpmat[0][1] = BJ_FZERO;       vpmat[0][2] = BJ_FZERO;
-    vpmat[1][0] = BJ_FZERO;       vpmat[1][1] = BJ_F(0.5) * h;  vpmat[1][2] = BJ_FZERO;
-    vpmat[2][0] = x + BJ_F(0.5) * w;
-    vpmat[2][1] = y + BJ_F(0.5) * h;
-    vpmat[2][2] = BJ_F(1.0);
+    bj_real* m = M->m;
+    m[BJ_M3(0,0)] = BJ_F(0.5) * w;
+    m[BJ_M3(0,1)] = BJ_FZERO;
+    m[BJ_M3(0,2)] = BJ_FZERO;
+    m[BJ_M3(1,0)] = BJ_FZERO;
+    m[BJ_M3(1,1)] = BJ_F(0.5) * h;
+    m[BJ_M3(1,2)] = BJ_FZERO;
+    m[BJ_M3(2,0)] = x + BJ_F(0.5) * w;
+    m[BJ_M3(2,1)] = y + BJ_F(0.5) * h;
+    m[BJ_M3(2,2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Set 3×2 to identity.
+/// Set a 3×2 affine matrix to identity.
+/// \param M Output 3×2 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3x2_identity(
-    BJ_ARRAY_2D(bj_real, 3, 2, m)
+static BJ_INLINE void bj_mat3x2_set_identity(
+    bj_mat3x2* BJ_RESTRICT M
 ) {
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]=BJ_F(1.0);
-    m[2][0]=BJ_FZERO;  m[2][1]=BJ_FZERO;
+    bj_real* m = M->m;
+    m[BJ_M32(0,0)] = BJ_F(1.0);
+    m[BJ_M32(0,1)] = BJ_FZERO;
+    m[BJ_M32(1,0)] = BJ_FZERO;
+    m[BJ_M32(1,1)] = BJ_F(1.0);
+    m[BJ_M32(2,0)] = BJ_FZERO;
+    m[BJ_M32(2,1)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Build 3×2 translation.
+/// Matrix operation.
+/// \param M Output 3×2 matrix.
+/// \param tx Translation along x.
+/// \param ty Translation along y.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3x2_translate(
-    BJ_ARRAY_2D(bj_real, 3, 2, m), bj_real tx, bj_real ty
+static BJ_INLINE void bj_mat3x2_set_translation(
+    bj_mat3x2* BJ_RESTRICT M,
+    bj_real                tx,
+    bj_real                ty
 ) {
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]=BJ_F(1.0);
-    m[2][0]=tx;        m[2][1]=ty;
+    bj_mat3x2_set_identity(M);
+    M->m[BJ_M32(2,0)] = tx;
+    M->m[BJ_M32(2,1)] = ty;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Build 3×2 scale.
+/// Scalar multiply: M = sx * k.
+/// \param M Output 3×2 matrix.
+/// \param sx Scale on x.
+/// \param sy Scale on y.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3x2_scale(
-    BJ_ARRAY_2D(bj_real, 3, 2, m), bj_real sx, bj_real sy
+static BJ_INLINE void bj_mat3x2_set_scaling_xy(
+    bj_mat3x2* BJ_RESTRICT M,
+    bj_real                sx,
+    bj_real                sy
 ) {
-    m[0][0]=sx;        m[0][1]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]=sy;
-    m[2][0]=BJ_FZERO;  m[2][1]=BJ_FZERO;
+    bj_mat3x2_set_identity(M);
+    M->m[BJ_M32(0,0)] = sx;
+    M->m[BJ_M32(1,1)] = sy;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Build 3×2 rotation.
+/// Matrix operation.
+/// \param M Output 3×2 matrix.
+/// \param angle Rotation angle in radians.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3x2_rotate(
-    BJ_ARRAY_2D(bj_real, 3, 2, m), bj_real angle
+static BJ_INLINE void bj_mat3x2_set_rotation_z(
+    bj_mat3x2* BJ_RESTRICT M,
+    bj_real                angle
 ) {
-    const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
-    m[0][0]= c;  m[0][1]= s;
-    m[1][0]=-s;  m[1][1]= c;
-    m[2][0]=BJ_FZERO; m[2][1]=BJ_FZERO;
+    const bj_real c = bj_cos(angle);
+    const bj_real s = bj_sin(angle);
+    bj_real* m = M->m;
+    m[BJ_M32(0,0)] =  c;
+    m[BJ_M32(0,1)] =  s;
+    m[BJ_M32(1,0)] = -s;
+    m[BJ_M32(1,1)] =  c;
+    m[BJ_M32(2,0)] = BJ_FZERO;
+    m[BJ_M32(2,1)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 3×2 multiplication: res = A * B.
+/// Matrix product: out = A * B.
+/// \param out Output 3×2 matrix.
+/// \param A Input 3×2 matrix.
+/// \param B Input 3×2 matrix.
+/// \note Column-major storage. Vectors are columns. Right-multiply: r = M * v.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3x2_mul(
-    BJ_ARRAY_2D      (bj_real, 3, 2, res),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, A),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, B)
+    bj_mat3x2* BJ_RESTRICT       out,
+    const bj_mat3x2* BJ_RESTRICT A,
+    const bj_mat3x2* BJ_RESTRICT B
 ) {
-#ifdef BJ_MAT_NO_UNROLL
-    res[0][0] = A[0][0]*B[0][0] + A[1][0]*B[1][0];
-    res[0][1] = A[0][1]*B[0][0] + A[1][1]*B[1][0];
+    const bj_real a00 = A->m[BJ_M32(0,0)];
+    const bj_real a10 = A->m[BJ_M32(0,1)];
+    const bj_real a01 = A->m[BJ_M32(1,0)];
+    const bj_real a11 = A->m[BJ_M32(1,1)];
+    const bj_real a02 = A->m[BJ_M32(2,0)];
+    const bj_real a12 = A->m[BJ_M32(2,1)];
 
-    res[1][0] = A[0][0]*B[0][1] + A[1][0]*B[1][1];
-    res[1][1] = A[0][1]*B[0][1] + A[1][1]*B[1][1];
+    const bj_real b00 = B->m[BJ_M32(0,0)];
+    const bj_real b10 = B->m[BJ_M32(0,1)];
+    const bj_real b01 = B->m[BJ_M32(1,0)];
+    const bj_real b11 = B->m[BJ_M32(1,1)];
+    const bj_real b02 = B->m[BJ_M32(2,0)];
+    const bj_real b12 = B->m[BJ_M32(2,1)];
 
-    res[2][0] = A[0][0]*B[2][0] + A[1][0]*B[2][1] + A[2][0];
-    res[2][1] = A[0][1]*B[2][0] + A[1][1]*B[2][1] + A[2][1];
-#else
-    const bj_real a00=A[0][0], a10=A[0][1];
-    const bj_real a01=A[1][0], a11=A[1][1];
-    const bj_real a02=A[2][0], a12=A[2][1];
+    out->m[BJ_M32(0,0)] = a00*b00 + a01*b10;
+    out->m[BJ_M32(0,1)] = a10*b00 + a11*b10;
+    out->m[BJ_M32(1,0)] = a00*b01 + a01*b11;
+    out->m[BJ_M32(1,1)] = a10*b01 + a11*b11;
+    out->m[BJ_M32(2,0)] = a00*b02 + a01*b12 + a02;
+    out->m[BJ_M32(2,1)] = a10*b02 + a11*b12 + a12;
+}
 
-    const bj_real b00=B[0][0], b10=B[0][1];
-    const bj_real b01=B[1][0], b11=B[1][1];
-    const bj_real b02=B[2][0], b12=B[2][1];
 
-    res[0][0] = a00*b00 + a01*b10; res[0][1] = a10*b00 + a11*b10;
-    res[1][0] = a00*b01 + a01*b11; res[1][1] = a10*b01 + a11*b11;
-    res[2][0] = a00*b02 + a01*b12 + a02;
-    res[2][1] = a10*b02 + a11*b12 + a12;
-#endif
+////////////////////////////////////////////////////////////////////////////////
+/// Transform a 2D point by a 3×2 affine matrix.
+/// \param M Input 3×2 matrix.
+/// \param p Input point.
+/// \return 2D vector result.
+/// \note Homogeneous 2D. Applies projective divide if w ≠ 0.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_vec2 bj_mat3x2_transform_point(
+    const bj_mat3x2* BJ_RESTRICT M,
+    bj_vec2                      p
+) {
+    const bj_real* m = M->m;
+    const bj_real x = p.x;
+    const bj_real y = p.y;
+    return (bj_vec2) {
+        m[BJ_M32(0,0)] * x + m[BJ_M32(1,0)] * y + m[BJ_M32(2,0)],
+        m[BJ_M32(0,1)] * x + m[BJ_M32(1,1)] * y + m[BJ_M32(2,1)]
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 3×2 transform point.
+/// Transform a direction vector (ignoring translation).
+/// \param M Input 3×2 matrix.
+/// \param v Input vector.
+/// \return 2D vector result.
+/// \note Homogeneous 2D. Applies projective divide if w ≠ 0.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3x2_mul_point(
-    BJ_ARRAY      (bj_real, 2, r),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, m),
-    BJ_CONST_ARRAY(bj_real, 2, p)
+static BJ_INLINE bj_vec2 bj_mat3x2_transform_dir(
+    const bj_mat3x2* BJ_RESTRICT M,
+    bj_vec2                      v
 ) {
-    const bj_real x=p[0], y=p[1];
-    r[0] = m[0][0]*x + m[1][0]*y + m[2][0];
-    r[1] = m[0][1]*x + m[1][1]*y + m[2][1];
+    const bj_real* m = M->m;
+    const bj_real x  = v.x;
+    const bj_real y  = v.y;
+    return (bj_vec2) {
+        m[BJ_M32(0,0)] * x + m[BJ_M32(1,0)] * y,
+        m[BJ_M32(0,1)] * x + m[BJ_M32(1,1)] * y
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 3×2 transform direction (no translation).
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat3x2_mul_dir(
-    BJ_ARRAY      (bj_real, 2, r),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, m),
-    BJ_CONST_ARRAY(bj_real, 2, v)
-) {
-    const bj_real x=v[0], y=v[1];
-    r[0] = m[0][0]*x + m[1][0]*y;
-    r[1] = m[0][1]*x + m[1][1]*y;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Promote 3×2 to 3×3 homogeneous.
+/// Promote a 3×2 affine matrix to 3×3.
+/// \param M Output 3×3 matrix.
+/// \param A Input 3×2 matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3_from_mat3x2(
-    BJ_ARRAY_2D      (bj_real, 3, 3, out3x3),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 2, a)
+    bj_mat3* BJ_RESTRICT         M,
+    const bj_mat3x2* BJ_RESTRICT A
 ) {
-    out3x3[0][0]=a[0][0]; out3x3[0][1]=a[0][1]; out3x3[0][2]=BJ_FZERO;
-    out3x3[1][0]=a[1][0]; out3x3[1][1]=a[1][1]; out3x3[1][2]=BJ_FZERO;
-    out3x3[2][0]=a[2][0]; out3x3[2][1]=a[2][1]; out3x3[2][2]=BJ_F(1.0);
+    bj_real* o = M->m;
+    const bj_real* a = A->m;
+    o[BJ_M3(0,0)] = a[BJ_M32(0,0)];
+    o[BJ_M3(0,1)] = a[BJ_M32(0,1)];
+    o[BJ_M3(0,2)] = BJ_FZERO;
+    o[BJ_M3(1,0)] = a[BJ_M32(1,0)];
+    o[BJ_M3(1,1)] = a[BJ_M32(1,1)];
+    o[BJ_M3(1,2)] = BJ_FZERO;
+    o[BJ_M3(2,0)] = a[BJ_M32(2,0)];
+    o[BJ_M3(2,1)] = a[BJ_M32(2,1)];
+    o[BJ_M3(2,2)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Extract 3×2 from 3×3.
+/// Demote a 3×3 matrix to 3×2 (drop projective terms).
+/// \param M Output 3×2 matrix.
+/// \param A Input 3×3 matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat3x2_from_mat3(
-    BJ_ARRAY_2D      (bj_real, 3, 2, out3x2),
-    BJ_CONST_ARRAY_2D(bj_real, 3, 3, m)
+    bj_mat3x2* BJ_RESTRICT     M,
+    const bj_mat3* BJ_RESTRICT A
 ) {
-    out3x2[0][0]=m[0][0]; out3x2[0][1]=m[0][1];
-    out3x2[1][0]=m[1][0]; out3x2[1][1]=m[1][1];
-    out3x2[2][0]=m[2][0]; out3x2[2][1]=m[2][1];
+    const bj_real* a = A->m;
+    bj_real* o = M->m;
+    o[BJ_M32(0,0)] = a[BJ_M3(0,0)];
+    o[BJ_M32(0,1)] = a[BJ_M3(0,1)];
+    o[BJ_M32(1,0)] = a[BJ_M3(1,0)];
+    o[BJ_M32(1,1)] = a[BJ_M3(1,1)];
+    o[BJ_M32(2,0)] = a[BJ_M3(2,0)];
+    o[BJ_M32(2,1)] = a[BJ_M3(2,1)];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Set 4×4 to identity.
+/// Set a 4×4 matrix to identity.
+/// \param M Output 4×4 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_identity(bj_mat4x4 mat)
-{
-    for (int i = 0; i < 4; ++i)
-        for (int j = 0; j < 4; ++j)
-            mat[i][j] = i == j ? BJ_F(1.0) : BJ_FZERO;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Copy 4×4.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_copy(bj_mat4x4 to, const bj_mat4x4 from)
-{
-    for (int i = 0; i < 4; ++i) bj_vec4_copy(to[i], from[i]);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Extract 4×4 row.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_row(bj_vec4 res, const bj_mat4x4 mat, int r)
-{
-    for (int k = 0; k < 4; ++k) res[k] = mat[k][r];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Extract 4×4 column.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_col(bj_vec4 res, const bj_mat4x4 mat, int c)
-{
-    for (int k = 0; k < 4; ++k) res[k] = mat[c][k];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Transpose 4×4.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_transpose(bj_mat4x4 res, const bj_mat4x4 mat)
-{
-    for (int j = 0; j < 4; ++j)
-        for (int i = 0; i < 4; ++i)
-            res[i][j] = mat[j][i];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Add 4×4.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_add(bj_mat4x4 res, const bj_mat4x4 lhs, const bj_mat4x4 rhs)
-{
-    for (int i = 0; i < 4; ++i) bj_vec4_add(res[i], lhs[i], rhs[i]);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Sub 4×4.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_sub(bj_mat4x4 res, const bj_mat4x4 lhs, const bj_mat4x4 rhs)
-{
-    for (int i = 0; i < 4; ++i) bj_vec4_sub(res[i], lhs[i], rhs[i]);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Scale 4×4 by k.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_scale(bj_mat4x4 res, const bj_mat4x4 lhs, bj_real k)
-{
-    for (int i = 0; i < 4; ++i) bj_vec4_scale(res[i], lhs[i], k);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Scale basis vectors.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_scale_xyz(bj_mat4x4 res, const bj_mat4x4 mat, bj_real x, bj_real y, bj_real z)
-{
-    bj_vec4_scale(res[0], mat[0], x);
-    bj_vec4_scale(res[1], mat[1], y);
-    bj_vec4_scale(res[2], mat[2], z);
-    bj_vec4_copy(res[3], mat[3]);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// 4×4 multiplication: res = lhs * rhs.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_mul(
-    BJ_ARRAY_2D      (bj_real, 4, 4, res),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 4, lhs),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 4, rhs)
+static BJ_INLINE void bj_mat4_set_identity(
+    bj_mat4* BJ_RESTRICT M
 ) {
-#ifdef BJ_MAT_NO_UNROLL
-    bj_mat4x4 temp;
-    for (int c = 0; c < 4; ++c) {
-        for (int r = 0; r < 4; ++r) {
-            temp[c][r] = BJ_FZERO;
-            for (int k = 0; k < 4; ++k)
-                temp[c][r] += lhs[k][r] * rhs[c][k];
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = BJ_F(1.0);
+    m[BJ_M4(0,1)] = BJ_FZERO;
+    m[BJ_M4(0,2)] = BJ_FZERO;
+    m[BJ_M4(0,3)] = BJ_FZERO;
+    m[BJ_M4(1,0)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = BJ_F(1.0);
+    m[BJ_M4(1,2)] = BJ_FZERO;
+    m[BJ_M4(1,3)] = BJ_FZERO;
+    m[BJ_M4(2,0)] = BJ_FZERO;
+    m[BJ_M4(2,1)] = BJ_FZERO;
+    m[BJ_M4(2,2)] = BJ_F(1.0);
+    m[BJ_M4(2,3)] = BJ_FZERO;
+    m[BJ_M4(3,0)] = BJ_FZERO;
+    m[BJ_M4(3,1)] = BJ_FZERO;
+    m[BJ_M4(3,2)] = BJ_FZERO;
+    m[BJ_M4(3,3)] = BJ_F(1.0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Copy a matrix.
+/// \param dst Output 4×4 matrix.
+/// \param src Input 4×4 matrix.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_copy(
+    bj_mat4* BJ_RESTRICT       dst,
+    const bj_mat4* BJ_RESTRICT src
+) {
+    for(int i = 0 ; i < 16 ; ++i) {
+        dst->m[i] = src->m[i];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Extract a matrix row as a vector.
+/// \param M Input 4×4 matrix.
+/// \param r index (0-based).
+/// \return 4D vector result.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_vec4 bj_mat4_row(
+    const bj_mat4* BJ_RESTRICT M,
+    int                        r
+) {
+    const bj_real* m = M->m;
+    return (bj_vec4) { 
+        m[BJ_M4(0,r)],
+        m[BJ_M4(1,r)],
+        m[BJ_M4(2,r)],
+        m[BJ_M4(3,r)] 
+    };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Extract a matrix column as a vector.
+/// \param M Input 4×4 matrix.
+/// \param c index (0-based).
+/// \return 4D vector result.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_vec4 bj_mat4_col(
+    const bj_mat4* BJ_RESTRICT M,
+    int                        c
+) {
+    const bj_real* m = M->m;
+    return (bj_vec4) { 
+        m[BJ_M4(c,0)],
+        m[BJ_M4(c,1)],
+        m[BJ_M4(c,2)],
+        m[BJ_M4(c,3)] 
+    };
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Transpose a matrix.
+/// \param out Output 4×4 matrix.
+/// \param A Input 4×4 matrix.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_transpose(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A
+) {
+    const bj_real* a = A->m;
+    bj_real r[16];
+    for(int c = 0 ; c < 4; ++c) {
+        for(int r0 = 0 ; r0 < 4; ++r0) {
+            r[BJ_M4(r0,c)] = a[BJ_M4(c,r0)];
         }
     }
-    bj_mat4_copy(res, temp);
-#else
-    const bj_real a0 = lhs[0][0], b0 = lhs[1][0], c0 = lhs[2][0], d0 = lhs[3][0];
-    const bj_real a1 = lhs[0][1], b1 = lhs[1][1], c1 = lhs[2][1], d1 = lhs[3][1];
-    const bj_real a2 = lhs[0][2], b2 = lhs[1][2], c2 = lhs[2][2], d2 = lhs[3][2];
-    const bj_real a3 = lhs[0][3], b3 = lhs[1][3], c3 = lhs[2][3], d3 = lhs[3][3];
-
-    { const bj_real r0 = rhs[0][0], r1 = rhs[0][1], r2 = rhs[0][2], r3 = rhs[0][3];
-      res[0][0] = a0*r0 + b0*r1 + c0*r2 + d0*r3;
-      res[0][1] = a1*r0 + b1*r1 + c1*r2 + d1*r3;
-      res[0][2] = a2*r0 + b2*r1 + c2*r2 + d2*r3;
-      res[0][3] = a3*r0 + b3*r1 + c3*r2 + d3*r3; }
-    { const bj_real r0 = rhs[1][0], r1 = rhs[1][1], r2 = rhs[1][2], r3 = rhs[1][3];
-      res[1][0] = a0*r0 + b0*r1 + c0*r2 + d0*r3;
-      res[1][1] = a1*r0 + b1*r1 + c1*r2 + d1*r3;
-      res[1][2] = a2*r0 + b2*r1 + c2*r2 + d2*r3;
-      res[1][3] = a3*r0 + b3*r1 + c3*r2 + d3*r3; }
-    { const bj_real r0 = rhs[2][0], r1 = rhs[2][1], r2 = rhs[2][2], r3 = rhs[2][3];
-      res[2][0] = a0*r0 + b0*r1 + c0*r2 + d0*r3;
-      res[2][1] = a1*r0 + b1*r1 + c1*r2 + d1*r3;
-      res[2][2] = a2*r0 + b2*r1 + c2*r2 + d2*r3;
-      res[2][3] = a3*r0 + b3*r1 + c3*r2 + d3*r3; }
-    { const bj_real r0 = rhs[3][0], r1 = rhs[3][1], r2 = rhs[3][2], r3 = rhs[3][3];
-      res[3][0] = a0*r0 + b0*r1 + c0*r2 + d0*r3;
-      res[3][1] = a1*r0 + b1*r1 + c1*r2 + d1*r3;
-      res[3][2] = a2*r0 + b2*r1 + c2*r2 + d2*r3;
-      res[3][3] = a3*r0 + b3*r1 + c3*r2 + d3*r3; }
-#endif
+    for(int i = 0 ; i < 16 ; ++i) {
+        out->m[i] = r[i];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 4×4 multiply by vec4.
+/// Component-wise addition: out = A + B.
+/// \param out Output 4×4 matrix.
+/// \param A Input 4×4 matrix.
+/// \param B Input 4×4 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_mul_vec4(
-    BJ_ARRAY      (bj_real, 4, res),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 4, mat),
-    BJ_CONST_ARRAY(bj_real, 4, v)
+static BJ_INLINE void bj_mat4_add(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    const bj_mat4* BJ_RESTRICT B
 ) {
-#ifdef BJ_MAT_NO_UNROLL
-    for (int j = 0; j < 4; ++j) {
-        res[j] = BJ_FZERO;
-        for (int i = 0; i < 4; ++i) res[j] += mat[i][j] * v[i];
-    }
-#else
-    const bj_real vx = v[0], vy = v[1], vz = v[2], vw = v[3];
-    res[0] = mat[0][0]*vx + mat[1][0]*vy + mat[2][0]*vz + mat[3][0]*vw;
-    res[1] = mat[0][1]*vx + mat[1][1]*vy + mat[2][1]*vz + mat[3][1]*vw;
-    res[2] = mat[0][2]*vx + mat[1][2]*vy + mat[2][2]*vz + mat[3][2]*vw;
-    res[3] = mat[0][3]*vx + mat[1][3]*vy + mat[2][3]*vz + mat[3][3]*vw;
-#endif
-}
 
-////////////////////////////////////////////////////////////////////////////////
-/// Create 4×4 translation matrix.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_translation(bj_mat4x4 res, bj_real x, bj_real y, bj_real z)
-{
-    bj_mat4_identity(res);
-    res[3][0] = x; res[3][1] = y; res[3][2] = z;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Apply 4×4 translation in-place.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_translation_inplace(bj_mat4x4 M, bj_real x, bj_real y, bj_real z)
-{
-    bj_vec4 t = { x, y, z, BJ_FZERO };
-    bj_vec4 r;
-    for (int i = 0; i < 4; ++i) {
-        bj_mat4_row(r, M, i);
-        M[3][i] += bj_vec4_dot(r, t);
+    for(int i = 0 ; i < 16 ; ++i) {
+        out->m[i] = A->m[i] + B->m[i];
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Outer product to upper-left 3×3 block of 4×4.
+/// Component-wise subtraction: out = A - B.
+/// \param out Output 4×4 matrix.
+/// \param A Input 4×4 matrix.
+/// \param B Input 4×4 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_mul_outer(bj_mat4x4 res, const bj_vec3 a, const bj_vec3 b)
-{
-    for (int i = 0; i < 4; ++i)
-        for (int j = 0; j < 4; ++j)
-            res[i][j] = (i < 3 && j < 3) ? a[i] * b[j] : BJ_FZERO;
+static BJ_INLINE void bj_mat4_sub(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    const bj_mat4* BJ_RESTRICT B
+) {
+
+    for(int i = 0 ; i < 16 ; ++i) {
+        out->m[i] = A->m[i] - B->m[i];
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Rotate about axis, post-multiply.
+/// Scalar multiply: out = A * k.
+/// \param out Output 4×4 matrix.
+/// \param A Input 4×4 matrix.
+/// \param k Uniform scale factor.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_rotate(bj_mat4x4 res, const bj_mat4x4 mat, bj_real x, bj_real y, bj_real z, bj_real angle)
+static BJ_INLINE void bj_mat4_mul_scalar(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    bj_real                    k
+) {
+
+    for(int i = 0;i<16;++i) {
+        out->m[i] = A->m[i] * k;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Scale basis vectors of a 4×4 matrix by per-axis factors.
+/// \param out Output 4×4 matrix.
+/// \param A Input 4×4 matrix.
+/// \param sx Scale on x.
+/// \param sy Scale on y.
+/// \param sz Scale on z.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_scale_axes(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    bj_real                    sx,
+    bj_real                    sy,
+    bj_real                    sz
+) {
+
+    const bj_real* a = A->m;
+    bj_real* m = out->m;
+    m[BJ_M4(0,0)] = a[BJ_M4(0,0)] * sx;
+    m[BJ_M4(0,1)] = a[BJ_M4(0,1)] * sx;
+    m[BJ_M4(0,2)] = a[BJ_M4(0,2)] * sx;
+    m[BJ_M4(0,3)] = a[BJ_M4(0,3)] * sx;
+    m[BJ_M4(1,0)] = a[BJ_M4(1,0)] * sy;
+    m[BJ_M4(1,1)] = a[BJ_M4(1,1)] * sy;
+    m[BJ_M4(1,2)] = a[BJ_M4(1,2)] * sy;
+    m[BJ_M4(1,3)] = a[BJ_M4(1,3)] * sy;
+    m[BJ_M4(2,0)] = a[BJ_M4(2,0)] * sz;
+    m[BJ_M4(2,1)] = a[BJ_M4(2,1)] * sz;
+    m[BJ_M4(2,2)] = a[BJ_M4(2,2)] * sz;
+    m[BJ_M4(2,3)] = a[BJ_M4(2,3)] * sz;
+    m[BJ_M4(3,0)] = a[BJ_M4(3,0)];
+    m[BJ_M4(3,1)] = a[BJ_M4(3,1)];
+    m[BJ_M4(3,2)] = a[BJ_M4(3,2)];
+    m[BJ_M4(3,3)] = a[BJ_M4(3,3)];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Matrix product: out = A * B.
+/// \param out Output 4×4 matrix.
+/// \param A Input 4×4 matrix.
+/// \param B Input 4×4 matrix.
+/// \note Column-major storage. Vectors are columns. Right-multiply: r = M * v.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_mul(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A,
+    const bj_mat4* BJ_RESTRICT B
+)
 {
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    bj_vec3 u = { x, y, z };
+    const bj_real* a = A->m;
+    const bj_real* b = B->m;
+    bj_real* o = out->m;
 
-    if (bj_vec3_len(u) > BJ_F(1e-4)) {
-        bj_vec3_normalize(u, u);
-        bj_mat4x4 T; bj_mat4_mul_outer(T, u, u);
+    for (int c = 0; c < 4; ++c) {
+        const bj_real b0 = b[BJ_M4(c,0)];
+        const bj_real b1 = b[BJ_M4(c,1)];
+        const bj_real b2 = b[BJ_M4(c,2)];
+        const bj_real b3 = b[BJ_M4(c,3)];
 
-        bj_mat4x4 S = {
-            {    BJ_FZERO,  u[2], -u[1], BJ_FZERO},
-            {-u[2],     BJ_FZERO,  u[0], BJ_FZERO},
-            { u[1], -u[0],     BJ_FZERO, BJ_FZERO},
-            {    BJ_FZERO,     BJ_FZERO,     BJ_FZERO, BJ_FZERO}
-        };
-        bj_mat4_scale(S, S, s);
+        o[BJ_M4(c,0)] = a[BJ_M4(0,0)] * b0 
+                      + a[BJ_M4(1,0)] * b1 
+                      + a[BJ_M4(2,0)] * b2 
+                      + a[BJ_M4(3,0)] * b3;
+        o[BJ_M4(c,1)] = a[BJ_M4(0,1)] * b0 
+                      + a[BJ_M4(1,1)] * b1 
+                      + a[BJ_M4(2,1)] * b2 
+                      + a[BJ_M4(3,1)] * b3;
+        o[BJ_M4(c,2)] = a[BJ_M4(0,2)] * b0 
+                      + a[BJ_M4(1,2)] * b1 
+                      + a[BJ_M4(2,2)] * b2 
+                      + a[BJ_M4(3,2)] * b3;
+        o[BJ_M4(c,3)] = a[BJ_M4(0,3)] * b0 
+                      + a[BJ_M4(1,3)] * b1 
+                      + a[BJ_M4(2,3)] * b2 
+                      + a[BJ_M4(3,3)] * b3;
+    }
+}
 
-        bj_mat4x4 C; bj_mat4_identity(C); bj_mat4_sub(C, C, T); bj_mat4_scale(C, C, c);
+////////////////////////////////////////////////////////////////////////////////
+/// Multiply a 4×4 matrix by a 4D vector: r = M * v.
+/// \param M Input 4×4 matrix.
+/// \param v Input vector.
+/// \return 4D vector result.
+/// \note Column-major storage. Vectors are columns. Right-multiply: r = M * v.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE bj_vec4 bj_mat4_transform_vec4(
+    const bj_mat4* BJ_RESTRICT M,
+    bj_vec4                    v
+) {
+    const bj_real* m = M->m;
+    return (bj_vec4) {
+        m[BJ_M4(0,0)] * v.x + m[BJ_M4(1,0)] * v.y + 
+        m[BJ_M4(2,0)] * v.z + m[BJ_M4(3,0)] * v.w,
+        m[BJ_M4(0,1)] * v.x + m[BJ_M4(1,1)] * v.y + 
+        m[BJ_M4(2,1)] * v.z + m[BJ_M4(3,1)] * v.w,
+        m[BJ_M4(0,2)] * v.x + m[BJ_M4(1,2)] * v.y + 
+        m[BJ_M4(2,2)] * v.z + m[BJ_M4(3,2)] * v.w,
+        m[BJ_M4(0,3)] * v.x + m[BJ_M4(1,3)] * v.y + 
+        m[BJ_M4(2,3)] * v.z + m[BJ_M4(3,3)] * v.w
+    };
+}
 
-        bj_mat4_add(T, T, C); bj_mat4_add(T, T, S);
-        T[3][3] = BJ_F(1.0);
-        bj_mat4_mul(res, mat, T);
+////////////////////////////////////////////////////////////////////////////////
+/// Build a 4×4 translation matrix.
+/// \param M Output 4×4 matrix.
+/// \param x Viewport X origin in pixels.
+/// \param y Viewport Y origin in pixels.
+/// \param z Input scalar.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_set_translation(
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              x,
+    bj_real              y,
+    bj_real              z
+) {
+    bj_mat4_set_identity(M);
+    M->m[BJ_M4(3,0)] = x;
+    M->m[BJ_M4(3,1)] = y;
+    M->m[BJ_M4(3,2)] = z;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Right-multiply by a translation: M = M * T(tx,ty,tz).
+/// \param M Output 4×4 matrix.
+/// \param x Viewport X origin in pixels.
+/// \param y Viewport Y origin in pixels.
+/// \param z Input scalar.
+/// \note Right-multiply in place.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_translate(
+    bj_mat4* BJ_RESTRICT M,
+    bj_real x,
+    bj_real y,
+    bj_real z
+) {
+    const bj_vec4 t = { x, y, z, BJ_FZERO };
+    for (int r = 0 ; r<4 ; ++r) {
+        const bj_vec4 row = bj_mat4_row(M, r);
+        M->m[BJ_M4(3,r)] +=  bj_vec4_dot(row, t);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Add outer product r += s * v^T to a 4×4 matrix.
+/// \param out Output 4×4 matrix.
+/// \param a Input 3D vector.
+/// \param b Input 3D vector.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_set_outer_product(
+    bj_mat4* BJ_RESTRICT out,
+    bj_vec3              a,
+    bj_vec3              b
+) {
+    bj_real* m = out->m;
+    m[BJ_M4(0,0)] = a.x*b.x;
+    m[BJ_M4(1,0)] = a.y*b.x;
+    m[BJ_M4(2,0)] = a.z*b.x;
+    m[BJ_M4(3,0)] = BJ_FZERO;
+    m[BJ_M4(0,1)] = a.x*b.y;
+    m[BJ_M4(1,1)] = a.y*b.y;
+    m[BJ_M4(2,1)] = a.z*b.y;
+    m[BJ_M4(3,1)] = BJ_FZERO;
+    m[BJ_M4(0,2)] = a.x*b.z;
+    m[BJ_M4(1,2)] = a.y*b.z;
+    m[BJ_M4(2,2)] = a.z*b.z;
+    m[BJ_M4(3,2)] = BJ_FZERO;
+    m[BJ_M4(0,3)] = BJ_FZERO;
+    m[BJ_M4(1,3)] = BJ_FZERO;
+    m[BJ_M4(2,3)] = BJ_FZERO;
+    m[BJ_M4(3,3)] = BJ_FZERO;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Right-multiply a 4×4 by a rotation around an arbitrary axis.
+/// \param out Output 4×4 matrix.
+/// \param M Input 4×4 matrix.
+/// \param axis Unit axis of rotation.
+/// \param angle Rotation angle in radians.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_rotate_axis_andle(
+    bj_mat4* restrict       out,
+    const bj_mat4* restrict M,
+    bj_vec3                 axis,
+    bj_real                 angle
+) {
+    const bj_real s = bj_sin(angle);
+    const bj_real c = bj_cos(angle);
+    const bj_real len = bj_vec3_len(axis);
+    if (len <= BJ_F(1e-4)) { 
+        bj_mat4_copy(out, M);
+        return; 
+    }
+
+    const bj_real inv = BJ_F(1.0) / len;
+    const bj_real ux = axis.x * inv, uy = axis.y * inv, uz = axis.z * inv;
+    const bj_real t = BJ_F(1.0) - c;
+
+    /* 3x3 rotation block */
+    const bj_real r00 = c + t*ux*ux;
+    const bj_real r01 = t*ux*uy + s*uz;
+    const bj_real r02 = t*ux*uz - s*uy;
+
+    const bj_real r10 = t*uy*ux - s*uz;
+    const bj_real r11 = c + t*uy*uy;
+    const bj_real r12 = t*uy*uz + s*ux;
+
+    const bj_real r20 = t*uz*ux + s*uy;
+    const bj_real r21 = t*uz*uy - s*ux;
+    const bj_real r22 = c + t*uz*uz;
+
+    const bj_real* m = M->m;
+    bj_real* o = out->m;
+
+    /* Columns of M (column-major) */
+    const bj_real* m0 = &m[BJ_M4(0,0)];
+    const bj_real* m1 = &m[BJ_M4(1,0)];
+    const bj_real* m2 = &m[BJ_M4(2,0)];
+    const bj_real* m3 = &m[BJ_M4(3,0)];
+
+    bj_real* o0 = &o[BJ_M4(0,0)];
+    bj_real* o1 = &o[BJ_M4(1,0)];
+    bj_real* o2 = &o[BJ_M4(2,0)];
+    bj_real* o3 = &o[BJ_M4(3,0)];
+
+    for (int r = 0; r < 4; ++r) {
+        const bj_real M0 = m0[r], M1 = m1[r], M2 = m2[r];
+        o0[r] = M0*r00 + M1*r10 + M2*r20;
+        o1[r] = M0*r01 + M1*r11 + M2*r21;
+        o2[r] = M0*r02 + M1*r12 + M2*r22;
+        o3[r] = m3[r];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Right-multiply by an X-axis rotation.
+/// \param out Output 4×4 matrix.
+/// \param M Input 4×4 matrix.
+/// \param a Input scalar.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_rotate_x(
+    bj_mat4* restrict       out,
+    const bj_mat4* restrict M,
+    bj_real                 a
+) {
+
+    const bj_real s = bj_sin(a), c = bj_cos(a);
+    const bj_real* m = M->m; bj_real* o = out->m;
+
+    const bj_real* m0 = &m[BJ_M4(0,0)];
+    const bj_real* m1 = &m[BJ_M4(1,0)];
+    const bj_real* m2 = &m[BJ_M4(2,0)];
+    const bj_real* m3 = &m[BJ_M4(3,0)];
+
+    bj_real* o0 = &o[BJ_M4(0,0)];
+    bj_real* o1 = &o[BJ_M4(1,0)];
+    bj_real* o2 = &o[BJ_M4(2,0)];
+    bj_real* o3 = &o[BJ_M4(3,0)];
+
+    for (int r = 0; r < 4; ++r) {
+        const bj_real M1 = m1[r], M2 = m2[r];
+        o0[r] = m0[r];
+        o1[r] =  c*M1 - s*M2;
+        o2[r] =  s*M1 + c*M2;
+        o3[r] = m3[r];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Right-multiply by a Y-axis rotation.
+/// \param out Output 4×4 matrix.
+/// \param M Input 4×4 matrix.
+/// \param a Input scalar.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_rotate_y(
+    bj_mat4* restrict       out,
+    const bj_mat4* restrict M,
+    bj_real                 a
+) {
+    const bj_real s = bj_sin(a), c = bj_cos(a);
+    const bj_real* m = M->m; bj_real* o = out->m;
+
+    const bj_real* m0 = &m[BJ_M4(0,0)];
+    const bj_real* m1 = &m[BJ_M4(1,0)];
+    const bj_real* m2 = &m[BJ_M4(2,0)];
+    const bj_real* m3 = &m[BJ_M4(3,0)];
+
+    bj_real* o0 = &o[BJ_M4(0,0)];
+    bj_real* o1 = &o[BJ_M4(1,0)];
+    bj_real* o2 = &o[BJ_M4(2,0)];
+    bj_real* o3 = &o[BJ_M4(3,0)];
+
+    for (int r = 0; r < 4; ++r) {
+        const bj_real M0 = m0[r], M2 = m2[r];
+        o0[r] =  c*M0 + s*M2;
+        o1[r] =  m1[r];
+        o2[r] = -s*M0 + c*M2;
+        o3[r] =  m3[r];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Right-multiply by a Z-axis rotation.
+/// \param out Output 4×4 matrix.
+/// \param M Input 4×4 matrix.
+/// \param a Input scalar.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_rotate_z(
+    bj_mat4* restrict       out,
+    const bj_mat4* restrict M,
+    bj_real                 a
+) {
+    const bj_real s = bj_sin(a), c = bj_cos(a);
+    const bj_real* m = M->m; bj_real* o = out->m;
+
+    const bj_real* m0 = &m[BJ_M4(0,0)];
+    const bj_real* m1 = &m[BJ_M4(1,0)];
+    const bj_real* m2 = &m[BJ_M4(2,0)];
+    const bj_real* m3 = &m[BJ_M4(3,0)];
+
+    bj_real* o0 = &o[BJ_M4(0,0)];
+    bj_real* o1 = &o[BJ_M4(1,0)];
+    bj_real* o2 = &o[BJ_M4(2,0)];
+    bj_real* o3 = &o[BJ_M4(3,0)];
+
+    for (int r = 0; r < 4; ++r) {
+        const bj_real M0 = m0[r], M1 = m1[r];
+        o0[r] =  c*M0 - s*M1;
+        o1[r] =  s*M0 + c*M1;
+        o2[r] =  m2[r];
+        o3[r] =  m3[r];
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Build a 4×4 rotation from two unit vectors (arcball).
+/// \param R Output 4×4 matrix.
+/// \param M Input 4×4 matrix.
+/// \param a Input 2D vector.
+/// \param b Input 2D vector.
+/// \param s Scale factors as a vector.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4_rotate_arcball(
+    bj_mat4* BJ_RESTRICT       R,
+    const bj_mat4* BJ_RESTRICT M,
+    bj_vec2                    a,
+    bj_vec2                    b,
+    bj_real                    s
+) {
+    bj_real z_a = BJ_FZERO;
+    bj_real z_b = BJ_FZERO;
+    const bj_real la = bj_vec2_len(a);
+    const bj_real lb = bj_vec2_len(b);
+    if (la < BJ_F(1.0)) {
+        z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a,a));
     } else {
-        bj_mat4_copy(res, mat);
+        a = bj_vec2_normalize(a);
     }
+    if (lb < BJ_F(1.0)) {
+        z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b,b));
+    } else {
+        b = bj_vec2_normalize(b);
+    }
+    const bj_vec3 A = { a.x, a.y, z_a };
+    const bj_vec3 B = { b.x, b.y, z_b };
+    const bj_vec3 C = bj_vec3_cross(A,B);
+    const bj_real ang = bj_acos(bj_vec3_dot(A,B)) * s;
+    bj_mat4_rotate_axis_andle(R, M, C, ang);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Rotate about X/Y/Z, post-multiply.
+/// \brief Invert a 4×4 matrix (safe).
+/// 
+/// \details Computes A^{-1} via cofactors. If det(A) is zero by
+/// bj_real_is_zero, returns 0 and leaves \p out unspecified.
+/// 
+/// \param out Output 4×4 matrix.
+/// \param M   Input 4×4 matrix.
+/// \return \ref BJ_TRUE on success, \ref BJ_FALSE if singular or 
+///         near-singular by bj_real_is_zero(det).
+/// 
+/// \warning Cofactor-based inversion is costly and can be unstable for
+/// ill-conditioned matrices. Prefer affine/orthonormal specializations when possible.
+/// \see bj_mat4_invert_unsafe
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_rotate_x(bj_mat4x4 res, const bj_mat4x4 mat, bj_real angle)
-{
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    bj_mat4x4 R = {
-        {BJ_F(1.0), BJ_FZERO, BJ_FZERO, BJ_FZERO},
-        {BJ_FZERO,   c,   s, BJ_FZERO},
-        {BJ_FZERO,  -s,   c, BJ_FZERO},
-        {BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_F(1.0)}
-    };
-    bj_mat4_mul(res, mat, R);
-}
-
-static BJ_INLINE void bj_mat4_rotate_y(bj_mat4x4 res, const bj_mat4x4 mat, bj_real angle)
-{
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    bj_mat4x4 R = {
-        {   c, BJ_FZERO,  -s, BJ_FZERO},
-        { BJ_FZERO, BJ_F(1.0), BJ_FZERO, BJ_FZERO},
-        {   s, BJ_FZERO,   c, BJ_FZERO},
-        { BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_F(1.0)}
-    };
-    bj_mat4_mul(res, mat, R);
-}
-
-static BJ_INLINE void bj_mat4_rotate_z(bj_mat4x4 res, const bj_mat4x4 mat, bj_real angle)
-{
-    bj_real s = bj_sin(angle), c = bj_cos(angle);
-    bj_mat4x4 R = {
-        {   c,   s, BJ_FZERO, BJ_FZERO},
-        {  -s,   c, BJ_FZERO, BJ_FZERO},
-        { BJ_FZERO, BJ_FZERO, BJ_F(1.0), BJ_FZERO},
-        { BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_F(1.0)}
-    };
-    bj_mat4_mul(res, mat, R);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Arcball rotation.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_rotate_arcball(bj_mat4x4 R, const bj_mat4x4 M, bj_vec2 const _a, bj_vec2 const _b, bj_real s)
-{
-    bj_vec2 a = { _a[0], _a[1] };
-    bj_vec2 b = { _b[0], _b[1] };
-
-    bj_real z_a = BJ_FZERO, z_b = BJ_FZERO;
-
-    if (bj_vec2_len(a) < BJ_F(1.0)) z_a = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(a, a)); else bj_vec2_normalize(a, a);
-    if (bj_vec2_len(b) < BJ_F(1.0)) z_b = bj_sqrt(BJ_F(1.0) - bj_vec2_dot(b, b)); else bj_vec2_normalize(b, b);
-
-    bj_vec3 a_ = { a[0], a[1], z_a };
-    bj_vec3 b_ = { b[0], b[1], z_b };
-
-    bj_vec3 c_; bj_vec3_cross(c_, a_, b_);
-    bj_real const angle = bj_acos(bj_vec3_dot(a_, b_)) * s;
-    bj_mat4_rotate(R, M, c_[0], c_[1], c_[2], angle);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Invert 4×4.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_inverse(bj_mat4x4 res, const bj_mat4x4 mat) {
+static BJ_INLINE bj_bool bj_mat4_invert(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT M
+) {
+    const bj_real* m = M->m;
     bj_real s[6], c[6];
-    s[0] = mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1];
-    s[1] = mat[0][0] * mat[1][2] - mat[1][0] * mat[0][2];
-    s[2] = mat[0][0] * mat[1][3] - mat[1][0] * mat[0][3];
-    s[3] = mat[0][1] * mat[1][2] - mat[1][1] * mat[0][2];
-    s[4] = mat[0][1] * mat[1][3] - mat[1][1] * mat[0][3];
-    s[5] = mat[0][2] * mat[1][3] - mat[1][2] * mat[0][3];
 
-    c[0] = mat[2][0] * mat[3][1] - mat[3][0] * mat[2][1];
-    c[1] = mat[2][0] * mat[3][2] - mat[3][0] * mat[2][2];
-    c[2] = mat[2][0] * mat[3][3] - mat[3][0] * mat[2][3];
-    c[3] = mat[2][1] * mat[3][2] - mat[3][1] * mat[2][2];
-    c[4] = mat[2][1] * mat[3][3] - mat[3][1] * mat[2][3];
-    c[5] = mat[2][2] * mat[3][3] - mat[3][2] * mat[2][3];
+    s[0] = m[BJ_M4(0,0)] * m[BJ_M4(1,1)] - m[BJ_M4(1,0)] * m[BJ_M4(0,1)];
+    s[1] = m[BJ_M4(0,0)] * m[BJ_M4(1,2)] - m[BJ_M4(1,0)] * m[BJ_M4(0,2)];
+    s[2] = m[BJ_M4(0,0)] * m[BJ_M4(1,3)] - m[BJ_M4(1,0)] * m[BJ_M4(0,3)];
+    s[3] = m[BJ_M4(0,1)] * m[BJ_M4(1,2)] - m[BJ_M4(1,1)] * m[BJ_M4(0,2)];
+    s[4] = m[BJ_M4(0,1)] * m[BJ_M4(1,3)] - m[BJ_M4(1,1)] * m[BJ_M4(0,3)];
+    s[5] = m[BJ_M4(0,2)] * m[BJ_M4(1,3)] - m[BJ_M4(1,2)] * m[BJ_M4(0,3)];
 
-    bj_real idet = BJ_F(1.0) / (s[0] * c[5] - s[1] * c[4] + s[2] * c[3] + s[3] * c[2] - s[4] * c[1] + s[5] * c[0]);
+    c[0] = m[BJ_M4(2,0)] * m[BJ_M4(3,1)] - m[BJ_M4(3,0)] * m[BJ_M4(2,1)];
+    c[1] = m[BJ_M4(2,0)] * m[BJ_M4(3,2)] - m[BJ_M4(3,0)] * m[BJ_M4(2,2)];
+    c[2] = m[BJ_M4(2,0)] * m[BJ_M4(3,3)] - m[BJ_M4(3,0)] * m[BJ_M4(2,3)];
+    c[3] = m[BJ_M4(2,1)] * m[BJ_M4(3,2)] - m[BJ_M4(3,1)] * m[BJ_M4(2,2)];
+    c[4] = m[BJ_M4(2,1)] * m[BJ_M4(3,3)] - m[BJ_M4(3,1)] * m[BJ_M4(2,3)];
+    c[5] = m[BJ_M4(2,2)] * m[BJ_M4(3,3)] - m[BJ_M4(3,2)] * m[BJ_M4(2,3)];
 
-    res[0][0] = (mat[1][1] * c[5] - mat[1][2] * c[4] + mat[1][3] * c[3]) * idet;
-    res[0][1] = (-mat[0][1] * c[5] + mat[0][2] * c[4] - mat[0][3] * c[3]) * idet;
-    res[0][2] = (mat[3][1] * s[5] - mat[3][2] * s[4] + mat[3][3] * s[3]) * idet;
-    res[0][3] = (-mat[2][1] * s[5] + mat[2][2] * s[4] - mat[2][3] * s[3]) * idet;
+    const bj_real det = s[0]*c[5] - s[1]*c[4] + s[2]*c[3]
+                      + s[3]*c[2] - s[4]*c[1] + s[5]*c[0];
 
-    res[1][0] = (-mat[1][0] * c[5] + mat[1][2] * c[2] - mat[1][3] * c[1]) * idet;
-    res[1][1] = (mat[0][0] * c[5] - mat[0][2] * c[2] + mat[0][3] * c[1]) * idet;
-    res[1][2] = (-mat[3][0] * s[5] + mat[3][2] * s[2] - mat[3][3] * s[1]) * idet;
-    res[1][3] = (mat[2][0] * s[5] - mat[2][2] * s[2] + mat[2][3] * s[1]) * idet;
+    if (bj_real_is_zero(det)) {
+        return BJ_FALSE;
+    }
+    const bj_real id = BJ_F(1.0) / det;
+    bj_real* o = out->m;
 
-    res[2][0] = (mat[1][0] * c[4] - mat[1][1] * c[2] + mat[1][3] * c[0]) * idet;
-    res[2][1] = (-mat[0][0] * c[4] + mat[0][1] * c[2] - mat[0][3] * c[0]) * idet;
-    res[2][2] = (mat[3][0] * s[4] - mat[3][1] * s[2] + mat[3][3] * s[0]) * idet;
-    res[2][3] = (-mat[2][0] * s[4] + mat[2][1] * s[2] - mat[2][3] * s[0]) * idet;
+    o[BJ_M4(0,0)] = ( m[BJ_M4(1,1)] * c[5] - m[BJ_M4(1,2)] * c[4] + m[BJ_M4(1,3)] * c[3]) * id;
+    o[BJ_M4(0,1)] = (-m[BJ_M4(0,1)] * c[5] + m[BJ_M4(0,2)] * c[4] - m[BJ_M4(0,3)] * c[3]) * id;
+    o[BJ_M4(0,2)] = ( m[BJ_M4(3,1)] * s[5] - m[BJ_M4(3,2)] * s[4] + m[BJ_M4(3,3)] * s[3]) * id;
+    o[BJ_M4(0,3)] = (-m[BJ_M4(2,1)] * s[5] + m[BJ_M4(2,2)] * s[4] - m[BJ_M4(2,3)] * s[3]) * id;
 
-    res[3][0] = (-mat[1][0] * c[3] + mat[1][1] * c[1] - mat[1][2] * c[0]) * idet;
-    res[3][1] = (mat[0][0] * c[3] - mat[0][1] * c[1] + mat[0][2] * c[0]) * idet;
-    res[3][2] = (-mat[3][0] * s[3] + mat[3][1] * s[1] - mat[3][2] * s[0]) * idet;
-    res[3][3] = (mat[2][0] * s[3] - mat[2][1] * s[1] + mat[2][2] * s[0]) * idet;
+    o[BJ_M4(1,0)] = (-m[BJ_M4(1,0)] * c[5] + m[BJ_M4(1,2)] * c[2] - m[BJ_M4(1,3)] * c[1]) * id;
+    o[BJ_M4(1,1)] = ( m[BJ_M4(0,0)] * c[5] - m[BJ_M4(0,2)] * c[2] + m[BJ_M4(0,3)] * c[1]) * id;
+    o[BJ_M4(1,2)] = (-m[BJ_M4(3,0)] * s[5] + m[BJ_M4(3,2)] * s[2] - m[BJ_M4(3,3)] * s[1]) * id;
+    o[BJ_M4(1,3)] = ( m[BJ_M4(2,0)] * s[5] - m[BJ_M4(2,2)] * s[2] + m[BJ_M4(2,3)] * s[1]) * id;
+
+    o[BJ_M4(2,0)] = ( m[BJ_M4(1,0)] * c[4] - m[BJ_M4(1,1)] * c[2] + m[BJ_M4(1,3)] * c[0]) * id;
+    o[BJ_M4(2,1)] = (-m[BJ_M4(0,0)] * c[4] + m[BJ_M4(0,1)] * c[2] - m[BJ_M4(0,3)] * c[0]) * id;
+    o[BJ_M4(2,2)] = ( m[BJ_M4(3,0)] * s[4] - m[BJ_M4(3,1)] * s[2] + m[BJ_M4(3,3)] * s[0]) * id;
+    o[BJ_M4(2,3)] = (-m[BJ_M4(2,0)] * s[4] + m[BJ_M4(2,1)] * s[2] - m[BJ_M4(2,3)] * s[0]) * id;
+
+    o[BJ_M4(3,0)] = (-m[BJ_M4(1,0)] * c[3] + m[BJ_M4(1,1)] * c[1] - m[BJ_M4(1,2)] * c[0]) * id;
+    o[BJ_M4(3,1)] = ( m[BJ_M4(0,0)] * c[3] - m[BJ_M4(0,1)] * c[1] + m[BJ_M4(0,2)] * c[0]) * id;
+    o[BJ_M4(3,2)] = (-m[BJ_M4(3,0)] * s[3] + m[BJ_M4(3,1)] * s[1] - m[BJ_M4(3,2)] * s[0]) * id;
+    o[BJ_M4(3,3)] = ( m[BJ_M4(2,0)] * s[3] - m[BJ_M4(2,1)] * s[1] + m[BJ_M4(2,2)] * s[0]) * id;
+
+    return BJ_TRUE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Orthonormalize upper-left 3×3 of 4×4.
+/// \brief Invert a 4×4 matrix (unsafe).
+/// 
+/// \details Same as bj_mat4_invert but skips the singularity check and divides
+/// by det(A) unconditionally.
+/// 
+/// \param out Output 4×4 matrix.
+/// \param M   Input 4×4 matrix (must be nonsingular).
+/// \pre det(M) != 0 and M is well-conditioned for numerical stability.
+/// \warning Division by zero if det(M) == 0. Consider bj_mat4_invert instead.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_orthonormalize(bj_mat4x4 res, const bj_mat4x4 mat) {
-    bj_mat4_copy(res, mat);
-    bj_real s = BJ_F(1.0);
-    bj_vec3 h;
-
-    bj_vec3_normalize(res[2], res[2]);
-
-    s = bj_vec3_dot(res[1], res[2]);
-    bj_vec3_scale(h, res[2], s);
-    bj_vec3_sub(res[1], res[1], h);
-    bj_vec3_normalize(res[1], res[1]);
-
-    s = bj_vec3_dot(res[0], res[2]);
-    bj_vec3_scale(h, res[2], s);
-    bj_vec3_sub(res[0], res[0], h);
-
-    s = bj_vec3_dot(res[0], res[1]);
-    bj_vec3_scale(h, res[1], s);
-    bj_vec3_sub(res[0], res[0], h);
-    bj_vec3_normalize(res[0], res[0]);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Off-center perspective frustum (4×4).
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_frustum(
-    BJ_ARRAY_2D(bj_real, 4, 4, fmat),
-    bj_real l, bj_real r,
-    bj_real b, bj_real t,
-    bj_real n, bj_real f
+static BJ_INLINE void bj_mat4_invert_unsafe(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT M
 ) {
-    fmat[0][0] = BJ_F(2.0) * n / (r - l);
-    fmat[0][1] = fmat[0][2] = fmat[0][3] = BJ_FZERO;
+    const bj_real* m = M->m;
+    bj_real s[6], c[6];
 
-    fmat[1][0] = BJ_FZERO;
-    fmat[1][1] = BJ_F(-2.0) * n / (t - b);
-    fmat[1][2] = fmat[1][3] = BJ_FZERO;
+    s[0] = m[BJ_M4(0,0)] * m[BJ_M4(1,1)] - m[BJ_M4(1,0)] * m[BJ_M4(0,1)];
+    s[1] = m[BJ_M4(0,0)] * m[BJ_M4(1,2)] - m[BJ_M4(1,0)] * m[BJ_M4(0,2)];
+    s[2] = m[BJ_M4(0,0)] * m[BJ_M4(1,3)] - m[BJ_M4(1,0)] * m[BJ_M4(0,3)];
+    s[3] = m[BJ_M4(0,1)] * m[BJ_M4(1,2)] - m[BJ_M4(1,1)] * m[BJ_M4(0,2)];
+    s[4] = m[BJ_M4(0,1)] * m[BJ_M4(1,3)] - m[BJ_M4(1,1)] * m[BJ_M4(0,3)];
+    s[5] = m[BJ_M4(0,2)] * m[BJ_M4(1,3)] - m[BJ_M4(1,2)] * m[BJ_M4(0,3)];
 
-    fmat[2][0] = (r + l) / (r - l);
-    fmat[2][1] = (t + b) / (t - b);
+    c[0] = m[BJ_M4(2,0)] * m[BJ_M4(3,1)] - m[BJ_M4(3,0)] * m[BJ_M4(2,1)];
+    c[1] = m[BJ_M4(2,0)] * m[BJ_M4(3,2)] - m[BJ_M4(3,0)] * m[BJ_M4(2,2)];
+    c[2] = m[BJ_M4(2,0)] * m[BJ_M4(3,3)] - m[BJ_M4(3,0)] * m[BJ_M4(2,3)];
+    c[3] = m[BJ_M4(2,1)] * m[BJ_M4(3,2)] - m[BJ_M4(3,1)] * m[BJ_M4(2,2)];
+    c[4] = m[BJ_M4(2,1)] * m[BJ_M4(3,3)] - m[BJ_M4(3,1)] * m[BJ_M4(2,3)];
+    c[5] = m[BJ_M4(2,2)] * m[BJ_M4(3,3)] - m[BJ_M4(3,2)] * m[BJ_M4(2,3)];
 
-    fmat[2][2] =  f / (f - n);
-    fmat[2][3] =  BJ_F(1.0);
+    const bj_real id = BJ_F(1.0) /
+        (s[0]*c[5] - s[1]*c[4] + s[2]*c[3] + s[3]*c[2] - s[4]*c[1] + s[5]*c[0]);
 
-    fmat[3][0] = BJ_FZERO;
-    fmat[3][1] = BJ_FZERO;
-    fmat[3][2] = -(f * n) / (f - n);
-    fmat[3][3] = BJ_FZERO;
+    bj_real* o = out->m;
+
+    o[BJ_M4(0,0)] = ( m[BJ_M4(1,1)] * c[5] - m[BJ_M4(1,2)] * c[4] + m[BJ_M4(1,3)] * c[3]) * id;
+    o[BJ_M4(0,1)] = (-m[BJ_M4(0,1)] * c[5] + m[BJ_M4(0,2)] * c[4] - m[BJ_M4(0,3)] * c[3]) * id;
+    o[BJ_M4(0,2)] = ( m[BJ_M4(3,1)] * s[5] - m[BJ_M4(3,2)] * s[4] + m[BJ_M4(3,3)] * s[3]) * id;
+    o[BJ_M4(0,3)] = (-m[BJ_M4(2,1)] * s[5] + m[BJ_M4(2,2)] * s[4] - m[BJ_M4(2,3)] * s[3]) * id;
+
+    o[BJ_M4(1,0)] = (-m[BJ_M4(1,0)] * c[5] + m[BJ_M4(1,2)] * c[2] - m[BJ_M4(1,3)] * c[1]) * id;
+    o[BJ_M4(1,1)] = ( m[BJ_M4(0,0)] * c[5] - m[BJ_M4(0,2)] * c[2] + m[BJ_M4(0,3)] * c[1]) * id;
+    o[BJ_M4(1,2)] = (-m[BJ_M4(3,0)] * s[5] + m[BJ_M4(3,2)] * s[2] - m[BJ_M4(3,3)] * s[1]) * id;
+    o[BJ_M4(1,3)] = ( m[BJ_M4(2,0)] * s[5] - m[BJ_M4(2,2)] * s[2] + m[BJ_M4(2,3)] * s[1]) * id;
+
+    o[BJ_M4(2,0)] = ( m[BJ_M4(1,0)] * c[4] - m[BJ_M4(1,1)] * c[2] + m[BJ_M4(1,3)] * c[0]) * id;
+    o[BJ_M4(2,1)] = (-m[BJ_M4(0,0)] * c[4] + m[BJ_M4(0,1)] * c[2] - m[BJ_M4(0,3)] * c[0]) * id;
+    o[BJ_M4(2,2)] = ( m[BJ_M4(3,0)] * s[4] - m[BJ_M4(3,1)] * s[2] + m[BJ_M4(3,3)] * s[0]) * id;
+    o[BJ_M4(2,3)] = (-m[BJ_M4(2,0)] * s[4] + m[BJ_M4(2,1)] * s[2] - m[BJ_M4(2,3)] * s[0]) * id;
+
+    o[BJ_M4(3,0)] = (-m[BJ_M4(1,0)] * c[3] + m[BJ_M4(1,1)] * c[1] - m[BJ_M4(1,2)] * c[0]) * id;
+    o[BJ_M4(3,1)] = ( m[BJ_M4(0,0)] * c[3] - m[BJ_M4(0,1)] * c[1] + m[BJ_M4(0,2)] * c[0]) * id;
+    o[BJ_M4(3,2)] = (-m[BJ_M4(3,0)] * s[3] + m[BJ_M4(3,1)] * s[1] - m[BJ_M4(3,2)] * s[0]) * id;
+    o[BJ_M4(3,3)] = ( m[BJ_M4(2,0)] * s[3] - m[BJ_M4(2,1)] * s[1] + m[BJ_M4(2,2)] * s[0]) * id;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Orthographic projection (4×4).
+/// Orthonormalize the 3×3 linear part of a 4×4 matrix.
+/// \param out Output 4×4 matrix.
+/// \param A Input 4×4 matrix.
+/// \warning If the 3×3 block is degenerate the result may contain NaNs.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_ortho(
-    BJ_ARRAY_2D(bj_real, 4, 4, omat),
-    bj_real l, bj_real r,
-    bj_real b, bj_real t,
-    bj_real n, bj_real f
+static BJ_INLINE void bj_mat4_orthonormalize(
+    bj_mat4* BJ_RESTRICT       out,
+    const bj_mat4* BJ_RESTRICT A
 ) {
-    omat[0][0] = BJ_F(2.0) / (r - l);
-    omat[0][1] = omat[0][2] = omat[0][3] = BJ_FZERO;
+    bj_mat4_copy(out, A);
+    bj_vec3 z = { 
+        out->m[BJ_M4(2,0)],
+        out->m[BJ_M4(2,1)],
+        out->m[BJ_M4(2,2)] 
+    };
+    z = bj_vec3_normalize(z);
 
-    omat[1][0] = omat[1][2] = omat[1][3] = BJ_FZERO;
-    omat[1][1] = BJ_F(-2.0) / (t - b);
+    bj_vec3 y = { 
+        out->m[BJ_M4(1,0)],
+        out->m[BJ_M4(1,1)],
+        out->m[BJ_M4(1,2)] 
+    };
+    y = bj_vec3_sub(y, bj_vec3_scale(z, bj_vec3_dot(y,z)));
+    y = bj_vec3_normalize(y);
 
-    omat[2][0] = omat[2][1] = omat[2][3] = BJ_FZERO;
-    omat[2][2] = BJ_F(1.0) / (f - n);
+    bj_vec3 x = {
+        out->m[BJ_M4(0,0)],
+        out->m[BJ_M4(0,1)],
+        out->m[BJ_M4(0,2)] 
+    };
+    x = bj_vec3_sub(x, bj_vec3_scale(z, bj_vec3_dot(x,z)));
+    x = bj_vec3_sub(x, bj_vec3_scale(y, bj_vec3_dot(x,y)));
+    x = bj_vec3_normalize(x);
 
-    omat[3][0] = -(r + l) / (r - l);
-    omat[3][1] =  (t + b) / (t - b);
-    omat[3][2] = -n / (f - n);
-    omat[3][3] = BJ_F(1.0);
+    out->m[BJ_M4(0,0)] = x.x;
+    out->m[BJ_M4(0,1)] = x.y;
+    out->m[BJ_M4(0,2)] = x.z;
+    out->m[BJ_M4(1,0)] = y.x;
+    out->m[BJ_M4(1,1)] = y.y;
+    out->m[BJ_M4(1,2)] = y.z;
+    out->m[BJ_M4(2,0)] = z.x;
+    out->m[BJ_M4(2,1)] = z.y;
+    out->m[BJ_M4(2,2)] = z.z;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Symmetric perspective from FOV+aspect (4×4).
+/// Build a perspective frustum into a 4×4 matrix.
+/// \param M Output 4×4 matrix.
+/// \param l Input scalar.
+/// \param r scalar (0-based).
+/// \param b Input scalar.
+/// \param t Input scalar.
+/// \param n Near plane distance.
+/// \param f Far plane distance.
+/// \warning Requires r>l, t>b, f>n. Depth maps to [0,1]. Y is inverted.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_perspective(
-    BJ_ARRAY_2D(bj_real, 4, 4, pmat),
-    bj_real y_fov, bj_real aspect,
-    bj_real n, bj_real f
+static BJ_INLINE void bj_mat4_set_frustum(
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              l,
+    bj_real              r,
+    bj_real              b,
+    bj_real              t,
+    bj_real              n,
+    bj_real              f
 ) {
-    const bj_real a = BJ_F(1.0) / bj_tan(y_fov / BJ_F(2.0));
 
-    pmat[0][0] = a / aspect;
-    pmat[0][1] = pmat[0][2] = pmat[0][3] = BJ_FZERO;
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = BJ_F(2.0)*n/(r-l);
+    m[BJ_M4(0,1)] = m[BJ_M4(0,2)] = m[BJ_M4(0,3)] = BJ_FZERO;
 
-    pmat[1][0] = BJ_FZERO;
-    pmat[1][1] = -a;
-    pmat[1][2] = pmat[1][3] = BJ_FZERO;
+    m[BJ_M4(1,0)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = BJ_F(-2.0)*n/(t-b);
+    m[BJ_M4(1,2)] = m[BJ_M4(1,3)] = BJ_FZERO;
 
-    pmat[2][0] = BJ_FZERO; pmat[2][1] = BJ_FZERO;
-    pmat[2][2] = f / (f - n);
-    pmat[2][3] = BJ_F(1.0);
+    m[BJ_M4(2,0)] = (r+l)/(r-l);
+    m[BJ_M4(2,1)] = (t+b)/(t-b);
+    m[BJ_M4(2,2)] =  f/(f-n);
+    m[BJ_M4(2,3)] =  BJ_F(1.0);
 
-    pmat[3][0] = BJ_FZERO; pmat[3][1] = BJ_FZERO;
-    pmat[3][2] = -(f * n) / (f - n);
-    pmat[3][3] = BJ_FZERO;
+    m[BJ_M4(3,0)] = BJ_FZERO; m[BJ_M4(3,1)] = BJ_FZERO;
+    m[BJ_M4(3,2)] = -(f*n)/(f-n);
+    m[BJ_M4(3,3)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Viewport transform (4×4).
+/// Build a 3D orthographic projection into a 4×4 matrix.
+/// \param M Output 4×4 matrix.
+/// \param l Input scalar.
+/// \param r scalar (0-based).
+/// \param b Input scalar.
+/// \param t Input scalar.
+/// \param n Near plane distance.
+/// \param f Far plane distance.
+/// \warning Requires r!=l, t!=b, f!=n. Depth maps to [0,1]. Y is inverted.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_viewport(
-    BJ_ARRAY_2D(bj_real, 4, 4, vpmat),
-    bj_real x, bj_real y,
-    bj_real w, bj_real h
+static BJ_INLINE void bj_mat4_set_ortho(
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              l,
+    bj_real              r,
+    bj_real              b,
+    bj_real              t,
+    bj_real              n,
+    bj_real              f
 ) {
-    const bj_real z_min = BJ_FZERO, z_max = BJ_F(1.0);
-    const bj_real sx = BJ_F(0.50) * w, sy = BJ_F(0.50) * h, sz = (z_max - z_min);
-    const bj_real tx = x + BJ_F(0.50) * w, ty = y + BJ_F(0.50) * h, tz = z_min;
 
-    vpmat[0][0] = sx; vpmat[0][1] = BJ_FZERO; vpmat[0][2] = BJ_FZERO; vpmat[0][3] = BJ_FZERO;
-    vpmat[1][0] = BJ_FZERO; vpmat[1][1] = sy; vpmat[1][2] = BJ_FZERO; vpmat[1][3] = BJ_FZERO;
-    vpmat[2][0] = BJ_FZERO; vpmat[2][1] = BJ_FZERO; vpmat[2][2] = sz; vpmat[2][3] = BJ_FZERO;
-    vpmat[3][0] = tx; vpmat[3][1] = ty; vpmat[3][2] = tz; vpmat[3][3] = BJ_F(1.0);
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = BJ_F(2.0)/(r-l);
+    m[BJ_M4(0,1)] = m[BJ_M4(0,2)] = m[BJ_M4(0,3)] = BJ_FZERO;
+
+    m[BJ_M4(1,0)] = m[BJ_M4(1,2)] = m[BJ_M4(1,3)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = BJ_F(-2.0)/(t-b);
+
+    m[BJ_M4(2,0)] = m[BJ_M4(2,1)] = m[BJ_M4(2,3)] = BJ_FZERO;
+    m[BJ_M4(2,2)] = BJ_F(1.0)/(f-n);
+
+    m[BJ_M4(3,0)] = -(r+l)/(r-l);
+    m[BJ_M4(3,1)] =  (t+b)/(t-b);
+    m[BJ_M4(3,2)] = -n/(f-n);
+    m[BJ_M4(3,3)] = BJ_F(1.0);
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
-/// Look-at view matrix builder (4×4).
+/// Build a 4×4 perspective projection from vertical FOV.
+/// \param M Output 4×4 matrix.
+/// \param y_fov Vertical field of view in radians.
+/// \param aspect Aspect ratio width/height.
+/// \param n Near plane distance.
+/// \param f Far plane distance.
+/// \warning Requires f > n and aspect > 0. Depth maps to [0,1]. Y is inverted.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4_lookat(
-    BJ_ARRAY_2D(bj_real, 4, 4, m),
-    const bj_vec3 eye,
-    const bj_vec3 center,
-    const bj_vec3 up
+static BJ_INLINE void bj_mat4_set_perspective(
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              y_fov,
+    bj_real              aspect,
+    bj_real              n,
+    bj_real              f
 ) {
-    bj_vec3 f;  bj_vec3_sub(f, center, eye);  bj_vec3_normalize(f, f);
-    bj_vec3 s;  bj_vec3_cross(s, up, f);      bj_vec3_normalize(s, s);
-    bj_vec3 t;  bj_vec3_cross(t, f, s);
 
-    m[0][0]=s[0]; m[0][1]=t[0]; m[0][2]=f[0]; m[0][3]=BJ_FZERO;
-    m[1][0]=s[1]; m[1][1]=t[1]; m[1][2]=f[1]; m[1][3]=BJ_FZERO;
-    m[2][0]=s[2]; m[2][1]=t[2]; m[2][2]=f[2]; m[2][3]=BJ_FZERO;
-    m[3][0]=BJ_FZERO; m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO; m[3][3]=BJ_F(1.0);
+    const bj_real a = BJ_F(1.0)/bj_tan(y_fov/BJ_F(2.0));
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = a/aspect;
+    m[BJ_M4(0,1)] = m[BJ_M4(0,2)] = m[BJ_M4(0,3)] = BJ_FZERO;
 
-    bj_mat4_translation_inplace(m, -eye[0], -eye[1], -eye[2]);
+    m[BJ_M4(1,0)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = -a;
+    m[BJ_M4(1,2)] = m[BJ_M4(1,3)] = BJ_FZERO;
+
+    m[BJ_M4(2,0)] = BJ_FZERO; m[BJ_M4(2,1)] = BJ_FZERO;
+    m[BJ_M4(2,2)] = f/(f-n);
+    m[BJ_M4(2,3)] = BJ_F(1.0);
+
+    m[BJ_M4(3,0)] = BJ_FZERO; m[BJ_M4(3,1)] = BJ_FZERO;
+    m[BJ_M4(3,2)] = -(f*n)/(f-n);
+    m[BJ_M4(3,3)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Set 4×3 to identity.
+/// Build a 3D viewport transform into a 4×4 matrix.
+/// \param M Output 4×4 matrix.
+/// \param x Viewport X origin in pixels.
+/// \param y Viewport Y origin in pixels.
+/// \param w Viewport width in pixels.
+/// \param h Viewport height in pixels.
+/// \note Maps NDC x,y ∈ [-1,1] and z ∈ [0,1] to window coordinates.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_identity(
-    BJ_ARRAY_2D(bj_real, 4, 3, m)
+static BJ_INLINE void bj_mat4_set_viewport(
+    bj_mat4* BJ_RESTRICT M,
+    bj_real              x,
+    bj_real              y,
+    bj_real              w,
+    bj_real              h
 ) {
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO; m[0][2]=BJ_FZERO;
-    m[1][0]=BJ_FZERO; m[1][1]=BJ_F(1.0); m[1][2]=BJ_FZERO;
-    m[2][0]=BJ_FZERO; m[2][1]=BJ_FZERO; m[2][2]=BJ_F(1.0);
-    m[3][0]=BJ_FZERO; m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO;
+    const bj_real zmin = BJ_FZERO;
+    const bj_real zmax = BJ_F(1.0);
+    bj_real* m = M->m;
+    m[BJ_M4(0,0)] = BJ_F(0.5) * w;
+    m[BJ_M4(0,1)] = BJ_FZERO;
+    m[BJ_M4(0,2)] = BJ_FZERO;
+    m[BJ_M4(0,3)] = BJ_FZERO;
+    m[BJ_M4(1,0)] = BJ_FZERO;
+    m[BJ_M4(1,1)] = BJ_F(0.5) * h;
+    m[BJ_M4(1,2)] = BJ_FZERO;
+    m[BJ_M4(1,3)] = BJ_FZERO;
+    m[BJ_M4(2,0)] = BJ_FZERO;
+    m[BJ_M4(2,1)] = BJ_FZERO;
+    m[BJ_M4(2,2)] = (zmax - zmin);
+    m[BJ_M4(2,3)] = BJ_FZERO;
+    m[BJ_M4(3,0)] = x + BJ_F(0.5) * w;
+    m[BJ_M4(3,1)] = y + BJ_F(0.5) * h;
+    m[BJ_M4(3,2)] = zmin;
+    m[BJ_M4(3,3)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 4×3 translation.
+/// Build a right-handed look-at view matrix.
+/// \param M Output 4×4 matrix.
+/// \param eye Camera position.
+/// \param center Target point the camera looks at.
+/// \param up Approximate up direction.
+/// \note Right-handed view: +Z looks from eye to center.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_translate(
-    BJ_ARRAY_2D(bj_real, 4, 3, m),
-    bj_real tx, bj_real ty, bj_real tz
+static BJ_INLINE void bj_mat4_set_lookat(
+    bj_mat4* BJ_RESTRICT M,
+    bj_vec3              eye,
+    bj_vec3              center,
+    bj_vec3              up
 ) {
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO; m[0][2]=BJ_FZERO;
-    m[1][0]=BJ_FZERO; m[1][1]=BJ_F(1.0); m[1][2]=BJ_FZERO;
-    m[2][0]=BJ_FZERO; m[2][1]=BJ_FZERO; m[2][2]=BJ_F(1.0);
-    m[3][0]=tx;        m[3][1]=ty;        m[3][2]=tz;
+    bj_vec3 f = bj_vec3_normalize(bj_vec3_sub(center, eye));
+    bj_vec3 s = bj_vec3_normalize(bj_vec3_cross(up, f));
+    bj_vec3 t = bj_vec3_cross(f, s);
+
+    bj_mat4_set_identity(M);
+    M->m[BJ_M4(0,0)] = s.x;
+    M->m[BJ_M4(0,1)] = t.x;
+    M->m[BJ_M4(0,2)] = f.x;
+    M->m[BJ_M4(1,0)] = s.y;
+    M->m[BJ_M4(1,1)] = t.y;
+    M->m[BJ_M4(1,2)] = f.y;
+    M->m[BJ_M4(2,0)] = s.z;
+    M->m[BJ_M4(2,1)] = t.z;
+    M->m[BJ_M4(2,2)] = f.z;
+    bj_mat4_translate(M, -eye.x, -eye.y, -eye.z);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 4×3 scale.
+/// Set a 4×3 affine matrix to identity.
+/// \param M Output 4×3 matrix.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_scale(
-    BJ_ARRAY_2D(bj_real, 4, 3, m),
-    bj_real sx, bj_real sy, bj_real sz
+static BJ_INLINE void bj_mat4x3_set_identity(
+    bj_mat4x3* BJ_RESTRICT M
 ) {
-    m[0][0]=sx;        m[0][1]=BJ_FZERO; m[0][2]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]=sy;       m[1][2]=BJ_FZERO;
-    m[2][0]=BJ_FZERO;  m[2][1]=BJ_FZERO; m[2][2]=sz;
-    m[3][0]=BJ_FZERO;  m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO;
+    bj_real* m = M->m;
+    m[BJ_M43(0,0)] = BJ_F(1.0);
+    m[BJ_M43(0,1)] = BJ_FZERO;
+    m[BJ_M43(0,2)] = BJ_FZERO;
+    m[BJ_M43(1,0)] = BJ_FZERO;
+    m[BJ_M43(1,1)] = BJ_F(1.0);
+    m[BJ_M43(1,2)] = BJ_FZERO;
+    m[BJ_M43(2,0)] = BJ_FZERO;
+    m[BJ_M43(2,1)] = BJ_FZERO;
+    m[BJ_M43(2,2)] = BJ_F(1.0);
+    m[BJ_M43(3,0)] = BJ_FZERO;
+    m[BJ_M43(3,1)] = BJ_FZERO;
+    m[BJ_M43(3,2)] = BJ_FZERO;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 4×3 rotate X/Y/Z.
+/// Matrix operation.
+/// \param M Output 4×3 matrix.
+/// \param tx Translation along x.
+/// \param ty Translation along y.
+/// \param tz Translation along z.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_rotate_x(BJ_ARRAY_2D(bj_real, 4, 3, m), bj_real angle) {
-    const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
-    m[0][0]=BJ_F(1.0); m[0][1]=BJ_FZERO; m[0][2]=BJ_FZERO;
-    m[1][0]=BJ_FZERO;  m[1][1]= c;       m[1][2]= s;
-    m[2][0]=BJ_FZERO;  m[2][1]=-s;       m[2][2]= c;
-    m[3][0]=BJ_FZERO;  m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO;
-}
-static BJ_INLINE void bj_mat4x3_rotate_y(BJ_ARRAY_2D(bj_real, 4, 3, m), bj_real angle) {
-    const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
-    m[0][0]= c;        m[0][1]=BJ_FZERO; m[0][2]=-s;
-    m[1][0]=BJ_FZERO;  m[1][1]=BJ_F(1.0);m[1][2]=BJ_FZERO;
-    m[2][0]= s;        m[2][1]=BJ_FZERO; m[2][2]= c;
-    m[3][0]=BJ_FZERO;  m[3][1]=BJ_FZERO; m[3][2]=BJ_FZERO;
-}
-static BJ_INLINE void bj_mat4x3_rotate_z(BJ_ARRAY_2D(bj_real, 4, 3, m), bj_real angle) {
-    const bj_real c = bj_cosf(angle), s = bj_sinf(angle);
-    m[0][0]= c;        m[0][1]= s;        m[0][2]=BJ_FZERO;
-    m[1][0]=-s;        m[1][1]= c;        m[1][2]=BJ_FZERO;
-    m[2][0]=BJ_FZERO;  m[2][1]=BJ_FZERO;  m[2][2]=BJ_F(1.0);
-    m[3][0]=BJ_FZERO;  m[3][1]=BJ_FZERO;  m[3][2]=BJ_FZERO;
+static BJ_INLINE void bj_mat4x3_set_translation(
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                tx,
+    bj_real                ty,
+    bj_real                tz
+) {
+    bj_mat4x3_set_identity(M);
+    M->m[BJ_M43(3,0)] = tx;
+    M->m[BJ_M43(3,1)] = ty;
+    M->m[BJ_M43(3,2)] = tz;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 4×3 multiplication: res = A * B.
+/// Scalar multiply: M = sx * k.
+/// \param M Output 4×3 matrix.
+/// \param sx Scale on x.
+/// \param sy Scale on y.
+/// \param sz Scale on z.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4x3_set_scaling_xyz(
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                sx,
+    bj_real                sy,
+    bj_real                sz
+) {
+    bj_mat4x3_set_identity(M);
+    M->m[BJ_M43(0,0)] = sx;
+    M->m[BJ_M43(1,1)] = sy;
+    M->m[BJ_M43(2,2)] = sz;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Right-multiply by an X-axis rotation.
+/// \param M Output 4×3 matrix.
+/// \param a Input scalar.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4x3_set_rotation_x(
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                a
+) {
+    const bj_real c = bj_cos(a), s = bj_sin(a);
+    bj_mat4x3_set_identity(M);
+    M->m[BJ_M43(1,1)] = c; M->m[BJ_M43(1,2)] = s;
+    M->m[BJ_M43(2,1)]  = -s; M->m[BJ_M43(2,2)] = c;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Right-multiply by a Y-axis rotation.
+/// \param M Output 4×3 matrix.
+/// \param a Input scalar.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4x3_set_rotation_y(
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                a
+) {
+    const bj_real c = bj_cos(a), s = bj_sin(a);
+    bj_mat4x3_set_identity(M);
+    M->m[BJ_M43(0,0)] = c; M->m[BJ_M43(0,2)] = -s;
+    M->m[BJ_M43(2,0)] = s; M->m[BJ_M43(2,2)] =  c;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Right-multiply by a Z-axis rotation.
+/// \param M Output 4×3 matrix.
+/// \param a Input scalar.
+////////////////////////////////////////////////////////////////////////////////
+static BJ_INLINE void bj_mat4x3_set_rotation_z(
+    bj_mat4x3* BJ_RESTRICT M,
+    bj_real                a
+) {
+    const bj_real c = bj_cos(a), s = bj_sin(a);
+    bj_mat4x3_set_identity(M);
+    M->m[BJ_M43(0,0)] = c; M->m[BJ_M43(0,1)] = s;
+    M->m[BJ_M43(1,0)]  = -s; M->m[BJ_M43(1,1)] = c;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// Matrix product: out = A * B.
+/// \param out Output 4×3 matrix.
+/// \param A Input 4×3 matrix.
+/// \param B Input 4×3 matrix.
+/// \note Column-major storage. Vectors are columns. Right-multiply: r = M * v.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4x3_mul(
-    BJ_ARRAY_2D      (bj_real, 4, 3, res),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, A),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, B)
-) {
-#ifdef BJ_MAT_NO_UNROLL
-    for (int r=0; r<3; ++r) {
-        res[0][r] = A[0][r]*B[0][0] + A[1][r]*B[1][0] + A[2][r]*B[2][0];
-        res[1][r] = A[0][r]*B[0][1] + A[1][r]*B[1][1] + A[2][r]*B[2][1];
-        res[2][r] = A[0][r]*B[0][2] + A[1][r]*B[1][2] + A[2][r]*B[2][2];
-        res[3][r] = A[0][r]*B[3][0] + A[1][r]*B[3][1] + A[2][r]*B[3][2] + A[3][r];
-    }
-#else
-    const bj_real a00=A[0][0], a10=A[1][0], a20=A[2][0], a30=A[3][0];
-    const bj_real a01=A[0][1], a11=A[1][1], a21=A[2][1], a31=A[3][1];
-    const bj_real a02=A[0][2], a12=A[1][2], a22=A[2][2], a32=A[3][2];
+    bj_mat4x3* BJ_RESTRICT       out,
+    const bj_mat4x3* BJ_RESTRICT A,
+    const bj_mat4x3* BJ_RESTRICT B
+){
 
-    const bj_real b00=B[0][0], b01=B[1][0], b02=B[2][0];
-    const bj_real b10=B[0][1], b11=B[1][1], b12=B[2][1];
-    const bj_real b20=B[0][2], b21=B[1][2], b22=B[2][2];
-    const bj_real bt0=B[3][0], bt1=B[3][1], bt2=B[3][2];
+    const bj_real a00 = A->m[BJ_M43(0,0)];
+    const bj_real a10 = A->m[BJ_M43(0,1)];
+    const bj_real a20 = A->m[BJ_M43(0,2)];
+    const bj_real a30 = A->m[BJ_M43(3,0)];
+    const bj_real a01 = A->m[BJ_M43(1,0)];
+    const bj_real a11 = A->m[BJ_M43(1,1)];
+    const bj_real a21 = A->m[BJ_M43(1,2)];
+    const bj_real a31 = A->m[BJ_M43(3,1)];
+    const bj_real a02 = A->m[BJ_M43(2,0)];
+    const bj_real a12 = A->m[BJ_M43(2,1)];
+    const bj_real a22 = A->m[BJ_M43(2,2)];
+    const bj_real a32 = A->m[BJ_M43(3,2)];
 
-    res[0][0] = a00*b00 + a10*b01 + a20*b02;
-    res[0][1] = a01*b00 + a11*b01 + a21*b02;
-    res[0][2] = a02*b00 + a12*b01 + a22*b02;
+    const bj_real b00 = B->m[BJ_M43(0,0)];
+    const bj_real b01 = B->m[BJ_M43(1,0)];
+    const bj_real bt0 = B->m[BJ_M43(3,0)];
+    const bj_real b10 = B->m[BJ_M43(0,1)];
+    const bj_real b11 = B->m[BJ_M43(1,1)];
+    const bj_real bt1 = B->m[BJ_M43(3,1)];
+    const bj_real b20 = B->m[BJ_M43(0,2)];
+    const bj_real b21 = B->m[BJ_M43(1,2)];
+    const bj_real b22 = B->m[BJ_M43(2,2)];
+    const bj_real bt2 = B->m[BJ_M43(3,2)];
 
-    res[1][0] = a00*b10 + a10*b11 + a20*b12;
-    res[1][1] = a01*b10 + a11*b11 + a21*b12;
-    res[1][2] = a02*b10 + a12*b11 + a22*b12;
+    out->m[BJ_M43(0,0)] = a00 * b00 + a01 * b10 + a02 * b20;
+    out->m[BJ_M43(0,1)] = a10 * b00 + a11 * b10 + a12 * b20;
+    out->m[BJ_M43(0,2)] = a20 * b00 + a21 * b10 + a22 * b20;
 
-    res[2][0] = a00*b20 + a10*b21 + a20*b22;
-    res[2][1] = a01*b20 + a11*b21 + a21*b22;
-    res[2][2] = a02*b20 + a12*b21 + a22*b22;
+    out->m[BJ_M43(1,0)] = a00 * b01 + a01 * b11 + a02 * b21;
+    out->m[BJ_M43(1,1)] = a10 * b01 + a11 * b11 + a12 * b21;
+    out->m[BJ_M43(1,2)] = a20 * b01 + a21 * b11 + a22 * b21;
 
-    res[3][0] = a00*bt0 + a10*bt1 + a20*bt2 + a30;
-    res[3][1] = a01*bt0 + a11*bt1 + a21*bt2 + a31;
-    res[3][2] = a02*bt0 + a12*bt1 + a22*bt2 + a32;
-#endif
+    out->m[BJ_M43(2,0)] = a00 * b20 + a01 * b21 + a02 * b22;
+    out->m[BJ_M43(2,1)] = a10 * b20 + a11 * b21 + a12 * b22;
+    out->m[BJ_M43(2,2)] = a20 * b20 + a21 * b21 + a22 * b22;
+
+    out->m[BJ_M43(3,0)] = a00 * bt0 + a01 * bt1 + a02 * bt2 + a30;
+    out->m[BJ_M43(3,1)] = a10 * bt0 + a11 * bt1 + a12 * bt2 + a31;
+    out->m[BJ_M43(3,2)] = a20 * bt0 + a21 * bt1 + a22 * bt2 + a32;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 4×3 transform point.
+/// Transform a 3D point by a 4×3 affine matrix.
+/// \param M Input 4×3 matrix.
+/// \param p Input point.
+/// \return 3D vector result.
+/// \note Affine 3D. Ignores projective terms; no divide.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_mul_point(
-    BJ_ARRAY      (bj_real, 3, r),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, m),
-    BJ_CONST_ARRAY(bj_real, 3, p)
-) {
-    const bj_real x=p[0], y=p[1], z=p[2];
-    r[0] = m[0][0]*x + m[1][0]*y + m[2][0]*z + m[3][0];
-    r[1] = m[0][1]*x + m[1][1]*y + m[2][1]*z + m[3][1];
-    r[2] = m[0][2]*x + m[1][2]*y + m[2][2]*z + m[3][2];
+static BJ_INLINE bj_vec3 bj_mat4x3_transform_point(
+    const bj_mat4x3* BJ_RESTRICT M,
+    bj_vec3                      p
+){
+    const bj_real* m = M->m; const bj_real x = p.x,y = p.y,z = p.z;
+    return (bj_vec3){
+        m[BJ_M43(0,0)]*x + m[BJ_M43(1,0)]*y + m[BJ_M43(2,0)]*z + m[BJ_M43(3,0)],
+        m[BJ_M43(0,1)]*x + m[BJ_M43(1,1)]*y + m[BJ_M43(2,1)]*z + m[BJ_M43(3,1)],
+        m[BJ_M43(0,2)]*x + m[BJ_M43(1,2)]*y + m[BJ_M43(2,2)]*z + m[BJ_M43(3,2)]
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// 4×3 transform direction (no translation).
+/// Transform a direction vector (ignoring translation).
+/// \param M Input 4×3 matrix.
+/// \param v Input vector.
+/// \return 3D vector result.
+/// \note Affine 3D. Ignores projective terms; no divide.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_mul_dir(
-    BJ_ARRAY      (bj_real, 3, r),
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, m),
-    BJ_CONST_ARRAY(bj_real, 3, v)
-) {
-    const bj_real x=v[0], y=v[1], z=v[2];
-    r[0] = m[0][0]*x + m[1][0]*y + m[2][0]*z;
-    r[1] = m[0][1]*x + m[1][1]*y + m[2][1]*z;
-    r[2] = m[0][2]*x + m[1][2]*y + m[2][2]*z;
+static BJ_INLINE bj_vec3 bj_mat4x3_transform_dir(
+    const bj_mat4x3* BJ_RESTRICT M,
+    bj_vec3                      v
+){
+    const bj_real* m = M->m; const bj_real x = v.x,y = v.y,z = v.z;
+    return (bj_vec3){
+        m[BJ_M43(0,0)]*x + m[BJ_M43(1,0)]*y + m[BJ_M43(2,0)]*z,
+        m[BJ_M43(0,1)]*x + m[BJ_M43(1,1)]*y + m[BJ_M43(2,1)]*z,
+        m[BJ_M43(0,2)]*x + m[BJ_M43(1,2)]*y + m[BJ_M43(2,2)]*z
+    };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Promote 4×3 to 4×4 homogeneous.
+/// Promote a 4×3 affine matrix to 4×4.
+/// \param M Output 4×4 matrix.
+/// \param A Input 4×3 matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4_from_mat4x3(
-    bj_mat4x4 out,
-    BJ_CONST_ARRAY_2D(bj_real, 4, 3, a)
-) {
-    out[0][0]=a[0][0]; out[0][1]=a[0][1]; out[0][2]=a[0][2]; out[0][3]=BJ_FZERO;
-    out[1][0]=a[1][0]; out[1][1]=a[1][1]; out[1][2]=a[1][2]; out[1][3]=BJ_FZERO;
-    out[2][0]=a[2][0]; out[2][1]=a[2][1]; out[2][2]=a[2][2]; out[2][3]=BJ_FZERO;
-    out[3][0]=a[3][0]; out[3][1]=a[3][1]; out[3][2]=a[3][2]; out[3][3]=BJ_F(1.0);
+    bj_mat4* BJ_RESTRICT         M,
+    const bj_mat4x3* BJ_RESTRICT A
+){
+    const bj_real* a = A->m; bj_real* o = M->m;
+    o[BJ_M4(0,0)] = a[BJ_M43(0,0)];
+    o[BJ_M4(0,1)] = a[BJ_M43(0,1)];
+    o[BJ_M4(0,2)] = a[BJ_M43(0,2)];
+    o[BJ_M4(0,3)] = BJ_FZERO;
+    o[BJ_M4(1,0)] = a[BJ_M43(1,0)];
+    o[BJ_M4(1,1)] = a[BJ_M43(1,1)];
+    o[BJ_M4(1,2)] = a[BJ_M43(1,2)];
+    o[BJ_M4(1,3)] = BJ_FZERO;
+    o[BJ_M4(2,0)] = a[BJ_M43(2,0)];
+    o[BJ_M4(2,1)] = a[BJ_M43(2,1)];
+    o[BJ_M4(2,2)] = a[BJ_M43(2,2)];
+    o[BJ_M4(2,3)] = BJ_FZERO;
+    o[BJ_M4(3,0)] = a[BJ_M43(3,0)];
+    o[BJ_M4(3,1)] = a[BJ_M43(3,1)];
+    o[BJ_M4(3,2)] = a[BJ_M43(3,2)];
+    o[BJ_M4(3,3)] = BJ_F(1.0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Extract 4×3 from 4×4.
+/// Demote a 4×4 matrix to 4×3 (drop projective terms).
+/// \param M Output 4×3 matrix.
+/// \param A Input 4×4 matrix.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_mat4x3_from_mat4(
-    BJ_ARRAY_2D(bj_real, 4, 3, out43),
-    const bj_mat4x4 m
-) {
-    out43[0][0]=m[0][0]; out43[0][1]=m[0][1]; out43[0][2]=m[0][2];
-    out43[1][0]=m[1][0]; out43[1][1]=m[1][1]; out43[1][2]=m[1][2];
-    out43[2][0]=m[2][0]; out43[2][1]=m[2][1]; out43[2][2]=m[2][2];
-    out43[3][0]=m[3][0]; out43[3][1]=m[3][1]; out43[3][2]=m[3][2];
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// Look-at builder for 4×3.
-////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE void bj_mat4x3_lookat(
-    BJ_ARRAY_2D(bj_real, 4, 3, m),
-    BJ_CONST_ARRAY(bj_real, 3, eye),
-    BJ_CONST_ARRAY(bj_real, 3, center),
-    BJ_CONST_ARRAY(bj_real, 3, up)
-) {
-    bj_real f[3] = { center[0]-eye[0], center[1]-eye[1], center[2]-eye[2] };
-    { const bj_real len2 = f[0]*f[0]+f[1]*f[1]+f[2]*f[2]; const bj_real inv = BJ_F(1.0)/bj_sqrt(len2);
-      f[0]*=inv; f[1]*=inv; f[2]*=inv; }
-    bj_real s[3] = { up[1]*f[2]-up[2]*f[1], up[2]*f[0]-up[0]*f[2], up[0]*f[1]-up[1]*f[0] };
-    { const bj_real len2 = s[0]*s[0]+s[1]*s[1]+s[2]*s[2]; const bj_real inv = BJ_F(1.0)/bj_sqrt(len2);
-      s[0]*=inv; s[1]*=inv; s[2]*=inv; }
-    const bj_real t[3] = { f[1]*s[2]-f[2]*s[1], f[2]*s[0]-f[0]*s[2], f[0]*s[1]-f[1]*s[0] };
-
-    m[0][0]=s[0]; m[0][1]=s[1]; m[0][2]=s[2];
-    m[1][0]=t[0]; m[1][1]=t[1]; m[1][2]=t[2];
-    m[2][0]=f[0]; m[2][1]=f[1]; m[2][2]=f[2];
-
-    m[3][0]=-(s[0]*eye[0] + s[1]*eye[1] + s[2]*eye[2]);
-    m[3][1]=-(t[0]*eye[0] + t[1]*eye[1] + t[2]*eye[2]);
-    m[3][2]=-(f[0]*eye[0] + f[1]*eye[1] + f[2]*eye[2]);
+    bj_mat4x3* BJ_RESTRICT     M,
+    const bj_mat4* BJ_RESTRICT A
+){
+    const bj_real* a = A->m; bj_real* o = M->m;
+    o[BJ_M43(0,0)] = a[BJ_M4(0,0)];
+    o[BJ_M43(0,1)] = a[BJ_M4(0,1)];
+    o[BJ_M43(0,2)] = a[BJ_M4(0,2)];
+    o[BJ_M43(1,0)] = a[BJ_M4(1,0)];
+    o[BJ_M43(1,1)] = a[BJ_M4(1,1)];
+    o[BJ_M43(1,2)] = a[BJ_M4(1,2)];
+    o[BJ_M43(2,0)] = a[BJ_M4(2,0)];
+    o[BJ_M43(2,1)] = a[BJ_M4(2,1)];
+    o[BJ_M43(2,2)] = a[BJ_M4(2,2)];
+    o[BJ_M43(3,0)] = a[BJ_M4(3,0)];
+    o[BJ_M43(3,1)] = a[BJ_M4(3,1)];
+    o[BJ_M43(3,2)] = a[BJ_M4(3,2)];
 }
 
 #endif

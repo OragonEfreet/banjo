@@ -32,18 +32,17 @@
 ///
 /// Uses: out = position + velocity * time + 0.5 * acceleration * time^2.
 ///
-/// \param out           Output position at time t [L]
 /// \param position      Initial position [L]
 /// \param velocity      Initial velocity [L T^-1]
 /// \param acceleration  Constant acceleration [L T^-2]
 /// \param time          Elapsed time t [T]
+/// \return  Output position at time t [L]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_compute_kinematics_2d(
-    BJ_ARRAY      (bj_real, 2, out),
-    BJ_CONST_ARRAY(bj_real, 2, position),
-    BJ_CONST_ARRAY(bj_real, 2, velocity),
-    BJ_CONST_ARRAY(bj_real, 2, acceleration),
-    bj_real time
+BANJO_EXPORT bj_vec2 bj_compute_kinematics_2d(
+    bj_vec2  position,
+    bj_vec2  velocity,
+    bj_vec2  acceleration,
+    bj_real  time
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,15 +50,14 @@ BANJO_EXPORT void bj_compute_kinematics_2d(
 ///
 /// Uses: out = velocity + acceleration * time.
 ///
-/// \param out           Output velocity at time t [L T^-1]
 /// \param velocity      Initial velocity [L T^-1]
 /// \param acceleration  Constant acceleration [L T^-2]
 /// \param time          Elapsed time t [T]
+/// \return Output velocity at time t [L T^-1]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_compute_kinematics_velocity_2d(
-    BJ_ARRAY      (bj_real, 2, out),
-    BJ_CONST_ARRAY(bj_real, 2, velocity),
-    BJ_CONST_ARRAY(bj_real, 2, acceleration),
+BANJO_EXPORT bj_vec2 bj_compute_kinematics_velocity_2d(
+    bj_vec2 velocity,
+    bj_vec2 acceleration,
     bj_real time
 );
 
@@ -197,18 +195,15 @@ BANJO_EXPORT bj_real bj_compute_particle_drag_coefficient_2d(
 ///
 /// result = -c * v_hat with c as above. Zero if vel is near zero.
 ///
-/// \param result Output force [M L T^-2]
 /// \param vel    Velocity vector [L T^-1]
 /// \param k1     Linear drag coefficient [M T^-1]
 /// \param k2     Quadratic drag coefficient [M L^-1]
-/// \retval BJ_TRUE  result written
-/// \retval BJ_FALSE velocity too small to define direction; result set to (0,0)
+/// \return Output force [M L T^-2]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_compute_particle_drag_force_2d(
-    BJ_ARRAY      (bj_real, 2, result),
-    BJ_CONST_ARRAY(bj_real, 2, vel),
-    const bj_real k1,
-    const bj_real k2
+BANJO_EXPORT bj_vec2 bj_compute_particle_drag_force_2d(
+    bj_vec2  vel,
+    const    bj_real k1,
+    const    bj_real k2
 );
 
 ////////////////////////////////////////////////////////////////////////////////
