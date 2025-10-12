@@ -149,3 +149,60 @@ long double bj_normal_long_double_distribution(
     return mean + standard_deviation * z0;
 }
 
+float bj_normal_float_minmax_distribution(
+    bj_random_u32_fn_t next,
+    void*              state,
+    float              min,
+    float              max
+) {
+    const float mu    = 0.5f * (min + max);
+    const float sigma = (max - min) / 6.0f;
+    return bj_normal_float_distribution(next, state, mu, sigma);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normal from min/max convenience (μ ≈ (min+max)/2, σ ≈ (max-min)/6).
+///
+/// Interprets min ≈ μ − 3σ and max ≈ μ + 3σ, then calls the typed normal
+/// distribution. Samples are not guaranteed to lie inside [min, max].
+///
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
+/// \param state  Opaque engine state for next.
+/// \param min    Approximate lower limit (treated as μ − 3σ).
+/// \param max    Approximate upper limit (treated as μ + 3σ).
+/// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
+////////////////////////////////////////////////////////////////////////////////
+double bj_normal_double_minmax_distribution(
+    bj_random_u32_fn_t next,
+    void*              state,
+    double             min,
+    double             max
+) {
+    const double mu    = 0.5 * (min + max);
+    const double sigma = (max - min) / 6.0;
+    return bj_normal_double_distribution(next, state, mu, sigma);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normal from min/max convenience (μ ≈ (min+max)/2, σ ≈ (max-min)/6).
+///
+/// Interprets min ≈ μ − 3σ and max ≈ μ + 3σ, then calls the typed normal
+/// distribution. Samples are not guaranteed to lie inside [min, max].
+///
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
+/// \param state  Opaque engine state for next.
+/// \param min    Approximate lower limit (treated as μ − 3σ).
+/// \param max    Approximate upper limit (treated as μ + 3σ).
+/// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
+////////////////////////////////////////////////////////////////////////////////
+long double bj_normal_long_double_minmax_distribution(
+    bj_random_u32_fn_t next,
+    void*              state,
+    long double        min,
+    long double        max
+) {
+    const long double mu    = 0.5L * (min + max);
+    const long double sigma = (max - min) / 6.0L;
+    return bj_normal_long_double_distribution(next, state, mu, sigma);
+}
+

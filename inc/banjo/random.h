@@ -102,7 +102,7 @@ uint32_t bj_max_pcg32(void);
 /// \param state Pointer to bj_pcg32.
 /// \return Next 32-bit pseudo-random value.
 ////////////////////////////////////////////////////////////////////////////////
-static inline uint32_t bj_pcg32_generator(void* state) {
+static BJ_INLINE uint32_t bj_pcg32_generator(void* state) {
     return bj_next_pcg32((bj_pcg32*)state);
 }
 
@@ -122,7 +122,7 @@ typedef uint32_t (*bj_random_u32_fn_t)(void* state);
 /// \param high   Inclusive upper bound.
 /// \return int32 in [low, high].
 ////////////////////////////////////////////////////////////////////////////////
-int32_t bj_uniform_int32_distribution(
+BANJO_EXPORT int32_t bj_uniform_int32_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     int32_t            low,
@@ -137,7 +137,7 @@ int32_t bj_uniform_int32_distribution(
 /// \param high   Exclusive upper bound.
 /// \return float in [low, high).
 ////////////////////////////////////////////////////////////////////////////////
-float bj_uniform_float_distribution(
+BANJO_EXPORT float bj_uniform_float_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     float              low,
@@ -152,7 +152,7 @@ float bj_uniform_float_distribution(
 /// \param high   Exclusive upper bound.
 /// \return double in [low, high).
 ////////////////////////////////////////////////////////////////////////////////
-double bj_uniform_double_distribution(
+BANJO_EXPORT double bj_uniform_double_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     double             low,
@@ -167,7 +167,7 @@ double bj_uniform_double_distribution(
 /// \param high   Exclusive upper bound.
 /// \return long double in [low, high).
 ////////////////////////////////////////////////////////////////////////////////
-long double bj_uniform_long_double_distribution(
+BANJO_EXPORT long double bj_uniform_long_double_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     long double        low,
@@ -198,7 +198,7 @@ long double bj_uniform_long_double_distribution(
 /// \param probability Probability in [0,1].
 /// \return 1 with the given probability, else 0.
 ////////////////////////////////////////////////////////////////////////////////
-int bj_bernoulli_distribution(
+BANJO_EXPORT int bj_bernoulli_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     bj_real            probability
@@ -212,7 +212,7 @@ int bj_bernoulli_distribution(
 /// \param standard_deviation  Standard deviation (>= 0).
 /// \return float sample.
 ////////////////////////////////////////////////////////////////////////////////
-float bj_normal_float_distribution(
+BANJO_EXPORT float bj_normal_float_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     float              mean,
@@ -227,7 +227,7 @@ float bj_normal_float_distribution(
 /// \param standard_deviation  Standard deviation (>= 0).
 /// \return double sample.
 ////////////////////////////////////////////////////////////////////////////////
-double bj_normal_double_distribution(
+BANJO_EXPORT double bj_normal_double_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     double             mean,
@@ -242,7 +242,7 @@ double bj_normal_double_distribution(
 /// \param standard_deviation  Standard deviation (>= 0).
 /// \return long double sample.
 ////////////////////////////////////////////////////////////////////////////////
-long double bj_normal_long_double_distribution(
+BANJO_EXPORT long double bj_normal_long_double_distribution(
     bj_random_u32_fn_t next,
     void*              state,
     long double        mean,
@@ -267,4 +267,78 @@ long double bj_normal_long_double_distribution(
 #endif
 
 #endif /* BJ_RANDOM_H */
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normal from min/max convenience (μ ≈ (min+max)/2, σ ≈ (max-min)/6).
+///
+/// Interprets min ≈ μ − 3σ and max ≈ μ + 3σ, then calls the typed normal
+/// distribution. Samples are not guaranteed to lie inside [min, max].
+///
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
+/// \param state  Opaque engine state for next.
+/// \param min    Approximate lower limit (treated as μ − 3σ).
+/// \param max    Approximate upper limit (treated as μ + 3σ).
+/// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT float bj_normal_float_minmax_distribution(
+    bj_random_u32_fn_t next,
+    void*              state,
+    float              min,
+    float              max
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normal from min/max convenience (μ ≈ (min+max)/2, σ ≈ (max-min)/6).
+///
+/// Interprets min ≈ μ − 3σ and max ≈ μ + 3σ, then calls the typed normal
+/// distribution. Samples are not guaranteed to lie inside [min, max].
+///
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
+/// \param state  Opaque engine state for next.
+/// \param min    Approximate lower limit (treated as μ − 3σ).
+/// \param max    Approximate upper limit (treated as μ + 3σ).
+/// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT double bj_normal_double_minmax_distribution(
+    bj_random_u32_fn_t next,
+    void*              state,
+    double             min,
+    double             max
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Normal from min/max convenience (μ ≈ (min+max)/2, σ ≈ (max-min)/6).
+///
+/// Interprets min ≈ μ − 3σ and max ≈ μ + 3σ, then calls the typed normal
+/// distribution. Samples are not guaranteed to lie inside [min, max].
+///
+/// \param next   RNG callback (e.g., bj_pcg32_generator).
+/// \param state  Opaque engine state for next.
+/// \param min    Approximate lower limit (treated as μ − 3σ).
+/// \param max    Approximate upper limit (treated as μ + 3σ).
+/// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT long double bj_normal_long_double_minmax_distribution(
+    bj_random_u32_fn_t next,
+    void*              state,
+    long double        min,
+    long double        max
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \def bj_normal_real_minmax_distribution
+/// \brief Alias to the real-typed min/max normal for the active precision.
+///
+/// Maps to:
+/// - bj_normal_long_double_minmax_distribution if BJ_API_LONG_DOUBLE
+/// - bj_normal_double_minmax_distribution      if BJ_API_FLOAT64
+/// - bj_normal_float_minmax_distribution       otherwise
+////////////////////////////////////////////////////////////////////////////////
+#if defined(BJ_API_LONG_DOUBLE)
+    #define bj_normal_real_minmax_distribution  bj_normal_long_double_minmax_distribution
+#elif defined(BJ_API_FLOAT64)
+    #define bj_normal_real_minmax_distribution  bj_normal_double_minmax_distribution
+#else
+    #define bj_normal_real_minmax_distribution  bj_normal_float_minmax_distribution
+#endif
 /// \} // end of random group
