@@ -1,10 +1,11 @@
 ![Documentation](https://github.com/OragonEfreet/banjo/actions/workflows/documentation.yml/badge.svg)
 [![Tests](https://github.com/OragonEfreet/banjo/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/OragonEfreet/banjo/actions/workflows/cmake-multi-platform.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Banjo is a lightweight, self-contained C99 framework based on four principles:  
-**Simple** – if you know C, you can use it.  
-**Minimal** – no external dependencies, even for tests.  
-**Self-documented** – APIs are explained in the headers.  
+Banjo is a lightweight, self-contained C99 framework based on four principles:
+**Simple** – if you know C, you can use it.
+**Minimal** – no external dependencies, even for tests.
+**Self-documented** – APIs are explained in the headers.
 **Fast** – must compile quickly.  
 
 Features include windowing and events, bitmap manipulation (loading, blitting, primitives), logging, custom allocators, and math utilities (vec2, vec3, vec4, mat3, mat4, quat). A roadmap is available at [Development Status](https://codework-orange.io/banjo/roadmap.html).  
@@ -20,4 +21,8 @@ Banjo is tested on the following environments, where “tested” means the full
 | Windows 11 64-bit       | Microsoft Visual C++ 2022   | 3.28.1  |
 | macOS 15.6.1            | Apple clang 16.0.0          | 3.29.3  |
 
-Demo code and usage examples are provided at [Examples](examples.html).  
+Demo code and usage examples are provided at [Examples](examples.html).
+
+## License
+
+Banjo is licensed under the [MIT License](LICENSE).  
