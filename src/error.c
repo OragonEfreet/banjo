@@ -16,10 +16,19 @@ void bj_set_error(
     }
 
     if(*p_error == 0) {
-        *p_error           = bj_malloc(sizeof(bj_error));
-        (*p_error)->code   = code;
-        bj_memcpy((*p_error)->message, message, BJ_ERROR_MESSAGE_MAX_LEN + 1);
-        ((*p_error)->message)[BJ_ERROR_MESSAGE_MAX_LEN] = '\0';
+        *p_error = bj_malloc(sizeof(bj_error));
+        if (*p_error == 0) {
+            return;
+        }
+        (*p_error)->code = code;
+
+        // Safe string copy with bounds checking
+        size_t msg_len = 0;
+        while (msg_len < BJ_ERROR_MESSAGE_MAX_LEN && message[msg_len] != '\0') {
+            (*p_error)->message[msg_len] = message[msg_len];
+            msg_len++;
+        }
+        (*p_error)->message[msg_len] = '\0';
     } else {
         bj_err("Error code 0x%08X overwritten by 0x%08X",
             (*p_error)->code, code

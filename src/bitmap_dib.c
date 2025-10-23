@@ -84,7 +84,10 @@ static bj_bitmap* unpalletized(bj_bitmap* p_original, dib_table_rgb* p_color_tab
                             default:
                                 break;
                         }
-                        bj_assert(index < color_table_size);
+                        if (index >= color_table_size) {
+                            bj_warn("Invalid color table index %zu >= %zu, clamping to 0", index, color_table_size);
+                            index = 0;
+                        }
                         *p_dest_byte++ = p_color_table[index].blue;
                         *p_dest_byte++ = p_color_table[index].green;
                         *p_dest_byte++ = p_color_table[index].red;
@@ -522,10 +525,16 @@ bj_bitmap* dib_create_bitmap_from_stream(
     // Stride of the bitmap is either the computed dib size (if mode is unknown) or 0.
     // If 0, the bitmap initialized will set to the best choice for us.
     bj_bitmap* p_bitmap = bj_create_bitmap(
-        dib_width, _ABS(dib_height), 
-        src_mode, 
+        dib_width, _ABS(dib_height),
+        src_mode,
         src_mode == BJ_PIXEL_MODE_UNKNOWN ? dib_uncompressed_row_size(dib_width, dib_bit_count) : 0
     );
+
+    if (p_bitmap == 0) {
+        bj_free(color_table);
+        bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot create bitmap");
+        return 0;
+    }
 
     bj_error* p_inner_error = 0;
     switch(dib_compression) {

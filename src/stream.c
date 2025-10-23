@@ -60,6 +60,7 @@ bj_stream* bj_open_stream_file(
         size_t bytes_read = fread(buffer, 1, file_byte_size, fstream);
         fclose(fstream);
         if (bytes_read != file_byte_size) {
+            bj_free(buffer);
             bj_set_error(p_error, BJ_ERROR, "cannot read file content");
             return 0;
         }

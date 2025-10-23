@@ -35,7 +35,9 @@ void* bj_malloc(size_t size) {
 
 void* bj_calloc(size_t size) {
     void* ptr = bj_malloc(size);
-    bj_memzero(ptr, size);
+    if (ptr) {
+        bj_memzero(ptr, size);
+    }
     return ptr;
 }
 

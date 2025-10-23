@@ -38,6 +38,7 @@ typedef int                 (* pfn_XEventsQueued)(Display*,int);
 typedef int                 (* pfn_XFindContext)(Display*,XID,XContext,XPointer*);
 typedef int                 (* pfn_XFlush)(Display*);
 typedef int                 (* pfn_XFree)(void*);
+typedef int                 (* pfn_XFreeGC)(Display*,GC);
 typedef KeySym*             (* pfn_XGetKeyboardMapping)(Display*,KeyCode,int,int*);
 typedef Status              (* pfn_XGetWindowAttributes)(Display*,Window,XWindowAttributes*);
 typedef Atom                (* pfn_XInternAtom)(Display*,const char*,Bool);
@@ -82,6 +83,7 @@ typedef struct bj_video_layer_data_t {
     pfn_XFindContext         XFindContext;
     pfn_XFlush               XFlush;
     pfn_XFree                XFree;
+    pfn_XFreeGC              XFreeGC;
     pfn_XGetWindowAttributes XGetWindowAttributes;
     pfn_XMapWindow           XMapWindow;
     pfn_XNextEvent           XNextEvent;
@@ -640,6 +642,11 @@ static bj_bitmap* x11_create_window_framebuffer(
         mode, 0
     );
 
+    if (!p_bitmap) {
+        bj_set_error(p_error, BJ_ERROR_VIDEO | X11_CANNOT_CREATE_IMAGE, "Failed to create bitmap");
+        return 0;
+    }
+
     p_window->p_framebuffer_pixels = bj_bitmap_pixels(p_bitmap);
     p_bitmap->weak = 1;
 
@@ -677,6 +684,7 @@ static void x11_flush_window_framebuffer(
 
     GC gc = p_x11->XCreateGC(display, window, 0, 0);
     p_x11->XPutImage(display, window, gc, p_window->p_framebuffer_image, 0, 0, 0, 0, width, height);
+    p_x11->XFreeGC(display, gc);
     p_x11->XSync(display, False);
 }
 
@@ -715,6 +723,7 @@ static bj_video_layer* x11_init_video(
     p_x11->XFindContext         = (pfn_XFindContext)x11_get_symbol(p_x11, "XFindContext");
     p_x11->XFlush               = (pfn_XFlush)x11_get_symbol(p_x11, "XFlush");
     p_x11->XFree                = (pfn_XFree)x11_get_symbol(p_x11, "XFree");
+    p_x11->XFreeGC              = (pfn_XFreeGC)x11_get_symbol(p_x11, "XFreeGC");
     p_x11->XMapWindow           = (pfn_XMapWindow)x11_get_symbol(p_x11, "XMapWindow");
     p_x11->XGetWindowAttributes = (pfn_XGetWindowAttributes)x11_get_symbol(p_x11, "XGetWindowAttributes");
     p_x11->XNextEvent           = (pfn_XNextEvent)x11_get_symbol(p_x11, "XNextEvent");

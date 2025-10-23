@@ -42,6 +42,9 @@ bj_bitmap* bj_init_bitmap(
                 p_bitmap->buffer = p_pixels;
             } else {
                 p_bitmap->buffer = bj_malloc(bufsize);
+                if (p_bitmap->buffer == 0) {
+                    return 0;
+                }
                 bj_memset(p_bitmap->buffer, 0x00, bufsize);
             }
             
@@ -58,6 +61,7 @@ void bj_reset_bitmap(
     if(p_bitmap->weak == 0) {
         bj_free(p_bitmap->buffer);
     }
+    p_bitmap->buffer = 0;
     bj_destroy_bitmap(p_bitmap->charset);
 }
 
@@ -71,7 +75,12 @@ bj_bitmap* bj_create_bitmap(
     if(bj_init_bitmap(&bitmap, 0, width, height, mode, stride) == 0) {
         return 0;
     }
-    return bj_memcpy(bj_allocate_bitmap(), &bitmap, sizeof(bj_bitmap));
+    bj_bitmap* p_new = bj_allocate_bitmap();
+    if (p_new == 0) {
+        bj_free(bitmap.buffer);
+        return 0;
+    }
+    return bj_memcpy(p_new, &bitmap, sizeof(bj_bitmap));
 }
 
 bj_bitmap* bj_create_bitmap_from_pixels(
@@ -86,7 +95,11 @@ bj_bitmap* bj_create_bitmap_from_pixels(
     if (bj_init_bitmap(&bitmap, p_pixels, width, height, mode, stride) == 0) {
         return 0;
     }
-    return bj_memcpy(bj_allocate_bitmap(), &bitmap, sizeof(bj_bitmap));
+    bj_bitmap* p_new = bj_allocate_bitmap();
+    if (p_new == 0) {
+        return 0;
+    }
+    return bj_memcpy(p_new, &bitmap, sizeof(bj_bitmap));
 }
 
 bj_bitmap* bj_copy_bitmap(
@@ -98,7 +111,12 @@ bj_bitmap* bj_copy_bitmap(
         return 0;
     }
     bj_memcpy(bitmap.buffer, p_bitmap->buffer, bitmap.stride * bitmap.height);
-    return bj_memcpy(bj_allocate_bitmap(), &bitmap, sizeof(bj_bitmap));
+    bj_bitmap* p_new = bj_allocate_bitmap();
+    if (p_new == 0) {
+        bj_free(bitmap.buffer);
+        return 0;
+    }
+    return bj_memcpy(p_new, &bitmap, sizeof(bj_bitmap));
 }
 
 bj_bitmap* bj_convert_bitmap(
@@ -126,7 +144,12 @@ bj_bitmap* bj_convert_bitmap(
         }
     }
 
-    return bj_memcpy(bj_allocate_bitmap(), &dst, sizeof(bj_bitmap));
+    bj_bitmap* p_new = bj_allocate_bitmap();
+    if (p_new == 0) {
+        bj_free(dst.buffer);
+        return 0;
+    }
+    return bj_memcpy(p_new, &dst, sizeof(bj_bitmap));
 }
 
 void bj_destroy_bitmap(
