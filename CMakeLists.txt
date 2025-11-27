@@ -25,6 +25,7 @@ option(BJ_CONFIG_FASTMATH     "Enable fast math (FMA, reassociation, etc.) "    
 
 file(GLOB SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.m"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/inc/banjo/*.h"
 )

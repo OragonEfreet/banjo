@@ -16,6 +16,7 @@
 static bj_video_layer* cocoa_init_video(
     bj_error** p_error
 ) {
+    (void)p_error;
 
     return 0;
 }
