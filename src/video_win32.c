@@ -400,7 +400,7 @@ static bj_video_layer* win32_init_video(
 }
 
 bj_video_layer_create_info win32_video_layer_info = {
-    .name = "Win32",
+    .name = "win32",
     .create = win32_init_video,
 };
 
