@@ -13,6 +13,10 @@
 
 #import <Cocoa/Cocoa.h>
 
+typedef struct bj_video_layer_data_t {
+    NSApplication* app;
+} cocoa;
+
 static bj_video_layer* cocoa_init_video(
     bj_error** p_error
 ) {
