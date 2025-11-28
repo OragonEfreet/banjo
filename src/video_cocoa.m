@@ -15,6 +15,7 @@
 #include "window_t.h"
 
 #import <Cocoa/Cocoa.h>
+#import <objc/runtime.h>
 
 typedef struct bj_video_layer_data_t {
     NSApplication* app;
@@ -35,6 +36,10 @@ typedef struct {
     BanjoView*         view;
 } cocoa_window;
 
+static void cocoa_dispatch_event(cocoa_window* window, NSEvent* event) {
+    // TODO: Implement
+}
+
 static void cocoa_poll_events(bj_video_layer* p_layer) {
   @autoreleasepool {
       NSEvent* event;
@@ -42,6 +47,21 @@ static void cocoa_poll_events(bj_video_layer* p_layer) {
                                          untilDate:nil
                                             inMode:NSDefaultRunLoopMode
                                            dequeue:YES])) {
+
+          cocoa_window* window = 0;
+          if([event window]) {
+              BanjoView* view = (BanjoView*)[[event window] contentView];
+              if ([view isKindOfClass:[BanjoView class]]) {
+                  window = (cocoa_window*)objc_getAssociatedObject(
+                    view, "banjo_window"
+                );
+              }
+          }
+
+          if(window != 0) {
+              cocoa_dispatch_event(window, event);
+          }
+
           [NSApp sendEvent:event];
       }
   }
@@ -116,6 +136,11 @@ static bj_window* cocoa_create_window(
         window->common.flags = flags;
         window->handle       = nsWindow;
         window->view         = view;
+
+        objc_setAssociatedObject(
+            view, "banjo_window", 
+            (id)(void*)window, OBJC_ASSOCIATION_ASSIGN
+        );
 
         [nsWindow makeKeyAndOrderFront:nil];
 
