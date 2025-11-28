@@ -26,6 +26,9 @@ typedef struct cocoa_window_t {
     struct bj_window_t common;
     NSWindow*          handle;
     void*              view;
+    void*              buffer;
+    int                buffer_width; 
+    int                buffer_height; 
 } cocoa_window;
 
 @interface BanjoView : NSView
@@ -34,6 +37,13 @@ typedef struct cocoa_window_t {
 @implementation BanjoView
 - (BOOL)acceptsFirstResponder {
     return YES;
+}
+
+- (void) drawRect:(NSRect)dirtyRect {
+    cocoa_window* window = (cocoa_window*)objc_getAssociatedObject(
+        self, "banjo_window"
+    );
+    bj_check(window);
 }
 
 - (BOOL)windowShouldClose:(NSWindow*)sender {
@@ -233,6 +243,35 @@ static bj_window* cocoa_create_window(
     }
 }
 
+static bj_bitmap* cocoa_create_window_framebuffer(
+    bj_video_layer*  p_video,
+    const bj_window* p_abstract_window,
+    bj_error**       p_error
+) {
+    @autoreleasepool {
+        cocoa_window* window = (cocoa_window*)p_abstract_window;
+
+        int width, height;
+        cocoa_get_window_size(p_video, p_abstract_window, &width, &height);
+
+        if (window->buffer) {
+            bj_free(window->buffer);
+        }
+
+        bj_pixel_mode mode = BJ_PIXEL_MODE_XRGB8888;
+        size_t stride         = bj_compute_bitmap_stride(width, mode);
+        window->buffer        = bj_malloc(stride * height);
+        window->buffer_width  = width;
+        window->buffer_height = height;
+
+        bj_info("Framebuffer created: %dx%d", width, height);
+
+        return bj_create_bitmap_from_pixels(
+            window->buffer, width, height, mode, stride
+        );
+    }
+}
+
 static void cocoa_end_video(
     bj_video_layer* p_video,
     bj_error** p_error
@@ -263,7 +302,7 @@ static bj_video_layer* cocoa_init_video(
         p_layer->delete_window             = cocoa_delete_window;
         p_layer->poll_events               = cocoa_poll_events;
         p_layer->get_window_size           = cocoa_get_window_size;
-        p_layer->create_window_framebuffer = 0;
+        p_layer->create_window_framebuffer = cocoa_create_window_framebuffer;
         p_layer->flush_window_framebuffer  = 0;
 
         bj_info("Cocoa backend initialized");
