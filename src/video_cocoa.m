@@ -11,6 +11,7 @@
 #include <banjo/video.h>
 #include <banjo/window.h>
 
+#include "check.h"
 #include "window_t.h"
 
 #import <Cocoa/Cocoa.h>
@@ -30,9 +31,22 @@ typedef struct bj_video_layer_data_t {
 
 typedef struct {
     struct bj_window_t common;
-    NSWindow*          window;
+    NSWindow*          handle;
     BanjoView*         view;
 } cocoa_window;
+
+static void cocoa_delete_window(
+    bj_video_layer* p_video,
+    bj_window* p_abstract_window
+) {
+    bj_check(p_abstract_window);
+    @autoreleasepool {
+        cocoa_window* p_window = (cocoa_window*)p_abstract_window;
+        [p_window->handle close];
+        bj_free(p_window);
+        bj_info("Cocoa window deleted");
+    }
+}
 
 static bj_window* cocoa_create_window(
     bj_video_layer* p_video,
@@ -70,7 +84,7 @@ static bj_window* cocoa_create_window(
 
         cocoa_window* window = bj_malloc(sizeof(cocoa_window));
         window->common.flags = flags;
-        window->window       = nsWindow;
+        window->handle       = nsWindow;
         window->view         = view;
 
         [nsWindow makeKeyAndOrderFront:nil];
@@ -107,7 +121,7 @@ static bj_video_layer* cocoa_init_video(
         p_layer->data                      = p_cocoa;
         p_layer->end                       = cocoa_end_video;
         p_layer->create_window             = cocoa_create_window;
-        p_layer->delete_window             = 0;
+        p_layer->delete_window             = cocoa_delete_window;
         p_layer->poll_events               = 0;
         p_layer->get_window_size           = 0;
         p_layer->create_window_framebuffer = 0;
