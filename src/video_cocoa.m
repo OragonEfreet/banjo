@@ -4,6 +4,7 @@
 
 #include <banjo/assert.h>
 #include <banjo/error.h>
+#include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
 #include <banjo/system.h>
@@ -21,6 +22,12 @@ typedef struct bj_video_layer_data_t {
     NSApplication* app;
 } cocoa;
 
+typedef struct cocoa_window_t {
+    struct bj_window_t common;
+    NSWindow*          handle;
+    void*              view;
+} cocoa_window;
+
 @interface BanjoView : NSView
 @end
 
@@ -28,16 +35,92 @@ typedef struct bj_video_layer_data_t {
 - (BOOL)acceptsFirstResponder {
     return YES;
 }
+
+- (BOOL)windowShouldClose:(NSWindow*)sender {
+    cocoa_window* window = (cocoa_window*)objc_getAssociatedObject(
+        self, "banjo_window"
+    );
+    if (window) {
+        bj_set_window_should_close(&window->common);
+    }
+    return NO;
+}
 @end
 
-typedef struct {
-    struct bj_window_t common;
-    NSWindow*          handle;
-    BanjoView*         view;
-} cocoa_window;
+static bj_key cocoa_keycode_to_bj_key(unsigned short keyCode) {
+    static const bj_key keymap[128] = {
+        [0x00] = BJ_KEY_A,       [0x01] = BJ_KEY_S,
+        [0x02] = BJ_KEY_D,       [0x03] = BJ_KEY_F,
+        [0x04] = BJ_KEY_H,       [0x05] = BJ_KEY_G,
+        [0x06] = BJ_KEY_Z,       [0x07] = BJ_KEY_X,
+        [0x08] = BJ_KEY_C,       [0x09] = BJ_KEY_V,
+        [0x0B] = BJ_KEY_B,       [0x0C] = BJ_KEY_Q,
+        [0x0D] = BJ_KEY_W,       [0x0E] = BJ_KEY_E,
+        [0x0F] = BJ_KEY_R,       [0x10] = BJ_KEY_Y,
+        [0x11] = BJ_KEY_T,       [0x12] = BJ_KEY_1,
+        [0x13] = BJ_KEY_2,       [0x14] = BJ_KEY_3,
+        [0x15] = BJ_KEY_4,       [0x16] = BJ_KEY_6,
+        [0x17] = BJ_KEY_5,       [0x19] = BJ_KEY_9,
+        [0x1A] = BJ_KEY_7,       [0x1C] = BJ_KEY_8,
+        [0x1D] = BJ_KEY_0,       [0x1F] = BJ_KEY_O,
+        [0x20] = BJ_KEY_U,       [0x22] = BJ_KEY_I,
+        [0x23] = BJ_KEY_P,       [0x24] = BJ_KEY_RETURN,
+        [0x25] = BJ_KEY_L,       [0x26] = BJ_KEY_J,
+        [0x28] = BJ_KEY_K,       [0x2D] = BJ_KEY_N,
+        [0x2E] = BJ_KEY_M,       [0x30] = BJ_KEY_TAB,
+        [0x31] = BJ_KEY_SPACE,   [0x33] = BJ_KEY_BACKSPACE,
+        [0x35] = BJ_KEY_ESCAPE,  [0x37] = BJ_KEY_LWIN,
+        [0x38] = BJ_KEY_LSHIFT,  [0x3A] = BJ_KEY_LMENU,
+        [0x3B] = BJ_KEY_LCONTROL,[0x3C] = BJ_KEY_RSHIFT,
+        [0x3D] = BJ_KEY_RMENU,   [0x3E] = BJ_KEY_RCONTROL,
+        [0x7B] = BJ_KEY_LEFT,    [0x7C] = BJ_KEY_RIGHT,
+        [0x7D] = BJ_KEY_DOWN,    [0x7E] = BJ_KEY_UP,
+    };
+
+    return (keyCode < 128) ? keymap[keyCode] : BJ_KEY_UNKNOWN;
+}
 
 static void cocoa_dispatch_event(cocoa_window* window, NSEvent* event) {
-    // TODO: Implement
+    bj_check(window);
+    bj_check(event);
+
+    NSEventType type = [event type];
+
+    switch (type) {
+        case NSEventTypeKeyDown: {
+            bj_key key = cocoa_keycode_to_bj_key([event keyCode]);
+            bj_push_key_event(&window->common, BJ_PRESS, key, [event keyCode]);
+            break;
+        }
+        case NSEventTypeKeyUp: {
+            bj_key key = cocoa_keycode_to_bj_key([event keyCode]);
+            bj_push_key_event(&window->common, BJ_RELEASE, key, [event keyCode]);
+            break;
+        }
+        case NSEventTypeLeftMouseDown:
+        case NSEventTypeLeftMouseUp: {
+            NSPoint loc = [event locationInWindow];
+            int action = (type == NSEventTypeLeftMouseDown) ? BJ_PRESS : BJ_RELEASE;
+            bj_push_button_event(&window->common, BJ_BUTTON_LEFT, action,
+                                 (int)loc.x, (int)loc.y);
+            break;
+        }
+        case NSEventTypeRightMouseDown:
+        case NSEventTypeRightMouseUp: {
+            NSPoint loc = [event locationInWindow];
+            int action = (type == NSEventTypeRightMouseDown) ? BJ_PRESS : BJ_RELEASE;
+            bj_push_button_event(&window->common, BJ_BUTTON_RIGHT, action,
+                                 (int)loc.x, (int)loc.y);
+            break;
+        }
+        case NSEventTypeMouseMoved:
+        case NSEventTypeLeftMouseDragged:
+        case NSEventTypeRightMouseDragged: {
+            NSPoint loc = [event locationInWindow];
+            bj_push_cursor_event(&window->common, (int)loc.x, (int)loc.y);
+            break;
+        }
+    }
 }
 
 static void cocoa_poll_events(bj_video_layer* p_layer) {
@@ -131,6 +214,7 @@ static bj_window* cocoa_create_window(
 
         BanjoView* view = [[BanjoView alloc] initWithFrame:contentRect];
         [nsWindow setContentView:view];
+        [nsWindow setDelegate:view];
 
         cocoa_window* window = bj_malloc(sizeof(cocoa_window));
         window->common.flags = flags;
