@@ -89,7 +89,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     if(!bj_initialize(&p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
-    } 
+    }
 
     window = bj_bind_window("Simple Text", 100, 100, 500, 500, 0);
     bj_set_key_callback(bj_close_on_escape, 0);
