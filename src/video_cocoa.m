@@ -35,6 +35,24 @@ typedef struct {
     BanjoView*         view;
 } cocoa_window;
 
+static int cocoa_get_window_size(
+    bj_video_layer* p_video,
+    const bj_window* p_abstract_window,
+    int* width,
+    int* height
+) {
+    bj_check_or_0(p_abstract_window);
+    bj_check_or_0(width);
+    bj_check_or_0(height);
+    cocoa_window* p_window = (cocoa_window*)p_abstract_window;
+    NSRect bounds = [p_window->view bounds];
+
+    *width = bounds.size.width;
+    *height = bounds.size.height;
+
+    return 1;
+}
+
 static void cocoa_delete_window(
     bj_video_layer* p_video,
     bj_window* p_abstract_window
@@ -123,7 +141,7 @@ static bj_video_layer* cocoa_init_video(
         p_layer->create_window             = cocoa_create_window;
         p_layer->delete_window             = cocoa_delete_window;
         p_layer->poll_events               = 0;
-        p_layer->get_window_size           = 0;
+        p_layer->get_window_size           = cocoa_get_window_size;
         p_layer->create_window_framebuffer = 0;
         p_layer->flush_window_framebuffer  = 0;
 
