@@ -7,6 +7,7 @@ extern bj_video_layer_create_info emscripten_video_layer_info;
 extern bj_video_layer_create_info novideo_video_layer_info;
 extern bj_video_layer_create_info win32_video_layer_info;
 extern bj_video_layer_create_info x11_video_layer_info;
+extern bj_video_layer_create_info cocoa_video_layer_info;
 
 static const bj_video_layer_create_info* layer_infos[] = {
 #if BJ_HAS_FEATURE(EMSCRIPTEN)
@@ -14,6 +15,9 @@ static const bj_video_layer_create_info* layer_infos[] = {
 #endif
 #if BJ_HAS_FEATURE(WIN32)
     &win32_video_layer_info,
+#endif
+#if BJ_HAS_FEATURE(COCOA)
+    &cocoa_video_layer_info,
 #endif
 #if BJ_HAS_FEATURE(X11)
     &x11_video_layer_info,

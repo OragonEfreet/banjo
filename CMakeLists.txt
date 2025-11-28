@@ -15,6 +15,7 @@ option(BJ_FEATURE_X11         "Add X11 support"                                 
 option(BJ_FEATURE_MME         "Add support for audio with Windows Multimedia Extensions"       OFF)
 option(BJ_FEATURE_ALSA        "Add support for audio with ALSA"                                OFF)
 option(BJ_FEATURE_EMSCRIPTEN  "Add support for Emscripten"                                     OFF)
+option(BJ_FEATURE_COCOA       "Add Cocoa/macOS support"                                        OFF)
 option(BJ_CONFIG_ALL          "Enable all CONFIG options at once"                              OFF)
 option(BJ_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)
 option(BJ_CONFIG_CHECKS_LOG   "If checks feature is on, failed check with log"                 OFF)
@@ -24,6 +25,7 @@ option(BJ_CONFIG_FASTMATH     "Enable fast math (FMA, reassociation, etc.) "    
 
 file(GLOB SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.m"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/inc/banjo/*.h"
 )
@@ -60,6 +62,12 @@ if(BJ_FEATURE_X11)
     find_package(X11)
     if(X11_FOUND)
         target_include_directories(banjo PRIVATE ${X11_INCLUDE_DIR})
+    endif()
+endif()
+
+if(BJ_FEATURE_COCOA)
+    if(APPLE)
+        target_link_libraries(banjo PUBLIC "-framework Cocoa")
     endif()
 endif()
 

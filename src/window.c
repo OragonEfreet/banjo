@@ -53,7 +53,6 @@ bj_bitmap* bj_get_window_framebuffer(
     bj_check_or_0(p_window);
 
     if (p_window->p_framebuffer == 0) {
-        
         int width = 0;
         int height = 0;
 
