@@ -272,6 +272,15 @@ static bj_bitmap* cocoa_create_window_framebuffer(
     }
 }
 
+static void cocoa_flush_window_framebuffer(
+    bj_video_layer* p_video,
+    const bj_window*   p_abstract_window
+) {
+    cocoa_window* p_window = (cocoa_window*)p_abstract_window;
+    NSView* view = (NSView*)p_window->view;
+    [view setNeedsDisplay:YES];
+}
+
 static void cocoa_end_video(
     bj_video_layer* p_video,
     bj_error** p_error
@@ -303,7 +312,7 @@ static bj_video_layer* cocoa_init_video(
         p_layer->poll_events               = cocoa_poll_events;
         p_layer->get_window_size           = cocoa_get_window_size;
         p_layer->create_window_framebuffer = cocoa_create_window_framebuffer;
-        p_layer->flush_window_framebuffer  = 0;
+        p_layer->flush_window_framebuffer  = cocoa_flush_window_framebuffer;
 
         bj_info("Cocoa backend initialized");
         return p_layer;
