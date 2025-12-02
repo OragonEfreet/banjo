@@ -1,8 +1,8 @@
 #include <banjo/math.h>
 #include <banjo/draw.h>
 
-#include "bitmap_t.h"
-#include "check.h"
+#include <bitmap_t.h>
+#include <check.h>
 
 #define ABS_INT(x) ((x) < 0 ? -(x) : (x))
 #define X 0

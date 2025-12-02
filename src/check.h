@@ -1,6 +1,6 @@
 #pragma once
 
-#include "config.h"
+#include <config.h>
 
 #if BJ_HAS_CONFIG(CHECKS_ABORT)
 #   include <stdlib.h>

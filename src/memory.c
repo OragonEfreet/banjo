@@ -1,6 +1,6 @@
 #include <banjo/error.h>
 
-#include "check.h"
+#include <check.h>
 
 #include <stdlib.h> // malloc, realloc, ...
 #include <string.h> // memset, memcpy, memmove

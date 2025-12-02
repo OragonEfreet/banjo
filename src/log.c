@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "config.h"
+#include <config.h>
 
 static struct {
     int level;

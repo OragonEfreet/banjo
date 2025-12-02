@@ -6,91 +6,155 @@ This document is about producing the Banjo API binaries.
 If you want to know how to build an application *with* banjo, see \ref use.
 
 You will need at least **a C99-compliant compiler**.
-Other requirements may be necessary according to the \ref features "features you enable".
-Then, you can either build Banjo \ref build_cmake "using CMake" or \ref build_nocmake "manually".
+
+## Manual Build (No Build System) {#build_manual}
+
+Banjo is designed to be easily built without any complex build system.
+You only need to feed your compiler with the source files and the correct include paths.
+
+### 1. Core Sources
+
+Compile all `.c` files in `src/` and `src/unix/` (if on Unix) or `src/win32/` (if on Windows).
+**Do not** compile files in backend-specific subdirectories (`src/x11/`, `src/cocoa/`, etc.) unless you are enabling that specific backend.
+
+Add `inc/` and `src/` to your include search path.
+
+### 2. Output Type
+
+- **Static Library**: Define `BANJO_STATIC`.
+- **Shared Library**: Define `BANJO_EXPORTS` (do NOT define `BANJO_STATIC`).
+
+### Example: Building a Static Library (GCC/Clang)
+
+```bash
+# Compile core sources (excluding backends for this example)
+gcc -c src/*.c src/unix/*.c -I inc/ -I src/ -D BANJO_STATIC
+# (Note: This example assumes a Unix-like system. On Windows, use src/win32/*.c instead.
+#  We are not including src/x11/*.c or src/alsa/*.c here.)
+
+# Create archive
+ar rcs libbanjo.a *.o
+```
 
 ## Build Options {#build_options}
 
-All build options are controlled through setting macro definitions:
-- All macro definition start with `BJ_`.
-- If a macro definition is set, the option is enabled, the value of the macro does not matter.
-- Conversely, if a macro definition is not set, the option is disabled.
-- By default, all options are disabled.
+You can customize the build by enabling backends or configuration options.
+To enable an option manually, you simply need to define the corresponding **C Macro** and compile any required **Additional Sources**.
 
+| Option Name                              | Description                                |
+| :--------------------------------------- | :----------------------------------------- |
+| \ref opt_win32 "Win32 Backend"           | Enable Win32 window support                |
+| \ref opt_x11 "X11 Backend"               | Enable X11 window support                  |
+| \ref opt_cocoa "Cocoa Backend"           | Enable Cocoa/macOS support                 |
+| \ref opt_mme "MME Backend"               | Enable Windows Multimedia Extensions audio |
+| \ref opt_alsa "ALSA Backend"             | Enable ALSA audio support                  |
+| \ref opt_emscripten "Emscripten Backend" | Enable Emscripten/WebAssembly support      |
+| \ref opt_log_color "Colored Logs"        | Enable support for colored log outputs     |
+| \ref opt_checks_log "Log Checks"         | Failing checks are logged                  |
+| \ref opt_checks_abort "Abort on Check"   | Failing checks call `abort()`              |
+| \ref opt_pedantic "Pedantic Mode"        | Prioritize safety over performance         |
+| \ref opt_fastmath "Fast Math"            | Enable fast-math optimizations             |
 
+---
 
+### Win32 Backend {#opt_win32}
 
+This backend enables support for creating windows on the Windows platform.
+To enable it, you must define the `BJ_CONFIG_WIN32_BACKEND` macro.
+You will also need to compile `src/win32/video.c` and link against the standard system libraries `user32`, `gdi32`, and `kernel32` (which are usually linked by default).
 
-Refer to your compiler's documentation to check how to set macro definitions.
+### X11 Backend {#opt_x11}
 
-Options listed below are C macro definitions that can be either set or unset. To enable an option, define the corresponding macro when compiling your code.
-For example, to enable colored logging support with *gcc*, use `-DBJ_CONFIG_LOG_COLOR`.  
+This backend enables support for creating windows on Linux and Unix systems using the X11 display server.
+To enable it, define the `BJ_CONFIG_X11_BACKEND` macro and compile `src/x11/video.c`.
+You must ensure the X11 headers are in your include path (typically `/usr/include/X11`) and link against the X11 library using `-lX11`.
 
-### Feature Options {#features}
+### Cocoa Backend {#opt_cocoa}
 
-Feature options enable additional capabilities in the API.
-For example, `BJ_FEATURE_X11` enables support for X11.  
-Enabling a feature does **not** necessarily make it available or mandatory at runtime, but only integrates the necessary codepath at compile time to provide this support at runtime.
+This backend enables support for creating windows on macOS.
+To enable it, define the `BJ_CONFIG_COCOA_BACKEND` macro and compile `src/cocoa/video.m`.
+You will need to link against the Cocoa framework using `-framework Cocoa`.
 
-Most features require additional third-party libraries for proper compilation and execution.
+### MME Backend {#opt_mme}
 
-| Option Name       | Description                                                |
-|-------------------|------------------------------------------------------------|
-| `BJ_FEATURE_X11`  | Enable support for X11 Window system, see \ref feature_x11 |
+This backend enables audio support on Windows using the Multimedia Extensions API.
+To enable it, define the `BJ_CONFIG_MME_BACKEND` macro and compile `src/mme/audio.c`.
+You will need to link against the `winmm` system library.
 
-#### X11 Support {#feature_x11}
+### ALSA Backend {#opt_alsa}
 
-X11 Support is enabled when Banjo is compiled with `BJ_FEATURE_X11`.
-This feature provides the support for windows and events using X11 displays server.
+This backend enables audio support on Linux using the Advanced Linux Sound Architecture (ALSA).
+To enable it, define the `BJ_CONFIG_ALSA_BACKEND` macro and compile `src/alsa/audio.c`.
+Ensure the ALSA headers are in your include path and link against the ALSA library using `-lasound`.
 
-At runtime, this feature requires that the Xlib runtime libraries are accessible.
-At compile time, the include folders for Xlib must be accessible from the compiler.
-When using CMake, they are automatically searched and passed to the compiler options if found.
+### Emscripten Backend {#opt_emscripten}
 
-### Configuration Options {#configuration}
+This backend enables support for WebAssembly builds using Emscripten.
+To enable it, define the `BJ_CONFIG_EMSCRIPTEN_BACKEND` macro and compile both `src/emscripten/video.c` and `src/emscripten/audio.c`.
 
-Configuration options control finer aspects of the code, such as enabling colored logging or more expensive memory checks.  
-Unlike feature options, these do **not** require third-party libraries.  
+When linking, you need to export specific runtime methods and functions to allow the browser to interact with the Banjo runtime.
+Add the following flags to your linker command:
+`-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','_malloc','_free'] -sEXPORTED_FUNCTIONS=['_bj_emscripten_audio_process'] -sALLOW_MEMORY_GROWTH`
 
-| Option Name             | Description                                                                 |
-|-------------------------|-----------------------------------------------------------------------------|
-| `BJ_CONFIG_LOG_COLOR`   | Enable support for colored log outputs with \ref bj_log                     |
-| `BJ_CONFIG_CHECK_LOG`   | Failing checks are logged using \ref bj_err                                 |
-| `BJ_CONFIG_CHECK_ABORT` | Failing checks call `abort()` (after logging, if enabled)                   |
-| `BJ_CONFIG_PEDANTIC`    | Codepaths prioritize safety over performance when there is a choice to make |
+### Colored Logs {#opt_log_color}
+
+This option enables ANSI color codes in the log output, making it easier to distinguish between different log levels in your terminal.
+To enable it, simply define the `BJ_CONFIG_LOG_COLOR` macro.
+
+### Log Checks {#opt_checks_log}
+
+This option ensures that when a check fails (as described in \ref bj_check), an error message is logged to the standard output.
+To enable this behavior, define the `BJ_CONFIG_CHECKS_LOG` macro.
+
+### Abort on Check {#opt_checks_abort}
+
+This option causes the program execution to immediately abort when a check fails.
+This is useful for debugging critical errors.
+To enable this behavior, define the `BJ_CONFIG_CHECKS_ABORT` macro.
+
+### Pedantic Mode {#opt_pedantic}
+
+This option enables extra runtime checks throughout the API.
+These checks might be costly in terms of performance but ensure strict correctness and safety.
+To enable pedantic mode, define the `BJ_CONFIG_PEDANTIC` macro.
+
+### Fast Math {#opt_fastmath}
+
+This option enables floating-point optimizations that may violate the IEEE 754 standard but can significantly improve performance for math-heavy applications.
+To enable it, define the `BJ_CONFIG_FASTMATH` macro.
+
+You should also pass the appropriate flags to your compiler.
+For GCC and Clang, use `-ffast-math -ffp-contract=fast -fno-math-errno -fno-trapping-math`.
+For MSVC, use `/fp:fast`.
 
 ## Build with CMake {#build_cmake}
 
-Banjo API uses CMake as its primary development environment, although it's not a mandatory step.
-The use of CMake is not different from the standard configure-generate-build workflow.
+Banjo provides a CMake configuration for convenience.
+It aims to work "out of the box" by automatically detecting available dependencies and enabling the corresponding backends.
 
-All build options listed in \ref build_options are available as CMake options with the same names.
-As such, to configure with colored logging support, use `-DBJ_CONFIG_LOG_COLOR` when calling CMake, or select it in CMake user interface.
+### Auto-Detection
 
-Enabling an option using CMake will provide additional platform checks during configure step to ensure your environment is able to compile with the specific options.
-For example, when `BJ_FEATURE_X11` is set, CMake searches for X11 development libraries and add their include folders into the compile options.
+CMake checks your system for libraries (X11, ALSA, etc.) and your platform (Windows, macOS).
+If a dependency is found, the corresponding backend is **enabled by default**.
 
-CMake is configured with [Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html), which provide you with the most common configurations:
+### CMake Options
 
+Every manual option listed above has a corresponding CMake option.
+The naming convention is simple: replace the `BJ_` prefix with `BANJO_`.
 
-## Build the Sources Manually {#build_nocmake}
+**Example**:
+- Manual Macro: `BJ_CONFIG_X11_BACKEND`
+- CMake Option: `BANJO_CONFIG_X11_BACKEND`
 
-Using the compiler of your choice, compile and link all *.c* files under *src/*, setting *inc/* as an includes search folder.
-This example builds Banjo as a static library using gcc:
+You can force options ON or OFF to override auto-detection:
 
-```
-$ gcc -c src/*.c -I inc/ -D BANJO_STATIC && ar rcs libbanjo.a *.o
-```
+```bash
+# Disable X11 even if libraries are present
+cmake -B build -DBANJO_CONFIG_X11_BACKEND=OFF
 
-`BANJO_STATIC` must be defined if (and only if) the library is compiled as a static library.
-If the library is built for a dynamic library (*.so*, *.dll* or *.dylib), `BANJO_STATIC` must not be set, and `BANJO_EXPORTS` must be set instead:
-
-This line builds banjo as a shared object:
-
-```
-$ gcc -shared -fPIC -D BANJO_EXPORTS -o libbanjo.so *.c
+# Enable Pedantic mode and Colored logs
+cmake -B build -DBANJO_CONFIG_PEDANTIC=ON -DBANJO_CONFIG_LOG_COLOR=ON
 ```
 
-Refer to your compiler's documentation for more information about building C projects into static of shared libraries.
 
 

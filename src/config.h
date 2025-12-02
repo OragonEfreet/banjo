@@ -2,46 +2,40 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef BJ_FEATURE_EMSCRIPTEN
-#   define _BJ_HAS_FEATURE_EMSCRIPTEN 1
+#ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
+#   define _BJ_HAS_CONFIG_EMSCRIPTEN_BACKEND 1
 #else
-#   define _BJ_HAS_FEATURE_EMSCRIPTEN 0
+#   define _BJ_HAS_CONFIG_EMSCRIPTEN_BACKEND 0
 #endif
 
-#ifdef BJ_FEATURE_WIN32
-#   define _BJ_HAS_FEATURE_WIN32 1
+#ifdef BJ_CONFIG_WIN32_BACKEND
+#   define _BJ_HAS_CONFIG_WIN32_BACKEND 1
 #else
-#   define _BJ_HAS_FEATURE_WIN32 0
+#   define _BJ_HAS_CONFIG_WIN32_BACKEND 0
 #endif
 
-#ifdef BJ_FEATURE_X11
-#   define _BJ_HAS_FEATURE_X11 1
+#ifdef BJ_CONFIG_X11_BACKEND
+#   define _BJ_HAS_CONFIG_X11_BACKEND 1
 #else
-#   define _BJ_HAS_FEATURE_X11 0
+#   define _BJ_HAS_CONFIG_X11_BACKEND 0
 #endif
 
-#ifdef BJ_FEATURE_COCOA
-#   define _BJ_HAS_FEATURE_COCOA 1
+#ifdef BJ_CONFIG_COCOA_BACKEND
+#   define _BJ_HAS_CONFIG_COCOA_BACKEND 1
 #else
-#   define _BJ_HAS_FEATURE_COCOA 0
+#   define _BJ_HAS_CONFIG_COCOA_BACKEND 0
 #endif
 
-#ifdef BJ_FEATURE_MME
-#   define _BJ_HAS_FEATURE_MME 1
+#ifdef BJ_CONFIG_MME_BACKEND
+#   define _BJ_HAS_CONFIG_MME_BACKEND 1
 #else
-#   define _BJ_HAS_FEATURE_MME 0
+#   define _BJ_HAS_CONFIG_MME_BACKEND 0
 #endif
 
-#ifdef BJ_FEATURE_ALSA
-#   define _BJ_HAS_FEATURE_ALSA 1
+#ifdef BJ_CONFIG_ALSA_BACKEND
+#   define _BJ_HAS_CONFIG_ALSA_BACKEND 1
 #else
-#   define _BJ_HAS_FEATURE_ALSA 0
-#endif
-
-#ifdef BJ_CONFIG_ALL
-#   define _BJ_HAS_CONFIG_ALL 1
-#else
-#   define _BJ_HAS_CONFIG_ALL 0
+#   define _BJ_HAS_CONFIG_ALSA_BACKEND 0
 #endif
 
 #ifdef BJ_CONFIG_CHECKS_ABORT
@@ -74,7 +68,6 @@
 #   define _BJ_HAS_CONFIG_FASTMATH 0
 #endif
 
-#define BJ_HAS_CONFIG(NAME) _BJ_HAS_CONFIG_ALL || _BJ_HAS_CONFIG_ ## NAME
-#define BJ_HAS_FEATURE(NAME) _BJ_HAS_FEATURE_ ## NAME
+#define BJ_HAS_CONFIG(NAME) _BJ_HAS_CONFIG_ ## NAME
 
 

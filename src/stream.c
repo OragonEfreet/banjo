@@ -1,6 +1,6 @@
-#include "stream_t.h"
+#include <stream_t.h>
 
-#include "check.h"
+#include <check.h>
 #include <stdio.h>
 
 bj_stream* bj_allocate_stream(

@@ -2,8 +2,8 @@
 #include <banjo/event.h>
 #include <banjo/video.h>
 
-#include "check.h"
-#include "window_t.h"
+#include <check.h>
+#include <window_t.h>
 
 extern bj_video_layer* s_video;
 

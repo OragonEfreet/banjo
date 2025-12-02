@@ -1,6 +1,6 @@
 #include <banjo/error.h>
 
-#include "check.h"
+#include <check.h>
 
 void bj_set_error(
     bj_error**  p_error,

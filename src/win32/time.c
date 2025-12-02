@@ -9,7 +9,7 @@
 #include <windows.h>
 #include <profileapi.h>
 
-#include "check.h"
+#include <check.h>
 
 extern uint64_t bj__time_frequency;
 static uint64_t    s_timer_base;

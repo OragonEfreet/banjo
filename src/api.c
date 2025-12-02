@@ -1,6 +1,6 @@
 #include <banjo/api.h>
 
-#include "check.h"
+#include <check.h>
 
 #ifdef BJ_BUILD_DEBUG
 #   define BJ_BUILD_DEBUG_ENABLED 1
@@ -8,31 +8,31 @@
 #   define BJ_BUILD_DEBUG_ENABLED 0
 #endif
 
-#if BJ_HAS_FEATURE(EMSCRIPTEN)
+#if BJ_HAS_CONFIG(EMSCRIPTEN_BACKEND)
 #   define BJ_INFO_EMSCRIPTEN 1
 #else
 #   define BJ_INFO_EMSCRIPTEN 0
 #endif
 
-#if BJ_HAS_FEATURE(WIN32)
+#if BJ_HAS_CONFIG(WIN32_BACKEND)
 #   define BJ_INFO_WIN32 1
 #else
 #   define BJ_INFO_WIN32 0
 #endif
 
-#if BJ_HAS_FEATURE(X11)
+#if BJ_HAS_CONFIG(X11_BACKEND)
 #   define BJ_INFO_X11 1
 #else
 #   define BJ_INFO_X11 0
 #endif
 
-#if BJ_HAS_FEATURE(ALSA)
+#if BJ_HAS_CONFIG(ALSA_BACKEND)
 #   define BJ_INFO_ALSA 1
 #else
 #   define BJ_INFO_ALSA 0
 #endif
 
-#if BJ_HAS_FEATURE(MME)
+#if BJ_HAS_CONFIG(MME_BACKEND)
 #   define BJ_INFO_MME 1
 #else
 #   define BJ_INFO_MME 0
