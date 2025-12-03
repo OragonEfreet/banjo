@@ -25,17 +25,18 @@ int main(int argc, char* argv[]) {
     );
     bj_info("Compiler: %s %d", info->compiler_name, info->compiler_version);
 
-    DESC(feature_alsa);
-    DESC(feature_emscripten);
-    DESC(feature_mme);
-    DESC(feature_win32);
-    DESC(feature_x11);
+    DESC(backend_alsa);
+    DESC(backend_cocoa);
+    DESC(backend_emscripten);
+    DESC(backend_mme);
+    DESC(backend_win32);
+    DESC(backend_x11);
 
-    DESC(config_checks_abort);
-    DESC(config_checks_log);
-    DESC(config_fastmath);
-    DESC(config_log_color);
-    DESC(config_pedantic);
+    DESC(checks_abort);
+    DESC(checks_log);
+    DESC(fastmath);
+    DESC(log_color);
+    DESC(pedantic);
 
     return 0;
 }

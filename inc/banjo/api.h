@@ -257,16 +257,17 @@ typedef struct {
     const char* compiler_name;       ///< Compiler name string.
     int         compiler_version;    ///< Compiler version number.
     bj_bool     debug;               ///< Non-zero if built with debug info.
-    bj_bool     feature_win32;       ///< Built with Win32 window support.
-    bj_bool     feature_emscripten;  ///< Built with Emscripten support.
-    bj_bool     feature_x11;         ///< Built with X11 window support.
-    bj_bool     feature_mme;         ///< Built with Windows MME audio.
-    bj_bool     feature_alsa;        ///< Built with ALSA audio.
-    bj_bool     config_checks_abort; ///< Checks abort execution on failure.
-    bj_bool     config_checks_log;   ///< Checks log failures.
-    bj_bool     config_log_color;    ///< Colored log output enabled.
-    bj_bool     config_pedantic;     ///< Extra runtime checks enabled.
-    bj_bool     config_fastmath;     ///< Built with fast-math optimizations.
+    bj_bool     backend_alsa;        ///< Built with ALSA audio.
+    bj_bool     backend_cocoa;       ///< Built with Cocoa/macOS support.
+    bj_bool     backend_emscripten;  ///< Built with Emscripten support.
+    bj_bool     backend_mme;         ///< Built with Windows MME audio.
+    bj_bool     backend_win32;       ///< Built with Win32 window support.
+    bj_bool     backend_x11;         ///< Built with X11 window support.
+    bj_bool     checks_abort;        ///< Checks abort execution on failure.
+    bj_bool     checks_log;          ///< Checks log failures.
+    bj_bool     fastmath;            ///< Built with fast-math optimizations.
+    bj_bool     log_color;           ///< Colored log output enabled.
+    bj_bool     pedantic;            ///< Extra runtime checks enabled.
 } bj_build_info;
 
 ////////////////////////////////////////////////////////////////////////////////

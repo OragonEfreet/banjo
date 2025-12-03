@@ -1,4 +1,4 @@
-#include <config.h>
+
 
 #ifdef BJ_CONFIG_COCOA_BACKEND
 

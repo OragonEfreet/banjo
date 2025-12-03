@@ -51,7 +51,7 @@ add_library(banjo
     src/bitmap_charsets.h
     src/bitmap_t.h
     src/check.h
-    src/config.h
+
     src/stream_t.h
     src/window_t.h
     inc/banjo/api.h

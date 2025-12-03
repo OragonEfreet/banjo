@@ -1,4 +1,4 @@
-#include <config.h>
+
 
 #ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
 
