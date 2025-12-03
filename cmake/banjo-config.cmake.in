@@ -1,0 +1,13 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find required dependencies
+if(NOT MSVC)
+    find_dependency(Threads)
+endif()
+
+# Include the targets file
+include("${CMAKE_CURRENT_LIST_DIR}/banjo-targets.cmake")
+
+check_required_components(banjo)

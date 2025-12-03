@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(banjo C)
+project(banjo VERSION 0.1.0 LANGUAGES C)
 
 include(CTest)
 
@@ -82,7 +82,13 @@ add_library(banjo
     inc/banjo/video.h
     inc/banjo/window.h
 )
-target_include_directories(banjo PUBLIC inc PRIVATE src)
+target_include_directories(banjo
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        src
+)
 set_target_properties(banjo PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED TRUE)
 
 if(NOT MSVC)
@@ -246,6 +252,66 @@ if(BANJO_CONFIG_FASTMATH)
         )
     endif()
 endif()
+
+################################################################################
+### Installation
+################################################################################
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+# Install the library
+install(TARGETS banjo
+    EXPORT banjo-targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# Install public headers
+install(DIRECTORY inc/banjo
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    FILES_MATCHING PATTERN "*.h"
+)
+
+# Generate and install CMake package configuration files
+set(BANJO_CMAKE_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/banjo)
+
+install(EXPORT banjo-targets
+    FILE banjo-targets.cmake
+    NAMESPACE banjo::
+    DESTINATION ${BANJO_CMAKE_CONFIG_INSTALL_DIR}
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/banjo-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/banjo-config.cmake
+    INSTALL_DESTINATION ${BANJO_CMAKE_CONFIG_INSTALL_DIR}
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/banjo-config-version.cmake
+    VERSION 0.1.0
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/banjo-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/banjo-config-version.cmake
+    DESTINATION ${BANJO_CMAKE_CONFIG_INSTALL_DIR}
+)
+
+# Generate and install pkg-config file
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/banjo.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/banjo.pc
+    @ONLY
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/banjo.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
 
 ################################################################################
 ### Examples and Tests
