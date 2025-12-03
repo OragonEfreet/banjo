@@ -1,6 +1,6 @@
-#include "config.h"
 
-#if BJ_HAS_FEATURE(WIN32)
+
+#ifdef BJ_CONFIG_WIN32_BACKEND
 
 #include <banjo/assert.h>
 #include <banjo/error.h>
@@ -14,7 +14,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "window_t.h"
+#include <window_t.h>
 
 
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")

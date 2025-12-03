@@ -1,6 +1,6 @@
-#include "config.h"
 
-#if BJ_HAS_FEATURE(ALSA)
+
+#ifdef BJ_CONFIG_ALSA_BACKEND
 
 #include <banjo/audio.h>
 #include <banjo/assert.h>
@@ -12,8 +12,8 @@
 #include <banjo/time.h>
 #include <banjo/video.h>
 
-#include "audio_t.h"
-#include "check.h"
+#include <audio_t.h>
+#include <check.h>
 
 #include <alsa/asoundlib.h>
 #include <pthread.h>

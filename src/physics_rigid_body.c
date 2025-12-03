@@ -1,5 +1,5 @@
 #include <banjo/physics_2d.h>
-#include "check.h"
+#include <check.h>
 
 void bj_apply_rigidbody_force_2d(
     bj_rigid_body_2d* body,

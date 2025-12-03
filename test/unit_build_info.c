@@ -1,5 +1,5 @@
 #include <banjo/api.h>
-#include "config.h"
+
 
 #include "test.h"
 
@@ -9,7 +9,7 @@
 #   define INFO_EXPECT_DEBUG BJ_TRUE
 #endif
 
-#if BJ_HAS_CONFIG(LOG_COLOR)
+#ifdef BJ_CONFIG_LOG_COLOR
 #   define INFO_EXPECT_COLOR_LOG BJ_TRUE
 #else
 #   define INFO_EXPECT_COLOR_LOG BJ_FALSE
@@ -21,7 +21,7 @@ TEST_CASE(get_build_info) {
     REQUIRE_EQ(cmp, 0);
     REQUIRE_EQ(info->version, BJ_VERSION);
     REQUIRE_EQ(info->debug, INFO_EXPECT_DEBUG);
-    REQUIRE_EQ(info->config_log_color, INFO_EXPECT_COLOR_LOG);
+    REQUIRE_EQ(info->log_color, INFO_EXPECT_COLOR_LOG);
 }
 
 int main(int argc, char* argv[]) {

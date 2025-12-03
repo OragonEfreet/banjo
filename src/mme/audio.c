@@ -1,12 +1,12 @@
-﻿#include "config.h"
+﻿
 
-#if BJ_HAS_FEATURE(MME)
+#ifdef BJ_CONFIG_MME_BACKEND
 
 #include <banjo/log.h>
 #include <banjo/system.h>
 
-#include "audio_t.h"
-#include "check.h"
+#include <audio_t.h>
+#include <check.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -297,4 +297,4 @@ bj_audio_layer_create_info mme_audio_layer_info = {
     .create = mme_init_audio,
 };
 
-#endif // BJ_HAS_FEATURE(MME)
+#endif

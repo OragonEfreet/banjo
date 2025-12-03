@@ -1,7 +1,7 @@
 #include <banjo/log.h>
 #include <banjo/video.h>
 
-#include "config.h"
+
 
 extern bj_video_layer_create_info emscripten_video_layer_info;
 extern bj_video_layer_create_info novideo_video_layer_info;
@@ -10,16 +10,16 @@ extern bj_video_layer_create_info x11_video_layer_info;
 extern bj_video_layer_create_info cocoa_video_layer_info;
 
 static const bj_video_layer_create_info* layer_infos[] = {
-#if BJ_HAS_FEATURE(EMSCRIPTEN)
+#ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
     &emscripten_video_layer_info,
 #endif
-#if BJ_HAS_FEATURE(WIN32)
+#ifdef BJ_CONFIG_WIN32_BACKEND
     &win32_video_layer_info,
 #endif
-#if BJ_HAS_FEATURE(COCOA)
+#ifdef BJ_CONFIG_COCOA_BACKEND
     &cocoa_video_layer_info,
 #endif
-#if BJ_HAS_FEATURE(X11)
+#ifdef BJ_CONFIG_X11_BACKEND
     &x11_video_layer_info,
 #endif
     &novideo_video_layer_info,

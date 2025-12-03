@@ -1,7 +1,7 @@
 #include <banjo/video.h>
 
-#include "check.h"
-#include "window_t.h"
+#include <check.h>
+#include <window_t.h>
 
 typedef struct {
     struct bj_window_t common;

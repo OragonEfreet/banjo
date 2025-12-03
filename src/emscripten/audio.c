@@ -1,6 +1,6 @@
-#include "config.h"
 
-#if BJ_HAS_FEATURE(EMSCRIPTEN)
+
+#ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
 
 // Note: This file is AI-generated.
 // TODO: I'll remake it myself later on.
@@ -12,7 +12,7 @@
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
-#include "audio_t.h"
+#include <audio_t.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -167,4 +167,4 @@ bj_audio_layer_create_info emscripten_audio_layer_info = {
     .create = emscripten_init_audio,
 };
 
-#endif // BJ_HAS_FEATURE(EMSCRIPTEN)
+#endif

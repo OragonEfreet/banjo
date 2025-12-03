@@ -1,13 +1,13 @@
-#include "config.h"
 
-#if BJ_HAS_FEATURE(EMSCRIPTEN)
+
+#ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
 
 #include <banjo/event.h>
 #include <banjo/string.h>
 #include <banjo/video.h>
 
-#include "check.h"
-#include "window_t.h"
+#include <check.h>
+#include <window_t.h>
 
 #include <emscripten/dom_pk_codes.h> 
 #include <emscripten/html5.h>

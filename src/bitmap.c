@@ -1,8 +1,8 @@
 #include <banjo/math.h>
 #include <banjo/draw.h>
 
-#include "bitmap_t.h"
-#include "check.h"
+#include <bitmap_t.h>
+#include <check.h>
 
 bj_bitmap* dib_create_bitmap_from_stream(bj_stream*, bj_error**);
 

@@ -1,9 +1,9 @@
 #include <banjo/assert.h>
 #include <banjo/math.h>
 
-#include "audio_t.h"
-#include "config.h"
-#include "check.h"
+#include <audio_t.h>
+
+#include <check.h>
 
 extern bj_audio_layer_create_info alsa_audio_layer_info;
 extern bj_audio_layer_create_info mme_audio_layer_info;
@@ -11,13 +11,13 @@ extern bj_audio_layer_create_info noaudio_audio_layer_info;
 extern bj_audio_layer_create_info emscripten_audio_layer_info;
 
 static const bj_audio_layer_create_info* layer_infos[] = {
-#if BJ_HAS_FEATURE(EMSCRIPTEN)
+#ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
     &emscripten_audio_layer_info,
 #endif
-#if BJ_HAS_FEATURE(MME)
+#ifdef BJ_CONFIG_MME_BACKEND
     &mme_audio_layer_info,
 #endif
-#if BJ_HAS_FEATURE(ALSA)
+#ifdef BJ_CONFIG_ALSA_BACKEND
     &alsa_audio_layer_info,
 #endif
     &noaudio_audio_layer_info,

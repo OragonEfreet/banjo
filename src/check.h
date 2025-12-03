@@ -1,12 +1,12 @@
 #pragma once
 
-#include "config.h"
 
-#if BJ_HAS_CONFIG(CHECKS_ABORT)
+
+#ifdef BJ_CONFIG_CHECKS_ABORT
 #   include <stdlib.h>
 #endif
 #include <banjo/log.h>
-#if BJ_HAS_CONFIG(CHECKS_LOG)
+#ifdef BJ_CONFIG_CHECKS_LOG
 #    ifdef BJ_BUILD_RELEASE
 #       define bj_check_err_msg(cond) bj_err("Unrecoverable Error (Failed Check)")
 #    else

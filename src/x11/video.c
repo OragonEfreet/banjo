@@ -1,6 +1,6 @@
-#include "config.h"
 
-#if BJ_HAS_FEATURE(X11)
+
+#ifdef BJ_CONFIG_X11_BACKEND
 
 #include <banjo/assert.h>
 #include <banjo/error.h>
@@ -11,9 +11,9 @@
 #include <banjo/video.h>
 #include <banjo/window.h>
 
-#include "bitmap_t.h"
-#include "check.h"
-#include "window_t.h"
+#include <bitmap_t.h>
+#include <check.h>
+#include <window_t.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>

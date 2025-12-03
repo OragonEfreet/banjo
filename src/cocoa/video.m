@@ -1,6 +1,6 @@
-#include "config.h"
 
-#if BJ_HAS_FEATURE(COCOA)
+
+#ifdef BJ_CONFIG_COCOA_BACKEND
 
 #include <banjo/assert.h>
 #include <banjo/error.h>
@@ -12,8 +12,8 @@
 #include <banjo/video.h>
 #include <banjo/window.h>
 
-#include "check.h"
-#include "window_t.h"
+#include <check.h>
+#include <window_t.h>
 
 #import <Cocoa/Cocoa.h>
 #import <objc/runtime.h>

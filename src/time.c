@@ -1,5 +1,5 @@
 #include <banjo/time.h>
-#include "check.h"
+#include <check.h>
 
 uint64_t bj__time_frequency = 0;
 

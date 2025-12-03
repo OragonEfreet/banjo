@@ -7,7 +7,7 @@
 #endif
 #include <windows.h>
 
-#include "check.h"
+#include <check.h>
 
 void* bj_load_library(
     const char* p_path

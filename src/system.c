@@ -3,7 +3,7 @@
 #include <banjo/system.h>
 #include <banjo/video.h>
 
-#include "config.h"
+
 
 
 bj_video_layer* s_video = 0;

@@ -12,9 +12,9 @@
 #include <banjo/rect.h>
 #include <banjo/bitmap.h>
 
-#include "bitmap_charsets.h"
-#include "bitmap_t.h"
-#include "check.h"
+#include <bitmap_charsets.h>
+#include <bitmap_t.h>
+#include <check.h>
 
 #include <stdio.h>
 #include <stdarg.h>

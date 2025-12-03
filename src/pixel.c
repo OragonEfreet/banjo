@@ -1,7 +1,7 @@
 #include <banjo/assert.h>
 #include <banjo/pixel.h>
 
-#include "check.h"
+#include <check.h>
 
 struct bitmask {
     uint8_t shift;

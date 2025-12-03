@@ -1,6 +1,6 @@
 #include <banjo/shader.h>
-#include "bitmap_t.h"
-#include "check.h"
+#include <bitmap_t.h>
+#include <check.h>
 
 void bj_shader_bitmap(
     bj_bitmap*               p_bitmap,

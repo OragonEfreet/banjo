@@ -1,6 +1,6 @@
 #include <banjo/audio.h>
 
-#include "check.h"
+#include <check.h>
 
 static void noaudio_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
     (void)p_error;

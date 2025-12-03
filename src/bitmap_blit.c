@@ -1,5 +1,5 @@
-#include "bitmap_t.h"
-#include "check.h"
+#include <bitmap_t.h>
+#include <check.h>
 
 // Note: This file is AI-generated.
 // TODO: I'll remake it myself later on.

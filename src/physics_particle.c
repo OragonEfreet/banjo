@@ -4,7 +4,7 @@
 #include <banjo/physics_2d.h>
 #include <banjo/vec.h>
 
-#include "check.h"
+#include <check.h>
 
 void bj_set_particle_mass_2d(
     bj_particle_2d* p_particle,

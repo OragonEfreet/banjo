@@ -1,5 +1,5 @@
 #include <banjo/physics_2d.h>
-#include "check.h"
+#include <check.h>
 
 void bj_apply_angular_torque_2d(
     bj_angular_2d* angular,
