@@ -51,6 +51,75 @@ typedef enum bj_window_flag_t {
 } bj_window_flag;
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Determines when and how images are presented to the user through windows.
+///
+/// This enum is set globally for the implementation.
+/// This can be set to lock the framerate or sync to implementation's.
+/// Choosing which presentation mode to set depends on your needs.
+///
+/// According to the selected backend implementation, some presentation mode
+/// may not be available or complete.
+///
+/// \par Immediate Mode
+///
+/// With `BJ_PRESENT_MODE_IMMEDIATE`, frames are run as fast as possible.
+/// They are presented immediately without waiting, which can generate tearing
+/// when the update isn't synchronized with your monitor refresh cycle.
+///
+/// This is usually recommended when input latency matters most and when tearing
+/// is acceptable.
+/// It usually comes with a much hight CPU usage since a lot of frames won't
+/// be displayed.
+///
+/// A visual representation of comparing screen and software synchronisation in 
+/// immediate mode could be:
+///
+/// ```
+/// Display Refresh:  |--60Hz--|--60Hz--|--60Hz--|
+/// Render/Present:   |   |   |   |   |   |   |    (uncapped, tearing)
+/// ```
+///
+/// \par Vsync
+///
+/// In vertical synchronization (VSync), Banjo will not present anything 
+/// onscreen until after the monitor finished its currently refresh cycle.
+///
+/// This will force your program to run as monitor's refresh rate, for example
+/// 50 frames per seconds at 60Hz. This mode is usually better when focusing on
+/// the image quality and with smooth presentation matters more than latency.
+/// This is also more energy-saving, since less rendering is done.
+///
+/// A visual representation of comparing screen and software synchronisation in 
+/// immediate mode could be:
+/// ```
+/// Display Refresh:  |--60Hz--|--60Hz--|--60Hz--|
+/// Render/Present:   |  60fps |  60fps |  60fps |  (synced, no tearing)
+/// Vblank:           ^        ^        ^
+/// ```
+/// \par Fixed
+///
+/// Presentation is done at a fixed rate set by \ref bj_set_frame_rate.
+/// This is similar to VSync, but the rate is set by the software rather than
+/// imposed by the hardware.
+///
+/// This is useful when precise control over the framerate is needed, and more
+/// power-savy than immediate mode, but can still generate screen tearing when
+/// the rate doesn't match vertical synchronisation.
+///
+////////////////////////////////////////////////////////////////////////////////
+typedef enum bj_present_mode_t {
+    BJ_PRESENT_MODE_IMMEDIATE,  //!< Images are presented as fast as possible.
+    BJ_PRESENT_VSYNC,           //!< Synchronize with hardware
+    BJ_PRESENT_FIXED,           //!< Fix the framerate to a specific value
+} bj_present_mode;
+
+////////////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_set_frame_rate
+
+
+////////////////////////////////////////////////////////////////////////////////
 /// Create a new bj_window with the specified attributes
 ///
 /// \param p_title  Title of the window
@@ -74,7 +143,7 @@ BANJO_EXPORT bj_window* bj_bind_window(
     uint16_t y,
     uint16_t width,
     uint16_t height,
-    uint8_t  flags
+uint8_t  flags
 );
 
 ////////////////////////////////////////////////////////////////////////////////
