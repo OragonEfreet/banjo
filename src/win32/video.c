@@ -198,7 +198,7 @@ static void win32_flush_window_framebuffer(
     const struct bj_window*   p_abstract_window
 ) {
     win32_window* p_window = (win32_window*)p_abstract_window;
-    bj_assert(p_window->common.p_framebuffer != 0);
+    bj_assert(p_window->common.framebuffer != 0);
 
     int width = 0;
     int height = 0;

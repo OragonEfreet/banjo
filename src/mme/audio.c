@@ -148,11 +148,11 @@ static DWORD WINAPI mme_playback_thread(LPVOID param) {
         }
 
         if (dev->playing) {
-            dev->p_callback(
+            dev->callback(
                 hdr->lpData,
                 mme->frames_per_block,
                 &dev->properties,
-                dev->p_callback_user_data,
+                dev->callback_user_data,
                 mme->sample_index
             );
         }
@@ -228,8 +228,8 @@ static struct bj_audio_device* mme_open_device(
         return NULL;
     }
 
-    p_device->p_callback = p_callback;
-    p_device->p_callback_user_data = p_callback_user_data;
+    p_device->callback = p_callback;
+    p_device->callback_user_data = p_callback_user_data;
     p_device->properties = *p_properties;
 
     // Compute proper silence value

@@ -15,7 +15,7 @@ void bj_step_angular_2d(struct bj_angular_2d* a, double dt) {
         a->velocity = (
             a->velocity + (a->acceleration + a->torque * a->inverse_inertia) * dt
         ) * bj_pow(a->damping, dt);
-        a->value += a->velocity * dt;
+        a->value += a->velocity * (bj_real)dt;
 
         if (a->value > BJ_PI) {
             a->value -= 2.0 * BJ_PI;
