@@ -3,11 +3,11 @@
 #include <banjo/event.h>
 #include <banjo/window.h>
 
-struct bj_window_t {
+struct bj_window {
     char                     keystates[0xFF];
     uint8_t                  flags;
 
-    bj_bitmap*               p_framebuffer;
+    struct bj_bitmap*               framebuffer;
 };
 
 

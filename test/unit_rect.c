@@ -2,9 +2,9 @@
 
 #include "test.h"
 
-TEST_CASE_ARGS(rect_no_intersect, {bj_rect rect;}) {
-    const bj_rect a = {.x = 0, .y = 0, .w = 10, .h = 10};
-    bj_rect result = {0};
+TEST_CASE_ARGS(rect_no_intersect, {struct bj_rect rect;}) {
+    const struct bj_rect a = {.x = 0, .y = 0, .w = 10, .h = 10};
+    struct bj_rect result = {0};
     bj_bool intersect = bj_rect_intersection(&a, &test_data->rect, &result);
     REQUIRE_EQ(intersect, BJ_FALSE);
     REQUIRE_EQ(result.x, 0);
@@ -13,9 +13,9 @@ TEST_CASE_ARGS(rect_no_intersect, {bj_rect rect;}) {
     REQUIRE_EQ(result.h, 0);
 }
 
-TEST_CASE_ARGS(rect_intersect, {bj_rect rect; bj_rect result;}) {
-    const bj_rect a = {.x = 0, .y = 0, .w = 10, .h = 10};
-    bj_rect result = test_data->result;
+TEST_CASE_ARGS(rect_intersect, {struct bj_rect rect; struct bj_rect result;}) {
+    const struct bj_rect a = {.x = 0, .y = 0, .w = 10, .h = 10};
+    struct bj_rect result = test_data->result;
     bj_bool intersect = bj_rect_intersection(&a, &test_data->rect, &result);
     REQUIRE_EQ(intersect, BJ_TRUE);
     REQUIRE_EQ(test_data->result.x, result.x);

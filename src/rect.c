@@ -1,9 +1,9 @@
 #include <banjo/rect.h>
 
 bj_bool bj_rect_intersection(
-    const bj_rect* p_rect_a,
-    const bj_rect* p_rect_b,
-    bj_rect* result
+    const struct bj_rect* p_rect_a,
+    const struct bj_rect* p_rect_b,
+    struct bj_rect* result
 ) {
     if (!p_rect_a || !p_rect_b) {
         return BJ_FALSE;

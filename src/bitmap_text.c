@@ -26,7 +26,7 @@
 /* =========================
    8bpp glyph mask atlas
    ========================= */
-static const bj_bitmap* get_charset_mask(bj_bitmap* p_bitmap)
+static const struct bj_bitmap* get_charset_mask(struct bj_bitmap* p_bitmap)
 {
     bj_check_or_0(p_bitmap);
 
@@ -41,7 +41,7 @@ static const bj_bitmap* get_charset_mask(bj_bitmap* p_bitmap)
     const size_t charset_pixel_width  = (size_t)CHARSET_CHAR_PER_ROW * (size_t)CHAR_PIXEL_W;
     const size_t charset_pixel_height = charset_rows * (size_t)CHAR_PIXEL_H;
 
-    bj_bitmap* mask = bj_create_bitmap(
+    struct bj_bitmap* mask = bj_create_bitmap(
         charset_pixel_width, charset_pixel_height,
         BJ_PIXEL_MODE_INDEXED_8, 0
     );
@@ -76,7 +76,7 @@ static const bj_bitmap* get_charset_mask(bj_bitmap* p_bitmap)
 /* =========================
    Fast fill (row-wise, no scratch, C99)
    ========================= */
-static void fast_fill_rect(bj_bitmap* dst, const bj_rect* r, uint32_t color_native)
+static void fast_fill_rect(struct bj_bitmap* dst, const struct bj_rect* r, uint32_t color_native)
 {
     bj_check(dst);
     bj_check(r);
@@ -141,9 +141,9 @@ static void ansi_basic_rgb(uint8_t idx, uint8_t* r, uint8_t* g, uint8_t* b, bj_b
     *r = tbl[idx][0]; *g = tbl[idx][1]; *b = tbl[idx][2];
 }
 
-static uint32_t pack_native_rgb(const bj_bitmap* dst, uint8_t r, uint8_t g, uint8_t b)
+static uint32_t pack_native_rgb(const struct bj_bitmap* dst, uint8_t r, uint8_t g, uint8_t b)
 {
-    return bj_make_bitmap_pixel((bj_bitmap*)dst, r, g, b);
+    return bj_make_bitmap_pixel((struct bj_bitmap*)dst, r, g, b);
 }
 
 /* Parse a sequence starting at text[i] which is after the ESC '['.
@@ -151,7 +151,7 @@ static uint32_t pack_native_rgb(const bj_bitmap* dst, uint8_t r, uint8_t g, uint
    (or the last parsed char), and a flag telling if we consumed a valid SGR. */
 static size_t parse_ansi_sgr(
     const char* text, size_t i, size_t len,
-    const bj_bitmap* dst,
+    const struct bj_bitmap* dst,
     uint32_t default_fg, uint32_t default_bg,
     bj_bool* out_changed,
     uint32_t* new_fg, uint32_t* new_bg
@@ -259,7 +259,7 @@ static size_t parse_ansi_sgr(
    Text renderer
    ========================= */
 static void render_text_masked(
-    bj_bitmap*      dst,
+    struct bj_bitmap*      dst,
     int             x,
     int             y,
     unsigned        height,
@@ -273,7 +273,7 @@ static void render_text_masked(
     bj_check(height > 0);
 
     /* Atlas (8bpp, 0/255) */
-    const bj_bitmap* mask = get_charset_mask(dst);
+    const struct bj_bitmap* mask = get_charset_mask(dst);
     bj_check(mask);
 
     /* Target glyph box (keeps aspect from CHAR_PIXEL_W×CHAR_PIXEL_H) */
@@ -320,7 +320,7 @@ static void render_text_masked(
         uint8_t code = (uint8_t)((ch < table_len) ? ch : (unsigned char)'?');
 
         /* Full source glyph (in atlas space) */
-        bj_rect src_full = {
+        struct bj_rect src_full = {
             .x = (int16_t)CHAR_PIXEL_X((int)code),
             .y = (int16_t)CHAR_PIXEL_Y((int)code),
             .w = (uint16_t)CHAR_PIXEL_W,
@@ -328,7 +328,7 @@ static void render_text_masked(
         };
 
         /* Desired destination box before clipping */
-        bj_rect dst_box = {
+        struct bj_rect dst_box = {
             .x = (int16_t)pen_x,
             .y = (int16_t)pen_y,
             .w = glyph_w,
@@ -347,7 +347,7 @@ static void render_text_masked(
         /* Clip dst_box against surface, and proportionally adjust src_full.
            We do left/top/right/bottom separately. */
 
-        bj_rect src_adj = src_full;
+        struct bj_rect src_adj = src_full;
 
         /* --- Horizontal clip --- */
         /* Left clip */
@@ -437,7 +437,7 @@ static void render_text_masked(
                 if (gap_x < dst_w) {
                     uint16_t gap_w = (uint16_t)((gap_x + spacing <= dst_w) ? spacing : (dst_w - gap_x));
                     if (gap_w) {
-                        bj_rect gap = { (int16_t)gap_x, (int16_t)dst_box.y, gap_w, dst_box.h };
+                        struct bj_rect gap = { (int16_t)gap_x, (int16_t)dst_box.y, gap_w, dst_box.h };
                         fast_fill_rect(dst, &gap, bg);
                     }
                 }
@@ -453,7 +453,7 @@ static void render_text_masked(
 
 /* Public: FG+BG with selectable background mode */
 void bj_blit_text(
-    bj_bitmap*      dst,
+    struct bj_bitmap*      dst,
     int             x,
     int             y,
     unsigned        height,
@@ -466,7 +466,7 @@ void bj_blit_text(
 }
 
 void bj_draw_text(
-    bj_bitmap*      dst,
+    struct bj_bitmap*      dst,
     int             x,
     int             y,
     unsigned        height,
@@ -477,7 +477,7 @@ void bj_draw_text(
 }
 
 void bj_draw_vtextf(
-    bj_bitmap*     p_bitmap,
+    struct bj_bitmap*     p_bitmap,
     int            x,
     int            y,
     unsigned       height,
@@ -522,7 +522,7 @@ void bj_draw_vtextf(
 }
 
 void bj_draw_textf(
-    bj_bitmap*     p_bitmap,
+    struct bj_bitmap*     p_bitmap,
     int            x,
     int            y,
     unsigned       height,

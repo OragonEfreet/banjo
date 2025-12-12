@@ -16,8 +16,8 @@
 #endif
 
 TEST_CASE(get_build_info) {
-    const bj_build_info* info = bj_build_information();
-    int cmp = bj_strcmp(info->p_name, BJ_NAME);
+    const struct bj_build_info* info = bj_build_information();
+    int cmp = bj_strcmp(info->name, BJ_NAME);
     REQUIRE_EQ(cmp, 0);
     REQUIRE_EQ(info->version, BJ_VERSION);
     REQUIRE_EQ(info->debug, INFO_EXPECT_DEBUG);

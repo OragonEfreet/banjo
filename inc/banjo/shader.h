@@ -5,13 +5,13 @@
 /// \defgroup shaders Shaders
 /// \ingroup bitmap
 ///
-/// Software shader-like API for \ref bj_bitmap.
+/// Software shader-like API for  bj_bitmap.
 ///
-/// This API provides facilities to manipulate the pixels of a \ref bj_bitmap
+/// This API provides facilities to manipulate the pixels of a  bj_bitmap
 /// object in a similar way GPU shaders do.
 ///
 /// A shader function is any user-provided function that corresponds to the
-/// \ref bj_bitmap_shading_fn_t signature.
+/// \ref bj_bitmap_shading_fn signature.
 /// Such function is passed to \ref bj_shader_bitmap which calls the
 /// shader fonction on every pixel of the bitmap.
 ///
@@ -39,22 +39,22 @@
 /// \return _1_ on success, non-zero if the pixel should be skipped or discarded.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-typedef int (*bj_bitmap_shading_fn_t)(bj_vec3* out_color, const bj_vec2 pixel_coord, void* user_data);
+typedef int (*bj_bitmap_shading_fn)(struct bj_vec3* out_color, const struct bj_vec2 pixel_coord, void* user_data);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Shader input control flags
 ///
 /// These flags are passed to \ref bj_shader_bitmap to control how
-/// the inputs to the shader function (\ref bj_bitmap_shading_fn_t) are transformed.
+/// the inputs to the shader function (\ref bj_bitmap_shading_fn) are transformed.
 /// They affect how the pixel coordinates are interpreted and how the shader's
 /// output color is handled.
 ////////////////////////////////////////////////////////////////////////////////
-typedef enum bj_shader_flag_t {
+enum bj_shader_flag {
 
     ////////////////////////////////////////////////////////////////////////////////
     /// \brief Invert the X coordinate of the input pixel.
     ///
-    /// By default, the coordinate system matches that of \ref bj_bitmap.
+    /// By default, the coordinate system matches that of  bj_bitmap.
     /// The origin is at the top-left corner, with X increasing to the right
     /// and Y increasing downward, ranging from 0 to the bitmap's width and height.
     ///
@@ -69,7 +69,7 @@ typedef enum bj_shader_flag_t {
     ////////////////////////////////////////////////////////////////////////////////
     /// \brief Invert the Y coordinate of the input pixel.
     ///
-    /// By default, the coordinate system matches that of \ref bj_bitmap.
+    /// By default, the coordinate system matches that of  bj_bitmap.
     /// The origin is at the top-left corner, with X increasing to the right
     /// and Y increasing downward, ranging from 0 to the bitmap's width and height.
     ///
@@ -127,7 +127,7 @@ typedef enum bj_shader_flag_t {
     ////////////////////////////////////////////////////////////////////////////////
     BJ_SHADER_CENTER_COORDS    = 0x10,
 
-} bj_shader_flag;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Flagset alias for \ref bj_shader_bitmap.
@@ -148,16 +148,16 @@ typedef enum bj_shader_flag_t {
 /// a reference to output a linear RGB color. Optional user data and behavior flags
 /// can be provided.
 ///
-/// \param p_bitmap Pointer to the target bitmap to be modified.
-/// \param p_shader A pointer to the shader function to call per pixel.
-/// \param p_data User-defined data passed to each shader call.
-/// \param flags Combination of \ref bj_shader_flag controlling coordinate
+/// \param bitmap Pointer to the target bitmap to be modified.
+/// \param shader A pointer to the shader function to call per pixel.
+/// \param data User-defined data passed to each shader call.
+/// \param flags Combination of  bj_shader_flag controlling coordinate
 ///        and color behavior.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_shader_bitmap(
-    bj_bitmap*             p_bitmap,
-    bj_bitmap_shading_fn_t p_shader,
-    void*                  p_data,
+    struct bj_bitmap*             bitmap,
+    bj_bitmap_shading_fn shader,
+    void*                  data,
     uint8_t                flags
 );
 

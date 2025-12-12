@@ -251,8 +251,8 @@ typedef uint32_t bj_bool;
 #define BJ_TRUE ((bj_bool)1)
 
 /// \brief Structure holding build information of the binary.
-typedef struct {
-    const char* p_name;              ///< API name (see BJ_NAME).
+struct bj_build_info {
+    const char* name;                ///< API name (see BJ_NAME).
     uint32_t    version;             ///< Packed API version (see BJ_VERSION).
     const char* compiler_name;       ///< Compiler name string.
     int         compiler_version;    ///< Compiler version number.
@@ -268,7 +268,7 @@ typedef struct {
     bj_bool     fastmath;            ///< Built with fast-math optimizations.
     bj_bool     log_color;           ///< Colored log output enabled.
     bj_bool     pedantic;            ///< Extra runtime checks enabled.
-} bj_build_info;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Get runtime build information for the loaded Banjo binaries.
@@ -276,9 +276,101 @@ typedef struct {
 /// The returned pointer is owned by the library and remains valid for the
 /// lifetime of the process. The content is immutable.
 ///
-/// \return Pointer to a bj_build_info structure describing the runtime build.
+/// \return Pointer to a struct bj_build_info structure describing the runtime build.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT const bj_build_info* bj_build_information(void);
+BANJO_EXPORT const struct bj_build_info* bj_build_information(void);
+
+////////////////////////////////////////////////////////////////////////////////
+/// \name Convenience typedefs for public API types
+///
+/// By default, Banjo provides typedefs that allow writing type names without
+/// the `struct` or `enum` keywords (e.g., `bj_vec2` instead of `struct bj_vec2`).
+///
+/// To disable these typedefs and use explicit struct/enum keywords everywhere,
+/// define `BJ_NO_TYPEDEF` before including Banjo headers.
+///
+////////////////////////////////////////////////////////////////////////////////
+/// \{
+#ifndef BJ_NO_TYPEDEF
+
+// Opaque types
+typedef struct bj_bitmap bj_bitmap;
+typedef struct bj_window bj_window;
+typedef struct bj_stream bj_stream;
+typedef struct bj_audio_device bj_audio_device;
+
+// Vector types
+typedef struct bj_vec2 bj_vec2;
+typedef struct bj_vec3 bj_vec3;
+typedef struct bj_vec4 bj_vec4;
+
+// Matrix types
+typedef struct bj_mat3x3 bj_mat3x3;
+typedef struct bj_mat3x3 bj_mat3;     // Alias for bj_mat3x3
+typedef struct bj_mat3x2 bj_mat3x2;
+typedef struct bj_mat4x4 bj_mat4x4;
+typedef struct bj_mat4x4 bj_mat4;     // Alias for bj_mat4x4
+typedef struct bj_mat4x3 bj_mat4x3;
+
+// Quaternion (alias to vec4)
+typedef struct bj_vec4 bj_quat;
+
+// Geometry types
+typedef struct bj_rect bj_rect;
+
+// Physics types
+typedef struct bj_particle_2d bj_particle_2d;
+typedef struct bj_angular_2d bj_angular_2d;
+typedef struct bj_rigid_body_2d bj_rigid_body_2d;
+
+// Random number generator
+typedef struct bj_pcg32 bj_pcg32;
+
+// Time
+typedef struct bj_stopwatch bj_stopwatch;
+
+// Event types
+typedef struct bj_enter_event bj_enter_event;
+typedef struct bj_cursor_event bj_cursor_event;
+typedef struct bj_button_event bj_button_event;
+typedef struct bj_key_event bj_key_event;
+typedef struct bj_event bj_event;
+
+// Audio types
+typedef struct bj_audio_properties bj_audio_properties;
+typedef struct bj_audio_play_note_data bj_audio_play_note_data;
+typedef struct bj_audio_layer bj_audio_layer;
+
+// Video types
+typedef struct bj_video_layer bj_video_layer;
+typedef struct bj_video_layer_create_info bj_video_layer_create_info;
+typedef struct bj_audio_layer_create_info bj_audio_layer_create_info;
+
+// Memory
+typedef struct bj_memory_callbacks bj_memory_callbacks;
+
+// Build info
+typedef struct bj_build_info bj_build_info;
+
+// Error
+typedef struct bj_error bj_error;
+
+// Enum types
+typedef enum bj_pixel_mode bj_pixel_mode;
+typedef enum bj_blit_op bj_blit_op;
+typedef enum bj_seek_origin bj_seek_origin;
+typedef enum bj_audio_format bj_audio_format;
+typedef enum bj_callback_result bj_callback_result;
+typedef enum bj_event_action bj_event_action;
+typedef enum bj_event_type bj_event_type;
+typedef enum bj_key bj_key;
+typedef enum bj_window_flag bj_window_flag;
+typedef enum bj_shader_flag bj_shader_flag;
+typedef enum bj_error_code bj_error_code;
+typedef enum bj_log_level bj_log_level;
+
+#endif /* BJ_NO_TYPEDEF */
+/// \}
 
 #endif /* BJ_API_H */
 /// \} End of core

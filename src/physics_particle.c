@@ -7,7 +7,7 @@
 #include <check.h>
 
 void bj_set_particle_mass_2d(
-    bj_particle_2d* p_particle,
+    struct bj_particle_2d* p_particle,
     bj_real         mass
 ) {
     bj_check(p_particle);
@@ -16,17 +16,17 @@ void bj_set_particle_mass_2d(
 }
 
 void bj_apply_particle_force_2d(
-    bj_particle_2d* p_particle,
-    bj_vec2 force
+    struct bj_particle_2d* p_particle,
+    struct bj_vec2 force
 ) {
     bj_check(p_particle);
     p_particle->forces = bj_vec2_add(p_particle->forces, force);
 }
 
-void bj_step_particle_2d(bj_particle_2d* p, bj_real dt) {
+void bj_step_particle_2d(struct bj_particle_2d* p, bj_real dt) {
     bj_check(p);
     if (p->inverse_mass != BJ_FZERO) {
-        bj_vec2 acc = bj_vec2_add_scaled(p->acceleration, p->forces, p->inverse_mass);
+        struct bj_vec2 acc = bj_vec2_add_scaled(p->acceleration, p->forces, p->inverse_mass);
         p->velocity = bj_vec2_add_scaled(p->velocity, acc, dt);
         p->velocity = bj_vec2_scale(p->velocity, bj_pow(p->damping, dt));
         p->position = bj_vec2_add_scaled(p->position, p->velocity, dt);
@@ -35,15 +35,15 @@ void bj_step_particle_2d(bj_particle_2d* p, bj_real dt) {
 }
 
 void bj_apply_gravity_2d(
-    bj_particle_2d* p_particle,
+    struct bj_particle_2d* p_particle,
     bj_real         gravity
 ) {
     p_particle->forces.y -= gravity;
 }
 
 void bj_apply_point_gravity_2d(
-    bj_particle_2d* BJ_RESTRICT       p_particle_from,
-    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    struct bj_particle_2d* BJ_RESTRICT       p_particle_from,
+    const struct bj_particle_2d* BJ_RESTRICT p_particle_to,
     const bj_real                     gravity_factor
 ) {
     bj_real g = bj_newton_gravitation(
@@ -53,7 +53,7 @@ void bj_apply_point_gravity_2d(
         gravity_factor
     );
 
-    const bj_vec2 force = bj_vec2_scale_to_len(bj_vec2_sub(
+    const struct bj_vec2 force = bj_vec2_scale_to_len(bj_vec2_sub(
         p_particle_to->position,
         p_particle_from->position
     ), g);
@@ -62,8 +62,8 @@ void bj_apply_point_gravity_2d(
 }
 
 void bj_apply_point_gravity_softened_2d(
-    bj_particle_2d*       BJ_RESTRICT p_particle_from,
-    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    struct bj_particle_2d*       BJ_RESTRICT p_particle_from,
+    const struct bj_particle_2d* BJ_RESTRICT p_particle_to,
     const bj_real                     gravity_factor,
     const bj_real                     epsilon
 ) {
@@ -73,7 +73,7 @@ void bj_apply_point_gravity_softened_2d(
 
     const bj_real g = bj_newton_plummer_gravitation(m1, m2, r, gravity_factor, epsilon);
 
-    const bj_vec2 force = bj_vec2_scale_to_len(bj_vec2_sub(
+    const struct bj_vec2 force = bj_vec2_scale_to_len(bj_vec2_sub(
         p_particle_to->position,
         p_particle_from->position
     ), g);
@@ -83,7 +83,7 @@ void bj_apply_point_gravity_softened_2d(
 
 
 void bj_apply_drag_2d(
-    bj_particle_2d* p_particle,
+    struct bj_particle_2d* p_particle,
     bj_real k1,
     bj_real k2
 ) {
@@ -94,7 +94,7 @@ void bj_apply_drag_2d(
 }
 
 bj_real bj_compute_particle_drag_coefficient_2d(
-    const bj_vec2 vel,
+    const struct bj_vec2 vel,
     const bj_real k1,
     const bj_real k2
 ) {
@@ -105,8 +105,8 @@ bj_real bj_compute_particle_drag_coefficient_2d(
     return k1 * coef + k2 * coef * coef;
 }
 
-bj_vec2 bj_compute_particle_drag_force_2d(
-    bj_vec2  vel,
+struct bj_vec2 bj_compute_particle_drag_force_2d(
+    struct bj_vec2  vel,
     const    bj_real k1,
     const    bj_real k2
 ) {

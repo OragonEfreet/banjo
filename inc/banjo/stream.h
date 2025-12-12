@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file stream.h
-/// \brief Header file for bj_stream_t struct and related functions
+/// \brief Header file for struct bj_stream struct and related functions
 ////////////////////////////////////////////////////////////////////////////////
 /// \defgroup stream Data Stream
 /// \{
@@ -14,71 +14,71 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Structure representing a stream of data
 ///
-typedef struct bj_stream_t bj_stream; ///< Typedef for the bj_stream_t struct
+struct bj_stream;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Position in a \ref bj_stream to use for origin
 ///
-typedef enum {
+enum bj_seek_origin {
     BJ_SEEK_BEGIN   = 0x00, //!< The beginning of the stream
     BJ_SEEK_CURRENT = 0x01, //!< The current position of the stream
     BJ_SEEK_END     = 0x02, //!< The end of the stream
-} bj_seek_origin;
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Allocate a new \ref bj_stream object
+/// Allocate a new bj_stream object
 ///
-/// \return A pointer to a new \ref bj_stream
+/// \return A pointer to a new  bj_stream
 ///
 /// \par Memory Management
 ///
 /// The object pointed by the returned value must be deleted using bj_free.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_stream* bj_allocate_stream(
+BANJO_EXPORT struct bj_stream* bj_allocate_stream(
     void
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a new bj_stream for reading from a memory buffer.
+/// \brief Creates a new struct bj_stream for reading from a memory buffer.
 ///
-/// \param p_data Pointer to the data buffer.
+/// \param data Pointer to the data buffer.
 /// \param length Length of the data buffer in bytes.
-/// \return A pointer to the newly created bj_stream object.
+/// \return A pointer to the newly created struct bj_stream object.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_stream* bj_open_stream_read(
-    const void* p_data,
+BANJO_EXPORT struct bj_stream* bj_open_stream_read(
+    const void* data,
     size_t length
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Creates a new bj_stream for reading from a file.
+/// \brief Creates a new struct bj_stream for reading from a file.
 ///
-/// \param p_path  The file path to open
-/// \param p_error Optional error object
+/// \param path  The file path to open
+/// \param error Optional error object
 /// \return A pointer to an error object
 ///
 /// The file memory is entirely copied to internal memory buffer.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_stream* bj_open_stream_file(
-    const char*       p_path,
-    bj_error**        p_error
+BANJO_EXPORT struct bj_stream* bj_open_stream_file(
+    const char*       path,
+    struct bj_error**        error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Deletes a bj_stream object and releases associated memory.
+/// \brief Deletes a struct bj_stream object and releases associated memory.
 ///
-/// \param p_stream Pointer to the bj_stream object to delete.
+/// \param stream Pointer to the struct bj_stream object to delete.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_close_stream(
-    bj_stream* p_stream
+    struct bj_stream* stream
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Reads data from the stream into a destination buffer.
 ///
-/// \param p_stream Pointer to the stream instance.
-/// \param p_dest Pointer to the destination buffer.
+/// \param stream Pointer to the stream instance.
+/// \param dest Pointer to the destination buffer.
 /// \param count Number of bytes to read.
 /// \return Number of bytes actually read.
 ///
@@ -88,29 +88,29 @@ BANJO_EXPORT void bj_close_stream(
 /// \par Memory Safety
 ///
 /// This function does not perform any memory bounds checking.
-/// It is the caller's responsibility to ensure `p_dest` has enough space
+/// It is the caller's responsibility to ensure `dest` has enough space
 /// to hold `count` bytes.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT size_t bj_read_stream(
-    bj_stream* p_stream,
-    void* p_dest,
+    struct bj_stream* stream,
+    void* dest,
     size_t count
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Get the size of the stream.
 ///
-/// \param p_stream Pointer to the stream instance.
+/// \param stream Pointer to the stream instance.
 /// \return The size of the stream, in bytes
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT size_t bj_get_stream_length(
-    bj_stream* p_stream
+    struct bj_stream* stream
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Seeks to a new position in the stream relative to a specified origin.
 ///
-/// \param p_stream Pointer to the stream instance.
+/// \param stream Pointer to the stream instance.
 /// \param position Offset for the new position.
 /// \param from Origin relative to which the position should be calculated.
 /// \return The new position within the stream after seeking.
@@ -119,19 +119,19 @@ BANJO_EXPORT size_t bj_get_stream_length(
 /// of the stream, from 0 to the length of the stream.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT size_t bj_seek_stream(
-    bj_stream* p_stream,
+    struct bj_stream* stream,
     ptrdiff_t position,
-    bj_seek_origin from
+    enum bj_seek_origin from
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Returns the current position of the cursor in the stream.
 ///
-/// \param p_stream Pointer to the stream instance.
+/// \param stream Pointer to the stream instance.
 /// \return The current position within the stream.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT size_t bj_tell_stream(
-    bj_stream* p_stream
+    struct bj_stream* stream
 );
 
 ////////////////////////////////////////////////////////////////////////////////

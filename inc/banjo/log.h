@@ -27,7 +27,7 @@
 /// Log Levels.
 /// Level values are ordered from 0.
 ///
-enum {
+enum bj_log_level {
     BJ_LOG_TRACE, ///< Fine-grained diagnostic details.
     BJ_LOG_DEBUG, ///< Detailed information for debugging.
     BJ_LOG_INFO,  ///< Informational messages about execution.
@@ -186,9 +186,9 @@ BANJO_EXPORT int bj_get_log_level(void);
 /// The string formatting follows standard `printf` signature and behaviour.
 ///
 /// \param level           The log level the message is reported in.
-/// \param p_file          The file name the message is reported from.
+/// \param file          The file name the message is reported from.
 /// \param line            The line number the message is reported from.
-/// \param p_format, ...   The formatted string to report.
+/// \param format, ...   The formatted string to report.
 ///
 /// \return The actual number of characters written,
 ///         excluding the null-terminating symbol.
@@ -203,7 +203,7 @@ BANJO_EXPORT int bj_get_log_level(void);
 ///   \ref bj_get_log_level_string. It takes up to 4 to 5 characters.
 /// - `SOURCE` is in the format "FILE:LINE" and takes an undetermined number of 
 ///   characters. This is only present in a debug build.
-/// - `MESSAGE` is the result of calling `snprintf(p_format, ...)` and the number
+/// - `MESSAGE` is the result of calling `snprintf(format, ...)` and the number
 ///   of character varies.
 ///
 /// For example: `12:23:34 WARN: logging.c:27 Warning level message`
@@ -227,7 +227,7 @@ BANJO_EXPORT int bj_get_log_level(void);
 /// - If there is not enough space for `LEVEL`, it is not present.
 ///
 /// \see bj_log_msg, bj_trace, bj_debug, bj_info, bj_warn, bj_err, bj_fatal
-BANJO_EXPORT size_t bj_log_message(int level, const char* p_file, int line, const char* p_format, ...);
+BANJO_EXPORT size_t bj_log_message(int level, const char* file, int line, const char* format, ...);
 
 #endif
 /// \} // End of array log

@@ -21,14 +21,14 @@ struct {
 } emscripten;
 
 typedef struct {
-    struct bj_window_t common;
+    struct bj_window common;
     const char* selector;
     int         width;
     int         height;
 } emscripten_window;
 
 
-static bj_key em_translate_keycode(const EM_UTF8 key[32], unsigned int location) {
+static enum bj_key em_translate_keycode(const EM_UTF8 key[32], unsigned int location) {
     // Common named keys
     if (bj_strcmp(key, "Enter") == 0) return BJ_KEY_RETURN;
     if (bj_strcmp(key, "Tab") == 0) return BJ_KEY_TAB;
@@ -55,7 +55,7 @@ static bj_key em_translate_keycode(const EM_UTF8 key[32], unsigned int location)
             fnum = fnum * 10 + (key[i] - '0');
         }
         if (fnum >= 1 && fnum <= 24) {
-            return (bj_key)(BJ_KEY_F1 + (fnum - 1));
+            return (enum bj_key)(BJ_KEY_F1 + (fnum - 1));
         }
     }
 
@@ -68,9 +68,9 @@ static bj_key em_translate_keycode(const EM_UTF8 key[32], unsigned int location)
     // Single-character keys
     if (strlen(key) == 1) {
         char c = key[0];
-        if (c >= '0' && c <= '9') return (bj_key)(BJ_KEY_0 + (c - '0'));
-        if (c >= 'A' && c <= 'Z') return (bj_key)(BJ_KEY_A + (c - 'A'));
-        if (c >= 'a' && c <= 'z') return (bj_key)(BJ_KEY_A + (c - 'a'));
+        if (c >= '0' && c <= '9') return (enum bj_key)(BJ_KEY_0 + (c - '0'));
+        if (c >= 'A' && c <= 'Z') return (enum bj_key)(BJ_KEY_A + (c - 'A'));
+        if (c >= 'a' && c <= 'z') return (enum bj_key)(BJ_KEY_A + (c - 'a'));
         // Handle symbols (US layout)
         switch (c) {
             case ';': return BJ_KEY_OEM_1;
@@ -129,8 +129,8 @@ static bool em_mouse_callback(int eventType, const EmscriptenMouseEvent *mouseEv
     return 1;
 }
 
-static bj_window* emscripten_window_new(
-    bj_video_layer* p_layer,
+static struct bj_window* emscripten_window_new(
+    struct bj_video_layer* p_layer,
     const char* p_title,
     uint16_t x,
     uint16_t y,
@@ -172,12 +172,12 @@ static bj_window* emscripten_window_new(
     emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, p_window, 0, em_key_callback);
 
     bj_memcpy(p_window, &window, sizeof(emscripten_window));
-    return (bj_window*)p_window;
+    return (struct bj_window*)p_window;
 }
 
 static void emscripten_window_del(
-    bj_video_layer* p_layer,
-    bj_window* p_abstract_window
+    struct bj_video_layer* p_layer,
+    struct bj_window* p_abstract_window
 ) {
     (void)p_layer;
     emscripten_window* p_window = (emscripten_window*)p_abstract_window;
@@ -188,22 +188,22 @@ static void emscripten_window_del(
 }
 
 static void emscripten_end_layer(
-    bj_video_layer* p_layer,
-    bj_error** p_error
+    struct bj_video_layer* p_layer,
+    struct bj_error** p_error
 ) {
     (void)p_error;
     bj_free(p_layer);
 }
 
 static void emscripten_window_poll(
-    bj_video_layer* p_layer
+    struct bj_video_layer* p_layer
 ) {
     (void)p_layer;
 }
 
 static int emscripten_get_window_size(
-    bj_video_layer* p_layer,
-    const bj_window* p_abstract_window,
+    struct bj_video_layer* p_layer,
+    const struct bj_window* p_abstract_window,
     int* width,
     int* height
 ) {
@@ -220,10 +220,10 @@ static int emscripten_get_window_size(
     return 1;
 }
 
-static bj_bitmap* emscripten_create_window_framebuffer(
-    bj_video_layer* p_layer,
-    const bj_window* p_abstract_window,
-    bj_error** p_error
+static struct bj_bitmap* emscripten_create_window_framebuffer(
+    struct bj_video_layer* p_layer,
+    const struct bj_window* p_abstract_window,
+    struct bj_error** p_error
 ) {
     (void)p_layer;
     (void)p_error;
@@ -235,8 +235,8 @@ static bj_bitmap* emscripten_create_window_framebuffer(
 }
 
 static void emscripten_flush_window_framebuffer(
-    bj_video_layer* p_layer,
-    const bj_window*   p_abstract_window
+    struct bj_video_layer* p_layer,
+    const struct bj_window*   p_abstract_window
 ) {
     const emscripten_window* p_window = (emscripten_window*)p_abstract_window;
     (void)p_layer;
@@ -268,12 +268,12 @@ static void emscripten_flush_window_framebuffer(
     }, p_window->width, p_window->height, bj_bitmap_pixels(p_abstract_window->p_framebuffer), p_window->selector);
 }
 
-static bj_video_layer* emscripten_init_layer(
-    bj_error** p_error
+static struct bj_video_layer* emscripten_init_layer(
+    struct bj_error** p_error
 ) {
     (void)p_error;
 
-    bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
+    struct bj_video_layer* p_layer = bj_malloc(sizeof(struct bj_video_layer));
     p_layer->end                       = emscripten_end_layer;
     p_layer->create_window             = emscripten_window_new;
     p_layer->delete_window             = emscripten_window_del;
@@ -285,7 +285,7 @@ static bj_video_layer* emscripten_init_layer(
     return p_layer;
 }
 
-bj_video_layer_create_info emscripten_video_layer_info = {
+struct bj_video_layer_create_info emscripten_video_layer_info = {
     .name   = "emscripten",
     .create = emscripten_init_layer,
 };

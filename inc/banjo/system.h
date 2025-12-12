@@ -17,7 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes the system.
 ///
-/// \param p_error An optional location to an error object.
+/// \param error An optional location to an error object.
 ///
 /// The initialization process will iteratively try to initialize a subsystem
 /// among the ones available and returns on the first that succeeded.
@@ -25,16 +25,16 @@
 /// \return _true_ if the system is properly initialized, BJ_FALSE otherswise.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_initialize(
-    bj_error** p_error
+    struct bj_error** error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// De-initializes the system.
 ///
-/// \param p_error An optional location to an error object.
+/// \param error An optional location to an error object.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_shutdown(
-    bj_error** p_error
+    struct bj_error** error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,14 +45,14 @@ BANJO_EXPORT void bj_shutdown(
 /// The provided pointer can be used with \ref bj_library_symbol to get a function
 /// from the loaded library.
 ///
-/// \param p_path A C-string path to the library to load.
+/// \param path A C-string path to the library to load.
 /// \return _0_ or a handle to the loaded library.
 ///
 /// \par Behaviour
 ///
-/// - On Unix platforms, `p_path` is passed to `dlopen()` with `RTLD_LAZY` and
+/// - On Unix platforms, `path` is passed to `dlopen()` with `RTLD_LAZY` and
 ///   `RTLD_LOCAL` flags.
-/// - On Windows, `p_path` is passed to `LoadLibraryA()`.
+/// - On Windows, `path` is passed to `LoadLibraryA()`.
 ///
 /// \par Memory Management
 ///
@@ -66,7 +66,7 @@ BANJO_EXPORT void bj_shutdown(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_load_library(
-    const char* p_path
+    const char* path
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -75,12 +75,12 @@ BANJO_EXPORT void* bj_load_library(
 /// This function is an abstraction over the platform specific function like
 /// `dlclose` and `FreeLibrary`.
 ///
-/// \param p_handle The library to unload.
+/// \param handle The library to unload.
 ///
 /// \par Behaviour
 ///
-/// - On Unix platforms, `p_handle` is passed to `dlclose()`.
-/// - On Windows, `p_path` is passed to `FreeLibrary()`.
+/// - On Unix platforms, `handle` is passed to `dlclose()`.
+/// - On Windows, `path` is passed to `FreeLibrary()`.
 ///
 /// \par Memory Management
 ///
@@ -94,29 +94,29 @@ BANJO_EXPORT void* bj_load_library(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_unload_library(
-    void* p_handle
+    void* handle
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Get the address of a function exported by `p_handle` given its name.
+/// Get the address of a function exported by `handle` given its name.
 ///
 /// This function is an abstraction over the platform specific function like
 /// `dlsym` and `GetProcAddress`.
 ///
-/// \param p_handle A library handle provided by \ref bj_load_library.
-/// \param p_name C-String name of the function to retrieve
+/// \param handle A library handle provided by \ref bj_load_library.
+/// \param name C-String name of the function to retrieve
 ///
 /// \return _0_ or the address of the retrieved function.
 ///
 /// \par Behaviour
 ///
-/// - On Unix platforms, `p_handle` and `p_name` are passed to `dlsym()`.
-/// - On Windows, `p_handle` and `p_name` are passed to `GetProcAddress()`.
+/// - On Unix platforms, `handle` and `name` are passed to `dlsym()`.
+/// - On Windows, `handle` and `name` are passed to `GetProcAddress()`.
 ///
 /// \par Memory Management
 ///
 /// The caller is responsible for release the loaded function using \ref 
-/// bj_unload_library with `p_handle`.
+/// bj_unload_library with `handle`.
 ///
 /// 
 /// \see bj_load_library, bj_unload_library
@@ -125,8 +125,8 @@ BANJO_EXPORT void bj_unload_library(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_library_symbol(
-    void*       p_handle,
-    const char* p_name
+    void*       handle,
+    const char* name
 );
 
 #endif

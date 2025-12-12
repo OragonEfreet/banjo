@@ -5,12 +5,12 @@
 
 #include <check.h>
 
-extern bj_audio_layer_create_info alsa_audio_layer_info;
-extern bj_audio_layer_create_info mme_audio_layer_info;
-extern bj_audio_layer_create_info noaudio_audio_layer_info;
-extern bj_audio_layer_create_info emscripten_audio_layer_info;
+extern struct bj_audio_layer_create_info alsa_audio_layer_info;
+extern struct bj_audio_layer_create_info mme_audio_layer_info;
+extern struct bj_audio_layer_create_info noaudio_audio_layer_info;
+extern struct bj_audio_layer_create_info emscripten_audio_layer_info;
 
-static const bj_audio_layer_create_info* layer_infos[] = {
+static const struct bj_audio_layer_create_info* layer_infos[] = {
 #ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
     &emscripten_audio_layer_info,
 #endif
@@ -23,17 +23,17 @@ static const bj_audio_layer_create_info* layer_infos[] = {
     &noaudio_audio_layer_info,
 };
 
-extern bj_audio_layer* s_audio;
+extern struct bj_audio_layer* s_audio;
 
-bj_audio_layer* bj_begin_audio(bj_error** p_error) {
+struct bj_audio_layer* bj_begin_audio(struct bj_error** p_error) {
     bj_assert(s_audio == 0);
 
-    const size_t n_layers = sizeof(layer_infos) / sizeof(bj_audio_layer_create_info*);
+    const size_t n_layers = sizeof(layer_infos) / sizeof(struct bj_audio_layer_create_info*);
 
     for (size_t b = 0; b < n_layers; ++b) {
-        bj_error* sub_err = 0;
+        struct bj_error* sub_err = 0;
 
-        const bj_audio_layer_create_info* p_create_info = layer_infos[b];
+        const struct bj_audio_layer_create_info* p_create_info = layer_infos[b];
         s_audio = p_create_info->create(&sub_err);
 
         if (sub_err) {
@@ -59,23 +59,23 @@ bj_audio_layer* bj_begin_audio(bj_error** p_error) {
     return s_audio;
 }
 
-void bj_end_audio(bj_audio_layer* p_audio, bj_error** p_error) {
+void bj_end_audio(struct bj_audio_layer* p_audio, struct bj_error** p_error) {
     // TODO?
     p_audio->end(p_audio, p_error);
 }
 
-bj_audio_device* bj_open_audio_device(
-    const bj_audio_properties* p_properties,
-    bj_audio_callback_t        p_callback,
+struct bj_audio_device* bj_open_audio_device(
+    const struct bj_audio_properties* p_properties,
+    bj_audio_callback_fn        p_callback,
     void*                      p_callback_user_data,
-    bj_error**                 p_error
+    struct bj_error**                 p_error
 ) {
     bj_check_or_0(s_audio);
     return s_audio->open_device(s_audio, p_properties, p_callback, p_callback_user_data, p_error);
 }
 
 void bj_close_audio_device(
-    bj_audio_device* p_device
+    struct bj_audio_device* p_device
 ) {
     bj_check(s_audio);
     p_device->should_close = BJ_TRUE;
@@ -84,34 +84,34 @@ void bj_close_audio_device(
 
 
 void bj_play_audio_device(
-    bj_audio_device* p_device
+    struct bj_audio_device* p_device
 ) {
     bj_check(p_device);
     p_device->playing = BJ_TRUE;
 }
 
 void bj_pause_audio_device(
-    bj_audio_device* p_device
+    struct bj_audio_device* p_device
 ) {
     bj_check(p_device);
     p_device->playing = BJ_FALSE;
 }
 
 bj_bool bj_audio_playing(
-    const bj_audio_device* p_device
+    const struct bj_audio_device* p_device
 ) {
     return p_device ? p_device->playing : BJ_FALSE;
 }
 
 void bj_reset_audio_device(
-    bj_audio_device* p_device
+    struct bj_audio_device* p_device
 ) {
     bj_check(p_device);
     p_device->should_reset = BJ_TRUE;
 }
 
 void bj_stop_audio_device(
-    bj_audio_device* p_device
+    struct bj_audio_device* p_device
 ) {
     bj_check(p_device);
     bj_pause_audio_device(p_device);
@@ -157,11 +157,11 @@ inline static double make_note_value(
 void bj_play_audio_note(
     void*                        buffer,
     unsigned                     frames,
-    const bj_audio_properties*   p_audio,
+    const struct bj_audio_properties*   p_audio,
     void*                        p_user_data,
     uint64_t                     base_sample_index
 ) {
-    bj_audio_play_note_data* data = (bj_audio_play_note_data*)p_user_data;
+    struct bj_audio_play_note_data* data = (struct bj_audio_play_note_data*)p_user_data;
 
     const double freq        = (double)data->frequency;
     const double amplitude   = (double)p_audio->amplitude;   /* scale for int16 path */

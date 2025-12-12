@@ -38,10 +38,10 @@
 /// \param time          Elapsed time t [T]
 /// \return  Output position at time t [L]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_vec2 bj_compute_kinematics_2d(
-    bj_vec2  position,
-    bj_vec2  velocity,
-    bj_vec2  acceleration,
+BANJO_EXPORT struct bj_vec2 bj_compute_kinematics_2d(
+    struct bj_vec2  position,
+    struct bj_vec2  velocity,
+    struct bj_vec2  acceleration,
     bj_real  time
 );
 
@@ -55,9 +55,9 @@ BANJO_EXPORT bj_vec2 bj_compute_kinematics_2d(
 /// \param time          Elapsed time t [T]
 /// \return Output velocity at time t [L T^-1]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_vec2 bj_compute_kinematics_velocity_2d(
-    bj_vec2 velocity,
-    bj_vec2 acceleration,
+BANJO_EXPORT struct bj_vec2 bj_compute_kinematics_velocity_2d(
+    struct bj_vec2 velocity,
+    struct bj_vec2 acceleration,
     bj_real time
 );
 
@@ -75,15 +75,15 @@ BANJO_EXPORT bj_vec2 bj_compute_kinematics_velocity_2d(
 /// \param damping      Velocity damping factor in [0, 1]
 /// \param inverse_mass Inverse of mass [M^-1]; 0 means infinite mass
 ////////////////////////////////////////////////////////////////////////////////
-struct bj_particle_2d_t {
-    bj_vec2 position;
-    bj_vec2 velocity;
-    bj_vec2 acceleration;
-    bj_vec2 forces;
+struct bj_particle_2d {
+    struct bj_vec2 position;
+    struct bj_vec2 velocity;
+    struct bj_vec2 acceleration;
+    struct bj_vec2 forces;
     bj_real damping;
     bj_real inverse_mass;
 };
-typedef struct bj_particle_2d_t bj_particle_2d;
+struct bj_particle_2d;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Add a force to a particle's accumulator.
@@ -91,12 +91,12 @@ typedef struct bj_particle_2d_t bj_particle_2d;
 /// The force will be used on the next integration step, then should be cleared
 /// by the step routine.
 ///
-/// \param p_particle Particle to modify
+/// \param particle Particle to modify
 /// \param force      Force to add [M L T^-2]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_particle_force_2d(
-    bj_particle_2d* p_particle,
-    const bj_vec2 force
+    struct bj_particle_2d* particle,
+    const struct bj_vec2 force
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -105,11 +105,11 @@ BANJO_EXPORT void bj_apply_particle_force_2d(
 /// Integrates acceleration and velocity, applies damping, and advances position.
 /// Clears the force accumulator after use.
 ///
-/// \param p_particle Particle to integrate
+/// \param particle Particle to integrate
 /// \param dt         Time step [T]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_step_particle_2d(
-    bj_particle_2d* p_particle,
+    struct bj_particle_2d* particle,
     bj_real dt
 );
 
@@ -118,27 +118,27 @@ BANJO_EXPORT void bj_step_particle_2d(
 ///
 /// Adds force F = m * g * (0, -1) assuming -Y is "down".
 ///
-/// \param p_particle Particle to affect
+/// \param particle Particle to affect
 /// \param gravity    Gravitational acceleration magnitude g >= 0 [L T^-2]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_gravity_2d(
-    bj_particle_2d* p_particle,
+    struct bj_particle_2d* particle,
     bj_real gravity
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Apply point gravity from one particle to another.
 ///
-/// Adds a Newtonian attraction from p_particle_to to p_particle_from.
+/// Adds a Newtonian attraction from particle_to to particle_from.
 /// Uses F = Gm1m2 r_hat / r^2 with gravity_factor = G.
 ///
-/// \param p_particle_from  Particle receiving the force
-/// \param p_particle_to    Source particle
+/// \param particle_from  Particle receiving the force
+/// \param particle_to    Source particle
 /// \param gravity_factor   Gravitational constant G [L^3 M^-1 T^-2]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_point_gravity_2d(
-    bj_particle_2d*       BJ_RESTRICT p_particle_from,
-    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    struct bj_particle_2d*       BJ_RESTRICT particle_from,
+    const struct bj_particle_2d* BJ_RESTRICT particle_to,
     const bj_real                     gravity_factor
 );
 
@@ -147,14 +147,14 @@ BANJO_EXPORT void bj_apply_point_gravity_2d(
 ///
 /// Uses F proportional to r / (r^2 + epsilon^2)^(3/2).
 ///
-/// \param p_particle_from  Particle receiving the force
-/// \param p_particle_to    Source particle
+/// \param particle_from  Particle receiving the force
+/// \param particle_to    Source particle
 /// \param gravity_factor   Gravitational constant G [L^3 M^-1 T^-2]
 /// \param epsilon          Softening length epsilon >= 0 [L]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_point_gravity_softened_2d(
-    bj_particle_2d*       BJ_RESTRICT p_particle_from,
-    const bj_particle_2d* BJ_RESTRICT p_particle_to,
+    struct bj_particle_2d*       BJ_RESTRICT particle_from,
+    const struct bj_particle_2d* BJ_RESTRICT particle_to,
     const bj_real                     gravity_factor,
     const bj_real                     epsilon
 );
@@ -164,12 +164,12 @@ BANJO_EXPORT void bj_apply_point_gravity_softened_2d(
 ///
 /// Drag magnitude = k1 * |v| + k2 * |v|^2 along -v_hat.
 ///
-/// \param p_particle Particle to affect
+/// \param particle Particle to affect
 /// \param k1         Linear drag coefficient [M T^-1]
 /// \param k2         Quadratic drag coefficient [M L^-1]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_drag_2d(
-    bj_particle_2d* p_particle,
+    struct bj_particle_2d* particle,
     bj_real k1,
     bj_real k2
 );
@@ -185,7 +185,7 @@ BANJO_EXPORT void bj_apply_drag_2d(
 /// \return c >= 0 [M T^-1]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_real bj_compute_particle_drag_coefficient_2d(
-    const bj_vec2 vel,
+    const struct bj_vec2 vel,
     const bj_real k1,
     const bj_real k2
 );
@@ -200,8 +200,8 @@ BANJO_EXPORT bj_real bj_compute_particle_drag_coefficient_2d(
 /// \param k2     Quadratic drag coefficient [M L^-1]
 /// \return Output force [M L T^-2]
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_vec2 bj_compute_particle_drag_force_2d(
-    bj_vec2  vel,
+BANJO_EXPORT struct bj_vec2 bj_compute_particle_drag_force_2d(
+    struct bj_vec2  vel,
     const    bj_real k1,
     const    bj_real k2
 );
@@ -223,7 +223,7 @@ BANJO_EXPORT bj_vec2 bj_compute_particle_drag_force_2d(
 /// \param damping          Angular velocity damping factor in [0, 1]
 /// \param inverse_inertia  Inverse moment of inertia I^-1 [M^-1 L^-2]
 ////////////////////////////////////////////////////////////////////////////////
-struct bj_angular_2d_t {
+struct bj_angular_2d {
     bj_real value;
     bj_real velocity;
     bj_real acceleration;
@@ -231,7 +231,7 @@ struct bj_angular_2d_t {
     bj_real damping;
     bj_real inverse_inertia;
 };
-typedef struct bj_angular_2d_t bj_angular_2d;
+struct bj_angular_2d;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Add torque to the angular accumulator.
@@ -240,7 +240,7 @@ typedef struct bj_angular_2d_t bj_angular_2d;
 /// \param torque  Torque to add tau [M L^2 T^-2]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_angular_torque_2d(
-    bj_angular_2d* angular,
+    struct bj_angular_2d* angular,
     bj_real torque
 );
 
@@ -253,7 +253,7 @@ BANJO_EXPORT void bj_apply_angular_torque_2d(
 /// \param delta_time  Time step [T]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_step_angular_2d(
-    bj_angular_2d* angular,
+    struct bj_angular_2d* angular,
     double         delta_time
 );
 
@@ -265,11 +265,11 @@ BANJO_EXPORT void bj_step_angular_2d(
 /// \param particle  Linear state (position, velocity, forces)
 /// \param angular   Angular state (theta, omega, tau)
 ////////////////////////////////////////////////////////////////////////////////
-struct bj_rigid_body_2d_t {
-    struct bj_particle_2d_t particle;
-    struct bj_angular_2d_t  angular;
+struct bj_rigid_body_2d {
+    struct bj_particle_2d particle;
+    struct bj_angular_2d  angular;
 };
-typedef struct bj_rigid_body_2d_t bj_rigid_body_2d;
+struct bj_rigid_body_2d;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Apply a world-space force at the center of mass.
@@ -280,8 +280,8 @@ typedef struct bj_rigid_body_2d_t bj_rigid_body_2d;
 /// \param force  Force to add [M L T^-2]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_apply_rigidbody_force_2d(
-    bj_rigid_body_2d* body,
-    const bj_vec2 force
+    struct bj_rigid_body_2d* body,
+    const struct bj_vec2 force
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +293,7 @@ BANJO_EXPORT void bj_apply_rigidbody_force_2d(
 /// \param delta_time  Time step [T]
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_step_rigid_body_2d(
-    bj_rigid_body_2d* body,
+    struct bj_rigid_body_2d* body,
     double            delta_time
 );
 

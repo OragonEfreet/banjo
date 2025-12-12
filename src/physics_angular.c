@@ -2,14 +2,14 @@
 #include <check.h>
 
 void bj_apply_angular_torque_2d(
-    bj_angular_2d* angular,
+    struct bj_angular_2d* angular,
     bj_real torque
 ) {
     bj_check(angular);
     angular->torque += torque;
 }
 
-void bj_step_angular_2d(bj_angular_2d* a, double dt) {
+void bj_step_angular_2d(struct bj_angular_2d* a, double dt) {
     bj_check(a);
     if (a->inverse_inertia != BJ_FZERO) {
         a->velocity = (

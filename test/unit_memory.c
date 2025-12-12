@@ -13,7 +13,7 @@ TEST_CASE(fallback_allocator_works) {
 }
 
 TEST_CASE(forcing_default_allocators_is_possible) {
-    bj_memory_callbacks allocators = mock_allocators(0);
+    struct bj_memory_callbacks allocators = mock_allocators(0);
 
     bj_set_memory_defaults(&allocators);
     bj_set_memory_defaults(0);
@@ -44,7 +44,7 @@ TEST_CASE(test_custom_default_allocators) {
     sAllocationData result = {.actual_current_allocated=0};
     sAllocationData expected = {.actual_current_allocated=0};
     CHECK_CLEAN_ALLOC(result);
-    bj_memory_callbacks allocators = mock_allocators(&result);
+    struct bj_memory_callbacks allocators = mock_allocators(&result);
 
     bj_set_memory_defaults(&allocators);
 

@@ -130,7 +130,7 @@ This option enables ANSI color codes in the log output, making it easier to dist
 
 ### Log Checks {#opt_checks_log}
 
-This option ensures that when a check fails (as described in \ref bj_check), an error message is logged to the standard output.
+This option ensures that when a check fails (as described in bj_check), an error message is logged to the standard output.
 
 | Compiler    | Compiler Flags                       |
 |-------------|--------------------------------------|

@@ -5,7 +5,7 @@
 // TODO: I'll remake it myself later on.
 
 /* ---------- Public: color key ---------- */
-void bj_set_bitmap_colorkey(bj_bitmap* bmp, bj_bool enabled, uint32_t key_value) {
+void bj_set_bitmap_colorkey(struct bj_bitmap* bmp, bj_bool enabled, uint32_t key_value) {
     bj_check(bmp);
     bmp->colorkey_enabled = enabled;
     bmp->colorkey = key_value;
@@ -24,10 +24,10 @@ static inline uint32_t buffer_get_pixel_bits(
     const size_t byte_offset = bit_offset >> 3;
     const size_t bit_in_byte = bit_offset & 7u;
     const size_t span_bytes  = (bit_in_byte + bpp + 7u) >> 3;
-    uint64_t window = 0;
-    bj_memcpy(&window, (const uint8_t*)buffer + byte_offset, span_bytes);
-    window >>= bit_in_byte;
-    return (uint32_t)(window & mask_for_bpp(bpp));
+    uint64_t bit_window = 0;
+    bj_memcpy(&bit_window, (const uint8_t*)buffer + byte_offset, span_bytes);
+    bit_window >>= bit_in_byte;
+    return (uint32_t)(bit_window & mask_for_bpp(bpp));
 }
 
 static inline void buffer_set_pixel_bits(
@@ -40,19 +40,19 @@ static inline void buffer_set_pixel_bits(
 
     const uint64_t field_mask = (uint64_t)mask_for_bpp(bpp) << bit_in_byte;
 
-    uint64_t window = 0;
-    bj_memcpy(&window, (const uint8_t*)buffer + byte_offset, span_bytes);
-    window = (window & ~field_mask) | (((uint64_t)(value & mask_for_bpp(bpp)) << bit_in_byte) & field_mask);
-    bj_memcpy((uint8_t*)buffer + byte_offset, &window, span_bytes);
+    uint64_t bit_window = 0;
+    bj_memcpy(&bit_window, (const uint8_t*)buffer + byte_offset, span_bytes);
+    bit_window = (bit_window & ~field_mask) | (((uint64_t)(value & mask_for_bpp(bpp)) << bit_in_byte) & field_mask);
+    bj_memcpy((uint8_t*)buffer + byte_offset, &bit_window, span_bytes);
 }
 
 /* ---------- Canonical RGB (8:8:8) converters via bj_pixel_* ---------- */
 
-static inline void unpack_rgb_from_native(bj_pixel_mode mode, uint32_t native, uint8_t* r, uint8_t* g, uint8_t* b) {
+static inline void unpack_rgb_from_native(enum bj_pixel_mode mode, uint32_t native, uint8_t* r, uint8_t* g, uint8_t* b) {
     bj_make_pixel_rgb(mode, native, r, g, b);
 }
 
-static inline uint32_t pack_rgb_to_native(bj_pixel_mode mode, uint8_t r, uint8_t g, uint8_t b) {
+static inline uint32_t pack_rgb_to_native(enum bj_pixel_mode mode, uint8_t r, uint8_t g, uint8_t b) {
     return bj_get_pixel_value(mode, r, g, b);
 }
 
@@ -61,7 +61,7 @@ static inline uint32_t pack_rgb_to_native(bj_pixel_mode mode, uint8_t r, uint8_t
 
 /* ---------- ROPs on packed values ---------- */
 
-static inline uint32_t rop_apply_u32(uint32_t dst, uint32_t src, bj_blit_op op) {
+static inline uint32_t rop_apply_u32(uint32_t dst, uint32_t src, enum bj_blit_op op) {
     switch (op) {
         case BJ_BLIT_OP_COPY:    return src;
         case BJ_BLIT_OP_XOR:     return dst ^ src;
@@ -91,14 +91,14 @@ static inline uint32_t rop_apply_u32(uint32_t dst, uint32_t src, bj_blit_op op) 
 
 /* ---------- Fast row kernels (same-format) ---------- */
 
-static inline bj_bool same_format_fastcopy_possible(const bj_bitmap* s, const bj_bitmap* d, bj_blit_op op, bj_bool use_key) {
+static inline bj_bool same_format_fastcopy_possible(const struct bj_bitmap* s, const struct bj_bitmap* d, enum bj_blit_op op, bj_bool use_key) {
     return (s->mode == d->mode) && (op == BJ_BLIT_OP_COPY) && !use_key;
 }
 
-static inline bj_bool is_32bpp(bj_pixel_mode m) { return BJ_PIXEL_GET_BPP(m) == 32; }
-static inline bj_bool is_24bpp(bj_pixel_mode m) { return BJ_PIXEL_GET_BPP(m) == 24; }
-static inline bj_bool is_16bpp(bj_pixel_mode m) { return BJ_PIXEL_GET_BPP(m) == 16; }
-static inline bj_bool is_subbyte(bj_pixel_mode m){ size_t b=BJ_PIXEL_GET_BPP(m); return (b==1||b==4||b==8); }
+static inline bj_bool is_32bpp(enum bj_pixel_mode m) { return BJ_PIXEL_GET_BPP(m) == 32; }
+static inline bj_bool is_24bpp(enum bj_pixel_mode m) { return BJ_PIXEL_GET_BPP(m) == 24; }
+static inline bj_bool is_16bpp(enum bj_pixel_mode m) { return BJ_PIXEL_GET_BPP(m) == 16; }
+static inline bj_bool is_subbyte(enum bj_pixel_mode m){ size_t b=BJ_PIXEL_GET_BPP(m); return (b==1||b==4||b==8); }
 
 /* bj_memcpy/bj_memmove whole rows (direction-aware for overlap) */
 static void blit_rows_mem(const uint8_t* s, size_t s_stride, uint8_t* d, size_t d_stride, size_t rowbytes, size_t rows, bj_bool overlap) {
@@ -111,7 +111,7 @@ static void blit_rows_mem(const uint8_t* s, size_t s_stride, uint8_t* d, size_t 
 }
 
 /* 32bpp same-mode ROP (XOR/OR/AND); colorkey optional */
-static void blit_row_32_rop(const uint32_t* src, uint32_t* dst, size_t pixels, bj_bool use_key, uint32_t key, bj_blit_op op) {
+static void blit_row_32_rop(const uint32_t* src, uint32_t* dst, size_t pixels, bj_bool use_key, uint32_t key, enum bj_blit_op op) {
     if (!use_key) {
         if (op == BJ_BLIT_OP_COPY) {
             bj_memcpy(dst, src, pixels * 4u);
@@ -131,7 +131,7 @@ static void blit_row_32_rop(const uint32_t* src, uint32_t* dst, size_t pixels, b
 }
 
 /* 16bpp same-mode fast bitwise (XOR/OR/AND); COPY → bj_memcpy; key compare in native */
-static void blit_row_16_fast(const uint16_t* src, uint16_t* dst, size_t pixels, bj_bool use_key, uint16_t key, bj_blit_op op) {
+static void blit_row_16_fast(const uint16_t* src, uint16_t* dst, size_t pixels, bj_bool use_key, uint16_t key, enum bj_blit_op op) {
     if (!use_key) {
         if (op == BJ_BLIT_OP_COPY) { bj_memcpy(dst, src, pixels * 2u); return; }
         if (op == BJ_BLIT_OP_XOR)  { for (size_t i=0;i<pixels;++i) dst[i]^=src[i]; return; }
@@ -142,7 +142,7 @@ static void blit_row_16_fast(const uint16_t* src, uint16_t* dst, size_t pixels, 
 }
 
 /* 24bpp BGR same-mode; do it channel-wise; COPY can use bj_memcpy; key compare needs 3-byte compare */
-static void blit_row_24_fast(const uint8_t* s, uint8_t* d, size_t pixels, bj_bool use_key, const uint8_t key[3], bj_blit_op op) {
+static void blit_row_24_fast(const uint8_t* s, uint8_t* d, size_t pixels, bj_bool use_key, const uint8_t key[3], enum bj_blit_op op) {
     if (!use_key && op == BJ_BLIT_OP_COPY) { bj_memcpy(d, s, pixels*3u); return; }
     for (size_t i=0;i<pixels;++i) {
         const uint8_t sr = s[i*3+2], sg = s[i*3+1], sb = s[i*3+0];
@@ -178,9 +178,9 @@ static void blit_row_24_fast(const uint8_t* s, uint8_t* d, size_t pixels, bj_boo
 /* ---------- General per-pixel kernel (any format combo) ---------- */
 
 static void blit_general_any(
-    const bj_bitmap* s, const bj_rect* sr,
-    bj_bitmap* d, const bj_rect* dr,
-    bj_blit_op op)
+    const struct bj_bitmap* s, const struct bj_rect* sr,
+    struct bj_bitmap* d, const struct bj_rect* dr,
+    enum bj_blit_op op)
 {
     const size_t bpp_s = BJ_PIXEL_GET_BPP(s->mode);
     const size_t bpp_d = BJ_PIXEL_GET_BPP(d->mode);
@@ -297,9 +297,9 @@ static void blit_general_any(
 /* ---------- Core clipped blit dispatcher (no scaling) ---------- */
 
 static bj_bool do_blit_dispatch(
-    const bj_bitmap* src, const bj_rect* sr,
-    bj_bitmap* dst, const bj_rect* dr,
-    bj_blit_op op)
+    const struct bj_bitmap* src, const struct bj_rect* sr,
+    struct bj_bitmap* dst, const struct bj_rect* dr,
+    enum bj_blit_op op)
 {
     bj_check_or_0(src && dst && sr && dr);
     if (!sr->w || !sr->h || !dr->w || !dr->h) return BJ_FALSE;
@@ -356,19 +356,19 @@ static bj_bool do_blit_dispatch(
 /* ---------- Public: clipped blit (no scaling) using existing clipper ---------- */
 
 bj_bool bj_blit(
-    const bj_bitmap* p_src, const bj_rect* p_src_area,
-    bj_bitmap* p_dst, const bj_rect* p_dst_area,
-    bj_blit_op op)
+    const struct bj_bitmap* p_src, const struct bj_rect* p_src_area,
+    struct bj_bitmap* p_dst, const struct bj_rect* p_dst_area,
+    enum bj_blit_op op)
 {
     bj_check_or_0(p_src && p_dst);
 
     /* Build default rects & clip like current bj_blit */
-    bj_rect src_rect = {0,0,(uint16_t)p_src->width,(uint16_t)p_src->height};
-    bj_rect dst_rect = {0,0,0,0};
+    struct bj_rect src_rect = {0,0,(uint16_t)p_src->width,(uint16_t)p_src->height};
+    struct bj_rect dst_rect = {0,0,0,0};
 
     if (p_dst_area) { dst_rect.x = p_dst_area->x; dst_rect.y = p_dst_area->y; }
     if (p_src_area) {
-        bj_rect tmp;
+        struct bj_rect tmp;
         if (bj_rect_intersection(p_src_area, &src_rect, &tmp) == 0) return BJ_FALSE;
         dst_rect.x += tmp.x - p_src_area->x;
         dst_rect.y += tmp.y - p_src_area->y;
@@ -376,8 +376,8 @@ bj_bool bj_blit(
     }
     dst_rect.w = src_rect.w; dst_rect.h = src_rect.h;
 
-    bj_rect dst_bounds = (bj_rect){0,0,(uint16_t)p_dst->width,(uint16_t)p_dst->height};
-    bj_rect inter;
+    struct bj_rect dst_bounds = (struct bj_rect){0,0,(uint16_t)p_dst->width,(uint16_t)p_dst->height};
+    struct bj_rect inter;
     if (bj_rect_intersection(&dst_rect, &dst_bounds, &inter) == 0) return BJ_FALSE;
 
     /* Adjust source accordingly */
@@ -400,27 +400,27 @@ static inline size_t map_nn(size_t i, size_t src_len, size_t dst_len) {
 }
 
 bj_bool bj_blit_stretched(
-    const bj_bitmap* src, const bj_rect* src_area,
-    bj_bitmap* dst, const bj_rect* dst_area,
-    bj_blit_op op)
+    const struct bj_bitmap* src, const struct bj_rect* src_area,
+    struct bj_bitmap* dst, const struct bj_rect* dst_area,
+    enum bj_blit_op op)
 {
     bj_check_or_0(src && dst);
 
     /* Determine rectangles (default to full) */
-    bj_rect s = {0,0,(uint16_t)src->width,(uint16_t)src->height};
-    bj_rect d = {0,0,(uint16_t)dst->width,(uint16_t)dst->height};
+    struct bj_rect s = {0,0,(uint16_t)src->width,(uint16_t)src->height};
+    struct bj_rect d = {0,0,(uint16_t)dst->width,(uint16_t)dst->height};
     if (src_area) s = *src_area;
     if (dst_area) d.x = dst_area->x, d.y = dst_area->y, d.w = dst_area->w, d.h = dst_area->h;
     if (!s.w || !s.h || !d.w || !d.h) return BJ_FALSE;
 
-    bj_rect sbounds = (bj_rect){0,0,(uint16_t)src->width,(uint16_t)src->height};
-    bj_rect dbounds = (bj_rect){0,0,(uint16_t)dst->width,(uint16_t)dst->height};
+    struct bj_rect sbounds = (struct bj_rect){0,0,(uint16_t)src->width,(uint16_t)src->height};
+    struct bj_rect dbounds = (struct bj_rect){0,0,(uint16_t)dst->width,(uint16_t)dst->height};
     if (bj_rect_intersection(&s, &sbounds, &s) == 0) return BJ_FALSE;
     if (bj_rect_intersection(&d, &dbounds, &d) == 0) return BJ_FALSE;
 
     /* If sizes match, delegate to non-stretched fast path */
     if (s.w == d.w && s.h == d.h) {
-        bj_rect s_adj = s, d_adj = d;
+        struct bj_rect s_adj = s, d_adj = d;
         return do_blit_dispatch(src, &s_adj, dst, &d_adj, op);
     }
 

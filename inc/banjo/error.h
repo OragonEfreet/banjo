@@ -8,9 +8,9 @@
 /// This API provides a simple mechanism for communicating recoverable errors
 /// from callee to caller.
 /// 
-/// When a function may fail, it takes a \ref bj_error pointer as a parameter.
+/// When a function may fail, it takes a  bj_error pointer as a parameter.
 /// The failing function may fill in this value to communicate error while
-/// the caller can check for the value of \ref bj_error_code to check if 
+/// the caller can check for the value of  bj_error_code to check if 
 /// any error occurred:
 /// 
 /// \snippet handling_errors.c Using bj_error
@@ -31,7 +31,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief A numeric representation of an error in Banjo.
 ///
-/// Within a \ref bj_error object, the first field is a `uint32_t` value indicating
+/// Within a  bj_error object, the first field is a `uint32_t` value indicating
 /// the type of error encountered.
 ///
 /// An error code is a 32-bit value composed as follows:
@@ -67,7 +67,7 @@
 ///
 /// You can use \ref bj_error_code_kind to get the error kind code of any error code.
 ///
-typedef enum {
+enum bj_error_code {
     BJ_ERROR_NONE                = 0x00000000, ///< No Error
     BJ_ERROR                     = 0x00000001, ///< General Error (unspecified)
     BJ_ERROR_UNSUPPORTED         = 0x00000101, ///< Unsupported operation error
@@ -87,9 +87,9 @@ typedef enum {
     BJ_ERROR_INCORRECT_VALUE     = 0x00000204, ///< Mismatched expected value
 
     BJ_ERROR_VIDEO = 0x00000005, ///< Error while running video layer
-    
+
     BJ_ERROR_AUDIO = 0x00000006, ///< Error while running audio layer
-} bj_error_code;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Checks if an error code is user-provided or Banjo.
@@ -118,7 +118,7 @@ typedef enum {
 ///
 #define bj_error_code_kind(c) (c & 0x000000FF)
 
-/// Maximum number of characters an error message in \ref bj_error can hold.
+/// Maximum number of characters an error message in  bj_error can hold.
 #define BJ_ERROR_MESSAGE_MAX_LEN 127
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,23 +126,23 @@ typedef enum {
 ///
 /// Described any error reported by a potentially failing function.
 ///
-/// Banjo-internals guarantee `code` to be a value of \ref bj_error_code.
+/// Banjo-internals guarantee `code` to be a value of  bj_error_code.
 ///
-typedef struct {
+struct bj_error {
     uint32_t         code;                                ///< Error code.
     char        message[BJ_ERROR_MESSAGE_MAX_LEN+1]; ///< Optional error description.
-} bj_error;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Fills in a \ref bj_error object with given code and message
+/// Fills in a  bj_error object with given code and message
 ///
-/// \param p_error The error to fill in.
+/// \param error   The error to fill in.
 /// \param code    Error code.
 /// \param message The error message to set.
 ///
-/// If `p_error` is null, the function does nothing.
+/// If `error` is null, the function does nothing.
 ///
-/// If `p_error` is not null, the function only stored the error if `code == 0`.
+/// If `error` is not null, the function only stored the error if `code == 0`.
 /// Otherwise, `code` and `message` are only reported as logs.
 ///
 /// `message` must point to a 0-terminated C-string of at max `BJ_ERROR_MESSAGE_MAX_LEN`
@@ -150,7 +150,7 @@ typedef struct {
 /// If the given string is larger, it is truncated to `BJ_ERROR_MESSAGE_MAX_LEN`
 /// and the nul pointer is enforced.
 BANJO_EXPORT void bj_set_error(
-    bj_error**  p_error,
+    struct bj_error**  error,
     uint32_t         code,
     const char* message
 );
@@ -158,16 +158,16 @@ BANJO_EXPORT void bj_set_error(
 ////////////////////////////////////////////////////////////////////////////////
 /// Checks if the given error matches the error code
 ///
-/// If `p_error` is _0_, return _false_, which must be interpreted as "no error".
-/// Otherwise, returns _true_ only if `p_error->code == code`.
+/// If `error` is _0_, return _false_, which must be interpreted as "no error".
+/// Otherwise, returns _true_ only if `error->code == code`.
 ///
-/// \param p_error The error to check
-/// \param code    The error code to match
+/// \param error The error to check
+/// \param code  The error code to match
 ///
-/// \return _true_ if `p_error` matches `code`, _false_ otherwise.
+/// \return _true_ if `error` matches `code`, _false_ otherwise.
 ///
 BANJO_EXPORT bj_bool bj_check_error(
-    const bj_error* p_error,
+    const struct bj_error* error,
     uint32_t code
 );
 
@@ -177,28 +177,28 @@ BANJO_EXPORT bj_bool bj_check_error(
 /// This function is used when calling an error-returning function from another
 /// error-returning function.
 ///
-/// If `p_source` contains a non-zero error, it is moved to `p_destination`.
-/// If `*p_destination` already contains an error, `p_source` is only logged
-/// (using \ref bj_error).
+/// If `source` contains a non-zero error, it is moved to `destination`.
+/// If `*destination` already contains an error, `source` is only logged
+/// (using  bj_error).
 ///
-/// \param p_source The source error.
-/// \param p_destination The destination error pointer.
+/// \param source      The source error.
+/// \param destination The destination error pointer.
 ///
-/// \return `BJ_TRUE` if both `p_source` and `p_destination` are non-zero.
+/// \return `BJ_TRUE` if both `source` and `destination` are non-zero.
 ///         When this happens, this means there was an error to propagate and
 ///         that the caller asked for it.
 ///
 BANJO_EXPORT bj_bool bj_forward_error(
-    bj_error*  p_source,
-    bj_error** p_destination
+    struct bj_error*  source,
+    struct bj_error** destination
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Clears the given error location.
 ///
-/// \param p_error The error to clear.
+/// \param error The error to clear.
 BANJO_EXPORT void bj_clear_error(
-    bj_error** p_error
+    struct bj_error** error
 );
 
 #endif

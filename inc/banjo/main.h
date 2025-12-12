@@ -47,22 +47,22 @@ extern int bj_call_main(int argc, char* argv[], int (*function)(int argc, char* 
 
 #ifdef BJ_AUTOMAIN_CALLBACKS
 
-typedef enum bj_callback_result_t
+enum bj_callback_result
 {
     bj_callback_exit_error   = -1,
     bj_callback_exit_success =  0,
     bj_callback_continue     =  1,
-} bj_callback_result;
+};
 
-typedef int (*bj_app_begin_fn_t)(void**, int, char*[]);
-typedef int (*bj_app_iterate_fn_t)(void*);
-typedef int (*bj_app_end_fn_t)(void*, int);
+typedef int (*bj_app_begin_fn)(void**, int, char*[]);
+typedef int (*bj_app_iterate_fn)(void*);
+typedef int (*bj_app_end_fn)(void*, int);
 
 extern int bj_app_begin(void** user_data, int argc, char *argv[]);
 extern int bj_app_iterate(void* user_data);
 extern int bj_app_end(void* user_data, int status);
 
-extern int bj_call_main_callbacks(int argc, char* argv[], bj_app_begin_fn_t, bj_app_iterate_fn_t, bj_app_end_fn_t);
+extern int bj_call_main_callbacks(int argc, char* argv[], bj_app_begin_fn, bj_app_iterate_fn, bj_app_end_fn);
 
 #endif
 

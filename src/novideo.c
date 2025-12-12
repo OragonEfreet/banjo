@@ -4,13 +4,13 @@
 #include <window_t.h>
 
 typedef struct {
-    struct bj_window_t common;
+    struct bj_window common;
     int        width;
     int        height;
 } novideo_window;
 
-static bj_window* novideo_window_new(
-    bj_video_layer* p_layer,
+static struct bj_window* novideo_window_new(
+    struct bj_video_layer* p_layer,
     const char* p_title,
     uint16_t x,
     uint16_t y,
@@ -35,12 +35,12 @@ static bj_window* novideo_window_new(
 
     novideo_window* p_window = bj_malloc(sizeof(novideo_window));
     bj_memcpy(p_window, &window, sizeof(novideo_window));
-    return (bj_window*)p_window;
+    return (struct bj_window*)p_window;
 }
 
 static void novideo_window_del(
-    bj_video_layer* p_layer,
-    bj_window* p_abstract_window
+    struct bj_video_layer* p_layer,
+    struct bj_window* p_abstract_window
 ) {
     (void)p_layer;
     novideo_window* p_window = (novideo_window*)p_abstract_window;
@@ -48,8 +48,8 @@ static void novideo_window_del(
 }
 
 static void novideo_dispose_layer(
-    bj_video_layer* p_layer,
-    bj_error** p_error
+    struct bj_video_layer* p_layer,
+    struct bj_error** p_error
 ) {
     (void)p_error;
 
@@ -57,14 +57,14 @@ static void novideo_dispose_layer(
 }
 
 static void novideo_window_poll(
-    bj_video_layer* p_layer
+    struct bj_video_layer* p_layer
 ) {
     (void)p_layer;
 }
 
 static int novideo_get_window_size(
-    bj_video_layer* p_layer,
-    const bj_window* p_abstract_window,
+    struct bj_video_layer* p_layer,
+    const struct bj_window* p_abstract_window,
     int* width,
     int* height
 ) {
@@ -81,10 +81,10 @@ static int novideo_get_window_size(
     return 1;
 }
 
-static bj_bitmap* novideo_create_window_framebuffer(
-    bj_video_layer* p_layer,
-    const bj_window* p_abstract_window,
-    bj_error** p_error
+static struct bj_bitmap* novideo_create_window_framebuffer(
+    struct bj_video_layer* p_layer,
+    const struct bj_window* p_abstract_window,
+    struct bj_error** p_error
 ) {
     (void)p_layer;
     (void)p_error;
@@ -96,19 +96,19 @@ static bj_bitmap* novideo_create_window_framebuffer(
 }
 
 static void novideo_flush_window_framebuffer(
-    bj_video_layer* p_layer,
-    const bj_window*   p_abstract_window
+    struct bj_video_layer* p_layer,
+    const struct bj_window*   p_abstract_window
 ) {
     (void)p_layer;
     (void)p_abstract_window;
 }
 
-static bj_video_layer* novideo_init_layer(
-    bj_error** p_error
+static struct bj_video_layer* novideo_init_layer(
+    struct bj_error** p_error
 ) {
     (void)p_error;
 
-    bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
+    struct bj_video_layer* p_layer = bj_malloc(sizeof(struct bj_video_layer));
     p_layer->end                       = novideo_dispose_layer;
     p_layer->create_window             = novideo_window_new;
     p_layer->delete_window             = novideo_window_del;
@@ -120,7 +120,7 @@ static bj_video_layer* novideo_init_layer(
     return p_layer;
 }
 
-bj_video_layer_create_info novideo_video_layer_info = {
+struct bj_video_layer_create_info novideo_video_layer_info = {
     .name = "novideo",
     .create = novideo_init_layer,
 };

@@ -23,7 +23,7 @@
 
 bj_window* window      = 0;
 bj_bitmap* framebuffer = 0;
-bj_mat3 projection;
+bj_mat3x3 projection;
 
 #define G_SUN      BJ_F(120.0)
 #define SOFTENING  BJ_F(6.0)
@@ -51,7 +51,7 @@ uint32_t asteroid_color;
 bj_stopwatch stopwatch;
 
 static void update_projection() {
-    bj_mat3 ortho, viewport;
+    bj_mat3x3 ortho, viewport;
     bj_mat3_set_ortho(&ortho, -CANVAS_WIDTH/2, CANVAS_WIDTH/2, -CANVAS_HEIGHT/2, CANVAS_HEIGHT/2);
     bj_mat3_set_viewport(&viewport, 0.f, 0.f, SCREEN_WIDTH, SCREEN_HEIGHT);
     bj_mat3_mul(&projection, &viewport, &ortho);

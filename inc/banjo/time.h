@@ -93,11 +93,11 @@ uint64_t bj_time_frequency(
 /// step. It computes elapsed time since reset, and delay since the last step.
 /// A zero-initialized stopwatch is valid and will auto-reset on first use.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct bj_stopwatch
+struct bj_stopwatch
 {
     uint64_t start_counter; ///< Time when stopwatch was last reset
     uint64_t last_tick;     ///< Time of last step/checkpoint
-} bj_stopwatch;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Resets the stopwatch to the current time.
@@ -105,12 +105,12 @@ typedef struct bj_stopwatch
 /// Records the current time as both the reset point and last step.
 /// Clears any prior timing information.
 ///
-/// \param p_stopwatch Pointer to the stopwatch.
+/// \param stopwatch Pointer to the stopwatch.
 ///
 /// \see bj_step_stopwatch, bj_stopwatch_elapsed, bj_stopwatch_delay
 ////////////////////////////////////////////////////////////////////////////////
 void bj_reset_stopwatch(
-    bj_stopwatch* p_stopwatch
+    struct bj_stopwatch* stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,12 +120,12 @@ void bj_reset_stopwatch(
 /// but is used to measure time deltas via \ref bj_stopwatch_delay or
 /// \ref bj_step_delay_stopwatch.
 ///
-/// \param p_stopwatch Pointer to the stopwatch.
+/// \param stopwatch Pointer to the stopwatch.
 ///
 /// \see bj_step_delay_stopwatch
 ////////////////////////////////////////////////////////////////////////////////
 void bj_step_stopwatch(
-    bj_stopwatch* p_stopwatch
+    struct bj_stopwatch* stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -134,14 +134,14 @@ void bj_step_stopwatch(
 /// If the stopwatch has never been explicitly reset, it will be reset
 /// automatically on first use.
 ///
-/// \param p_stopwatch Pointer to the stopwatch.
+/// \param stopwatch Pointer to the stopwatch.
 ///
 /// \return Elapsed time in seconds.
 ///
 /// \see bj_reset_stopwatch
 ////////////////////////////////////////////////////////////////////////////////
 double bj_stopwatch_elapsed(
-    const bj_stopwatch* p_stopwatch
+    const struct bj_stopwatch* stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -150,14 +150,14 @@ double bj_stopwatch_elapsed(
 /// If the stopwatch has never been used, it will be reset automatically on
 /// first use. This function does not modify the stopwatch state.
 ///
-/// \param p_stopwatch Pointer to the stopwatch.
+/// \param stopwatch Pointer to the stopwatch.
 ///
 /// \return Time in seconds since the last step.
 ///
 /// \see bj_step_stopwatch
 ////////////////////////////////////////////////////////////////////////////////
 double bj_stopwatch_delay(
-    const bj_stopwatch* p_stopwatch
+    const struct bj_stopwatch* stopwatch
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,14 +166,14 @@ double bj_stopwatch_delay(
 /// Equivalent to calling \ref bj_stopwatch_delay followed by
 /// \ref bj_step_stopwatch, but more efficient and concise.
 ///
-/// \param p_stopwatch Pointer to the stopwatch.
+/// \param stopwatch Pointer to the stopwatch.
 ///
 /// \return Time in seconds since the previous step.
 ///
 /// \see bj_step_stopwatch, bj_stopwatch_delay
 ////////////////////////////////////////////////////////////////////////////////
 double bj_step_delay_stopwatch(
-    bj_stopwatch* p_stopwatch
+    struct bj_stopwatch* stopwatch
 );
 
 #endif

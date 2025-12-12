@@ -5,42 +5,42 @@
 #include <check.h>
 #include <window_t.h>
 
-extern bj_video_layer* s_video;
+extern struct bj_video_layer* s_video;
 
 // Event queue implemented as a ring buffer
 #define BJ_EVQ_CAP ((size_t)64)
 
 static struct evq_t {
-    bj_event array[BJ_EVQ_CAP];
+    struct bj_event array[BJ_EVQ_CAP];
     size_t   read;
     size_t   write;
 } evq = { { {0} }, 0, 0 };
 
 static struct event_callbacks_t {
     struct {
-        bj_button_callback_fn_t p_call;
+        bj_button_callback_fn p_call;
         void*                   p_data;
     } button;
 
     struct {
-        bj_cursor_callback_fn_t p_call;
+        bj_cursor_callback_fn p_call;
         void*                   p_data;
     } cursor;
 
     struct {
-        bj_enter_callback_fn_t p_call;
+        bj_enter_callback_fn p_call;
         void*                  p_data;
     } enter;
 
     struct {
-        bj_key_callback_fn_t p_call;
+        bj_key_callback_fn p_call;
         void*                p_data;
     } key;
 
 } event_callbacks;
 
-#define evq_write(at, val) bj_memcpy(evq.array + at, val, sizeof(bj_event))
-#define evq_read(at, out) bj_memcpy(out, evq.array + at, sizeof(bj_event))
+#define evq_write(at, val) bj_memcpy(evq.array + at, val, sizeof(struct bj_event))
+#define evq_read(at, out) bj_memcpy(out, evq.array + at, sizeof(struct bj_event))
 
 // Both solution are presented by Juho Snellman.
 // See https://www.snellman.net/blog/archive/2016-12-13-ring-buffers/
@@ -71,7 +71,7 @@ void bj_end_event(void) {
     bj_trace("bj_end_event");
 }
 
-static inline bj_bool get_next_event(bj_event* e) {
+static inline bj_bool get_next_event(struct bj_event* e) {
     if(evq_empty()) {
         return BJ_FALSE;
     }
@@ -79,18 +79,18 @@ static inline bj_bool get_next_event(bj_event* e) {
     return BJ_TRUE;
 }
 
-bj_key_callback_fn_t bj_set_key_callback(
-    bj_key_callback_fn_t   p_callback,
+bj_key_callback_fn bj_set_key_callback(
+    bj_key_callback_fn   p_callback,
     void* p_user_data
 ) {
-    bj_key_callback_fn_t p_replaced = event_callbacks.key.p_call;
+    bj_key_callback_fn p_replaced = event_callbacks.key.p_call;
     event_callbacks.key.p_call = p_callback;
     event_callbacks.key.p_data = p_user_data;
     return p_replaced;
 }
 
-void bj_dispatch_event(const bj_event* p_event) {
-    bj_window* p_window = p_event->window;
+void bj_dispatch_event(const struct bj_event* p_event) {
+    struct bj_window* p_window = p_event->window;
     switch(p_event->type) {
         case BJ_EVENT_CURSOR:
             if(event_callbacks.cursor.p_call) {
@@ -115,7 +115,7 @@ void bj_dispatch_event(const bj_event* p_event) {
     }
 }
 
-bj_bool bj_poll_events(bj_event* p_event) {
+bj_bool bj_poll_events(struct bj_event* p_event) {
     s_video->poll_events(s_video);
     return get_next_event(p_event);
 }
@@ -123,45 +123,45 @@ bj_bool bj_poll_events(bj_event* p_event) {
 void bj_dispatch_events(
     void
 ) {
-    bj_event e;
+    struct bj_event e;
     while(bj_poll_events(&e)) {
         bj_dispatch_event(&e);
     }
 }
 
-bj_cursor_callback_fn_t bj_set_cursor_callback(
-    bj_cursor_callback_fn_t   p_callback,
+bj_cursor_callback_fn bj_set_cursor_callback(
+    bj_cursor_callback_fn   p_callback,
     void* p_user_data
 ) {
-    bj_cursor_callback_fn_t p_replaced = event_callbacks.cursor.p_call;
+    bj_cursor_callback_fn p_replaced = event_callbacks.cursor.p_call;
     event_callbacks.cursor.p_call = p_callback;
     event_callbacks.cursor.p_data = p_user_data;
     return p_replaced;
 }
 
-bj_button_callback_fn_t bj_set_button_callback(
-    bj_button_callback_fn_t   p_callback,
+bj_button_callback_fn bj_set_button_callback(
+    bj_button_callback_fn   p_callback,
     void* p_user_data
 ) {
-    bj_button_callback_fn_t p_replaced = event_callbacks.button.p_call;
+    bj_button_callback_fn p_replaced = event_callbacks.button.p_call;
     event_callbacks.button.p_call = p_callback;
     event_callbacks.button.p_data = p_user_data;
     return p_replaced;
 }
 
-bj_enter_callback_fn_t bj_set_enter_callback(
-    bj_enter_callback_fn_t    p_callback,
+bj_enter_callback_fn bj_set_enter_callback(
+    bj_enter_callback_fn    p_callback,
     void* p_user_data
 ) {
-    bj_enter_callback_fn_t p_replaced = event_callbacks.enter.p_call;
+    bj_enter_callback_fn p_replaced = event_callbacks.enter.p_call;
     event_callbacks.enter.p_call = p_callback;
     event_callbacks.enter.p_data = p_user_data;
     return p_replaced;
 }
 
 void bj_close_on_escape(
-    bj_window* p_window,
-    const bj_key_event* p_event,
+    struct bj_window* p_window,
+    const struct bj_key_event* p_event,
     void* p_user_data
 ) {
     (void)p_user_data;
@@ -174,7 +174,7 @@ void bj_close_on_escape(
 
 
 void bj_push_event(
-    const bj_event* e
+    const struct bj_event* e
 ) {
     if(!evq_full()) {
         evq_push(e);
@@ -182,12 +182,12 @@ void bj_push_event(
 }
 
 void bj_push_cursor_event(
-    bj_window* p_window,
+    struct bj_window* p_window,
     int x,
     int y
 ) {
     bj_push_event(
-        &(bj_event) {
+        &(struct bj_event) {
             .window = p_window,
             .type   = BJ_EVENT_CURSOR,
             .cursor = {.x=x, .y=y}
@@ -196,9 +196,9 @@ void bj_push_cursor_event(
 }
 
 void bj_push_key_event(
-    bj_window*      p_window,
-    bj_event_action action,
-    bj_key          key,
+    struct bj_window*      p_window,
+    enum bj_event_action action,
+    enum bj_key          key,
     int             scancode
 ) {
     bj_check(key >= 0x00 && key < 0xFF);
@@ -225,7 +225,7 @@ void bj_push_key_event(
     }
 
     bj_push_event(
-        &(bj_event) {
+        &(struct bj_event) {
             .window = p_window,
             .type   = BJ_EVENT_KEY,
             .key    = {
@@ -238,14 +238,14 @@ void bj_push_key_event(
 }
 
 void bj_push_button_event(
-    bj_window* p_window,
+    struct bj_window* p_window,
     int button,
-    bj_event_action action,
+    enum bj_event_action action,
     int x,
     int y
 ) {
     bj_push_event(
-        &(bj_event) {
+        &(struct bj_event) {
             .window = p_window,
             .type   = BJ_EVENT_BUTTON,
             .button = {
@@ -259,13 +259,13 @@ void bj_push_button_event(
 }
 
 void bj_push_enter_event(
-    bj_window* p_window,
+    struct bj_window* p_window,
     bj_bool enter,
     int x,
     int y
 ) {
     bj_push_event(
-        &(bj_event) {
+        &(struct bj_event) {
             .window = p_window,
             .type   = BJ_EVENT_ENTER,
             .enter  = {

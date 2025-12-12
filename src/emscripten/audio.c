@@ -28,7 +28,7 @@ typedef struct emscripten_device_t {
 
 // Forward declarations
 EMSCRIPTEN_KEEPALIVE void audio_emscripten_process(uintptr_t device_ptr);
-static void emscripten_close_device(bj_audio_layer* layer, bj_audio_device* p_device);
+static void emscripten_close_device(struct bj_audio_layer* layer, struct bj_audio_device* p_device);
 
 // JS initialization: set up AudioContext and ScriptProcessorNode
 EM_JS(int, js_audio_init, (uintptr_t device_ptr, float* buffer, int frames, int channels), {
@@ -73,15 +73,15 @@ EM_JS(int, js_audio_init, (uintptr_t device_ptr, float* buffer, int frames, int 
     return 1;
 });
 
-static bj_audio_device* emscripten_open_device(
-    bj_audio_layer*            layer,
-    const bj_audio_properties* p_properties,
-    bj_audio_callback_t        p_callback,
+static struct bj_audio_device* emscripten_open_device(
+    struct bj_audio_layer*            layer,
+    const struct bj_audio_properties* p_properties,
+    bj_audio_callback_fn        p_callback,
     void*                      p_callback_user_data,
-    bj_error**                 p_error
+    struct bj_error**                 p_error
 ) {
     (void)layer;
-    bj_audio_device* p_device = bj_calloc(sizeof(bj_audio_device));
+    struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device));
     if (!p_device) { bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "alloc device"); return NULL; }
     emscripten_device* dev = bj_calloc(sizeof(emscripten_device));
     if (!dev) { bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "alloc data"); bj_free(p_device); return NULL; }
@@ -114,7 +114,7 @@ static bj_audio_device* emscripten_open_device(
     return p_device;
 }
 
-static void emscripten_close_device(bj_audio_layer* layer, bj_audio_device* p_device) {
+static void emscripten_close_device(struct bj_audio_layer* layer, struct bj_audio_device* p_device) {
     (void)layer;
     emscripten_device* dev = (emscripten_device*)p_device->data;
     EM_ASM({
@@ -127,13 +127,13 @@ static void emscripten_close_device(bj_audio_layer* layer, bj_audio_device* p_de
     bj_free(p_device);
 }
 
-static void emscripten_dispose_audio(bj_audio_layer* layer, bj_error** p_error) {
+static void emscripten_dispose_audio(struct bj_audio_layer* layer, struct bj_error** p_error) {
     (void)layer; (void)p_error;
 }
 
-static bj_audio_layer* emscripten_init_audio(bj_error** p_error) {
+static struct bj_audio_layer* emscripten_init_audio(struct bj_error** p_error) {
     (void)p_error;
-    bj_audio_layer* layer = bj_malloc(sizeof(bj_audio_layer));
+    struct bj_audio_layer* layer = bj_malloc(sizeof(struct bj_audio_layer));
     if (!layer) return NULL;
     layer->open_device  = emscripten_open_device;
     layer->close_device = emscripten_close_device;
@@ -143,7 +143,7 @@ static bj_audio_layer* emscripten_init_audio(bj_error** p_error) {
 }
 
 EMSCRIPTEN_KEEPALIVE void audio_emscripten_process(uintptr_t device_ptr) {
-    bj_audio_device*   p_device = (bj_audio_device*)device_ptr;
+    struct bj_audio_device*   p_device = (struct bj_audio_device*)device_ptr;
     emscripten_device* dev      = (emscripten_device*)p_device->data;
 
     size_t samples = (size_t)dev->frames_per_block * (size_t)dev->channels;
@@ -162,7 +162,7 @@ EMSCRIPTEN_KEEPALIVE void audio_emscripten_process(uintptr_t device_ptr) {
     }
 }
 
-bj_audio_layer_create_info emscripten_audio_layer_info = {
+struct bj_audio_layer_create_info emscripten_audio_layer_info = {
     .name   = "emscripten",
     .create = emscripten_init_audio,
 };

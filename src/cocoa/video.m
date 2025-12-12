@@ -18,12 +18,12 @@
 #import <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
 
-typedef struct bj_video_layer_data_t {
+typedef struct bj_video_layer_data {
   NSApplication *app;
 } cocoa;
 
 typedef struct cocoa_window_t {
-  struct bj_window_t common;
+  struct bj_window common;
   NSWindow *handle;
   void *view;
   void *buffer;
@@ -76,8 +76,8 @@ typedef struct cocoa_window_t {
 }
 @end
 
-static bj_key cocoa_keycode_to_bj_key(unsigned short keyCode) {
-    static const bj_key keymap[128] = {
+static enum bj_key cocoa_keycode_to_bj_key(unsigned short keyCode) {
+    static const enum bj_key keymap[128] = {
         [0x00] = BJ_KEY_A,        [0x01] = BJ_KEY_S,
         [0x02] = BJ_KEY_D,        [0x03] = BJ_KEY_F,
         [0x04] = BJ_KEY_H,        [0x05] = BJ_KEY_G,
@@ -117,12 +117,12 @@ static void cocoa_dispatch_event(cocoa_window *window, NSEvent *event) {
 
     switch (type) {
         case NSEventTypeKeyDown: {
-            bj_key key = cocoa_keycode_to_bj_key([event keyCode]);
+            enum bj_key key = cocoa_keycode_to_bj_key([event keyCode]);
             bj_push_key_event(&window->common, BJ_PRESS, key, [event keyCode]);
             break;
         }
         case NSEventTypeKeyUp: {
-            bj_key key = cocoa_keycode_to_bj_key([event keyCode]);
+            enum bj_key key = cocoa_keycode_to_bj_key([event keyCode]);
             bj_push_key_event(&window->common, BJ_RELEASE, key, [event keyCode]);
             break;
         }
@@ -154,7 +154,7 @@ static void cocoa_dispatch_event(cocoa_window *window, NSEvent *event) {
     }
 }
 
-static void cocoa_poll_events(bj_video_layer *p_layer) {
+static void cocoa_poll_events(struct bj_video_layer *p_layer) {
     (void)p_layer;
     @autoreleasepool {
         NSEvent *event;
@@ -180,8 +180,8 @@ static void cocoa_poll_events(bj_video_layer *p_layer) {
     }
 }
 
-static int cocoa_get_window_size(bj_video_layer *p_video,
-                                 const bj_window *p_abstract_window, int *width,
+static int cocoa_get_window_size(struct bj_video_layer *p_video,
+                                 const struct bj_window *p_abstract_window, int *width,
                                  int *height) {
   (void)p_video;
   bj_check_or_0(p_abstract_window);
@@ -196,8 +196,8 @@ static int cocoa_get_window_size(bj_video_layer *p_video,
   return 1;
 }
 
-static void cocoa_delete_window(bj_video_layer *p_video,
-                                bj_window *p_abstract_window) {
+static void cocoa_delete_window(struct bj_video_layer *p_video,
+                                struct bj_window *p_abstract_window) {
   (void)p_video;
   bj_check(p_abstract_window);
   @autoreleasepool {
@@ -211,7 +211,7 @@ static void cocoa_delete_window(bj_video_layer *p_video,
   }
 }
 
-static bj_window *cocoa_create_window(bj_video_layer *p_video,
+static struct bj_window *cocoa_create_window(struct bj_video_layer *p_video,
                                       const char *p_title, uint16_t x,
                                       uint16_t y, uint16_t width,
                                       uint16_t height, uint8_t flags) {
@@ -251,14 +251,14 @@ static bj_window *cocoa_create_window(bj_video_layer *p_video,
     [nsWindow makeKeyAndOrderFront:nil];
 
     bj_info("Cocoa window created: %dx%d", width, height);
-    return (bj_window *)window;
+    return (struct bj_window *)window;
   }
 }
 
-static bj_bitmap *
-cocoa_create_window_framebuffer(bj_video_layer *p_video,
-                                const bj_window *p_abstract_window,
-                                bj_error **p_error) {
+static struct bj_bitmap *
+cocoa_create_window_framebuffer(struct bj_video_layer *p_video,
+                                const struct bj_window *p_abstract_window,
+                                struct bj_error **p_error) {
   (void)p_error;
   @autoreleasepool {
     cocoa_window *window = (cocoa_window *)p_abstract_window;
@@ -270,7 +270,7 @@ cocoa_create_window_framebuffer(bj_video_layer *p_video,
       bj_free(window->buffer);
     }
 
-    bj_pixel_mode mode = BJ_PIXEL_MODE_XRGB8888;
+    enum bj_pixel_mode mode = BJ_PIXEL_MODE_XRGB8888;
     size_t stride = bj_compute_bitmap_stride(width, mode);
     window->buffer = bj_malloc(stride * height);
     window->buffer_width = width;
@@ -283,8 +283,8 @@ cocoa_create_window_framebuffer(bj_video_layer *p_video,
   }
 }
 
-static void cocoa_flush_window_framebuffer(bj_video_layer *p_video,
-                                           const bj_window *p_abstract_window) {
+static void cocoa_flush_window_framebuffer(struct bj_video_layer *p_video,
+                                           const struct bj_window *p_abstract_window) {
   (void)p_video;
   cocoa_window *p_window = (cocoa_window *)p_abstract_window;
   NSView *view = (NSView *)p_window->view;
@@ -292,7 +292,7 @@ static void cocoa_flush_window_framebuffer(bj_video_layer *p_video,
   [view displayIfNeeded];
 }
 
-static void cocoa_end_video(bj_video_layer *p_video, bj_error **p_error) {
+static void cocoa_end_video(struct bj_video_layer *p_video, struct bj_error **p_error) {
   (void)p_error;
 
   cocoa *p_cocoa = (cocoa *)p_video->data;
@@ -301,7 +301,7 @@ static void cocoa_end_video(bj_video_layer *p_video, bj_error **p_error) {
   bj_info("Cocoa backend terminated");
 }
 
-static bj_video_layer *cocoa_init_video(bj_error **p_error) {
+static struct bj_video_layer *cocoa_init_video(struct bj_error **p_error) {
   (void)p_error;
   @autoreleasepool {
     NSApplication *app = [NSApplication sharedApplication];
@@ -311,7 +311,7 @@ static bj_video_layer *cocoa_init_video(bj_error **p_error) {
     cocoa *p_cocoa = bj_malloc(sizeof(cocoa));
     p_cocoa->app = app;
 
-    bj_video_layer *p_layer = bj_malloc(sizeof(bj_video_layer));
+    struct bj_video_layer *p_layer = bj_malloc(sizeof(struct bj_video_layer));
     p_layer->data = p_cocoa;
     p_layer->end = cocoa_end_video;
     p_layer->create_window = cocoa_create_window;
@@ -326,7 +326,7 @@ static bj_video_layer *cocoa_init_video(bj_error **p_error) {
   }
 }
 
-bj_video_layer_create_info cocoa_video_layer_info = {
+struct bj_video_layer_create_info cocoa_video_layer_info = {
     .name = "cocoa",
     .create = cocoa_init_video,
 };

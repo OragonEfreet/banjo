@@ -55,7 +55,7 @@
 /// equivalent.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-typedef enum bj_key_t {
+enum bj_key {
     BJ_KEY_UNKNOWN             = 0x00,  //!< No Button
     BJ_KEY_LBUTTON             = 0x01,  //!< Left mouse button
     BJ_KEY_RBUTTON             = 0x02,  //!< Right mouse button
@@ -245,7 +245,7 @@ typedef enum bj_key_t {
     BJ_KEY_NONAME              = 0xFC,  //!< Reserved
     BJ_KEY_PA1                 = 0xFD,  //!< PA1 key
     BJ_KEY_OEM_CLEAR           = 0xFE,  //!< Clear key
-} bj_key;
+};
 
 // Some Keycode aliases
 #define BJ_KEY_APOSTROPHE    BJ_KEY_OEM_7      //!< Alias for \ref BJ_KEY_OEM_7.
@@ -282,83 +282,83 @@ typedef enum bj_key_t {
 /// Return a string representing the key code. The returned string omits
 /// the `BJ_KEY_` prefix.
 ///
-/// \param key The \ref bj_key value.
+/// \param key The  bj_key value.
 /// \return A null-terminated string owned by Banjo.
 ///
-/// \see bj_key
+/// \see enum bj_key
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT const char* bj_key_name(int key);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define event action types for keys or mouse buttons.
 ////////////////////////////////////////////////////////////////////////////////
-typedef enum bj_event_action_t {
+enum bj_event_action {
     BJ_RELEASE, //!< The key or button was released
     BJ_PRESS,   //!< The key or button was pressed
     BJ_REPEAT,  //!< The key is being held (repeats)
-} bj_event_action;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Represent a mouse enter or leave event.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct bj_enter_event_t {
+struct bj_enter_event {
     int     x;     ///< Cursor x position
     int     y;     ///< Cursor y position
     bj_bool enter; ///< BJ_TRUE if entering window, BJ_FALSE if leaving
-} bj_enter_event;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Represent a mouse cursor movement event.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct bj_cursor_event_t {
+struct bj_cursor_event {
     int x; ///< Cursor x position
     int y; ///< Cursor y position
-} bj_cursor_event;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Represent a mouse button event.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct bj_button_event_t {
+struct bj_button_event {
     int             x;       ///< Cursor x position
     int             y;       ///< Cursor y position
-    bj_event_action action; ///< Action (press/release)
+    enum bj_event_action action; ///< Action (press/release)
     int             button; ///< Button identifier (e.g., BJ_BUTTON_LEFT)
-} bj_button_event;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Represent a keyboard key event.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct bj_key_event_t {
-    bj_key          key;      ///< Key identifier
+struct bj_key_event {
+    enum bj_key          key;      ///< Key identifier
     int             scancode; ///< Scancode (layout-independent)
-    bj_event_action action;   ///< Action (press/release/repeat)
-} bj_key_event;
+    enum bj_event_action action;   ///< Action (press/release/repeat)
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Identify the type of a generic event.
 ////////////////////////////////////////////////////////////////////////////////
-typedef enum bj_event_type_t {
+enum bj_event_type {
     BJ_EVENT_ENTER,  ///< Mouse enter/leave
     BJ_EVENT_CURSOR, ///< Mouse move
     BJ_EVENT_KEY,    ///< Keyboard key
     BJ_EVENT_BUTTON, ///< Mouse button
-} bj_event_type;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Represent a generic window-related event.
 ///
 /// This union-based structure wraps all types of input events.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct bj_event_t {
-    bj_window*     window; ///< Target window
-    bj_event_type  type;   ///< Type of event
+struct bj_event {
+    struct bj_window*     window; ///< Target window
+    enum bj_event_type  type;   ///< Type of event
     union {
-        bj_key_event    key;    ///< Key event data
-        bj_button_event button; ///< Button event data
-        bj_cursor_event cursor; ///< Cursor event data
-        bj_enter_event  enter;  ///< Enter/leave event data
+        struct bj_key_event    key;    ///< Key event data
+        struct bj_button_event button; ///< Button event data
+        struct bj_cursor_event cursor; ///< Cursor event data
+        struct bj_enter_event  enter;  ///< Enter/leave event data
     };
-} bj_event;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define the callback type for enter events.
@@ -366,7 +366,7 @@ typedef struct bj_event_t {
 /// Called when the cursor enters or exits a window.
 /// \see bj_set_enter_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_enter_callback_fn_t)(bj_window*, const bj_enter_event*, void*);
+typedef void(* bj_enter_callback_fn)(struct bj_window* window, const struct bj_enter_event* event, void* user_data);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define the callback type for cursor movement events.
@@ -374,7 +374,7 @@ typedef void(* bj_enter_callback_fn_t)(bj_window*, const bj_enter_event*, void*)
 /// Called when the cursor moves inside a window.
 /// \see bj_set_cursor_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, const bj_cursor_event*, void*);
+typedef void(* bj_cursor_callback_fn)(struct bj_window* window, const struct bj_cursor_event* event, void* user_data);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define the callback type for mouse button events.
@@ -382,7 +382,7 @@ typedef void(* bj_cursor_callback_fn_t)(bj_window* p_window, const bj_cursor_eve
 /// Called when a mouse button is pressed or released.
 /// \see bj_set_button_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_button_callback_fn_t)(bj_window* p_window, const bj_button_event*, void*);
+typedef void(* bj_button_callback_fn)(struct bj_window* window, const struct bj_button_event* event, void* user_data);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Define the callback type for keyboard key events.
@@ -390,66 +390,66 @@ typedef void(* bj_button_callback_fn_t)(bj_window* p_window, const bj_button_eve
 /// Called when a key is pressed, released, or repeated.
 /// \see bj_set_key_callback
 ////////////////////////////////////////////////////////////////////////////////
-typedef void(* bj_key_callback_fn_t)(bj_window* p_window, const bj_key_event*, void*);
+typedef void(* bj_key_callback_fn)(struct bj_window* window, const struct bj_key_event* event, void* user_data);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the global callback for cursor events.
 ///
-/// \param p_callback The new callback function
-/// \param p_user_data Location to user-provided data.
+/// \param callback The new callback function
+/// \param user_data Location to user-provided data.
 /// \return The previously set callback, or NULL if none
 ///
-/// \see bj_cursor_callback_fn_t
+/// \see bj_cursor_callback_fn
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_cursor_callback_fn_t bj_set_cursor_callback(
-    bj_cursor_callback_fn_t p_callback,
-    void*                   p_user_data
+BANJO_EXPORT bj_cursor_callback_fn bj_set_cursor_callback(
+    bj_cursor_callback_fn callback,
+    void*                   user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the global callback for mouse button events.
 ///
-/// \param p_callback The new callback function
-/// \param p_user_data Location to user-provided data.
+/// \param callback The new callback function
+/// \param user_data Location to user-provided data.
 /// \return The previously set callback, or NULL if none
 ///
-/// \see bj_button_callback_fn_t
+/// \see bj_button_callback_fn
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_button_callback_fn_t bj_set_button_callback(
-    bj_button_callback_fn_t p_callback,
-    void*                   p_user_data
+BANJO_EXPORT bj_button_callback_fn bj_set_button_callback(
+    bj_button_callback_fn callback,
+    void*                   user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the global callback for keyboard key events.
 ///
-/// \param p_callback The new callback function
-/// \param p_user_data Location to user-provided data.
+/// \param callback The new callback function
+/// \param user_data Location to user-provided data.
 /// \return The previously set callback, or NULL if none
 ///
 /// \par Key Repeat
 /// If the window has the \ref BJ_WINDOW_FLAG_KEY_REPEAT flag set,
 /// \ref BJ_REPEAT actions will be sent when holding keys.
 ///
-/// \see bj_key_callback_fn_t
+/// \see bj_key_callback_fn
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_key_callback_fn_t bj_set_key_callback(
-    bj_key_callback_fn_t p_callback,
-    void*                p_user_data
+BANJO_EXPORT bj_key_callback_fn bj_set_key_callback(
+    bj_key_callback_fn callback,
+    void*                user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the global callback for mouse enter/leave events.
 ///
-/// \param p_callback The new callback function
-/// \param p_user_data Location to user-provided data.
+/// \param callback The new callback function
+/// \param user_data Location to user-provided data.
 /// \return The previously set callback, or NULL if none
 ///
-/// \see bj_enter_callback_fn_t
+/// \see bj_enter_callback_fn
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
-    bj_enter_callback_fn_t p_callback,
-    void*                  p_user_data
+BANJO_EXPORT bj_enter_callback_fn bj_set_enter_callback(
+    bj_enter_callback_fn callback,
+    void*                  user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -459,18 +459,18 @@ BANJO_EXPORT bj_enter_callback_fn_t bj_set_enter_callback(
 /// Can be passed directly to \ref bj_set_key_callback or called manually
 /// by your event system.
 ///
-/// \param p_window     Target window pointer (must not be NULL).
-/// \param p_event      Key event data (must not be NULL).
-/// \param p_user_data  Opaque user pointer provided at callback registration.
+/// \param window     Target window pointer (must not be NULL).
+/// \param event      Key event data (must not be NULL).
+/// \param user_data  Opaque user pointer provided at callback registration.
 ///                     Not used by this function.
 ///
-/// \see bj_key_callback_fn_t
+/// \see bj_key_callback_fn
 /// \see bj_set_key_callback
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_close_on_escape(
-    bj_window*           p_window,
-    const bj_key_event*  p_event,
-    void*                p_user_data
+    struct bj_window*           window,
+    const struct bj_key_event*  event,
+    void*                user_data
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -483,7 +483,7 @@ BANJO_EXPORT void bj_close_on_escape(
 ///
 /// \note The event is copied internally and queued for later dispatch.
 ///
-void bj_push_event(const bj_event* e);
+void bj_push_event(const struct bj_event* e);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Push a keyboard event into the event system.
@@ -491,44 +491,44 @@ void bj_push_event(const bj_event* e);
 /// This function creates and queues a keyboard event reflecting
 /// a key press, release, or repeat.
 ///
-/// \param p_window Pointer to the window receiving the event.
+/// \param window Pointer to the window receiving the event.
 /// \param action   The key event action (press, release, repeat).
 /// \param key      The key code that triggered the event.
 /// \param scancode The platform-specific scancode of the key.
-void bj_push_key_event(bj_window* p_window, bj_event_action action, bj_key key, int scancode);
+void bj_push_key_event(struct bj_window* window, enum bj_event_action action, enum bj_key key, int scancode);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Push a cursor movement event.
 ///
 /// Indicates the cursor has moved within the specified window.
 ///
-/// \param p_window Pointer to the window receiving the event.
+/// \param window Pointer to the window receiving the event.
 /// \param x        The new x-coordinate of the cursor.
 /// \param y        The new y-coordinate of the cursor.
-void bj_push_cursor_event(bj_window* p_window, int x, int y);
+void bj_push_cursor_event(struct bj_window* window, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Push a mouse button event.
 ///
 /// Represents a mouse button press or release within a window.
 ///
-/// \param p_window Pointer to the window receiving the event.
+/// \param window Pointer to the window receiving the event.
 /// \param button   The mouse button identifier.
 /// \param action   The action performed (press or release).
 /// \param x        The x-coordinate of the cursor at the event.
 /// \param y        The y-coordinate of the cursor at the event.
-void bj_push_button_event(bj_window* p_window, int button, bj_event_action action, int x, int y);
+void bj_push_button_event(struct bj_window* window, int button, enum bj_event_action action, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Push an enter or leave window event.
 ///
 /// Indicates whether the cursor entered or left the specified window.
 ///
-/// \param p_window Pointer to the window receiving the event.
+/// \param window Pointer to the window receiving the event.
 /// \param enter    `BJ_TRUE` if cursor entered the window, `BJ_FALSE` if left.
 /// \param x        The x-coordinate of the cursor at the event.
 /// \param y        The y-coordinate of the cursor at the event.
-void bj_push_enter_event(bj_window* p_window, bj_bool enter, int x, int y);
+void bj_push_enter_event(struct bj_window* window, bj_bool enter, int x, int y);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Poll and dispatch all pending events.
@@ -547,26 +547,26 @@ BANJO_EXPORT void bj_dispatch_events(void);
 /// \brief Poll the next pending event from the system queue.
 ///
 /// Retrieves and removes the next event, if any.  
-/// If no events are available, returns BJ_FALSE and does not modify \p p_event.
+/// If no events are available, returns BJ_FALSE and does not modify \p event.
 ///
-/// \param p_event Pointer to a bj_event structure to be filled (must not be NULL).
-/// \retval BJ_TRUE  An event was retrieved and written to \p p_event.
+/// \param event Pointer to a struct bj_event structure to be filled (must not be NULL).
+/// \retval BJ_TRUE  An event was retrieved and written to \p event.
 /// \retval BJ_FALSE No event available.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_poll_events(
-    bj_event* p_event
+    struct bj_event* event
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Dispatch a single event to registered callbacks.
 ///
 /// Invokes the appropriate callback(s) associated with the event type.
-/// Does not take ownership of \p p_event; the caller manages its lifetime.
+/// Does not take ownership of \p event; the caller manages its lifetime.
 ///
-/// \param p_event Pointer to the event to dispatch (must not be NULL).
+/// \param event Pointer to the event to dispatch (must not be NULL).
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_dispatch_event(
-    const bj_event* p_event
+    const struct bj_event* event
 );
 
 

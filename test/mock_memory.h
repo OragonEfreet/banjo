@@ -109,9 +109,9 @@ static void* mock_realloc(void* p_user_data, void* pAppPtr, size_t appsize) {
     return res;
 }
 
-bj_memory_callbacks mock_allocators(sAllocationData* pData) {
-    return (bj_memory_callbacks) {
-        .p_user_data     = pData,
+struct bj_memory_callbacks mock_allocators(sAllocationData* pData) {
+    return (struct bj_memory_callbacks) {
+        .user_data       = pData,
         .fn_allocation   = mock_malloc,
         .fn_reallocation = mock_realloc,
         .fn_free         = mock_free,

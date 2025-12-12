@@ -75,8 +75,8 @@
 #   define BJ_HAS_FASTMATH 0
 #endif
 
-static const bj_build_info s_build_info = {
-    .p_name           = BJ_NAME,
+static const struct bj_build_info s_build_info = {
+    .name             = BJ_NAME,
     .version          = BJ_VERSION,
     .compiler_name    = BJ_COMPILER_NAME,
     .compiler_version = BJ_COMPILER_VERSION,
@@ -98,7 +98,7 @@ static const bj_build_info s_build_info = {
     .pedantic     = BJ_HAS_PEDANTIC,
 };
 
-const bj_build_info* bj_build_information(void) {
+const struct bj_build_info* bj_build_information(void) {
     return &s_build_info;
 }
 

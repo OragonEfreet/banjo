@@ -3,75 +3,75 @@
 #include <check.h>
 
 void bj_set_error(
-    bj_error**  p_error,
+    struct bj_error**  error,
     uint32_t         code,
     const char* message
 ) {
     // Don't report anything if the user is not interested
-    if(p_error == 0) {
+    if(error == 0) {
 #ifdef BJ_BUILD_DEBUG
         bj_err("Uncaught error: 0x%08X", code);
 #endif
         return;
     }
 
-    if(*p_error == 0) {
-        *p_error = bj_malloc(sizeof(bj_error));
-        if (*p_error == 0) {
+    if(*error == 0) {
+        *error = bj_malloc(sizeof(struct bj_error));
+        if (*error == 0) {
             return;
         }
-        (*p_error)->code = code;
+        (*error)->code = code;
 
         // Safe string copy with bounds checking
         size_t msg_len = 0;
         while (msg_len < BJ_ERROR_MESSAGE_MAX_LEN && message[msg_len] != '\0') {
-            (*p_error)->message[msg_len] = message[msg_len];
+            (*error)->message[msg_len] = message[msg_len];
             msg_len++;
         }
-        (*p_error)->message[msg_len] = '\0';
+        (*error)->message[msg_len] = '\0';
     } else {
         bj_err("Error code 0x%08X overwritten by 0x%08X",
-            (*p_error)->code, code
+            (*error)->code, code
         );
     }
 }
 
 bj_bool bj_check_error(
-    const bj_error* p_error,
+    const struct bj_error* error,
     uint32_t code
 ) {
-    return p_error && code == p_error->code;
+    return error && code == error->code;
 }
 
 bj_bool bj_forward_error(
-    bj_error*  p_source,
-    bj_error** p_destination
+    struct bj_error*  source,
+    struct bj_error** destination
 ) {
-    bj_check_or_0(p_source != 0);
+    bj_check_or_0(source != 0);
 
-    if (p_destination == 0) {
-        if (p_source) {
-            bj_free (p_source);
+    if (destination == 0) {
+        if (source) {
+            bj_free (source);
         }
         return BJ_FALSE;
     }
 
-    if (*p_destination != 0) {
+    if (*destination != 0) {
         bj_err("Error code 0x%08X overwritten by 0x%08X",
-            (*p_destination)->code, p_source->code
+            (*destination)->code, source->code
         );
-        bj_free (p_source);
+        bj_free (source);
     } else {
-        *p_destination = p_source;
+        *destination = source;
     }
     return BJ_TRUE;
 }
 
 void bj_clear_error(
-    bj_error** p_error
+    struct bj_error** error
 ) {
-    if(p_error && *p_error) {
-        bj_free(*p_error);
-        *p_error = 0;
+    if(error && *error) {
+        bj_free(*error);
+        *error = 0;
     }
 }

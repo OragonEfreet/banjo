@@ -6,34 +6,34 @@
 
 TEST_CASE(init_from_buffer_contains_pointer_to_the_buffer) {
     uint8_t buffer = 0;
-    bj_stream* p_stream = bj_open_stream_read(&buffer, 1);
-    REQUIRE_EQ(p_stream->p_data.r, &buffer);
+    struct bj_stream* p_stream = bj_open_stream_read(&buffer, 1);
+    REQUIRE_EQ(p_stream->data.r, &buffer);
     bj_close_stream(p_stream);
 }
 
 TEST_CASE(init_from_buffer_but_zero_size_returns_valid_object) {
     uint8_t buffer = 0;
-    bj_stream* p_stream = bj_open_stream_read(&buffer, 0);
+    struct bj_stream* p_stream = bj_open_stream_read(&buffer, 0);
     REQUIRE_VALUE(p_stream);
-    REQUIRE_EQ(p_stream->p_data.r, &buffer);
+    REQUIRE_EQ(p_stream->data.r, &buffer);
     REQUIRE_EQ(p_stream->len, 0);
     REQUIRE_EQ(p_stream->position, 0);
     bj_close_stream(p_stream);
 }
 
 TEST_CASE(init_from_null_buffer_and_non_zero_size_returns_valid_object) {
-    bj_stream* p_stream = bj_open_stream_read(0, 1);
+    struct bj_stream* p_stream = bj_open_stream_read(0, 1);
     REQUIRE_VALUE(p_stream);
-    REQUIRE_EQ(p_stream->p_data.r, 0);
+    REQUIRE_EQ(p_stream->data.r, 0);
     REQUIRE_EQ(p_stream->len, 1);
     REQUIRE_EQ(p_stream->position, 0);
     bj_close_stream(p_stream);
 }
 
 TEST_CASE(init_from_null_buffer_returns_valid) {
-    bj_stream* p_stream = bj_open_stream_read(0, 0);
+    struct bj_stream* p_stream = bj_open_stream_read(0, 0);
     REQUIRE_VALUE(p_stream);
-    REQUIRE_EQ(p_stream->p_data.r, 0);
+    REQUIRE_EQ(p_stream->data.r, 0);
     REQUIRE_EQ(p_stream->len, 0);
     REQUIRE_EQ(p_stream->position, 0);
     bj_close_stream(p_stream);
@@ -44,7 +44,7 @@ TEST_CASE(reading_n_bytes_shift_the_position_to_n_bytes) {
     size_t read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
     size_t pos_after_read[] = {0, 1, 2, 4, 7, 12, 20, 33, 54, 88};
 
-    bj_stream* p_stream = bj_open_stream_read(src, 88);
+    struct bj_stream* p_stream = bj_open_stream_read(src, 88);
 
     for(size_t i = 0 ; i < 10 ; ++i) {
         bj_read_stream(p_stream, 0, read_sizes[i]);
@@ -58,7 +58,7 @@ TEST_CASE(reading_n_bytes_returns_the_number_of_read_bytes) {
     uint8_t buffer[88] = {0};
     size_t read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
 
-    bj_stream* p_stream = bj_open_stream_read(buffer, 88);
+    struct bj_stream* p_stream = bj_open_stream_read(buffer, 88);
 
     for(size_t i = 0 ; i < 10 ; ++i) {
         size_t read = bj_read_stream(p_stream, 0, read_sizes[i]);
@@ -73,7 +73,7 @@ TEST_CASE(reading_to_get_values) {
     int test_value[] = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
     int dest         = 100;
 
-    bj_stream* p_stream = bj_open_stream_read(src, sizeof(int) * 10);
+    struct bj_stream* p_stream = bj_open_stream_read(src, sizeof(int) * 10);
 
     for(size_t i = 0 ; i < 10 ; ++i) {
         bj_stream_read_t(p_stream, int, &dest);
@@ -88,7 +88,7 @@ TEST_CASE(reading_n_bytes_shift_tell_return_to_n_bytes) {
     size_t read_sizes[]     = {0, 1, 1, 2, 3,  5,  8, 13, 21, 34};
     size_t pos_after_read[] = {0, 1, 2, 4, 7, 12, 20, 33, 54, 88};
 
-    bj_stream* p_stream = bj_open_stream_read(src, 88);
+    struct bj_stream* p_stream = bj_open_stream_read(src, 88);
 
     for(size_t i = 0 ; i < 10 ; ++i) {
         bj_read_stream(p_stream, 0, read_sizes[i]);

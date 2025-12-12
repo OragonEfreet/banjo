@@ -36,7 +36,7 @@ static struct bitfield bitfields[] = {
 };
 
 void bj_make_pixel_rgb(
-    bj_pixel_mode mode,
+    enum bj_pixel_mode mode,
     uint32_t      value,
     uint8_t*      p_red,
     uint8_t*      p_green,
@@ -78,7 +78,7 @@ void bj_make_pixel_rgb(
 }
 
 uint32_t bj_get_pixel_value(
-    bj_pixel_mode mode, 
+    enum bj_pixel_mode mode, 
     uint8_t red,
     uint8_t green,
     uint8_t blue
@@ -156,7 +156,7 @@ int bj_compute_pixel_mode(
 
 size_t bj_compute_bitmap_stride(
     size_t width,
-    bj_pixel_mode mode
+    enum bj_pixel_mode mode
 ) {
     switch (mode) {
     case BJ_PIXEL_MODE_INDEXED_1:

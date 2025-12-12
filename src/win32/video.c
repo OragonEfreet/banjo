@@ -20,7 +20,7 @@
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
 
 typedef struct {
-    struct bj_window_t common;
+    struct bj_window common;
     HWND               handle;
     int                cursor_in_window;
     HDC                hdc;
@@ -28,8 +28,8 @@ typedef struct {
     HBITMAP            fbmp;
 } win32_window;
 
-static bj_window* win32_window_new(
-    bj_video_layer* p_video,
+static struct bj_window* win32_window_new(
+    struct bj_video_layer* p_video,
     const char* p_title,
     uint16_t x,
     uint16_t y,
@@ -78,7 +78,7 @@ static bj_window* win32_window_new(
 
     SetWindowLongPtrA(hwnd, GWLP_USERDATA, (LONG_PTR)p_window);
 
-    return (bj_window*)p_window;
+    return (struct bj_window*)p_window;
 }
 
 static void win32_delete_window_framebuffer(
@@ -93,8 +93,8 @@ static void win32_delete_window_framebuffer(
 }
 
 static void win32_window_del(
-    bj_video_layer* p_video,
-    bj_window* p_abstract_window
+    struct bj_video_layer* p_video,
+    struct bj_window* p_abstract_window
 ) {
     (void)p_video;
     win32_window* p_window = (win32_window*)p_abstract_window;
@@ -107,8 +107,8 @@ static void win32_window_del(
 
 
 static int win32_get_window_size(
-    bj_video_layer* p_video,
-    const bj_window* p_abstract_window,
+    struct bj_video_layer* p_video,
+    const struct bj_window* p_abstract_window,
     int* width,
     int* height
 ) {
@@ -125,16 +125,16 @@ static int win32_get_window_size(
     return 0;
 }
 
-static bj_bitmap* win32_create_window_framebuffer(
-    bj_video_layer* p_video,
-    const bj_window* p_abstract_window,
-    bj_error** p_error
+static struct bj_bitmap* win32_create_window_framebuffer(
+    struct bj_video_layer* p_video,
+    const struct bj_window* p_abstract_window,
+    struct bj_error** p_error
 ) {
     win32_window* p_window = (win32_window*)p_abstract_window;
 
     int width = 0;
     int height = 0;
-    if (!win32_get_window_size(p_video, (const bj_window*)p_window, &width, &height)) {
+    if (!win32_get_window_size(p_video, (const struct bj_window*)p_window, &width, &height)) {
         bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot get window dimension");
         return 0;
     }
@@ -151,7 +151,7 @@ static bj_bitmap* win32_create_window_framebuffer(
     GetDIBits(p_window->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
     DeleteObject(h_bmp);
 
-    bj_pixel_mode pixel_mode = BJ_PIXEL_MODE_UNKNOWN;
+    enum bj_pixel_mode pixel_mode = BJ_PIXEL_MODE_UNKNOWN;
     if (p_bmp_info->bmiHeader.biCompression == BI_BITFIELDS) {
         int bpp = p_bmp_info->bmiHeader.biPlanes * p_bmp_info->bmiHeader.biBitCount;
         int32_t* masks = (int32_t*)((int8_t*)p_bmp_info + p_bmp_info->bmiHeader.biSize);
@@ -194,22 +194,22 @@ static bj_bitmap* win32_create_window_framebuffer(
 }
 
 static void win32_flush_window_framebuffer(
-    bj_video_layer* p_video,
-    const bj_window*   p_abstract_window
+    struct bj_video_layer* p_video,
+    const struct bj_window*   p_abstract_window
 ) {
     win32_window* p_window = (win32_window*)p_abstract_window;
     bj_assert(p_window->common.p_framebuffer != 0);
 
     int width = 0;
     int height = 0;
-    if (win32_get_window_size(p_video, (const bj_window*)p_window, &width, &height)) {
+    if (win32_get_window_size(p_video, (const struct bj_window*)p_window, &width, &height)) {
         BitBlt(p_window->hdc, 0, 0, width, height, p_window->fbdc, 0, 0, SRCCOPY);
     }
 }
 
 static void win32_end_video(
-    bj_video_layer* p_video,
-    bj_error** p_error
+    struct bj_video_layer* p_video,
+    struct bj_error** p_error
 ) {
     (void)p_error;
 
@@ -222,7 +222,7 @@ static void win32_end_video(
 }
 
 static void win32_window_poll(
-    bj_video_layer* p_video
+    struct bj_video_layer* p_video
 ) {
     (void)p_video;
     MSG message;
@@ -232,7 +232,7 @@ static void win32_window_poll(
     }
 }
 
-static bj_key vk_to_bj_key(WPARAM wParam, LPARAM lParam) {
+static enum bj_key vk_to_bj_key(WPARAM wParam, LPARAM lParam) {
     if(wParam < 0 || wParam >= 0xFF) {
         return BJ_KEY_UNKNOWN;
     }
@@ -248,7 +248,7 @@ static bj_key vk_to_bj_key(WPARAM wParam, LPARAM lParam) {
             break;
     }
 
-    return (bj_key)wParam;
+    return (enum bj_key)wParam;
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -257,7 +257,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     switch (uMsg) {
 
         case WM_CLOSE:
-            bj_set_window_should_close((bj_window*)p_window);
+            bj_set_window_should_close((struct bj_window*)p_window);
             break;
 
         case WM_DESTROY:
@@ -278,7 +278,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
             const int action = (HIWORD(lParam) & KF_UP) ? BJ_RELEASE : BJ_PRESS;
             const int scancode = (HIWORD(lParam) & (KF_EXTENDED | 0xFF));
-            bj_key keycode = vk_to_bj_key(wParam, lParam);
+            enum bj_key keycode = vk_to_bj_key(wParam, lParam);
 
             if(keycode == BJ_KEY_LCONTROL) {
                 MSG next;
@@ -295,14 +295,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 }
             }
 
-            bj_push_key_event((bj_window*)p_window, action, keycode, scancode);
+            bj_push_key_event((struct bj_window*)p_window, action, keycode, scancode);
             
             break;
         }
 
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
-            bj_push_button_event((bj_window*)p_window, 
+            bj_push_button_event((struct bj_window*)p_window, 
                 BJ_BUTTON_LEFT,
                 uMsg == WM_LBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -312,7 +312,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
         case WM_MBUTTONDOWN:
         case WM_MBUTTONUP:
-            bj_push_button_event((bj_window*)p_window, 
+            bj_push_button_event((struct bj_window*)p_window, 
                 BJ_BUTTON_MIDDLE,
                 uMsg == WM_MBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -326,25 +326,25 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
             if(!p_window->cursor_in_window) {
                 p_window->cursor_in_window = 1;
-                bj_push_enter_event((bj_window*)p_window, 1, x, y);
+                bj_push_enter_event((struct bj_window*)p_window, 1, x, y);
             }
             TRACKMOUSEEVENT tme = {0};
             tme.cbSize = sizeof(TRACKMOUSEEVENT);
             tme.dwFlags = TME_LEAVE;
             tme.hwndTrack = hwnd;
             TrackMouseEvent(&tme);
-            bj_push_cursor_event((bj_window*)p_window, x, y);
+            bj_push_cursor_event((struct bj_window*)p_window, x, y);
             break;
         }
 
         case WM_MOUSELEAVE: {
             p_window->cursor_in_window = 0;
-            bj_push_enter_event((bj_window*)p_window, 0, 0, 0);
+            bj_push_enter_event((struct bj_window*)p_window, 0, 0, 0);
             break;
         }
 
         case WM_MOUSEWHEEL:
-            bj_push_button_event((bj_window*)p_window, 
+            bj_push_button_event((struct bj_window*)p_window, 
                 GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? BJ_BUTTON_UP : BJ_BUTTON_DOWN,
                 BJ_PRESS,
                 GET_X_LPARAM(lParam),
@@ -355,7 +355,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case WM_RBUTTONDOWN:
 
         case WM_RBUTTONUP:
-            bj_push_button_event((bj_window*)p_window, 
+            bj_push_button_event((struct bj_window*)p_window, 
                 BJ_BUTTON_RIGHT,
                 uMsg == WM_RBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -371,8 +371,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     return 0;
 }
 
-static bj_video_layer* win32_init_video(
-    bj_error** p_error
+static struct bj_video_layer* win32_init_video(
+    struct bj_error** p_error
 ) {
     HINSTANCE hInstance = GetModuleHandleA(0);
 
@@ -387,7 +387,7 @@ static bj_video_layer* win32_init_video(
         return 0;
     }
 
-    bj_video_layer* p_layer = bj_malloc(sizeof(bj_video_layer));
+    struct bj_video_layer* p_layer = bj_malloc(sizeof(struct bj_video_layer));
     p_layer->end                       = win32_end_video;
     p_layer->create_window             = win32_window_new;
     p_layer->delete_window             = win32_window_del;
@@ -399,7 +399,7 @@ static bj_video_layer* win32_init_video(
     return p_layer;
 }
 
-bj_video_layer_create_info win32_video_layer_info = {
+struct bj_video_layer_create_info win32_video_layer_info = {
     .name = "win32",
     .create = win32_init_video,
 };

@@ -3,20 +3,20 @@
 #include <check.h>
 #include <stdio.h>
 
-bj_stream* bj_allocate_stream(
+struct bj_stream* bj_allocate_stream(
     void
 ) {
-    return bj_malloc(sizeof(bj_stream));
+    return bj_malloc(sizeof(struct bj_stream));
 }
 
-bj_stream* bj_open_stream_read(
+struct bj_stream* bj_open_stream_read(
     const void*  p_data,
     size_t        length
 ){
-    bj_stream* p_stream = bj_allocate_stream();
+    struct bj_stream* p_stream = bj_allocate_stream();
     if(p_stream != 0) {
-        bj_memset(p_stream, 0, sizeof(bj_stream));
-        p_stream->p_data.r = p_data;
+        bj_memset(p_stream, 0, sizeof(struct bj_stream));
+        p_stream->data.r = p_data;
         p_stream->weak   = BJ_TRUE;
         p_stream->len    = length;
     }
@@ -24,9 +24,9 @@ bj_stream* bj_open_stream_read(
     return p_stream;
 }
 
-bj_stream* bj_open_stream_file(
+struct bj_stream* bj_open_stream_file(
     const char*       p_path,
-    bj_error**        p_error
+    struct bj_error**        p_error
 ) {
     // TODO Avoid dumping entire file in memory
     bj_check_or_0(p_path);
@@ -65,7 +65,7 @@ bj_stream* bj_open_stream_file(
             return 0;
         }
 
-        bj_stream* p_stream = bj_open_stream_read(buffer, bytes_read);
+        struct bj_stream* p_stream = bj_open_stream_read(buffer, bytes_read);
         p_stream->weak   = BJ_FALSE;
         return p_stream;
     }
@@ -74,19 +74,19 @@ bj_stream* bj_open_stream_file(
 }
 
 void bj_close_stream(
-    bj_stream* p_stream
+    struct bj_stream* p_stream
 ) {
     bj_check(p_stream != 0);
 
-    if(!p_stream->weak && p_stream->p_data.r != 0) {
-        bj_free((void*)p_stream->p_data.r);
+    if(!p_stream->weak && p_stream->data.r != 0) {
+        bj_free((void*)p_stream->data.r);
     }
-    bj_memset(p_stream, 0, sizeof(bj_stream));
+    bj_memset(p_stream, 0, sizeof(struct bj_stream));
     bj_free(p_stream);
 }
 
 size_t bj_read_stream(
-    bj_stream* p_stream,
+    struct bj_stream* p_stream,
     void*      p_buffer,
     size_t      count
 ) {
@@ -96,7 +96,7 @@ size_t bj_read_stream(
    size_t bytes_to_read = (remaining < count) ? remaining : count;
 
    if(bytes_to_read > 0 && p_buffer != 0) {
-       bj_memcpy(p_buffer, p_stream->p_data.r + p_stream->position, bytes_to_read);
+       bj_memcpy(p_buffer, p_stream->data.r + p_stream->position, bytes_to_read);
    }
 
    p_stream->position += bytes_to_read; 
@@ -104,7 +104,7 @@ size_t bj_read_stream(
 }
 
 BANJO_EXPORT size_t bj_get_stream_length(
-    bj_stream* p_stream
+    struct bj_stream* p_stream
 ) {
     bj_check_or_0(p_stream);
     return p_stream->len;
@@ -112,9 +112,9 @@ BANJO_EXPORT size_t bj_get_stream_length(
 
 
 size_t bj_seek_stream(
-    bj_stream*     p_stream,
+    struct bj_stream*     p_stream,
     ptrdiff_t           offset,
-    bj_seek_origin from
+    enum bj_seek_origin from
 ) {
     size_t new_position = (from == BJ_SEEK_CURRENT) ? p_stream->position + offset :
                          (from == BJ_SEEK_BEGIN)   ? (size_t)offset :
@@ -131,7 +131,7 @@ size_t bj_seek_stream(
 }
 
 size_t bj_tell_stream(
-    bj_stream*     p_stream
+    struct bj_stream*     p_stream
 ) {
     return p_stream->position;
 }

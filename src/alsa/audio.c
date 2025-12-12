@@ -18,7 +18,7 @@
 #include <alsa/asoundlib.h>
 #include <pthread.h>
 
-typedef struct bj_audio_device_data_t {
+typedef struct bj_audio_device_data {
     snd_pcm_t*        p_handle;
     pthread_t         playback_thread;
     char*             p_buffer;
@@ -70,7 +70,7 @@ static struct alsa_lib_t {
     pfn_snd_pcm_format_size                    snd_pcm_format_size;
 } ALSA = {0};
 
-/* static bj_audio_format alsa_format_bj(snd_pcm_format_t alsa_format) { */
+/* static enum bj_audio_format alsa_format_bj(snd_pcm_format_t alsa_format) { */
 /*     switch(alsa_format) { */
 /*         case SND_PCM_FORMAT_S16_LE:   return BJ_AUDIO_FORMAT_INT16; */
 /*         case SND_PCM_FORMAT_FLOAT_LE: return BJ_AUDIO_FORMAT_F32; */
@@ -79,7 +79,7 @@ static struct alsa_lib_t {
 /*     return BJ_AUDIO_FORMAT_UNKNOWN; */
 /* } */
 
-static snd_pcm_format_t bj_format_alsa(bj_audio_format format) {
+static snd_pcm_format_t bj_format_alsa(enum bj_audio_format format) {
     switch(format) {
         case BJ_AUDIO_FORMAT_INT16:   return SND_PCM_FORMAT_S16_LE;
         case BJ_AUDIO_FORMAT_F32:     return SND_PCM_FORMAT_FLOAT_LE;
@@ -88,7 +88,7 @@ static snd_pcm_format_t bj_format_alsa(bj_audio_format format) {
     return SND_PCM_FORMAT_UNKNOWN;
 }
 
-static void alsa_set_error(bj_error** p_error, int alsa_err) {
+static void alsa_set_error(struct bj_error** p_error, int alsa_err) {
     bj_set_error(p_error, BJ_ERROR_AUDIO, ALSA.snd_strerror(alsa_err));
 }
 
@@ -99,7 +99,7 @@ static void alsa_unload_library() {
     bj_memzero(&ALSA, sizeof(struct alsa_lib_t));
 }
 
-static bj_bool alsa_load_library(bj_error** p_error) {
+static bj_bool alsa_load_library(struct bj_error** p_error) {
     bj_check_or_return(ALSA.p_handle == 0, BJ_TRUE);
 
     ALSA.p_handle = bj_load_library("libasound.so");
@@ -136,7 +136,7 @@ static bj_bool alsa_load_library(bj_error** p_error) {
 
 
 static void* playback_thread(void* p_data) {
-    bj_audio_device* p_device           = (bj_audio_device*)p_data;
+    struct bj_audio_device* p_device           = (struct bj_audio_device*)p_data;
     alsa_device* p_alsa_device          = (alsa_device*)p_device->data;
     snd_pcm_t* pcm_handle               = p_alsa_device->p_handle;
     char* buffer                        = p_alsa_device->p_buffer;
@@ -203,7 +203,7 @@ static void* playback_thread(void* p_data) {
     return NULL;
 }
 
-static void alsa_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device) {
+static void alsa_close_device(struct bj_audio_layer* p_audio, struct bj_audio_device* p_device) {
     bj_check(p_audio);
     bj_check(p_device);
 
@@ -227,14 +227,14 @@ static void alsa_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device
     bj_free(p_device);
 }
 
-static bj_audio_device* alsa_open_device(
-    bj_audio_layer*            p_audio,
-    const bj_audio_properties* p_properties,
-    bj_audio_callback_t        p_callback,
+static struct bj_audio_device* alsa_open_device(
+    struct bj_audio_layer*            p_audio,
+    const struct bj_audio_properties* p_properties,
+    bj_audio_callback_fn        p_callback,
     void*                      p_callback_user_data,
-    bj_error**                 p_error
+    struct bj_error**                 p_error
 ) {
-    bj_audio_device* p_device = bj_calloc(sizeof(bj_audio_device));
+    struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device));
     if(p_device == 0) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
         return 0;
@@ -320,21 +320,21 @@ static bj_audio_device* alsa_open_device(
 }
 
 
-static void alsa_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
+static void alsa_dispose_audio(struct bj_audio_layer* p_audio, struct bj_error** p_error) {
     (void)p_error;
     bj_check(p_audio);
     alsa_unload_library();
     bj_free(p_audio);
 }
 
-static bj_audio_layer* alsa_init_audio(bj_error** p_error) {
+static struct bj_audio_layer* alsa_init_audio(struct bj_error** p_error) {
 
     if(!alsa_load_library(p_error)) {
         return 0;
     }
 
     // Common Data
-	bj_audio_layer* p_audio = bj_malloc(sizeof(bj_audio_layer));
+	struct bj_audio_layer* p_audio = bj_malloc(sizeof(struct bj_audio_layer));
 	if (!p_audio) {
 		bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate memory for alsa");
 		return 0;
@@ -348,7 +348,7 @@ static bj_audio_layer* alsa_init_audio(bj_error** p_error) {
 	return p_audio;
 }
 
-bj_audio_layer_create_info alsa_audio_layer_info = {
+struct bj_audio_layer_create_info alsa_audio_layer_info = {
     .name   = "alsa",
     .create = alsa_init_audio,
 };

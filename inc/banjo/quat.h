@@ -1,17 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \file quat.h
-/// \brief Quaternion manipulation API (by-value, bj_vec4_t-based).
+/// \brief Quaternion manipulation API (by-value, struct bj_vec4-based).
 ///
 /// \details
 /// Quaternions are stored in \c {x,y,z,w} layout where the vector part is
 /// (x,y,z) and the scalar part is w.
 ///
-/// This header defines \c bj_quat as an alias of the 4D vector struct type
-/// \c bj_vec4_t and exposes a by-value API: all quaternion arguments and return
+/// This header defines \c struct bj_vec4 as an alias of the 4D vector struct type
+/// \c struct bj_vec4 and exposes a by-value API: all quaternion arguments and return
 /// values use pass-by-value semantics for clarity and inlining friendliness.
 ///
 /// Unless stated otherwise, angles are in radians, matrices are column-major
-/// as in \c bj_mat4, and inputs are not implicitly normalized except where
+/// as in \c struct bj_mat4x4, and inputs are not implicitly normalized except where
 /// explicitly noted.
 ///
 /// Provided operations:
@@ -36,20 +36,20 @@
 #include <banjo/mat.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \typedef bj_quat
+/// \typedef struct bj_vec4
 /// \brief Quaternion type alias based on the 4D vector struct.
 /// 
 /// \details
-/// The layout matches \c bj_vec4_t fields:
+/// The layout matches \c struct bj_vec4 fields:
 /// \code
 ///   q.x, q.y, q.z  // vector part
 ///   q.w            // scalar part
 /// \endcode
 /// 
-/// The alias preserves binary compatibility with \c bj_vec4_t and allows
+/// The alias preserves binary compatibility with \c struct bj_vec4 and allows
 /// using quaternion values wherever a 4D vector is accepted, when meaningful.
 ////////////////////////////////////////////////////////////////////////////////
-typedef struct bj_vec4_t bj_quat;
+struct bj_vec4;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Return the identity quaternion.
@@ -61,10 +61,10 @@ typedef struct bj_vec4_t bj_quat;
 /// 
 /// \sa bj_quat_normalize
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_quat bj_quat_identity(
+static BJ_INLINE struct bj_vec4 bj_quat_identity(
     void
 ) {
-    return (bj_quat){ BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_F(1.0) };
+    return (struct bj_vec4){ BJ_FZERO, BJ_FZERO, BJ_FZERO, BJ_F(1.0) };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,8 +78,8 @@ static BJ_INLINE bj_quat bj_quat_identity(
 /// half-angle between orientations used by \c bj_quat_slerp.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_real bj_quat_dot(
-    bj_quat a,
-    bj_quat b
+    struct bj_vec4 a,
+    struct bj_vec4 b
 ) {
     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
@@ -93,7 +93,7 @@ static BJ_INLINE bj_real bj_quat_dot(
 /// \sa bj_quat_norm, bj_quat_normalize
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_real bj_quat_norm2(
-    bj_quat q
+    struct bj_vec4 q
 ) {
     return bj_quat_dot(q, q);
 }
@@ -105,7 +105,7 @@ static BJ_INLINE bj_real bj_quat_norm2(
 /// \return \c ||q||.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE bj_real bj_quat_norm(
-    bj_quat q
+    struct bj_vec4 q
 ) {
     return bj_sqrt(bj_quat_norm2(q));
 }
@@ -119,15 +119,15 @@ static BJ_INLINE bj_real bj_quat_norm(
 /// \param q Quaternion.
 /// \return Unit-length quaternion.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_quat bj_quat_normalize(
-    bj_quat q
+static BJ_INLINE struct bj_vec4 bj_quat_normalize(
+    struct bj_vec4 q
 ) {
     const bj_real n2 = bj_quat_norm2(q);
     if (n2 <= BJ_EPSILON) {
         return bj_quat_identity();
     }
     const bj_real inv = BJ_F(1.0) / bj_sqrt(n2);
-    return (bj_quat){ q.x * inv, q.y * inv, q.z * inv, q.w * inv };
+    return (struct bj_vec4){ q.x * inv, q.y * inv, q.z * inv, q.w * inv };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,10 +142,10 @@ static BJ_INLINE bj_quat bj_quat_normalize(
 /// 
 /// \sa bj_quat_inverse
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_quat bj_quat_conjugate(
-    bj_quat q
+static BJ_INLINE struct bj_vec4 bj_quat_conjugate(
+    struct bj_vec4 q
 ) {
-    return (bj_quat){ -q.x, -q.y, -q.z, q.w };
+    return (struct bj_vec4){ -q.x, -q.y, -q.z, q.w };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -160,15 +160,15 @@ static BJ_INLINE bj_quat bj_quat_conjugate(
 /// 
 /// \sa bj_quat_conjugate, bj_quat_normalize
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_quat bj_quat_inverse(
-    bj_quat q
+static BJ_INLINE struct bj_vec4 bj_quat_inverse(
+    struct bj_vec4 q
 ) {
     const bj_real n2 = bj_quat_norm2(q);
     if (n2 <= BJ_EPSILON) {
         return bj_quat_identity();
     }
     const bj_real inv = BJ_F(1.0) / n2;
-    return (bj_quat){ -q.x * inv, -q.y * inv, -q.z * inv, q.w * inv };
+    return (struct bj_vec4){ -q.x * inv, -q.y * inv, -q.z * inv, q.w * inv };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -182,11 +182,11 @@ static BJ_INLINE bj_quat bj_quat_inverse(
 /// \param q Right quaternion.
 /// \return Product \c p*q.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_quat bj_quat_mul(
-    bj_quat p,
-    bj_quat q
+static BJ_INLINE struct bj_vec4 bj_quat_mul(
+    struct bj_vec4 p,
+    struct bj_vec4 q
 ) {
-    return (bj_quat){
+    return (struct bj_vec4){
         p.w*q.x + p.x*q.w + p.y*q.z - p.z*q.y,
         p.w*q.y - p.x*q.z + p.y*q.w + p.z*q.x,
         p.w*q.z + p.x*q.y - p.y*q.x + p.z*q.w,
@@ -208,13 +208,13 @@ static BJ_INLINE bj_quat bj_quat_mul(
 /// 
 /// \note Inputs need not be normalized; the result is normalized.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_quat bj_quat_slerp(
-    bj_quat a,
-    bj_quat b,
+static BJ_INLINE struct bj_vec4 bj_quat_slerp(
+    struct bj_vec4 a,
+    struct bj_vec4 b,
     bj_real t
 ) {
     bj_real cos_omega = bj_quat_dot(a, b);
-    bj_quat bb = b;
+    struct bj_vec4 bb = b;
     if (cos_omega < BJ_FZERO) {
         cos_omega = -cos_omega;
         bb.x = -b.x;
@@ -228,7 +228,7 @@ static BJ_INLINE bj_quat bj_quat_slerp(
     if (cos_omega < -BJ_F(1.0)) cos_omega = -BJ_F(1.0);
 
     if (cos_omega > BJ_F(1.0) - BJ_EPSILON) {
-        return bj_quat_normalize((bj_quat){
+        return bj_quat_normalize((struct bj_vec4){
             a.x + t*(bb.x - a.x),
             a.y + t*(bb.y - a.y),
             a.z + t*(bb.z - a.z),
@@ -240,7 +240,7 @@ static BJ_INLINE bj_quat bj_quat_slerp(
     const bj_real sin_omega = bj_sin(omega);
     if (sin_omega <= BJ_EPSILON) {
         /* Fallback to nlerp */
-        return bj_quat_normalize((bj_quat){
+        return bj_quat_normalize((struct bj_vec4){
             a.x + t*(bb.x - a.x),
             a.y + t*(bb.y - a.y),
             a.z + t*(bb.z - a.z),
@@ -250,7 +250,7 @@ static BJ_INLINE bj_quat bj_quat_slerp(
 
     const bj_real wa = bj_sin((BJ_F(1.0) - t) * omega) / sin_omega;
     const bj_real wb = bj_sin(t * omega) / sin_omega;
-    return (bj_quat){
+    return (struct bj_vec4){
         wa * a.x + wb * bb.x,
         wa * a.y + wb * bb.y,
         wa * a.z + wb * bb.z,
@@ -267,8 +267,8 @@ static BJ_INLINE bj_quat bj_quat_slerp(
 /// 
 /// \note Identity is returned if the axis length is near zero.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_quat bj_quat_from_axis_angle(
-    bj_vec3 axis,
+static BJ_INLINE struct bj_vec4 bj_quat_from_axis_angle(
+    struct bj_vec3 axis,
     bj_real angle_rad
 ) {
     const bj_real alen2 = axis.x*axis.x + axis.y*axis.y + axis.z*axis.z;
@@ -276,13 +276,13 @@ static BJ_INLINE bj_quat bj_quat_from_axis_angle(
         return bj_quat_identity();
     }
     const bj_real invlen = BJ_F(1.0) / bj_sqrt(alen2);
-    const bj_vec3 n = (bj_vec3){
+    const struct bj_vec3 n = (struct bj_vec3){
         axis.x * invlen, axis.y * invlen, axis.z * invlen
     };
     const bj_real h = angle_rad * BJ_F(0.5);
     const bj_real s = bj_sin(h);
     const bj_real c = bj_cos(h);
-    return (bj_quat){ n.x * s, n.y * s, n.z * s, c };
+    return (struct bj_vec4){ n.x * s, n.y * s, n.z * s, c };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -295,14 +295,14 @@ static BJ_INLINE bj_quat bj_quat_from_axis_angle(
 /// \note For performance, \c q is not normalized inside the function.
 /// Call \c bj_quat_normalize beforehand if needed.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec3 bj_quat_rotate_vec3(
-    bj_quat q,
-    bj_vec3 v
+static BJ_INLINE struct bj_vec3 bj_quat_rotate_vec3(
+    struct bj_vec4 q,
+    struct bj_vec3 v
 ) {
-    bj_vec3 u = (bj_vec3){ q.x, q.y, q.z };
-    bj_vec3 t = bj_vec3_cross(u, v);
+    struct bj_vec3 u = (struct bj_vec3){ q.x, q.y, q.z };
+    struct bj_vec3 t = bj_vec3_cross(u, v);
     t.x += t.x; t.y += t.y; t.z += t.z; /* 2*(u×v) */
-    bj_vec3 r = (bj_vec3){
+    struct bj_vec3 r = (struct bj_vec3){
         v.x + q.w * t.x + (u.y * t.z - u.z * t.y),
         v.y + q.w * t.y + (u.z * t.x - u.x * t.z),
         v.z + q.w * t.z + (u.x * t.y - u.y * t.x)
@@ -317,12 +317,12 @@ static BJ_INLINE bj_vec3 bj_quat_rotate_vec3(
 /// \param v Vector to rotate. Its \c w component is passed through unchanged.
 /// \return Rotated vector with original \c w.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_vec4 bj_quat_rotate_vec4(
-    bj_quat q,
-    bj_vec4 v
+static BJ_INLINE struct bj_vec4 bj_quat_rotate_vec4(
+    struct bj_vec4 q,
+    struct bj_vec4 v
 ) {
-    bj_vec3 r3 = bj_quat_rotate_vec3(q, (bj_vec3){ v.x, v.y, v.z });
-    return (bj_vec4){ .x = r3.x, .y = r3.y, .z = r3.z, .w = v.w };
+    struct bj_vec3 r3 = bj_quat_rotate_vec3(q, (struct bj_vec3){ v.x, v.y, v.z });
+    return (struct bj_vec4){ .x = r3.x, .y = r3.y, .z = r3.z, .w = v.w };
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -335,8 +335,8 @@ static BJ_INLINE bj_vec4 bj_quat_rotate_vec4(
 /// rigid transform rotation block with bottom-right element equal to 1.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE void bj_quat_to_mat4(
-    bj_mat4* BJ_RESTRICT M,
-    bj_quat              q
+    struct bj_mat4x4* BJ_RESTRICT M,
+    struct bj_vec4              q
 ) {
     q = bj_quat_normalize(q);
     bj_real xx = q.x * q.x, yy = q.y * q.y, zz = q.z * q.z;
@@ -378,8 +378,8 @@ static BJ_INLINE void bj_quat_to_mat4(
 /// \param M Source 4×4 matrix (column-major).
 /// \return Quaternion representing the rotation.
 ////////////////////////////////////////////////////////////////////////////////
-static BJ_INLINE bj_quat bj_quat_from_mat4(
-    const bj_mat4* BJ_RESTRICT M
+static BJ_INLINE struct bj_vec4 bj_quat_from_mat4(
+    const struct bj_mat4x4* BJ_RESTRICT M
 ) {
     const bj_real* m = M->m;
     bj_real m00 = m[BJ_M4(0,0)], m01 = m[BJ_M4(1,0)], m02 = m[BJ_M4(2,0)];
@@ -393,7 +393,7 @@ static BJ_INLINE bj_quat bj_quat_from_mat4(
         const bj_real x = (m21 - m12) / s;
         const bj_real y = (m02 - m20) / s;
         const bj_real z = (m10 - m01) / s;
-        return bj_quat_normalize((bj_quat){ x, y, z, w });
+        return bj_quat_normalize((struct bj_vec4){ x, y, z, w });
     }
 
     if (m00 > m11 && m00 > m22) {
@@ -402,21 +402,21 @@ static BJ_INLINE bj_quat bj_quat_from_mat4(
         const bj_real x = BJ_F(0.25) * s;
         const bj_real y = (m01 + m10) / s;
         const bj_real z = (m02 + m20) / s;
-        return bj_quat_normalize((bj_quat){ x, y, z, w });
+        return bj_quat_normalize((struct bj_vec4){ x, y, z, w });
     } else if (m11 > m22) {
         const bj_real s = bj_sqrt(BJ_F(1.0) - m00 + m11 - m22) * BJ_F(2.0);
         const bj_real w = (m02 - m20) / s;
         const bj_real x = (m01 + m10) / s;
         const bj_real y = BJ_F(0.25) * s;
         const bj_real z = (m12 + m21) / s;
-        return bj_quat_normalize((bj_quat){ x, y, z, w });
+        return bj_quat_normalize((struct bj_vec4){ x, y, z, w });
     } else {
         const bj_real s = bj_sqrt(BJ_F(1.0) - m00 - m11 + m22) * BJ_F(2.0);
         const bj_real w = (m10 - m01) / s;
         const bj_real x = (m02 + m20) / s;
         const bj_real y = (m12 + m21) / s;
         const bj_real z = BJ_F(0.25) * s;
-        return bj_quat_normalize((bj_quat){ x, y, z, w });
+        return bj_quat_normalize((struct bj_vec4){ x, y, z, w });
     }
 }
 

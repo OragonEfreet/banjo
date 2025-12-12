@@ -3,7 +3,7 @@
 
 uint64_t bj__time_frequency = 0;
 
-static void bj__stopwatch_autoreset(bj_stopwatch* p_stopwatch)
+static void bj__stopwatch_autoreset(struct bj_stopwatch* p_stopwatch)
 {
     if (p_stopwatch->start_counter == 0) {
         const uint64_t now = bj_time_counter();
@@ -12,7 +12,7 @@ static void bj__stopwatch_autoreset(bj_stopwatch* p_stopwatch)
     }
 }
 
-void bj_reset_stopwatch(bj_stopwatch* p_stopwatch)
+void bj_reset_stopwatch(struct bj_stopwatch* p_stopwatch)
 {
     bj_check(p_stopwatch);
     const uint64_t now = bj_time_counter();
@@ -20,20 +20,20 @@ void bj_reset_stopwatch(bj_stopwatch* p_stopwatch)
     p_stopwatch->last_tick     = now;
 }
 
-void bj_step_stopwatch(bj_stopwatch* p_stopwatch)
+void bj_step_stopwatch(struct bj_stopwatch* p_stopwatch)
 {
     bj_check(p_stopwatch);
     bj__stopwatch_autoreset(p_stopwatch);
     p_stopwatch->last_tick = bj_time_counter();
 }
 
-double bj_stopwatch_elapsed(const bj_stopwatch* p_stopwatch)
+double bj_stopwatch_elapsed(const struct bj_stopwatch* p_stopwatch)
 {
     bj_check_or_return(p_stopwatch, 0.0);
 
     if (p_stopwatch->start_counter == 0) {
         // auto-reset for read-only
-        bj_stopwatch* writable = (bj_stopwatch*)p_stopwatch;
+        struct bj_stopwatch* writable = (struct bj_stopwatch*)p_stopwatch;
         bj_reset_stopwatch(writable);
         return 0.0;
     }
@@ -42,13 +42,13 @@ double bj_stopwatch_elapsed(const bj_stopwatch* p_stopwatch)
     return (double)(now - p_stopwatch->start_counter) / (double)bj_time_frequency();
 }
 
-double bj_stopwatch_delay(const bj_stopwatch* p_stopwatch)
+double bj_stopwatch_delay(const struct bj_stopwatch* p_stopwatch)
 {
     bj_check_or_return(p_stopwatch, 0.0);
 
     if (p_stopwatch->last_tick == 0) {
         // auto-reset for read-only
-        bj_stopwatch* writable = (bj_stopwatch*)p_stopwatch;
+        struct bj_stopwatch* writable = (struct bj_stopwatch*)p_stopwatch;
         bj_reset_stopwatch(writable);
         return 0.0;
     }
@@ -57,7 +57,7 @@ double bj_stopwatch_delay(const bj_stopwatch* p_stopwatch)
     return (double)(now - p_stopwatch->last_tick) / (double)bj_time_frequency();
 }
 
-double bj_step_delay_stopwatch(bj_stopwatch* p_stopwatch)
+double bj_step_delay_stopwatch(struct bj_stopwatch* p_stopwatch)
 {
     bj_check_or_return(p_stopwatch, 0.0);
     bj__stopwatch_autoreset(p_stopwatch);

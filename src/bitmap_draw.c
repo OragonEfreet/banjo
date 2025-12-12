@@ -9,7 +9,7 @@
 #define Y 1
 
 BANJO_EXPORT void bj_draw_line(
-    bj_bitmap*     bmp,
+    struct bj_bitmap*     bmp,
     int            x0,
     int            y0,
     int            x1,
@@ -39,8 +39,8 @@ BANJO_EXPORT void bj_draw_line(
 }
 
 BANJO_EXPORT void bj_draw_rectangle(
-    bj_bitmap*     p_bitmap,
-    const bj_rect* p_area,
+    struct bj_bitmap*     p_bitmap,
+    const struct bj_rect* p_area,
     uint32_t       pixel
 ) {
     bj_check(p_area);
@@ -75,8 +75,8 @@ BANJO_EXPORT void bj_draw_rectangle(
 }
 
 BANJO_EXPORT void bj_draw_filled_rectangle(
-    bj_bitmap*     p_bitmap,
-    const bj_rect* p_area,
+    struct bj_bitmap*     p_bitmap,
+    const struct bj_rect* p_area,
     uint32_t       pixel
 ) {
     bj_check(p_bitmap);
@@ -89,7 +89,7 @@ BANJO_EXPORT void bj_draw_filled_rectangle(
 }
 
 void bj_draw_triangle(
-    bj_bitmap* bmp,
+    struct bj_bitmap* bmp,
     int        x0,
     int        y0,
     int        x1,
@@ -104,7 +104,7 @@ void bj_draw_triangle(
 }
 
 void bj_draw_circle(
-    bj_bitmap* p_bitmap,
+    struct bj_bitmap* p_bitmap,
     int        cx,
     int        cy,
     int        radius,
@@ -142,7 +142,7 @@ void bj_draw_circle(
 }
 
 void bj_draw_filled_circle(
-    bj_bitmap* p_bitmap,
+    struct bj_bitmap* p_bitmap,
     int        cx,
     int        cy,
     int        radius,
@@ -187,7 +187,7 @@ void bj_draw_filled_circle(
 }
 
 void bj_draw_polyline(
-    bj_bitmap*   bmp,
+    struct bj_bitmap*   bmp,
     size_t       count,
     const int*   x,
     const int*   y,

@@ -22,16 +22,16 @@ static inline size_t bj__map_nn(size_t i, size_t src_len, size_t dst_len) {
 
 /* Validate & prepare rectangles (mask must be 8 bpp) */
 static bj_bool bj__setup_mask_rects(
-    const bj_bitmap* mask, const bj_rect* mask_area_in,
-    bj_bitmap* dst, const bj_rect* dst_area_in,
-    bj_rect* mask_area, bj_rect* dst_area)
+    const struct bj_bitmap* mask, const struct bj_rect* mask_area_in,
+    struct bj_bitmap* dst, const struct bj_rect* dst_area_in,
+    struct bj_rect* mask_area, struct bj_rect* dst_area)
 {
     bj_check_or_0(mask && dst);
 
     /* Require one byte per pixel mask */
     if (BJ_PIXEL_GET_BPP(mask->mode) != 8u) return BJ_FALSE;
 
-    bj_rect full_mask = (bj_rect){
+    struct bj_rect full_mask = (struct bj_rect){
         .x = 0, .y = 0,
         .w = (uint16_t)bj__min_size_t(mask->width,  UINT16_MAX),
         .h = (uint16_t)bj__min_size_t(mask->height, UINT16_MAX)
@@ -39,11 +39,11 @@ static bj_bool bj__setup_mask_rects(
 
     *mask_area = mask_area_in ? *mask_area_in : full_mask;
 
-    bj_rect default_dst = (bj_rect){ .x = 0, .y = 0, .w = mask_area->w, .h = mask_area->h };
+    struct bj_rect default_dst = (struct bj_rect){ .x = 0, .y = 0, .w = mask_area->w, .h = mask_area->h };
     *dst_area = dst_area_in ? *dst_area_in : default_dst;
 
     /* Clip mask area to mask bounds */
-    bj_rect mask_bounds = full_mask;
+    struct bj_rect mask_bounds = full_mask;
     if (bj_rect_intersection(&mask_bounds, mask_area, mask_area) == 0) return BJ_FALSE;
     if (mask_area->w == 0 || mask_area->h == 0) return BJ_FALSE;
 
@@ -72,15 +72,15 @@ static inline void bj__src_over_rgb(
 /* -------------------------------------------------------------------------- */
 
 bj_bool bj_blit_mask(
-    const bj_bitmap* mask,
-    const bj_rect*   mask_area_in,
-    bj_bitmap*       dst,
-    const bj_rect*   dst_area_in,
+    const struct bj_bitmap* mask,
+    const struct bj_rect*   mask_area_in,
+    struct bj_bitmap*       dst,
+    const struct bj_rect*   dst_area_in,
     uint32_t         fg_native,
     uint32_t         bg_native,
     bj_mask_bg_mode  mode
 ) {
-    bj_rect ms, ds;
+    struct bj_rect ms, ds;
     if (!bj__setup_mask_rects(mask, mask_area_in, dst, dst_area_in, &ms, &ds))
         return BJ_FALSE;
 
@@ -88,12 +88,12 @@ bj_bool bj_blit_mask(
     if (ds.w != ms.w || ds.h != ms.h) return BJ_FALSE;
 
     /* Clip destination to bounds and adjust source accordingly */
-    bj_rect dst_bounds = (bj_rect){
+    struct bj_rect dst_bounds = (struct bj_rect){
         .x = 0, .y = 0,
         .w = (uint16_t)bj__min_size_t(dst->width,  UINT16_MAX),
         .h = (uint16_t)bj__min_size_t(dst->height, UINT16_MAX)
     };
-    bj_rect inter;
+    struct bj_rect inter;
     if (bj_rect_intersection(&ds, &dst_bounds, &inter) == 0) return BJ_FALSE;
 
     ms.x += inter.x - ds.x; ms.y += inter.y - ds.y;
@@ -174,31 +174,31 @@ bj_bool bj_blit_mask(
 /* -------------------------------------------------------------------------- */
 
 bj_bool bj_blit_mask_stretched(
-    const bj_bitmap* mask,
-    const bj_rect*   mask_area_in,
-    bj_bitmap*       dst,
-    const bj_rect*   dst_area_in,
+    const struct bj_bitmap* mask,
+    const struct bj_rect*   mask_area_in,
+    struct bj_bitmap*       dst,
+    const struct bj_rect*   dst_area_in,
     uint32_t         fg_native,
     uint32_t         bg_native,
     bj_mask_bg_mode  mode
 ) {
     bj_check_or_0(mask && dst);
 
-    bj_rect ms, ds;
+    struct bj_rect ms, ds;
     if (!bj__setup_mask_rects(mask, mask_area_in, dst, dst_area_in, &ms, &ds))
         return BJ_FALSE;
     if (ds.w == 0 || ds.h == 0) return BJ_FALSE;
 
     /* Save the *requested* (pre-clip) destination box for proportional mapping */
-    const bj_rect ds_req = ds;
+    const struct bj_rect ds_req = ds;
 
     /* Clip destination to surface */
-    bj_rect dst_bounds = (bj_rect){
+    struct bj_rect dst_bounds = (struct bj_rect){
         .x = 0, .y = 0,
         .w = (uint16_t)bj__min_size_t(dst->width,  UINT16_MAX),
         .h = (uint16_t)bj__min_size_t(dst->height, UINT16_MAX)
     };
-    bj_rect inter;
+    struct bj_rect inter;
     if (bj_rect_intersection(&ds, &dst_bounds, &inter) == 0) return BJ_FALSE;
     ds = inter;
 

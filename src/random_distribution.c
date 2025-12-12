@@ -5,7 +5,7 @@
 #include <limits.h>
 
 int32_t bj_uniform_int32_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     int32_t            low,
     int32_t            high
@@ -33,7 +33,7 @@ int32_t bj_uniform_int32_distribution(
 }
 
 float bj_uniform_float_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     float              low,
     float              high
@@ -48,7 +48,7 @@ float bj_uniform_float_distribution(
 }
 
 double bj_uniform_double_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     double             low,
     double             high
@@ -63,7 +63,7 @@ double bj_uniform_double_distribution(
 }
 
 long double bj_uniform_long_double_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     long double        low,
     long double        high
@@ -79,7 +79,7 @@ long double bj_uniform_long_double_distribution(
 }
 
 int bj_bernoulli_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     bj_real            probability
 ){
@@ -95,7 +95,7 @@ int bj_bernoulli_distribution(
 }
 
 float bj_normal_float_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     float              mean,
     float              standard_deviation
@@ -113,7 +113,7 @@ float bj_normal_float_distribution(
 }
 
 double bj_normal_double_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     double             mean,
     double             standard_deviation
@@ -131,7 +131,7 @@ double bj_normal_double_distribution(
 }
 
 long double bj_normal_long_double_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     long double        mean,
     long double        standard_deviation
@@ -150,7 +150,7 @@ long double bj_normal_long_double_distribution(
 }
 
 float bj_normal_float_minmax_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     float              min,
     float              max
@@ -173,7 +173,7 @@ float bj_normal_float_minmax_distribution(
 /// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
 ////////////////////////////////////////////////////////////////////////////////
 double bj_normal_double_minmax_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     double             min,
     double             max
@@ -196,7 +196,7 @@ double bj_normal_double_minmax_distribution(
 /// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
 ////////////////////////////////////////////////////////////////////////////////
 long double bj_normal_long_double_minmax_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     long double        min,
     long double        max

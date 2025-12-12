@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     const bj_build_info* info = bj_build_information();
 
     bj_info("%s API Version %d.%d.%d (0x%08X), %s build",
-        info->p_name,
+        info->name,
         BJ_VERSION_MAJOR(info->version),
         BJ_VERSION_MINOR(info->version),
         BJ_VERSION_PATCH(info->version),

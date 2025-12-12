@@ -16,7 +16,7 @@
 #define MME_BLOCK_COUNT 8
 #define MME_SAMPLES_PER_BLOCK 256
 
-typedef struct bj_audio_device_data_t {
+typedef struct bj_audio_device_data {
     HWAVEOUT  hwDevice;
     WAVEHDR*  p_wave_headers;
     void*     p_buffer;
@@ -59,7 +59,7 @@ static void mme_unload_library(void) {
     bj_memzero(&MME, sizeof(MME));
 }
 
-static bj_bool mme_load_library(bj_error** p_error) {
+static bj_bool mme_load_library(struct bj_error** p_error) {
     bj_check_or_return(MME.dll == 0, BJ_TRUE);
 
     MME.dll = bj_load_library("winmm.dll");
@@ -99,13 +99,13 @@ static void CALLBACK waveOutProcWrap(
     (void)dwParam1;
     (void)dwParam2;
     if (uMsg == WOM_DONE) {
-        bj_audio_device* dev = (bj_audio_device*)dwInstance;
+        struct bj_audio_device* dev = (struct bj_audio_device*)dwInstance;
         mme_device* mme = (mme_device*)dev->data;
         SetEvent(mme->event);
     }
 }
 
-static void mme_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device) {
+static void mme_close_device(struct bj_audio_layer* p_audio, struct bj_audio_device* p_device) {
     (void)p_audio;
     mme_device* mme = (mme_device*)p_device->data;
 
@@ -132,7 +132,7 @@ static void mme_close_device(bj_audio_layer* p_audio, bj_audio_device* p_device)
 
 static DWORD WINAPI mme_playback_thread(LPVOID param) {
     bj_check_or_0(param);
-    bj_audio_device* dev = (bj_audio_device*)param;
+    struct bj_audio_device* dev = (struct bj_audio_device*)param;
     mme_device* mme = (mme_device*)dev->data;
 
     while (!dev->should_close) {
@@ -180,14 +180,14 @@ static DWORD WINAPI mme_playback_thread(LPVOID param) {
     return 0;
 }
 
-static bj_audio_device* mme_open_device(
-    bj_audio_layer*             p_audio,
-    const bj_audio_properties*  p_properties,
-    bj_audio_callback_t         p_callback,
+static struct bj_audio_device* mme_open_device(
+    struct bj_audio_layer*             p_audio,
+    const struct bj_audio_properties*  p_properties,
+    bj_audio_callback_fn         p_callback,
     void*                       p_callback_user_data,
-    bj_error**                  p_error
+    struct bj_error**                  p_error
 ) {
-    bj_audio_device* p_device = bj_calloc(sizeof(bj_audio_device));
+    struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device));
     mme_device* mme = bj_calloc(sizeof(mme_device));
     if (!p_device || !mme) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
@@ -272,15 +272,15 @@ static bj_audio_device* mme_open_device(
     return p_device;
 }
 
-static void mme_dispose_audio(bj_audio_layer* p_audio, bj_error** p_error) {
+static void mme_dispose_audio(struct bj_audio_layer* p_audio, struct bj_error** p_error) {
     (void)p_error;
     bj_check(p_audio);
     mme_unload_library();
     bj_free(p_audio);
 }
 
-static bj_audio_layer* mme_init_audio(bj_error** p_error) {
-    bj_audio_layer* layer = bj_malloc(sizeof(bj_audio_layer));
+static struct bj_audio_layer* mme_init_audio(struct bj_error** p_error) {
+    struct bj_audio_layer* layer = bj_malloc(sizeof(struct bj_audio_layer));
     if (!layer) {
         bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate mme layer");
         return NULL;
@@ -292,7 +292,7 @@ static bj_audio_layer* mme_init_audio(bj_error** p_error) {
     return layer;
 }
 
-bj_audio_layer_create_info mme_audio_layer_info = {
+struct bj_audio_layer_create_info mme_audio_layer_info = {
     .name = "mme",
     .create = mme_init_audio,
 };

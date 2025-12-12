@@ -84,7 +84,7 @@ typedef struct {
         polar_coords coords[LANDER_VERTICES_LEN];
         size_t edges[LANDER_EDGES_LEN][2];
         size_t fire_attache_edges[2];
-        bj_mat3 projection;
+        bj_mat3x3 projection;
     } draw;
 
     struct {
@@ -177,8 +177,8 @@ static void prepare_assets(game_data* data) {
 }
 
 static void update_projection(game_data* data) {
-    bj_mat3 ortho;
-    bj_mat3 viewport;
+    bj_mat3x3 ortho;
+    bj_mat3x3 viewport;
 
     if (data->lander.body.particle.position.y - BOX_H <= -CANVAS_H * BJ_F(0.5)) {
 

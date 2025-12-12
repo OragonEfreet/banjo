@@ -42,9 +42,9 @@ typedef struct {
     uint8_t blue;
 } dib_table_rgb;
 
-static bj_bitmap* unpalletized(bj_bitmap* p_original, dib_table_rgb* p_color_table, size_t color_table_size) {
+static struct bj_bitmap* unpalletized(struct bj_bitmap* p_original, dib_table_rgb* p_color_table, size_t color_table_size) {
     (void)color_table_size; 
-    bj_pixel_mode mode = bj_bitmap_mode(p_original);
+    enum bj_pixel_mode mode = bj_bitmap_mode(p_original);
 
     switch(mode) {
         case BJ_PIXEL_MODE_INDEXED_1:
@@ -56,7 +56,7 @@ static bj_bitmap* unpalletized(bj_bitmap* p_original, dib_table_rgb* p_color_tab
                 const size_t width = bj_bitmap_width(p_original);
                 const size_t height = bj_bitmap_height(p_original);
 
-                bj_bitmap* p_bitmap = bj_create_bitmap(
+                struct bj_bitmap* p_bitmap = bj_create_bitmap(
                     width, height, BJ_PIXEL_MODE_BGR24, 0
                 );
 
@@ -130,7 +130,7 @@ static size_t dib_color_table_len(uint16_t bit_count, uint32_t override) {
 }
 
 static void dib_read_uncompressed_raster(
-    bj_stream* p_stream,
+    struct bj_stream* p_stream,
     uint8_t*   dst_pixels,
     size_t     dst_stride,
     uint32_t   width,
@@ -161,13 +161,13 @@ static void dib_read_uncompressed_raster(
 }
 
 static void dib_read_rle_raster(
-    bj_stream* p_stream, 
+    struct bj_stream* p_stream, 
     uint8_t*        p_dst_pixels,     
     size_t      dst_stride,
     uint32_t        width,
     int32_t        i_height,
     bj_bool       use_rle_4,
-    bj_error** p_error
+    struct bj_error** p_error
 ) {
     #define rle_fsm_expect_any                0x01
     #define rle_fsm_expect_escape             0x02
@@ -283,9 +283,9 @@ static void dib_read_rle_raster(
 }
 
 
-bj_bitmap* dib_create_bitmap_from_stream(
-    bj_stream*        p_stream, 
-    bj_error**        p_error
+struct bj_bitmap* dib_create_bitmap_from_stream(
+    struct bj_stream*        p_stream, 
+    struct bj_error**        p_error
 ) {
 
     // Read file header
@@ -483,7 +483,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
     }
 
     // Now we got the bitmasks and all, we can get the mode.
-    const bj_pixel_mode src_mode = bj_compute_pixel_mode(dib_bit_count, red_mask, green_mask, blue_mask);
+    const enum bj_pixel_mode src_mode = bj_compute_pixel_mode(dib_bit_count, red_mask, green_mask, blue_mask);
 
     // Read the color table
     dib_table_rgb* color_table = 0;
@@ -524,7 +524,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
 
     // Stride of the bitmap is either the computed dib size (if mode is unknown) or 0.
     // If 0, the bitmap initialized will set to the best choice for us.
-    bj_bitmap* p_bitmap = bj_create_bitmap(
+    struct bj_bitmap* p_bitmap = bj_create_bitmap(
         dib_width, _ABS(dib_height),
         src_mode,
         src_mode == BJ_PIXEL_MODE_UNKNOWN ? dib_uncompressed_row_size(dib_width, dib_bit_count) : 0
@@ -536,7 +536,7 @@ bj_bitmap* dib_create_bitmap_from_stream(
         return 0;
     }
 
-    bj_error* p_inner_error = 0;
+    struct bj_error* p_inner_error = 0;
     switch(dib_compression) {
         case DIB_BI_BITFIELD:
         case DIB_BI_RGB:

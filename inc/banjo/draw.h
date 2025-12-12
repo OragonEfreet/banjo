@@ -21,7 +21,7 @@
 ///
 /// The line is drawn for each pixel between p0 and p1.
 ///
-/// \param p_bitmap The bitmap object.
+/// \param bitmap The bitmap object.
 /// \param x0       The X coordinate of the first point in the line.
 /// \param y0       The Y coordinate of the first point in the line.
 /// \param x1       The X coordinate of the second point in the line.
@@ -32,12 +32,12 @@
 ///
 /// This function does not perform any bound checking on the pixel coordinates.
 /// It is up to you to ensure the coordinates lie between
-/// [0, bj_bitmap->width * bj_bitmap->height].
+/// [0, struct bj_bitmap->width * struct bj_bitmap->height].
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_draw_line(
-    bj_bitmap*     p_bitmap,
+    struct bj_bitmap*     bitmap,
     int            x0,
     int            y0,
     int            x1,
@@ -51,21 +51,21 @@ BANJO_EXPORT void bj_draw_line(
 /// The function draws an rectangle outline using 4 consecutive calls to
 /// \ref bj_draw_line.
 ///
-/// \param p_bitmap The bitmap object.
-/// \param p_area   The rectangle to draw.
+/// \param bitmap The bitmap object.
+/// \param area   The rectangle to draw.
 /// \param pixel    The line pixel value.
 ///
 /// \par Memory Safety
 ///
 /// This function does not perform any bound checking on the pixel coordinates.
 /// It is up to you to ensure the coordinates lie between
-/// [0, bj_bitmap->width * bj_bitmap->height].
+/// [0, struct bj_bitmap->width * struct bj_bitmap->height].
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_draw_rectangle(
-    bj_bitmap*     p_bitmap,
-    const bj_rect* p_area,
+    struct bj_bitmap*     bitmap,
+    const struct bj_rect* area,
     uint32_t       pixel
 );
 
@@ -73,30 +73,30 @@ BANJO_EXPORT void bj_draw_rectangle(
 /// Draws a filled rectangle in the given bitmap
 ///
 /// The function draws an filled rectangle by filling all pixels within 
-/// `p_area`.
+/// `area`.
 ///
-/// \param p_bitmap The bitmap object.
-/// \param p_area   The rectangle to draw.
+/// \param bitmap The bitmap object.
+/// \param area   The rectangle to draw.
 /// \param pixel    The line pixel value.
 ///
 /// \par Memory Safety
 ///
 /// This function does not perform any bound checking on the pixel coordinates.
 /// It is up to you to ensure the coordinates lie between
-/// [0, bj_bitmap->width * bj_bitmap->height].
+/// [0, struct bj_bitmap->width * struct bj_bitmap->height].
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_draw_filled_rectangle(
-    bj_bitmap*     p_bitmap,
-    const bj_rect* p_area,
+    struct bj_bitmap*     bitmap,
+    const struct bj_rect* area,
     uint32_t       pixel
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Draws the edges of a triangle given its 3 corners.
 ///
-/// \param p_bitmap The bitmap object.
+/// \param bitmap The bitmap object.
 /// \param x0       The X coordinate of the first triangle vertex.
 /// \param y0       The Y coordinate of the first triangle vertex.
 /// \param x1       The X coordinate of the second triangle vertex.
@@ -109,12 +109,12 @@ BANJO_EXPORT void bj_draw_filled_rectangle(
 ///
 /// This function does not perform any bound checking on the pixel coordinates.
 /// It is up to you to ensure the coordinates lie between
-/// [0, bj_bitmap->width * bj_bitmap->height].
+/// [0, struct bj_bitmap->width * struct bj_bitmap->height].
 /// Writing outside of these bounds will result in undefined behavior or 
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_draw_triangle(
-    bj_bitmap* p_bitmap,
+    struct bj_bitmap* bitmap,
     int        x0,
     int        y0,
     int        x1,
@@ -129,14 +129,14 @@ BANJO_EXPORT void bj_draw_triangle(
 ///
 /// Uses the midpoint circle algorithm (integer arithmetic).
 ///
-/// \param p_bitmap Target bitmap (must not be NULL).
+/// \param bitmap Target bitmap (must not be NULL).
 /// \param cx       X-coordinate of circle center (pixels).
 /// \param cy       Y-coordinate of circle center (pixels).
 /// \param radius   Circle radius in pixels (>= 0).
 /// \param color    Pixel color in 0xAARRGGBB format.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_draw_circle(
-    bj_bitmap* p_bitmap,
+    struct bj_bitmap* bitmap,
     int        cx,
     int        cy,
     int        radius,
@@ -148,14 +148,14 @@ BANJO_EXPORT void bj_draw_circle(
 ///
 /// Fills all pixels within radius distance from (cx, cy).
 ///
-/// \param p_bitmap Target bitmap (must not be NULL).
+/// \param bitmap Target bitmap (must not be NULL).
 /// \param cx       X-coordinate of circle center (pixels).
 /// \param cy       Y-coordinate of circle center (pixels).
 /// \param radius   Circle radius in pixels (>= 0).
 /// \param color    Pixel color in 0xAARRGGBB format.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_draw_filled_circle(
-    bj_bitmap* p_bitmap,
+    struct bj_bitmap* bitmap,
     int        cx,
     int        cy,
     int        radius,
@@ -168,7 +168,7 @@ BANJO_EXPORT void bj_draw_filled_circle(
 /// Draws line segments between successive vertex pairs (x[i], y[i]) -> (x[i+1], y[i+1]).
 /// If loop != 0 and count >= 2, an extra segment connects the last vertex to the first.
 ///
-/// \param p_bitmap Target bitmap.
+/// \param bitmap Target bitmap.
 /// \param x        Pointer to array of x coordinates (length >= count).
 /// \param y        Pointer to array of y coordinates (length >= count).
 /// \param count    Number of vertices. Segments drawn for i = 0..count-2.
@@ -176,7 +176,7 @@ BANJO_EXPORT void bj_draw_filled_circle(
 /// \param loop     Nonzero to close the polyline.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_draw_polyline(
-    bj_bitmap*   p_bitmap,
+    struct bj_bitmap*   bitmap,
     size_t       count,
     const int*   x,
     const int*   y,

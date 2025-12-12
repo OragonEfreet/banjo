@@ -13,7 +13,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Representation of a pixel encoding.
-typedef enum {
+enum bj_pixel_mode {
     BJ_PIXEL_MODE_UNKNOWN   = 0x00u,       //!< Unknown/Invalid pixel mode
     BJ_PIXEL_MODE_INDEXED_1 = 0x00000101u, //!< 1bpp indexed
     BJ_PIXEL_MODE_INDEXED_4 = 0x00000104u, //!< 4bpp indexed
@@ -24,24 +24,24 @@ typedef enum {
     BJ_PIXEL_MODE_XRGB8888  = 0x01010220u, //!< 32bpp RGB
 
     BJ_PIXEL_MODE_BGR24     = 0x02000318u, //!< 24bpp BGR
-} bj_pixel_mode;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Gets the RGB value of a pixel given its 32-bits representation.
 ///
-/// \param mode       The pixel mode
-/// \param value      The opaque pixel value
-/// \param p_red      A location to the red component
-/// \param p_green    A location to the green component
-/// \param p_blue     A location to the blue component
+/// \param mode  The pixel mode
+/// \param value The opaque pixel value
+/// \param red   A location to the red component
+/// \param green A location to the green component
+/// \param blue  A location to the blue component
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_make_pixel_rgb(
-    bj_pixel_mode mode,
+    enum bj_pixel_mode mode,
     uint32_t      value,
-    uint8_t*      p_red,
-    uint8_t*      p_green,
-    uint8_t*      p_blue
+    uint8_t*      red,
+    uint8_t*      green,
+    uint8_t*      blue
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,14 +55,14 @@ BANJO_EXPORT void bj_make_pixel_rgb(
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT uint32_t bj_get_pixel_value(
-    bj_pixel_mode mode, 
+    enum bj_pixel_mode mode, 
     uint8_t red,
     uint8_t green,
     uint8_t blue
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Determine the most suitable \ref bj_pixel_mode from a set of masks.
+/// Determine the most suitable bj_pixel_mode from a set of masks.
 ///
 /// This function can be used to retrieve what Banjo consider as the pixel
 /// mode corresponding to a given depth and masks.
@@ -73,7 +73,7 @@ BANJO_EXPORT uint32_t bj_get_pixel_value(
 /// \param red_mask   A bitmask for the red channel information in the bits.
 /// \param green_mask A bitmask for the green channel information in the bits.
 /// \param blue_mask  A bitmask for the blue channel information in the bits.
-/// \return A \ref bj_pixel_mode value.
+/// \return A  bj_pixel_mode value.
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT int bj_compute_pixel_mode(
@@ -101,7 +101,7 @@ BANJO_EXPORT int bj_compute_pixel_mode(
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT size_t bj_compute_bitmap_stride(
     size_t width,
-    bj_pixel_mode mode
+    enum bj_pixel_mode mode
 );
 
 /// Pixel type: Indexed (palette-based).

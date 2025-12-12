@@ -17,17 +17,17 @@
 
 // Return 1 if segments [a0,a1] and [b0,b1] intersect, else 0.
 BANJO_EXPORT bj_bool bj_check_segments_hit(
-    bj_vec2 a0,
-    bj_vec2 a1,
-    bj_vec2 b0,
-    bj_vec2 b1
+    struct bj_vec2 a0,
+    struct bj_vec2 a1,
+    struct bj_vec2 b0,
+    struct bj_vec2 b1
 );
 
 BANJO_EXPORT bj_bool bj_check_circle_segment_hit(
-    bj_vec2 c,
+    struct bj_vec2 c,
     bj_real r,
-    bj_vec2 l0, 
-    bj_vec2 l1
+    struct bj_vec2 l0, 
+    struct bj_vec2 l1
 );
 
 

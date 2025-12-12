@@ -43,12 +43,12 @@ int bj_rand(void);
 /// \brief PCG32 generator state.
 ///
 ////////////////////////////////////////////////////////////////////////////////
-struct bj_pcg32_t {
+struct bj_pcg32 {
     uint64_t state; ///< Current internal state (updated each step).
     uint64_t inc;   ///< Stream selector; odd recommended, 0 allowed.
 };
-/// \brief Alias for bj_pcg32_t.
-typedef struct bj_pcg32_t bj_pcg32;
+/// \brief Alias for struct bj_pcg32.
+struct bj_pcg32;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Set the generator state from seed and sequence.
@@ -57,7 +57,7 @@ typedef struct bj_pcg32_t bj_pcg32;
 /// \param seq       Stream selector (LSB forced to 1 internally).
 ////////////////////////////////////////////////////////////////////////////////
 void bj_seed_pcg32(
-    bj_pcg32* generator,
+    struct bj_pcg32* generator,
     uint64_t  seed,
     uint64_t  seq
 );
@@ -68,7 +68,7 @@ void bj_seed_pcg32(
 /// \return Next 32-bit pseudo-random value.
 ////////////////////////////////////////////////////////////////////////////////
 uint32_t bj_next_pcg32(
-    bj_pcg32* generator
+    struct bj_pcg32* generator
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ uint32_t bj_next_pcg32(
 /// \param z         Number of steps to skip ahead.
 ////////////////////////////////////////////////////////////////////////////////
 void bj_discard_pcg32(
-    bj_pcg32* generator,
+    struct bj_pcg32* generator,
     uint64_t  z
 );
 
@@ -96,23 +96,23 @@ uint32_t bj_max_pcg32(void);
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Adapter for distribution API (void* state).
 ///
-/// Allows bj_pcg32 to be used with callbacks of type
+/// Allows struct bj_pcg32 to be used with callbacks of type
 /// uint32_t (*)(void* state).
 ///
-/// \param state Pointer to bj_pcg32.
+/// \param state Pointer to struct bj_pcg32.
 /// \return Next 32-bit pseudo-random value.
 ////////////////////////////////////////////////////////////////////////////////
 static BJ_INLINE uint32_t bj_pcg32_generator(void* state) {
-    return bj_next_pcg32((bj_pcg32*)state);
+    return bj_next_pcg32((struct bj_pcg32*)state);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \typedef uint32_t (*bj_random_u32_fn_t)(void* state)
+/// \typedef uint32_t (*bj_random_u32_fn)(void* state)
 /// \brief RNG callback type for generator-agnostic distributions.
 /// \param state Opaque engine state pointer.
 /// \return Next 32-bit pseudo-random value.
 ////////////////////////////////////////////////////////////////////////////////
-typedef uint32_t (*bj_random_u32_fn_t)(void* state);
+typedef uint32_t (*bj_random_u32_fn)(void* state);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Uniform 32-bit integer in [low, high].
@@ -123,7 +123,7 @@ typedef uint32_t (*bj_random_u32_fn_t)(void* state);
 /// \return int32 in [low, high].
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT int32_t bj_uniform_int32_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     int32_t            low,
     int32_t            high
@@ -138,7 +138,7 @@ BANJO_EXPORT int32_t bj_uniform_int32_distribution(
 /// \return float in [low, high).
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT float bj_uniform_float_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     float              low,
     float              high
@@ -153,7 +153,7 @@ BANJO_EXPORT float bj_uniform_float_distribution(
 /// \return double in [low, high).
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT double bj_uniform_double_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     double             low,
     double             high
@@ -168,7 +168,7 @@ BANJO_EXPORT double bj_uniform_double_distribution(
 /// \return long double in [low, high).
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT long double bj_uniform_long_double_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     long double        low,
     long double        high
@@ -199,7 +199,7 @@ BANJO_EXPORT long double bj_uniform_long_double_distribution(
 /// \return 1 with the given probability, else 0.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT int bj_bernoulli_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     bj_real            probability
 );
@@ -213,7 +213,7 @@ BANJO_EXPORT int bj_bernoulli_distribution(
 /// \return float sample.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT float bj_normal_float_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     float              mean,
     float              standard_deviation
@@ -228,7 +228,7 @@ BANJO_EXPORT float bj_normal_float_distribution(
 /// \return double sample.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT double bj_normal_double_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     double             mean,
     double             standard_deviation
@@ -243,7 +243,7 @@ BANJO_EXPORT double bj_normal_double_distribution(
 /// \return long double sample.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT long double bj_normal_long_double_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     long double        mean,
     long double        standard_deviation
@@ -281,7 +281,7 @@ BANJO_EXPORT long double bj_normal_long_double_distribution(
 /// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT float bj_normal_float_minmax_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     float              min,
     float              max
@@ -300,7 +300,7 @@ BANJO_EXPORT float bj_normal_float_minmax_distribution(
 /// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT double bj_normal_double_minmax_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     double             min,
     double             max
@@ -319,7 +319,7 @@ BANJO_EXPORT double bj_normal_double_minmax_distribution(
 /// \return One sample from N(μ, σ²) with μ,σ derived from min/max.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT long double bj_normal_long_double_minmax_distribution(
-    bj_random_u32_fn_t next,
+    bj_random_u32_fn next,
     void*              state,
     long double        min,
     long double        max

@@ -3,8 +3,8 @@
 #include <check.h>
 
 void bj_shader_bitmap(
-    bj_bitmap*               p_bitmap,
-    bj_bitmap_shading_fn_t   p_shader,
+    struct bj_bitmap*               p_bitmap,
+    bj_bitmap_shading_fn   p_shader,
     void*                    p_data,
     uint8_t                  flags
 ) {
@@ -52,8 +52,8 @@ void bj_shader_bitmap(
             uint8_t r, g, b;
             bj_make_bitmap_rgb(p_bitmap, x, y, &r, &g, &b);
 
-            bj_vec3 color = { (bj_real)r * inv255, (bj_real)g * inv255, (bj_real)b * inv255 };
-            bj_vec2 frag_coords = { ax * (bj_real)x + bx, ay * (bj_real)y + by };
+            struct bj_vec3 color = { (bj_real)r * inv255, (bj_real)g * inv255, (bj_real)b * inv255 };
+            struct bj_vec2 frag_coords = { ax * (bj_real)x + bx, ay * (bj_real)y + by };
 
             if (p_shader(&color, frag_coords, p_data) > 0) {
                 if (clamp_color) {
