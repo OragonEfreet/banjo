@@ -4,6 +4,8 @@
 #include <banjo/error.h>
 #include <banjo/window.h>
 
+enum bj_renderer_type;
+struct bj_renderer;
 struct bj_video_layer;
 struct bj_video_layer_data;
 
@@ -111,6 +113,16 @@ typedef void (*bj_window_flush_framebuffer_fn)(
     const struct bj_window*         window
 );
 
+typedef struct bj_renderer* (*bj_video_create_renderer_fn)(
+    struct bj_video_layer* layer,
+    enum bj_renderer_type  type
+);
+
+typedef void (*bj_video_destroy_renderer_fn)(
+    struct bj_video_layer* layer,
+    struct bj_renderer*    renderer
+);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Structure describing a video layer backend.
 ///
@@ -127,6 +139,9 @@ struct bj_video_layer {
     bj_window_get_size_fn           get_window_size;          ///< Retrieve window dimensions
     bj_window_create_framebuffer_fn create_window_framebuffer;///< Create a framebuffer
     bj_window_flush_framebuffer_fn  flush_window_framebuffer; ///< Present framebuffer
+
+    bj_video_create_renderer_fn     create_renderer;
+    bj_video_destroy_renderer_fn    destroy_renderer;
 
     struct bj_video_layer_data*     data;                     ///< Backend-specific data
 };

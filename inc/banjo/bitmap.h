@@ -296,6 +296,16 @@ BANJO_EXPORT struct bj_bitmap* bj_init_bitmap(
     size_t stride
 );
 
+BANJO_EXPORT void bj_assign_bitmap(
+    struct bj_bitmap*  bitmap,
+    void*              pixels,
+    size_t             width,
+    size_t             height,
+    enum bj_pixel_mode mode,
+    size_t             stride
+);
+
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Resets a struct bj_bitmap object making it ready for a new init or free.
 ///

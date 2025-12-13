@@ -42,6 +42,8 @@ add_library(banjo
     src/random_distribution.c
     src/random_pcg32.c
     src/rect.c
+    src/renderer.c
+    src/renderer_t.h
     src/shader.c
     src/stream.c
     src/system.c
@@ -75,6 +77,7 @@ add_library(banjo
     inc/banjo/quat.h
     inc/banjo/random.h
     inc/banjo/rect.h
+    inc/banjo/renderer.h
     inc/banjo/shader.h
     inc/banjo/stream.h
     inc/banjo/string.h
@@ -101,6 +104,8 @@ if(BUILD_SHARED_LIBS)
 else()
     target_compile_definitions(banjo PUBLIC BANJO_STATIC)
 endif()
+
+target_compile_definitions(banjo PRIVATE BJ_NO_TYPEDEF)
 
 ################################################################################
 ### Win32 Backend

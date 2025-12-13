@@ -7,29 +7,36 @@
 #include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
+#include <banjo/renderer.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
 
 #include <check.h>
 #include <video_layer.h>
+#include <renderer_t.h>
 #include <window_t.h>
 
 #import <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
 
-typedef struct bj_video_layer_data {
-  NSApplication *app;
-} cocoa;
+struct bj_renderer_data {
+    struct bj_bitmap* framebuffer;
+    void*             buffer;
+    int               buffer_width;
+    int               buffer_height;
+    void*             configured_view;
+};
 
-typedef struct cocoa_window_t {
-  struct bj_window common;
-  NSWindow *handle;
-  void *view;
-  void *buffer;
-  int buffer_width;
-  int buffer_height;
-} cocoa_window;
+struct bj_video_layer_data {
+    NSApplication *app;
+};
+
+struct cocoa_window {
+    struct bj_window common;
+    NSWindow*        handle;
+    void*            view;
+};
 
 @interface BanjoView : NSView <NSWindowDelegate>
 @end
@@ -40,22 +47,23 @@ typedef struct cocoa_window_t {
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
-  cocoa_window *window =
-      (cocoa_window *)objc_getAssociatedObject(self, "banjo_window");
-  bj_check(window);
-  bj_check(window->buffer);
-  bj_check(window->buffer_width > 0);
-  bj_check(window->buffer_height > 0);
+  struct bj_renderer* renderer = 
+      (struct bj_renderer*)objc_getAssociatedObject(self, "bj_sw_render");
+
+  bj_check(renderer);
+  bj_assert(renderer->data);
+
+  const struct bj_renderer_data* data = renderer->data;
 
   CGContextRef cg_context = [[NSGraphicsContext currentContext] CGContext];
   CGDataProviderRef provider = CGDataProviderCreateWithData(
-      NULL, window->buffer, window->buffer_width * window->buffer_height * 4,
+      NULL, data->buffer, data->buffer_width * data->buffer_height * 4,
       NULL);
   CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
 
   CGImageRef image =
-      CGImageCreate(window->buffer_width, window->buffer_height, 8, 32,
-                    window->buffer_width * 4, colorspace,
+      CGImageCreate(data->buffer_width, data->buffer_height, 8, 32,
+                    data->buffer_width * 4, colorspace,
                     kCGImageAlphaNoneSkipFirst | kCGImageByteOrder32Little,
                     provider, NULL, false, kCGRenderingIntentDefault);
 
@@ -67,8 +75,8 @@ typedef struct cocoa_window_t {
 }
 
 - (BOOL)windowShouldClose:(NSWindow *)sender {
-  cocoa_window *window =
-      (cocoa_window *)objc_getAssociatedObject(self, "banjo_window");
+  struct cocoa_window *window =
+      (struct cocoa_window *)objc_getAssociatedObject(self, "bj_window");
   if (window) {
     bj_set_window_should_close(&window->common);
   }
@@ -109,7 +117,7 @@ static enum bj_key cocoa_keycode_to_bj_key(unsigned short keyCode) {
     return (keyCode < 128) ? keymap[keyCode] : BJ_KEY_UNKNOWN;
 }
 
-static void cocoa_dispatch_event(cocoa_window *window, NSEvent *event) {
+static void cocoa_dispatch_event(struct cocoa_window *window, NSEvent *event) {
     bj_check(window);
     bj_check(event);
 
@@ -163,11 +171,11 @@ static void cocoa_poll_events(struct bj_video_layer *p_layer) {
             inMode:NSDefaultRunLoopMode
             dequeue:YES])) {
 
-            cocoa_window *window = 0;
+            struct cocoa_window *window = 0;
             if ([event window]) {
                 BanjoView *view = (BanjoView *)[[event window] contentView];
                 if ([view isKindOfClass:[BanjoView class]]) {
-                    window = (cocoa_window *)objc_getAssociatedObject(view, "banjo_window");
+                    window = (struct cocoa_window *)objc_getAssociatedObject(view, "bj_window");
                 }
             }
 
@@ -187,7 +195,7 @@ static int cocoa_get_window_size(struct bj_video_layer *p_video,
   bj_check_or_0(p_abstract_window);
   bj_check_or_0(width);
   bj_check_or_0(height);
-  cocoa_window *p_window = (cocoa_window *)p_abstract_window;
+  struct cocoa_window *p_window = (struct cocoa_window *)p_abstract_window;
   NSRect bounds = [(NSView *)p_window->view bounds];
 
   *width = bounds.size.width;
@@ -201,13 +209,10 @@ static void cocoa_delete_window(struct bj_video_layer *p_video,
   (void)p_video;
   bj_check(p_abstract_window);
   @autoreleasepool {
-    cocoa_window *p_window = (cocoa_window *)p_abstract_window;
+    struct cocoa_window *p_window = (struct cocoa_window *)p_abstract_window;
+    objc_setAssociatedObject(p_window->view, "bj_window", nil, OBJC_ASSOCIATION_ASSIGN);
     [p_window->handle close];
-    if (p_window->buffer) {
-      bj_free(p_window->buffer);
-    }
     bj_free(p_window);
-    bj_info("Cocoa window deleted");
   }
 }
 
@@ -240,66 +245,149 @@ static struct bj_window *cocoa_create_window(struct bj_video_layer *p_video,
     [nsWindow setContentView:view];
     [nsWindow setDelegate:view];
 
-    cocoa_window *window = bj_malloc(sizeof(cocoa_window));
+    struct cocoa_window *window = bj_calloc(sizeof(struct cocoa_window));
     window->common.flags = flags;
     window->handle = nsWindow;
     window->view = view;
 
-    objc_setAssociatedObject(view, "banjo_window", (id)(void *)window,
+    objc_setAssociatedObject(view, "bj_window", (id)(void *)window,
                              OBJC_ASSOCIATION_ASSIGN);
 
     [nsWindow makeKeyAndOrderFront:nil];
 
-    bj_info("Cocoa window created: %dx%d", width, height);
     return (struct bj_window *)window;
   }
 }
 
-static struct bj_bitmap *
-cocoa_create_window_framebuffer(struct bj_video_layer *p_video,
-                                const struct bj_window *p_abstract_window,
-                                struct bj_error **p_error) {
-  (void)p_error;
-  @autoreleasepool {
-    cocoa_window *window = (cocoa_window *)p_abstract_window;
 
-    int width, height;
-    cocoa_get_window_size(p_video, p_abstract_window, &width, &height);
-
-    if (window->buffer) {
-      bj_free(window->buffer);
-    }
-
-    enum bj_pixel_mode mode = BJ_PIXEL_MODE_XRGB8888;
-    size_t stride = bj_compute_bitmap_stride(width, mode);
-    window->buffer = bj_malloc(stride * height);
-    window->buffer_width = width;
-    window->buffer_height = height;
-
-    bj_info("Framebuffer created: %dx%d", width, height);
-
-    return bj_create_bitmap_from_pixels(window->buffer, width, height, mode,
-                                        stride);
-  }
-}
-
-static void cocoa_flush_window_framebuffer(struct bj_video_layer *p_video,
-                                           const struct bj_window *p_abstract_window) {
-  (void)p_video;
-  cocoa_window *p_window = (cocoa_window *)p_abstract_window;
-  NSView *view = (NSView *)p_window->view;
-  [view setNeedsDisplay:YES];
-  [view displayIfNeeded];
-}
 
 static void cocoa_end_video(struct bj_video_layer *p_video, struct bj_error **p_error) {
   (void)p_error;
 
-  cocoa *p_cocoa = (cocoa *)p_video->data;
+  struct bj_video_layer_data *p_cocoa = (struct bj_video_layer_data *)p_video->data;
   bj_free(p_cocoa);
   bj_free(p_video);
-  bj_info("Cocoa backend terminated");
 }
+
+static void cocoa_renderer_configure(
+    struct bj_renderer* renderer,
+    struct bj_window* window
+) {
+    @autoreleasepool {
+
+        struct bj_renderer_data *data = renderer->data;
+
+        // Clear previous view association if reconfiguring
+        if (data->configured_view) {
+            objc_setAssociatedObject(data->configured_view, "bj_sw_render", nil, OBJC_ASSOCIATION_ASSIGN);
+        }
+
+        int width, height;
+        bj_get_window_size(window, &width, &height);
+
+        if(data->buffer) {
+            bj_free(data->buffer);
+        }
+
+        enum bj_pixel_mode mode = BJ_PIXEL_MODE_XRGB8888;
+        size_t stride = bj_compute_bitmap_stride(width, mode);
+        data->buffer = bj_calloc(stride * height);
+        data->buffer_width = width;
+        data->buffer_height = height;
+
+        bj_info("framebuffer created: %dx%d", width, height);
+
+        if(data->framebuffer == 0) {
+            data->framebuffer = bj_create_bitmap_from_pixels(
+                data->buffer, width, height, mode, stride
+            );
+        } else {
+            bj_assign_bitmap(data->framebuffer,
+                data->buffer, width, height, mode, stride
+            );
+        }
+
+        data->configured_view = ((struct cocoa_window*)window)->view;
+        objc_setAssociatedObject(
+            data->configured_view,
+            "bj_sw_render",
+            (id)(void*)renderer,
+            OBJC_ASSOCIATION_ASSIGN
+        );
+    }
+}
+
+static struct bj_bitmap* cocoa_renderer_get_framebuffer(
+    struct bj_renderer* renderer
+) {
+    bj_assert(renderer);
+    bj_assert(renderer->data);
+    return renderer->data->framebuffer;
+}
+
+static void cocoa_renderer_present(
+    struct bj_renderer* renderer,
+    struct bj_window* abstract_window
+) {
+    (void)renderer;
+    struct cocoa_window *window = (struct cocoa_window *)abstract_window;
+    NSView *view = (NSView *)window->view;
+    [view setNeedsDisplay:YES];
+    [view displayIfNeeded];
+}
+
+static struct bj_renderer* cocoa_create_renderer(
+    struct bj_video_layer* video,
+    enum bj_renderer_type  type
+) {
+    (void)video;
+
+    if(type != BJ_RENDERER_TYPE_SOFTWARE) {
+        bj_warn("%s %d.%d.%d only supports software rendering.", 
+            BJ_NAME, 
+            BJ_VERSION_MAJOR_NUMBER,
+            BJ_VERSION_MINOR_NUMBER,
+            BJ_VERSION_PATCH_NUMBER
+        );
+    }
+
+    struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
+
+    // This part will later depend on the renderer type
+    renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
+
+    // VTable
+    // Fill the list of function pointers depending on the renderer type
+    renderer->configure       = cocoa_renderer_configure;
+    renderer->get_framebuffer = cocoa_renderer_get_framebuffer;
+    renderer->present         = cocoa_renderer_present;
+    
+    // end of "This part will later depend on the renderer type"
+
+    return renderer;
+}
+
+static void cocoa_destroy_renderer(
+    struct bj_video_layer* video,
+    struct bj_renderer* renderer
+) {
+    bj_check(video);
+    bj_check(renderer);
+
+    // This part will later depend on the renderer type
+    if(renderer->data) {
+        if(renderer->data->configured_view) {
+            objc_setAssociatedObject(renderer->data->configured_view, "bj_sw_render", nil, OBJC_ASSOCIATION_ASSIGN);
+        }
+        bj_destroy_bitmap(renderer->data->framebuffer);
+        bj_free(renderer->data->buffer);
+    }
+    bj_free(renderer->data);
+
+    // end of "This part will later depend on the renderer type"
+    bj_free(renderer);
+}
+
 
 static struct bj_video_layer *cocoa_init_video(struct bj_error **p_error) {
   (void)p_error;
@@ -308,20 +396,20 @@ static struct bj_video_layer *cocoa_init_video(struct bj_error **p_error) {
     [app setActivationPolicy:NSApplicationActivationPolicyRegular];
     [app activateIgnoringOtherApps:YES];
 
-    cocoa *p_cocoa = bj_malloc(sizeof(cocoa));
+    struct bj_video_layer_data *p_cocoa = bj_calloc(sizeof(struct bj_video_layer_data));
     p_cocoa->app = app;
 
-    struct bj_video_layer *p_layer = bj_malloc(sizeof(struct bj_video_layer));
+    struct bj_video_layer *p_layer = bj_calloc(sizeof(struct bj_video_layer));
     p_layer->data = p_cocoa;
-    p_layer->end = cocoa_end_video;
-    p_layer->create_window = cocoa_create_window;
-    p_layer->delete_window = cocoa_delete_window;
-    p_layer->poll_events = cocoa_poll_events;
-    p_layer->get_window_size = cocoa_get_window_size;
-    p_layer->create_window_framebuffer = cocoa_create_window_framebuffer;
-    p_layer->flush_window_framebuffer = cocoa_flush_window_framebuffer;
 
-    bj_info("Cocoa backend initialized");
+    p_layer->create_renderer           = cocoa_create_renderer;
+    p_layer->create_window             = cocoa_create_window;
+    p_layer->delete_window             = cocoa_delete_window;
+    p_layer->destroy_renderer          = cocoa_destroy_renderer;
+    p_layer->end                       = cocoa_end_video;
+    p_layer->get_window_size           = cocoa_get_window_size;
+    p_layer->poll_events               = cocoa_poll_events;
+
     return p_layer;
   }
 }

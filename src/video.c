@@ -45,7 +45,7 @@ struct bj_video_layer* bj_begin_video(
         }
 
         if(p_layer != 0) {
-            bj_info("video: %s", p_create_info->name);
+            bj_info("initialized video (%s)", p_create_info->name);
             return p_layer;
         }
     }
@@ -60,5 +60,6 @@ void bj_end_video(
 ) {
     void (*end)(struct bj_video_layer*, struct bj_error** p_error) = p_video->end;
     end(p_video, p_error);
+    bj_info("closed video backend");
 }
 
