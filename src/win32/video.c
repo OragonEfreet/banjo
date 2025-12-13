@@ -6,7 +6,7 @@
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
-#include <banjo/video.h>
+#include <banjo/video_layer.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1

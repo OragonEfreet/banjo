@@ -1,10 +1,8 @@
 #include <banjo/assert.h>
 #include <banjo/audio.h>
 #include <banjo/system.h>
-#include <banjo/video.h>
 
-
-
+#include "video_layer.h"
 
 struct bj_video_layer* s_video = 0;
 struct bj_audio_layer* s_audio = 0;

@@ -8,11 +8,11 @@
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
-#include <banjo/video.h>
 #include <banjo/window.h>
 
 #include <bitmap_t.h>
 #include <check.h>
+#include <video_layer.h>
 #include <window_t.h>
 
 #include <X11/Xlib.h>

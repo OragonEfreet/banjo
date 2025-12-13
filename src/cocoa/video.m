@@ -9,10 +9,10 @@
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
-#include <banjo/video.h>
 #include <banjo/window.h>
 
 #include <check.h>
+#include <video_layer.h>
 #include <window_t.h>
 
 #import <Cocoa/Cocoa.h>

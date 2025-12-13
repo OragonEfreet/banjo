@@ -1,7 +1,6 @@
 #include <banjo/log.h>
-#include <banjo/video.h>
 
-
+#include "video_layer.h"
 
 extern struct bj_video_layer_create_info emscripten_video_layer_info;
 extern struct bj_video_layer_create_info novideo_video_layer_info;

@@ -4,7 +4,7 @@
 
 #include <banjo/event.h>
 #include <banjo/string.h>
-#include <banjo/video.h>
+#include <banjo/video_layer.h>
 
 #include <check.h>
 #include <window_t.h>

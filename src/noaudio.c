@@ -1,6 +1,7 @@
 #include <banjo/audio.h>
 
-#include <check.h>
+#include "audio_layer.h"
+#include "check.h"
 
 static void noaudio_dispose_audio(struct bj_audio_layer* p_audio, struct bj_error** p_error) {
     (void)p_error;

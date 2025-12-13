@@ -10,7 +10,7 @@
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
-#include <banjo/video.h>
+#include <banjo/video_layer.h>
 
 #include <audio_t.h>
 #include <check.h>

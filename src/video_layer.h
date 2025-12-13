@@ -1,21 +1,5 @@
-////////////////////////////////////////////////////////////////////////////////
-/// \file quat.h
-/// Quaternion manipulation API
-////////////////////////////////////////////////////////////////////////////////
-/// \defgroup video Video
-///
-/// \brief Manage window creation and pixel-based drawing
-///
-/// The video API provides an abstraction for creating and managing
-/// platform-specific windows and their framebuffers. It supports event polling,
-/// framebuffer rendering, and resizing operations.
-///
-/// Each video backend implements this interface.
-///
-/// \{
-////////////////////////////////////////////////////////////////////////////////
-#ifndef BJ_VIDEO_H
-#define BJ_VIDEO_H
+#ifndef BJ_VIDEO_LAYER_H
+#define BJ_VIDEO_LAYER_H
 
 #include <banjo/error.h>
 #include <banjo/window.h>
@@ -161,4 +145,3 @@ struct bj_video_layer_create_info {
 };
 
 #endif
-/// \} // End of video group

@@ -1,6 +1,7 @@
 #include <banjo/assert.h>
 #include <banjo/math.h>
 
+#include "audio_layer.h"
 #include <audio_t.h>
 
 #include <check.h>

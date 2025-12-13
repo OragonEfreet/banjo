@@ -1,9 +1,9 @@
 #include <banjo/assert.h>
 #include <banjo/event.h>
-#include <banjo/video.h>
 
-#include <check.h>
-#include <window_t.h>
+#include "check.h"
+#include "video_layer.h"
+#include "window_t.h"
 
 extern struct bj_video_layer* s_video;
 

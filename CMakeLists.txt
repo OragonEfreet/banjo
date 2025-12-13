@@ -13,12 +13,17 @@ endif()
 add_library(banjo
     src/api.c
     src/audio.c
+    src/audio_layer.h
+    src/audio_t.h
     src/bitmap.c
     src/bitmap_blit.c
     src/bitmap_blit_mask.c
+    src/bitmap_charsets.h
     src/bitmap_dib.c
     src/bitmap_draw.c
+    src/bitmap_t.h
     src/bitmap_text.c
+    src/check.h
     src/error.c
     src/event.c
     src/geometry_2d.c
@@ -40,17 +45,14 @@ add_library(banjo
     src/shader.c
     src/stream.c
     src/system.c
-    src/unix/system.c
-    src/win32/system.c
     src/time.c
+    src/unix/system.c
     src/unix/time.c
-    src/win32/time.c
     src/video.c
+    src/video_layer.h
+    src/win32/system.c
+    src/win32/time.c
     src/window.c
-    src/audio_t.h
-    src/bitmap_charsets.h
-    src/bitmap_t.h
-    src/check.h
 
     src/stream_t.h
     src/window_t.h
@@ -79,7 +81,6 @@ add_library(banjo
     inc/banjo/system.h
     inc/banjo/time.h
     inc/banjo/vec.h
-    inc/banjo/video.h
     inc/banjo/window.h
 )
 target_include_directories(banjo
