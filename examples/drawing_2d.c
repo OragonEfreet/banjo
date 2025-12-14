@@ -99,11 +99,9 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     bj_renderer_configure(renderer, window);
     bj_set_key_callback(bj_close_on_escape, 0);
 
-    /* bj_bitmap* framebuffer = bj_get_window_framebuffer(window, 0); */
     draw(bj_get_framebuffer(renderer));
 
     bj_present(renderer, window);
-    /* bj_update_window_framebuffer(window); */
 
     return bj_callback_continue;
 }

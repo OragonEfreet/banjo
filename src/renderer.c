@@ -11,6 +11,17 @@ struct bj_renderer* bj_create_renderer(
     enum bj_renderer_type type
 ) {
     bj_check_or_0(s_video);
+
+    if(type != BJ_RENDERER_TYPE_SOFTWARE) {
+        bj_warn("%s %d.%d.%d only supports software rendering.", 
+            BJ_NAME, 
+            BJ_VERSION_MAJOR_NUMBER,
+            BJ_VERSION_MINOR_NUMBER,
+            BJ_VERSION_PATCH_NUMBER
+        );
+        type = BJ_RENDERER_TYPE_SOFTWARE;
+    }
+
     struct bj_renderer* renderer = s_video->create_renderer(s_video, type);
     bj_info("renderer created");
     return renderer;

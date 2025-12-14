@@ -342,15 +342,6 @@ static struct bj_renderer* cocoa_create_renderer(
 ) {
     (void)video;
 
-    if(type != BJ_RENDERER_TYPE_SOFTWARE) {
-        bj_warn("%s %d.%d.%d only supports software rendering.", 
-            BJ_NAME, 
-            BJ_VERSION_MAJOR_NUMBER,
-            BJ_VERSION_MINOR_NUMBER,
-            BJ_VERSION_PATCH_NUMBER
-        );
-    }
-
     struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
 
     // This part will later depend on the renderer type

@@ -10,10 +10,10 @@
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
-#include <banjo/video_layer.h>
 
 #include <audio_t.h>
 #include <check.h>
+#include <audio_layer.h>
 
 #include <alsa/asoundlib.h>
 #include <pthread.h>
@@ -167,11 +167,11 @@ static void* playback_thread(void* p_data) {
         if ((snd_pcm_uframes_t)avail >= frames_per_period) {
             if (p_device->playing == BJ_TRUE) {
                 // Generate audio normally
-                p_device->p_callback(
+                p_device->callback(
                     buffer,
                     frames_per_period,
                     &p_device->properties,
-                    p_device->p_callback_user_data,
+                    p_device->callback_user_data,
                     global_sample_index
                 );
             } else {
@@ -245,8 +245,8 @@ static struct bj_audio_device* alsa_open_device(
         alsa_close_device(p_audio, p_device);
         return 0;
     }
-    p_device->p_callback           = p_callback;
-    p_device->p_callback_user_data = p_callback_user_data;
+    p_device->callback           = p_callback;
+    p_device->callback_user_data = p_callback_user_data;
     p_device->data                 = alsa_dev;
 
     p_device->properties.format      = p_properties ? p_properties->format : BJ_AUDIO_FORMAT_INT16;
