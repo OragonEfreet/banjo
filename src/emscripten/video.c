@@ -3,10 +3,12 @@
 #ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
 
 #include <banjo/event.h>
+#include <banjo/renderer.h>
 #include <banjo/string.h>
-#include <banjo/video_layer.h>
 
 #include <check.h>
+#include <renderer_t.h>
+#include <video_layer.h>
 #include <window_t.h>
 
 #include <emscripten/dom_pk_codes.h> 
@@ -15,6 +17,10 @@
 #include <ctype.h>
 
 #define BJ_EM_CANVAS_SELECTOR "#canvas"
+
+struct bj_renderer_data {
+    struct bj_bitmap* framebuffer;
+};
 
 struct {
     bj_bool window_exist;
@@ -26,7 +32,6 @@ typedef struct {
     int         width;
     int         height;
 } emscripten_window;
-
 
 static enum bj_key em_translate_keycode(const EM_UTF8 key[32], unsigned int location) {
     // Common named keys
@@ -265,7 +270,99 @@ static void emscripten_flush_window_framebuffer(
         }
 
         ctx.putImageData(imageData, 0, 0);
-    }, p_window->width, p_window->height, bj_bitmap_pixels(p_abstract_window->p_framebuffer), p_window->selector);
+    }, p_window->width, p_window->height, bj_bitmap_pixels(p_abstract_window->framebuffer), p_window->selector);
+}
+
+static void emscripten_renderer_configure(
+    struct bj_renderer* renderer,
+    struct bj_window* abstract_window
+) {
+    (void)renderer;
+    (void)abstract_window;
+
+    // TODO consistency?
+    emscripten_window* window = (emscripten_window*)abstract_window;
+    if(renderer->data->framebuffer != 0) {
+        bj_destroy_bitmap(renderer->data->framebuffer);
+    }
+
+    renderer->data->framebuffer = bj_create_bitmap(
+        window->width, window->height,
+        BJ_PIXEL_MODE_XRGB8888, 0
+    );
+}
+
+static struct bj_bitmap* emscripten_renderer_get_framebuffer(
+    struct bj_renderer* renderer
+) {
+    bj_check_or_0(renderer);
+    return renderer->data->framebuffer;
+}
+
+static void emscripten_renderer_present(
+    struct bj_renderer* renderer,
+    struct bj_window* abstract_window
+) {
+    const emscripten_window* window = (emscripten_window*)abstract_window;
+
+    MAIN_THREAD_EM_ASM({
+        var w = $0;
+        var h = $1;
+        var pixels = $2;
+        var canvasId = UTF8ToString($3);
+        var canvas = document.querySelector(canvasId);
+        var ctx = canvas.getContext('2d');
+
+        var imageData = ctx.createImageData(w, h);
+        var data = imageData.data;
+
+        var src32 = HEAP32.subarray(pixels >> 2, (pixels >> 2) + w * h);
+        var dst32 = new Uint32Array(data.buffer);
+
+        for (var i = 0; i < src32.length; ++i) {
+            var xrgb = src32[i];
+            var r = (xrgb >> 16) & 0xFF;
+            var g = (xrgb >> 8) & 0xFF;
+            var b = xrgb & 0xFF;
+            dst32[i] = (0xFF << 24) | (b << 16) | (g << 8) | r; // RGBA
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    }, window->width, window->height, bj_bitmap_pixels(renderer->data->framebuffer), window->selector);
+}
+
+static struct bj_renderer* emscripten_create_renderer(
+    struct bj_video_layer* video,
+    enum bj_renderer_type  type
+) {
+    (void)video;
+    (void)type;
+
+    struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
+
+    // This part will later depend on the renderer type
+    renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
+
+    // VTable
+    // Fill the list of function pointers depending on the renderer type
+    renderer->configure       = emscripten_renderer_configure;
+    renderer->get_framebuffer = emscripten_renderer_get_framebuffer;
+    renderer->present         = emscripten_renderer_present;
+    
+    // end of "This part will later depend on the renderer type"
+
+    return renderer;
+}
+
+static void emscripten_destroy_renderer(
+    struct bj_video_layer* video,
+    struct bj_renderer* renderer
+) {
+    bj_check(video);
+    bj_check(renderer);
+
+    bj_free(renderer->data);
+    bj_free(renderer);
 }
 
 static struct bj_video_layer* emscripten_init_layer(
@@ -279,6 +376,10 @@ static struct bj_video_layer* emscripten_init_layer(
     p_layer->delete_window             = emscripten_window_del;
     p_layer->poll_events               = emscripten_window_poll;
     p_layer->get_window_size           = emscripten_get_window_size;
+
+    p_layer->create_renderer           = emscripten_create_renderer;
+    p_layer->destroy_renderer          = emscripten_destroy_renderer;
+
     p_layer->create_window_framebuffer = emscripten_create_window_framebuffer;
     p_layer->flush_window_framebuffer  = emscripten_flush_window_framebuffer;
     p_layer->data = 0;

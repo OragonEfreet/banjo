@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <audio_layer.h>
+
 // Internal per-device data for Emscripten/WebAudio
 typedef struct emscripten_device_t {
     float*    p_buffer;         ///< Interleaved float buffer
@@ -86,8 +88,8 @@ static struct bj_audio_device* emscripten_open_device(
     emscripten_device* dev = bj_calloc(sizeof(emscripten_device));
     if (!dev) { bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "alloc data"); bj_free(p_device); return NULL; }
 
-    p_device->p_callback = p_callback;
-    p_device->p_callback_user_data = p_callback_user_data;
+    p_device->callback = p_callback;
+    p_device->callback_user_data = p_callback_user_data;
     p_device->properties.format    = BJ_AUDIO_FORMAT_F32;
     p_device->properties.amplitude = 1;
     p_device->properties.channels  = p_properties ? p_properties->channels : 1;
@@ -150,12 +152,12 @@ EMSCRIPTEN_KEEPALIVE void audio_emscripten_process(uintptr_t device_ptr) {
     // Always start with silence so JS never repeats old audio.
     memset(dev->p_buffer, 0, samples * sizeof(float));
 
-    if (p_device->playing && p_device->p_callback) {
-        p_device->p_callback(
+    if (p_device->playing && p_device->callback) {
+        p_device->callback(
             dev->p_buffer,
             dev->frames_per_block,
             &p_device->properties,
-            p_device->p_callback_user_data,
+            p_device->callback_user_data,
             dev->sample_index
         );
         dev->sample_index += dev->frames_per_block;
