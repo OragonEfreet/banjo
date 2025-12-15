@@ -6,6 +6,7 @@
 #include <banjo/renderer.h>
 #include <banjo/string.h>
 
+#include <bitmap_t.h>
 #include <check.h>
 #include <renderer_t.h>
 #include <video_layer.h>

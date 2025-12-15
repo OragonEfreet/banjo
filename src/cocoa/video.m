@@ -12,9 +12,10 @@
 #include <banjo/time.h>
 #include <banjo/window.h>
 
+#include <bitmap_t.h>
 #include <check.h>
-#include <video_layer.h>
 #include <renderer_t.h>
+#include <video_layer.h>
 #include <window_t.h>
 
 #import <Cocoa/Cocoa.h>
