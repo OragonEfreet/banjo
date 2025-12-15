@@ -1,7 +1,7 @@
 
 #include "check.h"
 #include "video_layer.h"
-#include "window_t.h"
+#include "window.h"
 
 typedef struct {
     struct bj_window common;

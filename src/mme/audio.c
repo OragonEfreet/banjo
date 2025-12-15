@@ -5,7 +5,7 @@
 #include <banjo/log.h>
 #include <banjo/system.h>
 
-#include <audio_t.h>
+#include <audio.h>
 #include <check.h>
 
 #define WIN32_LEAN_AND_MEAN

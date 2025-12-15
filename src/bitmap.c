@@ -1,7 +1,7 @@
 #include <banjo/math.h>
 #include <banjo/draw.h>
 
-#include <bitmap_t.h>
+#include <bitmap.h>
 #include <check.h>
 
 struct bj_bitmap* dib_create_bitmap_from_stream(struct bj_stream*, struct bj_error**);

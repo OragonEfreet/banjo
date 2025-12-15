@@ -6,11 +6,11 @@
 #include <banjo/renderer.h>
 #include <banjo/string.h>
 
-#include <bitmap_t.h>
+#include <bitmap.h>
 #include <check.h>
-#include <renderer_t.h>
+#include <renderer.h>
 #include <video_layer.h>
-#include <window_t.h>
+#include <window.h>
 
 #include <emscripten/dom_pk_codes.h> 
 #include <emscripten/html5.h>

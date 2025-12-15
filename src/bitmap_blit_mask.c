@@ -6,7 +6,7 @@
 #include <banjo/rect.h>
 #include <banjo/math.h>
 
-#include <bitmap_t.h>
+#include <bitmap.h>
 #include <check.h>
 
 /* -------------------------------------------------------------------------- */

@@ -2,7 +2,7 @@
 #include <banjo/math.h>
 
 #include "audio_layer.h"
-#include <audio_t.h>
+#include <audio.h>
 
 #include <check.h>
 

@@ -14,7 +14,7 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include <window_t.h>
+#include <window.h>
 
 
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")

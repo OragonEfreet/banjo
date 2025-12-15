@@ -2,7 +2,7 @@
 #include <banjo/renderer.h>
 
 #include "check.h"
-#include "renderer_t.h"
+#include "renderer.h"
 #include "video_layer.h"
 
 extern struct bj_video_layer* s_video;

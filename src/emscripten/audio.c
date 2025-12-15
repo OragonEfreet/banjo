@@ -12,7 +12,7 @@
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
-#include <audio_t.h>
+#include <audio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>

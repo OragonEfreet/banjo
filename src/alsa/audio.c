@@ -11,7 +11,7 @@
 #include <banjo/system.h>
 #include <banjo/time.h>
 
-#include <audio_t.h>
+#include <audio.h>
 #include <check.h>
 #include <audio_layer.h>
 

@@ -1,4 +1,4 @@
-#include <stream_t.h>
+#include <stream.h>
 
 #include <check.h>
 #include <stdio.h>
