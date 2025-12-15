@@ -101,15 +101,18 @@ struct {
 } x11;
 
 struct bj_renderer_data {
-    struct bj_video_layer_data* x11;
-    XImage*            framebuffer_image;
-    void*              framebuffer_pixels;
-    struct bj_bitmap*  framebuffer;
+    struct bj_video_layer_data* x11; // TODO Remove
+    XImage*                     framebuffer_image;
+    void*                       framebuffer_pixels;
+    struct bj_bitmap*           framebuffer;
 };
 
 typedef struct {
-    struct bj_window common;
-    Window             handle;
+    struct bj_window  common;
+    Window            handle;
+    XImage*           framebuffer_image; // TODO Remove
+    void*             framebuffer_pixels; // TODO Remove
+    struct bj_bitmap* framebuffer; // TODO Remove
 } x11_window;
 
 static void* x11_get_symbol(struct bj_video_layer_data* ignore, const char* name) {
@@ -726,6 +729,93 @@ static void x11_destroy_renderer(
     bj_free(renderer);
 }
 
+static void x11_delete_window_framebuffer(
+    x11_window* window
+) {
+    bj_check(window);
+
+    bj_free(window->framebuffer_pixels);
+    x11.XFree(window->framebuffer_image);
+
+    window->framebuffer_pixels = 0;
+    window->framebuffer_image  = 0;
+}
+
+static void x11_flush_window_framebuffer(
+    struct bj_video_layer* ignore,
+    const struct bj_window*   abstract_window
+) {
+    (void)ignore;
+    x11_window* window = (x11_window*)abstract_window;
+
+    Display* display = x11.display;
+    Window window_handle = window->handle;
+
+    int width = 0;
+    int height = 0;
+    x11_get_window_size(0, abstract_window, &width, &height);
+
+    GC gc = x11.XCreateGC(display, window_handle, 0, 0);
+    x11.XPutImage(display, window_handle, gc, window->framebuffer_image, 0, 0, 0, 0, width, height);
+    x11.XFreeGC(display, gc);
+    x11.XSync(display, False);
+}
+
+static struct bj_bitmap* x11_create_window_framebuffer(
+    struct bj_video_layer* ignore,
+    const struct bj_window* abstract_window,
+    struct bj_error** error
+) {
+    (void)ignore;
+    x11_window* window = (x11_window*)abstract_window;
+
+    x11_delete_window_framebuffer(window);
+
+    XWindowAttributes attributes;
+    x11.XGetWindowAttributes(
+        x11.display,
+        ((x11_window*)window)->handle,
+        &attributes
+    );
+
+    const enum bj_pixel_mode mode = bj_visual_to_pixel_mode(attributes.visual, attributes.depth);
+
+    if(mode == BJ_PIXEL_MODE_UNKNOWN) {
+        bj_set_error(error, BJ_ERROR_VIDEO | X11_CANNOT_CREATE_IMAGE, "Cannot use visual information");
+        return 0;
+    }
+
+    struct bj_bitmap* bitmap = bj_create_bitmap(
+        attributes.width,
+        attributes.height,
+        mode, 0
+    );
+
+    if (!bitmap) {
+        bj_set_error(error, BJ_ERROR_VIDEO | X11_CANNOT_CREATE_IMAGE, "Failed to create bitmap");
+        return 0;
+    }
+
+    window->framebuffer_pixels = bj_bitmap_pixels(bitmap);
+    bitmap->weak = 1;
+
+    // Note: don't use XDestroyImage to delete this structure, by XFree.
+    // Otherwise, XLib will XFree the pixels buffer as well.
+    window->framebuffer_image = x11.XCreateImage(
+        x11.display,              // X Display
+        attributes.visual,           // Window Visual
+        attributes.depth,            // Window Depth
+        ZPixmap,                     // Format
+        0,                           // Offset
+        window->framebuffer_pixels, // Pixel data
+        attributes.width,            // Width in pixels
+        attributes.height,           // Height in pixels
+        32,                          // pad
+        bj_bitmap_stride(bitmap)   // stride
+    );
+
+    return bitmap;
+}
 
 static struct bj_video_layer* x11_init_video(
     struct bj_error** error
@@ -800,6 +890,8 @@ static struct bj_video_layer* x11_init_video(
     layer->end              = x11_end_video;
     layer->get_window_size  = x11_get_window_size;
     layer->poll_events      = x11_poll_events;
+    layer->create_window_framebuffer = x11_create_window_framebuffer; // TODO Remove
+    layer->flush_window_framebuffer  = x11_flush_window_framebuffer; // TODO Remove
 
     return layer;
 }
