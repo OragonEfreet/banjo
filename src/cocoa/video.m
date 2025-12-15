@@ -28,9 +28,9 @@ struct bj_renderer_data {
     void*             configured_view;
 };
 
-struct bj_video_layer_data {
+struct {
     NSApplication *app;
-};
+} cocoa;
 
 struct cocoa_window {
     struct bj_window common;
@@ -263,9 +263,7 @@ static struct bj_window *cocoa_create_window(struct bj_video_layer *p_video,
 
 static void cocoa_end_video(struct bj_video_layer *p_video, struct bj_error **p_error) {
   (void)p_error;
-
-  struct bj_video_layer_data *p_cocoa = (struct bj_video_layer_data *)p_video->data;
-  bj_free(p_cocoa);
+  // TODO Remove NSApplication from global?
   bj_free(p_video);
 }
 
@@ -341,6 +339,7 @@ static struct bj_renderer* cocoa_create_renderer(
     enum bj_renderer_type  type
 ) {
     (void)video;
+    (void)type;
 
     struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
 
@@ -382,16 +381,15 @@ static void cocoa_destroy_renderer(
 
 static struct bj_video_layer *cocoa_init_video(struct bj_error **p_error) {
   (void)p_error;
+  bj_assert(cocoa.app == 0);
+
   @autoreleasepool {
     NSApplication *app = [NSApplication sharedApplication];
     [app setActivationPolicy:NSApplicationActivationPolicyRegular];
     [app activateIgnoringOtherApps:YES];
 
-    struct bj_video_layer_data *p_cocoa = bj_calloc(sizeof(struct bj_video_layer_data));
-    p_cocoa->app = app;
-
     struct bj_video_layer *p_layer = bj_calloc(sizeof(struct bj_video_layer));
-    p_layer->data = p_cocoa;
+    p_layer->data = 0;
 
     p_layer->create_renderer           = cocoa_create_renderer;
     p_layer->create_window             = cocoa_create_window;
