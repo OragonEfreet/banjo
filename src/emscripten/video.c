@@ -19,7 +19,7 @@
 #define BJ_EM_CANVAS_SELECTOR "#canvas"
 
 struct bj_renderer_data {
-    struct bj_bitmap* framebuffer;
+    struct bj_bitmap framebuffer;
 };
 
 struct {
@@ -282,11 +282,9 @@ static void emscripten_renderer_configure(
 
     // TODO consistency?
     emscripten_window* window = (emscripten_window*)abstract_window;
-    if(renderer->data->framebuffer != 0) {
-        bj_destroy_bitmap(renderer->data->framebuffer);
-    }
 
-    renderer->data->framebuffer = bj_create_bitmap(
+    bj_assign_bitmap(&renderer->data->framebuffer,
+        0,  // Let it allocate its own buffer
         window->width, window->height,
         BJ_PIXEL_MODE_XRGB8888, 0
     );
@@ -296,7 +294,7 @@ static struct bj_bitmap* emscripten_renderer_get_framebuffer(
     struct bj_renderer* renderer
 ) {
     bj_check_or_0(renderer);
-    return renderer->data->framebuffer;
+    return &renderer->data->framebuffer;
 }
 
 static void emscripten_renderer_present(
@@ -328,7 +326,7 @@ static void emscripten_renderer_present(
         }
 
         ctx.putImageData(imageData, 0, 0);
-    }, window->width, window->height, bj_bitmap_pixels(renderer->data->framebuffer), window->selector);
+    }, window->width, window->height, bj_bitmap_pixels(&renderer->data->framebuffer), window->selector);
 }
 
 static struct bj_renderer* emscripten_create_renderer(
@@ -360,6 +358,9 @@ static void emscripten_destroy_renderer(
 ) {
     bj_check(video);
     bj_check(renderer);
+
+    // Clean up the framebuffer bitmap internals
+    bj_reset_bitmap(&renderer->data->framebuffer);
 
     bj_free(renderer->data);
     bj_free(renderer);

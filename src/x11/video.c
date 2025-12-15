@@ -104,7 +104,7 @@ struct bj_renderer_data {
     struct bj_video_layer_data* x11; // TODO Remove
     XImage*                     framebuffer_image;
     void*                       framebuffer_pixels;
-    struct bj_bitmap*           framebuffer;
+    struct bj_bitmap            framebuffer;
 };
 
 typedef struct {
@@ -626,7 +626,6 @@ static void x11_renderer_configure(
     struct bj_renderer* renderer,
     struct bj_window* window
 ) {
-    // TODO this will not survive successive reconfigures
     XWindowAttributes attributes;
 
     x11.XGetWindowAttributes(
@@ -639,24 +638,26 @@ static void x11_renderer_configure(
         attributes.visual, attributes.depth
     );
 
-    /* if(mode == BJ_PIXEL_MODE_UNKNOWN) { */
-    /*     bj_set_error(error, BJ_ERROR_VIDEO | X11_CANNOT_CREATE_IMAGE, "Cannot use visual information"); */
-    /*     return 0; */
-    /* } */
 
-    renderer->data->framebuffer = bj_create_bitmap(
+    // Clean up old XImage if it exists
+    if (renderer->data->framebuffer_image) {
+        x11.XFree(renderer->data->framebuffer_image);
+        renderer->data->framebuffer_image = 0;
+    }
+
+    // Reassign the bitmap internals instead of creating a new one
+    bj_assign_bitmap(
+        &renderer->data->framebuffer,
+        0,  // Let it allocate its own buffer
         attributes.width,
         attributes.height,
-        mode, 0
+        mode,
+        0  // Auto-compute stride
     );
 
-    /* if (!bitmap) { */
-    /*     bj_set_error(error, BJ_ERROR_VIDEO | X11_CANNOT_CREATE_IMAGE, "Failed to create bitmap"); */
-    /*     return 0; */
-    /* } */
 
-    renderer->data->framebuffer_pixels = bj_bitmap_pixels(renderer->data->framebuffer);
-    renderer->data->framebuffer->weak = 1;
+    renderer->data->framebuffer_pixels = bj_bitmap_pixels(&renderer->data->framebuffer);
+    renderer->data->framebuffer.weak = 1;
 
     // Note: don't use XDestroyImage to delete this structure, by XFree.
     // Otherwise, XLib will XFree the pixels buffer as well.
@@ -670,14 +671,14 @@ static void x11_renderer_configure(
         attributes.width,            // Width in pixels
         attributes.height,           // Height in pixels
         32,                          // pad
-        bj_bitmap_stride(renderer->data->framebuffer)   // stride
+        bj_bitmap_stride(&renderer->data->framebuffer)   // stride
     );
 }
 
 static struct bj_bitmap* x11_renderer_get_framebuffer(
     struct bj_renderer* renderer
 ) {
-    return renderer->data->framebuffer;
+    return &renderer->data->framebuffer;
 }
 
 static void x11_renderer_present(
@@ -712,6 +713,8 @@ static struct bj_renderer* x11_create_renderer(
     renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
     renderer->data->x11 = 0;
 
+    // Framebuffer is embedded in the struct, already zeroed by calloc
+
     renderer->configure       = x11_renderer_configure;
     renderer->get_framebuffer = x11_renderer_get_framebuffer;
     renderer->present         = x11_renderer_present;
@@ -725,6 +728,15 @@ static void x11_destroy_renderer(
 ) {
     (void)ignore;
     bj_check(renderer);
+
+    // Clean up the framebuffer bitmap internals
+    bj_reset_bitmap(&renderer->data->framebuffer);
+
+    // Clean up XImage if it exists
+    if (renderer->data->framebuffer_image) {
+        x11.XFree(renderer->data->framebuffer_image);
+    }
+
     bj_free(renderer->data);
     bj_free(renderer);
 }

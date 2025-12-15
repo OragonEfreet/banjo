@@ -21,7 +21,7 @@
 #import <objc/runtime.h>
 
 struct bj_renderer_data {
-    struct bj_bitmap* framebuffer;
+    struct bj_bitmap  framebuffer;
     void*             buffer;
     int               buffer_width;
     int               buffer_height;
@@ -310,15 +310,9 @@ static void cocoa_renderer_configure(
 
         bj_info("framebuffer created: %dx%d", width, height);
 
-        if(data->framebuffer == 0) {
-            data->framebuffer = bj_create_bitmap_from_pixels(
-                data->buffer, width, height, mode, stride
-            );
-        } else {
-            bj_assign_bitmap(data->framebuffer,
-                data->buffer, width, height, mode, stride
-            );
-        }
+        bj_assign_bitmap(&data->framebuffer,
+            data->buffer, width, height, mode, stride
+        );
 
         data->configured_view = ((struct cocoa_window*)window)->view;
         objc_setAssociatedObject(
@@ -335,7 +329,7 @@ static struct bj_bitmap* cocoa_renderer_get_framebuffer(
 ) {
     bj_assert(renderer);
     bj_assert(renderer->data);
-    return renderer->data->framebuffer;
+    return &renderer->data->framebuffer;
 }
 
 static void cocoa_renderer_present(
@@ -384,7 +378,7 @@ static void cocoa_destroy_renderer(
         if(renderer->data->configured_view) {
             objc_setAssociatedObject(renderer->data->configured_view, "bj_sw_render", nil, OBJC_ASSOCIATION_ASSIGN);
         }
-        bj_destroy_bitmap(renderer->data->framebuffer);
+        bj_reset_bitmap(&renderer->data->framebuffer);
         bj_free(renderer->data->buffer);
     }
     bj_free(renderer->data);
