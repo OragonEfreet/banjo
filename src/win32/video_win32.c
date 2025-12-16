@@ -3,10 +3,16 @@
 #ifdef BJ_CONFIG_WIN32_BACKEND
 
 #include <banjo/assert.h>
+#include <banjo/bitmap.h>
 #include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/memory.h>
-#include <banjo/video_layer.h>
+#include <banjo/renderer.h>
+
+#include <bitmap.h>
+#include <check.h>
+#include <renderer.h>
+#include <video_layer.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
@@ -18,6 +24,13 @@
 
 
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
+
+struct bj_renderer_data {
+    struct bj_bitmap framebuffer;
+    HDC              hdc;
+    HDC              fbdc;
+    HBITMAP          fbmp;
+};
 
 typedef struct {
     struct bj_window common;
@@ -194,7 +207,7 @@ static struct bj_bitmap* win32_create_window_framebuffer(
 }
 
 static void win32_flush_window_framebuffer(
-    struct bj_video_layer* p_video,
+    struct bj_video_layer*    p_video,
     const struct bj_window*   p_abstract_window
 ) {
     win32_window* p_window = (win32_window*)p_abstract_window;
@@ -216,7 +229,7 @@ static void win32_end_video(
     if(!UnregisterClassA(WIN32_WINDOWCLASS_NAME, (HINSTANCE)(p_video->data))) {
         bj_set_error(p_error, BJ_ERROR_DISPOSE, "Failed to unregister window class");
     }
-
+    
     //bj_free(p_video->data);
     bj_free(p_video);
 }
@@ -371,6 +384,142 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     return 0;
 }
 
+
+static void win32_renderer_configure(
+    struct bj_renderer* renderer,
+    struct bj_window*   p_abstract_window
+) {
+    win32_window* p_window = (win32_window*)p_abstract_window;
+    struct bj_renderer_data* data = renderer->data;
+
+    int width  = 0;
+    int height = 0;
+
+    data->hdc = p_window->hdc;
+
+    if (!win32_get_window_size(0, (const struct bj_window*)p_window, &width, &height)) {
+    //    bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot get window dimension");
+        return 0;
+    }
+
+    if (data->fbdc) {
+        DeleteDC(data->fbdc);
+    }
+    if (data->fbmp) {
+        DeleteObject(data->fbmp);
+    }
+
+    const size_t info_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
+    LPBITMAPINFO p_bmp_info = bj_malloc(info_size); // TODO Stack allocate
+    bj_memset(p_bmp_info, 0, info_size);
+    p_bmp_info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+
+    HBITMAP h_bmp = CreateCompatibleBitmap(data->hdc, 1, 1);
+    GetDIBits(data->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
+    GetDIBits(data->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
+    DeleteObject(h_bmp);
+
+    enum bj_pixel_mode pixel_mode = BJ_PIXEL_MODE_UNKNOWN;
+    if (p_bmp_info->bmiHeader.biCompression == BI_BITFIELDS) {
+        int bpp = p_bmp_info->bmiHeader.biPlanes * p_bmp_info->bmiHeader.biBitCount;
+        int32_t* masks = (int32_t*)((int8_t*)p_bmp_info + p_bmp_info->bmiHeader.biSize);
+        pixel_mode = bj_compute_pixel_mode(bpp, masks[0], masks[1], masks[2]);
+    }
+    if (pixel_mode == BJ_PIXEL_MODE_UNKNOWN) {
+        pixel_mode = BJ_PIXEL_MODE_XRGB8888;
+        bj_memset(p_bmp_info, 0, info_size);
+        p_bmp_info->bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
+        p_bmp_info->bmiHeader.biPlanes      = 1;
+        p_bmp_info->bmiHeader.biBitCount    = 32;
+        p_bmp_info->bmiHeader.biCompression = BI_RGB;
+    }
+
+    const size_t stride = bj_compute_bitmap_stride(width, pixel_mode);
+
+    if (stride == 0) {
+    //    bj_set_error(p_error, BJ_ERROR_VIDEO, "Invalid window pixel format");
+        bj_free(p_bmp_info);
+        return 0;
+    }
+
+    p_bmp_info->bmiHeader.biWidth = width;
+    p_bmp_info->bmiHeader.biHeight = -height;
+    p_bmp_info->bmiHeader.biSizeImage = (DWORD)height * stride;
+
+    void* pixels = 0;
+    data->fbdc = CreateCompatibleDC(data->hdc);
+    data->fbmp = CreateDIBSection(data->hdc, p_bmp_info, DIB_RGB_COLORS, &pixels, NULL, 0);
+
+    bj_free(p_bmp_info);
+
+    if (!data->fbmp) {
+        //bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot create DIB section");
+        return 0;
+    }
+
+    SelectObject(data->fbdc, data->fbmp);
+
+    bj_assign_bitmap(&data->framebuffer, pixels, width, height, pixel_mode, stride);
+}
+
+static struct bj_bitmap* win32_renderer_get_framebuffer(
+    struct bj_renderer* renderer
+) {
+    return &renderer->data->framebuffer;
+}
+
+static void win32_renderer_present(
+    struct bj_renderer* renderer,
+    struct bj_window* abstract_window
+) {
+    win32_window* window = (win32_window*)abstract_window;
+
+    int width = 0;
+    int height = 0;
+    if (win32_get_window_size(0, abstract_window, &width, &height)) {
+        BitBlt(renderer->data->hdc, 0, 0, width, height, renderer->data->fbdc, 0, 0, SRCCOPY);
+    }
+}
+
+static struct bj_renderer* win32_create_renderer(
+    struct bj_video_layer* ignore,
+    enum bj_renderer_type  type
+) {
+    (void)type;
+    (void)ignore;
+    struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
+    renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
+    
+    renderer->configure       = win32_renderer_configure;
+    renderer->get_framebuffer = win32_renderer_get_framebuffer;
+    renderer->present         = win32_renderer_present;
+
+    return renderer;
+}
+
+static void win32_destroy_renderer(
+    struct bj_video_layer* ignore,
+    struct bj_renderer* renderer
+) {
+    (void)ignore;
+    bj_check(renderer);
+
+    struct bj_renderer_data* data = &renderer->data;
+
+    // Clean up the framebuffer bitmap internals
+    bj_reset_bitmap(&data->framebuffer);
+
+    if (data->fbdc) {
+        DeleteDC(data->fbdc);
+    }
+    if (data->fbmp) {
+        DeleteObject(data->fbmp);
+    }
+
+    bj_free(renderer->data);
+    bj_free(renderer);
+}
+
 static struct bj_video_layer* win32_init_video(
     struct bj_error** p_error
 ) {
@@ -395,12 +544,14 @@ static struct bj_video_layer* win32_init_video(
     p_layer->get_window_size           = win32_get_window_size;
     p_layer->create_window_framebuffer = win32_create_window_framebuffer;
     p_layer->flush_window_framebuffer  = win32_flush_window_framebuffer;
+    p_layer->create_renderer           = win32_create_renderer;
+    p_layer->destroy_renderer          = win32_destroy_renderer;
     p_layer->data                      = (void*)hInstance;
     return p_layer;
 }
 
 struct bj_video_layer_create_info win32_video_layer_info = {
-    .name = "win32",
+    .name   = "win32",
     .create = win32_init_video,
 };
 

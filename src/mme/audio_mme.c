@@ -7,6 +7,7 @@
 
 #include <audio.h>
 #include <check.h>
+#include <audio_layer.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

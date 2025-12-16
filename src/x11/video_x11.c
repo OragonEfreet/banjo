@@ -713,8 +713,6 @@ static struct bj_renderer* x11_create_renderer(
     renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
     renderer->data->x11 = 0;
 
-    // Framebuffer is embedded in the struct, already zeroed by calloc
-
     renderer->configure       = x11_renderer_configure;
     renderer->get_framebuffer = x11_renderer_get_framebuffer;
     renderer->present         = x11_renderer_present;
