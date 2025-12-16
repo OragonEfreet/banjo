@@ -25,6 +25,10 @@
 
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
 
+struct {
+    HINSTANCE hInstance;
+} win32;
+
 struct bj_renderer_data {
     struct bj_bitmap framebuffer;
     HDC              hdc;
@@ -42,7 +46,6 @@ typedef struct {
 } win32_window;
 
 static struct bj_window* win32_window_new(
-    struct bj_video_layer* p_video,
     const char* p_title,
     uint16_t x,
     uint16_t y,
@@ -67,7 +70,7 @@ static struct bj_window* win32_window_new(
     HWND hwnd = CreateWindowExA(
         window_ex_style, WIN32_WINDOWCLASS_NAME, p_title, window_style,
         window_x, window_y, window_width, window_height,
-        NULL, NULL, (HINSTANCE)p_video->data, 0
+        NULL, NULL, win32.hInstance, 0
     );
 
     if (!hwnd) {
@@ -106,10 +109,8 @@ static void win32_delete_window_framebuffer(
 }
 
 static void win32_window_del(
-    struct bj_video_layer* p_video,
     struct bj_window* p_abstract_window
 ) {
-    (void)p_video;
     win32_window* p_window = (win32_window*)p_abstract_window;
     win32_delete_window_framebuffer(p_window);
     ReleaseDC(p_window->handle, p_window->hdc);
@@ -120,12 +121,10 @@ static void win32_window_del(
 
 
 static int win32_get_window_size(
-    struct bj_video_layer* p_video,
     const struct bj_window* p_abstract_window,
     int* width,
     int* height
 ) {
-    (void)p_video;
     win32_window* p_window = (win32_window*)p_abstract_window;
     RECT rect;
 
@@ -139,7 +138,6 @@ static int win32_get_window_size(
 }
 
 static struct bj_bitmap* win32_create_window_framebuffer(
-    struct bj_video_layer* p_video,
     const struct bj_window* p_abstract_window,
     struct bj_error** p_error
 ) {
@@ -147,7 +145,7 @@ static struct bj_bitmap* win32_create_window_framebuffer(
 
     int width = 0;
     int height = 0;
-    if (!win32_get_window_size(p_video, (const struct bj_window*)p_window, &width, &height)) {
+    if (!win32_get_window_size(p_abstract_window, &width, &height)) {
         bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot get window dimension");
         return 0;
     }
@@ -207,7 +205,6 @@ static struct bj_bitmap* win32_create_window_framebuffer(
 }
 
 static void win32_flush_window_framebuffer(
-    struct bj_video_layer*    p_video,
     const struct bj_window*   p_abstract_window
 ) {
     win32_window* p_window = (win32_window*)p_abstract_window;
@@ -215,29 +212,25 @@ static void win32_flush_window_framebuffer(
 
     int width = 0;
     int height = 0;
-    if (win32_get_window_size(p_video, (const struct bj_window*)p_window, &width, &height)) {
+    if (win32_get_window_size((const struct bj_window*)p_window, &width, &height)) {
         BitBlt(p_window->hdc, 0, 0, width, height, p_window->fbdc, 0, 0, SRCCOPY);
     }
 }
 
 static void win32_end_video(
-    struct bj_video_layer* p_video,
     struct bj_error** p_error
 ) {
     (void)p_error;
 
-    if(!UnregisterClassA(WIN32_WINDOWCLASS_NAME, (HINSTANCE)(p_video->data))) {
+    if(!UnregisterClassA(WIN32_WINDOWCLASS_NAME, win32.hInstance)) {
         bj_set_error(p_error, BJ_ERROR_DISPOSE, "Failed to unregister window class");
     }
-    
-    //bj_free(p_video->data);
-    bj_free(p_video);
+    win32.hInstance = 0;   
 }
 
 static void win32_window_poll(
-    struct bj_video_layer* p_video
+    void
 ) {
-    (void)p_video;
     MSG message;
     while (PeekMessageA(&message, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage(&message);
@@ -397,7 +390,7 @@ static void win32_renderer_configure(
 
     data->hdc = p_window->hdc;
 
-    if (!win32_get_window_size(0, (const struct bj_window*)p_window, &width, &height)) {
+    if (!win32_get_window_size((const struct bj_window*)p_window, &width, &height)) {
     //    bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot get window dimension");
         return 0;
     }
@@ -476,17 +469,15 @@ static void win32_renderer_present(
 
     int width = 0;
     int height = 0;
-    if (win32_get_window_size(0, abstract_window, &width, &height)) {
+    if (win32_get_window_size(abstract_window, &width, &height)) {
         BitBlt(renderer->data->hdc, 0, 0, width, height, renderer->data->fbdc, 0, 0, SRCCOPY);
     }
 }
 
 static struct bj_renderer* win32_create_renderer(
-    struct bj_video_layer* ignore,
     enum bj_renderer_type  type
 ) {
     (void)type;
-    (void)ignore;
     struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
     renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
     
@@ -498,10 +489,8 @@ static struct bj_renderer* win32_create_renderer(
 }
 
 static void win32_destroy_renderer(
-    struct bj_video_layer* ignore,
     struct bj_renderer* renderer
 ) {
-    (void)ignore;
     bj_check(renderer);
 
     struct bj_renderer_data* data = &renderer->data;
@@ -523,11 +512,13 @@ static void win32_destroy_renderer(
 static struct bj_video_layer* win32_init_video(
     struct bj_error** p_error
 ) {
-    HINSTANCE hInstance = GetModuleHandleA(0);
+    static struct bj_video_layer layer;
+
+    win32.hInstance = GetModuleHandleA(0);
 
     if (!RegisterClassA(&(WNDCLASSA){
         .lpfnWndProc   = WindowProc,
-        .hInstance     = hInstance,
+        .hInstance     = win32.hInstance,
         .lpszClassName = WIN32_WINDOWCLASS_NAME,
         .hbrBackground = (HBRUSH)(COLOR_WINDOW + 1),
         .hCursor       = LoadCursor(NULL, IDC_ARROW),
@@ -536,18 +527,16 @@ static struct bj_video_layer* win32_init_video(
         return 0;
     }
 
-    struct bj_video_layer* p_layer = bj_malloc(sizeof(struct bj_video_layer));
-    p_layer->end                       = win32_end_video;
-    p_layer->create_window             = win32_window_new;
-    p_layer->delete_window             = win32_window_del;
-    p_layer->poll_events               = win32_window_poll;
-    p_layer->get_window_size           = win32_get_window_size;
-    p_layer->create_window_framebuffer = win32_create_window_framebuffer;
-    p_layer->flush_window_framebuffer  = win32_flush_window_framebuffer;
-    p_layer->create_renderer           = win32_create_renderer;
-    p_layer->destroy_renderer          = win32_destroy_renderer;
-    p_layer->data                      = (void*)hInstance;
-    return p_layer;
+    layer.end                       = win32_end_video;
+    layer.create_window             = win32_window_new;
+    layer.delete_window             = win32_window_del;
+    layer.poll_events               = win32_window_poll;
+    layer.get_window_size           = win32_get_window_size;
+    layer.create_window_framebuffer = win32_create_window_framebuffer;
+    layer.flush_window_framebuffer  = win32_flush_window_framebuffer;
+    layer.create_renderer           = win32_create_renderer;
+    layer.destroy_renderer          = win32_destroy_renderer;
+    return &layer;
 }
 
 struct bj_video_layer_create_info win32_video_layer_info = {
