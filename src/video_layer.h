@@ -141,7 +141,8 @@ struct bj_video_layer_create_info {
     const char* name;                                             ///< Name of the video backend
 
     /// Function to create the backend
-    struct bj_video_layer* (*create)(
+    bj_bool (*create)(
+        struct bj_video_layer* layer,
         struct bj_error**      error
     );   
 };

@@ -4,11 +4,12 @@
 
 #include "video_layer.h"
 
-struct bj_video_layer* s_video = 0;
+/* struct bj_video_layer* s_video = 0; */
 struct bj_audio_layer* s_audio = 0;
 
-struct bj_video_layer* bj_begin_video(struct bj_error**);
-void bj_end_video(struct bj_video_layer*, struct bj_error**);
+struct bj_video_layer s_video = {0};
+
+bj_bool bj_begin_video(struct bj_video_layer* layer, struct bj_error**);
 
 struct bj_audio_layer* bj_begin_audio(struct bj_error**);
 void bj_end_audio(struct bj_audio_layer*, struct bj_error**);
@@ -24,16 +25,20 @@ bj_bool bj_initialize(
 ) {
     struct bj_error* init_error = 0;
 
-    bj_assert(s_video == 0);
+    /* bj_assert(s_video == 0); */
     bj_assert(s_audio == 0);
 
     bj_begin_event();
     bj_begin_time();
 
-    s_video = bj_begin_video(&init_error);
-    if (init_error) {
-        bj_err("cannot initialize: %s (code %x)", init_error->message, init_error->code);
-        bj_forward_error(init_error, p_error);
+    if (bj_begin_video(&s_video, &init_error) == BJ_FALSE) {
+        if(init_error) {
+            bj_err("cannot initialize: %s (code %x)", init_error->message, init_error->code);
+            bj_forward_error(init_error, p_error);
+        } else {
+            bj_err("cannot initialize video layer");
+        }
+
         bj_shutdown(0);
         return BJ_FALSE;
     }
@@ -59,10 +64,9 @@ void bj_shutdown(
         s_audio = 0;
     }
 
-    if (s_video) {
-        bj_end_video(s_video, p_error);
-        s_video = 0;
-    }
+    s_video.end(p_error);
+    bj_info("closed video backend");
+    bj_memzero(&s_video, sizeof(struct bj_video_layer));
 
     bj_end_time();
     bj_end_event();

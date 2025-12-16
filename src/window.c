@@ -4,7 +4,7 @@
 #include "video_layer.h"
 #include "window.h"
 
-extern struct bj_video_layer* s_video;
+extern struct bj_video_layer s_video;
 
 struct bj_window* bj_bind_window(
     const char* title,
@@ -14,7 +14,7 @@ struct bj_window* bj_bind_window(
     uint16_t    height,
     uint8_t     window_flags
 ) {
-    return s_video->create_window(title, x, y, width, height, window_flags);
+    return s_video.create_window(title, x, y, width, height, window_flags);
 }
 
 void bj_unbind_window(
@@ -22,7 +22,7 @@ void bj_unbind_window(
 ) {
     bj_check(window);
     bj_destroy_bitmap(window->framebuffer);
-    s_video->delete_window(window);
+    s_video.delete_window(window);
 }
 
 bj_bool bj_should_close_window(
@@ -60,7 +60,7 @@ struct bj_bitmap* bj_get_window_framebuffer(
             return 0;
         }
 
-        window->framebuffer = s_video->create_window_framebuffer(window, error);
+        window->framebuffer = s_video.create_window_framebuffer(window, error);
     }
 
     return window->framebuffer;
@@ -71,7 +71,7 @@ void bj_update_window_framebuffer(
 ) {
     bj_check(window);
     bj_check(window->framebuffer != 0);
-    s_video->flush_window_framebuffer(window);
+    s_video.flush_window_framebuffer(window);
 }
 
 int bj_get_window_size(
@@ -80,7 +80,7 @@ int bj_get_window_size(
     int* height
 ) {
     bj_check_or_0(window);
-    return s_video->get_window_size(window, width, height);
+    return s_video.get_window_size(window, width, height);
 }
 
 int bj_get_key(

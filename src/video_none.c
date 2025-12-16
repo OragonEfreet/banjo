@@ -91,21 +91,21 @@ static void novideo_dispose_layer(
 }
 
 
-static struct bj_video_layer* novideo_create_layer(
+static bj_bool novideo_create_layer(
+    struct bj_video_layer* layer,
     struct bj_error**      error
 ) {
     (void)error;
-    static struct bj_video_layer layer;
 
-    layer.end                       = novideo_dispose_layer;
-    layer.create_window             = novideo_window_new;
-    layer.delete_window             = novideo_window_del;
-    layer.poll_events               = novideo_window_poll;
-    layer.get_window_size           = novideo_get_window_size;
-    layer.create_window_framebuffer = novideo_create_window_framebuffer;
-    layer.flush_window_framebuffer  = novideo_flush_window_framebuffer;
+    layer->end                       = novideo_dispose_layer;
+    layer->create_window             = novideo_window_new;
+    layer->delete_window             = novideo_window_del;
+    layer->poll_events               = novideo_window_poll;
+    layer->get_window_size           = novideo_get_window_size;
+    layer->create_window_framebuffer = novideo_create_window_framebuffer;
+    layer->flush_window_framebuffer  = novideo_flush_window_framebuffer;
 
-    return &layer;
+    return BJ_TRUE;
 }
 
 struct bj_video_layer_create_info novideo_video_layer_info = {

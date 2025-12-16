@@ -805,17 +805,16 @@ static struct bj_bitmap* x11_create_window_framebuffer(
     return bitmap;
 }
 
-static struct bj_video_layer* x11_init_video(
+static bj_bool x11_init_video(
+    struct bj_video_layer* layer,
     struct bj_error** error
 ) {
-    static struct bj_video_layer layer;
-
     void* handle = bj_load_library("libX11.so.6");
     if(handle == 0) {
-        return 0;
+        return BJ_FALSE;
     }
 
-    x11.handle            = handle;
+    x11.handle = handle;
 
     x11.XAllocSizeHints      = (pfn_XAllocSizeHints)x11_get_symbol(0, "XAllocSizeHints");
     x11.XCreateImage         = (pfn_XCreateImage)x11_get_symbol(0, "XCreateImage");
@@ -853,7 +852,7 @@ static struct bj_video_layer* x11_init_video(
     Display* display = x11_XOpenDisplay(0);
     if(display == 0) {
         bj_set_error(error, BJ_ERROR_INITIALIZE | X11_CANNOT_OPEN_DISPLAY, "cannot open X11 display");
-        return 0;
+        return BJ_FALSE;
     }
 
     x11.display          = display;
@@ -868,17 +867,17 @@ static struct bj_video_layer* x11_init_video(
 
     x11_init_keycodes(0);
 
-    layer.create_renderer           = x11_create_renderer;
-    layer.create_window             = x11_create_window;
-    layer.delete_window             = x11_delete_window;
-    layer.destroy_renderer          = x11_destroy_renderer;
-    layer.end                       = x11_end_video;
-    layer.get_window_size           = x11_get_window_size;
-    layer.poll_events               = x11_poll_events;
-    layer.create_window_framebuffer = x11_create_window_framebuffer; // TODO Remove
-    layer.flush_window_framebuffer  = x11_flush_window_framebuffer; // TODO Remove
+    layer->create_renderer           = x11_create_renderer;
+    layer->create_window             = x11_create_window;
+    layer->delete_window             = x11_delete_window;
+    layer->destroy_renderer          = x11_destroy_renderer;
+    layer->end                       = x11_end_video;
+    layer->get_window_size           = x11_get_window_size;
+    layer->poll_events               = x11_poll_events;
+    layer->create_window_framebuffer = x11_create_window_framebuffer; // TODO Remove
+    layer->flush_window_framebuffer  = x11_flush_window_framebuffer; // TODO Remove
 
-    return &layer;
+    return BJ_TRUE;
 }
 
 struct bj_video_layer_create_info x11_video_layer_info = {
