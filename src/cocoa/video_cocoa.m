@@ -178,8 +178,9 @@ static void cocoa_dispatch_event(struct cocoa_window *window, NSEvent *event) {
     }
 }
 
-static void cocoa_poll_events(struct bj_video_layer *p_layer) {
-    (void)p_layer;
+static void cocoa_poll_events(
+    void
+) {
     @autoreleasepool {
         NSEvent *event;
         while ((event = [NSApp nextEventMatchingMask:NSEventMaskAny
@@ -204,39 +205,43 @@ static void cocoa_poll_events(struct bj_video_layer *p_layer) {
     }
 }
 
-static int cocoa_get_window_size(struct bj_video_layer *p_video,
-                                 const struct bj_window *p_abstract_window, int *width,
-                                 int *height) {
-  (void)p_video;
-  bj_check_or_0(p_abstract_window);
-  bj_check_or_0(width);
-  bj_check_or_0(height);
-  struct cocoa_window *p_window = (struct cocoa_window *)p_abstract_window;
-  NSRect bounds = [(NSView *)p_window->view bounds];
-
-  *width = bounds.size.width;
-  *height = bounds.size.height;
-
-  return 1;
-}
-
-static void cocoa_delete_window(struct bj_video_layer *p_video,
-                                struct bj_window *p_abstract_window) {
-  (void)p_video;
-  bj_check(p_abstract_window);
-  @autoreleasepool {
+static int cocoa_get_window_size(
+    const struct bj_window* p_abstract_window,
+    int*                    width,
+    int*                    height
+) {
+    bj_check_or_0(p_abstract_window);
+    bj_check_or_0(width);
+    bj_check_or_0(height);
     struct cocoa_window *p_window = (struct cocoa_window *)p_abstract_window;
-    objc_setAssociatedObject(p_window->view, "bj_window", nil, OBJC_ASSOCIATION_ASSIGN);
-    [p_window->handle close];
-    bj_free(p_window);
-  }
+    NSRect bounds = [(NSView *)p_window->view bounds];
+
+    *width = bounds.size.width;
+    *height = bounds.size.height;
+
+    return 1;
 }
 
-static struct bj_window *cocoa_create_window(struct bj_video_layer *p_video,
-                                      const char *p_title, uint16_t x,
-                                      uint16_t y, uint16_t width,
-                                      uint16_t height, uint8_t flags) {
-  (void)p_video;
+static void cocoa_delete_window(
+    struct bj_window *p_abstract_window
+) {
+    bj_check(p_abstract_window);
+    @autoreleasepool {
+        struct cocoa_window *p_window = (struct cocoa_window *)p_abstract_window;
+        objc_setAssociatedObject(p_window->view, "bj_window", nil, OBJC_ASSOCIATION_ASSIGN);
+        [p_window->handle close];
+        bj_free(p_window);
+    }
+}
+
+static struct bj_window *cocoa_create_window(
+    const char*            p_title,
+    uint16_t               x,
+    uint16_t               y,
+    uint16_t               width,
+    uint16_t               height,
+    uint8_t                flags
+) {
   @autoreleasepool {
 
     // Flip Y coordinate (Cocoa uses bottom-left origin)
@@ -275,12 +280,11 @@ static struct bj_window *cocoa_create_window(struct bj_video_layer *p_video,
   }
 }
 
-
-
-static void cocoa_end_video(struct bj_video_layer *p_video, struct bj_error **p_error) {
-  (void)p_error;
+static void cocoa_end_video(
+    struct bj_error **error
+) {
+    (void)error;
   // TODO Remove NSApplication from global?
-  bj_free(p_video);
 }
 
 static void cocoa_renderer_configure(
@@ -345,10 +349,8 @@ static void cocoa_renderer_present(
 }
 
 static struct bj_renderer* cocoa_create_renderer(
-    struct bj_video_layer* video,
     enum bj_renderer_type  type
 ) {
-    (void)video;
     (void)type;
 
     struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
@@ -368,10 +370,8 @@ static struct bj_renderer* cocoa_create_renderer(
 }
 
 static void cocoa_destroy_renderer(
-    struct bj_video_layer* video,
     struct bj_renderer* renderer
 ) {
-    bj_check(video);
     bj_check(renderer);
 
     // This part will later depend on the renderer type
@@ -389,17 +389,15 @@ static void cocoa_destroy_renderer(
 }
 
 static struct bj_bitmap * cocoa_create_window_framebuffer(
-    struct bj_video_layer *ignore,
     const struct bj_window *p_abstract_window,
     struct bj_error **p_error) 
 {
   (void)p_error;
-  (void)ignore;
   @autoreleasepool {
     struct cocoa_window* window = (struct cocoa_window *)p_abstract_window;
 
     int width, height;
-    cocoa_get_window_size(0, p_abstract_window, &width, &height);
+    cocoa_get_window_size(p_abstract_window, &width, &height);
 
     if (window->buffer) {
       bj_free(window->buffer);
@@ -419,10 +417,8 @@ static struct bj_bitmap * cocoa_create_window_framebuffer(
 }
 
 static void cocoa_flush_window_framebuffer(
-    struct bj_video_layer  *ignore,
     const struct bj_window *p_abstract_window
 ) {
-  (void)ignore;
   struct cocoa_window *p_window = (struct cocoa_window *)p_abstract_window;
   NSView *view = (NSView *)p_window->view;
   [view setNeedsDisplay:YES];
@@ -430,30 +426,31 @@ static void cocoa_flush_window_framebuffer(
 }
 
 
-static struct bj_video_layer *cocoa_init_video(struct bj_error **p_error) {
+static struct bj_video_layer *cocoa_init_video(
+    struct bj_error **p_error
+) {
   (void)p_error;
   bj_assert(cocoa.app == 0);
+
+  static struct bj_video_layer layer;
 
   @autoreleasepool {
     NSApplication *app = [NSApplication sharedApplication];
     [app setActivationPolicy:NSApplicationActivationPolicyRegular];
     [app activateIgnoringOtherApps:YES];
 
-    struct bj_video_layer *p_layer = bj_calloc(sizeof(struct bj_video_layer));
-    p_layer->data = 0;
+    layer.create_renderer           = cocoa_create_renderer;
+    layer.create_window             = cocoa_create_window;
+    layer.delete_window             = cocoa_delete_window;
+    layer.destroy_renderer          = cocoa_destroy_renderer;
+    layer.end                       = cocoa_end_video;
+    layer.get_window_size           = cocoa_get_window_size;
+    layer.poll_events               = cocoa_poll_events;
 
-    p_layer->create_renderer           = cocoa_create_renderer;
-    p_layer->create_window             = cocoa_create_window;
-    p_layer->delete_window             = cocoa_delete_window;
-    p_layer->destroy_renderer          = cocoa_destroy_renderer;
-    p_layer->end                       = cocoa_end_video;
-    p_layer->get_window_size           = cocoa_get_window_size;
-    p_layer->poll_events               = cocoa_poll_events;
+    layer.create_window_framebuffer = cocoa_create_window_framebuffer; // TODO Remove
+    layer.flush_window_framebuffer = cocoa_flush_window_framebuffer; // TODO Remove
 
-    p_layer->create_window_framebuffer = cocoa_create_window_framebuffer; // TODO Remove
-    p_layer->flush_window_framebuffer = cocoa_flush_window_framebuffer; // TODO Remove
-
-    return p_layer;
+    return &layer;
   }
 }
 

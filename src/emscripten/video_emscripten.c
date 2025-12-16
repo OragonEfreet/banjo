@@ -136,7 +136,6 @@ static bool em_mouse_callback(int eventType, const EmscriptenMouseEvent *mouseEv
 }
 
 static struct bj_window* emscripten_window_new(
-    struct bj_video_layer* p_layer,
     const char* p_title,
     uint16_t x,
     uint16_t y,
@@ -144,7 +143,6 @@ static struct bj_window* emscripten_window_new(
     uint16_t height,
     uint8_t  flags
 ) {
-    (void)p_layer;
     (void)p_title;
     (void)x;
     (void)y;
@@ -182,10 +180,8 @@ static struct bj_window* emscripten_window_new(
 }
 
 static void emscripten_window_del(
-    struct bj_video_layer* p_layer,
     struct bj_window* p_abstract_window
 ) {
-    (void)p_layer;
     emscripten_window* p_window = (emscripten_window*)p_abstract_window;
     emscripten_set_canvas_element_size(p_window->selector, 0, 0);
     emscripten.window_exist = BJ_FALSE;
@@ -194,26 +190,22 @@ static void emscripten_window_del(
 }
 
 static void emscripten_end_layer(
-    struct bj_video_layer* p_layer,
     struct bj_error** p_error
 ) {
     (void)p_error;
-    bj_free(p_layer);
 }
 
 static void emscripten_window_poll(
-    struct bj_video_layer* p_layer
+    void
 ) {
-    (void)p_layer;
+    // EMPTY
 }
 
 static int emscripten_get_window_size(
-    struct bj_video_layer* p_layer,
     const struct bj_window* p_abstract_window,
     int* width,
     int* height
 ) {
-    (void)p_layer;
     bj_check_or_0(p_abstract_window);
     bj_check_or_0(width || height);
     const emscripten_window* p_window = (const emscripten_window*)p_abstract_window;
@@ -227,11 +219,9 @@ static int emscripten_get_window_size(
 }
 
 static struct bj_bitmap* emscripten_create_window_framebuffer(
-    struct bj_video_layer* p_layer,
     const struct bj_window* p_abstract_window,
     struct bj_error** p_error
 ) {
-    (void)p_layer;
     (void)p_error;
     emscripten_window* p_window = (emscripten_window*)p_abstract_window;
     return bj_create_bitmap(
@@ -241,11 +231,9 @@ static struct bj_bitmap* emscripten_create_window_framebuffer(
 }
 
 static void emscripten_flush_window_framebuffer(
-    struct bj_video_layer* p_layer,
     const struct bj_window*   p_abstract_window
 ) {
     const emscripten_window* p_window = (emscripten_window*)p_abstract_window;
-    (void)p_layer;
     (void)p_abstract_window;
 
     MAIN_THREAD_EM_ASM({
@@ -331,10 +319,8 @@ static void emscripten_renderer_present(
 }
 
 static struct bj_renderer* emscripten_create_renderer(
-    struct bj_video_layer* video,
     enum bj_renderer_type  type
 ) {
-    (void)video;
     (void)type;
 
     struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
@@ -354,10 +340,8 @@ static struct bj_renderer* emscripten_create_renderer(
 }
 
 static void emscripten_destroy_renderer(
-    struct bj_video_layer* video,
     struct bj_renderer* renderer
 ) {
-    bj_check(video);
     bj_check(renderer);
 
     // Clean up the framebuffer bitmap internals
@@ -372,20 +356,20 @@ static struct bj_video_layer* emscripten_init_layer(
 ) {
     (void)p_error;
 
-    struct bj_video_layer* p_layer = bj_malloc(sizeof(struct bj_video_layer));
-    p_layer->end                       = emscripten_end_layer;
-    p_layer->create_window             = emscripten_window_new;
-    p_layer->delete_window             = emscripten_window_del;
-    p_layer->poll_events               = emscripten_window_poll;
-    p_layer->get_window_size           = emscripten_get_window_size;
+    static struct bj_video_layer layer;
 
-    p_layer->create_renderer           = emscripten_create_renderer;
-    p_layer->destroy_renderer          = emscripten_destroy_renderer;
+    layer.end                       = emscripten_end_layer;
+    layer.create_window             = emscripten_window_new;
+    layer.delete_window             = emscripten_window_del;
+    layer.poll_events               = emscripten_window_poll;
+    layer.get_window_size           = emscripten_get_window_size;
 
-    p_layer->create_window_framebuffer = emscripten_create_window_framebuffer;
-    p_layer->flush_window_framebuffer  = emscripten_flush_window_framebuffer;
-    p_layer->data = 0;
-    return p_layer;
+    layer.create_renderer           = emscripten_create_renderer;
+    layer.destroy_renderer          = emscripten_destroy_renderer;
+
+    layer.create_window_framebuffer = emscripten_create_window_framebuffer;
+    layer.flush_window_framebuffer  = emscripten_flush_window_framebuffer;
+    return &layer;
 }
 
 struct bj_video_layer_create_info emscripten_video_layer_info = {
