@@ -101,7 +101,6 @@ struct {
 } x11;
 
 struct bj_renderer_data {
-    struct bj_video_layer_data* x11; // TODO Remove
     XImage*                     framebuffer_image;
     void*                       framebuffer_pixels;
     struct bj_bitmap            framebuffer;
@@ -139,7 +138,6 @@ static void x11_wait_for_map_notify(struct bj_video_layer_data* ignore, Window w
 }
 
 static struct bj_window* x11_create_window(
-    struct bj_video_layer* ignore,
     const char* title,
     uint16_t x,
     uint16_t y,
@@ -147,7 +145,6 @@ static struct bj_window* x11_create_window(
     uint16_t height,
     uint8_t  flags
 ) {
-    (void)ignore;
     Window root_window = RootWindow(x11.display, x11.default_screen);
 
     XSetWindowAttributes attributes = {
@@ -212,10 +209,8 @@ static struct bj_window* x11_create_window(
 }
 
 static void x11_delete_window(
-    struct bj_video_layer* ignore,
     struct bj_window* abstract_window
 ) {
-    (void)ignore;
     x11_window* window = (x11_window*)abstract_window;
     x11.XDeleteContext(x11.display, window->handle, x11.window_context);
     x11.XUnmapWindow(x11.display, window->handle);
@@ -334,10 +329,8 @@ static void x11_dispatch_callback(
 }
 
 static void x11_poll_events(
-    struct bj_video_layer* ignore
+    void
 ) {
-    (void)ignore;
-
     x11.XPending(x11.display);
 
     while(x11.XQLength(x11.display)) {
@@ -541,13 +534,10 @@ static void x11_init_keycodes(
 }
 
 static int x11_get_window_size(
-    struct bj_video_layer* ignore,
     const struct bj_window* window,
     int* width,
     int* height
 ) {
-    (void)ignore;
-
     XWindowAttributes attributes;
     x11.XGetWindowAttributes(
         x11.display,
@@ -611,15 +601,12 @@ static int bj_visual_to_pixel_mode(const Visual* visual, unsigned int depth) {
 }
 
 static void x11_end_video(
-    struct bj_video_layer* video,
     struct bj_error** error
 ) {
     (void)error;
     pfn_XCloseDisplay XCloseDisplay = (pfn_XCloseDisplay)x11_get_symbol(0, "XCloseDisplay");
     XCloseDisplay(x11.display);
     bj_free(x11.keymap);
-    bj_free(video->data);
-    bj_free(video);
 }
 
 static void x11_renderer_configure(
@@ -704,14 +691,11 @@ static void x11_renderer_present(
 }
 
 static struct bj_renderer* x11_create_renderer(
-    struct bj_video_layer* ignore,
     enum bj_renderer_type  type
 ) {
     (void)type;
-    (void)ignore;
     struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
     renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
-    renderer->data->x11 = 0;
 
     renderer->configure       = x11_renderer_configure;
     renderer->get_framebuffer = x11_renderer_get_framebuffer;
@@ -721,10 +705,8 @@ static struct bj_renderer* x11_create_renderer(
 }
 
 static void x11_destroy_renderer(
-    struct bj_video_layer* ignore,
     struct bj_renderer* renderer
 ) {
-    (void)ignore;
     bj_check(renderer);
 
     // Clean up the framebuffer bitmap internals
@@ -752,10 +734,8 @@ static void x11_delete_window_framebuffer(
 }
 
 static void x11_flush_window_framebuffer(
-    struct bj_video_layer* ignore,
     const struct bj_window*   abstract_window
 ) {
-    (void)ignore;
     x11_window* window = (x11_window*)abstract_window;
 
     Display* display = x11.display;
@@ -763,7 +743,7 @@ static void x11_flush_window_framebuffer(
 
     int width = 0;
     int height = 0;
-    x11_get_window_size(0, abstract_window, &width, &height);
+    x11_get_window_size(abstract_window, &width, &height);
 
     GC gc = x11.XCreateGC(display, window_handle, 0, 0);
     x11.XPutImage(display, window_handle, gc, window->framebuffer_image, 0, 0, 0, 0, width, height);
@@ -772,11 +752,9 @@ static void x11_flush_window_framebuffer(
 }
 
 static struct bj_bitmap* x11_create_window_framebuffer(
-    struct bj_video_layer* ignore,
     const struct bj_window* abstract_window,
     struct bj_error** error
 ) {
-    (void)ignore;
     x11_window* window = (x11_window*)abstract_window;
 
     x11_delete_window_framebuffer(window);
@@ -830,6 +808,7 @@ static struct bj_bitmap* x11_create_window_framebuffer(
 static struct bj_video_layer* x11_init_video(
     struct bj_error** error
 ) {
+    static struct bj_video_layer layer;
 
     void* handle = bj_load_library("libX11.so.6");
     if(handle == 0) {
@@ -889,25 +868,21 @@ static struct bj_video_layer* x11_init_video(
 
     x11_init_keycodes(0);
 
-    struct bj_video_layer* layer = bj_malloc(sizeof(struct bj_video_layer));
+    layer.create_renderer           = x11_create_renderer;
+    layer.create_window             = x11_create_window;
+    layer.delete_window             = x11_delete_window;
+    layer.destroy_renderer          = x11_destroy_renderer;
+    layer.end                       = x11_end_video;
+    layer.get_window_size           = x11_get_window_size;
+    layer.poll_events               = x11_poll_events;
+    layer.create_window_framebuffer = x11_create_window_framebuffer; // TODO Remove
+    layer.flush_window_framebuffer  = x11_flush_window_framebuffer; // TODO Remove
 
-    layer->data = 0;
-
-    layer->create_renderer  = x11_create_renderer;
-    layer->create_window    = x11_create_window;
-    layer->delete_window    = x11_delete_window;
-    layer->destroy_renderer = x11_destroy_renderer;
-    layer->end              = x11_end_video;
-    layer->get_window_size  = x11_get_window_size;
-    layer->poll_events      = x11_poll_events;
-    layer->create_window_framebuffer = x11_create_window_framebuffer; // TODO Remove
-    layer->flush_window_framebuffer  = x11_flush_window_framebuffer; // TODO Remove
-
-    return layer;
+    return &layer;
 }
 
 struct bj_video_layer_create_info x11_video_layer_info = {
-    .name = "x11",
+    .name   = "x11",
     .create = x11_init_video,
 };
 

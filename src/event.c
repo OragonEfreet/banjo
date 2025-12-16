@@ -116,7 +116,7 @@ void bj_dispatch_event(const struct bj_event* p_event) {
 }
 
 bj_bool bj_poll_events(struct bj_event* p_event) {
-    s_video->poll_events(s_video);
+    s_video->poll_events();
     return get_next_event(p_event);
 }
 

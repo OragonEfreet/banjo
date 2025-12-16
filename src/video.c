@@ -58,8 +58,8 @@ void bj_end_video(
     struct bj_video_layer* p_video,
     struct bj_error** p_error
 ) {
-    void (*end)(struct bj_video_layer*, struct bj_error** p_error) = p_video->end;
-    end(p_video, p_error);
+    void (*end)(struct bj_error** p_error) = p_video->end;
+    end(p_error);
     bj_info("closed video backend");
 }
 

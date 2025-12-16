@@ -22,7 +22,7 @@ struct bj_renderer* bj_create_renderer(
         type = BJ_RENDERER_TYPE_SOFTWARE;
     }
 
-    struct bj_renderer* renderer = s_video->create_renderer(s_video, type);
+    struct bj_renderer* renderer = s_video->create_renderer(type);
     bj_info("renderer created");
     return renderer;
 }
@@ -31,7 +31,7 @@ void bj_destroy_renderer(
     struct bj_renderer* renderer
 ) {
     bj_check(s_video);
-    s_video->destroy_renderer(s_video, renderer);
+    s_video->destroy_renderer(renderer);
     bj_info("renderer destroyed");
 }
 
