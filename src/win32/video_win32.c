@@ -510,9 +510,9 @@ static void win32_destroy_renderer(
 }
 
 static struct bj_video_layer* win32_init_video(
-    struct bj_error** p_error
+    struct bj_video_layer* layer,
+    struct bj_error** error
 ) {
-    static struct bj_video_layer layer;
 
     win32.hInstance = GetModuleHandleA(0);
 
@@ -523,20 +523,20 @@ static struct bj_video_layer* win32_init_video(
         .hbrBackground = (HBRUSH)(COLOR_WINDOW + 1),
         .hCursor       = LoadCursor(NULL, IDC_ARROW),
     })) {
-        bj_set_error(p_error, BJ_ERROR_INITIALIZE, "Failed to register window class");
-        return 0;
+        bj_set_error(error, BJ_ERROR_INITIALIZE, "Failed to register window class");
+        return BJ_FALSE;
     }
 
-    layer.end                       = win32_end_video;
-    layer.create_window             = win32_window_new;
-    layer.delete_window             = win32_window_del;
-    layer.poll_events               = win32_window_poll;
-    layer.get_window_size           = win32_get_window_size;
-    layer.create_window_framebuffer = win32_create_window_framebuffer;
-    layer.flush_window_framebuffer  = win32_flush_window_framebuffer;
-    layer.create_renderer           = win32_create_renderer;
-    layer.destroy_renderer          = win32_destroy_renderer;
-    return &layer;
+    layer->end                       = win32_end_video;
+    layer->create_window             = win32_window_new;
+    layer->delete_window             = win32_window_del;
+    layer->poll_events               = win32_window_poll;
+    layer->get_window_size           = win32_get_window_size;
+    layer->create_window_framebuffer = win32_create_window_framebuffer;
+    layer->flush_window_framebuffer  = win32_flush_window_framebuffer;
+    layer->create_renderer           = win32_create_renderer;
+    layer->destroy_renderer          = win32_destroy_renderer;
+    return BJ_TRUE;
 }
 
 struct bj_video_layer_create_info win32_video_layer_info = {
