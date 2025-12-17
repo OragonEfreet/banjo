@@ -59,7 +59,7 @@ struct bj_audio_layer_create_info {
     const char* name;                          ///< Name of the backend (e.g., "alsa", "mme").
 
     bj_bool (*create)(
-        struct bj_audio_layer* layer,
+        struct bj_audio_layer*,
         struct bj_error**
     );     ///< Factory function to instantiate the backend.
 };
