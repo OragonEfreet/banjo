@@ -22,7 +22,6 @@
 
 #include <window.h>
 
-
 #define WIN32_WINDOWCLASS_NAME ("banjo_window_class")
 
 struct {
@@ -36,25 +35,23 @@ struct bj_renderer_data {
     HBITMAP          fbmp;
 };
 
-typedef struct {
+struct win32_window {
     struct bj_window common;
-    HWND               handle;
-    int                cursor_in_window;
-    HDC                hdc;
-    HDC                fbdc;
-    HBITMAP            fbmp;
-} win32_window;
+    HWND             handle;
+    int              cursor_in_window;
+    HDC              hdc;
+    HDC              fbdc;
+    HBITMAP          fbmp;
+};
 
 static struct bj_window* win32_window_new(
-    const char* p_title,
+    const char* title,
     uint16_t x,
     uint16_t y,
     uint16_t width,
     uint16_t height,
     uint8_t  flags
 ) {
-    //win32* p_win32 = p_video->data;
-
     const uint32_t window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
                                  //| WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
     const uint32_t window_ex_style = WS_EX_APPWINDOW;
@@ -68,7 +65,7 @@ static struct bj_window* win32_window_new(
 
     // Create the window
     HWND hwnd = CreateWindowExA(
-        window_ex_style, WIN32_WINDOWCLASS_NAME, p_title, window_style,
+        window_ex_style, WIN32_WINDOWCLASS_NAME, title, window_style,
         window_x, window_y, window_width, window_height,
         NULL, NULL, win32.hInstance, 0
     );
@@ -77,7 +74,7 @@ static struct bj_window* win32_window_new(
         return 0;
     }
 
-    win32_window window = { 
+    struct win32_window window = { 
         .common = {
             .flags = flags,
         },
@@ -89,46 +86,46 @@ static struct bj_window* win32_window_new(
     ShowWindow(hwnd, SW_SHOW);
     UpdateWindow(hwnd);
 
-    win32_window* p_window = bj_malloc(sizeof(win32_window));
-    bj_memcpy(p_window, &window, sizeof(win32_window));
+    struct win32_window* window_res = bj_malloc(sizeof(struct win32_window));
+    bj_memcpy(window_res, &window, sizeof(struct win32_window));
 
-    SetWindowLongPtrA(hwnd, GWLP_USERDATA, (LONG_PTR)p_window);
+    SetWindowLongPtrA(hwnd, GWLP_USERDATA, (LONG_PTR)window_res);
 
-    return (struct bj_window*)p_window;
+    return (struct bj_window*)window_res;
 }
 
 static void win32_delete_window_framebuffer(
-    win32_window* p_window
+    struct win32_window* window
 ) {
-    if (p_window->fbdc) {
-        DeleteDC(p_window->fbdc);
+    if (window->fbdc) {
+        DeleteDC(window->fbdc);
     }
-    if (p_window->fbmp) {
-        DeleteObject(p_window->fbmp);
+    if (window->fbmp) {
+        DeleteObject(window->fbmp);
     }
 }
 
 static void win32_window_del(
-    struct bj_window* p_abstract_window
+    struct bj_window* abstract_window
 ) {
-    win32_window* p_window = (win32_window*)p_abstract_window;
-    win32_delete_window_framebuffer(p_window);
-    ReleaseDC(p_window->handle, p_window->hdc);
-    DestroyWindow(p_window->handle);
-    bj_free(p_window);
+    struct win32_window* window = (struct win32_window*)abstract_window;
+    win32_delete_window_framebuffer(window);
+    ReleaseDC(window->handle, window->hdc);
+    DestroyWindow(window->handle);
+    bj_free(window);
 }
 
 
 
 static int win32_get_window_size(
-    const struct bj_window* p_abstract_window,
+    const struct bj_window* abstract_window,
     int* width,
     int* height
 ) {
-    win32_window* p_window = (win32_window*)p_abstract_window;
+    struct win32_window* window = (struct win32_window*)abstract_window;
     RECT rect;
 
-    if (GetClientRect(p_window->handle, &rect)) {
+    if (GetClientRect(window->handle, &rect)) {
         *width = rect.right;
         *height = rect.bottom;
         return 1;
@@ -138,12 +135,12 @@ static int win32_get_window_size(
 }
 
 static void win32_end_video(
-    struct bj_error** p_error
+    struct bj_error** error
 ) {
-    (void)p_error;
+    (void)error;
 
     if(!UnregisterClassA(WIN32_WINDOWCLASS_NAME, win32.hInstance)) {
-        bj_set_error(p_error, BJ_ERROR_DISPOSE, "Failed to unregister window class");
+        bj_set_error(error, BJ_ERROR_DISPOSE, "Failed to unregister window class");
     }
     win32.hInstance = 0;   
 }
@@ -178,12 +175,12 @@ static enum bj_key vk_to_bj_key(WPARAM wParam, LPARAM lParam) {
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    win32_window* p_window = (win32_window*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
+    struct win32_window* window = (struct win32_window*)GetWindowLongPtrA(hwnd, GWLP_USERDATA);
 
     switch (uMsg) {
 
         case WM_CLOSE:
-            bj_set_window_should_close((struct bj_window*)p_window);
+            bj_set_window_should_close((struct bj_window*)window);
             break;
 
         case WM_DESTROY:
@@ -221,14 +218,14 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 }
             }
 
-            bj_push_key_event((struct bj_window*)p_window, action, keycode, scancode);
+            bj_push_key_event((struct bj_window*)window, action, keycode, scancode);
             
             break;
         }
 
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
-            bj_push_button_event((struct bj_window*)p_window, 
+            bj_push_button_event((struct bj_window*)window, 
                 BJ_BUTTON_LEFT,
                 uMsg == WM_LBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -238,7 +235,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
         case WM_MBUTTONDOWN:
         case WM_MBUTTONUP:
-            bj_push_button_event((struct bj_window*)p_window, 
+            bj_push_button_event((struct bj_window*)window, 
                 BJ_BUTTON_MIDDLE,
                 uMsg == WM_MBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -250,27 +247,27 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             const int x = GET_X_LPARAM(lParam);
             const int y = GET_Y_LPARAM(lParam);
 
-            if(!p_window->cursor_in_window) {
-                p_window->cursor_in_window = 1;
-                bj_push_enter_event((struct bj_window*)p_window, 1, x, y);
+            if(!window->cursor_in_window) {
+                window->cursor_in_window = 1;
+                bj_push_enter_event((struct bj_window*)window, 1, x, y);
             }
             TRACKMOUSEEVENT tme = {0};
             tme.cbSize = sizeof(TRACKMOUSEEVENT);
             tme.dwFlags = TME_LEAVE;
             tme.hwndTrack = hwnd;
             TrackMouseEvent(&tme);
-            bj_push_cursor_event((struct bj_window*)p_window, x, y);
+            bj_push_cursor_event((struct bj_window*)window, x, y);
             break;
         }
 
         case WM_MOUSELEAVE: {
-            p_window->cursor_in_window = 0;
-            bj_push_enter_event((struct bj_window*)p_window, 0, 0, 0);
+            window->cursor_in_window = 0;
+            bj_push_enter_event((struct bj_window*)window, 0, 0, 0);
             break;
         }
 
         case WM_MOUSEWHEEL:
-            bj_push_button_event((struct bj_window*)p_window, 
+            bj_push_button_event((struct bj_window*)window, 
                 GET_WHEEL_DELTA_WPARAM(wParam) > 0 ? BJ_BUTTON_UP : BJ_BUTTON_DOWN,
                 BJ_PRESS,
                 GET_X_LPARAM(lParam),
@@ -281,7 +278,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case WM_RBUTTONDOWN:
 
         case WM_RBUTTONUP:
-            bj_push_button_event((struct bj_window*)p_window, 
+            bj_push_button_event((struct bj_window*)window, 
                 BJ_BUTTON_RIGHT,
                 uMsg == WM_RBUTTONDOWN ? BJ_PRESS : BJ_RELEASE,
                 GET_X_LPARAM(lParam),
@@ -300,18 +297,18 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 static void win32_renderer_configure(
     struct bj_renderer* renderer,
-    struct bj_window*   p_abstract_window
+    struct bj_window*   abstract_window
 ) {
-    win32_window* p_window = (win32_window*)p_abstract_window;
+    struct win32_window* window = (struct win32_window*)abstract_window;
     struct bj_renderer_data* data = renderer->data;
 
     int width  = 0;
     int height = 0;
 
-    data->hdc = p_window->hdc;
+    data->hdc = window->hdc;
 
-    if (!win32_get_window_size((const struct bj_window*)p_window, &width, &height)) {
-    //    bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot get window dimension");
+    if (!win32_get_window_size((const struct bj_window*)window, &width, &height)) {
+    //    bj_set_error(error, BJ_ERROR_VIDEO, "Cannot get window dimension");
         return 0;
     }
 
@@ -323,50 +320,50 @@ static void win32_renderer_configure(
     }
 
     const size_t info_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
-    LPBITMAPINFO p_bmp_info = bj_malloc(info_size); // TODO Stack allocate
-    bj_memset(p_bmp_info, 0, info_size);
-    p_bmp_info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    LPBITMAPINFO bmp_info = bj_malloc(info_size); // TODO Stack allocate
+    bj_memset(bmp_info, 0, info_size);
+    bmp_info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 
     HBITMAP h_bmp = CreateCompatibleBitmap(data->hdc, 1, 1);
-    GetDIBits(data->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
-    GetDIBits(data->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
+    GetDIBits(data->hdc, h_bmp, 0, 0, NULL, bmp_info, DIB_RGB_COLORS);
+    GetDIBits(data->hdc, h_bmp, 0, 0, NULL, bmp_info, DIB_RGB_COLORS);
     DeleteObject(h_bmp);
 
     enum bj_pixel_mode pixel_mode = BJ_PIXEL_MODE_UNKNOWN;
-    if (p_bmp_info->bmiHeader.biCompression == BI_BITFIELDS) {
-        int bpp = p_bmp_info->bmiHeader.biPlanes * p_bmp_info->bmiHeader.biBitCount;
-        int32_t* masks = (int32_t*)((int8_t*)p_bmp_info + p_bmp_info->bmiHeader.biSize);
+    if (bmp_info->bmiHeader.biCompression == BI_BITFIELDS) {
+        int bpp = bmp_info->bmiHeader.biPlanes * bmp_info->bmiHeader.biBitCount;
+        int32_t* masks = (int32_t*)((int8_t*)bmp_info + bmp_info->bmiHeader.biSize);
         pixel_mode = bj_compute_pixel_mode(bpp, masks[0], masks[1], masks[2]);
     }
     if (pixel_mode == BJ_PIXEL_MODE_UNKNOWN) {
         pixel_mode = BJ_PIXEL_MODE_XRGB8888;
-        bj_memset(p_bmp_info, 0, info_size);
-        p_bmp_info->bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
-        p_bmp_info->bmiHeader.biPlanes      = 1;
-        p_bmp_info->bmiHeader.biBitCount    = 32;
-        p_bmp_info->bmiHeader.biCompression = BI_RGB;
+        bj_memset(bmp_info, 0, info_size);
+        bmp_info->bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
+        bmp_info->bmiHeader.biPlanes      = 1;
+        bmp_info->bmiHeader.biBitCount    = 32;
+        bmp_info->bmiHeader.biCompression = BI_RGB;
     }
 
     const size_t stride = bj_compute_bitmap_stride(width, pixel_mode);
 
     if (stride == 0) {
-    //    bj_set_error(p_error, BJ_ERROR_VIDEO, "Invalid window pixel format");
-        bj_free(p_bmp_info);
+    //    bj_set_error(error, BJ_ERROR_VIDEO, "Invalid window pixel format");
+        bj_free(bmp_info);
         return 0;
     }
 
-    p_bmp_info->bmiHeader.biWidth = width;
-    p_bmp_info->bmiHeader.biHeight = -height;
-    p_bmp_info->bmiHeader.biSizeImage = (DWORD)height * stride;
+    bmp_info->bmiHeader.biWidth = width;
+    bmp_info->bmiHeader.biHeight = -height;
+    bmp_info->bmiHeader.biSizeImage = (DWORD)height * stride;
 
     void* pixels = 0;
     data->fbdc = CreateCompatibleDC(data->hdc);
-    data->fbmp = CreateDIBSection(data->hdc, p_bmp_info, DIB_RGB_COLORS, &pixels, NULL, 0);
+    data->fbmp = CreateDIBSection(data->hdc, bmp_info, DIB_RGB_COLORS, &pixels, NULL, 0);
 
-    bj_free(p_bmp_info);
+    bj_free(bmp_info);
 
     if (!data->fbmp) {
-        //bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot create DIB section");
+        //bj_set_error(error, BJ_ERROR_VIDEO, "Cannot create DIB section");
         return 0;
     }
 
@@ -385,7 +382,7 @@ static void win32_renderer_present(
     struct bj_renderer* renderer,
     struct bj_window* abstract_window
 ) {
-    win32_window* window = (win32_window*)abstract_window;
+    struct win32_window* window = (struct win32_window*)abstract_window;
 
     int width = 0;
     int height = 0;
