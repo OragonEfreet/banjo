@@ -426,31 +426,29 @@ static void cocoa_flush_window_framebuffer(
 }
 
 
-static struct bj_video_layer *cocoa_init_video(
+static bj_bool cocoa_init_video(
+    struct bj_video_layer* layer,
     struct bj_error **p_error
 ) {
   (void)p_error;
   bj_assert(cocoa.app == 0);
-
-  static struct bj_video_layer layer;
 
   @autoreleasepool {
     NSApplication *app = [NSApplication sharedApplication];
     [app setActivationPolicy:NSApplicationActivationPolicyRegular];
     [app activateIgnoringOtherApps:YES];
 
-    layer.create_renderer           = cocoa_create_renderer;
-    layer.create_window             = cocoa_create_window;
-    layer.delete_window             = cocoa_delete_window;
-    layer.destroy_renderer          = cocoa_destroy_renderer;
-    layer.end                       = cocoa_end_video;
-    layer.get_window_size           = cocoa_get_window_size;
-    layer.poll_events               = cocoa_poll_events;
+    layer->create_renderer           = cocoa_create_renderer;
+    layer->create_window             = cocoa_create_window;
+    layer->delete_window             = cocoa_delete_window;
+    layer->destroy_renderer          = cocoa_destroy_renderer;
+    layer->end                       = cocoa_end_video;
+    layer->get_window_size           = cocoa_get_window_size;
+    layer->poll_events               = cocoa_poll_events;
+    layer->create_window_framebuffer = cocoa_create_window_framebuffer; // TODO Remove
+    layer->flush_window_framebuffer  = cocoa_flush_window_framebuffer; // TODO Remove
 
-    layer.create_window_framebuffer = cocoa_create_window_framebuffer; // TODO Remove
-    layer.flush_window_framebuffer = cocoa_flush_window_framebuffer; // TODO Remove
-
-    return &layer;
+    return BJ_TRUE;
   }
 }
 
