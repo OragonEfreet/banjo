@@ -46,34 +46,6 @@ uint8_t bj_get_window_flags(
     return (window->flags & flags);
 }
 
-struct bj_bitmap* bj_get_window_framebuffer(
-    struct bj_window* window,
-    struct bj_error**       error
-) {
-    bj_check_or_0(window);
-
-    if (window->framebuffer == 0) {
-        int width = 0;
-        int height = 0;
-
-        if (!bj_get_window_size(window, &width, &height)) {
-            return 0;
-        }
-
-        window->framebuffer = s_video.create_window_framebuffer(window, error);
-    }
-
-    return window->framebuffer;
-}
-
-void bj_update_window_framebuffer(
-    struct bj_window* window
-) {
-    bj_check(window);
-    bj_check(window->framebuffer != 0);
-    s_video.flush_window_framebuffer(window);
-}
-
 int bj_get_window_size(
     const struct bj_window* window,
     int* width,

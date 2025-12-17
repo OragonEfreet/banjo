@@ -137,86 +137,6 @@ static int win32_get_window_size(
     return 0;
 }
 
-static struct bj_bitmap* win32_create_window_framebuffer(
-    const struct bj_window* p_abstract_window,
-    struct bj_error** p_error
-) {
-    win32_window* p_window = (win32_window*)p_abstract_window;
-
-    int width = 0;
-    int height = 0;
-    if (!win32_get_window_size(p_abstract_window, &width, &height)) {
-        bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot get window dimension");
-        return 0;
-    }
-
-    win32_delete_window_framebuffer(p_window);
-
-    const size_t info_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
-    LPBITMAPINFO p_bmp_info = bj_malloc(info_size);
-    bj_memset(p_bmp_info, 0, info_size);
-    p_bmp_info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-
-    HBITMAP h_bmp = CreateCompatibleBitmap(p_window->hdc, 1, 1);
-    GetDIBits(p_window->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
-    GetDIBits(p_window->hdc, h_bmp, 0, 0, NULL, p_bmp_info, DIB_RGB_COLORS);
-    DeleteObject(h_bmp);
-
-    enum bj_pixel_mode pixel_mode = BJ_PIXEL_MODE_UNKNOWN;
-    if (p_bmp_info->bmiHeader.biCompression == BI_BITFIELDS) {
-        int bpp = p_bmp_info->bmiHeader.biPlanes * p_bmp_info->bmiHeader.biBitCount;
-        int32_t* masks = (int32_t*)((int8_t*)p_bmp_info + p_bmp_info->bmiHeader.biSize);
-        pixel_mode = bj_compute_pixel_mode(bpp, masks[0], masks[1], masks[2]);
-    }
-    if (pixel_mode == BJ_PIXEL_MODE_UNKNOWN) {
-        pixel_mode = BJ_PIXEL_MODE_XRGB8888;
-        bj_memset(p_bmp_info, 0, info_size);
-        p_bmp_info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        p_bmp_info->bmiHeader.biPlanes = 1;
-        p_bmp_info->bmiHeader.biBitCount = 32;
-        p_bmp_info->bmiHeader.biCompression = BI_RGB;
-    }
-
-    const size_t stride = bj_compute_bitmap_stride(width, pixel_mode);
-
-    if (stride == 0) {
-        bj_set_error(p_error, BJ_ERROR_VIDEO, "Invalid window pixel format");
-        bj_free(p_bmp_info);
-        return 0;
-    }
-
-    p_bmp_info->bmiHeader.biWidth = width;
-    p_bmp_info->bmiHeader.biHeight = -height;
-    p_bmp_info->bmiHeader.biSizeImage = (DWORD)height * stride;
-
-    void* pixels = 0;
-    p_window->fbdc = CreateCompatibleDC(p_window->hdc);
-    p_window->fbmp = CreateDIBSection(p_window->hdc, p_bmp_info, DIB_RGB_COLORS, &pixels, NULL, 0);
-
-    bj_free(p_bmp_info);
-
-    if (!p_window->fbmp) {
-        bj_set_error(p_error, BJ_ERROR_VIDEO, "Cannot create DIB section");
-        return 0;
-    }
-    SelectObject(p_window->fbdc, p_window->fbmp);
-
-    return bj_create_bitmap_from_pixels(pixels, width, height, pixel_mode, stride);
-}
-
-static void win32_flush_window_framebuffer(
-    const struct bj_window*   p_abstract_window
-) {
-    win32_window* p_window = (win32_window*)p_abstract_window;
-    bj_assert(p_window->common.framebuffer != 0);
-
-    int width = 0;
-    int height = 0;
-    if (win32_get_window_size((const struct bj_window*)p_window, &width, &height)) {
-        BitBlt(p_window->hdc, 0, 0, width, height, p_window->fbdc, 0, 0, SRCCOPY);
-    }
-}
-
 static void win32_end_video(
     struct bj_error** p_error
 ) {
@@ -532,8 +452,6 @@ static struct bj_video_layer* win32_init_video(
     layer->delete_window             = win32_window_del;
     layer->poll_events               = win32_window_poll;
     layer->get_window_size           = win32_get_window_size;
-    layer->create_window_framebuffer = win32_create_window_framebuffer;
-    layer->flush_window_framebuffer  = win32_flush_window_framebuffer;
     layer->create_renderer           = win32_create_renderer;
     layer->destroy_renderer          = win32_destroy_renderer;
     return BJ_TRUE;
