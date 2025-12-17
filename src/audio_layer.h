@@ -14,27 +14,24 @@ struct bj_audio_layer {
     ///
     /// Called during deinitialization to release all backend-related resources.
     ///
-    /// \param self    Pointer to the audio layer instance.
     /// \param error Optional pointer to receive error information.
     ////////////////////////////////////////////////////////////////////////////
-    void (*end)(struct bj_audio_layer* self, struct bj_error** error);
+    void (*end)(struct bj_error** error);
 
     ////////////////////////////////////////////////////////////////////////////
     /// \brief Close an audio device managed by this backend.
     ///
     /// Used to stop and destroy a specific audio device instance.
     ///
-    /// \param self   Pointer to the audio layer instance.
     /// \param device Pointer to the audio device to close.
     ////////////////////////////////////////////////////////////////////////////
-    void (*close_device)(struct bj_audio_layer* self, struct bj_audio_device* device);
+    void (*close_device)(struct bj_audio_device* device);
 
     ////////////////////////////////////////////////////////////////////////////
     /// \brief Open an audio device through this backend.
     ///
     /// Initializes a new audio device using the given properties and callback.
     ///
-    /// \param self         Pointer to the audio layer instance.
     /// \param properties Optional requested device properties, or NULL.
     /// \param callback     User-provided callback for audio sample generation.
     /// \param user_data    Pointer passed to the audio callback on each call.
@@ -42,19 +39,12 @@ struct bj_audio_layer {
     /// \return A new audio device instance, or NULL on failure.
     ////////////////////////////////////////////////////////////////////////////
     struct bj_audio_device* (*open_device)(
-        struct bj_audio_layer* self,
         const struct bj_audio_properties* properties,
-        bj_audio_callback_fn callback,
-        void* user_data,
-        struct bj_error** error
+        bj_audio_callback_fn              callback,
+        void*                             user_data,
+        struct bj_error**                 error
     );
 
-    ////////////////////////////////////////////////////////////////////////////
-    /// \brief Backend-specific data pointer.
-    ///
-    /// Used internally by the backend to store platform-specific state.
-    ////////////////////////////////////////////////////////////////////////////
-    struct bj_audio_layer_data* data;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +57,11 @@ struct bj_audio_layer {
 ////////////////////////////////////////////////////////////////////////////////
 struct bj_audio_layer_create_info {
     const char* name;                          ///< Name of the backend (e.g., "alsa", "mme").
-    struct bj_audio_layer* (*create)(struct bj_error**);     ///< Factory function to instantiate the backend.
+
+    bj_bool (*create)(
+        struct bj_audio_layer* layer,
+        struct bj_error**
+    );     ///< Factory function to instantiate the backend.
 };
 
 #endif
