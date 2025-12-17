@@ -351,25 +351,24 @@ static void emscripten_destroy_renderer(
     bj_free(renderer);
 }
 
-static struct bj_video_layer* emscripten_init_layer(
+static bj_bool emscripten_init_layer(
+    struct bj_video_layer* layer,
     struct bj_error** p_error
 ) {
     (void)p_error;
 
-    static struct bj_video_layer layer;
+    layer->end                       = emscripten_end_layer;
+    layer->create_window             = emscripten_window_new;
+    layer->delete_window             = emscripten_window_del;
+    layer->poll_events               = emscripten_window_poll;
+    layer->get_window_size           = emscripten_get_window_size;
 
-    layer.end                       = emscripten_end_layer;
-    layer.create_window             = emscripten_window_new;
-    layer.delete_window             = emscripten_window_del;
-    layer.poll_events               = emscripten_window_poll;
-    layer.get_window_size           = emscripten_get_window_size;
+    layer->create_renderer           = emscripten_create_renderer;
+    layer->destroy_renderer          = emscripten_destroy_renderer;
 
-    layer.create_renderer           = emscripten_create_renderer;
-    layer.destroy_renderer          = emscripten_destroy_renderer;
-
-    layer.create_window_framebuffer = emscripten_create_window_framebuffer;
-    layer.flush_window_framebuffer  = emscripten_flush_window_framebuffer;
-    return &layer;
+    layer->create_window_framebuffer = emscripten_create_window_framebuffer;
+    layer->flush_window_framebuffer  = emscripten_flush_window_framebuffer;
+    return BJ_TRUE;
 }
 
 struct bj_video_layer_create_info emscripten_video_layer_info = {
