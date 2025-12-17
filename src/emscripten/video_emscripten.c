@@ -218,50 +218,6 @@ static int emscripten_get_window_size(
     return 1;
 }
 
-static struct bj_bitmap* emscripten_create_window_framebuffer(
-    const struct bj_window* p_abstract_window,
-    struct bj_error** p_error
-) {
-    (void)p_error;
-    emscripten_window* p_window = (emscripten_window*)p_abstract_window;
-    return bj_create_bitmap(
-        p_window->width, p_window->height,
-        BJ_PIXEL_MODE_XRGB8888, 0
-    );
-}
-
-static void emscripten_flush_window_framebuffer(
-    const struct bj_window*   p_abstract_window
-) {
-    const emscripten_window* p_window = (emscripten_window*)p_abstract_window;
-    (void)p_abstract_window;
-
-    MAIN_THREAD_EM_ASM({
-        var w = $0;
-        var h = $1;
-        var pixels = $2;
-        var canvasId = UTF8ToString($3);
-        var canvas = document.querySelector(canvasId);
-        var ctx = canvas.getContext('2d');
-
-        var imageData = ctx.createImageData(w, h);
-        var data = imageData.data;
-
-        var src32 = HEAP32.subarray(pixels >> 2, (pixels >> 2) + w * h);
-        var dst32 = new Uint32Array(data.buffer);
-
-        for (var i = 0; i < src32.length; ++i) {
-            var xrgb = src32[i];
-            var r = (xrgb >> 16) & 0xFF;
-            var g = (xrgb >> 8) & 0xFF;
-            var b = xrgb & 0xFF;
-            dst32[i] = (0xFF << 24) | (b << 16) | (g << 8) | r; // RGBA
-        }
-
-        ctx.putImageData(imageData, 0, 0);
-    }, p_window->width, p_window->height, bj_bitmap_pixels(p_abstract_window->framebuffer), p_window->selector);
-}
-
 static void emscripten_renderer_configure(
     struct bj_renderer* renderer,
     struct bj_window* abstract_window
@@ -362,12 +318,9 @@ static bj_bool emscripten_init_layer(
     layer->delete_window             = emscripten_window_del;
     layer->poll_events               = emscripten_window_poll;
     layer->get_window_size           = emscripten_get_window_size;
-
     layer->create_renderer           = emscripten_create_renderer;
     layer->destroy_renderer          = emscripten_destroy_renderer;
 
-    layer->create_window_framebuffer = emscripten_create_window_framebuffer;
-    layer->flush_window_framebuffer  = emscripten_flush_window_framebuffer;
     return BJ_TRUE;
 }
 

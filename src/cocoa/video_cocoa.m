@@ -37,9 +37,6 @@ struct cocoa_window {
     struct bj_window common;
     NSWindow*        handle;
     void*            view;
-    void *buffer; // TODO Remove
-    int buffer_width; // TODO Remove
-    int buffer_height; // TODO Remove
 };
 
 @interface BanjoView : NSView <NSWindowDelegate>
@@ -52,26 +49,21 @@ struct cocoa_window {
 
 - (void)drawRect:(NSRect)dirtyRect {
 
-    struct cocoa_window *window =
-      (struct cocoa_window *)objc_getAssociatedObject(self, "bj_window");
-
-      void *buffer = window->buffer;
-      int buffer_width = window->buffer_width;
-      int buffer_height = window->buffer_height;
 
     struct bj_renderer* renderer = 
         (struct bj_renderer*)objc_getAssociatedObject(self, "bj_sw_render");
 
-    if(renderer) {
-        bj_assert(renderer->data);
-        const struct bj_renderer_data* data = renderer->data;
-        buffer = data->buffer;
-        buffer_width = data->buffer_width;
-        buffer_height = data->buffer_height;
-    }
+    bj_check(renderer);
+    bj_assert(renderer->data);
+
+    const struct bj_renderer_data* data = renderer->data;
+    void* buffer = data->buffer;
+    int buffer_width = data->buffer_width;
+    int buffer_height = data->buffer_height;
   
   
     CGContextRef cg_context = [[NSGraphicsContext currentContext] CGContext];
+
     CGDataProviderRef provider = CGDataProviderCreateWithData(
         NULL, buffer, buffer_width * buffer_height * 4,
         NULL);
@@ -388,44 +380,6 @@ static void cocoa_destroy_renderer(
     bj_free(renderer);
 }
 
-static struct bj_bitmap * cocoa_create_window_framebuffer(
-    const struct bj_window *p_abstract_window,
-    struct bj_error **p_error) 
-{
-  (void)p_error;
-  @autoreleasepool {
-    struct cocoa_window* window = (struct cocoa_window *)p_abstract_window;
-
-    int width, height;
-    cocoa_get_window_size(p_abstract_window, &width, &height);
-
-    if (window->buffer) {
-      bj_free(window->buffer);
-    }
-
-    enum bj_pixel_mode mode = BJ_PIXEL_MODE_XRGB8888;
-    size_t stride = bj_compute_bitmap_stride(width, mode);
-    window->buffer = bj_malloc(stride * height);
-    window->buffer_width = width;
-    window->buffer_height = height;
-
-    bj_info("Framebuffer created: %dx%d", width, height);
-
-    return bj_create_bitmap_from_pixels(window->buffer, width, height, mode,
-                                        stride);
-  }
-}
-
-static void cocoa_flush_window_framebuffer(
-    const struct bj_window *p_abstract_window
-) {
-  struct cocoa_window *p_window = (struct cocoa_window *)p_abstract_window;
-  NSView *view = (NSView *)p_window->view;
-  [view setNeedsDisplay:YES];
-  [view displayIfNeeded];
-}
-
-
 static bj_bool cocoa_init_video(
     struct bj_video_layer* layer,
     struct bj_error **p_error
@@ -445,8 +399,6 @@ static bj_bool cocoa_init_video(
     layer->end                       = cocoa_end_video;
     layer->get_window_size           = cocoa_get_window_size;
     layer->poll_events               = cocoa_poll_events;
-    layer->create_window_framebuffer = cocoa_create_window_framebuffer; // TODO Remove
-    layer->flush_window_framebuffer  = cocoa_flush_window_framebuffer; // TODO Remove
 
     return BJ_TRUE;
   }

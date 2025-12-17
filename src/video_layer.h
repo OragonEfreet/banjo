@@ -122,8 +122,6 @@ struct bj_video_layer {
     bj_window_delete_window_fn      delete_window;            ///< Delete a window
     bj_window_poll_events_fn        poll_events;              ///< Poll window events
     bj_window_get_size_fn           get_window_size;          ///< Retrieve window dimensions
-    bj_window_create_framebuffer_fn create_window_framebuffer;///< Create a framebuffer
-    bj_window_flush_framebuffer_fn  flush_window_framebuffer; ///< Present framebuffer
 
     bj_video_create_renderer_fn     create_renderer;
     bj_video_destroy_renderer_fn    destroy_renderer;
