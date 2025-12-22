@@ -30,27 +30,23 @@ cd my_banjo_app
 Create a file named `main.c` with the following content:
 
 ```c
-#define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
 #include <banjo/draw.h>
 #include <banjo/event.h>
 #include <banjo/main.h>
 #include <banjo/renderer.h>
+#include <banjo/system.h>
 #include <banjo/window.h>
 
-bj_window* window = 0;
-bj_renderer* renderer = 0;
-
-int bj_app_begin(void** user_data, int argc, char* argv[]) {
-    (void)user_data; (void)argc; (void)argv;
-
+int main(int argc, char* argv[]) {
+    (void)argc; (void)argv;
     bj_error* p_error = 0;
     if (!bj_initialize(&p_error)) {
-        return bj_callback_exit_error;
+        return 1;
     }
 
-    renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
-    window = bj_bind_window("My First Banjo App", 100, 100, 640, 480, 0);
+    bj_renderer* renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
+    bj_window* window = bj_bind_window("My First Banjo App", 100, 100, 640, 480, 0);
     bj_renderer_configure(renderer, window);
     bj_set_key_callback(bj_close_on_escape, 0);
 
@@ -60,37 +56,22 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     const uint32_t red = bj_make_bitmap_pixel(bmp, 0xFF, 0x00, 0x00);
     const uint32_t cyan = bj_make_bitmap_pixel(bmp, 0x00, 0xFF, 0xFF);
-    const uint32_t white = bj_make_bitmap_pixel(bmp, 0xFF, 0xFF, 0xFF);
 
-    // Draw a filled circle
     bj_draw_filled_circle(bmp, 320, 240, 100, red);
-    
-    // Draw a rectangle outline
     bj_draw_rectangle(bmp, &(bj_rect){.x = 200, .y = 120, .w = 240, .h = 240}, cyan);
-    
-    // Draw a triangle
-    bj_draw_triangle(bmp, 320, 100, 250, 200, 390, 200, white);
 
     bj_present(renderer, window);
 
-    return bj_callback_continue;
-}
+    // Main loop
+    while (!bj_should_close_window(window)) {
+        bj_dispatch_events();
+    }
 
-int bj_app_iterate(void* user_data) {
-    (void)user_data;
-    bj_dispatch_events();
-    
-    return bj_should_close_window(window) 
-         ? bj_callback_exit_success 
-         : bj_callback_continue;
-}
-
-int bj_app_end(void* user_data, int status) {
-    (void)user_data;
+    // Cleanup
     bj_destroy_renderer(renderer);
     bj_unbind_window(window);
     bj_shutdown(0);
-    return status;
+    return 0;
 }
 ```
 
@@ -135,6 +116,32 @@ cmake --build build
 ```
 
 On Windows, the executable will be located at `build\Debug\my_banjo_app.exe` or `build\Release\my_banjo_app.exe`.
+
+## What's Happening?
+
+Let's break down the key parts of the code:
+
+### Program Structure
+
+The program uses a standard `main()` function with three main sections:
+
+1. **Initialization**: Set up Banjo, create a window and renderer
+2. **Drawing**: Render shapes to the framebuffer and present it
+3. **Main Loop**: Keep the window open and handle events until the user closes it
+4. **Cleanup**: Free resources before exiting
+
+### Drawing Graphics
+
+- **Get the framebuffer**: `bj_get_framebuffer(renderer)` returns a bitmap you can draw on
+- **Create colors**: `bj_make_bitmap_pixel()` creates pixel values in the correct format
+- **Draw shapes**: Use functions like `bj_draw_filled_circle()` and `bj_draw_rectangle()`
+- **Present**: `bj_present()` displays your rendered frame in the window
+
+### Event Handling
+
+- `bj_dispatch_events()` processes window events (keyboard, mouse, etc.)
+- `bj_set_key_callback(bj_close_on_escape, 0)` sets up ESC key to close the window
+- `bj_should_close_window()` checks if the user requested to close the window
 
 ## Next Steps
 
