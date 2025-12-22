@@ -332,7 +332,7 @@ install(FILES
 ################################################################################
 set(BANJO_ASSETS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
 
-option(BANJO_BUILD_EXAMPLES "Build Banjo Examples" TRUE)
+option(BANJO_BUILD_EXAMPLES "Build Banjo Examples" FALSE)
 if(BANJO_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
