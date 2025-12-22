@@ -8,23 +8,15 @@ If you want to know how to build Banjo itself, see \ref build.
 ## Integration with CMake {#use_cmake}
 
 Banjo provides comprehensive CMake support with three integration methods.
-Choose the method that best fits your project's needs.
+For most projects, **FetchContent is the recommended approach** due to its simplicity and reproducibility.
 
-### Method 1: Installed Library (find_package) {#use_cmake_find_package}
+### Method 1: Fetch at Configure Time (FetchContent) {#use_cmake_fetch_content}
 
-This method is appropriate when Banjo has been installed system-wide or to a specific prefix.
-It is the recommended approach for production deployments and packaged distributions.
+This is the **quickest and easiest** way to get started with Banjo.
+CMake automatically downloads Banjo during configuration, making it ideal for new projects,
+open-source development, and continuous integration environments where dependencies should be reproducible.
 
-**Step 1: Install Banjo**
-
-```bash
-cd /path/to/banjo
-cmake -B build
-cmake --build build
-cmake --install build --prefix /usr/local
-```
-
-**Step 2: Use in Your Project**
+**Use in Your Project**
 
 In your \c CMakeLists.txt:
 
@@ -32,29 +24,28 @@ In your \c CMakeLists.txt:
 cmake_minimum_required(VERSION 3.21)
 project(MyGame C)
 
-# Find the installed Banjo package
-find_package(banjo REQUIRED)
+include(FetchContent)
+
+# Declare the Banjo dependency
+FetchContent_Declare(
+    banjo
+    GIT_REPOSITORY https://github.com/yourname/banjo.git
+    GIT_TAG        v0.1.0  # Use a specific tag or commit hash
+)
+FetchContent_MakeAvailable(banjo)
 
 add_executable(mygame main.c)
 
-# Link against the installed library
-target_link_libraries(mygame PRIVATE banjo::banjo)
+target_link_libraries(mygame PRIVATE banjo)
 ```
 
-**Step 3: Configure Your Project**
+**Advantages:**
+- No manual installation or submodule management required
+- Reproducible builds with version pinning (\c GIT_TAG)
+- CMake handles downloading and caching automatically
+- Ready to use in seconds
 
-If Banjo was installed to a non-standard prefix, specify \c CMAKE_PREFIX_PATH:
-
-```bash
-cmake -B build -DCMAKE_PREFIX_PATH=/custom/install/prefix
-cmake --build build
-```
-
-**What Gets Installed:**
-- Library files: \c lib/libbanjo.a (or \c .so for shared builds)
-- Public headers: \c include/banjo/*.h
-- CMake configuration: \c lib/cmake/banjo/
-- pkg-config file: \c lib/pkgconfig/banjo.pc
+**Note:** \c FetchContent requires an internet connection during the first configuration.
 
 ### Method 2: Source Subdirectory (add_subdirectory) {#use_cmake_add_subdirectory}
 
@@ -106,12 +97,21 @@ add_subdirectory(external/banjo)
 
 **Note:** When using \c add_subdirectory(), link against the \c banjo target (not \c banjo::banjo).
 
-### Method 3: Fetch at Configure Time (FetchContent) {#use_cmake_fetch_content}
+### Method 3: Installed Library (find_package) {#use_cmake_find_package}
 
-This method automatically downloads Banjo during the CMake configuration step.
-It is ideal for open-source projects and continuous integration environments where dependencies should be reproducible.
+This method is appropriate when Banjo has been installed system-wide or to a specific prefix.
+It is the recommended approach for production deployments and packaged distributions.
 
-**Use in Your Project**
+**Step 1: Install Banjo**
+
+```bash
+cd /path/to/banjo
+cmake -B build
+cmake --build build
+cmake --install build --prefix /usr/local
+```
+
+**Step 2: Use in Your Project**
 
 In your \c CMakeLists.txt:
 
@@ -119,34 +119,29 @@ In your \c CMakeLists.txt:
 cmake_minimum_required(VERSION 3.21)
 project(MyGame C)
 
-include(FetchContent)
-
-# Declare the Banjo dependency
-FetchContent_Declare(
-    banjo
-    GIT_REPOSITORY https://github.com/yourname/banjo.git
-    GIT_TAG        v0.1.0  # Use a specific tag or commit hash
-)
-
-# Optional: Configure Banjo before making it available
-set(BANJO_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-
-# Download and make available
-FetchContent_MakeAvailable(banjo)
+# Find the installed Banjo package
+find_package(banjo REQUIRED)
 
 add_executable(mygame main.c)
 
-# Link against the Banjo target
-target_link_libraries(mygame PRIVATE banjo)
+# Link against the installed library
+target_link_libraries(mygame PRIVATE banjo::banjo)
 ```
 
-**Advantages:**
-- No manual installation or submodule management required
-- Reproducible builds with version pinning (\c GIT_TAG)
-- CMake handles downloading and caching automatically
+**Step 3: Configure Your Project**
 
-**Note:** \c FetchContent requires an internet connection during the first configuration.
+If Banjo was installed to a non-standard prefix, specify \c CMAKE_PREFIX_PATH:
+
+```bash
+cmake -B build -DCMAKE_PREFIX_PATH=/custom/install/prefix
+cmake --build build
+```
+
+**What Gets Installed:**
+- Library files: \c lib/libbanjo.a (or \c .so for shared builds)
+- Public headers: \c include/banjo/*.h
+- CMake configuration: \c lib/cmake/banjo/
+- pkg-config file: \c lib/pkgconfig/banjo.pc
 
 ### Backend Selection {#use_cmake_backends}
 

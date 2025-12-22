@@ -13,8 +13,6 @@
 /// Typical usage:
 /// - Create a window with \ref bj_bind_window.
 /// - Query or modify its flags using \ref bj_get_window_flags and related calls.
-/// - Access and update the framebuffer with \ref bj_get_window_framebuffer
-///   and \ref bj_update_window_framebuffer.
 /// - Release resources with \ref bj_unbind_window.
 ///
 /// Banjo supports windows manipulation for Windows, GNU/Linux and WebAssembly.
