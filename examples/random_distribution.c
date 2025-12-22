@@ -10,6 +10,7 @@
 #include <banjo/main.h>
 #include <banjo/pixel.h>
 #include <banjo/random.h>
+#include <banjo/renderer.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
@@ -37,7 +38,8 @@ typedef struct {
 size_t n_steps_base = 524288;
 
 distribution distributions[N_DISTRIBUTIONS];
-bj_window* window = 0;
+bj_window* window      = 0;
+bj_renderer* renderer  = 0;
 bj_bitmap* framebuffer = 0;
 
 static void init_distributions(bj_bitmap* bmp) {
@@ -176,7 +178,7 @@ void draw(bj_bitmap* bmp) {
 static void roll() {
     run_distributions();
     draw(framebuffer);
-    bj_update_window_framebuffer(window);
+    bj_present(renderer, window);
 }
 
 void key_callback(bj_window* p_window, const bj_key_event* e, void* data) {
@@ -208,10 +210,13 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     }
 
+    renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
     window = bj_bind_window("Random Distribution", 100, 100, WINDOW_W, WINDOW_H, 0);
+
+    bj_renderer_configure(renderer, window);
     bj_set_key_callback(key_callback, 0);
 
-    framebuffer = bj_get_window_framebuffer(window, 0);
+    framebuffer = bj_get_framebuffer(renderer);
 
     bj_set_bitmap_clear_color(framebuffer, bj_make_bitmap_pixel(framebuffer, 22, 26, 32));
 
@@ -231,6 +236,7 @@ int bj_app_iterate(void* user_data) {
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
+    bj_destroy_renderer(renderer);
     bj_unbind_window(window);
     bj_shutdown(0);
     return status;

@@ -2,7 +2,7 @@
 
 #include <banjo/memory.h>
 
-#include "stream_t.h"
+#include "stream.h"
 
 TEST_CASE(init_from_buffer_contains_pointer_to_the_buffer) {
     uint8_t buffer = 0;

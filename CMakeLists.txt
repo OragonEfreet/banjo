@@ -13,12 +13,17 @@ endif()
 add_library(banjo
     src/api.c
     src/audio.c
+    src/audio_layer.h
+    src/audio.h
     src/bitmap.c
     src/bitmap_blit.c
     src/bitmap_blit_mask.c
+    src/bitmap_charsets.h
     src/bitmap_dib.c
     src/bitmap_draw.c
+    src/bitmap.h
     src/bitmap_text.c
+    src/check.h
     src/error.c
     src/event.c
     src/geometry_2d.c
@@ -26,8 +31,8 @@ add_library(banjo
     src/main.c
     src/main_callbacks.c
     src/memory.c
-    src/noaudio.c
-    src/novideo.c
+    src/audio_none.c
+    src/video_none.c
     src/physics_angular.c
     src/physics_kinematics.c
     src/physics_particle.c
@@ -37,23 +42,17 @@ add_library(banjo
     src/random_distribution.c
     src/random_pcg32.c
     src/rect.c
+    src/renderer.c
+    src/renderer.h
     src/shader.c
     src/stream.c
+    src/stream.h
     src/system.c
-    src/unix/system.c
-    src/win32/system.c
     src/time.c
-    src/unix/time.c
-    src/win32/time.c
     src/video.c
+    src/video_layer.h
     src/window.c
-    src/audio_t.h
-    src/bitmap_charsets.h
-    src/bitmap_t.h
-    src/check.h
-
-    src/stream_t.h
-    src/window_t.h
+    src/window.h
     inc/banjo/api.h
     inc/banjo/assert.h
     inc/banjo/audio.h
@@ -73,15 +72,28 @@ add_library(banjo
     inc/banjo/quat.h
     inc/banjo/random.h
     inc/banjo/rect.h
+    inc/banjo/renderer.h
     inc/banjo/shader.h
     inc/banjo/stream.h
     inc/banjo/string.h
     inc/banjo/system.h
     inc/banjo/time.h
     inc/banjo/vec.h
-    inc/banjo/video.h
     inc/banjo/window.h
 )
+
+if(WIN32)
+    target_sources(banjo PRIVATE 
+        src/win32/system_win32.c
+        src/win32/time_win32.c
+    )
+else()
+    target_sources(banjo PRIVATE 
+        src/unix/system_unix.c
+        src/unix/time_unix.c
+    )
+endif()
+
 target_include_directories(banjo
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
@@ -101,6 +113,8 @@ else()
     target_compile_definitions(banjo PUBLIC BANJO_STATIC)
 endif()
 
+target_compile_definitions(banjo PRIVATE BJ_NO_TYPEDEF)
+
 ################################################################################
 ### Win32 Backend
 ################################################################################
@@ -115,7 +129,7 @@ option(BANJO_CONFIG_WIN32_BACKEND "Add Win32 support" ${BJ_WIN32_AVAILABLE})
 
 if(BANJO_CONFIG_WIN32_BACKEND)
     target_compile_definitions(banjo PUBLIC BJ_CONFIG_WIN32_BACKEND)
-    target_sources(banjo PRIVATE src/win32/video.c)
+    target_sources(banjo PRIVATE src/win32/video_win32.c)
 endif()
 
 ################################################################################
@@ -133,7 +147,7 @@ option(BANJO_CONFIG_X11_BACKEND "Add X11 support" ${BJ_X11_AVAILABLE})
 
 if(BANJO_CONFIG_X11_BACKEND AND X11_FOUND)
     target_compile_definitions(banjo PUBLIC BJ_CONFIG_X11_BACKEND)
-    target_sources(banjo PRIVATE src/x11/video.c)
+    target_sources(banjo PRIVATE src/x11/video_x11.c)
     target_include_directories(banjo PRIVATE ${X11_INCLUDE_DIR})
     target_link_libraries(banjo PRIVATE ${X11_LIBRARIES})
 endif()
@@ -152,7 +166,7 @@ option(BANJO_CONFIG_COCOA_BACKEND "Add Cocoa/macOS support" ${BJ_COCOA_AVAILABLE
 
 if(BANJO_CONFIG_COCOA_BACKEND AND APPLE)
     target_compile_definitions(banjo PUBLIC BJ_CONFIG_COCOA_BACKEND)
-    target_sources(banjo PRIVATE src/cocoa/video.m)
+    target_sources(banjo PRIVATE src/cocoa/video_cocoa.m)
     target_link_libraries(banjo PUBLIC "-framework Cocoa")
 endif()
 
@@ -170,7 +184,7 @@ option(BANJO_CONFIG_EMSCRIPTEN_BACKEND "Add support for Emscripten" ${BJ_EMSCRIP
 
 if(BANJO_CONFIG_EMSCRIPTEN_BACKEND)
     target_compile_definitions(banjo PUBLIC BJ_CONFIG_EMSCRIPTEN_BACKEND)
-    target_sources(banjo PRIVATE src/emscripten/video.c src/emscripten/audio.c)
+    target_sources(banjo PRIVATE src/emscripten/video_emscripten.c src/emscripten/audio_emscripten.c)
     target_link_options(banjo PRIVATE
         "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','_malloc','_free']"
         "-sEXPORTED_FUNCTIONS=['_bj_emscripten_audio_process']"
@@ -193,7 +207,7 @@ option(BANJO_CONFIG_ALSA_BACKEND "Add support for audio with ALSA" ${BJ_ALSA_AVA
 
 if(BANJO_CONFIG_ALSA_BACKEND AND ALSA_FOUND)
     target_compile_definitions(banjo PUBLIC BJ_CONFIG_ALSA_BACKEND)
-    target_sources(banjo PRIVATE src/alsa/audio.c)
+    target_sources(banjo PRIVATE src/alsa/audio_alsa.c)
     target_include_directories(banjo PRIVATE ${ALSA_INCLUDE_DIRS})
     target_link_libraries(banjo PRIVATE ${ALSA_LIBRARIES})
 endif()
@@ -212,7 +226,7 @@ option(BANJO_CONFIG_MME_BACKEND "Add support for audio with Windows Multimedia E
 
 if(BANJO_CONFIG_MME_BACKEND)
     target_compile_definitions(banjo PUBLIC BJ_CONFIG_MME_BACKEND)
-    target_sources(banjo PRIVATE src/mme/audio.c)
+    target_sources(banjo PRIVATE src/mme/audio_mme.c)
 endif()
 
 ################################################################################

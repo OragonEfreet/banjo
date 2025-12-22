@@ -1,4 +1,4 @@
-#include <bitmap_t.h>
+#include <bitmap.h>
 #include <check.h>
 
 // Note: This file is AI-generated.

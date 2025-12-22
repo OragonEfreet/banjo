@@ -8,11 +8,13 @@
 #include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
+#include <banjo/renderer.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
 #include <banjo/window.h>
 
-bj_window* window = 0;
+bj_window* window     = 0;
+bj_renderer* renderer = 0;
 
 void draw(bj_bitmap* bmp) {
     bj_clear_bitmap(bmp);
@@ -91,12 +93,15 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     }
 
+    renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
     window = bj_bind_window("Simple Text", 100, 100, 500, 500, 0);
+
+    bj_renderer_configure(renderer, window);
     bj_set_key_callback(bj_close_on_escape, 0);
 
-    bj_bitmap* framebuffer = bj_get_window_framebuffer(window, 0);
-    draw(framebuffer);
-    bj_update_window_framebuffer(window);
+    draw(bj_get_framebuffer(renderer));
+
+    bj_present(renderer, window);
 
     return bj_callback_continue;
 }
@@ -113,6 +118,7 @@ int bj_app_iterate(void* user_data) {
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
+    bj_destroy_renderer(renderer);
     bj_unbind_window(window);
     bj_shutdown(0);
     return status;

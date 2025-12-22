@@ -10,6 +10,7 @@
 #include <banjo/physics.h>
 #include <banjo/physics_2d.h>
 #include <banjo/random.h>
+#include <banjo/renderer.h>
 #include <banjo/shader.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
@@ -69,6 +70,7 @@ typedef struct {
 
 typedef struct {
     bj_window* window;
+    bj_renderer* renderer;
 
     int state_set;
     bj_stopwatch state_since;
@@ -507,12 +509,15 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     game_data* data = bj_calloc(sizeof(game_data));
     data->window = bj_bind_window("Moonlander", 0, 0, SCREEN_W, SCREEN_H, 0);
-    data->draw.framebuffer = bj_get_window_framebuffer(data->window, 0);
 
     *user_data = data;
 
     prepare_data(data);
     prepare_assets(data);
+
+    data->renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
+    bj_renderer_configure(data->renderer, data->window);
+    data->draw.framebuffer = bj_get_framebuffer(data->renderer);
 
     bj_set_key_callback(bj_close_on_escape, 0);
 
@@ -540,7 +545,7 @@ int bj_app_iterate(void* user_data) {
     physics(data, dt);
     update_projection(data);
     draw(data);
-    bj_update_window_framebuffer(data->window);
+    bj_present(data->renderer, data->window);
 
     bj_sleep(15);
 
@@ -551,6 +556,7 @@ int bj_app_iterate(void* user_data) {
 
 int bj_app_end(void* user_data, int status) {
     game_data* data = (game_data*)user_data;
+    bj_destroy_renderer(data->renderer);
     bj_unbind_window(data->window);
     bj_shutdown(0);
     return status;

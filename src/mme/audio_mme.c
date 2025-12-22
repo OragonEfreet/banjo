@@ -5,8 +5,9 @@
 #include <banjo/log.h>
 #include <banjo/system.h>
 
-#include <audio_t.h>
+#include <audio.h>
 #include <check.h>
+#include <audio_layer.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -16,18 +17,19 @@
 #define MME_BLOCK_COUNT 8
 #define MME_SAMPLES_PER_BLOCK 256
 
-typedef struct bj_audio_device_data {
-    HWAVEOUT  hwDevice;
-    WAVEHDR*  p_wave_headers;
-    void*     p_buffer;
-    uint64_t  sample_index;
-    unsigned  block_count;
-    unsigned  frames_per_block;
-    HANDLE    thread;
-    HANDLE    event;
-    unsigned  next_block;
-    size_t    bytes_per_sample; // Added: bytes per sample
-} mme_device;
+struct mme_device {
+    struct bj_audio_device common;
+    HWAVEOUT               hwDevice;
+    WAVEHDR*               p_wave_headers;
+    void*                  p_buffer;
+    uint64_t               sample_index;
+    unsigned               block_count;
+    unsigned               frames_per_block;
+    HANDLE                 thread;
+    HANDLE                 event;
+    unsigned               next_block;
+    size_t                 bytes_per_sample;
+};
 
 typedef UINT(WINAPI* pfn_waveOutGetNumDevs)(void);
 typedef MMRESULT(WINAPI* pfn_waveOutGetDevCapsW)(UINT_PTR, LPWAVEOUTCAPSW, UINT);
@@ -39,7 +41,7 @@ typedef MMRESULT(WINAPI* pfn_waveOutWrite)(HWAVEOUT, LPWAVEHDR, UINT);
 typedef MMRESULT(WINAPI* pfn_waveOutReset)(HWAVEOUT);
 typedef MMRESULT(WINAPI* pfn_waveOutUnprepareHeader)(HWAVEOUT, LPWAVEHDR, UINT);
 
-static struct mme_lib_t {
+static struct mme_lib {
     void* dll;
     pfn_waveOutGetDevCapsW waveOutGetDevCapsW;
     pfn_waveOutGetNumDevs waveOutGetNumDevs;
@@ -100,66 +102,65 @@ static void CALLBACK waveOutProcWrap(
     (void)dwParam2;
     if (uMsg == WOM_DONE) {
         struct bj_audio_device* dev = (struct bj_audio_device*)dwInstance;
-        mme_device* mme = (mme_device*)dev->data;
+        struct mme_device* mme = (struct mme_device*)dev;
         SetEvent(mme->event);
     }
 }
 
-static void mme_close_device(struct bj_audio_layer* p_audio, struct bj_audio_device* p_device) {
-    (void)p_audio;
-    mme_device* mme = (mme_device*)p_device->data;
+static void mme_close_device(struct bj_audio_device* dev) {
+    struct mme_device* mme_dev= (struct mme_device*)dev;
 
-    p_device->should_close = BJ_TRUE;
-    if (mme->thread) {
-        WaitForSingleObject(mme->thread, INFINITE);
-        CloseHandle(mme->thread);
+    dev->should_close = BJ_TRUE;
+    if (mme_dev->thread) {
+        WaitForSingleObject(mme_dev->thread, INFINITE);
+        CloseHandle(mme_dev->thread);
     }
 
-    if (mme->hwDevice) {
-        MME.waveOutReset(mme->hwDevice);
-        for (unsigned i = 0; i < mme->block_count; ++i) {
-            MME.waveOutUnprepareHeader(mme->hwDevice, &mme->p_wave_headers[i], sizeof(WAVEHDR));
+    if (mme_dev->hwDevice) {
+        MME.waveOutReset(mme_dev->hwDevice);
+        for (unsigned i = 0; i < mme_dev->block_count; ++i) {
+            MME.waveOutUnprepareHeader(mme_dev->hwDevice, &mme_dev->p_wave_headers[i], sizeof(WAVEHDR));
         }
-        MME.waveOutClose(mme->hwDevice);
+        MME.waveOutClose(mme_dev->hwDevice);
     }
 
-    bj_free(mme->p_wave_headers);
-    bj_free(mme->p_buffer);
-    CloseHandle(mme->event);
-    bj_free(mme);
-    bj_free(p_device);
+    bj_free(mme_dev->p_wave_headers);
+    bj_free(mme_dev->p_buffer);
+    CloseHandle(mme_dev->event);
+    bj_free(mme_dev);
+
 }
 
 static DWORD WINAPI mme_playback_thread(LPVOID param) {
     bj_check_or_0(param);
+    struct mme_device* mme_dev = (struct mme_device*)param;
     struct bj_audio_device* dev = (struct bj_audio_device*)param;
-    mme_device* mme = (mme_device*)dev->data;
 
     while (!dev->should_close) {
         if (dev->should_reset) {
-            mme->sample_index = 0;
+            mme_dev->sample_index = 0;
             dev->should_reset = BJ_FALSE;
         }
 
-        WAVEHDR* hdr = &mme->p_wave_headers[mme->next_block];
+        WAVEHDR* hdr = &mme_dev->p_wave_headers[mme_dev->next_block];
         if (hdr->dwFlags & WHDR_INQUEUE) {
-            WaitForSingleObject(mme->event, 10);
+            WaitForSingleObject(mme_dev->event, 10);
             continue;
         }
 
         if (dev->playing) {
             dev->callback(
                 hdr->lpData,
-                mme->frames_per_block,
+                mme_dev->frames_per_block,
                 &dev->properties,
                 dev->callback_user_data,
-                mme->sample_index
+                mme_dev->sample_index
             );
         }
         else {
-            size_t total_frames = mme->frames_per_block;
+            size_t total_frames = mme_dev->frames_per_block;
             size_t channels = dev->properties.channels;
-            size_t bps = mme->bytes_per_sample;
+            size_t bps = mme_dev->bytes_per_sample;
             size_t block_bytes = total_frames * channels * bps;
 
             if (dev->silence == 0) {
@@ -172,31 +173,29 @@ static DWORD WINAPI mme_playback_thread(LPVOID param) {
             }
         }
 
-        MME.waveOutWrite(mme->hwDevice, hdr, sizeof(WAVEHDR));
-        mme->sample_index += mme->frames_per_block;
-        mme->next_block = (mme->next_block + 1) % mme->block_count;
+        MME.waveOutWrite(mme_dev->hwDevice, hdr, sizeof(WAVEHDR));
+        mme_dev->sample_index += mme_dev->frames_per_block;
+        mme_dev->next_block = (mme_dev->next_block + 1) % mme_dev->block_count;
     }
 
     return 0;
 }
 
 static struct bj_audio_device* mme_open_device(
-    struct bj_audio_layer*             p_audio,
-    const struct bj_audio_properties*  p_properties,
-    bj_audio_callback_fn         p_callback,
-    void*                       p_callback_user_data,
-    struct bj_error**                  p_error
+    const struct bj_audio_properties* p_properties,
+    bj_audio_callback_fn              p_callback,
+    void*                             p_callback_user_data,
+    struct bj_error**                 p_error
 ) {
-    struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device));
-    mme_device* mme = bj_calloc(sizeof(mme_device));
-    if (!p_device || !mme) {
+    //struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device));
+    struct mme_device* mme_dev = bj_calloc(sizeof(struct mme_device));
+    if (mme_dev == 0) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
-        return NULL;
+        return 0;
     }
 
     if (!mme_load_library(p_error)) {
-        bj_free(mme);
-        bj_free(p_device);
+        bj_free(mme_dev);
         return NULL;
     }
 
@@ -216,84 +215,76 @@ static struct bj_audio_device* mme_open_device(
     for (UINT d = 0; d < n_devs; ++d) {
         if (MME.waveOutOpen(&hwDevice, d, &wf,
             (DWORD_PTR)waveOutProcWrap,
-            (DWORD_PTR)p_device,
+            (DWORD_PTR)mme_dev,
             CALLBACK_FUNCTION) == MMSYSERR_NOERROR) {
             break;
         }
     }
     if (!hwDevice) {
         bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot open audio device");
-        bj_free(mme);
-        bj_free(p_device);
+        bj_free(mme_dev);
         return NULL;
     }
 
-    p_device->callback = p_callback;
-    p_device->callback_user_data = p_callback_user_data;
-    p_device->properties = *p_properties;
+    mme_dev->common.callback = p_callback;
+    mme_dev->common.callback_user_data = p_callback_user_data;
+    mme_dev->common.properties = *p_properties;
 
     // Compute proper silence value
     if (wf.wFormatTag == WAVE_FORMAT_PCM && wf.wBitsPerSample == 8) {
-        p_device->silence = 0x80; // unsigned 8-bit silence
+        mme_dev->common.silence = 0x80; // unsigned 8-bit silence
     } else {
-        p_device->silence = 0; // signed PCM and float32 silence
+        mme_dev->common.silence = 0; // signed PCM and float32 silence
     }
 
-    p_device->data = mme;
-
-    mme->hwDevice = hwDevice;
-    mme->block_count = MME_BLOCK_COUNT;
-    mme->frames_per_block = MME_SAMPLES_PER_BLOCK;
-    mme->sample_index = 0;
-    mme->next_block = 0;
-    mme->event = CreateEvent(NULL, FALSE, FALSE, NULL);
-    mme->bytes_per_sample = wf.wBitsPerSample / 8;
+    mme_dev->hwDevice = hwDevice;
+    mme_dev->block_count = MME_BLOCK_COUNT;
+    mme_dev->frames_per_block = MME_SAMPLES_PER_BLOCK;
+    mme_dev->sample_index = 0;
+    mme_dev->next_block = 0;
+    mme_dev->event = CreateEvent(NULL, FALSE, FALSE, NULL);
+    mme_dev->bytes_per_sample = wf.wBitsPerSample / 8;
 
     WORD channels = wf.nChannels;
-    size_t samples_per_block_allchan = mme->frames_per_block * channels;
-    size_t bytes_per_block = samples_per_block_allchan * mme->bytes_per_sample;
+    size_t samples_per_block_allchan = mme_dev->frames_per_block * channels;
+    size_t bytes_per_block = samples_per_block_allchan * mme_dev->bytes_per_sample;
 
-    mme->p_wave_headers = bj_calloc(sizeof(WAVEHDR) * mme->block_count);
-    mme->p_buffer = bj_calloc(bytes_per_block * mme->block_count);
-    if (!mme->p_wave_headers || !mme->p_buffer) {
+    mme_dev->p_wave_headers = bj_calloc(sizeof(WAVEHDR) * mme_dev->block_count);
+    mme_dev->p_buffer = bj_calloc(bytes_per_block * mme_dev->block_count);
+    if (!mme_dev->p_wave_headers || !mme_dev->p_buffer) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio buffer data");
-        mme_close_device(p_audio, p_device);
+        mme_close_device((struct bj_audio_device*)mme_dev);
         return NULL;
     }
 
-    for (unsigned i = 0; i < mme->block_count; ++i) {
-        WAVEHDR* hdr = &mme->p_wave_headers[i];
-        hdr->lpData = (LPSTR)((uint8_t*)mme->p_buffer + i * bytes_per_block);
+    for (unsigned i = 0; i < mme_dev->block_count; ++i) {
+        WAVEHDR* hdr = &mme_dev->p_wave_headers[i];
+        hdr->lpData = (LPSTR)((uint8_t*)mme_dev->p_buffer + i * bytes_per_block);
         hdr->dwBufferLength = (DWORD)bytes_per_block;
         MME.waveOutPrepareHeader(hwDevice, hdr, sizeof(WAVEHDR));
     }
 
-    mme->thread = CreateThread(NULL, 0, mme_playback_thread, p_device, 0, NULL);
-    return p_device;
+    mme_dev->thread = CreateThread(NULL, 0, mme_playback_thread, mme_dev, 0, NULL);
+    return (struct bj_audio_device*)mme_dev;
 }
 
-static void mme_dispose_audio(struct bj_audio_layer* p_audio, struct bj_error** p_error) {
+static void mme_dispose_audio(struct bj_error** p_error) {
     (void)p_error;
-    bj_check(p_audio);
     mme_unload_library();
-    bj_free(p_audio);
 }
 
-static struct bj_audio_layer* mme_init_audio(struct bj_error** p_error) {
-    struct bj_audio_layer* layer = bj_malloc(sizeof(struct bj_audio_layer));
-    if (!layer) {
-        bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate mme layer");
-        return NULL;
-    }
-    layer->end = mme_dispose_audio;
-    layer->open_device = mme_open_device;
+static bj_bool mme_init_audio(
+    struct bj_audio_layer* layer,
+    struct bj_error** error
+) {
+    layer->end          = mme_dispose_audio;
+    layer->open_device  = mme_open_device;
     layer->close_device = mme_close_device;
-    layer->data = NULL;
-    return layer;
+    return BJ_TRUE;
 }
 
 struct bj_audio_layer_create_info mme_audio_layer_info = {
-    .name = "mme",
+    .name   = "mme",
     .create = mme_init_audio,
 };
 

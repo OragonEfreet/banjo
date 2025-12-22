@@ -10,6 +10,7 @@
 #include <banjo/event.h>
 #include <banjo/log.h>
 #include <banjo/main.h>
+#include <banjo/renderer.h>
 #include <banjo/shader.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
@@ -19,6 +20,7 @@
 #define CANVAS_H 512
 
 bj_window* window      = 0;
+bj_renderer* renderer  = 0;
 bj_bitmap* framebuffer = 0;
 
 static bj_vec3 palette(bj_real t) {
@@ -81,10 +83,13 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     } 
 
+    renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
     window = bj_bind_window("Shader Art Coding Introduction", 1000, 500, CANVAS_W, CANVAS_H, 0);
+
+    bj_renderer_configure(renderer, window);
     bj_set_key_callback(bj_close_on_escape, 0);
 
-    framebuffer = bj_get_window_framebuffer(window, 0);
+    framebuffer = bj_get_framebuffer(renderer);
 
     return bj_callback_continue;
 }
@@ -94,7 +99,7 @@ int bj_app_iterate(void* user_data) {
     bj_dispatch_events();
     bj_real time = (bj_real)bj_run_time();
     bj_shader_bitmap(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
-    bj_update_window_framebuffer(window);
+    bj_present(renderer, window);
     bj_sleep(15);
 
     return bj_should_close_window(window) 
@@ -104,6 +109,7 @@ int bj_app_iterate(void* user_data) {
 
 int bj_app_end(void* user_data, int status) {
     (void)user_data;
+    bj_destroy_renderer(renderer);
     bj_unbind_window(window);
     bj_shutdown(0);
     return status;

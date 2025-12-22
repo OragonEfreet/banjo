@@ -13,8 +13,6 @@
 /// Typical usage:
 /// - Create a window with \ref bj_bind_window.
 /// - Query or modify its flags using \ref bj_get_window_flags and related calls.
-/// - Access and update the framebuffer with \ref bj_get_window_framebuffer
-///   and \ref bj_update_window_framebuffer.
 /// - Release resources with \ref bj_unbind_window.
 ///
 /// Banjo supports windows manipulation for Windows, GNU/Linux and WebAssembly.
@@ -156,39 +154,6 @@ BANJO_EXPORT int bj_get_key(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Return the framebuffer attached to the window.
-///
-/// The framebuffer is an instance of  bj_bitmap attached (and owned) by
-/// the window.
-/// If necessary, \ref bj_get_window_flags will create (or recreate) the
-/// framebuffer object upon calling this function.
-/// This can happen when the window is resize, minimized or any even that
-/// invalidate the window drawing area.
-///
-/// TODO: The instance should stay the same and the framebuffer only change
-/// internally.
-///
-/// \param window The window handler
-/// \param error  Optional error location
-///
-/// \return A pointer to a  bj_bitmap attached to the window or _0_ in
-///         case of failure.
-///
-/// \par Behaviour
-///
-/// The function performs nothing if `window`  is _0_.
-///
-/// \par Memory Management
-///
-/// The library is responsible for the return  bj_bitmap object.
-///
-////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT struct bj_bitmap* bj_get_window_framebuffer(
-    struct bj_window* window,
-    struct bj_error** error
-);
-
-////////////////////////////////////////////////////////////////////////////////
 /// Retrieve the size of the window.
 ///
 /// \param window   The window handler
@@ -215,24 +180,6 @@ BANJO_EXPORT int bj_get_window_size(
     int*             height
 );
 
-////////////////////////////////////////////////////////////////////////////////
-/// Copy window's framebuffer onto screen
-///
-/// \param window   The window handler
-///
-/// Use this function to apply any change made to the framebuffer on the window.
-/// 
-/// \par Behaviour
-///
-/// The function performs nothing if `window` is _0_ or does not contain any
-/// framebuffer.
-///
-/// \see bj_get_window_framebuffer
-///
-////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_update_window_framebuffer(
-    struct bj_window* window
-);
 
 #endif
 /// \} // End of window group

@@ -1,7 +1,8 @@
 #include <banjo/assert.h>
 #include <banjo/math.h>
 
-#include <audio_t.h>
+#include "audio_layer.h"
+#include <audio.h>
 
 #include <check.h>
 
@@ -10,23 +11,23 @@ extern struct bj_audio_layer_create_info mme_audio_layer_info;
 extern struct bj_audio_layer_create_info noaudio_audio_layer_info;
 extern struct bj_audio_layer_create_info emscripten_audio_layer_info;
 
-static const struct bj_audio_layer_create_info* layer_infos[] = {
+
+bj_bool bj_begin_audio(
+    struct bj_audio_layer* vt,
+    struct bj_error**      p_error
+) {
+    static const struct bj_audio_layer_create_info* layer_infos[] = {
 #ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
-    &emscripten_audio_layer_info,
+        &emscripten_audio_layer_info,
 #endif
 #ifdef BJ_CONFIG_MME_BACKEND
-    &mme_audio_layer_info,
+        &mme_audio_layer_info,
 #endif
 #ifdef BJ_CONFIG_ALSA_BACKEND
-    &alsa_audio_layer_info,
+        &alsa_audio_layer_info,
 #endif
-    &noaudio_audio_layer_info,
-};
-
-extern struct bj_audio_layer* s_audio;
-
-struct bj_audio_layer* bj_begin_audio(struct bj_error** p_error) {
-    bj_assert(s_audio == 0);
+        &noaudio_audio_layer_info,
+    };
 
     const size_t n_layers = sizeof(layer_infos) / sizeof(struct bj_audio_layer_create_info*);
 
@@ -34,52 +35,49 @@ struct bj_audio_layer* bj_begin_audio(struct bj_error** p_error) {
         struct bj_error* sub_err = 0;
 
         const struct bj_audio_layer_create_info* p_create_info = layer_infos[b];
-        s_audio = p_create_info->create(&sub_err);
+        const bj_bool success = p_create_info->create(vt, &sub_err);
+
+        /* s_audio = p_create_info->create(&sub_err); */
 
         if (sub_err) {
-            bj_log_message(s_audio == 0 ? 0 : 1, 0, 0,
-                "while trying %s audio layer: %s (code 0x%08X)",
+            bj_err("while trying %s audio layer: %s (code 0x%08X)",
                 p_create_info->name, sub_err->message, sub_err->code
             );
             bj_clear_error(&sub_err);
         }
 
-        if(s_audio != 0) {
+        if(success) {
             bj_info("audio: %s", p_create_info->name);
-            break;
+            return BJ_TRUE;
         }
 
     }
 
-    if(s_audio == 0) {
-        bj_set_error(p_error, BJ_ERROR_INITIALIZE, "no suitable audio");
-        return 0;
-    }
-
-    return s_audio;
+    bj_set_error(p_error, BJ_ERROR_INITIALIZE, "no suitable audio");
+    return BJ_FALSE;
 }
 
-void bj_end_audio(struct bj_audio_layer* p_audio, struct bj_error** p_error) {
-    // TODO?
-    p_audio->end(p_audio, p_error);
-}
+extern struct bj_audio_layer s_audio;
 
 struct bj_audio_device* bj_open_audio_device(
     const struct bj_audio_properties* p_properties,
-    bj_audio_callback_fn        p_callback,
-    void*                      p_callback_user_data,
+    bj_audio_callback_fn              p_callback,
+    void*                             p_callback_user_data,
     struct bj_error**                 p_error
 ) {
-    bj_check_or_0(s_audio);
-    return s_audio->open_device(s_audio, p_properties, p_callback, p_callback_user_data, p_error);
+    return s_audio.open_device(
+        p_properties,
+        p_callback,
+        p_callback_user_data,
+        p_error
+    );
 }
 
 void bj_close_audio_device(
     struct bj_audio_device* p_device
 ) {
-    bj_check(s_audio);
     p_device->should_close = BJ_TRUE;
-    s_audio->close_device(s_audio, p_device);
+    s_audio.close_device(p_device);
 }
 
 
@@ -155,11 +153,11 @@ inline static double make_note_value(
 }
 
 void bj_play_audio_note(
-    void*                        buffer,
-    unsigned                     frames,
-    const struct bj_audio_properties*   p_audio,
-    void*                        p_user_data,
-    uint64_t                     base_sample_index
+    void*                             buffer,
+    unsigned                          frames,
+    const struct bj_audio_properties* p_audio,
+    void*                             p_user_data,
+    uint64_t                          base_sample_index
 ) {
     struct bj_audio_play_note_data* data = (struct bj_audio_play_note_data*)p_user_data;
 

@@ -1,25 +1,11 @@
-////////////////////////////////////////////////////////////////////////////////
-/// \file quat.h
-/// Quaternion manipulation API
-////////////////////////////////////////////////////////////////////////////////
-/// \defgroup video Video
-///
-/// \brief Manage window creation and pixel-based drawing
-///
-/// The video API provides an abstraction for creating and managing
-/// platform-specific windows and their framebuffers. It supports event polling,
-/// framebuffer rendering, and resizing operations.
-///
-/// Each video backend implements this interface.
-///
-/// \{
-////////////////////////////////////////////////////////////////////////////////
-#ifndef BJ_VIDEO_H
-#define BJ_VIDEO_H
+#ifndef BJ_VIDEO_LAYER_H
+#define BJ_VIDEO_LAYER_H
 
 #include <banjo/error.h>
 #include <banjo/window.h>
 
+enum bj_renderer_type;
+struct bj_renderer;
 struct bj_video_layer;
 struct bj_video_layer_data;
 
@@ -27,18 +13,15 @@ struct bj_video_layer_data;
 ///
 /// This function is called to release all resources associated with the layer.
 ///
-/// \param layer Pointer to the video layer.
 /// \param error Output error pointer.
 ///
 /// \see struct bj_video_layer
 typedef void (*bj_window_end_fn)(
-    struct bj_video_layer* layer,
     struct bj_error**               error
 );
 
 /// \brief Define a function used to create a new window.
 ///
-/// \param layer  Pointer to the video layer.
 /// \param title    Title of the window.
 /// \param x        Initial x position of the window.
 /// \param y        Initial y position of the window.
@@ -50,38 +33,33 @@ typedef void (*bj_window_end_fn)(
 ///
 /// \see struct bj_window, struct bj_video_layer
 typedef struct bj_window* (*bj_window_create_window_fn)(
-    struct bj_video_layer* layer,
-    const char*              title,
-    uint16_t                 x,
-    uint16_t                 y,
-    uint16_t                 width,
-    uint16_t                 height,
-    uint8_t                  flags
+    const char* title,
+    uint16_t    x,
+    uint16_t    y,
+    uint16_t    width,
+    uint16_t    height,
+    uint8_t     flags
 );
 
 /// \brief Define a function used to destroy an existing window.
 ///
-/// \param layer  Pointer to the video layer.
 /// \param window Window to destroy.
 ///
 /// \see struct bj_window
 typedef void (*bj_window_delete_window_fn)(
-    struct bj_video_layer* layer,
-    struct bj_window*               window
+    struct bj_window* window
 );
 
 /// \brief Define a function used to poll events for all windows.
 ///
-/// \param layer Pointer to the video layer.
 ///
 /// \see bj_dispatch_events
 typedef void (*bj_window_poll_events_fn)(
-    struct bj_video_layer* layer
+    void
 );
 
 /// \brief Define a function used to retrieve the size of a window.
 ///
-/// \param layer  Pointer to the video layer.
 /// \param window Target window.
 /// \param width  Output width in pixels.
 /// \param height Output height in pixels.
@@ -90,8 +68,7 @@ typedef void (*bj_window_poll_events_fn)(
 ///
 /// \see struct bj_window
 typedef int (*bj_window_get_size_fn)(
-    struct bj_video_layer* layer,
-    const struct bj_window*         window,
+    const struct bj_window*  window,
     int*                     width,
     int*                     height
 );
@@ -101,7 +78,6 @@ typedef int (*bj_window_get_size_fn)(
 /// The framebuffer is a pixel buffer that can be written to by the application
 /// and later flushed to the screen.
 ///
-/// \param layer  Pointer to the video layer.
 /// \param window Target window.
 /// \param error  Output error pointer.
 ///
@@ -109,7 +85,6 @@ typedef int (*bj_window_get_size_fn)(
 ///
 /// \see struct bj_bitmap, struct bj_window
 typedef struct bj_bitmap* (*bj_window_create_framebuffer_fn)(
-    struct bj_video_layer* layer,
     const struct bj_window*         window,
     struct bj_error**               error
 );
@@ -118,13 +93,19 @@ typedef struct bj_bitmap* (*bj_window_create_framebuffer_fn)(
 ///
 /// This is typically called after rendering to the framebuffer.
 ///
-/// \param layer  Pointer to the video layer.
 /// \param window Target window.
 ///
 /// \see struct bj_window, struct bj_bitmap
 typedef void (*bj_window_flush_framebuffer_fn)(
-    struct bj_video_layer* layer,
     const struct bj_window*         window
+);
+
+typedef struct bj_renderer* (*bj_video_create_renderer_fn)(
+    enum bj_renderer_type  type
+);
+
+typedef void (*bj_video_destroy_renderer_fn)(
+    struct bj_renderer*    renderer
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -141,10 +122,9 @@ struct bj_video_layer {
     bj_window_delete_window_fn      delete_window;            ///< Delete a window
     bj_window_poll_events_fn        poll_events;              ///< Poll window events
     bj_window_get_size_fn           get_window_size;          ///< Retrieve window dimensions
-    bj_window_create_framebuffer_fn create_window_framebuffer;///< Create a framebuffer
-    bj_window_flush_framebuffer_fn  flush_window_framebuffer; ///< Present framebuffer
 
-    struct bj_video_layer_data*     data;                     ///< Backend-specific data
+    bj_video_create_renderer_fn     create_renderer;
+    bj_video_destroy_renderer_fn    destroy_renderer;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -156,9 +136,13 @@ struct bj_video_layer {
 /// \see struct bj_video_layer
 ////////////////////////////////////////////////////////////////////////////////
 struct bj_video_layer_create_info {
-    const char* name;                                ///< Name of the video backend
-    struct bj_video_layer* (*create)(struct bj_error** error);   ///< Function to create the backend
+    const char* name;                                             ///< Name of the video backend
+
+    /// Function to create the backend
+    bj_bool (*create)(
+        struct bj_video_layer* layer,
+        struct bj_error**      error
+    );   
 };
 
 #endif
-/// \} // End of video group

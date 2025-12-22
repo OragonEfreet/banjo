@@ -1,7 +1,7 @@
 #include <banjo/math.h>
 #include <banjo/draw.h>
 
-#include <bitmap_t.h>
+#include <bitmap.h>
 #include <check.h>
 
 struct bj_bitmap* dib_create_bitmap_from_stream(struct bj_stream*, struct bj_error**);
@@ -83,12 +83,26 @@ struct bj_bitmap* bj_create_bitmap(
     return bj_memcpy(new, &temp_bitmap, sizeof(struct bj_bitmap));
 }
 
+
+void bj_assign_bitmap(
+    struct bj_bitmap*  bitmap,
+    void*              pixels,
+    size_t             width,
+    size_t             height,
+    enum bj_pixel_mode mode,
+    size_t             stride
+) {
+    bj_check(bitmap);
+    bj_reset_bitmap(bitmap);
+    bj_init_bitmap(bitmap, pixels, width, height, mode, stride);
+}
+
 struct bj_bitmap* bj_create_bitmap_from_pixels(
-    void*            pixels,
-    size_t           width,
-    size_t           height,
-    enum bj_pixel_mode    mode,
-    size_t           stride
+    void*              pixels,
+    size_t             width,
+    size_t             height,
+    enum bj_pixel_mode mode,
+    size_t             stride
 ) {
     bj_check_or_0(pixels);
     struct bj_bitmap temp_bitmap;

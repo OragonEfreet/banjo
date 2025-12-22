@@ -1,11 +1,11 @@
 #include <banjo/assert.h>
 #include <banjo/event.h>
-#include <banjo/video.h>
 
-#include <check.h>
-#include <window_t.h>
+#include "check.h"
+#include "video_layer.h"
+#include "window.h"
 
-extern struct bj_video_layer* s_video;
+extern struct bj_video_layer s_video;
 
 // Event queue implemented as a ring buffer
 #define BJ_EVQ_CAP ((size_t)64)
@@ -116,7 +116,7 @@ void bj_dispatch_event(const struct bj_event* p_event) {
 }
 
 bj_bool bj_poll_events(struct bj_event* p_event) {
-    s_video->poll_events(s_video);
+    s_video.poll_events();
     return get_next_event(p_event);
 }
 

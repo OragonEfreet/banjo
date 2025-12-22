@@ -10,20 +10,21 @@
 #include <banjo/memory.h>
 #include <banjo/system.h>
 #include <banjo/time.h>
-#include <banjo/video.h>
 
-#include <audio_t.h>
+#include <audio.h>
 #include <check.h>
+#include <audio_layer.h>
 
 #include <alsa/asoundlib.h>
 #include <pthread.h>
 
-typedef struct bj_audio_device_data {
-    snd_pcm_t*        p_handle;
-    pthread_t         playback_thread;
-    char*             p_buffer;
-    snd_pcm_uframes_t frames_per_period;
-} alsa_device;
+struct alsa_device {
+    struct bj_audio_device common;
+    snd_pcm_t*             p_handle;
+    pthread_t              playback_thread;
+    char*                  p_buffer;
+    snd_pcm_uframes_t      frames_per_period;
+};
 
 typedef int(*pfn_snd_pcm_hw_params_any)(snd_pcm_t*, snd_pcm_hw_params_t*);
 typedef int(*pfn_snd_pcm_hw_params_malloc)(snd_pcm_hw_params_t**);
@@ -69,15 +70,6 @@ static struct alsa_lib_t {
     pfn_snd_pcm_format_silence_32              snd_pcm_format_silence_32;
     pfn_snd_pcm_format_size                    snd_pcm_format_size;
 } ALSA = {0};
-
-/* static enum bj_audio_format alsa_format_bj(snd_pcm_format_t alsa_format) { */
-/*     switch(alsa_format) { */
-/*         case SND_PCM_FORMAT_S16_LE:   return BJ_AUDIO_FORMAT_INT16; */
-/*         case SND_PCM_FORMAT_FLOAT_LE: return BJ_AUDIO_FORMAT_F32; */
-/*         default: break; */
-/*     } */
-/*     return BJ_AUDIO_FORMAT_UNKNOWN; */
-/* } */
 
 static snd_pcm_format_t bj_format_alsa(enum bj_audio_format format) {
     switch(format) {
@@ -136,19 +128,18 @@ static bj_bool alsa_load_library(struct bj_error** p_error) {
 
 
 static void* playback_thread(void* p_data) {
-    struct bj_audio_device* p_device           = (struct bj_audio_device*)p_data;
-    alsa_device* p_alsa_device          = (alsa_device*)p_device->data;
-    snd_pcm_t* pcm_handle               = p_alsa_device->p_handle;
-    char* buffer                        = p_alsa_device->p_buffer;
-    snd_pcm_uframes_t frames_per_period = p_alsa_device->frames_per_period;
+    struct alsa_device* p_device        = (struct alsa_device*)p_data;
+    snd_pcm_t* pcm_handle               = p_device->p_handle;
+    char* buffer                        = p_device->p_buffer;
+    snd_pcm_uframes_t frames_per_period = p_device->frames_per_period;
 
     uint64_t global_sample_index = 0;
 
-    while (p_device->should_close == BJ_FALSE) {
+    while (p_device->common.should_close == BJ_FALSE) {
 
-        if(p_device->should_reset == BJ_TRUE) {
+        if(p_device->common.should_reset == BJ_TRUE) {
             global_sample_index = 0;
-            p_device->should_reset = BJ_FALSE;
+            p_device->common.should_reset = BJ_FALSE;
         }
 
         snd_pcm_sframes_t avail = ALSA.snd_pcm_avail_update(pcm_handle);
@@ -165,21 +156,21 @@ static void* playback_thread(void* p_data) {
         }
 
         if ((snd_pcm_uframes_t)avail >= frames_per_period) {
-            if (p_device->playing == BJ_TRUE) {
+            if (p_device->common.playing == BJ_TRUE) {
                 // Generate audio normally
-                p_device->p_callback(
+                p_device->common.callback(
                     buffer,
                     frames_per_period,
-                    &p_device->properties,
-                    p_device->p_callback_user_data,
+                    &p_device->common.properties,
+                    p_device->common.callback_user_data,
                     global_sample_index
                 );
             } else {
                 const size_t bytes_per_sample =
-                    BJ_AUDIO_FORMAT_WIDTH(p_device->properties.format) / 8; // <-- divide by 8
+                    BJ_AUDIO_FORMAT_WIDTH(p_device->common.properties.format) / 8; // <-- divide by 8
 
-                for (size_t s = 0; s < frames_per_period * p_device->properties.channels; ++s) {
-                    bj_memcpy(buffer + s * bytes_per_sample, &p_device->silence, bytes_per_sample);
+                for (size_t s = 0; s < frames_per_period * p_device->common.properties.channels; ++s) {
+                    bj_memcpy(buffer + s * bytes_per_sample, &p_device->common.silence, bytes_per_sample);
                 }
             }
 
@@ -192,7 +183,7 @@ static void* playback_thread(void* p_data) {
                 break;
             }
 
-            if (p_device->playing) {
+            if (p_device->common.playing) {
                 global_sample_index += frames_per_period;
             }
         } else {
@@ -203,11 +194,12 @@ static void* playback_thread(void* p_data) {
     return NULL;
 }
 
-static void alsa_close_device(struct bj_audio_layer* p_audio, struct bj_audio_device* p_device) {
-    bj_check(p_audio);
+static void alsa_close_device(
+    struct bj_audio_device* p_device
+) {
     bj_check(p_device);
 
-    alsa_device* alsa_dev = p_device->data;
+    struct alsa_device* alsa_dev = (struct alsa_device*)p_device;
 
     if(alsa_dev != 0) {
         if(alsa_dev->playback_thread) {
@@ -223,38 +215,33 @@ static void alsa_close_device(struct bj_audio_layer* p_audio, struct bj_audio_de
         bj_free(alsa_dev->p_buffer);
     }
 
-    bj_free(p_device->data);
-    bj_free(p_device);
+    bj_free(alsa_dev);
 }
 
 static struct bj_audio_device* alsa_open_device(
-    struct bj_audio_layer*            p_audio,
     const struct bj_audio_properties* p_properties,
-    bj_audio_callback_fn        p_callback,
-    void*                      p_callback_user_data,
+    bj_audio_callback_fn              p_callback,
+    void*                             p_callback_user_data,
     struct bj_error**                 p_error
 ) {
-    struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device));
-    if(p_device == 0) {
+    /* struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device)); */
+    /* if(p_device == 0) { */
+    /*     bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device"); */
+    /*     return 0; */
+    /* } */
+    struct alsa_device* alsa_dev = bj_calloc(sizeof(struct alsa_device));
+    if(alsa_dev == 0) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
         return 0;
     }
-    alsa_device* alsa_dev = bj_calloc(sizeof(alsa_device));
-    if(alsa_dev == 0) {
-        bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device data");
-        alsa_close_device(p_audio, p_device);
-        return 0;
-    }
-    p_device->p_callback           = p_callback;
-    p_device->p_callback_user_data = p_callback_user_data;
-    p_device->data                 = alsa_dev;
+    alsa_dev->common.callback           = p_callback;
+    alsa_dev->common.callback_user_data = p_callback_user_data;
 
-    p_device->properties.format      = p_properties ? p_properties->format : BJ_AUDIO_FORMAT_INT16;
-    p_device->properties.amplitude   = p_properties ? p_properties->amplitude : BJ_AUDIO_AMPLITUDE;
-    p_device->properties.channels    = p_properties ? p_properties->channels : 1;
-    p_device->properties.sample_rate = p_properties ? p_properties->sample_rate : BJ_AUDIO_SAMPLE_RATE;
+    alsa_dev->common.properties.format      = p_properties ? p_properties->format : BJ_AUDIO_FORMAT_INT16;
+    alsa_dev->common.properties.amplitude   = p_properties ? p_properties->amplitude : BJ_AUDIO_AMPLITUDE;
+    alsa_dev->common.properties.channels    = p_properties ? p_properties->channels : 1;
+    alsa_dev->common.properties.sample_rate = p_properties ? p_properties->sample_rate : BJ_AUDIO_SAMPLE_RATE;
     
-
     alsa_dev->frames_per_period      = 512;
 
     snd_pcm_uframes_t total_frames = alsa_dev->frames_per_period * 4;
@@ -262,19 +249,21 @@ static struct bj_audio_device* alsa_open_device(
     int alsa_err = ALSA.snd_pcm_open(&alsa_dev->p_handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
     if(alsa_err < 0) {
         alsa_set_error(p_error, alsa_err);
-        alsa_close_device(p_audio, p_device);
+        alsa_close_device((struct bj_audio_device*)alsa_dev);
         return 0;
     }
 
-    const snd_pcm_format_t alsa_format = bj_format_alsa(p_device->properties.format);
+    const snd_pcm_format_t alsa_format = bj_format_alsa(
+        alsa_dev->common.properties.format
+    );
 
     snd_pcm_hw_params_t* params      = 0;
     ALSA.snd_pcm_hw_params_malloc(&params);
     ALSA.snd_pcm_hw_params_any(alsa_dev->p_handle, params);
     ALSA.snd_pcm_hw_params_set_access(alsa_dev->p_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
     ALSA.snd_pcm_hw_params_set_format(alsa_dev->p_handle, params, alsa_format);
-    ALSA.snd_pcm_hw_params_set_channels_near(alsa_dev->p_handle, params, &p_device->properties.channels);
-    ALSA.snd_pcm_hw_params_set_rate_near(alsa_dev->p_handle, params, &p_device->properties.sample_rate, 0);
+    ALSA.snd_pcm_hw_params_set_channels_near(alsa_dev->p_handle, params, &alsa_dev->common.properties.channels);
+    ALSA.snd_pcm_hw_params_set_rate_near(alsa_dev->p_handle, params, &alsa_dev->common.properties.sample_rate, 0);
     ALSA.snd_pcm_hw_params_set_period_size_near(alsa_dev->p_handle, params, &alsa_dev->frames_per_period, 0);
     ALSA.snd_pcm_hw_params_set_buffer_size_near(alsa_dev->p_handle, params, &total_frames);
 
@@ -282,70 +271,51 @@ static struct bj_audio_device* alsa_open_device(
     if(alsa_err < 0) {
         alsa_set_error(p_error, alsa_err);
         ALSA.snd_pcm_hw_params_free(params);
-        alsa_close_device(p_audio, p_device);
+        alsa_close_device((struct bj_audio_device*)alsa_dev);
         return 0;
     }
     ALSA.snd_pcm_hw_params_free(params);
 
-    bj_info("format: %d", p_device->properties.format);
-    bj_info("amplitude: %d", p_device->properties.amplitude);
-    bj_info("channels: %d", p_device->properties.channels);
-    bj_info("sample_rate: %d", p_device->properties.sample_rate);
+    bj_info("format: %d", alsa_dev->common.properties.format);
+    bj_info("amplitude: %d", alsa_dev->common.properties.amplitude);
+    bj_info("channels: %d", alsa_dev->common.properties.channels);
+    bj_info("sample_rate: %d", alsa_dev->common.properties.sample_rate);
 
     ssize_t format_byte_size = ALSA.snd_pcm_format_size(alsa_format, 1);
-    bj_assert(format_byte_size == BJ_AUDIO_FORMAT_WIDTH(p_device->properties.format) / 8);
-
-    /* switch(format_byte_size) { */
-    /*     case 2: */
-    /*         p_device->silence = ALSA.snd_pcm_format_silence_16(alsa_format); */
-    /*         break; */
-    /*     case 4: */
-    /*         p_device->silence = ALSA.snd_pcm_format_silence_32(alsa_format); */
-    /*         break; */
-    /*     default: */
-    /*         p_device->silence = 0; */
-    /*         break; */
-    /* } */
+    bj_assert(format_byte_size == BJ_AUDIO_FORMAT_WIDTH(alsa_dev->common.properties.format) / 8);
 
     // Create buffer and fill with silence
-    alsa_dev->p_buffer = bj_malloc(format_byte_size * alsa_dev->frames_per_period * p_device->properties.channels);
-    for(size_t s = 0 ; s < alsa_dev->frames_per_period * p_device->properties.channels ; ++s) {
-        bj_memcpy(alsa_dev->p_buffer + s * format_byte_size, &p_device->silence, format_byte_size);
+    alsa_dev->p_buffer = bj_malloc(format_byte_size * alsa_dev->frames_per_period * alsa_dev->common.properties.channels);
+    for(size_t s = 0 ; s < alsa_dev->frames_per_period * alsa_dev->common.properties.channels ; ++s) {
+        bj_memcpy(alsa_dev->p_buffer + s * format_byte_size, &alsa_dev->common.silence, format_byte_size);
     }
     
     ALSA.snd_pcm_prepare(alsa_dev->p_handle);
-    pthread_create(&alsa_dev->playback_thread, 0, playback_thread, (void*)p_device);
+    pthread_create(&alsa_dev->playback_thread, 0, playback_thread, (void*)alsa_dev);
 
-	return p_device;
+	return (struct bj_audio_device*)alsa_dev;
 }
 
 
-static void alsa_dispose_audio(struct bj_audio_layer* p_audio, struct bj_error** p_error) {
+static void alsa_dispose_audio(struct bj_error** p_error) {
     (void)p_error;
-    bj_check(p_audio);
     alsa_unload_library();
-    bj_free(p_audio);
 }
 
-static struct bj_audio_layer* alsa_init_audio(struct bj_error** p_error) {
+static bj_bool alsa_init_audio(
+        struct bj_audio_layer* layer,
+        struct bj_error**      p_error
+    ) {
 
     if(!alsa_load_library(p_error)) {
-        return 0;
+        return BJ_FALSE;
     }
 
-    // Common Data
-	struct bj_audio_layer* p_audio = bj_malloc(sizeof(struct bj_audio_layer));
-	if (!p_audio) {
-		bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate memory for alsa");
-		return 0;
-	}
+	layer->end            = alsa_dispose_audio;
+	layer->open_device    = alsa_open_device;
+	layer->close_device   = alsa_close_device;
 
-	p_audio->end            = alsa_dispose_audio;
-	p_audio->open_device    = alsa_open_device;
-	p_audio->close_device   = alsa_close_device;
-    p_audio->data = 0;
-
-	return p_audio;
+	return BJ_TRUE;
 }
 
 struct bj_audio_layer_create_info alsa_audio_layer_info = {
