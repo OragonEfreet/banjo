@@ -9,6 +9,7 @@
 extern struct bj_audio_layer_create_info alsa_audio_layer_info;
 extern struct bj_audio_layer_create_info mme_audio_layer_info;
 extern struct bj_audio_layer_create_info emscripten_audio_layer_info;
+extern struct bj_audio_layer_create_info coreaudio_audio_layer_info;
 
 bj_bool bj_begin_audio(
     struct bj_audio_layer* vt,
@@ -17,6 +18,9 @@ bj_bool bj_begin_audio(
     static const struct bj_audio_layer_create_info* layer_infos[] = {
 #ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
         &emscripten_audio_layer_info,
+#endif
+#ifdef BJ_CONFIG_COREAUDIO_BACKEND
+        &coreaudio_audio_layer_info,
 #endif
 #ifdef BJ_CONFIG_MME_BACKEND
         &mme_audio_layer_info,

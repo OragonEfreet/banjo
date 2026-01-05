@@ -228,6 +228,24 @@ if(BANJO_CONFIG_MME_BACKEND)
 endif()
 
 ################################################################################
+### CoreAudio Backend
+################################################################################
+if(APPLE)
+    set(BJ_COREAUDIO_AVAILABLE ON)
+else()
+    set(BJ_COREAUDIO_AVAILABLE OFF)
+endif()
+message(STATUS "CoreAudio backend: ${BJ_COREAUDIO_AVAILABLE}")
+
+option(BANJO_CONFIG_COREAUDIO_BACKEND "Add support for audio with CoreAudio (macOS)" ${BJ_COREAUDIO_AVAILABLE})
+
+if(BANJO_CONFIG_COREAUDIO_BACKEND AND APPLE)
+    target_compile_definitions(banjo PUBLIC BJ_CONFIG_COREAUDIO_BACKEND)
+    target_sources(banjo PRIVATE src/coreaudio/audio_coreaudio.c)
+    target_link_libraries(banjo PUBLIC "-framework AudioToolbox")
+endif()
+
+################################################################################
 ### Configuration Options
 ################################################################################
 option(BANJO_CONFIG_CHECKS_ABORT "When checks feature is on, a failed check will abort execution" OFF)

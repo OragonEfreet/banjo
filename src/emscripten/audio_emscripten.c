@@ -2,9 +2,6 @@
 
 #ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
 
-// Note: This file is AI-generated.
-// TODO: I'll remake it myself later on.
-
 #include <emscripten.h>
 #include <banjo/audio.h>
 #include <banjo/error.h>
