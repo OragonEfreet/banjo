@@ -157,7 +157,7 @@ void bj_end(void) {
         bj_end_time();
     }
 
-    bj_trace("system shutdown (time: %u, event: %u, audio: %u, video: %u)",
+    bj_trace("system shutdown (time: %u -> 0, event: %u -> 0, audio: %u -> 0, video: %u -> 0)",
         syscount.time,
         syscount.event,
         syscount.audio,
