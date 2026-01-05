@@ -225,7 +225,6 @@ static void emscripten_renderer_configure(
     (void)renderer;
     (void)abstract_window;
 
-    // TODO consistency?
     emscripten_window* window = (emscripten_window*)abstract_window;
 
     bj_assign_bitmap(&renderer->data->framebuffer,

@@ -7,7 +7,6 @@ void bj_apply_rigidbody_force_2d(
 ) {
     bj_check(body);
     bj_apply_particle_force_2d(&body->particle, force);
-    // TODO Add torque by mean of force
 }
 
 void bj_step_rigid_body_2d(

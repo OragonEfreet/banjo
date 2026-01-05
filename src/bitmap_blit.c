@@ -2,7 +2,6 @@
 #include <check.h>
 
 // Note: This file is AI-generated.
-// TODO: I'll remake it myself later on.
 
 /* ---------- Public: color key ---------- */
 void bj_set_bitmap_colorkey(struct bj_bitmap* bmp, bj_bool enabled, uint32_t key_value) {

@@ -190,7 +190,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         case WM_ERASEBKGND:
             return 1; // We handle it
 
-        // TODO
         // case WM_CHAR: bj_trace("WM_CHAR"); break;
         // case WM_UNICHAR: bj_trace("WM_UNICHAR"); break;
 
@@ -320,7 +319,7 @@ static void win32_renderer_configure(
     }
 
     const size_t info_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
-    LPBITMAPINFO bmp_info = bj_malloc(info_size); // TODO Stack allocate
+    LPBITMAPINFO bmp_info = bj_malloc(info_size);
     bj_memset(bmp_info, 0, info_size);
     bmp_info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 

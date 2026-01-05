@@ -57,7 +57,6 @@ void bj_sleep(
     Sleep(milliseconds);
 }
 
-// TODO merge with unix one?
 double bj_run_time(
     void
 ) {

@@ -132,7 +132,7 @@ size_t bj_log_message(
 
         buf[header_max_len + msg_payload] = '\0';
 
-        // TODO Should be WriteConsoleA on windows, etc.
+        // Should be WriteConsoleA on windows, etc.
         puts(buf + header_max_len - header_size);
 
         return msg_payload + header_size;

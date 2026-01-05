@@ -48,6 +48,7 @@ To enable an option manually, you simply need to define the corresponding **C Ma
 | \ref opt_cocoa "Cocoa Backend"           | Enable Cocoa/macOS support                 |
 | \ref opt_mme "MME Backend"               | Enable Windows Multimedia Extensions audio |
 | \ref opt_alsa "ALSA Backend"             | Enable ALSA audio support                  |
+| \ref opt_c_audio "CoreAudio Backend"     | Enable CoreAudio support                   |
 | \ref opt_emscripten "Emscripten Backend" | Enable Emscripten/WebAssembly support      |
 | \ref opt_log_color "Colored Logs"        | Enable support for colored log outputs     |
 | \ref opt_checks_log "Log Checks"         | Failing checks are logged                  |
@@ -87,6 +88,14 @@ This backend enables support for creating windows on macOS.
 | Compiler    | Compiler Flags                       | Linker Flags                         |
 |-------------|--------------------------------------|--------------------------------------|
 | GCC/Clang   | \c -D \c BJ_CONFIG_COCOA_BACKEND     | \c -framework \c Cocoa               |
+
+### CoreAudio Backend {#opt_c_audio}
+
+This backend enables support for manipulating audio on macOS.
+
+| Compiler    | Compiler Flags                          | Linker Flags                         |
+|-------------|-----------------------------------------|--------------------------------------|
+| GCC/Clang   | \c -D \c BANJO_CONFIG_COREAUDIO_BACKEND | \c -framework \c AudioToolbox        |
 
 ### MME Backend {#opt_mme}
 

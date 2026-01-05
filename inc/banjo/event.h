@@ -19,7 +19,6 @@
 
 #include <banjo/window.h>
 
-// TODO Align buttons and keys
 /// First button
 #define BJ_BUTTON_1      1
 /// Second button

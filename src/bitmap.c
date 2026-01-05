@@ -219,7 +219,7 @@ uint32_t bj_make_bitmap_pixel(
     return bj_get_pixel_value(bitmap->mode, red, green, blue);
 }
 
-// TODO this code is potentially underperformant.
+// this code is potentially underperformant.
 // Doesn't take alignment into account, just uses bytes memcpy
 static void buffer_set_pixel(size_t x, size_t y, size_t stride, void* buffer, int32_t value, size_t bpp) {
     const size_t   bit_offset        = y * stride * 8 + x * bpp;
@@ -238,7 +238,7 @@ static uint32_t buffer_get_pixel(size_t x, size_t y, size_t stride, void* buffer
     uint32_t pixel_value = 0;
     bj_memcpy(&pixel_value, (uint8_t*)buffer + byte_offset, bytes_to_copy);
     pixel_value >>= bit_in_first_byte;
-    //pixel_value &= (1u << bpp) - 1; // TODO This does not work
+    //pixel_value &= (1u << bpp) - 1; // This does not work
     return pixel_value;
 }
 

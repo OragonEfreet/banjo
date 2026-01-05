@@ -276,7 +276,6 @@ static void cocoa_end_video(
     struct bj_error **error
 ) {
     (void)error;
-  // TODO Remove NSApplication from global?
 }
 
 static void cocoa_renderer_configure(

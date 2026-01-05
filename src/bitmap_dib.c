@@ -472,7 +472,6 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
             return 0;
         }
 
-        // TODO Maybe remove
         if (    (red_mask & green_mask & blue_mask)
               | (red_mask & green_mask) 
               | (red_mask & blue_mask) 

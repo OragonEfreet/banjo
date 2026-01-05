@@ -28,7 +28,6 @@ struct bj_stream* bj_open_stream_file(
     const char*       p_path,
     struct bj_error**        p_error
 ) {
-    // TODO Avoid dumping entire file in memory
     bj_check_or_0(p_path);
 
     FILE* fstream  = fopen(p_path, "rb");
