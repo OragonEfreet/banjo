@@ -8,9 +8,7 @@
 
 extern struct bj_audio_layer_create_info alsa_audio_layer_info;
 extern struct bj_audio_layer_create_info mme_audio_layer_info;
-extern struct bj_audio_layer_create_info noaudio_audio_layer_info;
 extern struct bj_audio_layer_create_info emscripten_audio_layer_info;
-
 
 bj_bool bj_begin_audio(
     struct bj_audio_layer* vt,
@@ -26,7 +24,6 @@ bj_bool bj_begin_audio(
 #ifdef BJ_CONFIG_ALSA_BACKEND
         &alsa_audio_layer_info,
 #endif
-        &noaudio_audio_layer_info,
     };
 
     const size_t n_layers = sizeof(layer_infos) / sizeof(struct bj_audio_layer_create_info*);
@@ -47,7 +44,7 @@ bj_bool bj_begin_audio(
         }
 
         if(success) {
-            bj_info("audio: %s", p_create_info->name);
+            bj_info("audio selected: %s", p_create_info->name);
             return BJ_TRUE;
         }
 

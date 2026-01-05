@@ -31,8 +31,6 @@ add_library(banjo
     src/main.c
     src/main_callbacks.c
     src/memory.c
-    src/audio_none.c
-    src/video_none.c
     src/physics_angular.c
     src/physics_kinematics.c
     src/physics_particle.c

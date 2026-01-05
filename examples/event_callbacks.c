@@ -72,7 +72,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
-    if(!bj_initialize(&p_error)) {
+    if(!bj_begin(BJ_VIDEO_SYSTEM, &p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return bj_callback_exit_error;
     } 
@@ -110,7 +110,7 @@ int bj_app_end(void* user_data, int status) {
     bj_free(counter);
 
     bj_unbind_window(window);
-    bj_shutdown(0);
+    bj_end();
     return status;
 }
 

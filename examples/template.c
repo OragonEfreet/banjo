@@ -12,13 +12,13 @@ int main(int argc, char* argv[]) {
 
     bj_error* p_error = 0;
 
-    if(!bj_initialize(&p_error)) {
+    if(!bj_begin(BJ_VIDEO_SYSTEM | BJ_AUDIO_SYSTEM, &p_error)) {
         bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
         return 1;
     } 
 
     bj_info("Hello Banjo!");
 
-    bj_shutdown(0);
+    bj_end();
     return 0;
 }

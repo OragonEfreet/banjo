@@ -14,9 +14,16 @@
 #include <banjo/api.h>
 #include <banjo/error.h>
 
+enum bj_system {
+    BJ_NO_SYSTEM    = 0x00,
+    BJ_AUDIO_SYSTEM = 0x01,
+    BJ_VIDEO_SYSTEM = 0x02,
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Initializes the system.
 ///
+/// \param systems An OR combination of \ref bj_system to initialize.
 /// \param error An optional location to an error object.
 ///
 /// The initialization process will iteratively try to initialize a subsystem
@@ -24,16 +31,56 @@
 ///
 /// \return _true_ if the system is properly initialized, BJ_FALSE otherswise.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT bj_bool bj_initialize(
+BANJO_EXPORT bj_bool bj_begin(
+    int               systems,
     struct bj_error** error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
 /// De-initializes the system.
 ///
-/// \param error An optional location to an error object.
+/// This function forcefully shuts down all subsystems and resets all reference
+/// counts to zero, regardless of how many times they were retained. Errors
+/// during shutdown are ignored.
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_shutdown(
+BANJO_EXPORT void bj_end(
+    void
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Initializes a single system with reference counting.
+///
+/// \param system A single \ref bj_system value to initialize.
+/// \param error An optional location to an error object.
+///
+/// This function retains the specified system, incrementing its reference count.
+/// Time and event subsystems are always retained as dependencies.
+/// Multiple calls to this function must be balanced with matching calls to
+/// \ref bj_end_system.
+///
+/// \return _true_ if the system is successfully retained, BJ_FALSE otherwise.
+///
+/// \see bj_end_system, bj_begin
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT bj_bool bj_begin_system(
+    enum bj_system    system,
+    struct bj_error** error
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// De-initializes a single system with reference counting.
+///
+/// \param system A single \ref bj_system value to release.
+/// \param error An optional location to an error object.
+///
+/// This function releases the specified system, decrementing its reference count.
+/// Time and event subsystems are also released. When a system's reference count
+/// reaches zero, it is fully shut down.
+///
+/// \see bj_begin_system, bj_end
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_end_system(
+    enum bj_system    system,
     struct bj_error** error
 );
 

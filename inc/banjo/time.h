@@ -46,7 +46,7 @@ void bj_sleep(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Gets the current time in seconds since Banjo initialization.
 ///
-/// This function returns the time in seconds since \ref bj_initialize was called.
+/// This function returns the time in seconds since \ref bj_begin was called.
 /// It is suitable for general-purpose timing, but not for high-resolution use.
 ///
 /// \return The current time in seconds.

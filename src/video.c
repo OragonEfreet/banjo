@@ -3,7 +3,6 @@
 #include "video_layer.h"
 
 extern struct bj_video_layer_create_info emscripten_video_layer_info;
-extern struct bj_video_layer_create_info novideo_video_layer_info;
 extern struct bj_video_layer_create_info win32_video_layer_info;
 extern struct bj_video_layer_create_info x11_video_layer_info;
 extern struct bj_video_layer_create_info cocoa_video_layer_info;
@@ -25,7 +24,6 @@ bj_bool bj_begin_video(
 #ifdef BJ_CONFIG_X11_BACKEND
         &x11_video_layer_info,
 #endif
-        &novideo_video_layer_info,
     };
 
     const size_t n_layers = sizeof(layer_infos) / sizeof(struct bj_video_layer_create_info*);
@@ -45,7 +43,7 @@ bj_bool bj_begin_video(
         }
 
         if(success) {
-            bj_info("initialized video (%s)", p_create_info->name);
+            bj_info("video selected: %s", p_create_info->name);
             return BJ_TRUE;
         }
     }
