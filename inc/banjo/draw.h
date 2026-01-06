@@ -110,10 +110,41 @@ BANJO_EXPORT void bj_draw_filled_rectangle(
 /// This function does not perform any bound checking on the pixel coordinates.
 /// It is up to you to ensure the coordinates lie between
 /// [0, struct bj_bitmap->width * struct bj_bitmap->height].
-/// Writing outside of these bounds will result in undefined behavior or 
+/// Writing outside of these bounds will result in undefined behavior or
 /// corrupted memory access.
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void bj_draw_triangle(
+    struct bj_bitmap* bitmap,
+    int        x0,
+    int        y0,
+    int        x1,
+    int        y1,
+    int        x2,
+    int        y2,
+    uint32_t   color
+);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Draws a filled triangle given its 3 corners.
+///
+/// \param bitmap The bitmap object.
+/// \param x0       The X coordinate of the first triangle vertex.
+/// \param y0       The Y coordinate of the first triangle vertex.
+/// \param x1       The X coordinate of the second triangle vertex.
+/// \param y1       The Y coordinate of the second triangle vertex.
+/// \param x2       The X coordinate of the third triangle vertex.
+/// \param y2       The Y coordinate of the third triangle vertex.
+/// \param color    The fill color.
+///
+/// \par Memory Safety
+///
+/// This function does not perform any bound checking on the pixel coordinates.
+/// It is up to you to ensure the coordinates lie between
+/// [0, struct bj_bitmap->width * struct bj_bitmap->height].
+/// Writing outside of these bounds will result in undefined behavior or
+/// corrupted memory access.
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_draw_filled_triangle(
     struct bj_bitmap* bitmap,
     int        x0,
     int        y0,

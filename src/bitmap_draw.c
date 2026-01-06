@@ -103,6 +103,80 @@ void bj_draw_triangle(
     bj_draw_line(bmp, x2, y2, x0, y0, c);
 }
 
+#define SWAP_INT(a, b) do { int tmp = a; a = b; b = tmp; } while(0)
+#define SWAP_COORDS(x0, y0, x1, y1) do { SWAP_INT(x0, x1); SWAP_INT(y0, y1); } while(0)
+
+void bj_draw_filled_triangle(
+    struct bj_bitmap* bmp,
+    int        x0,
+    int        y0,
+    int        x1,
+    int        y1,
+    int        x2,
+    int        y2,
+    uint32_t   c
+) {
+    // Sort vertices by Y coordinate: p0 < p1 < p2
+    if (y1 < y0) { SWAP_COORDS(x0, y0, x1, y1); }
+    if (y2 < y0) { SWAP_COORDS(x0, y0, x2, y2); }
+    if (y2 < y1) { SWAP_COORDS(x1, y1, x2, y2); }
+
+    // Degenerate case: all points on same horizontal line
+    if (y0 == y2) {
+        int min_x = x0 < x1 ? (x0 < x2 ? x0 : x2) : (x1 < x2 ? x1 : x2);
+        int max_x = x0 > x1 ? (x0 > x2 ? x0 : x2) : (x1 > x2 ? x1 : x2);
+        bj_draw_line(bmp, min_x, y0, max_x, y0, c);
+        return;
+    }
+
+    // Interpolation for the long edge (p0 to p2)
+    const float x02_a = (float)(x2 - x0) / (float)(y2 - y0);
+    float x02_d = (float)x0;
+
+    // First triangle half (top): from p0 to p1
+    if (y1 > y0) {
+        const float x01_a = (float)(x1 - x0) / (float)(y1 - y0);
+        float x01_d = (float)x0;
+
+        for (int y = y0; y < y1; ++y) {
+            int left_x = (int)x01_d;
+            int right_x = (int)x02_d;
+
+            if (right_x < left_x) {
+                SWAP_INT(left_x, right_x);
+            }
+
+            bj_draw_line(bmp, left_x, y, right_x, y, c);
+
+            x01_d += x01_a;
+            x02_d += x02_a;
+        }
+    }
+
+    // Second triangle half (bottom): from p1 to p2
+    if (y2 > y1) {
+        const float x12_a = (float)(x2 - x1) / (float)(y2 - y1);
+        float x12_d = (float)x1;
+
+        for (int y = y1; y <= y2; ++y) {
+            int left_x = (int)x12_d;
+            int right_x = (int)x02_d;
+
+            if (right_x < left_x) {
+                SWAP_INT(left_x, right_x);
+            }
+
+            bj_draw_line(bmp, left_x, y, right_x, y, c);
+
+            x12_d += x12_a;
+            x02_d += x02_a;
+        }
+    }
+}
+
+#undef SWAP_COORDS
+#undef SWAP_INT
+
 void bj_draw_circle(
     struct bj_bitmap* p_bitmap,
     int        cx,

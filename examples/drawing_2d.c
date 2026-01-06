@@ -81,6 +81,15 @@ void draw(bj_bitmap* bmp) {
     for (int r = 80; r > 0; r -= 20) {
         bj_draw_filled_circle(bmp, 100, 400, r, (r/20) % 2 ? color_red : color_white);
     }
+
+    // Filled triangles (mountain scene)
+    const uint32_t color_dark_gray = bj_make_bitmap_pixel(bmp, 0x50, 0x50, 0x50);
+    const uint32_t color_gray = bj_make_bitmap_pixel(bmp, 0x80, 0x80, 0x80);
+    const uint32_t color_light_gray = bj_make_bitmap_pixel(bmp, 0xB0, 0xB0, 0xB0);
+
+    bj_draw_filled_triangle(bmp, 250, 400, 200, 480, 300, 480, color_gray);
+    bj_draw_filled_triangle(bmp, 300, 420, 250, 480, 350, 480, color_dark_gray);
+    bj_draw_filled_triangle(bmp, 350, 390, 300, 480, 400, 480, color_light_gray);
 }
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
