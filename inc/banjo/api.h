@@ -307,6 +307,8 @@ typedef enum bj_seek_origin bj_seek_origin;
 typedef enum bj_shader_flag bj_shader_flag;
 typedef enum bj_window_flag bj_window_flag;
 typedef struct bj_angular_2d bj_angular_2d;
+typedef struct bj_cli bj_cli;
+typedef struct bj_cli_argument bj_cli_argument;
 typedef struct bj_audio_device bj_audio_device;
 typedef struct bj_audio_play_note_data bj_audio_play_note_data;
 typedef struct bj_audio_properties bj_audio_properties;

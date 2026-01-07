@@ -12,6 +12,7 @@ endif()
 
 add_library(banjo
     src/api.c
+    src/cli.c
     src/audio.c
     src/audio_layer.h
     src/audio.h
@@ -52,6 +53,7 @@ add_library(banjo
     src/window.c
     src/window.h
     inc/banjo/api.h
+    inc/banjo/cli.h
     inc/banjo/assert.h
     inc/banjo/audio.h
     inc/banjo/bitmap.h
