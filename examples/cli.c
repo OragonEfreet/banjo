@@ -7,6 +7,8 @@
 #include <banjo/log.h>
 #include <banjo/memory.h>
 
+#include <stdio.h>
+
 int main(int argc, char* argv[]) {
     // Argument storage variables
     int verbose             = 0;
@@ -108,7 +110,7 @@ int main(int argc, char* argv[]) {
     // Parse arguments
     struct bj_error* error = NULL;
     if (!bj_cli_parse(&parser, argc, argv, &error)) {
-        bj_err("Error parsing arguments: %s", error->message);
+        puts(error->message);
         bj_cli_print_help(&parser);
         bj_clear_error(&error);
         return 1;

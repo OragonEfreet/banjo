@@ -150,7 +150,7 @@ BANJO_EXPORT bj_bool bj_cli_validate(
     const int errlen = bj_cli_validate_sn(parser, errbuf, 256);
 
     if (errlen > 0) {
-        fprintf(stderr, "%s\n", errbuf);
+        /* fprintf(stderr, "%s\n", errbuf); */
         bj_set_error(error, BJ_ERROR_INVALID_DATA, errbuf);
         return BJ_FALSE;
     }
@@ -362,8 +362,6 @@ static int v_sprint_error(char* buffer, size_t n, const struct bj_cli* parser, c
     va_start(args, format);
     total_size += v_sprint_buffer(buffer, &buffer_remaining, format, args);
     va_end(args);
-    total_size += sprint_buffer(buffer+total_size, &buffer_remaining, "\n");
-    total_size += sprint_usage(buffer+total_size, &buffer_remaining, parser);
     return total_size;
 }
 
@@ -657,7 +655,7 @@ BANJO_EXPORT bj_bool bj_cli_parse(
     const int errlen = bj_cli_parse_sn(parser, argc, argv, errbuf, 256);
 
     if (errlen > 0) {
-        fprintf(stderr, "%s\n", errbuf);
+        /* fprintf(stderr, "%s\n", errbuf); */
         bj_set_error(error, BJ_ERROR_INVALID_DATA, errbuf);
         return BJ_FALSE;
     }
