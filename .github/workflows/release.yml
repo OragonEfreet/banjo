@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   build-matrix:
-    name: Build ${{ matrix.platform_name }} libraries and examples
+    name: Build ${{ matrix.platform_name }} libraries
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -179,23 +179,18 @@ jobs:
         if: matrix.archive_ext == 'tar.gz'
         run: |
           tar -czf "${PKG_NAME}.tar.gz" "${PKG_NAME}"
-          sha256sum "${PKG_NAME}.tar.gz" > "${PKG_NAME}.tar.gz.sha256"
 
       - name: Create zip archive (Windows)
         if: matrix.archive_ext == 'zip'
         shell: pwsh
         run: |
           Compress-Archive -Path "$env:PKG_NAME" -DestinationPath "$env:PKG_NAME.zip"
-          $hash = (Get-FileHash -Algorithm SHA256 "$env:PKG_NAME.zip").Hash.ToLower()
-          "$hash  $env:PKG_NAME.zip" | Out-File -FilePath "$env:PKG_NAME.zip.sha256" -Encoding ASCII
 
       - name: Upload packaged artifact
         uses: actions/upload-artifact@v4
         with:
           name: package-${{ matrix.platform_name }}
-          path: |
-            banjo-*.${{ matrix.archive_ext }}
-            banjo-*.${{ matrix.archive_ext }}.sha256
+          path: banjo-*.${{ matrix.archive_ext }}
           retention-days: 1
 
   create-release:
@@ -232,15 +227,8 @@ jobs:
       - name: Organize artifacts
         run: |
           mkdir -p final-release/
-          find release-artifacts/ -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "*.sha256" \) -exec mv {} final-release/ \;
+          find release-artifacts/ -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec mv {} final-release/ \;
           mv banjo-*-source.* final-release/
-
-      - name: Generate master checksums
-        run: |
-          cd final-release/
-          VERSION=${{ steps.version.outputs.version }}
-          sha256sum banjo-${VERSION}-* > "banjo-${VERSION}-checksums.txt"
-          cat "banjo-${VERSION}-checksums.txt"
 
       - name: Create GitHub Release
         env:
@@ -252,27 +240,7 @@ jobs:
           cat > release-notes.md << 'EOF'
           ## Banjo ${VERSION}
 
-          This release includes pre-built binaries for Linux, Windows, and macOS, along with complete source archives.
-
-          ### Download Options
-
-          - **Linux**: `banjo-${VERSION}-linux-x64.tar.gz`
-          - **Windows**: `banjo-${VERSION}-windows-x64.zip`
-          - **macOS**: `banjo-${VERSION}-macos-arm64.tar.gz`
-          - **Source**: `banjo-${VERSION}-source.tar.gz` or `.zip`
-
-          Each platform archive includes:
-          - Static library (`.a` / `.lib`)
-          - Shared library (`.so` / `.dll` / `.dylib`)
-          - Public headers
-          - CMake package configuration files
-
-          ### Verification
-
-          All artifacts include SHA256 checksums. Verify downloads using:
-          ```bash
-          sha256sum -c banjo-${VERSION}-checksums.txt
-          ```
+          Pre-built binaries for Linux, Windows, and macOS, along with source archives.
           EOF
 
           # Replace variables in release notes
