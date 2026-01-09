@@ -1,0 +1,353 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-matrix:
+    name: Build ${{ matrix.platform_name }} libraries and examples
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            c_compiler: gcc
+            platform_name: linux
+            archive_ext: tar.gz
+            backend_flags: -DBANJO_CONFIG_X11_BACKEND=ON -DBANJO_CONFIG_ALSA_BACKEND=ON
+          - os: windows-latest
+            c_compiler: cl
+            platform_name: windows
+            archive_ext: zip
+            backend_flags: -DBANJO_CONFIG_WIN32_BACKEND=ON -DBANJO_CONFIG_MME_BACKEND=ON
+          - os: macos-latest
+            c_compiler: clang
+            platform_name: macos
+            archive_ext: tar.gz
+            backend_flags: -DBANJO_CONFIG_COCOA_BACKEND=ON -DBANJO_CONFIG_COREAUDIO_BACKEND=ON
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      - name: Install Linux dependencies
+        if: matrix.platform_name == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libasound2-dev
+
+      - name: Set version
+        id: version
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION=${VERSION#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Configure CMake (Static)
+        run: >
+          cmake -B ${{ github.workspace }}/build-static
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_SHARED_LIBS=OFF
+          -DBANJO_BUILD_EXAMPLES=OFF
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install-static
+          ${{ matrix.backend_flags }}
+          -S ${{ github.workspace }}
+
+      - name: Build Static Library
+        run: cmake --build ${{ github.workspace }}/build-static --config Release
+
+      - name: Install Static Library
+        run: cmake --install ${{ github.workspace }}/build-static --config Release
+
+      - name: Configure CMake (Shared)
+        run: >
+          cmake -B ${{ github.workspace }}/build-shared
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_SHARED_LIBS=ON
+          -DBANJO_BUILD_EXAMPLES=OFF
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install-shared
+          ${{ matrix.backend_flags }}
+          -S ${{ github.workspace }}
+
+      - name: Build Shared Library
+        run: cmake --build ${{ github.workspace }}/build-shared --config Release
+
+      - name: Install Shared Library
+        run: cmake --install ${{ github.workspace }}/build-shared --config Release
+
+      - name: Configure CMake (Examples)
+        run: >
+          cmake -B ${{ github.workspace }}/build-examples
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_SHARED_LIBS=OFF
+          -DBANJO_BUILD_EXAMPLES=ON
+          ${{ matrix.backend_flags }}
+          -S ${{ github.workspace }}
+
+      - name: Build Examples
+        run: cmake --build ${{ github.workspace }}/build-examples --config Release
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: banjo-libs-${{ matrix.platform_name }}
+          path: |
+            install-static/
+            install-shared/
+            build-examples/examples/
+          retention-days: 1
+
+  package-artifacts:
+    name: Package ${{ matrix.platform_name }} artifacts
+    needs: build-matrix
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform_name: linux
+            os: ubuntu-latest
+            arch: x64
+            archive_ext: tar.gz
+          - platform_name: windows
+            os: windows-latest
+            arch: x64
+            archive_ext: zip
+          - platform_name: macos
+            os: macos-latest
+            arch: arm64
+            archive_ext: tar.gz
+
+    steps:
+      - name: Checkout (for LICENSE)
+        uses: actions/checkout@v3
+
+      - name: Set version
+        id: version
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION=${VERSION#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Packaging version: $VERSION"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: banjo-libs-${{ matrix.platform_name }}
+          path: artifacts/
+
+      - name: Create package directory
+        shell: bash
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          PKG_NAME="banjo-${VERSION}-${{ matrix.platform_name }}-${{ matrix.arch }}"
+          mkdir -p "${PKG_NAME}"
+
+          # Create directory structure
+          mkdir -p "${PKG_NAME}/lib"
+          mkdir -p "${PKG_NAME}/include"
+          mkdir -p "${PKG_NAME}/examples/src"
+
+          # Copy libraries (both static and shared)
+          if [ "${{ matrix.platform_name }}" = "windows" ]; then
+            # Windows: static lib, DLL, and import lib
+            cp -r artifacts/install-static/lib/*.lib "${PKG_NAME}/lib/" 2>/dev/null || true
+            cp -r artifacts/install-shared/bin/*.dll "${PKG_NAME}/lib/" 2>/dev/null || true
+            cp -r artifacts/install-shared/lib/*.lib "${PKG_NAME}/lib/" 2>/dev/null || true
+          else
+            # Unix-like: .a for static, .so/.dylib for shared
+            cp -r artifacts/install-static/lib/* "${PKG_NAME}/lib/" 2>/dev/null || true
+            cp -r artifacts/install-shared/lib/* "${PKG_NAME}/lib/" 2>/dev/null || true
+          fi
+
+          # Copy headers
+          cp -r artifacts/install-static/include/* "${PKG_NAME}/include/"
+
+          # Copy examples binaries
+          if [ "${{ matrix.platform_name }}" = "windows" ]; then
+            cp artifacts/build-examples/examples/Release/*.exe "${PKG_NAME}/examples/" 2>/dev/null || true
+            cp artifacts/build-examples/examples/*.exe "${PKG_NAME}/examples/" 2>/dev/null || true
+          else
+            find artifacts/build-examples/examples -type f -executable -exec cp {} "${PKG_NAME}/examples/" \; 2>/dev/null || true
+          fi
+
+          # Copy example source files
+          cp examples/*.c "${PKG_NAME}/examples/src/" 2>/dev/null || true
+
+          # Copy LICENSE
+          cp LICENSE "${PKG_NAME}/"
+
+          echo "PKG_NAME=${PKG_NAME}" >> $GITHUB_ENV
+
+      - name: Create tar.gz archive (Unix)
+        if: matrix.archive_ext == 'tar.gz'
+        run: |
+          tar -czf "${PKG_NAME}.tar.gz" "${PKG_NAME}"
+          sha256sum "${PKG_NAME}.tar.gz" > "${PKG_NAME}.tar.gz.sha256"
+
+      - name: Create zip archive (Windows)
+        if: matrix.archive_ext == 'zip'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "$env:PKG_NAME" -DestinationPath "$env:PKG_NAME.zip"
+          $hash = (Get-FileHash -Algorithm SHA256 "$env:PKG_NAME.zip").Hash.ToLower()
+          "$hash  $env:PKG_NAME.zip" | Out-File -FilePath "$env:PKG_NAME.zip.sha256" -Encoding ASCII
+
+      - name: Upload packaged artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-${{ matrix.platform_name }}
+          path: |
+            banjo-*.${{ matrix.archive_ext }}
+            banjo-*.${{ matrix.archive_ext }}.sha256
+          retention-days: 1
+
+  build-documentation:
+    name: Build documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION=${VERSION#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building documentation for version: $VERSION"
+
+      - name: Install Dependencies
+        run: |
+          sudo apt install --yes graphviz
+          wget https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
+          tar -xzf ./doxygen-1.14.0.linux.bin.tar.gz
+
+      - name: Generate Documentation
+        run: ./doxygen-1.14.0/bin/doxygen
+
+      - name: Create documentation archive
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          tar -czf "banjo-${VERSION}-docs.tar.gz" docs/html/
+          sha256sum "banjo-${VERSION}-docs.tar.gz" > "banjo-${VERSION}-docs.tar.gz.sha256"
+
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: |
+            banjo-*-docs.tar.gz
+            banjo-*-docs.tar.gz.sha256
+          retention-days: 1
+
+  create-release:
+    name: Create GitHub Release
+    needs: [package-artifacts, build-documentation]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set version
+        id: version
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG_NAME#v}
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Creating release for version: $VERSION (tag: $TAG_NAME)"
+
+      - name: Create source archives
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          git archive --format=tar.gz --output="banjo-${VERSION}-source.tar.gz" --prefix="banjo-${VERSION}/" HEAD
+          git archive --format=zip --output="banjo-${VERSION}-source.zip" --prefix="banjo-${VERSION}/" HEAD
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts/
+
+      - name: Organize artifacts
+        run: |
+          mkdir -p final-release/
+          find release-artifacts/ -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "*.sha256" \) -exec mv {} final-release/ \;
+          mv banjo-*-source.* final-release/
+
+      - name: Generate master checksums
+        run: |
+          cd final-release/
+          VERSION=${{ steps.version.outputs.version }}
+          sha256sum banjo-${VERSION}-* > "banjo-${VERSION}-checksums.txt"
+          cat "banjo-${VERSION}-checksums.txt"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+
+          # Create release notes
+          cat > release-notes.md << 'EOF'
+          ## Banjo ${VERSION}
+
+          This release includes pre-built binaries for Linux, Windows, and macOS, along with complete source archives and documentation.
+
+          ### Download Options
+
+          - **Linux**: `banjo-${VERSION}-linux-x64.tar.gz`
+          - **Windows**: `banjo-${VERSION}-windows-x64.zip`
+          - **macOS**: `banjo-${VERSION}-macos-arm64.tar.gz`
+          - **Documentation**: `banjo-${VERSION}-docs.tar.gz`
+          - **Source**: `banjo-${VERSION}-source.tar.gz` or `.zip`
+
+          Each platform archive includes:
+          - Static library (`.a` / `.lib`)
+          - Shared library (`.so` / `.dll` / `.dylib`)
+          - Public headers
+          - CMake package configuration files
+          - Compiled example programs
+          - Example source code
+
+          ### Verification
+
+          All artifacts include SHA256 checksums. Verify downloads using:
+          ```bash
+          sha256sum -c banjo-${VERSION}-checksums.txt
+          ```
+          EOF
+
+          # Replace variables in release notes
+          sed -i "s/\${VERSION}/${VERSION}/g" release-notes.md
+
+          # Create release
+          TAG_NAME=${{ steps.version.outputs.tag_name }}
+          gh release create "$TAG_NAME" \
+            --title "Banjo $VERSION" \
+            --notes-file release-notes.md \
+            final-release/*
