@@ -64,6 +64,7 @@ jobs:
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_SHARED_LIBS=OFF
+          -DBUILD_TESTING=OFF
           -DBANJO_BUILD_EXAMPLES=OFF
           -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install-static
           ${{ matrix.backend_flags }}
@@ -81,6 +82,7 @@ jobs:
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_SHARED_LIBS=ON
+          -DBUILD_TESTING=OFF
           -DBANJO_BUILD_EXAMPLES=OFF
           -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install-shared
           ${{ matrix.backend_flags }}
@@ -98,6 +100,7 @@ jobs:
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_SHARED_LIBS=OFF
+          -DBUILD_TESTING=OFF
           -DBANJO_BUILD_EXAMPLES=ON
           ${{ matrix.backend_flags }}
           -S ${{ github.workspace }}
@@ -222,49 +225,9 @@ jobs:
             banjo-*.${{ matrix.archive_ext }}.sha256
           retention-days: 1
 
-  build-documentation:
-    name: Build documentation
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set version
-        id: version
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          VERSION=${VERSION#v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Building documentation for version: $VERSION"
-
-      - name: Install Dependencies
-        run: |
-          sudo apt install --yes graphviz
-          wget https://github.com/doxygen/doxygen/releases/download/Release_1_14_0/doxygen-1.14.0.linux.bin.tar.gz
-          tar -xzf ./doxygen-1.14.0.linux.bin.tar.gz
-
-      - name: Generate Documentation
-        run: ./doxygen-1.14.0/bin/doxygen
-
-      - name: Create documentation archive
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-          tar -czf "banjo-${VERSION}-docs.tar.gz" docs/html/
-          sha256sum "banjo-${VERSION}-docs.tar.gz" > "banjo-${VERSION}-docs.tar.gz.sha256"
-
-      - name: Upload documentation artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: documentation
-          path: |
-            banjo-*-docs.tar.gz
-            banjo-*-docs.tar.gz.sha256
-          retention-days: 1
-
   create-release:
     name: Create GitHub Release
-    needs: [package-artifacts, build-documentation]
+    needs: package-artifacts
     runs-on: ubuntu-latest
 
     steps:
@@ -316,14 +279,13 @@ jobs:
           cat > release-notes.md << 'EOF'
           ## Banjo ${VERSION}
 
-          This release includes pre-built binaries for Linux, Windows, and macOS, along with complete source archives and documentation.
+          This release includes pre-built binaries for Linux, Windows, and macOS, along with complete source archives.
 
           ### Download Options
 
           - **Linux**: `banjo-${VERSION}-linux-x64.tar.gz`
           - **Windows**: `banjo-${VERSION}-windows-x64.zip`
           - **macOS**: `banjo-${VERSION}-macos-arm64.tar.gz`
-          - **Documentation**: `banjo-${VERSION}-docs.tar.gz`
           - **Source**: `banjo-${VERSION}-source.tar.gz` or `.zip`
 
           Each platform archive includes:
