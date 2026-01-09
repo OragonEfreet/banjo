@@ -94,20 +94,6 @@ jobs:
       - name: Install Shared Library
         run: cmake --install ${{ github.workspace }}/build-shared --config Release
 
-      - name: Configure CMake (Examples)
-        run: >
-          cmake -B ${{ github.workspace }}/build-examples
-          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-          -DCMAKE_BUILD_TYPE=Release
-          -DBUILD_SHARED_LIBS=OFF
-          -DBUILD_TESTING=OFF
-          -DBANJO_BUILD_EXAMPLES=ON
-          ${{ matrix.backend_flags }}
-          -S ${{ github.workspace }}
-
-      - name: Build Examples
-        run: cmake --build ${{ github.workspace }}/build-examples --config Release
-
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -115,7 +101,6 @@ jobs:
           path: |
             install-static/
             install-shared/
-            build-examples/examples/
           retention-days: 1
 
   package-artifacts:
@@ -169,7 +154,6 @@ jobs:
           # Create directory structure
           mkdir -p "${PKG_NAME}/lib"
           mkdir -p "${PKG_NAME}/include"
-          mkdir -p "${PKG_NAME}/examples/src"
 
           # Copy libraries (both static and shared)
           if [ "${{ matrix.platform_name }}" = "windows" ]; then
@@ -185,17 +169,6 @@ jobs:
 
           # Copy headers
           cp -r artifacts/install-static/include/* "${PKG_NAME}/include/"
-
-          # Copy examples binaries
-          if [ "${{ matrix.platform_name }}" = "windows" ]; then
-            cp artifacts/build-examples/examples/Release/*.exe "${PKG_NAME}/examples/" 2>/dev/null || true
-            cp artifacts/build-examples/examples/*.exe "${PKG_NAME}/examples/" 2>/dev/null || true
-          else
-            find artifacts/build-examples/examples -type f -executable -exec cp {} "${PKG_NAME}/examples/" \; 2>/dev/null || true
-          fi
-
-          # Copy example source files
-          cp examples/*.c "${PKG_NAME}/examples/src/" 2>/dev/null || true
 
           # Copy LICENSE
           cp LICENSE "${PKG_NAME}/"
@@ -293,8 +266,6 @@ jobs:
           - Shared library (`.so` / `.dll` / `.dylib`)
           - Public headers
           - CMake package configuration files
-          - Compiled example programs
-          - Example source code
 
           ### Verification
 
