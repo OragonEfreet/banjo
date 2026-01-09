@@ -15,6 +15,19 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/// \brief Version variant types.
+/// @{
+#define BJ_VERSION_RELEASE 0  ///< Stable release (e.g., 0.1.0).
+#define BJ_VERSION_DEV     1  ///< Development build (e.g., 0.1.0-dev).
+#define BJ_VERSION_BETA    2  ///< Beta release (e.g., 0.1.0-beta).
+#define BJ_VERSION_RC      3  ///< Release candidate (e.g., 0.1.0-rc).
+/// @}
+
+/// \brief Extract variant from a 32-bit version value.
+/// \param version Packed version from BJ_MAKE_VERSION.
+/// \return Variant in [0, 3].
+#define BJ_VERSION_VARIANT(version) ((version) & 0x3U)
+
 /// \brief Extract major version from a 32-bit version value.
 /// \param version Packed version from BJ_MAKE_VERSION.
 /// \return Major version in [0, 1023].
@@ -27,23 +40,26 @@
 
 /// \brief Extract patch version from a 32-bit version value.
 /// \param version Packed version from BJ_MAKE_VERSION.
-/// \return Patch version in [0, 4095].
-#define BJ_VERSION_PATCH(version) ((version) & 0xFFFU)
+/// \return Patch version in [0, 1023].
+#define BJ_VERSION_PATCH(version) (((version) >> 2U) & 0x3FFU)
 
-/// \brief Construct a packed 32-bit version value: [major:10 | minor:10 | patch:12].
+/// \brief Construct a packed 32-bit version value: [major:10 | minor:10 | patch:10 | variant:2].
 /// \param major Major version in [0, 1023].
 /// \param minor Minor version in [0, 1023].
-/// \param patch Patch version in [0, 4095].
+/// \param patch Patch version in [0, 1023].
+/// \param variant Variant type (BJ_VERSION_VARIANT_*).
 /// \return Packed version suitable for BJ_VERSION_* macros.
-#define BJ_MAKE_VERSION(major, minor, patch) \
-    ((((uint32_t)(major)) << 22U) | (((uint32_t)(minor)) << 12U) | ((uint32_t)(patch)))
+#define BJ_MAKE_VERSION(major, minor, patch, variant) \
+    ((((uint32_t)(major)) << 22U) | (((uint32_t)(minor)) << 12U) | \
+     (((uint32_t)(patch)) << 2U) | ((uint32_t)(variant)))
 
 #define BJ_VERSION_MAJOR_NUMBER 0 ///< Current major version number.
 #define BJ_VERSION_MINOR_NUMBER 1 ///< Current minor version number.
 #define BJ_VERSION_PATCH_NUMBER 0 ///< Current patch version number.
+#define BJ_VERSION_VARIANT_NUMBER BJ_VERSION_DEV ///< Current version variant.
 
 /// \brief Current API version as a packed 32-bit representation.
-#define BJ_VERSION BJ_MAKE_VERSION(BJ_VERSION_MAJOR_NUMBER, BJ_VERSION_MINOR_NUMBER, BJ_VERSION_PATCH_NUMBER)
+#define BJ_VERSION BJ_MAKE_VERSION(BJ_VERSION_MAJOR_NUMBER, BJ_VERSION_MINOR_NUMBER, BJ_VERSION_PATCH_NUMBER, BJ_VERSION_VARIANT_NUMBER)
 
 /// \brief Library name string.
 #define BJ_NAME "Banjo"
