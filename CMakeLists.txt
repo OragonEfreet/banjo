@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(banjo VERSION 0.1.0 LANGUAGES C)
+project(banjo LANGUAGES C)
 
 include(CTest)
 
