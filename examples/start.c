@@ -11,13 +11,7 @@
 int main(int argc, char* argv[]) {
     (void)argc; (void)argv;
 
-    bj_error* error = 0;
-
-    if (!bj_begin(BJ_VIDEO_SYSTEM, &error)) {
-        if(error) {
-            bj_err("Cannot initialize Banjo: %s [%x]", error->message, error->code);
-            bj_clear_error(&error);
-        }
+    if (!bj_begin(BJ_VIDEO_SYSTEM, 0)) {
         return 1;
     }
 

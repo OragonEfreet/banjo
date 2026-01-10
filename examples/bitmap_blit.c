@@ -25,8 +25,6 @@ bj_renderer* renderer = 0;
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
 
-    bj_error* p_error = 0;
-
     bj_bitmap* bmp_rendering = bj_create_bitmap(WINDOW_W, WINDOW_H, BJ_PIXEL_MODE_BGR24, 0);
     bj_set_bitmap_clear_color(bmp_rendering, bj_make_bitmap_pixel(bmp_rendering, 0xFF, 0x00, 0x00));
     bj_clear_bitmap(bmp_rendering);
@@ -45,8 +43,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     bj_destroy_bitmap(bmp_greenland_grid_velo_762_1309);
     bj_destroy_bitmap(bmp_blackbuck_512_512);
 
-    if(!bj_begin(BJ_VIDEO_SYSTEM, &p_error)) {
-        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
+    if(!bj_begin(BJ_VIDEO_SYSTEM, 0)) {
         return bj_callback_exit_error;
     } 
 

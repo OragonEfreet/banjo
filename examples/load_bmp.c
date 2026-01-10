@@ -22,10 +22,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bmp_sprite_sheet = bj_create_bitmap_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
 
-    bj_error* p_error = 0;
-
-    if(!bj_begin(BJ_VIDEO_SYSTEM, &p_error)) {
-        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
+    if(!bj_begin(BJ_VIDEO_SYSTEM, 0)) {
         return bj_callback_exit_error;
     } 
 

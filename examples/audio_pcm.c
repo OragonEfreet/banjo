@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// audio_pcm.c
+// \example audio_pcm.c
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/api.h>
@@ -15,10 +15,7 @@ bj_audio_device* p_device    = 0;
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
 
-    bj_error* p_error = 0;
-
-    if (!bj_begin(BJ_AUDIO_SYSTEM, &p_error)) {
-        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
+    if (!bj_begin(BJ_AUDIO_SYSTEM, 0)) {
         return bj_callback_exit_error;
     }
 
@@ -29,10 +26,9 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         .amplitude   = 16000,                /* used only for INT16 path */
         .sample_rate = 44100,
         .channels    = 2,
-    }, bj_play_audio_note, &data, &p_error);
+    }, bj_play_audio_note, &data, 0);
 
     if (!p_device) {
-        if (p_error) bj_err("cannot open audio: %s (%x)", p_error->message, p_error->code);
         return bj_callback_exit_error;
     }
 

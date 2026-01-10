@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// \file example_cli.c
+/// \example cli.c
 /// \brief Example demonstrating Banjo's argument parsing module
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -108,11 +108,8 @@ int main(int argc, char* argv[]) {
     };
 
     // Parse arguments
-    struct bj_error* error = NULL;
-    if (!bj_cli_parse(&parser, argc, argv, &error)) {
-        puts(error->message);
+    if (!bj_cli_parse(&parser, argc, argv, 0)) {
         bj_cli_print_help(&parser);
-        bj_clear_error(&error);
         return 1;
     }
 

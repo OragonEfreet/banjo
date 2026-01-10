@@ -29,8 +29,6 @@ bj_renderer* renderer = 0;
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
 
-    bj_error* p_error = 0;
-
     // Create rendering target with a gradient background
     bj_bitmap* bmp_rendering = bj_create_bitmap(WINDOW_W, WINDOW_H, BJ_PIXEL_MODE_BGR24, 0);
 
@@ -103,8 +101,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     bj_destroy_bitmap(sprite_sheet);
 
-    if(!bj_begin(BJ_VIDEO_SYSTEM, &p_error)) {
-        bj_err("Error 0x%08X: %s", p_error->code, p_error->message);
+    if(!bj_begin(BJ_VIDEO_SYSTEM, 0)) {
         return bj_callback_exit_error;
     }
 
