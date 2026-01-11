@@ -1,6 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example cli.c
-/// \brief Example demonstrating Banjo's argument parsing module
+/// Command-line argument parsing with type conversion and validation.
+///
+/// Banjo's CLI parser automatically handles:
+/// - Named options: --flag or -f (short form)
+/// - Type conversion: strings, integers, doubles, booleans
+/// - Help generation: --help prints auto-generated usage
+/// - Positional arguments: arguments without dashes
+/// - Short option combining: -abc = -a -b -c
+///
+/// The pattern: declare storage variables, define argument specs with actions,
+/// create parser, parse, then use the values. Actions automatically convert
+/// and store parsed values into your variables.
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <banjo/cli.h>
@@ -10,7 +21,8 @@
 #include <stdio.h>
 
 int main(int argc, char* argv[]) {
-    // Argument storage variables
+    // Declare variables to store parsed values. Set defaults here - if the
+    // user doesn't provide a value, these defaults remain unchanged.
     int verbose             = 0;
     const char* input_file  = "default.txt";
     const char* output_file = NULL;
@@ -19,8 +31,18 @@ int main(int argc, char* argv[]) {
     double tolerance        = 0.001;
     int enable_feature      = 0;
 
+    // Define argument specifications. Each bj_cli_argument describes one option.
+    // Fields:
+    //   - name: long option name (--name)
+    //   - shortname: single-character shortcut (-n)
+    //   - help: description shown in --help
+    //   - metavar: placeholder for value display (--count <N>)
+    //   - action: function to parse and store the value
+    //   - dest: pointer to variable that receives the value
+    //   - required: whether this argument must be provided
     struct bj_cli_argument args[] = {
-        // Help flag (will print help and exit)
+        // bj_cli_print_help_action: special action that prints help and exits.
+        // Use this for --help flags. No dest needed.
         {
             .shortname = 'h',
             .name      = "help",
@@ -28,7 +50,8 @@ int main(int argc, char* argv[]) {
             .action    = bj_cli_print_help_action
         },
 
-        // Verbose flag
+        // Boolean flag (no action specified): toggles the variable to 1 if present.
+        // Usage: -v or --verbose sets verbose=1
         {
             .shortname = 'v',
             .name      = "verbose",
@@ -36,7 +59,8 @@ int main(int argc, char* argv[]) {
             .dest      = &verbose
         },
 
-        // Input file with string value
+        // bj_cli_store_cstring: parses the next argument as a string.
+        // Usage: --input file.txt or -i file.txt
         {
             .shortname = 'i',
             .name      = "input",
@@ -46,7 +70,8 @@ int main(int argc, char* argv[]) {
             .dest      = &input_file
         },
 
-        // Count with integer value
+        // bj_cli_store_int: parses the next argument as an integer.
+        // Usage: --count 42 or -c 42
         {
             .shortname = 'c',
             .name      = "count",
@@ -56,7 +81,7 @@ int main(int argc, char* argv[]) {
             .dest      = &count
         },
 
-        // Threads with integer value
+        // Another integer option. Can have shortname or not.
         {
             .shortname = 't',
             .name      = "threads",
@@ -66,7 +91,8 @@ int main(int argc, char* argv[]) {
             .dest      = &threads
         },
 
-        // Tolerance with double value
+        // bj_cli_store_double: parses the next argument as a floating-point number.
+        // Usage: --tolerance 0.001
         {
             .name    = "tolerance",
             .help    = "Tolerance level for calculations",
@@ -75,7 +101,8 @@ int main(int argc, char* argv[]) {
             .dest    = &tolerance
         },
 
-        // Boolean feature flag
+        // bj_cli_store_bool: parses true/false, yes/no, 1/0 as boolean.
+        // Usage: --enable-feature true
         {
             .name    = "enable-feature",
             .help    = "Enable experimental feature (true/false)",
@@ -84,7 +111,9 @@ int main(int argc, char* argv[]) {
             .dest    = &enable_feature
         },
 
-        // Positional argument (output file)
+        // Positional argument: no name or shortname, just help and metavar.
+        // Matches arguments that don't start with dashes, in order.
+        // Usage: program [options] output.txt
         {
             .help     = "Output file path (optional)",
             .metavar  = "OUTPUT",
@@ -94,7 +123,10 @@ int main(int argc, char* argv[]) {
         },
     };
 
-    // Configure the parser
+    // Create the parser with program metadata.
+    // description: shown in help before options list
+    // epilog: shown in help after options list (good for examples)
+    // The parser auto-generates help text from argument definitions.
     struct bj_cli parser = {
         .prog          = "example_cli",
         .description   = "Example program demonstrating Banjo's argument parsing.\n"
@@ -107,13 +139,19 @@ int main(int argc, char* argv[]) {
         .arguments     = args,
     };
 
-    // Parse arguments
+    // Parse command-line arguments. This processes argv, calls actions to
+    // convert and store values, and validates required arguments.
+    // Returns false if parsing fails (unknown option, missing value, etc.)
+    // On failure, print help and exit with error code.
     if (!bj_cli_parse(&parser, argc, argv, 0)) {
         bj_cli_print_help(&parser);
         return 1;
     }
 
-    // Display parsed values
+    // After successful parsing, all variables contain the parsed values.
+    // Just use them normally - the parser has already converted types and
+    // validated everything. If a value wasn't provided, it still has the
+    // default you initialized it with.
     bj_info("=== Parsed Arguments ===");
     bj_info("Verbose: %s", verbose ? "enabled" : "disabled");
     bj_info("Input File: %s", input_file);

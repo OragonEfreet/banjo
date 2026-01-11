@@ -1,5 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example physics_particle.c
+/// Particle physics with force integration for orbital mechanics.
+///
+/// Particle physics simulates objects with forces that change over time.
+/// Unlike kinematics (constant acceleration), particles accumulate forces each
+/// frame and integrate to update velocity and position. Use particles when:
+/// - Forces vary (gravity between moving objects, springs, drag)
+/// - Multiple forces act simultaneously
+/// - You need realistic physics interactions
+///
+/// The particle loop: accumulate forces → integrate → clear forces → repeat
+/// This example simulates a solar system where gravitational forces constantly
+/// change as planets move, creating realistic orbital mechanics.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/assert.h>
@@ -30,6 +42,10 @@ bj_bitmap* framebuffer = 0;
 bj_renderer* renderer  = 0;
 bj_mat3x3 projection;
 
+// Physics constants for the solar system simulation.
+// G_SUN: gravitational constant (tuned for visual appeal, not realistic)
+// SOFTENING: prevents infinite forces when particles get very close
+// Masses: relative to Earth (Jupiter is 317.8× Earth's mass)
 #define G_SUN      BJ_F(120.0)
 #define SOFTENING  BJ_F(6.0)
 #define M_SUN      BJ_F(1000.0)
@@ -39,6 +55,9 @@ bj_mat3x3 projection;
 #define M_MARS     BJ_F(0.107)
 #define M_JUPITER  BJ_F(317.8)
 
+// bj_particle_2d contains: position, velocity, forces, inverse_mass, damping
+// Forces accumulate during a frame, then bj_step_particle_2d() integrates them
+// into velocity and position changes.
 typedef struct {
     bj_particle_2d body;
     bj_real radius;
@@ -62,6 +81,10 @@ static void update_projection() {
     bj_mat3_mul(&projection, &viewport, &ortho);
 }
 
+// Calculate stable orbital velocity for a circular orbit with softening.
+// For realistic orbits, velocity must balance gravitational force.
+// Formula: v = sqrt(G*M*r² / (r² + eps²)^1.5)
+// Without this, planets would either spiral in or fly away.
 static bj_real orbital_speed_soft(bj_real G, bj_real M, bj_real r, bj_real eps) {
     const bj_real r2 = r*r;
     const bj_real denom = bj_pow(r2 + eps*eps, BJ_F(1.5));
@@ -73,6 +96,12 @@ static void init_sun() {
     sun.inverse_mass = BJ_F(1.0) / M_SUN;
 }
 
+// Initialize a planet in a stable circular orbit.
+// Setting up particles: configure position, velocity, mass, damping.
+// - Position: place at orbital radius r, angle phase
+// - Velocity: perpendicular to position vector, magnitude = orbital speed
+// - Mass: stored as inverse_mass for efficiency (F = a / inverse_mass)
+// - Damping: 1.0 = no damping (perfect conservation of energy)
 static void init_planet(planet_t* p, bj_real r, bj_real mass, uint32_t color, bj_real draw_r, bj_real phase) {
     const bj_real a = phase;
     p->body.position.x = r * bj_cos(a);
@@ -132,8 +161,26 @@ static void initialize() {
 
 static void update(bj_real t) { (void)t; }
 
+// Clamp delta time to prevent instability from large time steps.
+// Large dt can cause particles to overshoot and destabilize the simulation.
 #define DT_CLAMP (BJ_F(1.0)/BJ_F(120.0))
 
+// The particle physics loop: apply forces, then integrate.
+// This is the core pattern for all particle simulations:
+//
+// 1. bj_apply_point_gravity_softened_2d(): Accumulates gravitational force
+//    into particle.forces based on distance and masses. Softening prevents
+//    infinite forces when particles are very close.
+//
+// 2. bj_step_particle_2d(): Integrates accumulated forces:
+//    - acceleration = forces * inverse_mass
+//    - velocity += acceleration * dt (with damping)
+//    - position += velocity * dt
+//    - forces = zero (ready for next frame)
+//
+// This pattern allows multiple forces (gravity, wind, springs) to combine
+// naturally. Each force function just adds to particle.forces, then step
+// integrates them all at once.
 static void physics(bj_real dt) {
     if (dt > DT_CLAMP) dt = DT_CLAMP;
 
@@ -197,6 +244,11 @@ int bj_app_iterate(void* user_data) {
     bj_dispatch_events();
 
     update(bj_stopwatch_elapsed(&stopwatch));
+    // Run particle physics with delta time for frame-rate independence.
+    // Particles vs Kinematics choice:
+    // - Use particles when forces change (orbiting bodies, springs, interactions)
+    // - Use kinematics when acceleration is constant (projectiles with gravity only)
+    // Here, gravity direction/magnitude changes as planets orbit, so particles are needed.
     physics(bj_stopwatch_delay(&stopwatch));
     draw();
     bj_present(renderer, window);

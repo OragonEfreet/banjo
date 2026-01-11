@@ -1,9 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example shaders.c
-/// A small example of using \ref bj_shader_bitmap to generate animated
-/// images.
-//  This shader comes from https://www.shadertoy.com/view/mtyGWy
-//  Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
+/// Procedural graphics using pixel shaders.
+///
+/// A shader is a function that runs on every pixel to compute its color.
+/// bj_shader_bitmap() applies a shader function to an entire bitmap, enabling
+/// procedural generation of images and animations purely through math. This is
+/// software-based (CPU) shader execution - conceptually similar to GPU fragment
+/// shaders but running on the CPU.
+///
+/// This shader comes from https://www.shadertoy.com/view/mtyGWy
+/// Designed by kishimisu at https://www.youtube.com/watch?v=f4s1h2YETNY
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
@@ -23,6 +29,9 @@ bj_window* window      = 0;
 bj_renderer* renderer  = 0;
 bj_bitmap* framebuffer = 0;
 
+// Helper function that generates RGB colors using cosine waves. This creates
+// smooth color gradients for the shader. BJ_F() creates floating-point literals
+// (32-bit or 64-bit depending on build configuration).
 static bj_vec3 palette(bj_real t) {
     const bj_real f = BJ_F(6.28318);
 
@@ -39,17 +48,27 @@ static bj_vec3 palette(bj_real t) {
 
   }
 
+// Shader function signature: receives fragment coordinates and outputs a color.
+// This function runs once per pixel in the bitmap.
+// Parameters:
+//   - frag_color: Output RGB color (values 0.0-1.0)
+//   - frag_coords: Pixel coordinates normalized to -1.0 to 1.0 range
+//   - data: User data pointer (we pass the current time for animation)
+// Returns: 1 to write the pixel, 0 to skip it
 int shader_code(bj_vec3* frag_color, const bj_vec2 frag_coords, void* data) {
     bj_real time = *(bj_real*)data;
 
     bj_vec3 final_color = { BJ_FZERO, BJ_FZERO, BJ_FZERO };
 
+    // The shader math below creates animated colorful patterns using distance
+    // fields, sine waves, and iterative coordinate transformations. This is
+    // typical procedural shader code - pure math creating visuals.
     bj_vec2 uv = frag_coords;
     const bj_real uv0_len = bj_vec2_len(uv);
-    
+
     for (bj_real i = BJ_FZERO; i < BJ_F(4.0); i += BJ_F(1.0)) {
         bj_vec3 col = palette(uv0_len + i * BJ_F(0.4) + time * BJ_F(0.4));
-        
+
         uv = bj_vec2_scale(uv, BJ_F(1.5));
         uv = bj_vec2_map(uv, bj_fract);
         uv = bj_vec2_sub(uv, (bj_vec2){ BJ_F(0.5), BJ_F(0.5) });
@@ -69,6 +88,7 @@ int shader_code(bj_vec3* frag_color, const bj_vec2 frag_coords, void* data) {
         final_color = bj_vec3_add(final_color, col);
     }
 
+    // Write the computed color to the output pixel.
     *frag_color = final_color;
     return 1;
 }
@@ -94,13 +114,21 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 int bj_app_iterate(void* user_data) {
     (void)user_data;
     bj_dispatch_events();
+
+    // Get current runtime to animate the shader.
     bj_real time = (bj_real)bj_run_time();
+
+    // bj_shader_bitmap() applies the shader function to every pixel in the bitmap.
+    // Parameters: target bitmap, shader function, user data, flags
+    // BJ_SHADER_STANDARD_FLAGS normalizes coordinates to -1.0 to 1.0 range.
+    // This is where the magic happens - the shader runs on all 512x512 = 262,144 pixels.
     bj_shader_bitmap(framebuffer, shader_code, &time, BJ_SHADER_STANDARD_FLAGS);
+
     bj_present(renderer, window);
     bj_sleep(15);
 
-    return bj_should_close_window(window) 
-         ? bj_callback_exit_success 
+    return bj_should_close_window(window)
+         ? bj_callback_exit_success
          : bj_callback_continue;
 }
 

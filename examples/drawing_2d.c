@@ -1,6 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example drawing_2d.c
-///  2D primitive drawing demo.
+/// Comprehensive demonstration of 2D primitive drawing functions.
+///
+/// Banjo provides functions to draw pixels, lines, rectangles, circles, and
+/// triangles to bitmaps. This example showcases all major drawing primitives
+/// and demonstrates the difference between filled and outlined shapes.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
@@ -17,25 +21,34 @@ bj_window* window     = 0;
 bj_renderer* renderer = 0;
 
 void draw(bj_bitmap* bmp) {
+    // Clear the bitmap to black before drawing.
     bj_clear_bitmap(bmp);
 
+    // Create colors in the bitmap's native pixel format. Always use
+    // bj_make_bitmap_pixel() rather than hardcoding values, as the format
+    // varies by platform and configuration.
     const uint32_t color_red = bj_make_bitmap_pixel(bmp, 0xFF, 0x00, 0x00);
     const uint32_t color_cyan = bj_make_bitmap_pixel(bmp, 0x7F, 0xFF, 0xD4);
     const uint32_t color_white = bj_make_bitmap_pixel(bmp, 0xFF, 0xFF, 0xFF);
 
-    // Draw pixels individually
+    // Draw individual pixels. bj_put_pixel() sets a single pixel at (x, y).
+    // This is the most basic drawing operation.
     for (size_t x = 10; x < 490; ++x) {
         if (x % 7 == 0) {
             bj_put_pixel(bmp, x, 10, color_red);
         }
     }
 
-    // Draw lines (shapes a banjo)
+    // Draw a polyline (connected line segments). The last parameter (BJ_TRUE)
+    // closes the shape by connecting the last point back to the first.
+    // This draws a banjo outline.
     int poly_x[] = { 100, 95, 95, 100, 100, 95,  75,  75,  95,  120, 140, 140, 120, 115, 115, 120, 120, 115, };
     int poly_y[] = { 20,  25, 50, 55,  100, 100, 120, 145, 165, 165, 145, 120, 100, 100, 55,  50,  25,  20, };
     bj_draw_polyline(bmp, 18, poly_x, poly_y, BJ_TRUE, color_cyan);
 
-    // Draw triangles (shapes a fox)
+    // Draw outlined triangles by indexing into a vertex array. This technique
+    // is common in graphics programming and efficiently reuses vertex data.
+    // Here we draw 13 triangles forming a fox shape.
     int verts[][2] = {
         {330, 270}, {270, 210}, {210, 270}, {210, 150}, {390, 210}, {450, 270},
         {450, 150}, {180, 330}, {270, 390}, {390, 390}, {480, 330}, {330, 450},
@@ -50,39 +63,41 @@ void draw(bj_bitmap* bmp) {
 
     for (size_t t = 0; t < 13; ++t) {
         bj_draw_triangle(bmp,
-            verts[tris[t][0]][0], verts[tris[t][0]][1], 
-            verts[tris[t][1]][0], verts[tris[t][1]][1], 
+            verts[tris[t][0]][0], verts[tris[t][0]][1],
+            verts[tris[t][1]][0], verts[tris[t][1]][1],
             verts[tris[t][2]][0], verts[tris[t][2]][1],
             color_white
         );
     }
 
-    //Draw a checker board
+    // Draw a checkerboard pattern using filled rectangles. The bj_rect
+    // structure defines a rectangle's position and size.
     bj_rect board = {.w = 10, .h = 10,};
     for(size_t y = 0 ; y < 8 ; ++y) {
         for(size_t x = 0 ; x < 8 ; ++x) {
             board.x = 200 + x * board.w;
             board.y = 50 + y * board.h;
+            // XOR determines checkerboard pattern (alternating squares).
             if((x ^ y) & 1) {
-                bj_draw_filled_rectangle(bmp,
-                    &board,
-                    color_red
-                );
-            } 
+                bj_draw_filled_rectangle(bmp, &board, color_red);
+            }
         }
     }
+    // Draw an outline around the entire checkerboard. Note the difference
+    // between bj_draw_rectangle (outline) and bj_draw_filled_rectangle (solid).
     bj_draw_rectangle(bmp,
         &(bj_rect) {.x = 200, .y = 50, .w = 80, .h = 80,},
         color_cyan
     );
 
-
-    // Circle
+    // Draw concentric circles with alternating colors. bj_draw_filled_circle()
+    // takes center (x, y), radius, and color.
     for (int r = 80; r > 0; r -= 20) {
         bj_draw_filled_circle(bmp, 100, 400, r, (r/20) % 2 ? color_red : color_white);
     }
 
-    // Filled triangles (mountain scene)
+    // Draw filled triangles for a simple mountain scene. Filled triangles are
+    // drawn with bj_draw_filled_triangle(), taking three vertices and a color.
     const uint32_t color_dark_gray = bj_make_bitmap_pixel(bmp, 0x50, 0x50, 0x50);
     const uint32_t color_gray = bj_make_bitmap_pixel(bmp, 0x80, 0x80, 0x80);
     const uint32_t color_light_gray = bj_make_bitmap_pixel(bmp, 0xB0, 0xB0, 0xB0);

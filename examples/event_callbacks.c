@@ -1,6 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example event_callbacks.c
-/// Basic event handling.
+/// Event handling using the callback pattern.
+///
+/// This demonstrates registering callback functions that are automatically
+/// invoked when events occur. Callbacks provide cleaner, more declarative
+/// event handling compared to polling, especially for simple input handling.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/error.h>
@@ -20,6 +24,10 @@ typedef struct {
     size_t enter;
 } event_counter;
 
+// Callback functions follow a standard signature:
+// (bj_window* window, const event_type* event, void* user_data)
+// The user_data parameter is whatever you passed during registration.
+
 void cursor_callback(bj_window* p_window, const bj_cursor_event* e, void* data) {
     event_counter* counter = (event_counter*)data;
     ++counter->cursor;
@@ -32,7 +40,7 @@ void button_callback(bj_window* p_window, const bj_button_event* e, void* data) 
     event_counter* counter = (event_counter*)data;
     ++counter->button;
     bj_info("Button event, window %p, button %d, %s, (%d,%d)",
-        (void*)p_window, e->button, 
+        (void*)p_window, e->button,
         e->action == BJ_PRESS ? "pressed" : "released",
         e->x, e->y
     );
@@ -48,7 +56,7 @@ void key_callback(bj_window* p_window, const bj_key_event* e, void* data) {
         action_str = e->action == BJ_RELEASE ? "released" : "repeated";
     }
 
-    bj_info("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s", 
+    bj_info("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s",
         e->key, bj_key_name(e->key), e->scancode, action_str
     );
 
@@ -61,7 +69,7 @@ void enter_callback(bj_window* p_window, const bj_enter_event* e, void* data) {
     event_counter* counter = (event_counter*)data;
     ++counter->enter;
     bj_info("Enter event, window %p, %s, (%d,%d)",
-        (void*)p_window, 
+        (void*)p_window,
         e->enter ? "entered" : "left",
         e->x, e->y
     );
@@ -72,12 +80,15 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     if(!bj_begin(BJ_VIDEO_SYSTEM, 0)) {
         return bj_callback_exit_error;
-    } 
+    }
 
     window = bj_bind_window("Event Callbacks", 100, 100, 800, 600, 0);
 
     event_counter* counter = bj_calloc(sizeof(event_counter));
 
+    // Register callbacks for each event type. When bj_dispatch_events() runs,
+    // these functions will be called automatically for each matching event.
+    // The second parameter (counter) is passed to the callback as user_data.
     bj_set_key_callback(key_callback, counter);
     bj_set_button_callback(button_callback, counter);
     bj_set_cursor_callback(cursor_callback, counter);
@@ -90,11 +101,15 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
 int bj_app_iterate(void* user_data) {
     (void)user_data;
+
+    // bj_dispatch_events() processes all queued events and invokes the
+    // registered callbacks. Unlike polling where you manually check each event,
+    // callbacks are automatically invoked for you.
     bj_dispatch_events();
     bj_sleep(30);
 
-    return bj_should_close_window(window) 
-         ? bj_callback_exit_success 
+    return bj_should_close_window(window)
+         ? bj_callback_exit_success
          : bj_callback_continue;
 }
 

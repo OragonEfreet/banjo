@@ -1,6 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example stopwatch.c
-/// Code example demonstrating the use of bj_stopwatch for 3 seconds.
+/// Using stopwatch for precise timing and delta time measurements.
+///
+/// A stopwatch tracks both total elapsed time and delta time (time since last
+/// measurement). This is essential for frame-independent game logic, animation,
+/// and performance profiling.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/log.h>
@@ -8,6 +12,7 @@
 #include <banjo/system.h>
 #include <banjo/time.h>
 
+// A stopwatch must be zero-initialized before use.
 static bj_stopwatch p_stopwatch = {0};
 
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
@@ -23,9 +28,17 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 int bj_app_iterate(void* user_data) {
     (void)user_data;
 
+    // Update the stopwatch. This must be called once per iteration to record
+    // the current time. The first call starts the stopwatch.
     bj_step_stopwatch(&p_stopwatch);
 
+    // Get total time elapsed since the stopwatch started (first step call).
     double elapsed = bj_stopwatch_elapsed(&p_stopwatch);
+
+    // Get delta time - time since the previous step. This is crucial for
+    // frame-independent movement and animation. For example:
+    //   position += velocity * delay;
+    // ensures objects move at constant speed regardless of frame rate.
     double delay   = bj_stopwatch_delay(&p_stopwatch);
 
     bj_trace("Elapsed: %.3lf s | Delay: %.3lf s", elapsed, delay);

@@ -1,6 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example logging.c
-/// Demonstrate the use of log facilities
+/// Using Banjo's logging system with severity levels and filtering.
+///
+/// Banjo provides a multi-level logging system for debugging and diagnostics.
+/// Messages can be filtered by severity, formatted like printf, and queried
+/// for output length.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/assert.h>
 #include <banjo/main.h>
@@ -10,32 +14,40 @@ int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    // Usually, log levels go from 0 to 5 in that order:
-    // BJ_LOG_TRACE < BJ_LOG_DEBUG < BJ_LOG_INFO,
-    // BJ_LOG_WARN <  BJ_LOG_ERROR < BJ_LOG_FATAL.
-    // The default log level on application start is 0 (TRACE)
+    // Banjo has six log levels in ascending severity:
+    //   BJ_LOG_TRACE (0) - Detailed trace information
+    //   BJ_LOG_DEBUG (1) - Debug information
+    //   BJ_LOG_INFO  (2) - Informational messages
+    //   BJ_LOG_WARN  (3) - Warning messages
+    //   BJ_LOG_ERROR (4) - Error messages
+    //   BJ_LOG_FATAL (5) - Fatal error messages
+    //
+    // The default level is TRACE (0), which displays all messages.
     const int default_level = bj_get_log_level();
     bj_assert(default_level == 0);
     bj_info("Default log level: %d\n", default_level);
 
-    // To set the current log level:
+    // Change the minimum severity level that will be displayed. Messages below
+    // this level are silently discarded. Here we set it to INFO, so TRACE and
+    // DEBUG messages won't appear.
     bj_set_log_level(BJ_LOG_INFO);
-    // Since level are signed int, you can provide any custom log level outside
-    // the range [0;5].
 
-    // Any message sent in a level equal to higher than the current will
-    // output:
+    // The generic bj_log_msg(level, ...) function logs at any severity.
+    // Only messages at or above the current level (INFO) will display.
     bj_log_msg(TRACE, "Trace level (won't display)");
     bj_log_msg(INFO, "Information level message");
     bj_log_msg(WARN, "Warning level message");
-    // Also ther is bj_info(), bj_trace(), etc:
+
+    // Convenience functions are provided for each level: bj_trace(), bj_debug(),
+    // bj_info(), bj_warn(), bj_err(), bj_fatal(). These are clearer than using
+    // the generic bj_log_msg().
     bj_err("This is an error message");
 
+    // All logging functions support printf-style formatting with variable
+    // arguments. They return the number of characters written (excluding the
+    // null terminator), which can be useful for buffer management or testing.
+    size_t written = bj_warn("Room #%d is closed, but you have '%s'", 42, "The Key Item");
 
-    // Logging functions accept variable arguments and string formatting a-la printf:
-    size_t written = bj_warn("Room #%d is closed, but you have '%s'", 42, "The Key Item"); 
-
-    // Written contains the number of characters actually written:
     bj_info("Previous log message was written in %ld characters (excluding '\\0')", written);
     return 0;
 }

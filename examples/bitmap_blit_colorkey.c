@@ -29,10 +29,11 @@ bj_renderer* renderer = 0;
 int bj_app_begin(void** user_data, int argc, char* argv[]) {
     (void)user_data; (void)argc; (void)argv;
 
-    // Create rendering target with a gradient background
+    // Create an off-screen rendering target.
     bj_bitmap* bmp_rendering = bj_create_bitmap(WINDOW_W, WINDOW_H, BJ_PIXEL_MODE_BGR24, 0);
 
-    // Draw a checkerboard pattern to show transparency
+    // Draw a checkerboard pattern as the background. This makes it easy to see
+    // which pixels are transparent after we blit sprites with color keys.
     for (int y = 0; y < WINDOW_H; y += 40) {
         for (int x = 0; x < WINDOW_W; x += 40) {
             uint32_t color = ((x/40 + y/40) % 2 == 0)
@@ -47,20 +48,23 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         }
     }
 
-    // Load sprite sheet
+    // Load a sprite sheet. Sprite sheets typically have a solid background color
+    // (black, magenta, etc.) that should be treated as transparent.
     bj_bitmap* sprite_sheet = bj_create_bitmap_from_file(BANJO_ASSETS_DIR"/bmp/gabe-idle-run.bmp", 0);
 
-    // The sprite uses black (RGB: 0, 0, 0) as the transparent color
-    // We need to convert this to the native format of the sprite bitmap
+    // Define which color should be transparent. This sprite sheet uses black
+    // (RGB: 0, 0, 0). Convert to the sprite's native pixel format.
     uint32_t black_key = bj_make_bitmap_pixel(sprite_sheet, 0x00, 0x00, 0x00);
 
-    // Enable color key transparency on the sprite
+    // Enable color key transparency. Any pixel matching black_key will be
+    // skipped during blitting, making it transparent. This is how classic
+    // sprite rendering works - much simpler than alpha channels.
     bj_set_bitmap_colorkey(sprite_sheet, BJ_TRUE, black_key);
 
-    // Blit multiple sprites to demonstrate transparency
-    // Each sprite frame is 24x24 pixels in the sprite sheet
+    // Now when we blit from the sprite sheet, pixels matching the color key
+    // won't be copied, creating transparent sprites. Each frame is 24x24 pixels.
 
-    // Row 1: Idle animation frames
+    // Blit idle animation frames (row 0 of the sprite sheet).
     for (int i = 0; i < 4; i++) {
         bj_blit(
             sprite_sheet,
@@ -71,7 +75,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         );
     }
 
-    // Row 2: Run animation frames
+    // Blit run animation frames (row 1 of the sprite sheet).
     for (int i = 0; i < 6; i++) {
         bj_blit(
             sprite_sheet,
@@ -82,7 +86,8 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         );
     }
 
-    // Draw some sprites at larger scale using bj_blit_stretched
+    // Color key transparency also works with scaled blitting. Here we draw
+    // sprites at 4x scale (24x24 → 96x96).
     bj_blit_stretched(
         sprite_sheet,
         &(bj_rect){.x = 0, .y = 0, .w = 24, .h = 24},

@@ -1,6 +1,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example random_distribution.c
-/// Display of different random distribution results
+/// Statistical random distributions with interactive histograms.
+///
+/// Random distributions generate numbers following specific probability patterns.
+/// This example demonstrates three common distributions:
+/// - Uniform: All values in a range are equally likely (dice rolls, card shuffles)
+/// - Bernoulli: Binary true/false outcomes with probability p (coin flips, hit chances)
+/// - Normal (Gaussian): Bell curve around a mean (measurement errors, natural variation)
+///
+/// The example visualizes each distribution as a histogram, showing how random
+/// samples converge to the expected statistical shape as sample count increases.
 ////////////////////////////////////////////////////////////////////////////////
 #define BJ_AUTOMAIN_CALLBACKS
 #include <banjo/bitmap.h>
@@ -71,14 +80,23 @@ static void run_distributions() {
     distributions[1].n_steps = n_steps_base / 128;
     distributions[2].n_steps = n_steps_base / 64;
 
-    // Uniform
+    // Uniform distribution: generates integers uniformly across [min, max].
+    // bj_uniform_int32_distribution(generator, gen_data, min, max)
+    // Every value in the range has equal probability. Use this for:
+    // - Random array indices, positions, rotations
+    // - Shuffling, dealing cards, rolling dice
     for (size_t s = 0; s < distributions[0].n_steps; ++s) {
         uint32_t x = bj_uniform_int32_distribution(bj_pcg32_generator, 0, 0, GRAPH_W - 1);
         size_t y = ++distributions[0].result[x];
         if (y > distributions[0].max_y) distributions[0].max_y = y;
     }
 
-    // Bernoulli: p varies with x position
+    // Bernoulli distribution: generates true/false with probability p.
+    // bj_bernoulli_distribution(generator, gen_data, p)
+    // Returns 1 with probability p, 0 with probability (1-p). Use this for:
+    // - Coin flips, critical hit chances, spawn decisions
+    // - Any yes/no outcome with a specific probability
+    // Here we vary p across x to show the linear relationship.
     for (size_t px = 0; px < GRAPH_W; ++px) {
         bj_real p = (bj_real)px / GRAPH_W;
         for (size_t s = 0; s < distributions[1].n_steps; ++s) {
@@ -89,7 +107,13 @@ static void run_distributions() {
         }
     }
 
-    // Normal
+    // Normal (Gaussian) distribution: generates values in a bell curve.
+    // bj_normal_real_distribution(generator, gen_data, mean, std_deviation)
+    // Most values cluster near the mean, with probability decreasing away from it.
+    // Use this for:
+    // - Natural variation (damage ranges, spawn positions with clustering)
+    // - Measurement errors, particle velocities
+    // - Anything that should be "usually X but sometimes a bit more/less"
     const bj_real mean = BJ_F(0.5) * (bj_real)(GRAPH_W - 1);
     const bj_real sd   = BJ_F(100.);
     for (size_t s = 0; s < distributions[2].n_steps; ++s) {
@@ -110,6 +134,10 @@ static uint32_t darken_color(uint32_t pixel, double factor, bj_bitmap* bmp) {
     return bj_make_bitmap_pixel(bmp, r, g, b);
 }
 
+// Visualize distributions as histograms. For each distribution, the x-axis
+// represents value buckets and y-axis shows frequency (how many samples fell
+// in that bucket). Dots show raw data, smooth curves show moving averages.
+// This visualization helps understand how distributions behave statistically.
 void draw(bj_bitmap* bmp) {
     bj_clear_bitmap(bmp);
 
@@ -181,6 +209,9 @@ static void roll() {
     bj_present(renderer, window);
 }
 
+// Interactive controls: adjust sample count to see how distributions converge.
+// With few samples, histograms are noisy. With many samples, they approach
+// the theoretical probability curves. This demonstrates the law of large numbers.
 void key_callback(bj_window* p_window, const bj_key_event* e, void* data) {
     (void)data;
     if (e->action != BJ_RELEASE) return;
