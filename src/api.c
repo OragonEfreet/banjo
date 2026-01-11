@@ -1,4 +1,5 @@
 #include <banjo/api.h>
+#include <banjo/version.h>
 
 #include <check.h>
 
@@ -75,30 +76,32 @@
 #   define BJ_HAS_FASTMATH 0
 #endif
 
-static const struct bj_build_info s_build_info = {
-    .name             = BJ_NAME,
-    .version          = BJ_VERSION,
-    .compiler_name    = BJ_COMPILER_NAME,
-    .compiler_version = BJ_COMPILER_VERSION,
-    .debug            = BJ_BUILD_DEBUG_ENABLED,
-
-    // Backends (alphabetically sorted)
-    .backend_alsa       = BJ_HAS_ALSA_BACKEND,
-    .backend_cocoa      = BJ_HAS_COCOA_BACKEND,
-    .backend_emscripten = BJ_HAS_EMSCRIPTEN_BACKEND,
-    .backend_mme        = BJ_HAS_MME_BACKEND,
-    .backend_win32      = BJ_HAS_WIN32_BACKEND,
-    .backend_x11        = BJ_HAS_X11_BACKEND,
-
-    // Configs (alphabetically sorted)
-    .checks_abort = BJ_HAS_CHECKS_ABORT,
-    .checks_log   = BJ_HAS_CHECKS_LOG,
-    .fastmath     = BJ_HAS_FASTMATH,
-    .log_color    = BJ_HAS_LOG_COLOR,
-    .pedantic     = BJ_HAS_PEDANTIC,
-};
-
 const struct bj_build_info* bj_build_information(void) {
+
+    static const struct bj_build_info s_build_info = {
+        .name             = BJ_NAME,
+        .variant          = BJ_NAME_VARIANT,
+        .version          = BJ_VERSION,
+        .compiler_name    = BJ_COMPILER_NAME,
+        .compiler_version = BJ_COMPILER_VERSION,
+        .debug            = BJ_BUILD_DEBUG_ENABLED,
+
+        // Backends (alphabetically sorted)
+        .backend_alsa       = BJ_HAS_ALSA_BACKEND,
+        .backend_cocoa      = BJ_HAS_COCOA_BACKEND,
+        .backend_emscripten = BJ_HAS_EMSCRIPTEN_BACKEND,
+        .backend_mme        = BJ_HAS_MME_BACKEND,
+        .backend_win32      = BJ_HAS_WIN32_BACKEND,
+        .backend_x11        = BJ_HAS_X11_BACKEND,
+
+        // Configs (alphabetically sorted)
+        .checks_abort = BJ_HAS_CHECKS_ABORT,
+        .checks_log   = BJ_HAS_CHECKS_LOG,
+        .fastmath     = BJ_HAS_FASTMATH,
+        .log_color    = BJ_HAS_LOG_COLOR,
+        .pedantic     = BJ_HAS_PEDANTIC,
+    };
+
     return &s_build_info;
 }
 

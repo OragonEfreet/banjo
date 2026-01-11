@@ -1,5 +1,6 @@
 #include <banjo/log.h>
 #include <banjo/renderer.h>
+#include <banjo/version.h>
 
 #include "check.h"
 #include "renderer.h"

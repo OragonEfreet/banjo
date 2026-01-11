@@ -48,6 +48,7 @@ add_library(banjo
     src/stream.h
     src/system.c
     src/time.c
+    src/version.c
     src/video.c
     src/video_layer.h
     src/window.c
@@ -79,6 +80,7 @@ add_library(banjo
     inc/banjo/system.h
     inc/banjo/time.h
     inc/banjo/vec.h
+    inc/banjo/version.h
     inc/banjo/window.h
 )
 
