@@ -3,6 +3,8 @@ project(banjo LANGUAGES C)
 
 include(CTest)
 
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 if (MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
