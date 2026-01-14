@@ -3,11 +3,21 @@
 
 // Note: This file is AI-generated.
 
-/* ---------- Public: color key ---------- */
-void bj_set_bitmap_colorkey(struct bj_bitmap* bmp, bj_bool enabled, uint32_t key_value) {
+/* ---------- Public: color properties ---------- */
+void bj_set_bitmap_color(struct bj_bitmap* bmp, uint32_t color, uint8_t roles) {
+    bj_check(bmp);
+    if (roles & BJ_BITMAP_CLEAR_COLOR) {
+        bmp->clear_color = color;
+    }
+    if (roles & BJ_BITMAP_COLORKEY) {
+        bmp->colorkey = color;
+        bmp->colorkey_enabled = BJ_TRUE;  /* Auto-enable when setting colorkey */
+    }
+}
+
+void bj_enable_colorkey(struct bj_bitmap* bmp, bj_bool enabled) {
     bj_check(bmp);
     bmp->colorkey_enabled = enabled;
-    bmp->colorkey = key_value;
 }
 
 /* ---------- Bit helpers for sub-byte formats (1/4/8bpp) ---------- */

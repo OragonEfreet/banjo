@@ -2,7 +2,7 @@
 /// \example bitmap_blit_colorkey.c
 /// Demonstration of color key transparency for sprite blitting.
 ///
-/// This example shows how to use \ref bj_set_bitmap_colorkey to make specific
+/// This example shows how to use \ref bj_set_bitmap_color to make specific
 /// pixel values transparent during blitting. This is commonly used for sprite
 /// rendering where a background color (like black or magenta) should be treated
 /// as transparent. The example uses the Gabe sprite sheet with black (RGB: 0, 0, 0)
@@ -59,7 +59,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     // Enable color key transparency. Any pixel matching black_key will be
     // skipped during blitting, making it transparent. This is how classic
     // sprite rendering works - much simpler than alpha channels.
-    bj_set_bitmap_colorkey(sprite_sheet, BJ_TRUE, black_key);
+    bj_set_bitmap_color(sprite_sheet, black_key, BJ_BITMAP_COLORKEY);
 
     // Now when we blit from the sprite sheet, pixels matching the color key
     // won't be copied, creating transparent sprites. Each frame is 24x24 pixels.

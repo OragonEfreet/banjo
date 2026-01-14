@@ -247,7 +247,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     framebuffer = bj_get_framebuffer(renderer);
 
-    bj_set_bitmap_clear_color(framebuffer, bj_make_bitmap_pixel(framebuffer, 22, 26, 32));
+    bj_set_bitmap_color(framebuffer, bj_make_bitmap_pixel(framebuffer, 22, 26, 32), BJ_BITMAP_CLEAR_COLOR);
 
     init_distributions(framebuffer);
     roll();

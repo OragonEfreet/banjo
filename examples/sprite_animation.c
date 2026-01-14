@@ -41,7 +41,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
 
     // Create a small off-screen bitmap to hold one animation frame.
     bmp_rendering = bj_create_bitmap(SPRITE_W, SPRITE_H, BJ_PIXEL_MODE_BGR24, 0);
-    bj_set_bitmap_clear_color(bmp_rendering, bj_make_bitmap_pixel(bmp_rendering, 0xFF, 0x00, 0x00));
+    bj_set_bitmap_color(bmp_rendering, bj_make_bitmap_pixel(bmp_rendering, 0xFF, 0x00, 0x00), BJ_BITMAP_CLEAR_COLOR);
     bj_clear_bitmap(bmp_rendering);
 
     // Load the sprite sheet once. It stays in memory - we just blit different

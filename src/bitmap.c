@@ -294,15 +294,6 @@ void bj_clear_bitmap(struct bj_bitmap* bitmap) {
 }
 
 
-void bj_set_bitmap_clear_color(
-    struct bj_bitmap* bitmap,
-    uint32_t clear_color
-) {
-    bj_check(bitmap);
-    bitmap->clear_color = clear_color;
-}
-
-
 
 void bj_make_bitmap_rgb(
     const struct bj_bitmap* bitmap,

@@ -54,6 +54,24 @@ enum bj_blit_op {
     BJ_BLIT_OP_SUB_SAT,   //!< Per-channel saturated subtract (clamped to 0)
 };
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Color roles for bitmaps.
+///
+/// These flags specify which color properties of a bitmap should be affected
+/// when calling \ref bj_set_bitmap_color. Multiple roles can be combined using
+/// bitwise OR.
+///
+/// \par Typical Usage
+/// - `BJ_BITMAP_CLEAR_COLOR`: Sets the color used by \ref bj_clear_bitmap.
+/// - `BJ_BITMAP_COLORKEY`: Sets the transparency key and enables color keying.
+/// - Both flags together: Common when initializing sprite sheets with a
+///   transparent background color.
+///
+enum bj_bitmap_color_role {
+    BJ_BITMAP_CLEAR_COLOR = (1 << 0),  //!< Clear/fill color for bj_clear_bitmap()
+    BJ_BITMAP_COLORKEY    = (1 << 1)   //!< Transparency key for blitting (auto-enables)
+};
+
 
 
 /// Typedef for the  bj_bitmap struct
@@ -422,7 +440,8 @@ BANJO_EXPORT void bj_put_pixel(
 ///
 /// \param bitmap The bitmap object to reset.
 ///
-/// The clear color can be set with \ref bj_set_bitmap_clear_color.
+/// The clear color can be set with \ref bj_set_bitmap_color using the
+/// \ref BJ_BITMAP_CLEAR_COLOR role.
 /// This function effectively fills all the pixels of the bitmap with
 /// the clear color.
 ////////////////////////////////////////////////////////////////////////////////
@@ -431,19 +450,67 @@ BANJO_EXPORT void bj_clear_bitmap(
 );
 
 ////////////////////////////////////////////////////////////////////////////////
+/// Sets one or more color properties of a bitmap.
+///
+/// \param bitmap The target bitmap.
+/// \param color  The color value in the bitmap's native pixel format.
+/// \param roles  Bitwise OR of \ref bj_bitmap_color_role flags.
+///
+/// This function can set the clear color and/or the transparency key in a
+/// single call by combining flags with bitwise OR.
+///
+/// \par Color Key Auto-Enable
+/// When \ref BJ_BITMAP_COLORKEY is specified, color keying is **automatically
+/// enabled**. To disable it later without changing the key value, use
+/// \ref bj_enable_colorkey.
+///
+/// \par Common Patterns
+///
+/// Set clear color only:
+/// \code
+/// bj_set_bitmap_color(bmp, black, BJ_BITMAP_CLEAR_COLOR);
+/// \endcode
+///
+/// Set transparency key only (and enable it):
+/// \code
+/// bj_set_bitmap_color(bmp, magenta, BJ_BITMAP_COLORKEY);
+/// \endcode
+///
+/// Set both at once (sprite sheet initialization):
+/// \code
+/// uint32_t key = bj_make_bitmap_pixel(bmp, 0xFF, 0x00, 0xFF);
+/// bj_set_bitmap_color(bmp, key, BJ_BITMAP_CLEAR_COLOR | BJ_BITMAP_COLORKEY);
+/// bj_clear_bitmap(bmp);  // Fill with transparent background
+/// \endcode
+///
+/// \see bj_enable_colorkey
+////////////////////////////////////////////////////////////////////////////////
+BANJO_EXPORT void bj_set_bitmap_color(
+    struct bj_bitmap*  bitmap,
+    uint32_t    color,
+    uint8_t     roles
+);
+
+////////////////////////////////////////////////////////////////////////////////
 /// Enables or disables color key transparency for blitting.
 ///
-/// \param bitmap   The target bitmap.
-/// \param enabled    Whether the color key should be enabled.
-/// \param key_value  The pixel value (in bitmap's native format) considered transparent.
+/// \param bitmap  The target bitmap.
+/// \param enabled Whether color keying should be enabled.
 ///
-/// When color keying is enabled on the **source** bitmap, blitters skip any
-/// source pixel equal to `key_value`.
+/// When color keying is enabled on the **source** bitmap during blitting,
+/// any source pixel equal to the colorkey value is skipped (transparent).
+///
+/// \par Usage
+/// This function is typically used to toggle transparency on/off without
+/// changing the key value. Setting a colorkey with \ref bj_set_bitmap_color
+/// automatically enables it, so explicit enabling is only needed when
+/// re-enabling after a previous disable.
+///
+/// \see bj_set_bitmap_color
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_set_bitmap_colorkey(
+BANJO_EXPORT void bj_enable_colorkey(
     struct bj_bitmap*  bitmap,
-    bj_bool     enabled,
-    uint32_t    key_value
+    bj_bool     enabled
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -468,16 +535,6 @@ BANJO_EXPORT uint32_t bj_bitmap_pixel(
     size_t           y
 );
 
-////////////////////////////////////////////////////////////////////////////////
-/// Sets the color used for clearing the bitmap.
-///
-/// \param bitmap    The target bitmap.
-/// \param clear_color The new clear color.
-////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_set_bitmap_clear_color(
-    struct bj_bitmap* bitmap,
-    uint32_t clear_color
-);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Bitmap blitting operation from a source to a destination bitmap.
@@ -499,7 +556,7 @@ BANJO_EXPORT void bj_set_bitmap_clear_color(
 ///
 /// \par Color Key
 ///
-/// If the *source* bitmap has color keying enabled via \ref bj_set_bitmap_colorkey,
+/// If the *source* bitmap has color keying enabled via \ref bj_set_bitmap_color,
 /// any source pixel equal to the key value is skipped.
 ///
 /// \par Pixel Formats
@@ -537,7 +594,7 @@ BANJO_EXPORT bj_bool bj_blit(
 ///
 /// \par Color Key
 ///
-/// Color keying on the *source* bitmap is honored (see \ref bj_set_bitmap_colorkey).
+/// Color keying on the *source* bitmap is honored (see \ref bj_set_bitmap_color).
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT bj_bool bj_blit_stretched(

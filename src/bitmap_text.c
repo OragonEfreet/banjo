@@ -46,7 +46,7 @@ static const struct bj_bitmap* get_charset_mask(struct bj_bitmap* p_bitmap)
     );
     bj_check_or_0(mask);
 
-    bj_set_bitmap_clear_color(mask, 0x00u);
+    bj_set_bitmap_color(mask, 0x00u, BJ_BITMAP_CLEAR_COLOR);
     bj_clear_bitmap(mask);
 
     for (size_t idx = 0; idx < charset_char_len; ++idx) {
