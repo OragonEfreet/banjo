@@ -356,6 +356,7 @@ BANJO_EXPORT void bj_cli_print_help(
 }
 
 static int v_sprint_error(char* buffer, size_t n, const struct bj_cli* parser, const char* format, ...) {
+    (void)parser;
     size_t buffer_remaining = n;
     size_t total_size = 0;
     va_list args;
