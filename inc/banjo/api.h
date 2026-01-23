@@ -45,6 +45,13 @@
 #if defined(__unix__)
 #   define BJ_OS_UNIX
 #endif
+
+#if defined(BJ_OS_UNIX)
+#   include <unistd.h>
+#   if defined(_POSIX_VERSION)
+#       define BJ_OS_POSIX
+#   endif
+#endif
 /// @}
 
 /// \name Compiler detection

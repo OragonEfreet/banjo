@@ -2,9 +2,7 @@
 
 #include <banjo/time.h>
 
-#include "video_layer.h"
-
-#ifdef BJ_OS_UNIX
+#ifdef BJ_OS_POSIX
 
 #include <time.h>
 

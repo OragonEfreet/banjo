@@ -13,6 +13,7 @@ static struct {
     unsigned short event;
     unsigned short video;
     unsigned short audio;
+    unsigned short network;
 } syscount = {0};
 
 static void retain_time(void) {
@@ -26,7 +27,6 @@ static void release_time(void) {
         bj_end_time();
     }
 }
-
 
 static void retain_event(void) {
     if(syscount.event++ == 0) {
@@ -90,6 +90,17 @@ static void release_audio(struct bj_error** p_error) {
     }
 }
 
+static void retain_network(void) {
+    if(syscount.network++ == 0) {
+        bj_begin_network();
+    }
+}
+
+static void release_network(void) {
+    if(syscount.network > 0 && syscount.network-- == 1) {
+        bj_end_network();
+    }
+}
 
 bj_bool bj_begin(
     int               systems,
@@ -117,11 +128,16 @@ bj_bool bj_begin(
         }
     }
 
-    bj_trace("system initialized (time: %u, event: %u, audio: %u, video: %u)",
+    if((systems & BJ_NETWORK_SYSTEM) > 0) {
+        retain_network();
+    }
+
+    bj_trace("system initialized (time: %u, event: %u, audio: %u, video: %u, network: %u)",
         syscount.time,
         syscount.event,
         syscount.audio,
-        syscount.video
+        syscount.video,
+        syscount.network
     );
 
     return BJ_TRUE;
@@ -148,17 +164,23 @@ void bj_end(void) {
         bj_end_time();
     }
 
-    bj_trace("system shutdown (time: %u -> 0, event: %u -> 0, audio: %u -> 0, video: %u -> 0)",
+    if(syscount.network > 0) {
+        bj_end_network();
+    }
+
+    bj_trace("system shutdown (time: %u -> 0, event: %u -> 0, audio: %u -> 0, video: %u -> 0, network: %u -> 0)",
         syscount.time,
         syscount.event,
         syscount.audio,
-        syscount.video
+        syscount.video,
+        syscount.network
     );
 
-    syscount.audio = 0;
-    syscount.video = 0;
-    syscount.event = 0;
-    syscount.time = 0;
+    syscount.audio   = 0;
+    syscount.video   = 0;
+    syscount.event   = 0;
+    syscount.time    = 0;
+    syscount.network = 0;
 }
 
 bj_bool bj_begin_system(
@@ -168,25 +190,34 @@ bj_bool bj_begin_system(
     retain_time();
     retain_event();
 
-    if(system == BJ_VIDEO_SYSTEM) {
-        if (retain_video(p_error) == BJ_FALSE) {
-            release_event();
-            release_time();
-            return BJ_FALSE;
-        }
-    } else if(system == BJ_AUDIO_SYSTEM) {
-        if (retain_audio(p_error) == BJ_FALSE) {
-            release_event();
-            release_time();
-            return BJ_FALSE;
-        }
+    switch(system) {
+        case BJ_VIDEO_SYSTEM:
+            if (retain_video(p_error) == BJ_FALSE) {
+                release_event();
+                release_time();
+                return BJ_FALSE;
+            }
+            break;
+        case BJ_AUDIO_SYSTEM:
+            if (retain_audio(p_error) == BJ_FALSE) {
+                release_event();
+                release_time();
+                return BJ_FALSE;
+            }
+            break;
+        case BJ_NETWORK_SYSTEM:
+            retain_network();
+            break;
+        default:
+            break;
     }
 
-    bj_trace("system retained (time: %u, event: %u, audio: %u, video: %u)",
+    bj_trace("system retained (time: %u, event: %u, audio: %u, video: %u, network: %u)",
         syscount.time,
         syscount.event,
         syscount.audio,
-        syscount.video
+        syscount.video,
+        syscount.network
     );
 
     return BJ_TRUE;
@@ -196,20 +227,29 @@ void bj_end_system(
     enum bj_system    system,
     struct bj_error** p_error
 ) {
-    if(system == BJ_VIDEO_SYSTEM) {
-        release_video(p_error);
-    } else if(system == BJ_AUDIO_SYSTEM) {
-        release_audio(p_error);
+    switch(system) {
+        case BJ_VIDEO_SYSTEM:
+            release_video(p_error);
+            break;
+        case BJ_AUDIO_SYSTEM:
+            release_audio(p_error);
+            break;
+        case BJ_NETWORK_SYSTEM:
+            release_network();
+            break;
+        default:
+            break;
     }
 
     release_event();
     release_time();
 
-    bj_trace("system released (time: %u, event: %u, audio: %u, video: %u)",
+    bj_trace("system released (time: %u, event: %u, audio: %u, video: %u, network: %u)",
         syscount.time,
         syscount.event,
         syscount.audio,
-        syscount.video
+        syscount.video,
+        syscount.network
     );
 }
 

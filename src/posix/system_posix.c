@@ -2,7 +2,7 @@
 
 #include <banjo/system.h>
 
-#ifdef BJ_OS_UNIX
+#ifdef BJ_OS_POSIX
 
 #include <banjo/error.h>
 

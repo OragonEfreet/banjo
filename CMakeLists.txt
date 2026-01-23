@@ -11,11 +11,40 @@ endif()
 
 add_library(banjo
     src/api.c
-    src/cli.c
+    inc/banjo/api.h
+    inc/banjo/assert.h
+    inc/banjo/audio.h
+    inc/banjo/bitmap.h
+    inc/banjo/cli.h
+    inc/banjo/draw.h
+    inc/banjo/error.h
+    inc/banjo/event.h
+    inc/banjo/geometry_2d.h
+    inc/banjo/log.h
+    inc/banjo/main.h
+    inc/banjo/mat.h
+    inc/banjo/math.h
+    inc/banjo/memory.h
+    inc/banjo/physics.h
+    inc/banjo/physics_2d.h
+    inc/banjo/pixel.h
+    inc/banjo/quat.h
+    inc/banjo/random.h
+    inc/banjo/rect.h
+    inc/banjo/renderer.h
+    inc/banjo/shader.h
+    inc/banjo/stream.h
+    inc/banjo/string.h
+    inc/banjo/system.h
+    inc/banjo/time.h
+    inc/banjo/vec.h
+    inc/banjo/version.h
+    inc/banjo/window.h
     src/audio.c
-    src/audio_layer.h
     src/audio.h
+    src/audio_layer.h
     src/bitmap.c
+    src/bitmap.h
     src/bitmap_blit.c
     src/bitmap_blit_mask.c
     src/bitmap_16.c
@@ -24,9 +53,9 @@ add_library(banjo
     src/bitmap_charsets.h
     src/bitmap_dib.c
     src/bitmap_draw.c
-    src/bitmap.h
     src/bitmap_text.c
     src/check.h
+    src/cli.c
     src/error.c
     src/event.c
     src/geometry_2d.c
@@ -55,48 +84,22 @@ add_library(banjo
     src/video_layer.h
     src/window.c
     src/window.h
-    inc/banjo/api.h
-    inc/banjo/cli.h
-    inc/banjo/assert.h
-    inc/banjo/audio.h
-    inc/banjo/bitmap.h
-    inc/banjo/draw.h
-    inc/banjo/error.h
-    inc/banjo/event.h
-    inc/banjo/geometry_2d.h
-    inc/banjo/log.h
-    inc/banjo/main.h
-    inc/banjo/mat.h
-    inc/banjo/math.h
-    inc/banjo/memory.h
-    inc/banjo/physics_2d.h
-    inc/banjo/physics.h
-    inc/banjo/pixel.h
-    inc/banjo/quat.h
-    inc/banjo/random.h
-    inc/banjo/rect.h
-    inc/banjo/renderer.h
-    inc/banjo/shader.h
-    inc/banjo/stream.h
-    inc/banjo/string.h
-    inc/banjo/system.h
-    inc/banjo/time.h
-    inc/banjo/vec.h
-    inc/banjo/version.h
-    inc/banjo/window.h
 )
 
 if(WIN32)
     target_sources(banjo PRIVATE 
+        src/win32/network_win32.c
         src/win32/system_win32.c
         src/win32/time_win32.c
     )
-else()
-    target_sources(banjo PRIVATE
-        src/unix/system_unix.c
-        src/unix/time_unix.c
-    )
+endif()
 
+if(UNIX)
+    target_sources(banjo PRIVATE 
+        src/posix/network_posix.c
+        src/posix/system_posix.c
+        src/posix/time_posix.c
+    )
 endif()
 
 target_include_directories(banjo

@@ -15,9 +15,10 @@
 #include <banjo/error.h>
 
 enum bj_system {
-    BJ_NO_SYSTEM    = 0x00,
-    BJ_AUDIO_SYSTEM = 0x01,
-    BJ_VIDEO_SYSTEM = 0x02,
+    BJ_NO_SYSTEM      = 0x00,
+    BJ_AUDIO_SYSTEM   = 0x01,
+    BJ_VIDEO_SYSTEM   = 0x02,
+    BJ_NETWORK_SYSTEM = 0x04,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
