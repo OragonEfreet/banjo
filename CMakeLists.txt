@@ -25,6 +25,7 @@ add_library(banjo
     inc/banjo/mat.h
     inc/banjo/math.h
     inc/banjo/memory.h
+    inc/banjo/net.h
     inc/banjo/physics.h
     inc/banjo/physics_2d.h
     inc/banjo/pixel.h
@@ -88,7 +89,7 @@ add_library(banjo
 
 if(WIN32)
     target_sources(banjo PRIVATE 
-        src/win32/network_win32.c
+        src/win32/net_win32.c
         src/win32/system_win32.c
         src/win32/time_win32.c
     )
@@ -96,7 +97,7 @@ endif()
 
 if(UNIX)
     target_sources(banjo PRIVATE 
-        src/posix/network_posix.c
+        src/posix/net_posix.c
         src/posix/system_posix.c
         src/posix/time_posix.c
     )
