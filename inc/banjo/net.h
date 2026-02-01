@@ -16,30 +16,18 @@
 #include <banjo/api.h>
 #include <banjo/error.h>
 
-enum bj_net_type {
-    BJ_IPV4,
-    BJ_IPV6,
-};
+struct bj_net_addr;
+struct bj_tcp_listener;
 
-struct bj_net_address;
-
-struct bj_net_address_info {
-    struct bj_net_address*      address;
-    struct bj_net_address_info* next;
-};
-
-BANJO_EXPORT struct bj_net_address_info* bj_get_local_addresses(void);
-
-BANJO_EXPORT void bj_free_address_info(
-    struct bj_net_address_info* info
+BANJO_EXPORT void bj_unbind(
+    struct bj_tcp_listener* listener
 );
 
-BANJO_EXPORT size_t bj_sprint_address(
-    const struct bj_net_address* address,
-    char*                        buffer,
-    size_t                       buffer_size
+BANJO_EXPORT struct bj_tcp_listener* bj_bind(
+    const struct bj_net_addr* addr,
+    uint16_t                  port,
+    uint16_t                  queue_size
 );
-
 
 #endif
 /// \} // End of net group

@@ -5,15 +5,14 @@ int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    struct bj_net_address_info* list = bj_get_local_addresses();
+    struct bj_tcp_listener* listener = bj_bind(0, 8080, 5);
 
-    char buf[128];
-    for (struct bj_net_address_info* node = list; node; node = node->next) {
-        bj_sprint_address(node->address, buf, sizeof(buf));
-        bj_info("%s", buf);
-    }
+    bj_trace("%p", listener);
 
-    bj_free_address_info(list);
+    bj_unbind(listener);
+
+
+
 
     return 0;
 }

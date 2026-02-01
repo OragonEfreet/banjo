@@ -22,6 +22,7 @@ I owe the progress of this project some acknowledgements.
 - [The Book of Shaders](https://thebookofshaders.com/), by [Patricio Gonzales Vivo](https://patriciogonzalezvivo.com/) and [Jen Lowe](https://www.jenlowe.net/).
 - *Game Physics Engine Development*, by [Ian Millington](https://github.com/idmillington/cyclone-physics).
 - [Hands-On Network Programming with C](https://www.packtpub.com/en-fr/product/hands-on-network-programming-with-c-9781789349863), by [Lewis Van Winkle](https://codeplea.com/about).
+- [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/), by [Beej Jorgensen](https://beej.us/).
 
 ## Projects
 

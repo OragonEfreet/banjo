@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
 
     printf("Configuring local address\n");
     const struct addrinfo hints = {
-        .ai_family   = AF_INET,
+        .ai_family   = AF_INET6,
         .ai_socktype = SOCK_STREAM,
         .ai_flags    = AI_PASSIVE,
     };
@@ -50,6 +50,9 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "socket() failed. (%d)\n", errno);
         return 1;
     }
+
+    int v6only = 0;
+    setsockopt(socket_listen, IPPROTO_IPV6, IPV6_V6ONLY, &v6only, sizeof(v6only));
 
     printf("Binding socket to local address...\n");
     if(bind(socket_listen, bind_address->ai_addr, bind_address->ai_addrlen)) {
