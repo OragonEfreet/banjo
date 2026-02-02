@@ -5,14 +5,27 @@ int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    struct bj_tcp_listener* listener = bj_bind(0, 8080, 5);
+    struct bj_error* error = 0;
+    struct bj_tcp_listener* listener = bj_listen_tcp(0, 8080, &error);
+    if(error) {
+        bj_err("bind failed: %s", error->message);
+        bj_clear_error(&error);
+        return 1;
+    }
 
-    bj_trace("%p", listener);
+    struct bj_tcp_stream* stream = bj_accept_tcp(listener, &error);
+    if(stream) {
 
-    bj_unbind(listener);
+        char buf[1024];
+        int n = bj_tcp_recv(stream, buf, sizeof(buf));
+        if(n > 0) {
+            bj_tcp_send(stream, buf, n); // echo back
+        }
 
+        bj_close_tcp_stream(stream);
+    }
 
-
+    bj_close_tcp_listener(listener);
 
     return 0;
 }

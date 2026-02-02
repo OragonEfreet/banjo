@@ -12,6 +12,8 @@
 #include <netdb.h>     // addrinfo
 #include <stdio.h>     // snprintf
 
+#define QUEUE_SIZE 5
+
 struct bj_tcp_listener {
     int socket;
 };
@@ -69,12 +71,12 @@ static struct bj_tcp_listener* bj_bind_addrinfo(
     return listener;
 }
 
-
-struct bj_tcp_listener* bj_bind(
+struct bj_tcp_listener* bj_listen_tcp(
     const struct bj_net_addr* addr,
     uint16_t                  port,
-    uint16_t                  queue_size
+    struct bj_error**         error
 ) {
+    (void)error;
     bj_assert(addr == 0);
 
     char service[6];
@@ -97,8 +99,8 @@ struct bj_tcp_listener* bj_bind(
     struct bj_tcp_listener* listener = 0;
     struct addrinfo* bindaddr        = bindaddrs;
     while(bindaddr) {
-        listener = bj_bind_addrinfo(bindaddr, queue_size);
-        if(listener > 0) {
+        listener = bj_bind_addrinfo(bindaddr, QUEUE_SIZE);
+        if(listener != 0) {
             break;
         }
         bindaddr = bindaddr->ai_next;
@@ -107,4 +109,49 @@ struct bj_tcp_listener* bj_bind(
     freeaddrinfo(bindaddrs);
 
     return listener;
+}
+
+BANJO_EXPORT struct bj_tcp_stream* bj_accept_tcp(
+    struct bj_tcp_listener* listener,
+    struct bj_error**         error
+) {
+    (void)listener;
+    (void)error;
+    // TODO
+    return 0;
+}
+
+int bj_tcp_recv(
+    struct bj_tcp_stream* stream,
+    void*                 buf,
+    size_t                len
+) {
+    (void)stream;
+    (void)buf;
+    (void)len;
+    return 0;
+}
+
+int bj_tcp_send(
+    struct bj_tcp_stream* stream,
+    const void*           buf,
+    size_t                len
+) {
+    (void)stream;
+    (void)buf;
+    (void)len;
+    return 0;
+}
+
+void bj_close_tcp_stream(
+    struct bj_tcp_stream* stream
+) {
+    (void)stream;
+}
+
+void bj_close_tcp_listener(
+    struct bj_tcp_listener* listener
+) {
+    (void)listener;
+
 }
