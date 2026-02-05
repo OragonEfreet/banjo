@@ -76,39 +76,13 @@ struct bj_tcp_listener* bj_listen_tcp(
     uint16_t                  port,
     struct bj_error**         error
 ) {
+    (void)addr;
     (void)error;
+
     bj_assert(addr == 0);
 
-    char service[6];
-    snprintf(service, sizeof(service), "%u", port);
 
-    const struct addrinfo hints = {
-        .ai_family   = AF_INET6,
-        .ai_socktype = SOCK_STREAM,
-        .ai_flags    = AI_PASSIVE,
-    };
-
-    struct addrinfo *bindaddrs = 0;
-
-    const int res = getaddrinfo(0, service, &hints, &bindaddrs);
-    if(res) {
-        bj_err("cannot configure local address: %s", gai_strerror(res));
-        return 0;
-    }
-
-    struct bj_tcp_listener* listener = 0;
-    struct addrinfo* bindaddr        = bindaddrs;
-    while(bindaddr) {
-        listener = bj_bind_addrinfo(bindaddr, QUEUE_SIZE);
-        if(listener != 0) {
-            break;
-        }
-        bindaddr = bindaddr->ai_next;
-    }
-
-    freeaddrinfo(bindaddrs);
-
-    return listener;
+    return 0;
 }
 
 BANJO_EXPORT struct bj_tcp_stream* bj_accept_tcp(
