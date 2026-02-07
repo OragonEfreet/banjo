@@ -48,7 +48,7 @@ struct bj_audio_layer {
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Declare a backend and its constructor function.
+/// \brief Declare a backend and its constru    ctor function.
 ///
 /// Used at initialization to register available backends such as ALSA,
 /// MME, or WebAudio.

@@ -64,16 +64,17 @@ static void mme_unload_library(void) {
 
 static bj_bool mme_load_library(struct bj_error** p_error) {
     bj_check_or_return(MME.dll == 0, BJ_TRUE);
+    struct bj_error* inner_error = 0;
 
-    MME.dll = bj_load_library("winmm.dll");
+    MME.dll = bj_load_library("winmm.dll", &inner_error);
     if (!MME.dll) {
-        bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot load winmm.dll");
+        bj_propagate_prefixed_error(p_error, inner_error, "while loading MME library");
         return BJ_FALSE;
     }
 
 #define MME_BIND(fn) \
-    if (!(MME.fn = (pfn_##fn)bj_library_symbol(MME.dll, #fn))) { \
-        bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot load MME function " #fn); \
+    if (!(MME.fn = (pfn_##fn)bj_library_symbol(MME.dll, #fn, &inner_error))) { \
+        bj_propagate_prefixed_error(p_error, inner_error, "while loading %s", #fn); \
         mme_unload_library(); \
         return BJ_FALSE; \
     }

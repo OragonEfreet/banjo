@@ -16,6 +16,7 @@
 
 #include <banjo/cli.h>
 #include <banjo/log.h>
+#include <banjo/main.h>
 #include <banjo/memory.h>
 
 #include <stdio.h>
