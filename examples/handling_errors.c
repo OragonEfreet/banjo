@@ -1,81 +1,174 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// \example handling_errors.c
-/// Handling recoverable errors with Banjo's error system.
+/// Recoverable error handling with Banjo's error system.
 ///
-/// Banjo uses an out-parameter pattern for error handling. Functions that can
-/// fail take a bj_error** parameter to return error information. This allows
-/// checking error codes, reading messages, and propagating errors up the call
-/// stack without exceptions.
+/// Banjo uses an out-parameter pattern for error handling inspired by GLib.
+/// Functions that can fail take a `bj_error**` parameter to return error
+/// information. This allows checking error codes, reading messages, and
+/// propagating errors up the call stack without exceptions.
 ////////////////////////////////////////////////////////////////////////////////
 #include <banjo/error.h>
-#include <banjo/main.h>
 #include <banjo/log.h>
 
-#define CODE 101
+#include <stdio.h>
 
-// Functions that can fail take a bj_error** as an out-parameter. If the caller
-// passes a non-NULL pointer, the function creates an error object on failure.
-void function_returning_error(bj_error** error) {
-    // Set an error with a code and message. The error object is allocated
-    // internally and must be freed later with bj_clear_error.
-    bj_set_error(error, CODE, "An error occured");
+////////////////////////////////////////////////////////////////////////////////
+// Example: Basic error reporting
+////////////////////////////////////////////////////////////////////////////////
+
+// [Return Errors]
+// Functions that can fail take a bj_error** as their last parameter.
+// Use bj_set_error for literal messages.
+void load_config_file(const char* path, bj_error** error) {
+    (void)path;
+    // Simulate a failure
+    int file_exists = 0;
+
+    if (!file_exists) {
+        bj_set_error(error, BJ_ERROR_FILE_NOT_FOUND, "configuration file missing");
+        return;
+    }
+    // ... normal processing ...
 }
 
-// When calling functions that might fail, check for errors and either handle
-// them or forward them up the call stack.
-void function_calling_failing_function(bj_error** error) {
-    bj_error* sub_err = 0;
+// Use bj_set_error_fmt for formatted messages with runtime values.
+void open_network_port(int port, bj_error** error) {
+    // Simulate a failure
+    int port_available = 0;
 
-    function_returning_error(&sub_err);
+    if (!port_available) {
+        bj_set_error_fmt(error, BJ_ERROR_SYSTEM,
+                         "port %d is already in use", port);
+        return;
+    }
+    // ... normal processing ...
+}
+// [Return Errors]
 
-    // Check if an error occurred. A non-NULL pointer means failure.
-    if(sub_err != 0) {
-        // Forward the error to our caller. This transfers ownership of the
-        // error object, so we don't need to clear it ourselves.
-        bj_forward_error(sub_err, error);
+////////////////////////////////////////////////////////////////////////////////
+// Example: Error propagation with context
+////////////////////////////////////////////////////////////////////////////////
+
+void initialize_server(const char* config_path, int port, bj_error** error) {
+    bj_error* local_err = 0;
+
+    // Try to load config
+    load_config_file(config_path, &local_err);
+    if (local_err != 0) {
+        // Add context and propagate - local_err is consumed
+        bj_propagate_prefixed_error(error, local_err,
+                                    "While initializing server: ");
         return;
     }
 
-    bj_info("This should not be printed\n");
+    // Try to open port
+    open_network_port(port, &local_err);
+    if (local_err != 0) {
+        // Alternative: prefix then propagate separately
+        bj_prefix_error_fmt(&local_err, "Cannot bind to port %d: ", port);
+        bj_propagate_error(error, local_err);
+        return;
+    }
+
+    bj_info("Server initialized successfully");
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Example: Error matching by code and kind
+////////////////////////////////////////////////////////////////////////////////
 
+void demonstrate_error_matching(void) {
+    bj_error* err = 0;
+
+    load_config_file("missing.cfg", &err);
+
+    if (err != 0) {
+        // Match specific error code
+        if (bj_error_matches(err, BJ_ERROR_FILE_NOT_FOUND)) {
+            bj_info("Specific match: file not found");
+        }
+
+        // Match error kind (category) - catches all system errors
+        if (bj_error_matches_kind(err, BJ_ERROR_SYSTEM)) {
+            bj_info("Kind match: this is a system error");
+        }
+
+        // Access error details
+        bj_info("Error code: 0x%08X", bj_error_code(err));
+        bj_info("Error message: %s", bj_error_message(err));
+
+        bj_clear_error(&err);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Example: Copying errors
+////////////////////////////////////////////////////////////////////////////////
+
+void demonstrate_error_copy(void) {
+    bj_error* original = 0;
+    bj_error* copy = 0;
+
+    open_network_port(8080, &original);
+
+    if (original != 0) {
+        // Create a copy for logging/reporting while keeping original
+        copy = bj_copy_error(original);
+
+        bj_info("Original: %s", bj_error_message(original));
+        bj_info("Copy: %s", bj_error_message(copy));
+
+        // Both must be freed
+        bj_clear_error(&original);
+        bj_clear_error(&copy);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Example: Ignoring errors (zero-cost path)
+////////////////////////////////////////////////////////////////////////////////
+
+void demonstrate_zero_cost(void) {
+    // Pass NULL to indicate you don't care about error details.
+    // No allocation occurs - just a pointer check and early return.
+    load_config_file("optional.cfg", 0);
+
+    bj_info("Continued despite potential error (zero cost)");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Main
+////////////////////////////////////////////////////////////////////////////////
+
+// [Using bj_error]
 int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    // Passing NULL (0) for the error parameter tells the function you don't
-    // care about error details. The function will still fail, but won't
-    // allocate an error object.
-    function_returning_error(0);
+    bj_info("=== Basic Error Handling ===");
 
-    // To receive error information, pass a pointer to a bj_error* initialized
-    // to NULL (0).
+    // To receive error information, pass a pointer to a NULL bj_error*
     bj_error* error = 0;
 
-    function_returning_error(&error);
+    initialize_server("/etc/myapp.conf", 8080, &error);
 
-    // Check if an error occurred by testing for non-NULL.
-    if(error != 0) {
-        bj_info("There was an error");
+    if (error != 0) {
+        // The error message now includes context from the call chain
+        bj_err("Startup failed: %s", bj_error_message(error));
+
+        // Always clear errors when done to free memory
+        bj_clear_error(&error);
     }
 
-    // bj_check_error verifies an error exists and matches the expected code.
-    // This is safer than comparing codes manually.
-    if (bj_check_error(error, CODE)) {
-        bj_info("Error domain and code match");
-    }
+    bj_info("\n=== Error Matching ===");
+    demonstrate_error_matching();
 
-    // Always clear errors when done to free memory. This also sets the pointer
-    // back to NULL, making it safe to reuse.
-    bj_clear_error(&error);
+    bj_info("\n=== Error Copying ===");
+    demonstrate_error_copy();
 
-    // The same error pointer can be reused after clearing.
-    function_calling_failing_function(&error);
-
-    if (bj_check_error(error, CODE)) {
-        bj_info("Error from nested function");
-    }
+    bj_info("\n=== Zero-Cost Path ===");
+    demonstrate_zero_cost();
 
     return 0;
 }
+// [Using bj_error]

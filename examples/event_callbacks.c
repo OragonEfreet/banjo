@@ -82,7 +82,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     }
 
-    window = bj_bind_window("Event Callbacks", 100, 100, 800, 600, 0);
+    window = bj_bind_window("Event Callbacks", 100, 100, 800, 600, 0, 0);
 
     event_counter* counter = bj_calloc(sizeof(event_counter));
 

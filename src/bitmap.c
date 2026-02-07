@@ -1,4 +1,5 @@
 #include <banjo/math.h>
+#include <banjo/memory.h>
 #include <banjo/draw.h>
 
 #include <bitmap.h>
@@ -271,7 +272,8 @@ struct bj_bitmap* bj_create_bitmap_from_file(
 
     struct bj_stream* stream = bj_open_stream_file(path, &inner_error);
     if(inner_error) {
-        bj_forward_error(inner_error, error);
+        bj_propagate_prefixed_error(error, inner_error,
+            "Loading bitmap '%s': ", path);
         return 0;
     }
 

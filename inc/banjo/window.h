@@ -28,6 +28,7 @@
 
 #include <banjo/api.h>
 #include <banjo/bitmap.h>
+#include <banjo/error.h>
 #include <banjo/memory.h>
 
 /// Opaque typedef for the window type
@@ -52,27 +53,32 @@ enum bj_window_flag {
 /// Create a new struct bj_window with the specified attributes
 ///
 /// \param title  Title of the window
-/// \param x        Horizontal position of the window on-screen, expressed in pixels
-/// \param y        Vertical position of the window on-screen, expressed in pixels
-/// \param width    Width of the window.
-/// \param height   Height of the window.
-/// \param flags    A set of options flags.
+/// \param x      Horizontal position of the window on-screen, expressed in pixels
+/// \param y      Vertical position of the window on-screen, expressed in pixels
+/// \param width  Width of the window.
+/// \param height Height of the window.
+/// \param flags  A set of options flags.
+/// \param error  Optional pointer to receive error information on failure.
 ///
-/// \return A pointer to the newly created struct bj_window object.
+/// \return A pointer to the newly created struct bj_window object, or NULL on failure.
 ///
 /// \par Memory Management
 ///
 /// The caller is responsible for releasing the returned  bj_window object
 /// with \ref bj_unbind_window.
 ///
+/// \par Error Codes
+/// - BJ_ERROR_VIDEO: Window creation failed (display unavailable, etc.)
+///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT struct bj_window* bj_bind_window(
-    const char* title,
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height,
-    uint8_t  flags
+    const char*       title,
+    uint16_t          x,
+    uint16_t          y,
+    uint16_t          width,
+    uint16_t          height,
+    uint8_t           flags,
+    struct bj_error** error
 );
 
 ////////////////////////////////////////////////////////////////////////////////

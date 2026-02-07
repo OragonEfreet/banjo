@@ -45,12 +45,13 @@ struct win32_window {
 };
 
 static struct bj_window* win32_window_new(
-    const char* title,
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height,
-    uint8_t  flags
+    const char*       title,
+    uint16_t          x,
+    uint16_t          y,
+    uint16_t          width,
+    uint16_t          height,
+    uint8_t           flags,
+    struct bj_error** error
 ) {
     const uint32_t window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
                                  //| WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
@@ -71,10 +72,12 @@ static struct bj_window* win32_window_new(
     );
 
     if (!hwnd) {
+        bj_set_error_fmt(error, BJ_ERROR_VIDEO,
+                         "Failed to create window (error %lu)", GetLastError());
         return 0;
     }
 
-    struct win32_window window = { 
+    struct win32_window window = {
         .common = {
             .flags = flags,
         },
@@ -87,6 +90,11 @@ static struct bj_window* win32_window_new(
     UpdateWindow(hwnd);
 
     struct win32_window* window_res = bj_malloc(sizeof(struct win32_window));
+    if (window_res == 0) {
+        DestroyWindow(hwnd);
+        bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate window structure");
+        return 0;
+    }
     bj_memcpy(window_res, &window, sizeof(struct win32_window));
 
     SetWindowLongPtrA(hwnd, GWLP_USERDATA, (LONG_PTR)window_res);
@@ -294,9 +302,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 
-static void win32_renderer_configure(
+static bj_bool win32_renderer_configure(
     struct bj_renderer* renderer,
-    struct bj_window*   abstract_window
+    struct bj_window*   abstract_window,
+    struct bj_error**   error
 ) {
     struct win32_window* window = (struct win32_window*)abstract_window;
     struct bj_renderer_data* data = renderer->data;
@@ -307,8 +316,8 @@ static void win32_renderer_configure(
     data->hdc = window->hdc;
 
     if (!win32_get_window_size((const struct bj_window*)window, &width, &height)) {
-    //    bj_set_error(error, BJ_ERROR_VIDEO, "Cannot get window dimension");
-        return 0;
+        bj_set_error(error, BJ_ERROR_VIDEO, "Cannot get window dimensions");
+        return BJ_FALSE;
     }
 
     if (data->fbdc) {
@@ -346,9 +355,9 @@ static void win32_renderer_configure(
     const size_t stride = bj_compute_bitmap_stride(width, pixel_mode);
 
     if (stride == 0) {
-    //    bj_set_error(error, BJ_ERROR_VIDEO, "Invalid window pixel format");
+        bj_set_error(error, BJ_ERROR_VIDEO, "Invalid window pixel format");
         bj_free(bmp_info);
-        return 0;
+        return BJ_FALSE;
     }
 
     bmp_info->bmiHeader.biWidth = width;
@@ -362,13 +371,14 @@ static void win32_renderer_configure(
     bj_free(bmp_info);
 
     if (!data->fbmp) {
-        //bj_set_error(error, BJ_ERROR_VIDEO, "Cannot create DIB section");
-        return 0;
+        bj_set_error(error, BJ_ERROR_VIDEO, "Cannot create DIB section");
+        return BJ_FALSE;
     }
 
     SelectObject(data->fbdc, data->fbmp);
 
     bj_assign_bitmap(&data->framebuffer, pixels, width, height, pixel_mode, stride);
+    return BJ_TRUE;
 }
 
 static struct bj_bitmap* win32_renderer_get_framebuffer(
@@ -391,12 +401,22 @@ static void win32_renderer_present(
 }
 
 static struct bj_renderer* win32_create_renderer(
-    enum bj_renderer_type  type
+    enum bj_renderer_type  type,
+    struct bj_error**      error
 ) {
     (void)type;
     struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
+    if (renderer == 0) {
+        bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate renderer");
+        return 0;
+    }
     renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
-    
+    if (renderer->data == 0) {
+        bj_free(renderer);
+        bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate renderer data");
+        return 0;
+    }
+
     renderer->configure       = win32_renderer_configure;
     renderer->get_framebuffer = win32_renderer_get_framebuffer;
     renderer->present         = win32_renderer_present;

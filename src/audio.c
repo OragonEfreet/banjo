@@ -42,7 +42,9 @@ bj_bool bj_begin_audio(
 
         if (sub_err) {
             bj_err("while trying %s audio layer: %s (code 0x%08X)",
-                p_create_info->name, sub_err->message, sub_err->code
+                p_create_info->name, 
+                bj_error_message(sub_err),
+                bj_error_code(sub_err)
             );
             bj_clear_error(&sub_err);
         }

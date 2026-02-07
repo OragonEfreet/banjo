@@ -264,7 +264,6 @@ BANJO_EXPORT const struct bj_build_info* bj_build_information(void);
 typedef enum bj_audio_format bj_audio_format;
 typedef enum bj_blit_op bj_blit_op;
 typedef enum bj_callback_result bj_callback_result;
-typedef enum bj_error_code bj_error_code;
 typedef enum bj_event_action bj_event_action;
 typedef enum bj_event_type bj_event_type;
 typedef enum bj_key bj_key;

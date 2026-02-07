@@ -27,7 +27,7 @@ TEST_CASE_ARGS(is_corrupt_bmp, {const char* name;enum bj_error_code code;}) {
     bj_destroy_bitmap(bj_create_bitmap_from_file(bmp_path, &p_error));
 
     REQUIRE_VALUE(p_error);
-    REQUIRE_EQ(p_error->code, (uint32_t)test_data->code);
+    REQUIRE_EQ(bj_error_code(p_error), (uint32_t)test_data->code);
 
     bj_clear_error(&p_error);
     
@@ -72,22 +72,22 @@ int main(int argc, char* argv[]) {
     RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/width-negative.bmp", .code = BJ_ERROR_INCORRECT_VALUE);
     RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/width-times-height-overflow.bmp", .code = BJ_ERROR_INCORRECT_VALUE);
     RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/width-zero.bmp", .code = BJ_ERROR_INCORRECT_VALUE);
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/1bpp-no-palette.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/1bpp-pixeldata-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/24bpp-pixeldata-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/32bpp-pixeldata-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/4bpp-no-palette.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/4bpp-pixeldata-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/555-pixeldata-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/8bpp-no-palette.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/8bpp-pixeldata-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/pixeldata-missing.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/rle4-absolute-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/rle4-delta-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/rle4-runlength-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/rle8-absolute-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/rle8-delta-cropped.bmp");
-    RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/corrupt/rle8-runlength-cropped.bmp");
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/1bpp-no-palette.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/1bpp-pixeldata-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/24bpp-pixeldata-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/32bpp-pixeldata-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/4bpp-no-palette.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/4bpp-pixeldata-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/555-pixeldata-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/8bpp-no-palette.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/8bpp-pixeldata-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/pixeldata-missing.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/rle4-absolute-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/rle4-delta-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/rle4-runlength-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/rle8-absolute-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/rle8-delta-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
+    RUN_TEST_ARGS(is_corrupt_bmp, .name = "/bmp/test/corrupt/rle8-runlength-cropped.bmp", .code = BJ_ERROR_INVALID_FORMAT);
     RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/valid/ spaces in  filename.bmp");
     RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/valid/1bpp-1x1.bmp");
     RUN_TEST_ARGS(is_valid_bmp, .name = "/bmp/test/valid/1bpp-320x240-color.bmp");

@@ -1,4 +1,4 @@
-#include <banjo/error.h>
+#include <banjo/memory.h>
 
 #include <check.h>
 

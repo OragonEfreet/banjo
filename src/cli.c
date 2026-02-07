@@ -410,11 +410,9 @@ static int process_arg(const struct bj_cli* parser, const struct bj_cli_argument
         struct bj_error* error = NULL;
         bj_bool success = arg->action(parser, arg, value, arg->dest, &error);
         if(!success) {
-            const char* errmsg = error ? error->message : "unknown error";
-            int errsize = v_sprint_error(buffer, n, parser, "while parsing parameter: %s", errmsg);
-            if (error) {
-                bj_free(error);
-            }
+            const char* errmsg = bj_error_message(error);
+            int errsize = v_sprint_error(buffer, n, parser, "while parsing parameter: %s", errmsg ? errmsg : "Unknown error");
+            bj_clear_error(&error);
             return errsize;
         }
     } else {

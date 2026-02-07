@@ -181,7 +181,7 @@ static struct bj_audio_device* coreaudio_open_device(
     // 1. Allocate device
     struct coreaudio_device* ca_dev = bj_calloc(sizeof(struct coreaudio_device));
     if (!ca_dev) {
-        bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
+        bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot allocate audio device");
         return NULL;
     }
 

@@ -1,3 +1,4 @@
+#include <banjo/error.h>
 #include <banjo/log.h>
 #include <banjo/renderer.h>
 #include <banjo/version.h>
@@ -9,11 +10,12 @@
 extern struct bj_video_layer s_video;
 
 struct bj_renderer* bj_create_renderer(
-    enum bj_renderer_type type
+    enum bj_renderer_type type,
+    struct bj_error**     error
 ) {
     if(type != BJ_RENDERER_TYPE_SOFTWARE) {
-        bj_warn("%s %d.%d.%d only supports software rendering.", 
-            BJ_NAME, 
+        bj_warn("%s %d.%d.%d only supports software rendering.",
+            BJ_NAME,
             BJ_VERSION_MAJOR_NUMBER,
             BJ_VERSION_MINOR_NUMBER,
             BJ_VERSION_PATCH_NUMBER
@@ -21,8 +23,10 @@ struct bj_renderer* bj_create_renderer(
         type = BJ_RENDERER_TYPE_SOFTWARE;
     }
 
-    struct bj_renderer* renderer = s_video.create_renderer(type);
-    bj_info("renderer created");
+    struct bj_renderer* renderer = s_video.create_renderer(type, error);
+    if (renderer != 0) {
+        bj_info("renderer created");
+    }
     return renderer;
 }
 
@@ -33,12 +37,13 @@ void bj_destroy_renderer(
     bj_info("renderer destroyed");
 }
 
-void bj_renderer_configure(
+bj_bool bj_renderer_configure(
     struct bj_renderer* renderer,
-    struct bj_window* window
+    struct bj_window*   window,
+    struct bj_error**   error
 ) {
-    bj_check(renderer);
-    renderer->configure(renderer, window);
+    bj_check_or_0(renderer);
+    return renderer->configure(renderer, window, error);
 }
 
 struct bj_bitmap* bj_get_framebuffer(

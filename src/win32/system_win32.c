@@ -2,6 +2,8 @@
 
 #ifdef BJ_OS_WINDOWS
 
+#include <banjo/error.h>
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 #endif
@@ -10,10 +12,17 @@
 #include <check.h>
 
 void* bj_load_library(
-    const char* p_path
+    const char*       p_path,
+    struct bj_error** error
 ) {
     bj_check_or_0(p_path);
-    return (void*)LoadLibraryA(p_path);
+    HMODULE handle = LoadLibraryA(p_path);
+    if (handle == 0) {
+        bj_set_error_fmt(error, BJ_ERROR_SYSTEM,
+                         "Cannot load library '%s' (error %lu)",
+                         p_path, GetLastError());
+    }
+    return (void*)handle;
 }
 
 void bj_unload_library(
@@ -24,12 +33,19 @@ void bj_unload_library(
 }
 
 void* bj_library_symbol(
-    void*       p_handle,
-    const char* p_name
+    void*             p_handle,
+    const char*       p_name,
+    struct bj_error** error
 ) {
     bj_check_or_0(p_handle);
     bj_check_or_0(p_name);
-    return (void*)GetProcAddress((HMODULE)p_handle, p_name);
+    void* symbol = (void*)GetProcAddress((HMODULE)p_handle, p_name);
+    if (symbol == 0) {
+        bj_set_error_fmt(error, BJ_ERROR_SYSTEM,
+                         "Cannot find symbol '%s' (error %lu)",
+                         p_name, GetLastError());
+    }
+    return symbol;
 }
 
 #endif

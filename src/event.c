@@ -1,5 +1,6 @@
 #include <banjo/assert.h>
 #include <banjo/event.h>
+#include <banjo/memory.h>
 
 #include "check.h"
 #include "video_layer.h"

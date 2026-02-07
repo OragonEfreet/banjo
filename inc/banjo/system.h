@@ -92,7 +92,8 @@ BANJO_EXPORT void bj_end_system(
 /// The provided pointer can be used with \ref bj_library_symbol to get a function
 /// from the loaded library.
 ///
-/// \param path A C-string path to the library to load.
+/// \param path  A C-string path to the library to load.
+/// \param error Optional pointer to receive error information on failure.
 /// \return _0_ or a handle to the loaded library.
 ///
 /// \par Behaviour
@@ -103,17 +104,20 @@ BANJO_EXPORT void bj_end_system(
 ///
 /// \par Memory Management
 ///
-/// The caller is responsible for release the loaded library using \ref 
+/// The caller is responsible for release the loaded library using \ref
 /// bj_unload_library.
 ///
-/// 
+/// \par Error Codes
+/// - BJ_ERROR_SYSTEM: Library could not be loaded (not found, wrong arch, etc.)
+///
 /// \see bj_library_symbol, bj_unload_library
 /// \see [dlopen()](https://linux.die.net/man/3/dlopen),
 ///      [LoadLibraryA()](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-loadlibrarya)
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_load_library(
-    const char* path
+    const char*       path,
+    struct bj_error** error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,7 +155,8 @@ BANJO_EXPORT void bj_unload_library(
 /// `dlsym` and `GetProcAddress`.
 ///
 /// \param handle A library handle provided by \ref bj_load_library.
-/// \param name C-String name of the function to retrieve
+/// \param name   C-String name of the function to retrieve
+/// \param error  Optional pointer to receive error information on failure.
 ///
 /// \return _0_ or the address of the retrieved function.
 ///
@@ -162,18 +167,21 @@ BANJO_EXPORT void bj_unload_library(
 ///
 /// \par Memory Management
 ///
-/// The caller is responsible for release the loaded function using \ref 
+/// The caller is responsible for release the loaded function using \ref
 /// bj_unload_library with `handle`.
 ///
-/// 
+/// \par Error Codes
+/// - BJ_ERROR_SYSTEM: Symbol could not be found in the library.
+///
 /// \see bj_load_library, bj_unload_library
 /// \see [dlsym()](https://linux.die.net/man/3/dlsym),
 ///      [GetProcAddress()](https://learn.microsoft.com/en-us/windows/win32/api/libloaderapi/nf-libloaderapi-getprocaddress)
 ///
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT void* bj_library_symbol(
-    void*       handle,
-    const char* name
+    void*             handle,
+    const char*       name,
+    struct bj_error** error
 );
 
 #endif

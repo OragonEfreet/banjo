@@ -1,5 +1,6 @@
 #include <banjo/assert.h>
 #include <banjo/bitmap.h>
+#include <banjo/memory.h>
 
 #define ERR_MSG                         "unsupported"
 #define ERR_MSG_BAD_BIT_COUNT           "unsupported bit count"
@@ -135,7 +136,8 @@ static void dib_read_uncompressed_raster(
     size_t     dst_stride,
     uint32_t   width,
     int32_t    height,
-    uint16_t   dib_bit_count
+    uint16_t   dib_bit_count,
+    struct bj_error** p_error
 ) {
     const bj_bool is_top_down = height < 0;
 
@@ -148,7 +150,7 @@ static void dib_read_uncompressed_raster(
 
     while(p_dst_row >= dst_pixels && p_dst_row < dst_end) {
         if(bj_read_stream(p_stream, p_dst_row, copy_stride) < copy_stride) {
-            bj_warn("unexpected end of bitmap stream");
+            bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, ERR_MSG_EOS);
             return;
         }
 
@@ -189,6 +191,7 @@ static void dib_read_rle_raster(
 
     while (BJ_TRUE) {
         if (state != rle_fsm_keep_and_write_index && bj_stream_read_t(p_stream, uint8_t, &last_read_byte) == 0) {
+            bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, ERR_MSG_EOS);
             return;
         }
 
@@ -496,19 +499,20 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
             return 0;
         }
 
-        // Sometimes, the color table is not encoded, we know it because
         if ((bj_tell_stream(p_stream) == dib_data_offset)) {
-            bj_warn("%dbpp bitmap stream contains no color table", dib_bit_count);
-            // In this case, we fill the color table with white, with exception
-            // to the first index, that is set to black
-            bj_memset(color_table, 0xFF, sizeof(dib_table_rgb) * color_table_len);
-            bj_memset(color_table, 0x00, sizeof(dib_table_rgb));
+            bj_set_error_fmt(p_error, BJ_ERROR_INVALID_FORMAT, "%dbpp bitmap stream contains no color table", dib_bit_count);
+            bj_free(color_table);
+            return 0;
         } else {
             for (size_t i = 0; i < color_table_len; ++i) {
-                bj_stream_read_t(p_stream, char, &color_table[i].blue);
-                bj_stream_read_t(p_stream, char, &color_table[i].green);
-                bj_stream_read_t(p_stream, char, &color_table[i].red);
-                bj_stream_skip_t(p_stream, char);
+                if (bj_stream_read_t(p_stream, char, &color_table[i].blue) != sizeof(char) ||
+                    bj_stream_read_t(p_stream, char, &color_table[i].green) != sizeof(char) ||
+                    bj_stream_read_t(p_stream, char, &color_table[i].red) != sizeof(char) ||
+                    bj_stream_skip_t(p_stream, char) != sizeof(char)) {
+                    bj_set_error(p_error, BJ_ERROR_INVALID_FORMAT, ERR_MSG_EOS);
+                    bj_free(color_table);
+                    return 0;
+                }
             }
         }
     }
@@ -544,7 +548,8 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
                 bj_bitmap_pixels(p_bitmap), // dst_pixels
                 bj_bitmap_stride(p_bitmap), // dst_stride
                 dib_width, dib_height,
-                dib_bit_count
+                dib_bit_count,
+                &p_inner_error
             );
             break;
         case DIB_BI_RLE4:
@@ -555,7 +560,7 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
                 bj_bitmap_stride(p_bitmap), // dst_stride
                 dib_width, dib_height,
                 dib_compression == DIB_BI_RLE4,
-                p_error
+                &p_inner_error
             );
             break;
         default:
@@ -565,7 +570,11 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
             return 0;
     }
     if(p_inner_error) {
-        bj_forward_error(p_inner_error, p_error);
+        const char* compression_name =
+            dib_compression == DIB_BI_RLE4 ? "RLE4" :
+            dib_compression == DIB_BI_RLE8 ? "RLE8" : "uncompressed";
+        bj_propagate_prefixed_error(p_error, p_inner_error,
+            "Decoding %s bitmap: ", compression_name);
         bj_destroy_bitmap(p_bitmap);
         bj_free(color_table);
         return 0;

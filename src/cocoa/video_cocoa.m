@@ -239,7 +239,8 @@ static void cocoa_delete_window(struct bj_window *p_abstract_window) {
 
 static struct bj_window *cocoa_create_window(const char *p_title, uint16_t x,
                                              uint16_t y, uint16_t width,
-                                             uint16_t height, uint8_t flags) {
+                                             uint16_t height, uint8_t flags,
+                                             struct bj_error **error) {
   @autoreleasepool {
 
     // Flip Y coordinate (Cocoa uses bottom-left origin)
@@ -258,6 +259,11 @@ static struct bj_window *cocoa_create_window(const char *p_title, uint16_t x,
                                       backing:NSBackingStoreBuffered
                                         defer:NO];
 
+    if (!nsWindow) {
+      bj_set_error(error, BJ_ERROR_VIDEO, "Failed to create Cocoa window");
+      return 0;
+    }
+
     [nsWindow setTitle:[NSString stringWithUTF8String:p_title]];
 
     BanjoView *view = [[BanjoView alloc] initWithFrame:contentRect];
@@ -265,6 +271,10 @@ static struct bj_window *cocoa_create_window(const char *p_title, uint16_t x,
     [nsWindow setDelegate:view];
 
     struct cocoa_window *window = bj_calloc(sizeof(struct cocoa_window));
+    if (!window) {
+      bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate window structure");
+      return 0;
+    }
     window->common.flags = flags;
     window->handle = nsWindow;
     window->view = view;
@@ -280,8 +290,9 @@ static struct bj_window *cocoa_create_window(const char *p_title, uint16_t x,
 
 static void cocoa_end_video(struct bj_error **error) { (void)error; }
 
-static void cocoa_renderer_configure(struct bj_renderer *renderer,
-                                     struct bj_window *window) {
+static bj_bool cocoa_renderer_configure(struct bj_renderer *renderer,
+                                        struct bj_window *window,
+                                        struct bj_error **error) {
   @autoreleasepool {
 
     struct bj_renderer_data *data = renderer->data;
@@ -293,7 +304,10 @@ static void cocoa_renderer_configure(struct bj_renderer *renderer,
     }
 
     int width, height;
-    bj_get_window_size(window, &width, &height);
+    if (!bj_get_window_size(window, &width, &height)) {
+      bj_set_error(error, BJ_ERROR_VIDEO, "Cannot get window dimensions");
+      return BJ_FALSE;
+    }
 
     if (data->buffer) {
       bj_free(data->buffer);
@@ -302,6 +316,10 @@ static void cocoa_renderer_configure(struct bj_renderer *renderer,
     enum bj_pixel_mode mode = BJ_PIXEL_MODE_XRGB8888;
     size_t stride = bj_compute_bitmap_stride(width, mode);
     data->buffer = bj_calloc(stride * height);
+    if (!data->buffer) {
+      bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate framebuffer");
+      return BJ_FALSE;
+    }
     data->buffer_width = width;
     data->buffer_height = height;
 
@@ -313,6 +331,8 @@ static void cocoa_renderer_configure(struct bj_renderer *renderer,
     data->configured_view = ((struct cocoa_window *)window)->view;
     objc_setAssociatedObject(data->configured_view, "bj_sw_render",
                              (id)(void *)renderer, OBJC_ASSOCIATION_ASSIGN);
+
+    return BJ_TRUE;
   }
 }
 
@@ -332,13 +352,23 @@ static void cocoa_renderer_present(struct bj_renderer *renderer,
   [view displayIfNeeded];
 }
 
-static struct bj_renderer *cocoa_create_renderer(enum bj_renderer_type type) {
+static struct bj_renderer *cocoa_create_renderer(enum bj_renderer_type type,
+                                                 struct bj_error **error) {
   (void)type;
 
   struct bj_renderer *renderer = bj_calloc(sizeof(struct bj_renderer));
+  if (!renderer) {
+    bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate renderer");
+    return 0;
+  }
 
   // This part will later depend on the renderer type
   renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
+  if (!renderer->data) {
+    bj_free(renderer);
+    bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate renderer data");
+    return 0;
+  }
 
   // VTable
   // Fill the list of function pointers depending on the renderer type

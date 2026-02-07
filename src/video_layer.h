@@ -28,17 +28,19 @@ typedef void (*bj_window_end_fn)(
 /// \param width    Width of the window in pixels.
 /// \param height   Height of the window in pixels.
 /// \param flags    Window creation flags.
+/// \param error    Output error pointer.
 ///
 /// \return A pointer to the created window, or NULL on failure.
 ///
 /// \see struct bj_window, struct bj_video_layer
 typedef struct bj_window* (*bj_window_create_window_fn)(
-    const char* title,
-    uint16_t    x,
-    uint16_t    y,
-    uint16_t    width,
-    uint16_t    height,
-    uint8_t     flags
+    const char*       title,
+    uint16_t          x,
+    uint16_t          y,
+    uint16_t          width,
+    uint16_t          height,
+    uint8_t           flags,
+    struct bj_error** error
 );
 
 /// \brief Define a function used to destroy an existing window.
@@ -101,7 +103,8 @@ typedef void (*bj_window_flush_framebuffer_fn)(
 );
 
 typedef struct bj_renderer* (*bj_video_create_renderer_fn)(
-    enum bj_renderer_type  type
+    enum bj_renderer_type  type,
+    struct bj_error**      error
 );
 
 typedef void (*bj_video_destroy_renderer_fn)(

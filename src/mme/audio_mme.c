@@ -1,8 +1,9 @@
-﻿
+
 
 #ifdef BJ_CONFIG_MME_BACKEND
 
 #include <banjo/log.h>
+#include <banjo/memory.h>
 #include <banjo/system.h>
 
 #include <audio.h>

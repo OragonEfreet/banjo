@@ -24,6 +24,7 @@
 #define BJ_RENDERER_H
 
 #include <banjo/api.h>
+#include <banjo/error.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Renderer backend type.
@@ -46,7 +47,8 @@ struct bj_window;
 ///
 /// Allocates and initializes a renderer of the specified type.
 ///
-/// \param type The type of renderer to create.
+/// \param type  The type of renderer to create.
+/// \param error Optional pointer to receive error information on failure.
 ///
 /// \return Pointer to the newly created renderer, or NULL on failure.
 ///
@@ -55,10 +57,14 @@ struct bj_window;
 /// The caller is responsible for destroying the renderer with
 /// \ref bj_destroy_renderer.
 ///
+/// \par Error Codes
+/// - BJ_ERROR_VIDEO: Renderer creation failed.
+///
 /// \see bj_destroy_renderer
 ////////////////////////////////////////////////////////////////////////////////
 BANJO_EXPORT struct bj_renderer* bj_create_renderer(
-    enum bj_renderer_type type
+    enum bj_renderer_type type,
+    struct bj_error**     error
 );
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,17 +88,24 @@ BANJO_EXPORT void bj_destroy_renderer(
 ///
 /// \param renderer Pointer to the renderer to configure.
 /// \param window   Pointer to the target window.
+/// \param error    Optional pointer to receive error information on failure.
+///
+/// \return BJ_TRUE on success, BJ_FALSE on failure.
 ///
 /// \par Behavior
 ///
 /// This function should be called before rendering operations to ensure
 /// the framebuffer matches the window's current size and format.
 ///
+/// \par Error Codes
+/// - BJ_ERROR_VIDEO: Framebuffer creation failed (unsupported format, etc.)
+///
 /// \see bj_get_framebuffer
 ////////////////////////////////////////////////////////////////////////////////
-BANJO_EXPORT void bj_renderer_configure(
+BANJO_EXPORT bj_bool bj_renderer_configure(
     struct bj_renderer* renderer,
-    struct bj_window* window
+    struct bj_window*   window,
+    struct bj_error**   error
 );
 
 ////////////////////////////////////////////////////////////////////////////////

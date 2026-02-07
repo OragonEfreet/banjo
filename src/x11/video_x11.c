@@ -19,9 +19,6 @@
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
 
-#define X11_CANNOT_OPEN_DISPLAY 0x00010000
-#define X11_CANNOT_CREATE_IMAGE 0x00020000
-
 typedef XSizeHints*         (* pfn_XAllocSizeHints)(void);
 typedef unsigned long       (* pfn_XBlackPixel)(Display*,int);
 typedef int                 (* pfn_XCloseDisplay)(Display*);
@@ -113,7 +110,7 @@ typedef struct {
 
 static void* x11_get_symbol(struct bj_video_layer_data* ignore, const char* name) {
     (void)ignore;
-    return bj_library_symbol(x11.handle, name);
+    return bj_library_symbol(x11.handle, name, 0);
 }
 
 static void x11_wait_for_map_notify(struct bj_video_layer_data* ignore, Window window) {
@@ -135,12 +132,13 @@ static void x11_wait_for_map_notify(struct bj_video_layer_data* ignore, Window w
 }
 
 static struct bj_window* x11_create_window(
-    const char* title,
-    uint16_t x,
-    uint16_t y,
-    uint16_t width,
-    uint16_t height,
-    uint8_t  flags
+    const char*       title,
+    uint16_t          x,
+    uint16_t          y,
+    uint16_t          width,
+    uint16_t          height,
+    uint8_t           flags,
+    struct bj_error** error
 ) {
     Window root_window = RootWindow(x11.display, x11.default_screen);
 
@@ -153,19 +151,26 @@ static struct bj_window* x11_create_window(
                             | EnterWindowMask   | LeaveWindowMask
     };
 
+    Window handle = x11.XCreateWindow(
+        x11.display, root_window,
+        x, y,
+        width, height, 1,
+        x11.default_depth,
+        InputOutput,
+        x11.default_visual,
+        CWBackPixel | CWBorderPixel | CWEventMask, &attributes
+    );
+
+    if (handle == 0) {
+        bj_set_error(error, BJ_ERROR_VIDEO, "Failed to create X11 window");
+        return 0;
+    }
+
     x11_window window = {
         .common = {
-            .flags      = flags,
+            .flags = flags,
         },
-        .handle = x11.XCreateWindow(
-            x11.display, root_window,
-            x, y,
-            width, height, 1,
-            x11.default_depth,
-            InputOutput,
-            x11.default_visual,
-            CWBackPixel | CWBorderPixel | CWEventMask, &attributes
-        ),
+        .handle = handle,
     };
 
     // For now we don't want to make the window resizable
@@ -191,6 +196,11 @@ static struct bj_window* x11_create_window(
     x11.XSync(x11.display, 0);
 
     x11_window* window_ptr = bj_malloc(sizeof(x11_window));
+    if (window_ptr == 0) {
+        x11.XDestroyWindow(x11.display, handle);
+        bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate window structure");
+        return 0;
+    }
     bj_memcpy(window_ptr, &window, sizeof(x11_window));
 
     x11.XSaveContext(
@@ -518,6 +528,10 @@ static void x11_init_keycodes(
     );
 
     x11.keymap = bj_malloc(sizeof(enum bj_key) * (max_keycode+1));
+    if (x11.keymap == 0) {
+        x11.XFree(keysyms);
+        return;
+    }
     bj_memset(x11.keymap, 0, sizeof(enum bj_key) * (max_keycode+1));
 
     for (int keycode = min_keycode;  keycode <= max_keycode;  ++keycode) {
@@ -606,9 +620,10 @@ static void x11_end_video(
     bj_free(x11.keymap);
 }
 
-static void x11_renderer_configure(
+static bj_bool x11_renderer_configure(
     struct bj_renderer* renderer,
-    struct bj_window* window
+    struct bj_window*   window,
+    struct bj_error**   error
 ) {
     XWindowAttributes attributes;
 
@@ -622,6 +637,10 @@ static void x11_renderer_configure(
         attributes.visual, attributes.depth
     );
 
+    if (mode == BJ_PIXEL_MODE_UNKNOWN) {
+        bj_set_error(error, BJ_ERROR_VIDEO, "Unsupported X11 visual pixel format");
+        return BJ_FALSE;
+    }
 
     // Clean up old XImage if it exists
     if (renderer->data->framebuffer_image) {
@@ -643,7 +662,7 @@ static void x11_renderer_configure(
     renderer->data->framebuffer_pixels = bj_bitmap_pixels(&renderer->data->framebuffer);
     renderer->data->framebuffer.weak = 1;
 
-    // Note: don't use XDestroyImage to delete this structure, by XFree.
+    // Note: don't use XDestroyImage to delete this structure, use XFree.
     // Otherwise, XLib will XFree the pixels buffer as well.
     renderer->data->framebuffer_image = x11.XCreateImage(
         x11.display,              // X Display
@@ -657,6 +676,12 @@ static void x11_renderer_configure(
         32,                          // pad
         bj_bitmap_stride(&renderer->data->framebuffer)   // stride
     );
+    if (renderer->data->framebuffer_image == 0) {
+        bj_set_error(error, BJ_ERROR_VIDEO, "XCreateImage failed");
+        return BJ_FALSE;
+    }
+
+    return BJ_TRUE;
 }
 
 static struct bj_bitmap* x11_renderer_get_framebuffer(
@@ -688,11 +713,21 @@ static void x11_renderer_present(
 }
 
 static struct bj_renderer* x11_create_renderer(
-    enum bj_renderer_type  type
+    enum bj_renderer_type  type,
+    struct bj_error**      error
 ) {
     (void)type;
     struct bj_renderer* renderer = bj_calloc(sizeof(struct bj_renderer));
+    if (renderer == 0) {
+        bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate renderer");
+        return 0;
+    }
     renderer->data = bj_calloc(sizeof(struct bj_renderer_data));
+    if (renderer->data == 0) {
+        bj_free(renderer);
+        bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate renderer data");
+        return 0;
+    }
 
     renderer->configure       = x11_renderer_configure;
     renderer->get_framebuffer = x11_renderer_get_framebuffer;
@@ -722,7 +757,7 @@ static bj_bool x11_init_video(
     struct bj_video_layer* layer,
     struct bj_error** error
 ) {
-    void* handle = bj_load_library("libX11.so.6");
+    void* handle = bj_load_library("libX11.so.6", error);
     if(handle == 0) {
         return BJ_FALSE;
     }
@@ -764,7 +799,7 @@ static bj_bool x11_init_video(
 
     Display* display = x11_XOpenDisplay(0);
     if(display == 0) {
-        bj_set_error(error, BJ_ERROR_INITIALIZE | X11_CANNOT_OPEN_DISPLAY, "cannot open X11 display");
+        bj_set_error(error, BJ_ERROR_INITIALIZE, "cannot open X11 display");
         return BJ_FALSE;
     }
 

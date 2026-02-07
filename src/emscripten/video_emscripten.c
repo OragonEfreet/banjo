@@ -3,6 +3,7 @@
 #ifdef BJ_CONFIG_EMSCRIPTEN_BACKEND
 
 #include <banjo/event.h>
+#include <banjo/memory.h>
 #include <banjo/renderer.h>
 #include <banjo/string.h>
 

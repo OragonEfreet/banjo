@@ -15,9 +15,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    bj_renderer* renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
-    bj_window* window = bj_bind_window("My First Banjo App", 100, 100, 640, 480, 0);
-    bj_renderer_configure(renderer, window);
+    bj_renderer* renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE, 0);
+    bj_window* window = bj_bind_window("My First Banjo App", 100, 100, 640, 480, 0, 0);
+    bj_renderer_configure(renderer, window, 0);
     bj_set_key_callback(bj_close_on_escape, 0);
 
     // Draw some shapes

@@ -7,14 +7,15 @@
 extern struct bj_video_layer s_video;
 
 struct bj_window* bj_bind_window(
-    const char* title,
-    uint16_t    x,
-    uint16_t    y,
-    uint16_t    width,
-    uint16_t    height,
-    uint8_t     window_flags
+    const char*       title,
+    uint16_t          x,
+    uint16_t          y,
+    uint16_t          width,
+    uint16_t          height,
+    uint8_t           window_flags,
+    struct bj_error** error
 ) {
-    return s_video.create_window(title, x, y, width, height, window_flags);
+    return s_video.create_window(title, x, y, width, height, window_flags, error);
 }
 
 void bj_unbind_window(

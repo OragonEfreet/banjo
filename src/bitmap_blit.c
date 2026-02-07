@@ -1,3 +1,5 @@
+#include <banjo/memory.h>
+
 #include <bitmap.h>
 #include <check.h>
 

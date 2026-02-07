@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include <banjo/log.h>
+#include <banjo/memory.h>
 #include <banjo/math.h>
 #include <banjo/string.h>
 

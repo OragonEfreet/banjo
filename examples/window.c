@@ -26,7 +26,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     // Parameters: title, x position, y position, width, height, flags
     // The last parameter (flags) can specify fullscreen, borderless, etc.
     // Returns a window handle that must be destroyed with bj_unbind_window().
-    window = bj_bind_window("Simple Banjo Window", 100, 100, 800, 600, 0);
+    window = bj_bind_window("Simple Banjo Window", 100, 100, 800, 600, 0, 0);
 
     // Set up a keyboard callback. bj_close_on_escape is a built-in helper that
     // requests window closure when ESC is pressed.

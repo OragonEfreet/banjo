@@ -1,7 +1,11 @@
+#include <banjo/memory.h>
+
 #include <stream.h>
 
 #include <check.h>
+#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 
 struct bj_stream* bj_allocate_stream(
     void
@@ -33,14 +37,16 @@ struct bj_stream* bj_open_stream_file(
     FILE* fstream  = fopen(p_path, "rb");
 
     if (!fstream ) {
-        bj_set_error(p_error, BJ_ERROR_FILE_NOT_FOUND, "cannot open file");
+        bj_set_error_fmt(p_error, BJ_ERROR_FILE_NOT_FOUND,
+            "Cannot open '%s': %s", p_path, strerror(errno));
         return 0;
     }
 
     fseek(fstream, 0, SEEK_END);
     const long file_size = ftell(fstream);
     if(file_size == -1L) {
-        bj_set_error(p_error, BJ_ERROR_IO, "Cannot get file cursor position");
+        bj_set_error_fmt(p_error, BJ_ERROR_IO,
+            "Cannot get size of '%s': %s", p_path, strerror(errno));
         fclose(fstream);
         return 0;
     }
@@ -51,7 +57,8 @@ struct bj_stream* bj_open_stream_file(
 
         void *buffer = bj_malloc(file_byte_size);
         if (buffer == 0) {
-            bj_set_error(p_error, BJ_ERROR_CANNOT_ALLOCATE, "cannot read file content");
+            bj_set_error_fmt(p_error, BJ_ERROR_CANNOT_ALLOCATE,
+                "Cannot allocate %zu bytes for '%s'", file_byte_size, p_path);
             fclose(fstream);
             return 0;
         }
@@ -60,7 +67,8 @@ struct bj_stream* bj_open_stream_file(
         fclose(fstream);
         if (bytes_read != file_byte_size) {
             bj_free(buffer);
-            bj_set_error(p_error, BJ_ERROR, "cannot read file content");
+            bj_set_error_fmt(p_error, BJ_ERROR_CANNOT_READ,
+                "Read %zu of %zu bytes from '%s'", bytes_read, file_byte_size, p_path);
             return 0;
         }
 

@@ -110,10 +110,10 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     }
 
-    renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
-    window = bj_bind_window("Color Key Transparency Demo", 0, 0, WINDOW_W, WINDOW_H, 0);
+    renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE, 0);
+    window = bj_bind_window("Color Key Transparency Demo", 0, 0, WINDOW_W, WINDOW_H, 0, 0);
 
-    bj_renderer_configure(renderer, window);
+    bj_renderer_configure(renderer, window, 0);
     bj_set_key_callback(bj_close_on_escape, 0);
 
     bj_blit(bmp_rendering, 0, bj_get_framebuffer(renderer), 0, BJ_BLIT_OP_COPY);

@@ -33,7 +33,7 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
         return bj_callback_exit_error;
     }
 
-    renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE);
+    renderer = bj_create_renderer(BJ_RENDERER_TYPE_SOFTWARE, 0);
 
     // Create a window sized to the loaded bitmap. bj_bitmap_width() and
     // bj_bitmap_height() query the dimensions. We scale by 10 for visibility
@@ -41,10 +41,10 @@ int bj_app_begin(void** user_data, int argc, char* argv[]) {
     window = bj_bind_window("sprite sheet - Banjo", 0, 0,
         bj_bitmap_width(bmp_sprite_sheet) * 10,
         bj_bitmap_height(bmp_sprite_sheet) * 10,
-        0
+        0, 0
     );
 
-    bj_renderer_configure(renderer, window);
+    bj_renderer_configure(renderer, window, 0);
     bj_set_key_callback(bj_close_on_escape, 0);
 
     // bj_blit_stretched() copies the source bitmap to the destination,
