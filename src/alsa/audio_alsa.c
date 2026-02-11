@@ -94,13 +94,13 @@ static void alsa_unload_library() {
 static bj_bool alsa_load_library(struct bj_error** p_error) {
     bj_check_or_return(ALSA.p_handle == 0, BJ_TRUE);
 
-    ALSA.p_handle = bj_load_library("libasound.so");
+    ALSA.p_handle = bj_load_library("libasound.so", p_error);
 	if (!ALSA.p_handle) {
-		bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot load libasound.so");
+        bj_prefix_error(p_error, "while loading libasound.so");
 		return BJ_FALSE;
 	}
 
-#define ALSA_BIND(name) if(!(ALSA.name = (pfn_ ## name)bj_library_symbol(ALSA.p_handle, #name))) {bj_set_error(p_error, BJ_ERROR_AUDIO, "cannot load ALSA function " #name); alsa_unload_library(); return 0;}
+#define ALSA_BIND(name) if(!(ALSA.name = (pfn_ ## name)bj_library_symbol(ALSA.p_handle, #name, p_error))) {bj_prefix_error(p_error, "while loading function " #name); alsa_unload_library(); return 0;}
     ALSA_BIND(snd_pcm_avail_update)
     ALSA_BIND(snd_pcm_close)
     ALSA_BIND(snd_pcm_drain)
