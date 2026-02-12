@@ -6,7 +6,7 @@
 // Optimizations applied:
 //   - Direct 32-bit memory access (no byte unpacking)
 //   - Row pointers computed once per scanline
-//   - Division-free alpha blending (see bj__mix_u8)
+//   - Division-free alpha blending (see bj_mix_u8)
 //   - No function call overhead in inner loops
 
 #include <stdint.h>
@@ -84,7 +84,7 @@ static inline uint32_t blend_over(
 // Mask Blit (non-stretched)
 // ----------------------------------------------------------------------------
 
-void bj__blit_mask_32(
+void bj_blit_mask_32(
     const struct bj_bitmap* mask,
     const struct bj_rect*   ms,
     struct bj_bitmap*       dst,
@@ -152,7 +152,7 @@ void bj__blit_mask_32(
 // Mask Blit (stretched, nearest-neighbor)
 // ----------------------------------------------------------------------------
 
-void bj__blit_mask_stretched_32(
+void bj_blit_mask_stretched_32(
     const struct bj_bitmap* mask,
     const struct bj_rect*   ms,
     struct bj_bitmap*       dst,
@@ -235,7 +235,7 @@ void bj__blit_mask_stretched_32(
 // Filled Rectangle
 // ----------------------------------------------------------------------------
 
-void bj__fill_rect_32(
+void bj_fill_rect_32(
     struct bj_bitmap* dst,
     int x0, int y0,
     int x1, int y1,
@@ -269,7 +269,7 @@ void bj__fill_rect_32(
 // Horizontal Line - for circles/triangles
 // ----------------------------------------------------------------------------
 
-void bj__hline_32(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
+void bj_hline_32(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
     // Clip
     if (y < 0 || y >= (int)dst->height) return;
     if (x0 < 0) x0 = 0;

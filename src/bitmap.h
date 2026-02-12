@@ -6,16 +6,16 @@
 #include <banjo/rect.h>
 
 struct bj_bitmap {
-    size_t                 width;
-    size_t                 height;
-    size_t                 stride;
-    enum bj_pixel_mode          mode;
-    uint32_t               clear_color;
-    void*                  buffer;
-    int                    weak;
-    bj_bool                colorkey_enabled;
-    uint32_t               colorkey;
-    struct bj_bitmap*    charset;
+    size_t             width;
+    size_t             height;
+    size_t             stride;
+    enum bj_pixel_mode mode;
+    uint32_t           clear_color;
+    void*              buffer;
+    int                weak;
+    bj_bool            colorkey_enabled;
+    uint32_t           colorkey;
+    struct bj_bitmap*  charset;
 };
 
 // ============================================================================
@@ -40,7 +40,7 @@ struct bj_bitmap {
 // --------------------------------------------------------------------------
 
 // Get pointer to the start of row `y` in the bitmap buffer.
-static inline uint8_t* bj__row_ptr(const struct bj_bitmap* bmp, size_t y) {
+static inline uint8_t* bj_row_ptr(const struct bj_bitmap* bmp, size_t y) {
     return (uint8_t*)bmp->buffer + y * bmp->stride;
 }
 
@@ -49,12 +49,12 @@ static inline uint8_t* bj__row_ptr(const struct bj_bitmap* bmp, size_t y) {
 // --------------------------------------------------------------------------
 
 // Write a 32-bit pixel directly. No checks.
-static inline void bj__put_pixel_32(uint8_t* row, size_t x, uint32_t pixel) {
+static inline void bj_put_pixel_32(uint8_t* row, size_t x, uint32_t pixel) {
     ((uint32_t*)row)[x] = pixel;
 }
 
 // Read a 32-bit pixel directly. No checks.
-static inline uint32_t bj__get_pixel_32(const uint8_t* row, size_t x) {
+static inline uint32_t bj_get_pixel_32(const uint8_t* row, size_t x) {
     return ((const uint32_t*)row)[x];
 }
 
@@ -63,7 +63,7 @@ static inline uint32_t bj__get_pixel_32(const uint8_t* row, size_t x) {
 // --------------------------------------------------------------------------
 
 // Write a 24-bit BGR pixel. Pixel format: 0x00RRGGBB in memory as BB GG RR.
-static inline void bj__put_pixel_24(uint8_t* row, size_t x, uint32_t pixel) {
+static inline void bj_put_pixel_24(uint8_t* row, size_t x, uint32_t pixel) {
     uint8_t* p = row + x * 3;
     p[0] = (uint8_t)(pixel);        // Blue
     p[1] = (uint8_t)(pixel >> 8);   // Green
@@ -71,7 +71,7 @@ static inline void bj__put_pixel_24(uint8_t* row, size_t x, uint32_t pixel) {
 }
 
 // Read a 24-bit BGR pixel, returned as 0x00RRGGBB.
-static inline uint32_t bj__get_pixel_24(const uint8_t* row, size_t x) {
+static inline uint32_t bj_get_pixel_24(const uint8_t* row, size_t x) {
     const uint8_t* p = row + x * 3;
     return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16);
 }
@@ -81,12 +81,12 @@ static inline uint32_t bj__get_pixel_24(const uint8_t* row, size_t x) {
 // --------------------------------------------------------------------------
 
 // Write a 16-bit pixel directly. No checks.
-static inline void bj__put_pixel_16(uint8_t* row, size_t x, uint16_t pixel) {
+static inline void bj_put_pixel_16(uint8_t* row, size_t x, uint16_t pixel) {
     ((uint16_t*)row)[x] = pixel;
 }
 
 // Read a 16-bit pixel directly. No checks.
-static inline uint16_t bj__get_pixel_16(const uint8_t* row, size_t x) {
+static inline uint16_t bj_get_pixel_16(const uint8_t* row, size_t x) {
     return ((const uint16_t*)row)[x];
 }
 
@@ -95,12 +95,12 @@ static inline uint16_t bj__get_pixel_16(const uint8_t* row, size_t x) {
 // --------------------------------------------------------------------------
 
 // Write an 8-bit pixel directly. No checks.
-static inline void bj__put_pixel_8(uint8_t* row, size_t x, uint8_t pixel) {
+static inline void bj_put_pixel_8(uint8_t* row, size_t x, uint8_t pixel) {
     row[x] = pixel;
 }
 
 // Read an 8-bit pixel directly. No checks.
-static inline uint8_t bj__get_pixel_8(const uint8_t* row, size_t x) {
+static inline uint8_t bj_get_pixel_8(const uint8_t* row, size_t x) {
     return row[x];
 }
 
@@ -110,23 +110,23 @@ static inline uint8_t bj__get_pixel_8(const uint8_t* row, size_t x) {
 // --------------------------------------------------------------------------
 
 // Write a pixel given pre-computed BPP. For 8/16/24/32 bpp only.
-static inline void bj__put_pixel_by_bpp(uint8_t* row, size_t x, uint32_t pixel, size_t bpp) {
+static inline void bj_put_pixel_by_bpp(uint8_t* row, size_t x, uint32_t pixel, size_t bpp) {
     switch (bpp) {
-        case 32: bj__put_pixel_32(row, x, pixel); break;
-        case 24: bj__put_pixel_24(row, x, pixel); break;
-        case 16: bj__put_pixel_16(row, x, (uint16_t)pixel); break;
-        case 8:  bj__put_pixel_8(row, x, (uint8_t)pixel); break;
+        case 32: bj_put_pixel_32(row, x, pixel); break;
+        case 24: bj_put_pixel_24(row, x, pixel); break;
+        case 16: bj_put_pixel_16(row, x, (uint16_t)pixel); break;
+        case 8:  bj_put_pixel_8(row, x, (uint8_t)pixel); break;
         default: break; // Sub-byte formats not supported here
     }
 }
 
 // Read a pixel given pre-computed BPP. For 8/16/24/32 bpp only.
-static inline uint32_t bj__get_pixel_by_bpp(const uint8_t* row, size_t x, size_t bpp) {
+static inline uint32_t bj_get_pixel_by_bpp(const uint8_t* row, size_t x, size_t bpp) {
     switch (bpp) {
-        case 32: return bj__get_pixel_32(row, x);
-        case 24: return bj__get_pixel_24(row, x);
-        case 16: return bj__get_pixel_16(row, x);
-        case 8:  return bj__get_pixel_8(row, x);
+        case 32: return bj_get_pixel_32(row, x);
+        case 24: return bj_get_pixel_24(row, x);
+        case 16: return bj_get_pixel_16(row, x);
+        case 8:  return bj_get_pixel_8(row, x);
         default: return 0; // Sub-byte formats not supported here
     }
 }
@@ -146,7 +146,7 @@ static inline uint32_t bj__get_pixel_by_bpp(const uint8_t* row, size_t x, size_t
 // FG/BG colors are pre-unpacked to RGB components by the caller.
 
 // 32bpp (XRGB8888) mask blit - most common, highly optimized
-void bj__blit_mask_32(
+void bj_blit_mask_32(
     const struct bj_bitmap* mask,
     const struct bj_rect*   mask_area,
     struct bj_bitmap*       dst,
@@ -158,7 +158,7 @@ void bj__blit_mask_32(
     bj_mask_bg_mode         mode
 );
 
-void bj__blit_mask_stretched_32(
+void bj_blit_mask_stretched_32(
     const struct bj_bitmap* mask,
     const struct bj_rect*   mask_area,
     struct bj_bitmap*       dst,
@@ -171,7 +171,7 @@ void bj__blit_mask_stretched_32(
 );
 
 // 24bpp (BGR24) mask blit
-void bj__blit_mask_24(
+void bj_blit_mask_24(
     const struct bj_bitmap* mask,
     const struct bj_rect*   mask_area,
     struct bj_bitmap*       dst,
@@ -183,7 +183,7 @@ void bj__blit_mask_24(
     bj_mask_bg_mode         mode
 );
 
-void bj__blit_mask_stretched_24(
+void bj_blit_mask_stretched_24(
     const struct bj_bitmap* mask,
     const struct bj_rect*   mask_area,
     struct bj_bitmap*       dst,
@@ -196,7 +196,7 @@ void bj__blit_mask_stretched_24(
 );
 
 // 16bpp (RGB565, XRGB1555) mask blit
-void bj__blit_mask_16(
+void bj_blit_mask_16(
     const struct bj_bitmap* mask,
     const struct bj_rect*   mask_area,
     struct bj_bitmap*       dst,
@@ -208,7 +208,7 @@ void bj__blit_mask_16(
     bj_mask_bg_mode         mode
 );
 
-void bj__blit_mask_stretched_16(
+void bj_blit_mask_stretched_16(
     const struct bj_bitmap* mask,
     const struct bj_rect*   mask_area,
     struct bj_bitmap*       dst,
@@ -221,7 +221,7 @@ void bj__blit_mask_stretched_16(
 );
 
 // Generic fallback - uses bj_put_pixel/bj_bitmap_pixel, works for any format
-void bj__blit_mask_generic(
+void bj_blit_mask_generic(
     const struct bj_bitmap* mask,
     const struct bj_rect*   mask_area,
     struct bj_bitmap*       dst,
@@ -233,7 +233,7 @@ void bj__blit_mask_generic(
     bj_mask_bg_mode         mode
 );
 
-void bj__blit_mask_stretched_generic(
+void bj_blit_mask_stretched_generic(
     const struct bj_bitmap* mask,
     const struct bj_rect*   mask_area,
     struct bj_bitmap*       dst,
@@ -251,28 +251,28 @@ void bj__blit_mask_stretched_generic(
 // Fast rectangle fill for each format. Used by bj_draw_filled_rectangle
 // and bj_clear_bitmap.
 
-void bj__fill_rect_32(
+void bj_fill_rect_32(
     struct bj_bitmap* dst,
     int x0, int y0,
     int x1, int y1,
     uint32_t pixel
 );
 
-void bj__fill_rect_24(
+void bj_fill_rect_24(
     struct bj_bitmap* dst,
     int x0, int y0,
     int x1, int y1,
     uint32_t pixel
 );
 
-void bj__fill_rect_16(
+void bj_fill_rect_16(
     struct bj_bitmap* dst,
     int x0, int y0,
     int x1, int y1,
     uint32_t pixel
 );
 
-void bj__fill_rect_generic(
+void bj_fill_rect_generic(
     struct bj_bitmap* dst,
     int x0, int y0,
     int x1, int y1,
@@ -285,10 +285,10 @@ void bj__fill_rect_generic(
 // Fast horizontal span fill. Coordinates are NOT clipped - caller must ensure
 // y is in bounds and x0 <= x1.
 
-void bj__hline_32(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
-void bj__hline_24(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
-void bj__hline_16(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
-void bj__hline_generic(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
+void bj_hline_32(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
+void bj_hline_24(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
+void bj_hline_16(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
+void bj_hline_generic(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
 
 
 

@@ -11,7 +11,7 @@
 
 #include <check.h>
 
-extern uint64_t bj__time_frequency;
+extern uint64_t bj_time_frequency_value;
 static uint64_t    s_timer_base;
 
 void bj_end_time() {
@@ -21,7 +21,7 @@ void bj_end_time() {
 void bj_begin_time(
     void
 ) {
-    QueryPerformanceFrequency((LARGE_INTEGER*)&bj__time_frequency);
+    QueryPerformanceFrequency((LARGE_INTEGER*)&bj_time_frequency_value);
     s_timer_base = bj_time_counter();
 }
 
@@ -48,7 +48,7 @@ uint64_t bj_time_counter(
 uint64_t bj_time_frequency(
     void
 ) {
-    return bj__time_frequency;
+    return bj_time_frequency_value;
 }
 
 void bj_sleep(

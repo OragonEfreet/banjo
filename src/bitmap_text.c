@@ -63,7 +63,7 @@ static const struct bj_bitmap* get_charset_mask(struct bj_bitmap* p_bitmap)
         for (int row = 0; row < CHAR_PIXEL_H; ++row) {
             const uint8_t rowbits = charset_latin1[idx][row];
             // Get row pointer once per scanline
-            uint8_t* mask_row = bj__row_ptr(mask, base_y + (size_t)row);
+            uint8_t* mask_row = bj_row_ptr(mask, base_y + (size_t)row);
 
             for (int col = 0; col < CHAR_PIXEL_W; ++col) {
                 if ((rowbits >> col) & 0x01u) {
@@ -95,16 +95,16 @@ static void fast_fill_rect(struct bj_bitmap* dst, const struct bj_rect* r, uint3
     const size_t bpp = BJ_PIXEL_GET_BPP(dst->mode);
     switch (bpp) {
     case 32:
-        bj__fill_rect_32(dst, x0, y0, x1, y1, color_native);
+        bj_fill_rect_32(dst, x0, y0, x1, y1, color_native);
         break;
     case 24:
-        bj__fill_rect_24(dst, x0, y0, x1, y1, color_native);
+        bj_fill_rect_24(dst, x0, y0, x1, y1, color_native);
         break;
     case 16:
-        bj__fill_rect_16(dst, x0, y0, x1, y1, color_native);
+        bj_fill_rect_16(dst, x0, y0, x1, y1, color_native);
         break;
     default:
-        bj__fill_rect_generic(dst, x0, y0, x1, y1, color_native);
+        bj_fill_rect_generic(dst, x0, y0, x1, y1, color_native);
         break;
     }
 }

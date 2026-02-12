@@ -23,20 +23,20 @@ static inline void plot_pixel_fast(
         return;
     }
 
-    uint8_t* row = bj__row_ptr(bmp, (size_t)py);
+    uint8_t* row = bj_row_ptr(bmp, (size_t)py);
 
     switch (bpp) {
     case 32:
-        bj__put_pixel_32(row, (size_t)px, color);
+        bj_put_pixel_32(row, (size_t)px, color);
         break;
     case 24:
-        bj__put_pixel_24(row, (size_t)px, color);
+        bj_put_pixel_24(row, (size_t)px, color);
         break;
     case 16:
-        bj__put_pixel_16(row, (size_t)px, (uint16_t)color);
+        bj_put_pixel_16(row, (size_t)px, (uint16_t)color);
         break;
     case 8:
-        bj__put_pixel_8(row, (size_t)px, (uint8_t)color);
+        bj_put_pixel_8(row, (size_t)px, (uint8_t)color);
         break;
     default:
         // Sub-byte formats: fall back to validated API
@@ -105,32 +105,32 @@ static inline void vline_fast(
     if (y0 > y1) return;
 
     // Compute row pointer once, then increment by stride (avoids y*stride per pixel)
-    uint8_t* row = bj__row_ptr(bmp, (size_t)y0);
+    uint8_t* row = bj_row_ptr(bmp, (size_t)y0);
     const size_t stride = bmp->stride;
     const int count = y1 - y0 + 1;
 
     switch (bpp) {
     case 32:
         for (int i = 0; i < count; ++i) {
-            bj__put_pixel_32(row, (size_t)x, color);
+            bj_put_pixel_32(row, (size_t)x, color);
             row += stride;
         }
         break;
     case 24:
         for (int i = 0; i < count; ++i) {
-            bj__put_pixel_24(row, (size_t)x, color);
+            bj_put_pixel_24(row, (size_t)x, color);
             row += stride;
         }
         break;
     case 16:
         for (int i = 0; i < count; ++i) {
-            bj__put_pixel_16(row, (size_t)x, (uint16_t)color);
+            bj_put_pixel_16(row, (size_t)x, (uint16_t)color);
             row += stride;
         }
         break;
     case 8:
         for (int i = 0; i < count; ++i) {
-            bj__put_pixel_8(row, (size_t)x, (uint8_t)color);
+            bj_put_pixel_8(row, (size_t)x, (uint8_t)color);
             row += stride;
         }
         break;
@@ -158,16 +158,16 @@ static inline void hline_rect(
 
     switch (bpp) {
     case 32:
-        bj__hline_32(bmp, x0, x1 + 1, y, color);
+        bj_hline_32(bmp, x0, x1 + 1, y, color);
         break;
     case 24:
-        bj__hline_24(bmp, x0, x1 + 1, y, color);
+        bj_hline_24(bmp, x0, x1 + 1, y, color);
         break;
     case 16:
-        bj__hline_16(bmp, x0, x1 + 1, y, color);
+        bj_hline_16(bmp, x0, x1 + 1, y, color);
         break;
     default:
-        bj__hline_generic(bmp, x0, x1 + 1, y, color);
+        bj_hline_generic(bmp, x0, x1 + 1, y, color);
         break;
     }
 }
@@ -196,12 +196,12 @@ BANJO_EXPORT void bj_draw_rectangle(
         const int w = (int)p_bitmap->width;
         const int h = (int)p_bitmap->height;
         if ((unsigned)x0 < (unsigned)w && (unsigned)y0 < (unsigned)h) {
-            uint8_t* row = bj__row_ptr(p_bitmap, (size_t)y0);
+            uint8_t* row = bj_row_ptr(p_bitmap, (size_t)y0);
             switch (bpp) {
-            case 32: bj__put_pixel_32(row, (size_t)x0, pixel); break;
-            case 24: bj__put_pixel_24(row, (size_t)x0, pixel); break;
-            case 16: bj__put_pixel_16(row, (size_t)x0, (uint16_t)pixel); break;
-            case 8:  bj__put_pixel_8(row, (size_t)x0, (uint8_t)pixel); break;
+            case 32: bj_put_pixel_32(row, (size_t)x0, pixel); break;
+            case 24: bj_put_pixel_24(row, (size_t)x0, pixel); break;
+            case 16: bj_put_pixel_16(row, (size_t)x0, (uint16_t)pixel); break;
+            case 8:  bj_put_pixel_8(row, (size_t)x0, (uint8_t)pixel); break;
             default: bj_put_pixel(p_bitmap, (size_t)x0, (size_t)y0, pixel); break;
             }
         }
@@ -242,16 +242,16 @@ BANJO_EXPORT void bj_draw_filled_rectangle(
     const size_t bpp = BJ_PIXEL_GET_BPP(p_bitmap->mode);
     switch (bpp) {
     case 32:
-        bj__fill_rect_32(p_bitmap, x0, y0, x1, y1, pixel);
+        bj_fill_rect_32(p_bitmap, x0, y0, x1, y1, pixel);
         break;
     case 24:
-        bj__fill_rect_24(p_bitmap, x0, y0, x1, y1, pixel);
+        bj_fill_rect_24(p_bitmap, x0, y0, x1, y1, pixel);
         break;
     case 16:
-        bj__fill_rect_16(p_bitmap, x0, y0, x1, y1, pixel);
+        bj_fill_rect_16(p_bitmap, x0, y0, x1, y1, pixel);
         break;
     default:
-        bj__fill_rect_generic(p_bitmap, x0, y0, x1, y1, pixel);
+        bj_fill_rect_generic(p_bitmap, x0, y0, x1, y1, pixel);
         break;
     }
 }
@@ -276,7 +276,7 @@ void bj_draw_triangle(
 
 // Fast horizontal line dispatcher.
 // Selects format-specific hline or falls back to generic.
-// The bj__hline_* functions handle clipping internally.
+// The bj_hline_* functions handle clipping internally.
 static inline void hline_fast(
     struct bj_bitmap* bmp,
     int x0, int x1, int y,
@@ -290,16 +290,16 @@ static inline void hline_fast(
 
     switch (bpp) {
     case 32:
-        bj__hline_32(bmp, x0, x1 + 1, y, color);  // +1: hline uses exclusive end
+        bj_hline_32(bmp, x0, x1 + 1, y, color);  // +1: hline uses exclusive end
         break;
     case 24:
-        bj__hline_24(bmp, x0, x1 + 1, y, color);
+        bj_hline_24(bmp, x0, x1 + 1, y, color);
         break;
     case 16:
-        bj__hline_16(bmp, x0, x1 + 1, y, color);
+        bj_hline_16(bmp, x0, x1 + 1, y, color);
         break;
     default:
-        bj__hline_generic(bmp, x0, x1 + 1, y, color);
+        bj_hline_generic(bmp, x0, x1 + 1, y, color);
         break;
     }
 }

@@ -84,19 +84,19 @@ static void dispatch_blit_mask(
 
     switch (bpp) {
     case 32:
-        bj__blit_mask_32(mask, ms, dst, ds, fg_native, bg_native,
+        bj_blit_mask_32(mask, ms, dst, ds, fg_native, bg_native,
                          fr, fg, fb, br, bg, bb, mode);
         break;
     case 24:
-        bj__blit_mask_24(mask, ms, dst, ds, fg_native, bg_native,
+        bj_blit_mask_24(mask, ms, dst, ds, fg_native, bg_native,
                          fr, fg, fb, br, bg, bb, mode);
         break;
     case 16:
-        bj__blit_mask_16(mask, ms, dst, ds, fg_native, bg_native,
+        bj_blit_mask_16(mask, ms, dst, ds, fg_native, bg_native,
                          fr, fg, fb, br, bg, bb, mode);
         break;
     default:
-        bj__blit_mask_generic(mask, ms, dst, ds, fg_native, bg_native,
+        bj_blit_mask_generic(mask, ms, dst, ds, fg_native, bg_native,
                               fr, fg, fb, br, bg, bb, mode);
         break;
     }
@@ -117,19 +117,19 @@ static void dispatch_blit_mask_stretched(
 
     switch (bpp) {
     case 32:
-        bj__blit_mask_stretched_32(mask, ms, dst, ds, fg_native, bg_native,
+        bj_blit_mask_stretched_32(mask, ms, dst, ds, fg_native, bg_native,
                                    fr, fg, fb, br, bg, bb, mode);
         break;
     case 24:
-        bj__blit_mask_stretched_24(mask, ms, dst, ds, fg_native, bg_native,
+        bj_blit_mask_stretched_24(mask, ms, dst, ds, fg_native, bg_native,
                                    fr, fg, fb, br, bg, bb, mode);
         break;
     case 16:
-        bj__blit_mask_stretched_16(mask, ms, dst, ds, fg_native, bg_native,
+        bj_blit_mask_stretched_16(mask, ms, dst, ds, fg_native, bg_native,
                                    fr, fg, fb, br, bg, bb, mode);
         break;
     default:
-        bj__blit_mask_stretched_generic(mask, ms, dst, ds, fg_native, bg_native,
+        bj_blit_mask_stretched_generic(mask, ms, dst, ds, fg_native, bg_native,
                                         fr, fg, fb, br, bg, bb, mode);
         break;
     }

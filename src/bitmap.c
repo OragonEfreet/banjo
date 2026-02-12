@@ -631,16 +631,16 @@ void bj_clear_bitmap(struct bj_bitmap* bitmap) {
     // Dispatch to format-specific fill for maximum speed
     switch (bpp) {
     case 32:
-        bj__fill_rect_32(bitmap, 0, 0, w, h, bitmap->clear_color);
+        bj_fill_rect_32(bitmap, 0, 0, w, h, bitmap->clear_color);
         break;
     case 24:
-        bj__fill_rect_24(bitmap, 0, 0, w, h, bitmap->clear_color);
+        bj_fill_rect_24(bitmap, 0, 0, w, h, bitmap->clear_color);
         break;
     case 16:
-        bj__fill_rect_16(bitmap, 0, 0, w, h, bitmap->clear_color);
+        bj_fill_rect_16(bitmap, 0, 0, w, h, bitmap->clear_color);
         break;
     default:
-        bj__fill_rect_generic(bitmap, 0, 0, w, h, bitmap->clear_color);
+        bj_fill_rect_generic(bitmap, 0, 0, w, h, bitmap->clear_color);
         break;
     }
 }
@@ -702,7 +702,7 @@ static inline void generic_src_over_rgb(
 // Mask Blit (non-stretched) - Generic
 // ----------------------------------------------------------------------------
 
-void bj__blit_mask_generic(
+void bj_blit_mask_generic(
     const struct bj_bitmap* mask,
     const struct bj_rect*   ms,
     struct bj_bitmap*       dst,
@@ -717,7 +717,7 @@ void bj__blit_mask_generic(
         const size_t my = (size_t)ms->y + row;
         const size_t dy = (size_t)ds->y + row;
         // Optimize mask access at least - mask is always 8bpp
-        const uint8_t* mrow = bj__row_ptr(mask, my);
+        const uint8_t* mrow = bj_row_ptr(mask, my);
 
         for (uint16_t col = 0; col < ds->w; ++col) {
             const size_t mx = (size_t)ms->x + col;
@@ -776,7 +776,7 @@ void bj__blit_mask_generic(
 // Mask Blit (stretched) - Generic
 // ----------------------------------------------------------------------------
 
-void bj__blit_mask_stretched_generic(
+void bj_blit_mask_stretched_generic(
     const struct bj_bitmap* mask,
     const struct bj_rect*   ms,
     struct bj_bitmap*       dst,
@@ -803,7 +803,7 @@ void bj__blit_mask_stretched_generic(
         const size_t out_y = (size_t)ds->y + dy;
         y_accum += y_step;
 
-        const uint8_t* mrow = bj__row_ptr(mask, sy);
+        const uint8_t* mrow = bj_row_ptr(mask, sy);
 
         uint32_t x_accum = 0;
 
@@ -865,7 +865,7 @@ void bj__blit_mask_stretched_generic(
 // Filled Rectangle - Generic
 // ----------------------------------------------------------------------------
 
-void bj__fill_rect_generic(
+void bj_fill_rect_generic(
     struct bj_bitmap* dst,
     int x0, int y0,
     int x1, int y1,
@@ -885,7 +885,7 @@ void bj__fill_rect_generic(
     switch (bpp) {
     case 32: {
         // Fill first row
-        uint8_t* first_row = bj__row_ptr(dst, (size_t)y0);
+        uint8_t* first_row = bj_row_ptr(dst, (size_t)y0);
         uint32_t* p = (uint32_t*)first_row + x0;
         for (size_t x = 0; x < width; ++x) {
             p[x] = pixel;
@@ -893,7 +893,7 @@ void bj__fill_rect_generic(
         // Copy to remaining rows
         const size_t row_bytes = width * sizeof(uint32_t);
         for (int y = y0 + 1; y < y1; ++y) {
-            uint8_t* dest_row = bj__row_ptr(dst, (size_t)y);
+            uint8_t* dest_row = bj_row_ptr(dst, (size_t)y);
             memcpy((uint32_t*)dest_row + x0, p, row_bytes);
         }
     } break;
@@ -901,36 +901,36 @@ void bj__fill_rect_generic(
         const uint8_t b = (uint8_t)(pixel);
         const uint8_t g = (uint8_t)(pixel >> 8);
         const uint8_t r = (uint8_t)(pixel >> 16);
-        uint8_t* first_row = bj__row_ptr(dst, (size_t)y0) + (size_t)x0 * 3;
+        uint8_t* first_row = bj_row_ptr(dst, (size_t)y0) + (size_t)x0 * 3;
         uint8_t* p = first_row;
         for (size_t x = 0; x < width; ++x) {
             *p++ = b; *p++ = g; *p++ = r;
         }
         const size_t row_bytes = width * 3;
         for (int y = y0 + 1; y < y1; ++y) {
-            uint8_t* dest_row = bj__row_ptr(dst, (size_t)y) + (size_t)x0 * 3;
+            uint8_t* dest_row = bj_row_ptr(dst, (size_t)y) + (size_t)x0 * 3;
             memcpy(dest_row, first_row, row_bytes);
         }
     } break;
     case 16: {
         const uint16_t p16 = (uint16_t)pixel;
-        uint16_t* first_row = (uint16_t*)bj__row_ptr(dst, (size_t)y0) + x0;
+        uint16_t* first_row = (uint16_t*)bj_row_ptr(dst, (size_t)y0) + x0;
         for (size_t x = 0; x < width; ++x) {
             first_row[x] = p16;
         }
         const size_t row_bytes = width * sizeof(uint16_t);
         for (int y = y0 + 1; y < y1; ++y) {
-            uint16_t* dest_row = (uint16_t*)bj__row_ptr(dst, (size_t)y) + x0;
+            uint16_t* dest_row = (uint16_t*)bj_row_ptr(dst, (size_t)y) + x0;
             memcpy(dest_row, first_row, row_bytes);
         }
     } break;
     case 8: {
         // 8bpp: can use memset for first row if all bytes same, otherwise fill + memcpy
         const uint8_t p8 = (uint8_t)pixel;
-        uint8_t* first_row = bj__row_ptr(dst, (size_t)y0) + x0;
+        uint8_t* first_row = bj_row_ptr(dst, (size_t)y0) + x0;
         memset(first_row, p8, width);
         for (int y = y0 + 1; y < y1; ++y) {
-            uint8_t* dest_row = bj__row_ptr(dst, (size_t)y) + x0;
+            uint8_t* dest_row = bj_row_ptr(dst, (size_t)y) + x0;
             memcpy(dest_row, first_row, width);
         }
     } break;
@@ -949,7 +949,7 @@ void bj__fill_rect_generic(
 // Stubs for 24bpp and 16bpp - delegate to generic for now
 // ----------------------------------------------------------------------------
 
-void bj__blit_mask_24(
+void bj_blit_mask_24(
     const struct bj_bitmap* mask,
     const struct bj_rect*   ms,
     struct bj_bitmap*       dst,
@@ -960,11 +960,11 @@ void bj__blit_mask_24(
     uint8_t br, uint8_t bg, uint8_t bb,
     bj_mask_bg_mode         mode
 ) {
-    bj__blit_mask_generic(mask, ms, dst, ds, fg_native, bg_native,
+    bj_blit_mask_generic(mask, ms, dst, ds, fg_native, bg_native,
                           fr, fg, fb, br, bg, bb, mode);
 }
 
-void bj__blit_mask_stretched_24(
+void bj_blit_mask_stretched_24(
     const struct bj_bitmap* mask,
     const struct bj_rect*   ms,
     struct bj_bitmap*       dst,
@@ -975,11 +975,11 @@ void bj__blit_mask_stretched_24(
     uint8_t br, uint8_t bg, uint8_t bb,
     bj_mask_bg_mode         mode
 ) {
-    bj__blit_mask_stretched_generic(mask, ms, dst, ds, fg_native, bg_native,
+    bj_blit_mask_stretched_generic(mask, ms, dst, ds, fg_native, bg_native,
                                     fr, fg, fb, br, bg, bb, mode);
 }
 
-void bj__blit_mask_16(
+void bj_blit_mask_16(
     const struct bj_bitmap* mask,
     const struct bj_rect*   ms,
     struct bj_bitmap*       dst,
@@ -990,11 +990,11 @@ void bj__blit_mask_16(
     uint8_t br, uint8_t bg, uint8_t bb,
     bj_mask_bg_mode         mode
 ) {
-    bj__blit_mask_generic(mask, ms, dst, ds, fg_native, bg_native,
+    bj_blit_mask_generic(mask, ms, dst, ds, fg_native, bg_native,
                           fr, fg, fb, br, bg, bb, mode);
 }
 
-void bj__blit_mask_stretched_16(
+void bj_blit_mask_stretched_16(
     const struct bj_bitmap* mask,
     const struct bj_rect*   ms,
     struct bj_bitmap*       dst,
@@ -1005,12 +1005,12 @@ void bj__blit_mask_stretched_16(
     uint8_t br, uint8_t bg, uint8_t bb,
     bj_mask_bg_mode         mode
 ) {
-    bj__blit_mask_stretched_generic(mask, ms, dst, ds, fg_native, bg_native,
+    bj_blit_mask_stretched_generic(mask, ms, dst, ds, fg_native, bg_native,
                                     fr, fg, fb, br, bg, bb, mode);
 }
 
 // Optimized 24bpp fill using first-row + memcpy pattern.
-void bj__fill_rect_24(
+void bj_fill_rect_24(
     struct bj_bitmap* dst,
     int x0, int y0,
     int x1, int y1,
@@ -1031,7 +1031,7 @@ void bj__fill_rect_24(
     const uint8_t r = (uint8_t)(pixel >> 16);
 
     // Fill first row
-    uint8_t* first_row = bj__row_ptr(dst, (size_t)y0) + (size_t)x0 * 3;
+    uint8_t* first_row = bj_row_ptr(dst, (size_t)y0) + (size_t)x0 * 3;
     uint8_t* p = first_row;
     for (size_t x = 0; x < width; ++x) {
         *p++ = b;
@@ -1042,13 +1042,13 @@ void bj__fill_rect_24(
     // Copy first row to remaining rows
     const size_t row_bytes = width * 3;
     for (int y = y0 + 1; y < y1; ++y) {
-        uint8_t* dest_row = bj__row_ptr(dst, (size_t)y) + (size_t)x0 * 3;
+        uint8_t* dest_row = bj_row_ptr(dst, (size_t)y) + (size_t)x0 * 3;
         memcpy(dest_row, first_row, row_bytes);
     }
 }
 
 // Optimized 16bpp fill using first-row + memcpy pattern.
-void bj__fill_rect_16(
+void bj_fill_rect_16(
     struct bj_bitmap* dst,
     int x0, int y0,
     int x1, int y1,
@@ -1065,7 +1065,7 @@ void bj__fill_rect_16(
     const uint16_t p16 = (uint16_t)pixel;
 
     // Fill first row
-    uint8_t* first_row_base = bj__row_ptr(dst, (size_t)y0);
+    uint8_t* first_row_base = bj_row_ptr(dst, (size_t)y0);
     uint16_t* first_row = (uint16_t*)first_row_base + x0;
     for (size_t x = 0; x < width; ++x) {
         first_row[x] = p16;
@@ -1074,7 +1074,7 @@ void bj__fill_rect_16(
     // Copy first row to remaining rows
     const size_t row_bytes = width * sizeof(uint16_t);
     for (int y = y0 + 1; y < y1; ++y) {
-        uint8_t* dest_row = bj__row_ptr(dst, (size_t)y);
+        uint8_t* dest_row = bj_row_ptr(dst, (size_t)y);
         memcpy((uint16_t*)dest_row + x0, first_row, row_bytes);
     }
 }
@@ -1083,7 +1083,7 @@ void bj__fill_rect_16(
 // Horizontal Line - for circles/triangles
 // ----------------------------------------------------------------------------
 
-void bj__hline_generic(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
+void bj_hline_generic(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
     // Clip
     if (y < 0 || y >= (int)dst->height) return;
     if (x0 < 0) x0 = 0;
@@ -1091,7 +1091,7 @@ void bj__hline_generic(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pi
     if (x0 >= x1) return;
 
     // Compute row pointer once, use fast accessors (coordinates already clipped)
-    uint8_t* row = bj__row_ptr(dst, (size_t)y);
+    uint8_t* row = bj_row_ptr(dst, (size_t)y);
     const size_t bpp = BJ_PIXEL_GET_BPP(dst->mode);
 
     // For 8/16/24/32 bpp, use direct access; sub-byte falls back to bj_put_pixel
@@ -1128,14 +1128,14 @@ void bj__hline_generic(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pi
     }
 }
 
-void bj__hline_24(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
+void bj_hline_24(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
     // Clip
     if (y < 0 || y >= (int)dst->height) return;
     if (x0 < 0) x0 = 0;
     if (x1 > (int)dst->width) x1 = (int)dst->width;
     if (x0 >= x1) return;
 
-    uint8_t* row = bj__row_ptr(dst, (size_t)y) + x0 * 3;
+    uint8_t* row = bj_row_ptr(dst, (size_t)y) + x0 * 3;
     const uint8_t b = (uint8_t)(pixel);
     const uint8_t g = (uint8_t)(pixel >> 8);
     const uint8_t r = (uint8_t)(pixel >> 16);
@@ -1147,14 +1147,14 @@ void bj__hline_24(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) 
     }
 }
 
-void bj__hline_16(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
+void bj_hline_16(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
     // Clip
     if (y < 0 || y >= (int)dst->height) return;
     if (x0 < 0) x0 = 0;
     if (x1 > (int)dst->width) x1 = (int)dst->width;
     if (x0 >= x1) return;
 
-    uint16_t* row = (uint16_t*)bj__row_ptr(dst, (size_t)y) + x0;
+    uint16_t* row = (uint16_t*)bj_row_ptr(dst, (size_t)y) + x0;
     const uint16_t p16 = (uint16_t)pixel;
     const size_t count = (size_t)(x1 - x0);
 
