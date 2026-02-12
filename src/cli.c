@@ -150,7 +150,7 @@ BANJO_EXPORT bj_bool bj_cli_validate(
     const int errlen = bj_cli_validate_sn(parser, errbuf, 256);
 
     if (errlen > 0) {
-        /* fprintf(stderr, "%s\n", errbuf); */
+        // fprintf(stderr, "%s\n", errbuf);
         bj_set_error(error, BJ_ERROR_INVALID_DATA, errbuf);
         return BJ_FALSE;
     }
@@ -496,15 +496,15 @@ static int bj_cli_parse_sn(struct bj_cli* parser, int argc, char* argv[], char* 
                                 assert(current_arg != 0);
                                 state = FSM_EXPECT_VALUE;
 
-                                /* size_t next_arg = n_positional_found; */
-                                /* for(size_t a = 0 ; a < parser->arguments_len ; ++a) { */
-                                /*     const struct bj_cli_argument* arg = &parser->arguments[a]; */
-                                /*     if(arg_is_positional(arg)) { */
-                                /*         if(--next_arg == 0) { */
-                                /*             TRY_PROCESS_ARG(arg, token); */
-                                /*         } */
-                                /*     } */
-                                /* } */
+                                // size_t next_arg = n_positional_found;
+                                // for(size_t a = 0 ; a < parser->arguments_len ; ++a) {
+                                //     const struct bj_cli_argument* arg = &parser->arguments[a];
+                                //     if(arg_is_positional(arg)) {
+                                //         if(--next_arg == 0) {
+                                //             TRY_PROCESS_ARG(arg, token);
+                                //         }
+                                //     }
+                                // }
                             }
                             break;
 
@@ -654,7 +654,7 @@ BANJO_EXPORT bj_bool bj_cli_parse(
     const int errlen = bj_cli_parse_sn(parser, argc, argv, errbuf, 256);
 
     if (errlen > 0) {
-        /* fprintf(stderr, "%s\n", errbuf); */
+        // fprintf(stderr, "%s\n", errbuf);
         bj_set_error(error, BJ_ERROR_INVALID_DATA, errbuf);
         return BJ_FALSE;
     }

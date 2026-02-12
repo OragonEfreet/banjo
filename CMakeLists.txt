@@ -21,6 +21,7 @@ add_library(banjo
     src/bitmap.c
     src/bitmap_blit.c
     src/bitmap_blit_mask.c
+    src/bitmap_32.c
     src/bitmap_charsets.h
     src/bitmap_dib.c
     src/bitmap_draw.c

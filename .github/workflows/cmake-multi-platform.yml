@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [ "main", "event_polling" ]
+    branches: [ "main", "performances" ]
   pull_request:
     branches: [ "main" ]
 

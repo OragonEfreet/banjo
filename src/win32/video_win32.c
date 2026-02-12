@@ -293,7 +293,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             );
             break;
 
-        case WM_SIZE:           /*bj_trace("WM_SIZE");*/        break;
+        case WM_SIZE:           // bj_trace("WM_SIZE");
+            break;
 
         default:
             return DefWindowProcA(hwnd, uMsg, wParam, lParam);

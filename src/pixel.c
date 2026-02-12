@@ -132,7 +132,7 @@ int bj_compute_pixel_mode(
         return BJ_PIXEL_MODE_INDEXED_8;
 
     case 16:
-        /* print_masks_instructions(red_mask, green_mask, blue_mask); */
+        // print_masks_instructions(red_mask, green_mask, blue_mask);
 
         RETURN_IF_MATCH(0x0000F800, 0x000007E0, 0x0000001F, BJ_PIXEL_MODE_RGB565);
 

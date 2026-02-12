@@ -71,9 +71,9 @@ long double bj_uniform_long_double_distribution(
     if (low > high) { long double t = low; low = high; high = t; }
     if (low == high) return low;
 
-    /* 64 uniform bits → [0,1) with 2^-64 resolution */
+    // 64 uniform bits → [0,1) with 2^-64 resolution
     uint64_t u64 = ((uint64_t)next(state) << 32) | (uint64_t)next(state);
-    long double u = (long double)u64 * (1.0L / 18446744073709551616.0L); /* 2^-64 */
+    long double u = (long double)u64 * (1.0L / 18446744073709551616.0L); // 2^-64
 
     return low + (high - low) * u;
 }
@@ -141,11 +141,11 @@ long double bj_normal_long_double_distribution(
     long double u1 = bj_uniform_long_double_distribution(next, state, 0.0L, 1.0L);
     long double u2 = bj_uniform_long_double_distribution(next, state, 0.0L, 1.0L);
 
-    /* Box–Muller: use 1-u1 to avoid logl(0) */
+    // Box–Muller: use 1-u1 to avoid logl(0)
     long double r     = sqrtl(-2.0L * logl(1.0L - u1));
-    long double theta = 6.28318530717958647692528676655900576L * u2; /* 2π */
+    long double theta = 6.28318530717958647692528676655900576L * u2; // 2π
 
-    long double z0 = r * cosl(theta); /* standard normal */
+    long double z0 = r * cosl(theta); // standard normal
     return mean + standard_deviation * z0;
 }
 

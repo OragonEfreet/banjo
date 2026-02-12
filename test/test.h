@@ -164,3 +164,22 @@ bj_bool all_zero(void* ptr, size_t byte_size) {
 #define REQUIRE_NULL(EXPR) DO_CHECK_NULL(REQUIRE_NULL, EXPR, STOP)
 #define REQUIRE_VALUE(EXPR) DO_CHECK_VALUE(REQUIRE_VALUE, EXPR, STOP)
 #define REQUIRE_NIL(T, OBJ) DO_CHECK_EMPTY(REQUIRE_NIL, T, OBJ, STOP)
+
+// Parametric test support
+#define TEST_PARAMS(NAME, TYPE, ...) \
+    static TYPE SM_NS(params_ ## NAME)[] = { __VA_ARGS__ }; \
+    static const size_t SM_NS(params_count_ ## NAME) = \
+        sizeof(SM_NS(params_ ## NAME)) / sizeof(SM_NS(params_ ## NAME)[0])
+
+#define TEST_CASE_PARAM(NAME, TYPE) \
+    DECL_TST_FLAGS(NAME); \
+    void SM_TST_FN(NAME)(Context* SM_CTX(), StatusFlag* SM_FLAGS_PARAM(), TYPE* param)
+
+#define RUN_TEST_PARAM(NAME) \
+    for (size_t SM_NS(i_ ## NAME) = 0; SM_NS(i_ ## NAME) < SM_NS(params_count_ ## NAME); ++SM_NS(i_ ## NAME)) { \
+        RESET_TST_FLAGS(NAME); \
+        SM_TST_FN(NAME)(&SM_CTX(), &TST_FLAGS(NAME), &SM_NS(params_ ## NAME)[SM_NS(i_ ## NAME)]); \
+        char SM_NS(label_ ## NAME)[128]; \
+        snprintf(SM_NS(label_ ## NAME), sizeof(SM_NS(label_ ## NAME)), "%s[%zu]", #NAME, SM_NS(i_ ## NAME)); \
+        CHECK_TEST(NAME, SM_NS(label_ ## NAME)); \
+    }

@@ -52,7 +52,7 @@ static struct bj_bitmap* unpalletized(struct bj_bitmap* p_original, dib_table_rg
         case BJ_PIXEL_MODE_INDEXED_4:
         case BJ_PIXEL_MODE_INDEXED_8:
             {
-                /* bj_debug("Bitmap using 0x%08X encoding converted to BGR24", mode); */
+                // bj_debug("Bitmap using 0x%08X encoding converted to BGR24", mode);
 
                 const size_t width = bj_bitmap_width(p_original);
                 const size_t height = bj_bitmap_height(p_original);
@@ -93,9 +93,9 @@ static struct bj_bitmap* unpalletized(struct bj_bitmap* p_original, dib_table_rg
                         *p_dest_byte++ = p_color_table[index].green;
                         *p_dest_byte++ = p_color_table[index].red;
 
-                        /* *p_dest_byte++ = p_color_table[index].blue; */
-                        /* *p_dest_byte++ = p_color_table[index].green; */
-                        /* *p_dest_byte++ = p_color_table[index].red; */
+                        // *p_dest_byte++ = p_color_table[index].blue;
+                        // *p_dest_byte++ = p_color_table[index].green;
+                        // *p_dest_byte++ = p_color_table[index].red;
                     }
 
                     p_src_row += src_stride;

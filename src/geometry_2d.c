@@ -67,9 +67,8 @@ bj_bool bj_check_circle_segment_hit(
     const struct bj_vec2 pc = bj_vec2_sub(p, c);
     bj_real dist2 = bj_vec2_dot(pc, pc);
 
-    // petite tolérance numérique optionnelle
-    bj_real tol = BJ_F(1e-6);
-    bj_real r2  = (r + tol)*(r + tol);
+    // Small numerical tolerance to avoid edge-case misses
+    bj_real r2  = (r + BJ_EPSILON) * (r + BJ_EPSILON);
 
     return dist2 <= r2;
 }

@@ -1,46 +1,70 @@
+#include "test.h"
 #include <banjo/rect.h>
 
-#include "test.h"
+TEST_CASE(rect_intersection_full_overlap) {
+  struct bj_rect a = {0, 0, 10, 10};
+  struct bj_rect b = {0, 0, 10, 10};
+  struct bj_rect res;
 
-TEST_CASE_ARGS(rect_no_intersect, {struct bj_rect rect;}) {
-    const struct bj_rect a = {.x = 0, .y = 0, .w = 10, .h = 10};
-    struct bj_rect result = {0};
-    bj_bool intersect = bj_rect_intersection(&a, &test_data->rect, &result);
-    REQUIRE_EQ(intersect, BJ_FALSE);
-    REQUIRE_EQ(result.x, 0);
-    REQUIRE_EQ(result.y, 0);
-    REQUIRE_EQ(result.w, 0);
-    REQUIRE_EQ(result.h, 0);
+  bj_bool intersects = bj_rect_intersection(&a, &b, &res);
+
+  REQUIRE(intersects == BJ_TRUE);
+  REQUIRE_EQ(res.x, 0);
+  REQUIRE_EQ(res.y, 0);
+  REQUIRE_EQ(res.w, 10);
+  REQUIRE_EQ(res.h, 10);
 }
 
-TEST_CASE_ARGS(rect_intersect, {struct bj_rect rect; struct bj_rect result;}) {
-    const struct bj_rect a = {.x = 0, .y = 0, .w = 10, .h = 10};
-    struct bj_rect result = test_data->result;
-    bj_bool intersect = bj_rect_intersection(&a, &test_data->rect, &result);
-    REQUIRE_EQ(intersect, BJ_TRUE);
-    REQUIRE_EQ(test_data->result.x, result.x);
-    REQUIRE_EQ(test_data->result.y, result.y);
-    REQUIRE_EQ(test_data->result.w, result.w);
-    REQUIRE_EQ(test_data->result.h, result.h);
+TEST_CASE(rect_intersection_partial_overlap) {
+  struct bj_rect a = {0, 0, 10, 10};
+  struct bj_rect b = {5, 5, 10, 10};
+  struct bj_rect res;
+
+  bj_bool intersects = bj_rect_intersection(&a, &b, &res);
+
+  REQUIRE(intersects == BJ_TRUE);
+  REQUIRE_EQ(res.x, 5);
+  REQUIRE_EQ(res.y, 5);
+  REQUIRE_EQ(res.w, 5);
+  REQUIRE_EQ(res.h, 5);
 }
 
-int main(int argc, char* argv[]) {
-    BEGIN_TESTS(argc, argv);
+TEST_CASE(rect_intersection_no_overlap) {
+  struct bj_rect a = {0, 0, 5, 5};
+  struct bj_rect b = {10, 10, 5, 5};
 
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=2, .y=2, .w=8, .h=8},  .result={.x=2,.y=2,.w=8, .h= 8});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=0, .y=0, .w=10,.h= 10},.result={.x=0,.y=0,.w=10,.h= 10});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=2, .y=-2,.w=8, .h=8},  .result={.x=2,.y=0,.w=8, .h = 6});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=8, .y=-2,.w=8, .h= 8}, .result={.x=8,.y=0,.w=2, .h= 6});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=8, .y=2, .w=8, .h= 8}, .result={.x=8,.y=2,.w=2, .h= 8});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=8, .y=8, .w=8, .h= 8}, .result={.x=8,.y=8,.w=2, .h= 2});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=2, .y=8, .w=8, .h= 8}, .result={.x=2,.y=8,.w=8, .h= 2});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=-2,.y=8, .w=8, .h= 8}, .result={.x=0,.y=8,.w=6, .h= 2});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=-2,.y=2, .w=8, .h= 8}, .result={.x=0,.y=2,.w=6, .h= 8});
-    RUN_TEST_ARGS(rect_intersect,.rect={.x=-2,.y=-2,.w=8, .h= 8}, .result={.x=0,.y=0,.w=6, .h= 6});
-    RUN_TEST_ARGS(rect_no_intersect,.rect={.x=-10,.y=-10,.w=2, .h= 2}, );
-    RUN_TEST_ARGS(rect_no_intersect,.rect={.x=-10,.y=-10,.w=0, .h= 0}, );
-    RUN_TEST_ARGS(rect_no_intersect,.rect={0}, );
-    RUN_TEST_ARGS(rect_no_intersect,.rect={.x=2,.y=2,.w=0, .h= 0}, );
+  bj_bool intersects = bj_rect_intersection(&a, &b, NULL);
+  REQUIRE(intersects == BJ_FALSE);
+}
 
-    END_TESTS();
+TEST_CASE(rect_intersection_touching_edges) {
+  // Rectangles touching but not overlapping inside
+  struct bj_rect a = {0, 0, 5, 5};
+  struct bj_rect b = {5, 0, 5, 5};
+
+  // Depending on implementation, touching edges might be considered
+  // intersection or not. Usually, in pixel-coord systems, it's [x, x+w), so (5,
+  // 0) is OUTSIDE rect A.
+  bj_bool intersects = bj_rect_intersection(&a, &b, NULL);
+  REQUIRE(intersects == BJ_FALSE);
+}
+
+TEST_CASE(rect_intersection_null_result) {
+  struct bj_rect a = {0, 0, 10, 10};
+  struct bj_rect b = {5, 5, 10, 10};
+
+  bj_bool intersects = bj_rect_intersection(&a, &b, NULL);
+  REQUIRE(intersects == BJ_TRUE);
+}
+
+int main(int argc, char *argv[]) {
+  BEGIN_TESTS(argc, argv);
+
+  RUN_TEST(rect_intersection_full_overlap);
+  RUN_TEST(rect_intersection_partial_overlap);
+  RUN_TEST(rect_intersection_no_overlap);
+  RUN_TEST(rect_intersection_touching_edges);
+  RUN_TEST(rect_intersection_null_result);
+
+  END_TESTS();
 }

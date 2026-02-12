@@ -38,7 +38,7 @@ bj_bool bj_begin_audio(
         const struct bj_audio_layer_create_info* p_create_info = layer_infos[b];
         const bj_bool success = p_create_info->create(vt, &sub_err);
 
-        /* s_audio = p_create_info->create(&sub_err); */
+        // s_audio = p_create_info->create(&sub_err);
 
         if (sub_err) {
             bj_err("while trying %s audio layer: %s (code 0x%08X)",
@@ -126,10 +126,10 @@ inline static double make_note_value(
     double   phase_step
 ) {
     const uint64_t sample_index = base_sample_index + i;
-    const double two_pi = BJ_TAU; /* 2PI exactly in double */
+    const double two_pi = BJ_TAU; // 2PI exactly in double
 
-    /* Use the double variant explicitly to avoid accidental float truncation
-       when BJ_API_FLOAT64 is off. */
+    // Use the double variant explicitly to avoid accidental float truncation
+    // when BJ_API_FLOAT64 is off.
     const double phase = bj_fmodd(sample_index * phase_step, two_pi);
 
     switch (function) {
@@ -137,16 +137,16 @@ inline static double make_note_value(
             return bj_sind(phase);
 
         case BJ_AUDIO_PLAY_SQUARE:
-            /* Cheap sign of sine; or compare phase against PI for duty=50%. */
+            // Cheap sign of sine; or compare phase against PI for duty=50%.
             return (bj_sind(phase) > 0.0) ? 0.2 : -0.2;
 
         case BJ_AUDIO_PLAY_TRIANGLE: {
-            const double t = phase / two_pi;               /* 0..1 ramp */
+            const double t = phase / two_pi;               // 0..1 ramp
             return 4.0 * bj_absd(t - bj_floord(t + 0.5)) - 1.0;
         }
 
         case BJ_AUDIO_PLAY_SAWTOOTH: {
-            const double t = phase / two_pi;               /* 0..1 ramp */
+            const double t = phase / two_pi;               // 0..1 ramp
             return 2.0 * (t - bj_floord(t + 0.5));
         }
 
@@ -165,7 +165,7 @@ void bj_play_audio_note(
     struct bj_audio_play_note_data* data = (struct bj_audio_play_note_data*)p_user_data;
 
     const double freq        = (double)data->frequency;
-    const double amplitude   = (double)p_audio->amplitude;   /* scale for int16 path */
+    const double amplitude   = (double)p_audio->amplitude;   // scale for int16 path
     const double sample_rate = (double)p_audio->sample_rate;
     const double phase_step  = BJ_TAU * freq / sample_rate;
     const int    channels    = p_audio->channels;
@@ -179,7 +179,7 @@ void bj_play_audio_note(
             switch (p_audio->format) {
             case BJ_AUDIO_FORMAT_INT16: {
                 int16_t* buf = (int16_t*)buffer;
-                /* clamp to avoid wrap if amplitude drives beyond range */
+                // clamp to avoid wrap if amplitude drives beyond range
                 double s = output * amplitude;
                 if (s >  32767.0) s =  32767.0;
                 if (s < -32768.0) s = -32768.0;
@@ -188,11 +188,11 @@ void bj_play_audio_note(
             }
             case BJ_AUDIO_FORMAT_F32: {
                 float* buf = (float*)buffer;
-                buf[idx] = (float)output;  /* amplitude can be baked into output if desired */
+                buf[idx] = (float)output;  // amplitude can be baked into output if desired
                 break;
             }
             default:
-                /* unsupported -> silence */
+                // unsupported -> silence
                 break;
             }
         }

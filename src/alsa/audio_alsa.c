@@ -95,10 +95,10 @@ static bj_bool alsa_load_library(struct bj_error** p_error) {
     bj_check_or_return(ALSA.p_handle == 0, BJ_TRUE);
 
     ALSA.p_handle = bj_load_library("libasound.so", p_error);
-	if (!ALSA.p_handle) {
+    if (!ALSA.p_handle) {
         bj_prefix_error(p_error, "while loading libasound.so");
-		return BJ_FALSE;
-	}
+        return BJ_FALSE;
+    }
 
 #define ALSA_BIND(name) if(!(ALSA.name = (pfn_ ## name)bj_library_symbol(ALSA.p_handle, #name, p_error))) {bj_prefix_error(p_error, "while loading function " #name); alsa_unload_library(); return 0;}
     ALSA_BIND(snd_pcm_avail_update)
@@ -224,11 +224,11 @@ static struct bj_audio_device* alsa_open_device(
     void*                             p_callback_user_data,
     struct bj_error**                 p_error
 ) {
-    /* struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device)); */
-    /* if(p_device == 0) { */
-    /*     bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device"); */
-    /*     return 0; */
-    /* } */
+    // struct bj_audio_device* p_device = bj_calloc(sizeof(struct bj_audio_device));
+    // if(p_device == 0) {
+    //     bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
+    //     return 0;
+    // }
     struct alsa_device* alsa_dev = bj_calloc(sizeof(struct alsa_device));
     if(alsa_dev == 0) {
         bj_set_error(p_error, BJ_ERROR_INITIALIZE, "cannot allocate audio device");
@@ -293,7 +293,7 @@ static struct bj_audio_device* alsa_open_device(
     ALSA.snd_pcm_prepare(alsa_dev->p_handle);
     pthread_create(&alsa_dev->playback_thread, 0, playback_thread, (void*)alsa_dev);
 
-	return (struct bj_audio_device*)alsa_dev;
+    return (struct bj_audio_device*)alsa_dev;
 }
 
 
@@ -311,11 +311,11 @@ static bj_bool alsa_init_audio(
         return BJ_FALSE;
     }
 
-	layer->end            = alsa_dispose_audio;
-	layer->open_device    = alsa_open_device;
-	layer->close_device   = alsa_close_device;
+    layer->end            = alsa_dispose_audio;
+    layer->open_device    = alsa_open_device;
+    layer->close_device   = alsa_close_device;
 
-	return BJ_TRUE;
+    return BJ_TRUE;
 }
 
 struct bj_audio_layer_create_info alsa_audio_layer_info = {

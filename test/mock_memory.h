@@ -97,8 +97,13 @@ static void* mock_realloc(void* p_user_data, void* pAppPtr, size_t appsize) {
         return realloc(pAppPtr, appsize);
     }
 
+    // Get old size before allocating new block
+    block_allocation* old_meta = (block_allocation*)pAppPtr - 1;
+    size_t old_size = old_meta->appsize;
+    size_t copy_size = old_size < appsize ? old_size : appsize;
+
     void* res = mock_malloc(p_user_data, appsize);
-    bj_memcpy(res, pAppPtr, appsize);
+    bj_memcpy(res, pAppPtr, copy_size);
     mock_free(p_user_data, pAppPtr);
 
     sAllocationData* pData = (sAllocationData*)p_user_data;
