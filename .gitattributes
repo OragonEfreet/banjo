@@ -1,1 +1,6 @@
 *.bmp filter=lfs diff=lfs merge=lfs -text
+
+assets/* linguist-detectable=false
+resources/* linguist-detectable=false
+docs/* linguist-documentation
+
