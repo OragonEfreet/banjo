@@ -9,30 +9,9 @@
 //   - Division-free alpha blending (see bj_mix_u8)
 //   - No function call overhead in inner loops
 
-#include <stdint.h>
-#include <stddef.h>
 #include <string.h>
 
 #include "bitmap.h"
-
-// ----------------------------------------------------------------------------
-// Pixel Accessors - static inline, file-local
-// ----------------------------------------------------------------------------
-
-// Get pointer to start of row y.
-static inline uint8_t* row_ptr(const struct bj_bitmap* bmp, size_t y) {
-    return (uint8_t*)bmp->buffer + y * bmp->stride;
-}
-
-// Write 32-bit pixel at (row, x).
-static inline void put_pixel(uint8_t* row, size_t x, uint32_t pixel) {
-    ((uint32_t*)row)[x] = pixel;
-}
-
-// Read 32-bit pixel at (row, x).
-static inline uint32_t get_pixel(const uint8_t* row, size_t x) {
-    return ((const uint32_t*)row)[x];
-}
 
 // Pack RGB components to XRGB8888.
 static inline uint32_t pack_rgb(uint8_t r, uint8_t g, uint8_t b) {
@@ -99,8 +78,8 @@ void bj_blit_mask_32(
         const size_t my = (size_t)ms->y + row;
         const size_t dy = (size_t)ds->y + row;
 
-        const uint8_t* mrow = row_ptr(mask, my);
-        uint8_t*       drow = row_ptr(dst, dy);
+        const uint8_t* mrow = bj_row_ptr(mask, my);
+        uint8_t*       drow = bj_row_ptr(dst, dy);
 
         for (uint16_t col = 0; col < ds->w; ++col) {
             const size_t mx = (size_t)ms->x + col;
@@ -111,22 +90,22 @@ void bj_blit_mask_32(
             case BJ_MASK_BG_TRANSPARENT:
                 if (alpha == 0) continue;
                 if (alpha == 255) {
-                    put_pixel(drow, dx, fg_native);
+                    bj_put_pixel_32(drow, dx, fg_native);
                 } else {
-                    uint32_t dval = get_pixel(drow, dx);
+                    uint32_t dval = bj_get_pixel_32(drow, dx);
                     uint8_t dst_r, dst_g, dst_b;
                     unpack_rgb(dval, &dst_r, &dst_g, &dst_b);
-                    put_pixel(drow, dx, blend_over(alpha, fr, fg, fb, dst_r, dst_g, dst_b));
+                    bj_put_pixel_32(drow, dx, blend_over(alpha, fr, fg, fb, dst_r, dst_g, dst_b));
                 }
                 break;
 
             case BJ_MASK_BG_OPAQUE:
                 if (alpha == 0) {
-                    put_pixel(drow, dx, bg_native);
+                    bj_put_pixel_32(drow, dx, bg_native);
                 } else if (alpha == 255) {
-                    put_pixel(drow, dx, fg_native);
+                    bj_put_pixel_32(drow, dx, fg_native);
                 } else {
-                    put_pixel(drow, dx, blend_over(alpha, fr, fg, fb, br, bg, bb));
+                    bj_put_pixel_32(drow, dx, blend_over(alpha, fr, fg, fb, br, bg, bb));
                 }
                 break;
 
@@ -135,12 +114,12 @@ void bj_blit_mask_32(
                 if (alpha_bg == 0) {
                     // Inside glyph: keep dst
                 } else if (alpha_bg == 255) {
-                    put_pixel(drow, dx, bg_native);
+                    bj_put_pixel_32(drow, dx, bg_native);
                 } else {
-                    uint32_t dval = get_pixel(drow, dx);
+                    uint32_t dval = bj_get_pixel_32(drow, dx);
                     uint8_t dst_r, dst_g, dst_b;
                     unpack_rgb(dval, &dst_r, &dst_g, &dst_b);
-                    put_pixel(drow, dx, blend_over(alpha_bg, br, bg, bb, dst_r, dst_g, dst_b));
+                    bj_put_pixel_32(drow, dx, blend_over(alpha_bg, br, bg, bb, dst_r, dst_g, dst_b));
                 }
             } break;
             }
@@ -179,8 +158,8 @@ void bj_blit_mask_stretched_32(
         const size_t out_y = (size_t)ds->y + dy;
         y_accum += y_step;
 
-        const uint8_t* mrow = row_ptr(mask, sy);
-        uint8_t*       drow = row_ptr(dst, out_y);
+        const uint8_t* mrow = bj_row_ptr(mask, sy);
+        uint8_t*       drow = bj_row_ptr(dst, out_y);
 
         uint32_t x_accum = 0;
 
@@ -195,22 +174,22 @@ void bj_blit_mask_stretched_32(
             case BJ_MASK_BG_TRANSPARENT:
                 if (alpha == 0) continue;
                 if (alpha == 255) {
-                    put_pixel(drow, out_x, fg_native);
+                    bj_put_pixel_32(drow, out_x, fg_native);
                 } else {
-                    uint32_t dval = get_pixel(drow, out_x);
+                    uint32_t dval = bj_get_pixel_32(drow, out_x);
                     uint8_t dst_r, dst_g, dst_b;
                     unpack_rgb(dval, &dst_r, &dst_g, &dst_b);
-                    put_pixel(drow, out_x, blend_over(alpha, fr, fg, fb, dst_r, dst_g, dst_b));
+                    bj_put_pixel_32(drow, out_x, blend_over(alpha, fr, fg, fb, dst_r, dst_g, dst_b));
                 }
                 break;
 
             case BJ_MASK_BG_OPAQUE:
                 if (alpha == 0) {
-                    put_pixel(drow, out_x, bg_native);
+                    bj_put_pixel_32(drow, out_x, bg_native);
                 } else if (alpha == 255) {
-                    put_pixel(drow, out_x, fg_native);
+                    bj_put_pixel_32(drow, out_x, fg_native);
                 } else {
-                    put_pixel(drow, out_x, blend_over(alpha, fr, fg, fb, br, bg, bb));
+                    bj_put_pixel_32(drow, out_x, blend_over(alpha, fr, fg, fb, br, bg, bb));
                 }
                 break;
 
@@ -218,12 +197,12 @@ void bj_blit_mask_stretched_32(
                 const uint8_t alpha_bg = (uint8_t)(255u - alpha);
                 if (alpha_bg == 0) { } // keep dst
                 else if (alpha_bg == 255) {
-                    put_pixel(drow, out_x, bg_native);
+                    bj_put_pixel_32(drow, out_x, bg_native);
                 } else {
-                    uint32_t dval = get_pixel(drow, out_x);
+                    uint32_t dval = bj_get_pixel_32(drow, out_x);
                     uint8_t dst_r, dst_g, dst_b;
                     unpack_rgb(dval, &dst_r, &dst_g, &dst_b);
-                    put_pixel(drow, out_x, blend_over(alpha_bg, br, bg, bb, dst_r, dst_g, dst_b));
+                    bj_put_pixel_32(drow, out_x, blend_over(alpha_bg, br, bg, bb, dst_r, dst_g, dst_b));
                 }
             } break;
             }
@@ -251,7 +230,7 @@ void bj_fill_rect_32(
     const size_t width = (size_t)(x1 - x0);
 
     // Fill first row
-    uint8_t* first_row = row_ptr(dst, (size_t)y0);
+    uint8_t* first_row = bj_row_ptr(dst, (size_t)y0);
     uint32_t* p = (uint32_t*)first_row + x0;
     for (size_t x = 0; x < width; ++x) {
         p[x] = pixel;
@@ -260,7 +239,7 @@ void bj_fill_rect_32(
     // Copy first row to remaining rows (memcpy is heavily optimized)
     const size_t row_bytes = width * sizeof(uint32_t);
     for (int y = y0 + 1; y < y1; ++y) {
-        uint8_t* dest_row = row_ptr(dst, (size_t)y);
+        uint8_t* dest_row = bj_row_ptr(dst, (size_t)y);
         memcpy(dest_row + x0 * sizeof(uint32_t), first_row + x0 * sizeof(uint32_t), row_bytes);
     }
 }
@@ -276,7 +255,7 @@ void bj_hline_32(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel) {
     if (x1 > (int)dst->width) x1 = (int)dst->width;
     if (x0 >= x1) return;
 
-    uint32_t* row = (uint32_t*)row_ptr(dst, (size_t)y) + x0;
+    uint32_t* row = (uint32_t*)bj_row_ptr(dst, (size_t)y) + x0;
     const size_t count = (size_t)(x1 - x0);
     for (size_t i = 0; i < count; ++i) {
         row[i] = pixel;
