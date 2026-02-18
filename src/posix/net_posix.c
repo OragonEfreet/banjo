@@ -8,9 +8,10 @@
 #include <arpa/inet.h>  // inet_ntop
 /* #include <ifaddrs.h>   // getifaddrs, freeifaddrs */
 /* #include <net/if.h>    // IFF_UP, IFF_LOOPBACK */
-#include <errno.h>
+#include <errno.h> // errno
 #include <netdb.h>     // addrinfo
 #include <stdio.h>     // snprintf
+#include <string.h> //strerror
 
 #define QUEUE_SIZE 5
 
@@ -34,54 +35,59 @@ void bj_unbind(
     bj_free(listener);
 }
 
-static struct bj_tcp_listener* bj_bind_addrinfo(
-    struct addrinfo* bindaddr,
-    uint16_t         backlog
-) {
-    // Create socket
-    const int listen_socket = socket(
-        bindaddr->ai_family,
-        bindaddr->ai_socktype,
-        bindaddr->ai_protocol
-    );
-    if(listen_socket <= 0) {
-        bj_err("socket() failed: %u", errno);
-        return 0;
-    }
-
-    setsockopt(listen_socket, 
-        IPPROTO_IPV6, IPV6_V6ONLY,
-        &(int){0}, sizeof(int)
-    );
-
-    if(bind(listen_socket, bindaddr->ai_addr, bindaddr->ai_addrlen)) {
-        bj_err("bind() failed: %u", errno);
-        close(listen_socket);
-        return 0;
-    }
-
-    if(listen(listen_socket, backlog) < 0) {
-        bj_err("listen() failed: %u", errno);
-        close(listen_socket);
-        return 0;
-    }
-
-    struct bj_tcp_listener* listener = bj_calloc(sizeof(struct bj_tcp_listener));
-    listener->socket = listen_socket;
-    return listener;
-}
-
 struct bj_tcp_listener* bj_listen_tcp(
     const struct bj_net_addr* addr,
     uint16_t                  port,
     struct bj_error**         error
 ) {
-    (void)addr;
-    (void)error;
-
     bj_assert(addr == 0);
 
+    (void)addr;
+    (void)error;
+    (void)port;
 
+    static char str_port[6];
+    const int written = snprintf(str_port, sizeof(str_port), "%u", port);
+    if(written <= 0 || written >= (int)sizeof(str_port)) {
+        bj_set_error_fmt(
+            error, BJ_ERROR_NETWORK, 
+            "incorrect port number '%u'", port
+        );
+        return 0;
+    }
+
+    const struct addrinfo hints = {
+        .ai_family   = AF_INET,
+        .ai_socktype = SOCK_STREAM,
+        .ai_flags    = AI_PASSIVE,
+    };
+    struct addrinfo* listen_addrs = 0;
+
+    
+    const int gaierror = getaddrinfo(0, str_port, &hints, &listen_addrs);
+    if(gaierror) {
+        bj_set_error(error, BJ_ERROR_NETWORK, gai_strerror(gaierror));
+        return 0;
+    }
+
+    for(
+        struct addrinfo* addr = listen_addrs;
+        addr != 0;
+        addr = addr->ai_next
+    ) {
+        if(socket(
+            addr->ai_family, addr->ai_socktype, addr->ai_protocol
+        ) == -1) {
+            bj_set_error(error, BJ_ERROR_NETWORK_SOCKET, strerror(errno));
+            freeaddrinfo(listen_addrs);
+            return 0;
+        }
+    }
+
+    freeaddrinfo(listen_addrs);
+    bj_assert(addr == 0);
+
+    bj_set_error(error, BJ_ERROR_NOT_IMPLEMENTED, "not implemented");
     return 0;
 }
 

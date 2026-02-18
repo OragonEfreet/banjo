@@ -133,6 +133,12 @@ enum bj_error_code {
     // Kind 0x06: Audio subsystem errors
     /// Error in audio subsystem.
     BJ_ERROR_AUDIO           = 0x00000006,
+
+    // Kind 0x07: Network subsystem errors
+    /// Error in network subsystem.
+    BJ_ERROR_NETWORK         = 0x00000007,
+    /// Socket error
+    BJ_ERROR_NETWORK_SOCKET  = 0x00000107,
 };
 
 ////////////////////////////////////////////////////////////////////////////////

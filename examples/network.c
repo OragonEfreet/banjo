@@ -7,8 +7,8 @@ int main(int argc, char* argv[]) {
 
     struct bj_error* error = 0;
     struct bj_tcp_listener* listener = bj_listen_tcp(0, 8080, &error);
-    if(error) {
-        bj_err("bind failed: %s", error->message);
+    if(!listener) {
+        bj_err("bind failed (%s)", bj_error_message(error));
         bj_clear_error(&error);
         return 1;
     }
