@@ -329,6 +329,16 @@ if(BANJO_CONFIG_FASTMATH)
     endif()
 endif()
 
+option(BANJO_ENABLE_SANITIZER "Enable AddressSanitizer" OFF)
+if(BANJO_ENABLE_SANITIZER)
+    if(MSVC)
+        add_compile_options(/fsanitize=address)
+    else()
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address)
+    endif()
+endif()
+
 ################################################################################
 ### Installation
 ################################################################################

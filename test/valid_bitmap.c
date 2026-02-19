@@ -7,8 +7,9 @@
 TEST_CASE_ARGS(is_valid_bmp, {const char* name;}) {
     const char* folder = BANJO_ASSETS_DIR;
     size_t folder_len = bj_strlen(folder);
-    char* bmp_path = bj_malloc(sizeof(char) * (folder_len + bj_strlen(test_data->name) + 2));
-    sprintf(bmp_path, "%s/%s", folder, test_data->name);
+    size_t path_len = folder_len + bj_strlen(test_data->name) + 2;
+    char* bmp_path = bj_malloc(sizeof(char) * path_len);
+    snprintf(bmp_path, path_len, "%s/%s", folder, test_data->name);
 
     struct bj_error* p_error = 0;
     bj_destroy_bitmap(bj_create_bitmap_from_file(bmp_path, &p_error));
@@ -20,8 +21,9 @@ TEST_CASE_ARGS(is_valid_bmp, {const char* name;}) {
 TEST_CASE_ARGS(is_corrupt_bmp, {const char* name;enum bj_error_code code;}) {
     const char* folder = BANJO_ASSETS_DIR;
     size_t folder_len = bj_strlen(folder);
-    char* bmp_path = bj_malloc(sizeof(char) * (folder_len + bj_strlen(test_data->name) + 2));
-    sprintf(bmp_path, "%s/%s", folder, test_data->name);
+    size_t path_len = folder_len + bj_strlen(test_data->name) + 2;
+    char* bmp_path = bj_malloc(sizeof(char) * path_len);
+    snprintf(bmp_path, path_len, "%s/%s", folder, test_data->name);
 
     struct bj_error* p_error = 0;
     bj_destroy_bitmap(bj_create_bitmap_from_file(bmp_path, &p_error));
