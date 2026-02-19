@@ -13,7 +13,7 @@ static inline uint32_t pcg32_step(struct bj_pcg32 *g) {
     uint64_t old = g->state;
     g->state = old * PCG32_MULT + (g->inc | 1ULL);
     uint32_t xorshifted = (uint32_t)(((old >> 18u) ^ old) >> 27u);
-    uint32_t rot = (uint32_t)(old >> 59u);
+    int32_t rot = (uint32_t)(old >> 59u);
     return (xorshifted >> rot) | (xorshifted << ((-rot) & 31u));
 }
 
