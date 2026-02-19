@@ -7,9 +7,6 @@ SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-    add_compile_options(/W4 /D_CRT_SECURE_NO_WARNINGS)
-else()
-    add_compile_options(-Wall -Wextra)
 endif()
 
 add_library(banjo
@@ -95,9 +92,14 @@ if(WIN32)
         src/win32/time_win32.c
     )
 else()
-    target_sources(banjo PRIVATE 
+    target_sources(banjo PRIVATE
         src/unix/system_unix.c
         src/unix/time_unix.c
+    )
+    set_source_files_properties(
+        src/unix/system_unix.c
+        src/unix/time_unix.c
+        PROPERTIES COMPILE_DEFINITIONS _POSIX_C_SOURCE=199309L
     )
 endif()
 
@@ -108,7 +110,40 @@ target_include_directories(banjo
     PRIVATE
         src
 )
-set_target_properties(banjo PROPERTIES C_STANDARD 99 C_STANDARD_REQUIRED TRUE)
+
+################################################################################
+# C99 Compliance
+################################################################################
+set_target_properties(banjo PROPERTIES 
+    C_STANDARD 99 
+    C_STANDARD_REQUIRED TRUE 
+    C_EXTENSIONS OFF
+)
+if (MSVC)
+    target_compile_options(banjo PRIVATE
+        /W4
+        /permissive-
+        /D_CRT_SECURE_NO_WARNINGS
+        /w14244               # C4244: conversion, possible loss of data
+        /w14267               # C4267: conversion from 'size_t', possible loss of data
+        /w14242               # C4242: conversion, possible loss of data (narrowing)
+        /w14254               # C4254: conversion, possible loss of data (operator)
+        /w14296               # C4296: expression is always false
+        /w14388               # C4388: signed/unsigned mismatch in comparison
+    )
+else()
+    target_compile_options(banjo PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Wdouble-promotion
+        -Wshadow
+        -Wstrict-prototypes
+        -Wmissing-prototypes
+    )
+endif()
 
 if(NOT MSVC)
     target_link_libraries(banjo PUBLIC m)
@@ -215,6 +250,7 @@ option(BANJO_CONFIG_ALSA_BACKEND "Add support for audio with ALSA" ${BJ_ALSA_AVA
 if(BANJO_CONFIG_ALSA_BACKEND AND ALSA_FOUND)
     target_compile_definitions(banjo PUBLIC BJ_CONFIG_ALSA_BACKEND)
     target_sources(banjo PRIVATE src/alsa/audio_alsa.c)
+    set_source_files_properties(src/alsa/audio_alsa.c PROPERTIES COMPILE_DEFINITIONS "_POSIX_C_SOURCE=199309L;_DEFAULT_SOURCE")
     target_include_directories(banjo PRIVATE ${ALSA_INCLUDE_DIRS})
     target_link_libraries(banjo PRIVATE ${ALSA_LIBRARIES})
 endif()
