@@ -3,6 +3,7 @@
 #include <banjo/memory.h>
 
 #include "check.h"
+#include "event_layer.h"
 #include "video_layer.h"
 #include "window.h"
 

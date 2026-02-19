@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 3.21)
-project(banjo LANGUAGES C)
+project(banjo VERSION 0.1.0 LANGUAGES C)
 
 include(CTest)
 
-SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (MSVC)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
 add_library(banjo
-    src/api.c
     inc/banjo/api.h
     inc/banjo/assert.h
     inc/banjo/audio.h
@@ -41,16 +40,17 @@ add_library(banjo
     inc/banjo/vec.h
     inc/banjo/version.h
     inc/banjo/window.h
-    src/audio.c
+    src/api.c
     src/audio.h
+    src/audio_layer.c
     src/audio_layer.h
     src/bitmap.c
     src/bitmap.h
-    src/bitmap_blit.c
-    src/bitmap_blit_mask.c
     src/bitmap_16.c
     src/bitmap_24.c
     src/bitmap_32.c
+    src/bitmap_blit.c
+    src/bitmap_blit_mask.c
     src/bitmap_charsets.h
     src/bitmap_dib.c
     src/bitmap_draw.c
@@ -58,12 +58,14 @@ add_library(banjo
     src/check.h
     src/cli.c
     src/error.c
-    src/event.c
+    src/event_layer.c
+    src/event_layer.h
     src/geometry_2d.c
     src/log.c
     src/main.c
     src/main_callbacks.c
     src/memory.c
+    src/net_layer.h
     src/physics_angular.c
     src/physics_kinematics.c
     src/physics_particle.c
@@ -79,7 +81,8 @@ add_library(banjo
     src/stream.c
     src/stream.h
     src/system.c
-    src/time.c
+    src/time_layer.c
+    src/time_layer.h
     src/version.c
     src/video.c
     src/video_layer.h
@@ -117,7 +120,6 @@ target_include_directories(banjo
 set_target_properties(banjo PROPERTIES 
     C_STANDARD 99 
     C_STANDARD_REQUIRED TRUE 
-    C_EXTENSIONS OFF
 )
 if (MSVC)
     target_compile_options(banjo PRIVATE
@@ -365,7 +367,7 @@ configure_package_config_file(
 
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/banjo-config-version.cmake
-    VERSION 0.1.0
+    VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 

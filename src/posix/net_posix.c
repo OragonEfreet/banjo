@@ -3,7 +3,7 @@
 #include <banjo/memory.h>
 #include <banjo/net.h>
 
-#include "check.h"
+#include "net_layer.h"
 
 #include <arpa/inet.h>  // inet_ntop
 /* #include <ifaddrs.h>   // getifaddrs, freeifaddrs */
@@ -27,22 +27,22 @@ void bj_end_network(void) {
     // EMPTY
 }
 
-void bj_unbind(
-    struct bj_tcp_listener* listener
-) {
-    bj_check(listener);
-    close(listener->socket);
-    bj_free(listener);
-}
+/* void bj_unbind( */
+/*     struct bj_tcp_listener* listener */
+/* ) { */
+/*     bj_check(listener); */
+/*     close(listener->socket); */
+/*     bj_free(listener); */
+/* } */
 
 struct bj_tcp_listener* bj_listen_tcp(
-    const struct bj_net_addr* addr,
+    const struct bj_net_addr* listen_addr,
     uint16_t                  port,
     struct bj_error**         error
 ) {
-    bj_assert(addr == 0);
+    bj_assert(listen_addr == 0);
 
-    (void)addr;
+    (void)listen_addr;
     (void)error;
     (void)port;
 
@@ -85,7 +85,6 @@ struct bj_tcp_listener* bj_listen_tcp(
     }
 
     freeaddrinfo(listen_addrs);
-    bj_assert(addr == 0);
 
     bj_set_error(error, BJ_ERROR_NOT_IMPLEMENTED, "not implemented");
     return 0;

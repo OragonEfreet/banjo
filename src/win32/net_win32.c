@@ -1,3 +1,5 @@
+#include "net_layer.h"
+
 void bj_begin_network(void) {
 }
 

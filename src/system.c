@@ -3,7 +3,13 @@
 #include <banjo/system.h>
 
 #include "audio_layer.h"
+#include "event_layer.h"
+#include "net_layer.h"
+#include "time_layer.h"
 #include "video_layer.h"
+
+void bj_begin_event(void);
+void bj_end_event(void);
 
 struct bj_audio_layer s_audio = {0};
 struct bj_video_layer s_video = {0};

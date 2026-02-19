@@ -149,10 +149,4 @@ struct bj_video_layer_create_info {
 
 bj_bool bj_begin_video(struct bj_video_layer* layer, struct bj_error** error);
 
-void bj_begin_time(void);
-void bj_end_time(void);
-
-void bj_begin_event(void);
-void bj_end_event(void);
-
 #endif

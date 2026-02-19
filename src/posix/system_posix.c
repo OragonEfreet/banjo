@@ -1,5 +1,3 @@
-#include "posix.h"
-
 #include <banjo/system.h>
 
 #ifdef BJ_OS_POSIX
