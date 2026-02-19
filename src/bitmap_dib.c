@@ -336,7 +336,7 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
     int32_t  dib_height           = 0;
     uint32_t dib_width            = 0;
     uint16_t dib_planes           = 0;
-    uint8_t  dib_bit_count        = 0;
+    uint16_t  dib_bit_count        = 0;
     uint32_t dib_compression      = 0;
     uint32_t dib_image_size       = 0;
     uint32_t dib_x_pixels_per_m   = 0;
@@ -486,7 +486,7 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
     }
 
     // Now we got the bitmasks and all, we can get the mode.
-    const enum bj_pixel_mode src_mode = (enum bj_pixel_mode)bj_compute_pixel_mode(dib_bit_count, red_mask, green_mask, blue_mask);
+    const enum bj_pixel_mode src_mode = (enum bj_pixel_mode)bj_compute_pixel_mode((uint8_t)dib_bit_count, red_mask, green_mask, blue_mask);
 
     // Read the color table
     dib_table_rgb* color_table = 0;
