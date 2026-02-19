@@ -63,7 +63,7 @@
 /// \param version The packed 32-bit version value.
 /// \return Major version in the range [0, 255].
 ////////////////////////////////////////////////////////////////////////////////
-#define BJ_VERSION_MAJOR(version) (((version) >> 24U) & 0xFFU)
+#define BJ_VERSION_MAJOR(version) ((uint8_t)(((version) >> 24U) & 0xFFU))
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Extract the minor version from a packed 32-bit version.

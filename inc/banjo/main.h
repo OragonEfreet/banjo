@@ -106,8 +106,10 @@ extern int bj_main(int argc, char* argv[]);
 ///
 /// \return Process exit code.
 ////////////////////////////////////////////////////////////////////////////////
+#endif /* BJ_AUTOMAIN || BJ_AUTOMAIN_CALLBACKS */
+
 extern int bj_call_main(int argc, char* argv[], int (*function)(int argc, char* argv[]));
-#endif
+
 
 #ifdef BJ_AUTOMAIN_CALLBACKS
 
@@ -123,6 +125,9 @@ enum bj_callback_result
     bj_callback_exit_success =  0, ///< Exit successfully.
     bj_callback_continue     =  1, ///< Continue running (iterate again).
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_callback_result bj_callback_result;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \typedef bj_app_begin_fn

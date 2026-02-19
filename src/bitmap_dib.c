@@ -1,6 +1,7 @@
 #include <banjo/assert.h>
-#include <banjo/bitmap.h>
 #include <banjo/memory.h>
+
+#include <bitmap.h>
 
 #define ERR_MSG                         "unsupported"
 #define ERR_MSG_BAD_BIT_COUNT           "unsupported bit count"
@@ -20,7 +21,7 @@
 #define ERR_MSG_UNSUPPORTED_COMPRESSION "unsupported compression"
 #define ERR_MSG_WRITE_OUTSIDE           "rle decoding writes outside of frame"
 
-#define _ABS(x) ((x) < 0 ? -(x) : (x))
+#define _ABS(x) ((x) < 0 ? (uint32_t)(-(x)) : (uint32_t)(x))
 
 #define DIB_SIGNATURE 0x4D42
 #define DIB_INFO_HEADER_SIZE 40
@@ -115,7 +116,7 @@ static struct bj_bitmap* unpalletized(struct bj_bitmap* p_original, dib_table_rg
 }
 
 static size_t dib_uncompressed_row_size(uint32_t width, uint16_t bit_count) {
-    return ((((width * bit_count) + 31) & ~31) >> 3);
+    return ((((width * (uint32_t)bit_count) + 31u) & ~31u) >> 3);
 }
 
 static size_t dib_color_table_len(uint16_t bit_count, uint32_t override) {
@@ -141,7 +142,7 @@ static void dib_read_uncompressed_raster(
 ) {
     const bj_bool is_top_down = height < 0;
 
-    uint8_t* const dst_end = dst_pixels + dst_stride * _ABS(height);
+    uint8_t* const dst_end = dst_pixels + dst_stride * (size_t)_ABS(height);
     bj_assert(dst_stride > 0);
 
     uint8_t* p_dst_row         = is_top_down ? dst_pixels : dst_end - dst_stride;
@@ -354,7 +355,7 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
     }
 
 
-    if (dib_width * dib_height == 0x00) {
+    if (dib_width == 0 || dib_height == 0) {
         bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, ERR_MSG_BAD_BMP_SIZE);
         return 0;
     }

@@ -24,6 +24,9 @@ enum bj_seek_origin {
     BJ_SEEK_CURRENT = 0x01, //!< The current position of the stream
     BJ_SEEK_END     = 0x02, //!< The end of the stream
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_seek_origin bj_seek_origin;
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////

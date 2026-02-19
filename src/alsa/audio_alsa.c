@@ -17,6 +17,7 @@
 
 #include <alsa/asoundlib.h>
 #include <pthread.h>
+#include <string.h> /* memcpy for C99-safe void*-to-function-pointer loading */
 
 struct alsa_device {
     struct bj_audio_device common;
@@ -84,7 +85,7 @@ static void alsa_set_error(struct bj_error** p_error, int alsa_err) {
     bj_set_error(p_error, BJ_ERROR_AUDIO, ALSA.snd_strerror(alsa_err));
 }
 
-static void alsa_unload_library() {
+static void alsa_unload_library(void) {
     if(ALSA.p_handle != 0) {
         bj_unload_library(ALSA.p_handle);
     }
@@ -100,7 +101,11 @@ static bj_bool alsa_load_library(struct bj_error** p_error) {
         return BJ_FALSE;
     }
 
-#define ALSA_BIND(name) if(!(ALSA.name = (pfn_ ## name)bj_library_symbol(ALSA.p_handle, #name, p_error))) {bj_prefix_error(p_error, "while loading function " #name); alsa_unload_library(); return 0;}
+#define ALSA_BIND(name) do { \
+    void* sym_ = bj_library_symbol(ALSA.p_handle, #name, p_error); \
+    if (!sym_) { bj_prefix_error(p_error, "while loading function " #name); alsa_unload_library(); return 0; } \
+    memcpy(&ALSA.name, &sym_, sizeof(ALSA.name)); \
+} while(0);
     ALSA_BIND(snd_pcm_avail_update)
     ALSA_BIND(snd_pcm_close)
     ALSA_BIND(snd_pcm_drain)
@@ -150,7 +155,7 @@ static void* playback_thread(void* p_data) {
                 ALSA.snd_pcm_prepare(pcm_handle);
                 continue;
             } else {
-                bj_err("avail error: %s", ALSA.snd_strerror(avail));
+                bj_err("avail error: %s", ALSA.snd_strerror((int)avail));
                 break;
             }
         }
@@ -160,7 +165,7 @@ static void* playback_thread(void* p_data) {
                 // Generate audio normally
                 p_device->common.callback(
                     buffer,
-                    frames_per_period,
+                    (unsigned)frames_per_period,
                     &p_device->common.properties,
                     p_device->common.callback_user_data,
                     global_sample_index
@@ -174,12 +179,12 @@ static void* playback_thread(void* p_data) {
                 }
             }
 
-            int err = ALSA.snd_pcm_writei(pcm_handle, buffer, frames_per_period);
+            snd_pcm_sframes_t err = ALSA.snd_pcm_writei(pcm_handle, buffer, frames_per_period);
             if (err == -EPIPE) {
                 bj_err("write underrun!");
                 ALSA.snd_pcm_prepare(pcm_handle);
             } else if (err < 0) {
-                bj_err("write error: %s", ALSA.snd_strerror(err));
+                bj_err("write error: %s", ALSA.snd_strerror((int)err));
                 break;
             }
 
@@ -281,8 +286,10 @@ static struct bj_audio_device* alsa_open_device(
     bj_info("channels: %d", alsa_dev->common.properties.channels);
     bj_info("sample_rate: %d", alsa_dev->common.properties.sample_rate);
 
-    ssize_t format_byte_size = ALSA.snd_pcm_format_size(alsa_format, 1);
-    bj_assert(format_byte_size == BJ_AUDIO_FORMAT_WIDTH(alsa_dev->common.properties.format) / 8);
+    ssize_t format_byte_size_s = ALSA.snd_pcm_format_size(alsa_format, 1);
+    bj_assert(format_byte_size_s > 0);
+    bj_assert(format_byte_size_s == (ssize_t)(BJ_AUDIO_FORMAT_WIDTH(alsa_dev->common.properties.format) / 8));
+    const size_t format_byte_size = (size_t)format_byte_size_s;
 
     // Create buffer and fill with silence
     alsa_dev->p_buffer = bj_malloc(format_byte_size * alsa_dev->frames_per_period * alsa_dev->common.properties.channels);

@@ -61,7 +61,7 @@ static const struct bj_bitmap* get_charset_mask(struct bj_bitmap* p_bitmap)
         const size_t base_y = (size_t)CHAR_PIXEL_Y((int)idx);
 
         for (int row = 0; row < CHAR_PIXEL_H; ++row) {
-            const uint8_t rowbits = charset_latin1[idx][row];
+            const uint8_t rowbits = (uint8_t)charset_latin1[idx][row];
             // Get row pointer once per scanline
             uint8_t* mask_row = bj_row_ptr(mask, base_y + (size_t)row);
 
@@ -460,7 +460,7 @@ void bj_draw_text(
     render_text_masked(dst, x, y, height, fg_native, 0, BJ_MASK_BG_TRANSPARENT, text);
 }
 
-void bj_draw_vtextf(
+static void bj_draw_vtextf(
     struct bj_bitmap*     p_bitmap,
     int            x,
     int            y,

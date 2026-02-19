@@ -25,6 +25,9 @@ enum bj_pixel_mode {
 
     BJ_PIXEL_MODE_BGR24     = 0x02000318u, //!< 24bpp BGR
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_pixel_mode bj_pixel_mode;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Gets the RGB value of a pixel given its 32-bits representation.

@@ -19,6 +19,14 @@
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
 
+#include <string.h> /* memcpy for C99-safe void*-to-function-pointer loading */
+
+/* C99-safe dlsym wrapper: avoids void*-to-function-pointer cast (ISO C forbids it). */
+#define LOAD_SYM(dest, handle, name) do { \
+    void* sym_ = bj_library_symbol((handle), (name), 0); \
+    memcpy(&(dest), &sym_, sizeof(dest)); \
+} while(0)
+
 typedef XSizeHints*         (* pfn_XAllocSizeHints)(void);
 typedef unsigned long       (* pfn_XBlackPixel)(Display*,int);
 typedef int                 (* pfn_XCloseDisplay)(Display*);
@@ -108,16 +116,11 @@ typedef struct {
     Window           handle;
 } x11_window;
 
-static void* x11_get_symbol(struct bj_video_layer_data* ignore, const char* name) {
-    (void)ignore;
-    return bj_library_symbol(x11.handle, name, 0);
-}
-
 static void x11_wait_for_map_notify(struct bj_video_layer_data* ignore, Window window) {
     (void)ignore;
     double start_time = bj_run_time();
 
-    while ((bj_run_time() - start_time) < 1.f) {
+    while ((bj_run_time() - start_time) < 1.0) {
         while (x11.XPending(x11.display)) {
             XEvent event;
             x11.XNextEvent(x11.display, &event);
@@ -227,7 +230,7 @@ static void x11_delete_window(
 }
 
 
-static int get_key(struct bj_video_layer_data* ignore, int keycode) {
+static enum bj_key get_key(struct bj_video_layer_data* ignore, int keycode) {
     (void)ignore;
     if (keycode < 0 || keycode > 255) {
         return BJ_KEY_UNKNOWN;
@@ -271,7 +274,7 @@ static void x11_dispatch_callback(
         case ButtonPress:
             bj_push_button_event(
                 (struct bj_window*)window,
-                event->xbutton.button,
+                (int)event->xbutton.button,
                 event->type == ButtonPress ? BJ_PRESS : BJ_RELEASE,
                 event->xbutton.x,
                 event->xbutton.y
@@ -317,8 +320,8 @@ static void x11_dispatch_callback(
             bj_push_key_event(
                 (struct bj_window*)window,
                 BJ_RELEASE,
-                get_key(0, event->xkey.keycode),
-                event->xkey.keycode
+                get_key(0, (int)event->xkey.keycode),
+                (int)event->xkey.keycode
             );
             return;
 
@@ -327,8 +330,8 @@ static void x11_dispatch_callback(
             bj_push_key_event(
                 (struct bj_window*)window,
                 BJ_PRESS,
-                get_key(0, event->xkey.keycode),
-                event->xkey.keycode
+                get_key(0, (int)event->xkey.keycode),
+                (int)event->xkey.keycode
             );
             return;
     }
@@ -513,8 +516,10 @@ static void x11_init_keycodes(
     int min_keycode = 0;
     int max_keycode = 0;
 
-    pfn_XDisplayKeycodes    x11_XDisplayKeycodes    = (pfn_XDisplayKeycodes)x11_get_symbol(0, "XDisplayKeycodes");
-    pfn_XGetKeyboardMapping x11_XGetKeyboardMapping = (pfn_XGetKeyboardMapping)x11_get_symbol(0, "XGetKeyboardMapping");
+    pfn_XDisplayKeycodes    x11_XDisplayKeycodes;
+    pfn_XGetKeyboardMapping x11_XGetKeyboardMapping;
+    LOAD_SYM(x11_XDisplayKeycodes, x11.handle, "XDisplayKeycodes");
+    LOAD_SYM(x11_XGetKeyboardMapping, x11.handle, "XGetKeyboardMapping");
 
 
     x11_XDisplayKeycodes(x11.display, &min_keycode, &max_keycode);
@@ -522,22 +527,22 @@ static void x11_init_keycodes(
     int keysym_per_keycode;
     KeySym* keysyms = x11_XGetKeyboardMapping(
         x11.display,
-        min_keycode,
+        (KeyCode)min_keycode,
         max_keycode - min_keycode + 1,
         &keysym_per_keycode
     );
 
-    x11.keymap = bj_malloc(sizeof(enum bj_key) * (max_keycode+1));
+    x11.keymap = bj_malloc(sizeof(enum bj_key) * (size_t)(max_keycode+1));
     if (x11.keymap == 0) {
         x11.XFree(keysyms);
         return;
     }
-    bj_memset(x11.keymap, 0, sizeof(enum bj_key) * (max_keycode+1));
+    bj_memset(x11.keymap, 0, sizeof(enum bj_key) * (size_t)(max_keycode+1));
 
     for (int keycode = min_keycode;  keycode <= max_keycode;  ++keycode) {
         if (x11.keymap[keycode] == BJ_KEY_UNKNOWN) {
-            const size_t base = (keycode - min_keycode) * keysym_per_keycode;
-            x11.keymap[keycode] = translate_keysyms(&keysyms[base], keysym_per_keycode);
+            const size_t base = (size_t)(keycode - min_keycode) * (size_t)keysym_per_keycode;
+            x11.keymap[keycode] = (enum bj_key)translate_keysyms(&keysyms[base], keysym_per_keycode);
         }
     }
 
@@ -615,8 +620,9 @@ static void x11_end_video(
     struct bj_error** error
 ) {
     (void)error;
-    pfn_XCloseDisplay XCloseDisplay = (pfn_XCloseDisplay)x11_get_symbol(0, "XCloseDisplay");
-    XCloseDisplay(x11.display);
+    pfn_XCloseDisplay fn_XCloseDisplay;
+    LOAD_SYM(fn_XCloseDisplay, x11.handle, "XCloseDisplay");
+    fn_XCloseDisplay(x11.display);
     bj_free(x11.keymap);
 }
 
@@ -633,8 +639,8 @@ static bj_bool x11_renderer_configure(
         &attributes
     );
 
-    const enum bj_pixel_mode mode = bj_visual_to_pixel_mode(
-        attributes.visual, attributes.depth
+    const enum bj_pixel_mode mode = (enum bj_pixel_mode)bj_visual_to_pixel_mode(
+        attributes.visual, (unsigned int)attributes.depth
     );
 
     if (mode == BJ_PIXEL_MODE_UNKNOWN) {
@@ -652,8 +658,8 @@ static bj_bool x11_renderer_configure(
     bj_assign_bitmap(
         &renderer->data->framebuffer,
         0,  // Let it allocate its own buffer
-        attributes.width,
-        attributes.height,
+        (size_t)attributes.width,
+        (size_t)attributes.height,
         mode,
         0  // Auto-compute stride
     );
@@ -667,14 +673,14 @@ static bj_bool x11_renderer_configure(
     renderer->data->framebuffer_image = x11.XCreateImage(
         x11.display,              // X Display
         attributes.visual,           // Window Visual
-        attributes.depth,            // Window Depth
+        (unsigned int)attributes.depth, // Window Depth
         ZPixmap,                     // Format
         0,                           // Offset
         renderer->data->framebuffer_pixels, // Pixel data
-        attributes.width,            // Width in pixels
-        attributes.height,           // Height in pixels
+        (unsigned int)attributes.width,  // Width in pixels
+        (unsigned int)attributes.height, // Height in pixels
         32,                          // pad
-        bj_bitmap_stride(&renderer->data->framebuffer)   // stride
+        (int)bj_bitmap_stride(&renderer->data->framebuffer)   // stride
     );
     if (renderer->data->framebuffer_image == 0) {
         bj_set_error(error, BJ_ERROR_VIDEO, "XCreateImage failed");
@@ -706,7 +712,7 @@ static void x11_renderer_present(
     x11.XPutImage(
         display, window_handle, gc,
         renderer->data->framebuffer_image,
-        0, 0, 0, 0, width, height
+        0, 0, 0, 0, (unsigned int)width, (unsigned int)height
     );
     x11.XFreeGC(display, gc);
     x11.XSync(display, False);
@@ -764,38 +770,45 @@ static bj_bool x11_init_video(
 
     x11.handle = handle;
 
-    x11.XAllocSizeHints      = (pfn_XAllocSizeHints)x11_get_symbol(0, "XAllocSizeHints");
-    x11.XCreateImage         = (pfn_XCreateImage)x11_get_symbol(0, "XCreateImage");
-    x11.XCreateWindow        = (pfn_XCreateWindow)x11_get_symbol(0, "XCreateWindow");
-    x11.XDeleteContext       = (pfn_XDeleteContext)x11_get_symbol(0, "XDeleteContext");
-    x11.XDestroyWindow       = (pfn_XDestroyWindow)x11_get_symbol(0, "XDestroyWindow");
-    x11.XEventsQueued        = (pfn_XEventsQueued)x11_get_symbol(0, "XEventsQueued");
-    x11.XFindContext         = (pfn_XFindContext)x11_get_symbol(0, "XFindContext");
-    x11.XFlush               = (pfn_XFlush)x11_get_symbol(0, "XFlush");
-    x11.XFree                = (pfn_XFree)x11_get_symbol(0, "XFree");
-    x11.XFreeGC              = (pfn_XFreeGC)x11_get_symbol(0, "XFreeGC");
-    x11.XMapWindow           = (pfn_XMapWindow)x11_get_symbol(0, "XMapWindow");
-    x11.XGetWindowAttributes = (pfn_XGetWindowAttributes)x11_get_symbol(0, "XGetWindowAttributes");
-    x11.XNextEvent           = (pfn_XNextEvent)x11_get_symbol(0, "XNextEvent");
-    x11.XPeekEvent           = (pfn_XPeekEvent)x11_get_symbol(0, "XPeekEvent");
-    x11.XPending             = (pfn_XPending)x11_get_symbol(0, "XPending");
-    x11.XQLength             = (pfn_XQLength)x11_get_symbol(0, "XQLength");
-    x11.XCreateGC            = (pfn_XCreateGC)x11_get_symbol(0, "XCreateGC");
-    x11.XPutImage            = (pfn_XPutImage)x11_get_symbol(0, "XPutImage");
-    x11.XSaveContext         = (pfn_XSaveContext)x11_get_symbol(0, "XSaveContext");
-    x11.XSetWMNormalHints    = (pfn_XSetWMNormalHints)x11_get_symbol(0, "XSetWMNormalHints");
-    x11.XSetWMProtocols      = (pfn_XSetWMProtocols)x11_get_symbol(0, "XSetWMProtocols");
-    x11.XStoreName           = (pfn_XStoreName)x11_get_symbol(0, "XStoreName");
-    x11.XSync                = (pfn_XSync)x11_get_symbol(0, "XSync");
-    x11.XUnmapWindow         = (pfn_XUnmapWindow)x11_get_symbol(0, "XUnmapWindow");
+    LOAD_SYM(x11.XAllocSizeHints,      handle, "XAllocSizeHints");
+    LOAD_SYM(x11.XCreateImage,         handle, "XCreateImage");
+    LOAD_SYM(x11.XCreateWindow,        handle, "XCreateWindow");
+    LOAD_SYM(x11.XDeleteContext,       handle, "XDeleteContext");
+    LOAD_SYM(x11.XDestroyWindow,       handle, "XDestroyWindow");
+    LOAD_SYM(x11.XEventsQueued,        handle, "XEventsQueued");
+    LOAD_SYM(x11.XFindContext,         handle, "XFindContext");
+    LOAD_SYM(x11.XFlush,               handle, "XFlush");
+    LOAD_SYM(x11.XFree,                handle, "XFree");
+    LOAD_SYM(x11.XFreeGC,              handle, "XFreeGC");
+    LOAD_SYM(x11.XMapWindow,           handle, "XMapWindow");
+    LOAD_SYM(x11.XGetWindowAttributes, handle, "XGetWindowAttributes");
+    LOAD_SYM(x11.XNextEvent,           handle, "XNextEvent");
+    LOAD_SYM(x11.XPeekEvent,           handle, "XPeekEvent");
+    LOAD_SYM(x11.XPending,             handle, "XPending");
+    LOAD_SYM(x11.XQLength,             handle, "XQLength");
+    LOAD_SYM(x11.XCreateGC,            handle, "XCreateGC");
+    LOAD_SYM(x11.XPutImage,            handle, "XPutImage");
+    LOAD_SYM(x11.XSaveContext,         handle, "XSaveContext");
+    LOAD_SYM(x11.XSetWMNormalHints,    handle, "XSetWMNormalHints");
+    LOAD_SYM(x11.XSetWMProtocols,      handle, "XSetWMProtocols");
+    LOAD_SYM(x11.XStoreName,           handle, "XStoreName");
+    LOAD_SYM(x11.XSync,                handle, "XSync");
+    LOAD_SYM(x11.XUnmapWindow,         handle, "XUnmapWindow");
 
-    pfn_XBlackPixel         x11_XBlackPixel       = (pfn_XBlackPixel)x11_get_symbol(0, "XBlackPixel");
-    pfn_XDefaultDepth       x11_XDefaultDepth     = (pfn_XDefaultDepth)x11_get_symbol(0, "XDefaultDepth");
-    pfn_XDefaultScreen      x11_XDefaultScreen    = (pfn_XDefaultScreen)x11_get_symbol(0, "XDefaultScreen");
-    pfn_XDefaultVisual      x11_XDefaultVisual    = (pfn_XDefaultVisual)x11_get_symbol(0, "XDefaultVisual");
-    pfn_XInternAtom         x11_XInternAtom       = (pfn_XInternAtom)x11_get_symbol(0, "XInternAtom");
-    pfn_XOpenDisplay        x11_XOpenDisplay      = (pfn_XOpenDisplay)x11_get_symbol(0, "XOpenDisplay");
-    pfn_XrmUniqueQuark      x11_XrmUniqueQuark    = (pfn_XrmUniqueQuark)x11_get_symbol(0, "XrmUniqueQuark");
+    pfn_XBlackPixel         x11_XBlackPixel;
+    pfn_XDefaultDepth       x11_XDefaultDepth;
+    pfn_XDefaultScreen      x11_XDefaultScreen;
+    pfn_XDefaultVisual      x11_XDefaultVisual;
+    pfn_XInternAtom         x11_XInternAtom;
+    pfn_XOpenDisplay        x11_XOpenDisplay;
+    pfn_XrmUniqueQuark      x11_XrmUniqueQuark;
+    LOAD_SYM(x11_XBlackPixel,    handle, "XBlackPixel");
+    LOAD_SYM(x11_XDefaultDepth,  handle, "XDefaultDepth");
+    LOAD_SYM(x11_XDefaultScreen, handle, "XDefaultScreen");
+    LOAD_SYM(x11_XDefaultVisual, handle, "XDefaultVisual");
+    LOAD_SYM(x11_XInternAtom,    handle, "XInternAtom");
+    LOAD_SYM(x11_XOpenDisplay,   handle, "XOpenDisplay");
+    LOAD_SYM(x11_XrmUniqueQuark, handle, "XrmUniqueQuark");
 
     Display* display = x11_XOpenDisplay(0);
     if(display == 0) {

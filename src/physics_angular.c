@@ -9,18 +9,18 @@ void bj_apply_angular_torque_2d(
     angular->torque += torque;
 }
 
-void bj_step_angular_2d(struct bj_angular_2d* a, double dt) {
+void bj_step_angular_2d(struct bj_angular_2d* a, bj_real dt) {
     bj_check(a);
     if (a->inverse_inertia != BJ_FZERO) {
         a->velocity = (
-            a->velocity + (a->acceleration + a->torque * a->inverse_inertia) * (bj_real)dt
-        ) * bj_pow(a->damping, (bj_real)dt);
-        a->value += a->velocity * (bj_real)dt;
+            a->velocity + (a->acceleration + a->torque * a->inverse_inertia) * dt
+        ) * bj_pow(a->damping, dt);
+        a->value += a->velocity * dt;
 
         if (a->value > BJ_PI) {
-            a->value -= 2.0 * BJ_PI;
+            a->value -= BJ_F(2.0) * BJ_PI;
         } else if (a->value < -BJ_PI) {
-            a->value += 2.0 * BJ_PI;
+            a->value += BJ_F(2.0) * BJ_PI;
         }
     } else {
         a->velocity = BJ_FZERO;

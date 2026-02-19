@@ -461,8 +461,8 @@ static bj_bool do_blit_dispatch(
     if (src->mode == dst->mode) {
         const size_t bpp = BJ_PIXEL_GET_BPP(src->mode);
         const size_t rowbytes = (size_t)dr->w * (bpp >> 3); // only for 8+ bpp
-        const uint8_t* sbase = (const uint8_t*)src->buffer + sr->y*src->stride + (sr->x * (bpp>>3));
-        uint8_t*       dbase = (uint8_t*)dst->buffer       + dr->y*dst->stride + (dr->x * (bpp>>3));
+        const uint8_t* sbase = (const uint8_t*)src->buffer + (size_t)sr->y*src->stride + ((size_t)sr->x * (bpp>>3));
+        uint8_t*       dbase = (uint8_t*)dst->buffer       + (size_t)dr->y*dst->stride + ((size_t)dr->x * (bpp>>3));
 
         const bj_bool overlap =
             (src == dst) &&
@@ -523,8 +523,8 @@ bj_bool bj_blit(
     if (p_src_area) {
         struct bj_rect tmp;
         if (bj_rect_intersection(p_src_area, &src_rect, &tmp) == 0) return BJ_FALSE;
-        dst_rect.x += tmp.x - p_src_area->x;
-        dst_rect.y += tmp.y - p_src_area->y;
+        dst_rect.x += (int16_t)(tmp.x - p_src_area->x);
+        dst_rect.y += (int16_t)(tmp.y - p_src_area->y);
         src_rect = tmp;
     }
     dst_rect.w = src_rect.w; dst_rect.h = src_rect.h;
@@ -534,8 +534,8 @@ bj_bool bj_blit(
     if (bj_rect_intersection(&dst_rect, &dst_bounds, &inter) == 0) return BJ_FALSE;
 
     // Adjust source accordingly
-    src_rect.x += inter.x - dst_rect.x;
-    src_rect.y += inter.y - dst_rect.y;
+    src_rect.x += (int16_t)(inter.x - dst_rect.x);
+    src_rect.y += (int16_t)(inter.y - dst_rect.y);
     src_rect.w  = inter.w;
     src_rect.h  = inter.h;
     dst_rect    = inter;

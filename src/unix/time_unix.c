@@ -1,5 +1,7 @@
 #include <banjo/time.h>
 
+#include "video_layer.h"
+
 #ifdef BJ_OS_UNIX
 
 #include <time.h>
@@ -8,7 +10,7 @@ extern uint64_t bj_time_frequency_value;
 static clockid_t   s_clock;
 static uint64_t    s_timer_base;
 
-void bj_end_time() {
+void bj_end_time(void) {
     // EMPTY
 }
 
@@ -63,7 +65,7 @@ void bj_sleep(
 double bj_run_time(
     void
 ) {
-    return (double)(bj_time_counter() - s_timer_base) / bj_time_frequency();
+    return (double)(bj_time_counter() - s_timer_base) / (double)bj_time_frequency();
 }
 
 #endif

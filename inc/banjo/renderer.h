@@ -34,6 +34,9 @@
 enum bj_renderer_type {
     BJ_RENDERER_TYPE_SOFTWARE, ///< Software (CPU-based) renderer.
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_renderer_type bj_renderer_type;
+#endif
 
 /// Opaque renderer handle.
 struct bj_bitmap;

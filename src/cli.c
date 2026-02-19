@@ -13,9 +13,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _MSC_VER
-#define strcasecmp _stricmp
-#endif
+static int bj_strcasecmp(const char* a, const char* b) {
+    while (*a && *b) {
+        int ca = tolower((unsigned char)*a);
+        int cb = tolower((unsigned char)*b);
+        if (ca != cb) return ca - cb;
+        ++a; ++b;
+    }
+    return tolower((unsigned char)*a) - tolower((unsigned char)*b);
+}
 
 // dest == 0 ; action == 0: "A does-nothing argument"
 // dest != 0 ; action == 0: flag, automatic storage of 1 or 0 into dest
@@ -256,7 +262,7 @@ static int sprint_help(char* buffer, size_t n, const struct bj_cli* parser) {
     int total_size = bj_cli_validate_sn(parser, buffer, n);
 
     if(total_size > 0) {
-        size_t buffer_remaining = n < total_size ? 0 : n - total_size;
+        size_t buffer_remaining = n < (size_t)total_size ? 0 : n - (size_t)total_size;
         total_size += sprint_buffer(buffer+total_size, &buffer_remaining, "\n");
         return total_size;
     }
@@ -338,7 +344,8 @@ BANJO_EXPORT size_t bj_cli_get_help_string(
     char*                      buffer,
     size_t                     buffer_size
 ) {
-    return sprint_help(buffer, buffer_size, parser);
+    const int result = sprint_help(buffer, buffer_size, parser);
+    return result > 0 ? (size_t)result : 0;
 }
 
 BANJO_EXPORT void bj_cli_print_help(
@@ -346,9 +353,9 @@ BANJO_EXPORT void bj_cli_print_help(
 ) {
     const int strsize = sprint_help(0, 0, parser);
     if(strsize > 0) {
-        char* buffer = bj_malloc(strsize + 1);
+        char* buffer = bj_malloc((size_t)strsize + 1);
         if (buffer) {
-            sprint_help(buffer, strsize + 1, parser);
+            sprint_help(buffer, (size_t)strsize + 1, parser);
             printf("%s", buffer);
             bj_free(buffer);
         }
@@ -766,18 +773,18 @@ BANJO_EXPORT bj_bool bj_cli_store_bool(
         return BJ_FALSE;
     }
 
-    if (strcasecmp(value, "true")   == 0
-        || strcasecmp(value, "1")   == 0
-        || strcasecmp(value, "yes") == 0
-        || strcasecmp(value, "on")  == 0) {
+    if (bj_strcasecmp(value, "true")   == 0
+        || bj_strcasecmp(value, "1")   == 0
+        || bj_strcasecmp(value, "yes") == 0
+        || bj_strcasecmp(value, "on")  == 0) {
         *(int*)dest = 1;
         return BJ_TRUE;
     }
 
-    if (strcasecmp(value, "false")  == 0
-        || strcasecmp(value, "0")   == 0
-        || strcasecmp(value, "no")  == 0
-        || strcasecmp(value, "off") == 0) {
+    if (bj_strcasecmp(value, "false")  == 0
+        || bj_strcasecmp(value, "0")   == 0
+        || bj_strcasecmp(value, "no")  == 0
+        || bj_strcasecmp(value, "off") == 0) {
         *(int*)dest = 0;
         return BJ_TRUE;
     }

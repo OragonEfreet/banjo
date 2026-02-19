@@ -128,6 +128,9 @@ enum bj_shader_flag {
     BJ_SHADER_CENTER_COORDS    = 0x10,
 
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_shader_flag bj_shader_flag;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Flagset alias for \ref bj_shader_bitmap.

@@ -240,7 +240,7 @@ void bj_fill_rect_32(
     const size_t row_bytes = width * sizeof(uint32_t);
     for (int y = y0 + 1; y < y1; ++y) {
         uint8_t* dest_row = bj_row_ptr(dst, (size_t)y);
-        memcpy(dest_row + x0 * sizeof(uint32_t), first_row + x0 * sizeof(uint32_t), row_bytes);
+        memcpy(dest_row + (size_t)x0 * sizeof(uint32_t), first_row + (size_t)x0 * sizeof(uint32_t), row_bytes);
     }
 }
 

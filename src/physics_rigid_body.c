@@ -11,7 +11,7 @@ void bj_apply_rigidbody_force_2d(
 
 void bj_step_rigid_body_2d(
     struct bj_rigid_body_2d* body,
-    double            delta_time
+    bj_real           delta_time
 ) {
     bj_check(body);
     bj_step_particle_2d(&body->particle, delta_time);

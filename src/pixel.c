@@ -65,9 +65,9 @@ void bj_make_pixel_rgb(
         {
             const struct bitfield bf = bitfields[BJ_PIXEL_GET_LAYOUT(mode)];
 
-            *p_red   = (uint8_t)((value >> bf.red.shift) & ((1 << bf.red.bits) - 1)) << (8 - bf.red.bits);
-            *p_green = (uint8_t)((value >> bf.green.shift) & ((1 << bf.green.bits) - 1)) << (8 - bf.green.bits);
-            *p_blue  = (uint8_t)((value >> bf.blue.shift) & ((1 << bf.blue.bits) - 1)) << (8 - bf.blue.bits);
+            *p_red   = (uint8_t)((uint32_t)((value >> bf.red.shift) & ((1u << bf.red.bits) - 1u)) << (8 - bf.red.bits));
+            *p_green = (uint8_t)((uint32_t)((value >> bf.green.shift) & ((1u << bf.green.bits) - 1u)) << (8 - bf.green.bits));
+            *p_blue  = (uint8_t)((uint32_t)((value >> bf.blue.shift) & ((1u << bf.blue.bits) - 1u)) << (8 - bf.blue.bits));
         }
         break;
 
@@ -160,16 +160,16 @@ size_t bj_compute_bitmap_stride(
 ) {
     switch (mode) {
     case BJ_PIXEL_MODE_INDEXED_1:
-        return ((width + 7) / 8 + 3) & ~3;
+        return ((width + 7) / 8 + 3) & ~(size_t)3;
     case BJ_PIXEL_MODE_INDEXED_4:
-        return ((width + 1) / 2 + 3) & ~3;
+        return ((width + 1) / 2 + 3) & ~(size_t)3;
     case BJ_PIXEL_MODE_INDEXED_8:
-        return (width + 3) & ~3;
+        return (width + 3) & ~(size_t)3;
     case BJ_PIXEL_MODE_RGB565:
     case BJ_PIXEL_MODE_XRGB1555:
-        return (width * 2 + 3) & ~3;
+        return (width * 2 + 3) & ~(size_t)3;
     case BJ_PIXEL_MODE_BGR24:
-        return (width * 3 + 3) & ~3;
+        return (width * 3 + 3) & ~(size_t)3;
     case BJ_PIXEL_MODE_XRGB8888:
         return width * 4;
     default: break;

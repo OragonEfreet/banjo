@@ -68,17 +68,17 @@ size_t bj_log_message(
         va_end(ap);
 
         if (msg_payload < 0) return 0;
-        if (msg_payload > BJ_MAXIMUM_LOG_LEN) msg_payload = BJ_MAXIMUM_LOG_LEN;
+        if ((unsigned)msg_payload > BJ_MAXIMUM_LOG_LEN) msg_payload = (int)BJ_MAXIMUM_LOG_LEN;
 
-        const size_t header_max_len = BJ_MAXIMUM_LOG_LEN - msg_payload;
+        const size_t header_max_len = BJ_MAXIMUM_LOG_LEN - (unsigned)msg_payload;
 
         size_t header_size = 0;
         if (header_max_len > 0) {
-            bj_memmove(buf + header_max_len, buf, msg_payload);
+            bj_memmove(buf + header_max_len, buf, (size_t)msg_payload);
 
             size_t source_payload = 0;
             if (p_file) {
-                source_payload = snprintf(buf, header_max_len, "(%s:%d)", p_file, line) + 1;
+                source_payload = (size_t)snprintf(buf, header_max_len, "(%s:%d)", p_file, line) + 1;
                 if (source_payload > header_max_len) source_payload = 0;
                 else buf[source_payload-1] = ' ';
             }
@@ -130,12 +130,12 @@ size_t bj_log_message(
             }
         }
 
-        buf[header_max_len + msg_payload] = '\0';
+        buf[header_max_len + (size_t)msg_payload] = '\0';
 
         // Should be WriteConsoleA on windows, etc.
         puts(buf + header_max_len - header_size);
 
-        return msg_payload + header_size;
+        return (size_t)msg_payload + header_size;
     }
     return 0;
 }

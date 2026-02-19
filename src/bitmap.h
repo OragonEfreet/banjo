@@ -290,5 +290,7 @@ void bj_hline_24(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
 void bj_hline_16(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
 void bj_hline_generic(struct bj_bitmap* dst, int x0, int x1, int y, uint32_t pixel);
 
+struct bj_bitmap* dib_create_bitmap_from_stream(struct bj_stream* stream, struct bj_error** error);
+
 
 

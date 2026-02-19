@@ -48,6 +48,9 @@ enum bj_window_flag {
     BJ_WINDOW_FLAG_KEY_REPEAT = 0x02, //!< Key repeat event is enabled (see \ref bj_set_key_callback).
     BJ_WINDOW_FLAG_ALL        = 0xFF, //!< All flags set.
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_window_flag bj_window_flag;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Create a new struct bj_window with the specified attributes

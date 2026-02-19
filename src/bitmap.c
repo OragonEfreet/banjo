@@ -7,7 +7,6 @@
 
 #include <string.h>
 
-struct bj_bitmap* dib_create_bitmap_from_stream(struct bj_stream*, struct bj_error**);
 
 BANJO_EXPORT struct bj_bitmap* bj_allocate_bitmap(
     void

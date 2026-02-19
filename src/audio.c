@@ -130,7 +130,7 @@ inline static double make_note_value(
 
     // Use the double variant explicitly to avoid accidental float truncation
     // when BJ_API_FLOAT64 is off.
-    const double phase = bj_fmodd(sample_index * phase_step, two_pi);
+    const double phase = bj_fmodd((double)sample_index * phase_step, two_pi);
 
     switch (function) {
         case BJ_AUDIO_PLAY_SINE:
@@ -167,14 +167,14 @@ void bj_play_audio_note(
     const double freq        = (double)data->frequency;
     const double amplitude   = (double)p_audio->amplitude;   // scale for int16 path
     const double sample_rate = (double)p_audio->sample_rate;
-    const double phase_step  = BJ_TAU * freq / sample_rate;
-    const int    channels    = p_audio->channels;
+    const double phase_step  = BJ_TAU_D * freq / sample_rate;
+    const unsigned channels  = p_audio->channels;
 
     for (unsigned i = 0; i < frames; ++i) {
         const double output = make_note_value(i, data->function, base_sample_index, phase_step);
 
-        for (int ch = 0; ch < channels; ++ch) {
-            const unsigned idx = i * (unsigned)channels + (unsigned)ch;
+        for (unsigned ch = 0; ch < channels; ++ch) {
+            const unsigned idx = i * channels + ch;
 
             switch (p_audio->format) {
             case BJ_AUDIO_FORMAT_INT16: {

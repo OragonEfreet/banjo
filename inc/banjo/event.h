@@ -245,6 +245,9 @@ enum bj_key {
     BJ_KEY_PA1                 = 0xFD,  //!< PA1 key
     BJ_KEY_OEM_CLEAR           = 0xFE,  //!< Clear key
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_key bj_key;
+#endif
 
 // Some Keycode aliases
 #define BJ_KEY_APOSTROPHE    BJ_KEY_OEM_7      //!< Alias for \ref BJ_KEY_OEM_7.
@@ -296,6 +299,9 @@ enum bj_event_action {
     BJ_PRESS,   //!< The key or button was pressed
     BJ_REPEAT,  //!< The key is being held (repeats)
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_event_action bj_event_action;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Represent a mouse enter or leave event.
@@ -342,6 +348,9 @@ enum bj_event_type {
     BJ_EVENT_KEY,    ///< Keyboard key
     BJ_EVENT_BUTTON, ///< Mouse button
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_event_type bj_event_type;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Represent a generic window-related event.
