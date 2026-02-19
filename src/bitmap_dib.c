@@ -332,10 +332,10 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
         return 0;
     }
 
-    int32_t dib_height           = 0;
+    int32_t  dib_height           = 0;
     uint32_t dib_width            = 0;
     uint16_t dib_planes           = 0;
-    uint16_t dib_bit_count        = 0;
+    uint8_t  dib_bit_count        = 0;
     uint32_t dib_compression      = 0;
     uint32_t dib_image_size       = 0;
     uint32_t dib_x_pixels_per_m   = 0;

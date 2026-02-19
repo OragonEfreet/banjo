@@ -356,7 +356,7 @@ struct bj_event {
         struct bj_button_event button; ///< Button event data
         struct bj_cursor_event cursor; ///< Cursor event data
         struct bj_enter_event  enter;  ///< Enter/leave event data
-    };
+    } as;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

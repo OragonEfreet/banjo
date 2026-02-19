@@ -46,7 +46,7 @@ static struct event_callbacks_t {
 // Both solution are presented by Juho Snellman.
 // See https://www.snellman.net/blog/archive/2016-12-13-ring-buffers/
 #define evq_mask(val) (val & (BJ_EVQ_CAP - 1))
-#define evq_reset(val) evq.read = evq.write = 0
+#define evq_reset() evq.read = evq.write = 0
 #define EVQ_UNMASKED_INDICES
 #ifdef EVQ_UNMASKED_INDICES
 #   define evq_push(val) bj_assert(!evq_full()); evq_write(evq_mask(evq.write++), val)
@@ -95,22 +95,22 @@ void bj_dispatch_event(const struct bj_event* p_event) {
     switch(p_event->type) {
         case BJ_EVENT_CURSOR:
             if(event_callbacks.cursor.p_call) {
-                event_callbacks.cursor.p_call(p_window, &p_event->cursor, event_callbacks.cursor.p_data);
+                event_callbacks.cursor.p_call(p_window, &p_event->as.cursor, event_callbacks.cursor.p_data);
             }
             break;
         case BJ_EVENT_KEY:
             if(event_callbacks.key.p_call) {
-                event_callbacks.key.p_call(p_window, &p_event->key, event_callbacks.key.p_data);
+                event_callbacks.key.p_call(p_window, &p_event->as.key, event_callbacks.key.p_data);
             }
             break;
         case BJ_EVENT_BUTTON:
             if(event_callbacks.button.p_call) {
-                event_callbacks.button.p_call(p_window, &p_event->button, event_callbacks.button.p_data);
+                event_callbacks.button.p_call(p_window, &p_event->as.button, event_callbacks.button.p_data);
             }
             break;
         case BJ_EVENT_ENTER:
             if(event_callbacks.enter.p_call) {
-                event_callbacks.enter.p_call(p_window, &p_event->enter, event_callbacks.enter.p_data);
+                event_callbacks.enter.p_call(p_window, &p_event->as.enter, event_callbacks.enter.p_data);
             }
             break;
     }
@@ -191,7 +191,7 @@ void bj_push_cursor_event(
         &(struct bj_event) {
             .window = p_window,
             .type   = BJ_EVENT_CURSOR,
-            .cursor = {.x=x, .y=y}
+            .as.cursor = {.x=x, .y=y}
         }
     );
 }
@@ -229,7 +229,7 @@ void bj_push_key_event(
         &(struct bj_event) {
             .window = p_window,
             .type   = BJ_EVENT_KEY,
-            .key    = {
+            .as.key    = {
                 .action   = action,
                 .key      = key,
                 .scancode = scancode,
@@ -249,7 +249,7 @@ void bj_push_button_event(
         &(struct bj_event) {
             .window = p_window,
             .type   = BJ_EVENT_BUTTON,
-            .button = {
+            .as.button = {
                 .action = action,
                 .button = button,
                 .x      = x,
@@ -269,7 +269,7 @@ void bj_push_enter_event(
         &(struct bj_event) {
             .window = p_window,
             .type   = BJ_EVENT_ENTER,
-            .enter  = {
+            .as.enter  = {
                 .x      = x,
                 .y      = y,
                 .enter  = enter,

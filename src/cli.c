@@ -177,7 +177,7 @@ static int sprint_buffer(char* buffer, size_t* n, const char* format, ...) {
 
 static int sprint_arg(char* buffer, size_t* buffer_remaining, const struct bj_cli_argument* arg, const char* before, const char* after, int full) {
     assert(arg);
-    size_t total_size       = 0;
+    int total_size       = 0;
 
     if(before) {
         total_size += sprint_buffer(buffer+total_size, buffer_remaining, before);
@@ -231,7 +231,7 @@ static int sprint_arg(char* buffer, size_t* buffer_remaining, const struct bj_cl
 
 static int sprint_usage(char* buffer, size_t* buffer_remaining, const struct bj_cli* parser) {
     if(parser == 0) {return 0;}
-    size_t total_size = 0;
+    int total_size = 0;
 
     total_size += sprint_buffer(buffer+total_size, buffer_remaining, "Usage: ");
 
@@ -253,7 +253,7 @@ static int sprint_usage(char* buffer, size_t* buffer_remaining, const struct bj_
 static int sprint_help(char* buffer, size_t n, const struct bj_cli* parser) {
     if(parser == 0) {return 0;}
 
-    size_t total_size = bj_cli_validate_sn(parser, buffer, n);
+    int total_size = bj_cli_validate_sn(parser, buffer, n);
 
     if(total_size > 0) {
         size_t buffer_remaining = n < total_size ? 0 : n - total_size;
@@ -289,7 +289,7 @@ static int sprint_help(char* buffer, size_t n, const struct bj_cli* parser) {
         for(size_t a = 0 ; a < parser->arguments_len ; ++a) {
             const struct bj_cli_argument* arg = &parser->arguments[a];
             if(arg_is_positional(arg)) {
-                const size_t strsize = sprint_arg(buffer+total_size, &buffer_remaining, arg, " ", "", 1);
+                const int strsize = sprint_arg(buffer+total_size, &buffer_remaining, arg, " ", "", 1);
                 total_size += strsize;
                 if(arg->help) {
                     total_size += sprint_buffer(buffer+total_size, &buffer_remaining, "%*s%s", gutter - strsize, "", arg->help);
@@ -314,7 +314,7 @@ static int sprint_help(char* buffer, size_t n, const struct bj_cli* parser) {
         for(size_t a = 0 ; a < parser->arguments_len ; ++a) {
             const struct bj_cli_argument* arg = &parser->arguments[a];
             if(!arg_is_positional(arg)) {
-                const size_t strsize = sprint_arg(buffer+total_size, &buffer_remaining, arg, " ", "", 1);
+                const int strsize = sprint_arg(buffer+total_size, &buffer_remaining, arg, " ", "", 1);
                 total_size += strsize;
                 if(arg->help) {
                     total_size += sprint_buffer(buffer+total_size, &buffer_remaining, "%*s%s", gutter - strsize, "", arg->help);
@@ -358,10 +358,9 @@ BANJO_EXPORT void bj_cli_print_help(
 static int v_sprint_error(char* buffer, size_t n, const struct bj_cli* parser, const char* format, ...) {
     (void)parser;
     size_t buffer_remaining = n;
-    size_t total_size = 0;
     va_list args;
     va_start(args, format);
-    total_size += v_sprint_buffer(buffer, &buffer_remaining, format, args);
+    const int total_size = v_sprint_buffer(buffer, &buffer_remaining, format, args);
     va_end(args);
     return total_size;
 }
@@ -457,7 +456,7 @@ static int bj_cli_parse_sn(struct bj_cli* parser, int argc, char* argv[], char* 
         FSM_EXPECT_SHORTNAMES,
         FSM_EXPECT_LONGNAME,
         FSM_EXPECT_VALUE,
-    } state = {};
+    } state = FSM_IDLE;
 
     const struct bj_cli_argument* current_arg = 0;
     size_t n_positional_found = 0; // Number of positional argument we found
