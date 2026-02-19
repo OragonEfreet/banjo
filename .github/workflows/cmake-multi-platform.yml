@@ -40,6 +40,10 @@ jobs:
       with:
         lfs: true
 
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y libasound2-dev libx11-dev
+
     - name: Configure CMake
       run: >
         cmake -B ${{ github.workspace }}/build-${{ matrix.libtype }}
