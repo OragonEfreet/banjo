@@ -6,14 +6,6 @@
 
 #include <check.h>
 
-void bj_set_particle_mass_2d(
-    struct bj_particle_2d* p_particle,
-    bj_real         mass
-) {
-    bj_check(p_particle);
-    bj_assert(!bj_real_is_zero(mass));
-    p_particle->inverse_mass = BJ_F(1.0) / mass;
-}
 
 void bj_apply_particle_force_2d(
     struct bj_particle_2d* p_particle,

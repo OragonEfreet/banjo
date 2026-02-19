@@ -63,11 +63,11 @@ struct cocoa_window {
   CGContextRef cg_context = [[NSGraphicsContext currentContext] CGContext];
 
   CGDataProviderRef provider = CGDataProviderCreateWithData(
-      NULL, buffer, buffer_width * buffer_height * 4, NULL);
+      NULL, buffer, (size_t)(buffer_width * buffer_height * 4), NULL);
   CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
 
   CGImageRef image = CGImageCreate(
-      buffer_width, buffer_height, 8, 32, buffer_width * 4, colorspace,
+      (size_t)buffer_width, (size_t)buffer_height, 8, 32, (size_t)(buffer_width * 4), colorspace,
       kCGImageAlphaNoneSkipFirst | kCGImageByteOrder32Little, provider, NULL,
       false, kCGRenderingIntentDefault);
 
@@ -145,7 +145,7 @@ static void cocoa_dispatch_event(struct cocoa_window *window, NSEvent *event) {
   case NSEventTypeLeftMouseDown:
   case NSEventTypeLeftMouseUp: {
     NSPoint loc = [event locationInWindow];
-    int action = (type == NSEventTypeLeftMouseDown) ? BJ_PRESS : BJ_RELEASE;
+    enum bj_event_action action = (type == NSEventTypeLeftMouseDown) ? BJ_PRESS : BJ_RELEASE;
     bj_push_button_event(&window->common, BJ_BUTTON_LEFT, action, (int)loc.x,
                          (int)loc.y);
     break;
@@ -153,7 +153,7 @@ static void cocoa_dispatch_event(struct cocoa_window *window, NSEvent *event) {
   case NSEventTypeRightMouseDown:
   case NSEventTypeRightMouseUp: {
     NSPoint loc = [event locationInWindow];
-    int action = (type == NSEventTypeRightMouseDown) ? BJ_PRESS : BJ_RELEASE;
+    enum bj_event_action action = (type == NSEventTypeRightMouseDown) ? BJ_PRESS : BJ_RELEASE;
     bj_push_button_event(&window->common, BJ_BUTTON_RIGHT, action, (int)loc.x,
                          (int)loc.y);
     break;
@@ -220,8 +220,8 @@ static int cocoa_get_window_size(const struct bj_window *p_abstract_window,
   struct cocoa_window *p_window = (struct cocoa_window *)p_abstract_window;
   NSRect bounds = [(NSView *)p_window->view bounds];
 
-  *width = bounds.size.width;
-  *height = bounds.size.height;
+  *width = (int)bounds.size.width;
+  *height = (int)bounds.size.height;
 
   return 1;
 }
@@ -314,8 +314,8 @@ static bj_bool cocoa_renderer_configure(struct bj_renderer *renderer,
     }
 
     enum bj_pixel_mode mode = BJ_PIXEL_MODE_XRGB8888;
-    size_t stride = bj_compute_bitmap_stride(width, mode);
-    data->buffer = bj_calloc(stride * height);
+    size_t stride = bj_compute_bitmap_stride((size_t)width, mode);
+    data->buffer = bj_calloc(stride * (size_t)height);
     if (!data->buffer) {
       bj_set_error(error, BJ_ERROR_VIDEO, "Failed to allocate framebuffer");
       return BJ_FALSE;
@@ -325,7 +325,7 @@ static bj_bool cocoa_renderer_configure(struct bj_renderer *renderer,
 
     bj_info("framebuffer created: %dx%d", width, height);
 
-    bj_assign_bitmap(&data->framebuffer, data->buffer, width, height, mode,
+    bj_assign_bitmap(&data->framebuffer, data->buffer, (size_t)width, (size_t)height, mode,
                      stride);
 
     data->configured_view = ((struct cocoa_window *)window)->view;

@@ -53,6 +53,9 @@ enum bj_blit_op {
     BJ_BLIT_OP_ADD_SAT,   //!< Per-channel saturated add (clamped to 255)
     BJ_BLIT_OP_SUB_SAT,   //!< Per-channel saturated subtract (clamped to 0)
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_blit_op bj_blit_op;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Color roles for bitmaps.

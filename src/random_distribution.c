@@ -13,7 +13,7 @@ int32_t bj_uniform_int32_distribution(
     if (low > high) { int32_t t = low; low = high; high = t; }
     if (low == INT32_MIN && high == INT32_MAX) return (int32_t)next(state);
 
-    uint64_t span64 = (int64_t)high - (int64_t)low + 1LL;
+    uint64_t span64 = (uint64_t)((int64_t)high - (int64_t)low + 1LL);
     uint32_t bound  = (uint32_t)span64;
 
     if ((bound & (bound - 1u)) == 0u) {
@@ -25,7 +25,7 @@ int32_t bj_uniform_int32_distribution(
         uint64_t m = (uint64_t)r * (uint64_t)bound;
         uint32_t l = (uint32_t)m;
         if (l < bound) {
-            uint32_t t = (uint32_t)(-bound) % bound;
+            uint32_t t = (0u - bound) % bound;
             if (l < t) continue;
         }
         return low + (int32_t)(m >> 32);
@@ -123,10 +123,10 @@ double bj_normal_double_distribution(
     double u1 = bj_uniform_double_distribution(next, state, 0.0, 1.0);
     double u2 = bj_uniform_double_distribution(next, state, 0.0, 1.0);
 
-    double r     = bj_sqrt(-2.0 * bj_log(1.0 - u1));
+    double r     = bj_sqrtd(-2.0 * bj_logd(1.0 - u1));
     double theta = BJ_TAU_D * u2;
 
-    double z0 = r * bj_cos(theta);
+    double z0 = r * bj_cosd(theta);
     return mean + standard_deviation * z0;
 }
 

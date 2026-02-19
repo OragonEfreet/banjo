@@ -1,5 +1,7 @@
 #include <banjo/time.h>
 
+#include "video_layer.h"
+
 #ifdef BJ_OS_WINDOWS
 
 

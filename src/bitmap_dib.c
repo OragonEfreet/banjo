@@ -1,6 +1,7 @@
 #include <banjo/assert.h>
-#include <banjo/bitmap.h>
 #include <banjo/memory.h>
+
+#include <bitmap.h>
 
 #define ERR_MSG                         "unsupported"
 #define ERR_MSG_BAD_BIT_COUNT           "unsupported bit count"
@@ -20,7 +21,7 @@
 #define ERR_MSG_UNSUPPORTED_COMPRESSION "unsupported compression"
 #define ERR_MSG_WRITE_OUTSIDE           "rle decoding writes outside of frame"
 
-#define _ABS(x) ((x) < 0 ? -(x) : (x))
+#define _ABS(x) ((x) < 0 ? (uint32_t)(-(x)) : (uint32_t)(x))
 
 #define DIB_SIGNATURE 0x4D42
 #define DIB_INFO_HEADER_SIZE 40
@@ -44,8 +45,8 @@ typedef struct {
 } dib_table_rgb;
 
 static struct bj_bitmap* unpalletized(struct bj_bitmap* p_original, dib_table_rgb* p_color_table, size_t color_table_size) {
-    (void)color_table_size; 
-    enum bj_pixel_mode mode = bj_bitmap_mode(p_original);
+    (void)color_table_size;
+    enum bj_pixel_mode mode = (enum bj_pixel_mode)bj_bitmap_mode(p_original);
 
     switch(mode) {
         case BJ_PIXEL_MODE_INDEXED_1:
@@ -115,7 +116,7 @@ static struct bj_bitmap* unpalletized(struct bj_bitmap* p_original, dib_table_rg
 }
 
 static size_t dib_uncompressed_row_size(uint32_t width, uint16_t bit_count) {
-    return ((((width * bit_count) + 31) & ~31) >> 3);
+    return ((((width * (uint32_t)bit_count) + 31u) & ~31u) >> 3);
 }
 
 static size_t dib_color_table_len(uint16_t bit_count, uint32_t override) {
@@ -141,7 +142,7 @@ static void dib_read_uncompressed_raster(
 ) {
     const bj_bool is_top_down = height < 0;
 
-    uint8_t* const dst_end = dst_pixels + dst_stride * _ABS(height);
+    uint8_t* const dst_end = dst_pixels + dst_stride * (size_t)_ABS(height);
     bj_assert(dst_stride > 0);
 
     uint8_t* p_dst_row         = is_top_down ? dst_pixels : dst_end - dst_stride;
@@ -332,10 +333,10 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
         return 0;
     }
 
-    int32_t dib_height           = 0;
+    int32_t  dib_height           = 0;
     uint32_t dib_width            = 0;
     uint16_t dib_planes           = 0;
-    uint16_t dib_bit_count        = 0;
+    uint16_t  dib_bit_count        = 0;
     uint32_t dib_compression      = 0;
     uint32_t dib_image_size       = 0;
     uint32_t dib_x_pixels_per_m   = 0;
@@ -354,7 +355,7 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
     }
 
 
-    if (dib_width * dib_height == 0x00) {
+    if (dib_width == 0 || dib_height == 0) {
         bj_set_error(p_error, BJ_ERROR_INCORRECT_VALUE, ERR_MSG_BAD_BMP_SIZE);
         return 0;
     }
@@ -485,7 +486,7 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
     }
 
     // Now we got the bitmasks and all, we can get the mode.
-    const enum bj_pixel_mode src_mode = bj_compute_pixel_mode(dib_bit_count, red_mask, green_mask, blue_mask);
+    const enum bj_pixel_mode src_mode = (enum bj_pixel_mode)bj_compute_pixel_mode((uint8_t)dib_bit_count, red_mask, green_mask, blue_mask);
 
     // Read the color table
     dib_table_rgb* color_table = 0;

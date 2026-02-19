@@ -164,8 +164,8 @@ bj_bool bj_blit_mask(
     struct bj_rect inter;
     if (bj_rect_intersection(&ds, &dst_bounds, &inter) == 0) return BJ_FALSE;
 
-    ms.x += inter.x - ds.x;
-    ms.y += inter.y - ds.y;
+    ms.x += (int16_t)(inter.x - ds.x);
+    ms.y += (int16_t)(inter.y - ds.y);
     ms.w  = inter.w;
     ms.h  = inter.h;
     ds    = inter;

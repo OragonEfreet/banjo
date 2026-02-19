@@ -64,4 +64,6 @@ struct bj_audio_layer_create_info {
     );     ///< Factory function to instantiate the backend.
 };
 
+bj_bool bj_begin_audio(struct bj_audio_layer* layer, struct bj_error** error);
+
 #endif

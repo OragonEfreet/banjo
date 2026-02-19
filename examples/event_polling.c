@@ -52,8 +52,8 @@ int bj_app_iterate(void* user_data) {
                 ++counter->enter;
                 bj_info("Enter event, window %p, %s, (%d,%d)",
                     window,
-                    e.enter.enter ? "entered" : "left",
-                    e.enter.x, e.enter.y
+                    e.as.enter.enter ? "entered" : "left",
+                    e.as.enter.x, e.as.enter.y
                 );
                 break;
 
@@ -61,7 +61,7 @@ int bj_app_iterate(void* user_data) {
                 // Mouse movement within the window.
                 ++counter->cursor;
                 bj_info("Cursor event, window %p, (%d,%d)",
-                    window, e.cursor.x, e.cursor.y
+                    window, e.as.cursor.x, e.as.cursor.y
                 );
                 break;
 
@@ -70,17 +70,17 @@ int bj_app_iterate(void* user_data) {
                 ++counter->key;
 
                 const char* action_str = "pressed";
-                if(e.key.action != BJ_PRESS) {
-                    action_str = e.key.action == BJ_RELEASE ? "released" : "repeated";
+                if(e.as.key.action != BJ_PRESS) {
+                    action_str = e.as.key.action == BJ_RELEASE ? "released" : "repeated";
                 }
 
                 bj_info("Key 0x%04X (%s) Scancode 0x%04X (with no mods) was %s",
-                    e.key.key, bj_key_name(e.key.key), e.key.scancode, action_str
+                    e.as.key.key, bj_key_name(e.as.key.key), e.as.key.scancode, action_str
                 );
 
                 // With polling, you manually check for keys like ESC and handle
                 // them explicitly, unlike with callbacks where you register handlers.
-                if(e.key.key == BJ_KEY_ESCAPE) {
+                if(e.as.key.key == BJ_KEY_ESCAPE) {
                     bj_set_window_should_close(window);
                 }
                 break;
@@ -89,9 +89,9 @@ int bj_app_iterate(void* user_data) {
                 // Mouse button clicks. Button index and position are provided.
                 ++counter->button;
                 bj_info("Button event, window %p, button %d, %s, (%d,%d)",
-                    (void*)window, e.button.button,
-                    e.button.action == BJ_PRESS ? "pressed" : "released",
-                    e.button.x, e.button.y
+                    (void*)window, e.as.button.button,
+                    e.as.button.action == BJ_PRESS ? "pressed" : "released",
+                    e.as.button.x, e.as.button.y
                 );
                 break;
         }

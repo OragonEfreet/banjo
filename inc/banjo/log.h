@@ -21,7 +21,7 @@
 /// null character.
 /// In case a message is longer than this limit, the content is truncated in
 /// order of priority as described in \ref bj_log_message.
-#define BJ_MAXIMUM_LOG_LEN 120
+#define BJ_MAXIMUM_LOG_LEN 120u
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Log Levels.
@@ -35,6 +35,9 @@ enum bj_log_level {
     BJ_LOG_ERROR, ///< Errors preventing correct function.
     BJ_LOG_FATAL  ///< Critical errors leading to termination.
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_log_level bj_log_level;
+#endif
     
 ////////////////////////////////////////////////////////////////////////////////
 /// Log a message using the given level `LEVEL`.

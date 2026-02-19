@@ -53,7 +53,7 @@ struct bj_stream* bj_open_stream_file(
     fseek(fstream, 0, SEEK_SET);
 
     if(file_size > 0) {
-        size_t file_byte_size = file_size;
+        size_t file_byte_size = (size_t)file_size;
 
         void *buffer = bj_malloc(file_byte_size);
         if (buffer == 0) {
@@ -123,9 +123,9 @@ size_t bj_seek_stream(
     ptrdiff_t           offset,
     enum bj_seek_origin from
 ) {
-    size_t new_position = (from == BJ_SEEK_CURRENT) ? p_stream->position + offset :
+    size_t new_position = (from == BJ_SEEK_CURRENT) ? (size_t)((ptrdiff_t)p_stream->position + offset) :
                          (from == BJ_SEEK_BEGIN)   ? (size_t)offset :
-                         p_stream->len + offset;
+                         (size_t)((ptrdiff_t)p_stream->len + offset);
 
     if ((ptrdiff_t)new_position < 0) {
         new_position = 0;

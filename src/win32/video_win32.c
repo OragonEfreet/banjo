@@ -164,7 +164,7 @@ static void win32_window_poll(
 }
 
 static enum bj_key vk_to_bj_key(WPARAM wParam, LPARAM lParam) {
-    if(wParam < 0 || wParam >= 0xFF) {
+    if(wParam >= 0xFF) {
         return BJ_KEY_UNKNOWN;
     }
 
@@ -342,7 +342,7 @@ static bj_bool win32_renderer_configure(
     if (bmp_info->bmiHeader.biCompression == BI_BITFIELDS) {
         int bpp = bmp_info->bmiHeader.biPlanes * bmp_info->bmiHeader.biBitCount;
         int32_t* masks = (int32_t*)((int8_t*)bmp_info + bmp_info->bmiHeader.biSize);
-        pixel_mode = bj_compute_pixel_mode(bpp, masks[0], masks[1], masks[2]);
+        pixel_mode = bj_compute_pixel_mode((uint8_t)bpp, masks[0], masks[1], masks[2]);
     }
     if (pixel_mode == BJ_PIXEL_MODE_UNKNOWN) {
         pixel_mode = BJ_PIXEL_MODE_XRGB8888;
@@ -363,7 +363,7 @@ static bj_bool win32_renderer_configure(
 
     bmp_info->bmiHeader.biWidth = width;
     bmp_info->bmiHeader.biHeight = -height;
-    bmp_info->bmiHeader.biSizeImage = (DWORD)height * stride;
+    bmp_info->bmiHeader.biSizeImage = (DWORD)height * (DWORD)stride;
 
     void* pixels = 0;
     data->fbdc = CreateCompatibleDC(data->hdc);
@@ -392,8 +392,6 @@ static void win32_renderer_present(
     struct bj_renderer* renderer,
     struct bj_window* abstract_window
 ) {
-    struct win32_window* window = (struct win32_window*)abstract_window;
-
     int width = 0;
     int height = 0;
     if (win32_get_window_size(abstract_window, &width, &height)) {
@@ -430,7 +428,7 @@ static void win32_destroy_renderer(
 ) {
     bj_check(renderer);
 
-    struct bj_renderer_data* data = &renderer->data;
+    struct bj_renderer_data* data = renderer->data;
 
     // Clean up the framebuffer bitmap internals
     bj_reset_bitmap(&data->framebuffer);
@@ -446,7 +444,7 @@ static void win32_destroy_renderer(
     bj_free(renderer);
 }
 
-static struct bj_video_layer* win32_init_video(
+static bj_bool win32_init_video(
     struct bj_video_layer* layer,
     struct bj_error** error
 ) {

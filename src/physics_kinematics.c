@@ -1,4 +1,5 @@
 #include <banjo/physics.h>
+#include <banjo/physics_2d.h>
 
 struct bj_vec2 bj_compute_kinematics_2d(
     struct bj_vec2  position,

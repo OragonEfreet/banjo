@@ -7,12 +7,12 @@
 #include <stdio.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-// Internal structure definition (flexible array member)
+// Internal structure definition (separate pointer)
 ////////////////////////////////////////////////////////////////////////////////
 
 struct bj_error {
-    uint32_t code;
-    char     message[];
+    uint32_t  code;
+    char* message;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -31,13 +31,30 @@ static size_t str_len(const char* str) {
 /// Allocates and initializes a new error with exact message size
 static struct bj_error* error_new(uint32_t code, const char* message) {
     size_t msg_len = str_len(message);
-    struct bj_error* err = bj_malloc(sizeof(struct bj_error) + msg_len + 1);
+
+    struct bj_error* err = bj_malloc(sizeof(struct bj_error));
     if (err == 0) {
         return 0;
     }
+
+    err->message = bj_malloc(msg_len + 1);
+    if (err->message == 0) {
+        bj_free(err);
+        return 0;
+    }
+
     err->code = code;
     bj_memcpy(err->message, message, msg_len + 1);
     return err;
+}
+
+/// Frees an error and its message
+static void error_free(struct bj_error* err) {
+    if (err == 0) {
+        return;
+    }
+    bj_free(err->message);
+    bj_free(err);
 }
 
 /// Logs an error (used when error is discarded)
@@ -57,7 +74,7 @@ static void log_discarded_error(const struct bj_error* err, const char* reason) 
 void bj_set_error(
     struct bj_error** error,
     uint32_t          code,
-    const char*       message
+    const char* message
 ) {
     // Zero cost path: caller doesn't want error details
     if (error == 0) {
@@ -70,7 +87,7 @@ void bj_set_error(
     // First error wins: don't overwrite existing error
     if (*error != 0) {
         bj_err("Error [0x%08X] discarded, keeping [0x%08X]: %s",
-               code, (*error)->code, message);
+            code, (*error)->code, message);
         return;
     }
 
@@ -81,7 +98,7 @@ void bj_set_error(
 void bj_set_error_fmt(
     struct bj_error** error,
     uint32_t          code,
-    const char*       format,
+    const char* format,
     ...
 ) {
     va_list args;
@@ -121,28 +138,36 @@ void bj_set_error_fmt(
             vsnprintf(buf, (size_t)len + 1, format, args);
             va_end(args);
             bj_err("Error [0x%08X] discarded, keeping [0x%08X]: %s",
-                   code, (*error)->code, buf);
+                code, (*error)->code, buf);
             bj_free(buf);
         }
 #endif
         return;
     }
 
-    // Allocate error with exact size needed
-    *error = bj_malloc(sizeof(struct bj_error) + (size_t)len + 1);
-    if (*error == 0) {
+    // Allocate error struct and message separately
+    struct bj_error* err = bj_malloc(sizeof(struct bj_error));
+    if (err == 0) {
         return;
     }
 
-    (*error)->code = code;
+    err->message = bj_malloc((size_t)len + 1);
+    if (err->message == 0) {
+        bj_free(err);
+        return;
+    }
+
+    err->code = code;
     va_start(args, format);
-    vsnprintf((*error)->message, (size_t)len + 1, format, args);
+    vsnprintf(err->message, (size_t)len + 1, format, args);
     va_end(args);
+
+    *error = err;
 }
 
 void bj_propagate_error(
     struct bj_error** dest,
-    struct bj_error*  src
+    struct bj_error* src
 ) {
     // Nothing to propagate
     if (src == 0) {
@@ -152,14 +177,14 @@ void bj_propagate_error(
     // Caller doesn't want error details - log and free
     if (dest == 0) {
         log_discarded_error(src, "Propagated error discarded");
-        bj_free(src);
+        error_free(src);
         return;
     }
 
     // First error wins - log and free the new one
     if (*dest != 0) {
         log_discarded_error(src, "Propagated error discarded, keeping original");
-        bj_free(src);
+        error_free(src);
         return;
     }
 
@@ -169,8 +194,8 @@ void bj_propagate_error(
 
 void bj_propagate_prefixed_error(
     struct bj_error** dest,
-    struct bj_error*  src,
-    const char*       format,
+    struct bj_error* src,
+    const char* format,
     ...
 ) {
     // Nothing to propagate
@@ -191,10 +216,16 @@ void bj_propagate_prefixed_error(
     size_t msg_len = str_len(src->message);
     size_t total_len = (size_t)prefix_len + msg_len;
 
-    // Allocate new error with combined message
-    struct bj_error* new_err = bj_malloc(sizeof(struct bj_error) + total_len + 1);
+    struct bj_error* new_err = bj_malloc(sizeof(struct bj_error));
     if (new_err == 0) {
         // Propagate without prefix on allocation failure
+        bj_propagate_error(dest, src);
+        return;
+    }
+
+    new_err->message = bj_malloc(total_len + 1);
+    if (new_err->message == 0) {
+        bj_free(new_err);
         bj_propagate_error(dest, src);
         return;
     }
@@ -210,7 +241,7 @@ void bj_propagate_prefixed_error(
     bj_memcpy(new_err->message + prefix_len, src->message, msg_len + 1);
 
     // Free original
-    bj_free(src);
+    error_free(src);
 
     // Propagate the new prefixed error
     bj_propagate_error(dest, new_err);
@@ -218,7 +249,7 @@ void bj_propagate_prefixed_error(
 
 void bj_prefix_error(
     struct bj_error** error,
-    const char*       prefix
+    const char* prefix
 ) {
     if (error == 0 || *error == 0) {
         return;
@@ -229,24 +260,22 @@ void bj_prefix_error(
     size_t msg_len = str_len(err->message);
     size_t total_len = prefix_len + msg_len;
 
-    // Allocate new error with combined message
-    struct bj_error* new_err = bj_malloc(sizeof(struct bj_error) + total_len + 1);
-    if (new_err == 0) {
+    char* new_message = bj_malloc(total_len + 1);
+    if (new_message == 0) {
         // Keep original on allocation failure
         return;
     }
 
-    new_err->code = err->code;
-    bj_memcpy(new_err->message, prefix, prefix_len);
-    bj_memcpy(new_err->message + prefix_len, err->message, msg_len + 1);
+    bj_memcpy(new_message, prefix, prefix_len);
+    bj_memcpy(new_message + prefix_len, err->message, msg_len + 1);
 
-    bj_free(err);
-    *error = new_err;
+    bj_free(err->message);
+    err->message = new_message;
 }
 
 void bj_prefix_error_fmt(
     struct bj_error** error,
-    const char*       format,
+    const char* format,
     ...
 ) {
     if (error == 0 || *error == 0) {
@@ -267,24 +296,21 @@ void bj_prefix_error_fmt(
     size_t msg_len = str_len(err->message);
     size_t total_len = (size_t)prefix_len + msg_len;
 
-    // Allocate new error with combined message
-    struct bj_error* new_err = bj_malloc(sizeof(struct bj_error) + total_len + 1);
-    if (new_err == 0) {
+    char* new_message = bj_malloc(total_len + 1);
+    if (new_message == 0) {
         return;
     }
 
-    new_err->code = err->code;
-
     // Write prefix
     va_start(args, format);
-    vsnprintf(new_err->message, (size_t)prefix_len + 1, format, args);
+    vsnprintf(new_message, (size_t)prefix_len + 1, format, args);
     va_end(args);
 
     // Append original message
-    bj_memcpy(new_err->message + prefix_len, err->message, msg_len + 1);
+    bj_memcpy(new_message + prefix_len, err->message, msg_len + 1);
 
-    bj_free(err);
-    *error = new_err;
+    bj_free(err->message);
+    err->message = new_message;
 }
 
 struct bj_error* bj_copy_error(
@@ -300,7 +326,7 @@ void bj_clear_error(
     struct bj_error** error
 ) {
     if (error != 0 && *error != 0) {
-        bj_free(*error);
+        error_free(*error);
         *error = 0;
     }
 }
@@ -343,4 +369,3 @@ const char* bj_error_message(
     }
     return error->message;
 }
-

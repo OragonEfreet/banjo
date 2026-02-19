@@ -14,7 +14,7 @@ static inline uint32_t pcg32_step(struct bj_pcg32 *g) {
     g->state = old * PCG32_MULT + (g->inc | 1ULL);
     uint32_t xorshifted = (uint32_t)(((old >> 18u) ^ old) >> 27u);
     uint32_t rot = (uint32_t)(old >> 59u);
-    return (xorshifted >> rot) | (xorshifted << ((-rot) & 31u));
+    return (xorshifted >> rot) | (xorshifted << ((32u - rot) & 31u));
 }
 
 void bj_seed_pcg32(struct bj_pcg32 *g, uint64_t initstate, uint64_t initseq) {

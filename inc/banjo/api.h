@@ -261,18 +261,6 @@ BANJO_EXPORT const struct bj_build_info* bj_build_information(void);
 /// \{
 #ifndef BJ_NO_TYPEDEF
 
-typedef enum bj_audio_format bj_audio_format;
-typedef enum bj_blit_op bj_blit_op;
-typedef enum bj_callback_result bj_callback_result;
-typedef enum bj_event_action bj_event_action;
-typedef enum bj_event_type bj_event_type;
-typedef enum bj_key bj_key;
-typedef enum bj_log_level bj_log_level;
-typedef enum bj_pixel_mode bj_pixel_mode;
-typedef enum bj_renderer_type bj_renderer_type;
-typedef enum bj_seek_origin bj_seek_origin;
-typedef enum bj_shader_flag bj_shader_flag;
-typedef enum bj_window_flag bj_window_flag;
 typedef struct bj_angular_2d bj_angular_2d;
 typedef struct bj_cli bj_cli;
 typedef struct bj_cli_argument bj_cli_argument;

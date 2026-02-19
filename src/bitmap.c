@@ -7,7 +7,6 @@
 
 #include <string.h>
 
-struct bj_bitmap* dib_create_bitmap_from_stream(struct bj_stream*, struct bj_error**);
 
 BANJO_EXPORT struct bj_bitmap* bj_allocate_bitmap(
     void
@@ -483,7 +482,7 @@ int bj_bitmap_mode(
     struct bj_bitmap* bitmap
 ) {
     bj_check_or_0(bitmap);
-    return bitmap->mode;
+    return (int)bitmap->mode;
 }
 
 size_t bj_bitmap_stride(

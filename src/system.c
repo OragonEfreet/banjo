@@ -8,15 +8,6 @@
 struct bj_audio_layer s_audio = {0};
 struct bj_video_layer s_video = {0};
 
-bj_bool bj_begin_video(struct bj_video_layer* layer, struct bj_error**);
-bj_bool bj_begin_audio(struct bj_audio_layer* layer, struct bj_error**);
-
-void bj_begin_time(void);
-void bj_end_time(void);
-
-void bj_begin_event(void);
-void bj_end_event(void);
-
 static struct {
     unsigned short time;
     unsigned short event;

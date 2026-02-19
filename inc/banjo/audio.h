@@ -53,6 +53,9 @@ enum bj_audio_format {
     BJ_AUDIO_FORMAT_INT16   = 0x8010,  ///< 16-bit signed integer PCM.
     BJ_AUDIO_FORMAT_F32     = 0x8120,  ///< 32-bit IEEE-754 float PCM.
 };
+#ifndef BJ_NO_TYPEDEF
+typedef enum bj_audio_format bj_audio_format;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \def BJ_AUDIO_FORMAT_WIDTH(x)

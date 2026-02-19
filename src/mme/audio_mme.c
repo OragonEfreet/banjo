@@ -279,6 +279,7 @@ static bj_bool mme_init_audio(
     struct bj_audio_layer* layer,
     struct bj_error** error
 ) {
+    (void)error;
     layer->end          = mme_dispose_audio;
     layer->open_device  = mme_open_device;
     layer->close_device = mme_close_device;
