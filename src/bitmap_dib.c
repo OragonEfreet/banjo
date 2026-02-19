@@ -45,8 +45,8 @@ typedef struct {
 } dib_table_rgb;
 
 static struct bj_bitmap* unpalletized(struct bj_bitmap* p_original, dib_table_rgb* p_color_table, size_t color_table_size) {
-    (void)color_table_size; 
-    enum bj_pixel_mode mode = bj_bitmap_mode(p_original);
+    (void)color_table_size;
+    enum bj_pixel_mode mode = (enum bj_pixel_mode)bj_bitmap_mode(p_original);
 
     switch(mode) {
         case BJ_PIXEL_MODE_INDEXED_1:
@@ -486,7 +486,7 @@ struct bj_bitmap* dib_create_bitmap_from_stream(
     }
 
     // Now we got the bitmasks and all, we can get the mode.
-    const enum bj_pixel_mode src_mode = bj_compute_pixel_mode(dib_bit_count, red_mask, green_mask, blue_mask);
+    const enum bj_pixel_mode src_mode = (enum bj_pixel_mode)bj_compute_pixel_mode(dib_bit_count, red_mask, green_mask, blue_mask);
 
     // Read the color table
     dib_table_rgb* color_table = 0;

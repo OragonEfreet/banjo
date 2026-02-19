@@ -8,8 +8,8 @@
 #include <audio_layer.h>
 #include <check.h>
 
-#import <AudioToolbox/AudioToolbox.h>
-#import <pthread.h>
+#include <AudioToolbox/AudioToolbox.h>
+#include <pthread.h>
 
 // Note: This file is AI-generated.
 
@@ -160,7 +160,7 @@ static void coreaudio_output_callback(
     }
 
     // Set buffer size
-    buffer->mAudioDataByteSize = ca_dev->buffer_size_bytes;
+    buffer->mAudioDataByteSize = (UInt32)ca_dev->buffer_size_bytes;
 
     pthread_mutex_unlock(&ca_dev->lock);
 
@@ -237,7 +237,7 @@ static struct bj_audio_device* coreaudio_open_device(
     for (unsigned i = 0; i < ca_dev->buffer_count; i++) {
         status = AudioQueueAllocateBuffer(
             ca_dev->audio_queue,
-            ca_dev->buffer_size_bytes,
+            (UInt32)ca_dev->buffer_size_bytes,
             &ca_dev->buffers[i]
         );
 
@@ -256,7 +256,7 @@ static struct bj_audio_device* coreaudio_open_device(
 
         // Fill with silence and enqueue
         fill_with_silence(ca_dev->buffers[i], ca_dev);
-        ca_dev->buffers[i]->mAudioDataByteSize = ca_dev->buffer_size_bytes;
+        ca_dev->buffers[i]->mAudioDataByteSize = (UInt32)ca_dev->buffer_size_bytes;
 
         status = AudioQueueEnqueueBuffer(ca_dev->audio_queue, ca_dev->buffers[i], 0, NULL);
         if (status != noErr) {

@@ -482,7 +482,7 @@ int bj_bitmap_mode(
     struct bj_bitmap* bitmap
 ) {
     bj_check_or_0(bitmap);
-    return bitmap->mode;
+    return (int)bitmap->mode;
 }
 
 size_t bj_bitmap_stride(
