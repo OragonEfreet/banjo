@@ -96,11 +96,7 @@ else()
         src/unix/system_unix.c
         src/unix/time_unix.c
     )
-    set_source_files_properties(
-        src/unix/system_unix.c
-        src/unix/time_unix.c
-        PROPERTIES COMPILE_DEFINITIONS _POSIX_C_SOURCE=199309L
-    )
+
 endif()
 
 target_include_directories(banjo
@@ -250,7 +246,6 @@ option(BANJO_CONFIG_ALSA_BACKEND "Add support for audio with ALSA" ${BJ_ALSA_AVA
 if(BANJO_CONFIG_ALSA_BACKEND AND ALSA_FOUND)
     target_compile_definitions(banjo PUBLIC BJ_CONFIG_ALSA_BACKEND)
     target_sources(banjo PRIVATE src/alsa/audio_alsa.c)
-    set_source_files_properties(src/alsa/audio_alsa.c PROPERTIES COMPILE_DEFINITIONS "_POSIX_C_SOURCE=199309L;_DEFAULT_SOURCE")
     target_include_directories(banjo PRIVATE ${ALSA_INCLUDE_DIRS})
     target_link_libraries(banjo PRIVATE ${ALSA_LIBRARIES})
 endif()
