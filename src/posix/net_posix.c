@@ -3,15 +3,18 @@
 #include <banjo/memory.h>
 #include <banjo/net.h>
 
+#include "check.h"
 #include "net_layer.h"
 
 #include <arpa/inet.h>  // inet_ntop
-/* #include <ifaddrs.h>   // getifaddrs, freeifaddrs */
-/* #include <net/if.h>    // IFF_UP, IFF_LOOPBACK */
 #include <errno.h> // errno
 #include <netdb.h>     // addrinfo
 #include <stdio.h>     // snprintf
 #include <string.h> //strerror
+#include <sys/socket.h> 
+#include <sys/types.h> 
+/* #include <ifaddrs.h>   // getifaddrs, freeifaddrs */
+/* #include <net/if.h>    // IFF_UP, IFF_LOOPBACK */
 
 #define QUEUE_SIZE 5
 
@@ -62,7 +65,6 @@ struct bj_tcp_listener* bj_listen_tcp(
         .ai_flags    = AI_PASSIVE,
     };
     struct addrinfo* listen_addrs = 0;
-
     
     const int gaierror = getaddrinfo(0, str_port, &hints, &listen_addrs);
     if(gaierror) {
@@ -75,17 +77,36 @@ struct bj_tcp_listener* bj_listen_tcp(
         addr != 0;
         addr = addr->ai_next
     ) {
-        if(socket(
+        const int sockfd = socket(
             addr->ai_family, addr->ai_socktype, addr->ai_protocol
-        ) == -1) {
+        );
+
+        if(sockfd == -1) {
             bj_set_error(error, BJ_ERROR_NETWORK_SOCKET, strerror(errno));
             freeaddrinfo(listen_addrs);
             return 0;
         }
+
+        if(bind(sockfd, addr->ai_addr, addr->ai_addrlen) == -1) {
+            bj_set_error(error, BJ_ERROR_NETWORK_SOCKET, strerror(errno));
+            close(sockfd);
+            freeaddrinfo(listen_addrs);
+            return 0;
+        }
+
+        if(listen(sockfd, BJ_NET_LISTEN_QUEUE) == -1) {
+            bj_set_error(error, BJ_ERROR_NETWORK_SOCKET, strerror(errno));
+            close(sockfd);
+            freeaddrinfo(listen_addrs);
+            return 0;
+        }
+
+        struct bj_tcp_listener* listener = bj_calloc(sizeof(struct bj_tcp_listener));
+        listener->socket = sockfd;
+        return listener;
     }
 
     freeaddrinfo(listen_addrs);
-
     bj_set_error(error, BJ_ERROR_NOT_IMPLEMENTED, "not implemented");
     return 0;
 }
@@ -94,9 +115,17 @@ BANJO_EXPORT struct bj_tcp_stream* bj_accept_tcp(
     struct bj_tcp_listener* listener,
     struct bj_error**         error
 ) {
-    (void)listener;
+    bj_check_or_0(listener);
     (void)error;
-    // TODO
+
+    struct sockaddr_storage their_addr;
+    socklen_t addr_size = sizeof(their_addr);
+    int new_fd = accept(listener->socket, (struct sockaddr*)&their_addr, &addr_size);
+    if(new_fd == -1) {
+        bj_set_error(error, BJ_ERROR_NETWORK_SOCKET, strerror(errno));
+        return 0;
+    }
+
     return 0;
 }
 
