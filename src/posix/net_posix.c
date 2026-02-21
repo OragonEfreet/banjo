@@ -22,6 +22,10 @@ struct bj_tcp_listener {
     int socket;
 };
 
+struct bj_tcp_stream {
+    int socket;
+};
+
 void bj_begin_network(void) {
     // EMPTY
 }
@@ -126,7 +130,9 @@ BANJO_EXPORT struct bj_tcp_stream* bj_accept_tcp(
         return 0;
     }
 
-    return 0;
+    struct bj_tcp_stream* stream = bj_calloc(sizeof(struct bj_tcp_stream));
+    stream->socket = new_fd;
+    return stream;
 }
 
 int bj_tcp_recv(
